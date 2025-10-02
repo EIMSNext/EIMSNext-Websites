@@ -1,0 +1,67 @@
+.fd-theme-purple, .fd-theme-purple ._fc-designer, .fd-theme-purple ._fd-config-dialog {
+    --fc-style-color-1: #884CFF;
+    --fc-style-bg-color-1: rgba(136, 76, 255, 0.05);
+    --el-color-primary: #884CFF;
+    --el-color-primary-light-3: #A47FFF;
+    --el-color-primary-light-5: #B599FF;
+    --el-color-primary-light-7: #C6B3FF;
+    --el-color-primary-light-8: #D1C2FF;
+    --el-color-primary-light-9: #E1D6FF;
+    --el-color-primary-dark-2: #6E3ACC;
+    --fc-style-color-4: #E000FF;
+    --fc-style-bg-color-4: rgba(224, 0, 255, 0.05);
+}
+
+.fd-theme-orange, .fd-theme-orange ._fc-designer, .fd-theme-orange ._fd-config-dialog {
+    --fc-style-color-1: #F27024;
+    --fc-style-bg-color-1: rgba(242, 112, 36, 0.05);
+    --el-color-primary: #F27024;
+    --el-color-primary-light-3: #FF9A59;
+    --el-color-primary-light-5: #FFB380;
+    --el-color-primary-light-7: #FFCC99;
+    --el-color-primary-light-8: #FFD6B3;
+    --el-color-primary-light-9: #FFE6CC;
+    --el-color-primary-dark-2: #C25A1D;
+    --fc-style-color-4: #FFB600;
+    --fc-style-bg-color-4: rgba(255, 182, 0, 0.05);
+}
+
+.fd-theme-pink, .fd-theme-pink ._fc-designer, .fd-theme-pink ._fd-config-dialog {
+    --fc-style-color-1: #FE679A;
+    --fc-style-bg-color-1: rgba(254, 103, 154, 0.05);
+    --el-color-primary: #FE679A;
+    --el-color-primary-light-3: #FF96B3;
+    --el-color-primary-light-5: #FFB3C8;
+    --el-color-primary-light-7: #FFD1DC;
+    --el-color-primary-light-8: #FFDCE5;
+    --el-color-primary-light-9: #FFE6ED;
+    --el-color-primary-dark-2: #CB517A;
+    --fc-style-color-4: #BD2BFF;
+    --fc-style-bg-color-4: rgba(189, 43, 255, 0.05);
+}
+
+.fd-theme-green, .fd-theme-green ._fc-designer, .fd-theme-green ._fd-config-dialog {
+    --fc-style-color-1: #18BF82;
+    --fc-style-bg-color-1: rgba(24, 191, 130, 0.05);
+    --el-color-primary: #18BF82;
+    --el-color-primary-light-3: #4FD8A1;
+    --el-color-primary-light-5: #80E6BB;
+    --el-color-primary-light-7: #B3F1D6;
+    --el-color-primary-light-8: #C6F5E0;
+    --el-color-primary-light-9: #D9F9EB;
+    --el-color-primary-dark-2: #149566;
+    --fc-style-color-4: #E2FF00;
+    --fc-style-bg-color-4: rgba(226, 255, 0, 0.05);
+}
+
+.fd-theme-green ._fc-designer .el-button--success.is-plain, .fd-theme-green ._fd-config-dialog .el-button--success.is-plain {
+    --el-button-bg-color: #FEF1E9;
+    --el-button-text-color: #F27024;
+    --el-button-border-color: #F9B892;
+    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-bg-color: #F27024;
+    --el-button-hover-border-color: #F27024;
+    --el-button-active-bg-color: #C65E21;
+    --el-button-active-text-color: var(--el-color-white);
+    --el-button-active-border-color: #C65E21;
+}

@@ -1,0 +1,53 @@
+@import "../../common/index.less";
+
+.@{prefix}-list {
+  border: 1px solid var(--el-border-color);
+  border-radius: 4px;
+  padding: 12px 4px;
+
+  .list-header {
+    line-height: 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 8px;
+    // border-bottom: 1px solid var(--el-border-color);
+
+    .item-header {
+      font-weight: 500;
+      color: var(--color-primary);
+    }
+  }
+
+  .list-content-wrapper {
+    list-style: none;
+    padding: 0;
+    margin: 0px;
+    padding: 0px 8px;
+
+    .list-item {
+      line-height: 32px;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: var(--el-fill-color-light);
+      }
+
+      .content-wrapper {
+        display: flex;
+        justify-content: space-between;
+
+        .item-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .item-label {
+          font-weight: 500;
+          color: var(--color-text-secondary);
+        }
+      }
+    }
+  }
+}
