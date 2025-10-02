@@ -23,3 +23,4 @@ export * from "./webPushLogService";
 export * from "./wfDefinitionService";
 export * from "./wfTodoService";
 export * from "./workflowService";
+export * from "./wfApprovalLogService";
