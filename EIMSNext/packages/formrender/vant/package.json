@@ -1,0 +1,25 @@
+{
+    "name": "@eimsnext/form-render-vant",
+    "version": "1.0.0",
+    "description": "",
+    "main": "./dist/index.umd.js",
+    "module": "./dist/index.es.js",
+    "types": "./types/index.d.ts",
+    "keywords": [],
+    "files": [
+        "auto-import.js",
+        "auto-import.d.ts",
+        "dist",
+        "types"
+    ],
+    "author": "",
+    "license": "",
+    "scripts": {
+        "build": "vite build"
+    },
+    "peerDependencies": {
+        "dayjs": "^1.11.13",
+        "v-jsoneditor": "^1.4.5",
+        "vant": "^4.9.15"
+    }
+}

@@ -1,0 +1,11 @@
+._fc-upload-preview {
+    display: inline-block;
+    width: 120px;
+    height: 120px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.form-create.is-preview ._fc-upload .el-upload, .form-create.is-preview ._fc-upload .el-icon--close, .form-create.is-preview ._fc-upload .el-icon--close-tip{
+    display: none !important;
+}

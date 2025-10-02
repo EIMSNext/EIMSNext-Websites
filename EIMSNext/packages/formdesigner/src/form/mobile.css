@@ -1,0 +1,45 @@
+
+.form-create-m .van-radio--horizontal, .form-create-m .van-checkbox--horizontal {
+    margin-bottom: 5px;
+}
+
+.form-create-m .el-input__wrapper, .form-create-m .el-select__wrapper {
+    box-shadow: none;
+    padding-right: 0;
+    border-radius: 0;
+}
+
+.form-create-m .el-input__wrapper:before, .form-create-m .el-select__wrapper:before {
+    position: absolute;
+    box-sizing: border-box;
+    content: " ";
+    pointer-events: none;
+    right: var(--van-padding-md);
+    bottom: 0;
+    left: var(--van-padding-md);
+    border-bottom: 1px solid var(--van-cell-border-color);
+    transform: scaleY(.5);
+}
+
+.form-create-m .el-select__suffix {
+    display: none;
+}
+
+.form-create-m .el-input__wrapper:after, .form-create-m .el-select__wrapper:after {
+    font: normal normal normal 14px / 1 var(--van-icon-font-family, "vant-icon");
+    content: "\e660";
+    color: var(--van-cell-right-icon-color);
+}
+
+.form-create-m .el-date-editor.el-input, .form-create-m .el-date-editor.el-input__wrapper, .form-create-m .el-tree {
+    width: 100%;
+}
+
+.form-create-m .el-upload-list, .form-create-m .el-upload--picture-card {
+    --el-upload-list-picture-card-size: 64px;
+    --el-upload-picture-card-size: 64px;
+}
+
+.form-create-m.is-preview ._fc-upload .el-upload, .form-create-m.is-preview ._fc-upload .el-icon--close, .form-create-m.is-preview ._fc-upload .el-icon--close-tip{
+    display: none !important;
+}

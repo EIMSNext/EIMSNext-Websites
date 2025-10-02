@@ -1,0 +1,17 @@
+{
+  "name": "@eimsnext/form-builder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "author": "",
+  "license": "",
+  "scripts": {
+    "build": "vite build"
+  }
+}
