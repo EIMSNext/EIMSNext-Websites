@@ -2,6 +2,7 @@
   <div :class="{ 'has-logo': sidebarLogo }">
     <form-edit v-if="showFormEditor" :formId="''" :usingFlow="usingWorkflow" :isLedger="isLedger"
       @close="showFormEditor = false" />
+    <DashboardDesigner v-model="showDshEditor"></DashboardDesigner>
 
     <!-- 顶部布局顶部 || 左侧布局左侧 -->
     <!-- <SidebarLogo v-if="sidebarLogo" :collapse="isSidebarCollapsed" /> -->
@@ -63,6 +64,8 @@
             <el-dropdown-item @click="createForm(true, false)">创建流程表单</el-dropdown-item>
             <el-dropdown-item @click="createForm(false, true)">新建数据台账</el-dropdown-item>
             <el-divider style="margin: 3px 0" />
+            <el-dropdown-item @click="createDashboard">创建仪表盘</el-dropdown-item>
+            <el-divider style="margin: 3px 0" />
             <el-dropdown-item @click="createFolder">创建表单分组</el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -82,6 +85,7 @@ import { App } from "@eimsnext/models";
 import { useAppStore, useContextStore } from "@eimsnext/store";
 import NavbarRight from "../NavBar/components/NavbarRight.vue";
 import FormEdit from "@/components/FormEdit/index.vue";
+import DashboardDesigner from "@/components/DashboardDesigner/index.vue";
 import { useRoute } from "vue-router";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 
