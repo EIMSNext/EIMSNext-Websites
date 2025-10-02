@@ -3,6 +3,10 @@
     <el-tab-pane label="智能助手" name="dataflow" class="adv-panel">
       <DataflowList :form-def="formDef" />
     </el-tab-pane>
+    <el-tab-pane label="提醒助手" name="reminder" class="adv-panel" />
+    <el-tab-pane label="打印模板" name="print" class="adv-panel">
+      <PrintTemplateList :form-def="formDef"></PrintTemplateList>
+    </el-tab-pane>
   </el-tabs>
 </template>
 <script setup lang="ts">
@@ -11,7 +15,7 @@ import { useSystemStore } from "@/store/system";
 import { useFormStore } from "@eimsnext/store";
 import { FormDef, EventSourceType } from "@eimsnext/models";
 import { TabsPaneContext } from "element-plus";
-
+import PrintTemplateList from "./PrintTemplateList.vue";
 
 defineOptions({
   name: "Advanced",
