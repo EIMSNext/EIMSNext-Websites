@@ -63,3 +63,4 @@ dist/
 /.vscode
 */pnpm-lock.yaml
 
+EIMSNext/admin/src/types/components.d.ts
