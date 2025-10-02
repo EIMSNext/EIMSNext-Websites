@@ -1,0 +1,50 @@
+@import "../../common/index.less";
+
+.selected-tags {
+  align-content: flex-start;
+  border: 1px dashed #d7d9dc;
+  display: flex;
+  flex-wrap: wrap;
+  height: 86px;
+  padding: 8px;
+  position: relative;
+
+  .el-tag {
+    border-radius: 1px;
+    padding: 0 6px;
+
+    .tag-icon {
+      font-size: 16px;
+      margin-right: 4px;
+    }
+
+    .tag-label {
+      display: inline-block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-right: 2px;
+
+      &.has-error {
+        color: var(--color-error);
+      }
+    }
+  }
+
+  .empty-wrapper {
+    align-items: center;
+    bottom: 0;
+    color: var(--color-text-secondary);
+    display: flex;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+
+    .empty-text {
+      padding-left: 5px;
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@eimsnext/utils",
+  "version": "1.0.0",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "description": "",
+  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "author": "",
+  "license": "",
+  "scripts": {
+    "build": "vite build"
+  }
+}

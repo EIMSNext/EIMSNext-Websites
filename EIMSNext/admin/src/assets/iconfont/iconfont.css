@@ -1,0 +1,50 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 5026874 */
+  src: url('//at.alicdn.com/t/c/font_5026874_0ro3s19a630l.woff2?t=1758449130364') format('woff2'),
+       url('//at.alicdn.com/t/c/font_5026874_0ro3s19a630l.woff?t=1758449130364') format('woff'),
+       url('//at.alicdn.com/t/c/font_5026874_0ro3s19a630l.ttf?t=1758449130364') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-ledgerdefault:before {
+  content: "\e6d9";
+}
+
+.icon-flowdefault:before {
+  content: "\e685";
+}
+
+.icon-dshdefault:before {
+  content: "\e77b";
+}
+
+.icon-formdefault:before {
+  content: "\e610";
+}
+
+.icon-mystarted:before {
+  content: "\e646";
+}
+
+.icon-appdefault:before {
+  content: "\e628";
+}
+
+.icon-myapproved:before {
+  content: "\e686";
+}
+
+.icon-mycced:before {
+  content: "\e602";
+}
+
+.icon-mytodo:before {
+  content: "\e774";
+}
