@@ -17,12 +17,13 @@ export * from "./dto/formNotification";
 export * from "./dto/formTemplate";
 export * from "./dto/auditLogin";
 export * from "./dto/payment";
-export * from "./dto/printTemplate"
+export * from "./dto/printTemplate";
 export * from "./dto/publicSetting";
 export * from "./dto/role";
-export * from "./dto/roleGroup"
+export * from "./dto/roleGroup";
 export * from "./dto/webhook";
-export * from "./dto/webPushLog"
+export * from "./dto/webPushLog";
 export * from "./dto/wfDefinition";
 export * from "./dto/wfTodo";
 export * from "./dto/workflow";
+export * from "./dto/wfApprovalLog";
