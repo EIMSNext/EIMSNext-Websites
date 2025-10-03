@@ -197,7 +197,7 @@ function checkCapslock(event: KeyboardEvent) {
 
   .lang-switch {
     align-items: center;
-    color: var(--fd-color-text-tertiary);
+    color: var(--et-color-text-tertiary);
     cursor: pointer;
     display: inline-flex;
     font-size: 14px;

@@ -1,8 +1,8 @@
 
 <template>
-  <MyApproved></MyApproved>
+  <MyCced></MyCced>
 </template>
 
 <script setup lang="ts">
-import MyApproved from "../components/MyApproved.vue";
+import MyCced from "../components/MyCced.vue";
 </script>

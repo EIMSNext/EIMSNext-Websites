@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
-import vueJsx from '@vitejs/plugin-vue-jsx'
-import vue from '@vitejs/plugin-vue'
+import vueJsx from "@vitejs/plugin-vue-jsx";
+import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
   build: {
@@ -14,17 +14,23 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     rollupOptions: {
-      external: ["vue", "vant", "v-jsoneditor", "dayjs", "@eimsnext/form-render-core"],
+      external: [
+        "vue",
+        "vant",
+        "v-jsoneditor",
+        "dayjs",
+        "@eimsnext/form-render-core",
+      ],
       input: ["src/index.js"],
       output: {
         compact: true,
         exports: "named",
         globals: {
-          "vue": "vue",
-          "vant": "vant",
+          vue: "vue",
+          vant: "vant",
           "v-jsoneditor": "v-jsoneditor",
-          "dayjs": "dayjs",
-          "@eimsnext/form-render-core": "@eimsnext/form-render-core"
+          dayjs: "dayjs",
+          "@eimsnext/form-render-core": "@eimsnext/form-render-core",
         },
       },
     },
@@ -36,11 +42,11 @@ export default defineConfig({
     },
   },
   esbuild: {
-    drop: ["console", "debugger"]
+    drop: ["console", "debugger"],
   },
   plugins: [
     vue(),
-    vueJsx()
+    vueJsx(),
     // dts({
     //   outDir: resolve(__dirname, "./dist"),
     //   tsconfigPath: "./tsconfig.json",
