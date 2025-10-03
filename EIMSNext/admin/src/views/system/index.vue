@@ -4,16 +4,12 @@
       <el-aside width="150px" style="border-right: 1px solid var(--el-menu-border-color)">
         <el-menu style="border-right: none">
           <el-menu-item>
-            <el-icon>
-              <document />
-            </el-icon>
-            部门员工
+            <et-icon icon="iconfont-organization" size="16px" />
+            <span class="menu-title">内部组织</span>
           </el-menu-item>
           <el-menu-item>
-            <el-icon>
-              <setting />
-            </el-icon>
-            设置
+            <et-icon icon="iconfont-admin" size="16px" />
+            <span class="menu-title">管理员</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -32,5 +28,12 @@ import EmpView from "./employee/index.vue";
 <style lang="scss" scoped>
 :deep(.el-container) {
   height: 100%;
+}
+:deep(.el-menu-item) {
+  line-height: 40px;
+  height: 40px;
+}
+.menu-title {
+  margin-left: 5px;
 }
 </style>

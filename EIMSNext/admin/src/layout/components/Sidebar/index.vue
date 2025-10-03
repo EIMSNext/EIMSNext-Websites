@@ -150,6 +150,7 @@ const resolveFullPath = (routePath: string) => wfbasePath + routePath;
 }
 
 :deep(.el-menu-item) {
+  line-height: 40px;
   height: 40px;
 }
 </style>
