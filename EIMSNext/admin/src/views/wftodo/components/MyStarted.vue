@@ -54,7 +54,7 @@
 </template>
 <script setup lang="ts">
 defineOptions({
-  name: "MyApproved",
+  name: "MyStarted",
 });
 
 import { useRoute } from "vue-router";
@@ -80,7 +80,7 @@ const totalRef = ref(0);
 const dataRef = ref<[]>();
 
 const loadCount = () => {
-  let query = buildQuery({ filter: { appId: appId, nodeType: 7 } });
+  let query = buildQuery({ filter: { appId: appId, nodeType: 1 } });
 
   wfApprovalLogService.count(query).then((cnt: number) => {
     // console.log("cnt", cnt);
@@ -88,7 +88,7 @@ const loadCount = () => {
   });
 };
 const loadData = () => {
-  let query = buildQuery({ filter: { appId: appId, nodeType: 7 } });
+  let query = buildQuery({ filter: { appId: appId, nodeType: 1 } });
   wfApprovalLogService.query<WfApprovalLog>(query).then((res: WfApprovalLog[]) => {
     dataRef.value = res;
   });
