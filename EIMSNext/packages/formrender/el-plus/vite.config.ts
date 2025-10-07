@@ -46,9 +46,9 @@ export default defineConfig({
       fileName: (format) => `index.${format}.js`,
     },
   },
-  esbuild: {
-    drop: ["console", "debugger"],
-  },
+  // esbuild: {
+  //   drop: ["console", "debugger"],
+  // },
   plugins: [
     vue(),
     vueJsx(),

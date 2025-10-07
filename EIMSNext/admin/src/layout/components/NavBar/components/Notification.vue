@@ -17,7 +17,7 @@
               <template v-if="notices.length > 0">
                 <div v-for="(item, index) in notices" :key="index" class="w400px flex-x-between p-1">
                   <div class="flex-center">
-                    <DictLabel v-model="item.type" code="notice_type" size="small" class="mr-1" />
+                    <!-- <DictLabel v-model="item.type" code="notice_type" size="small" class="mr-1" /> -->
                     <el-text type="primary" size="small" class="w200px cursor-pointer" truncated
                       @click="readNotice(item.id)">
                       {{ item.title }}
@@ -50,7 +50,7 @@
               <template v-if="messages.length > 0">
                 <div v-for="(item, index) in messages" :key="index" class="w400px flex-x-between p-1">
                   <div>
-                    <DictLabel v-model="item.type" code="notice_type" size="small" />
+                    <!-- <DictLabel v-model="item.type" code="notice_type" size="small" /> -->
                     <el-link type="primary" class="ml-1" @click="readNotice(item.id)">
                       {{ item.title }}
                     </el-link>
@@ -83,7 +83,7 @@
               <template v-if="tasks.length > 0">
                 <div v-for="(item, index) in tasks" :key="index" class="w400px flex-x-between p-1">
                   <div>
-                    <DictLabel v-model="item.type" code="notice_type" size="small" />
+                    <!-- <DictLabel v-model="item.type" code="notice_type" size="small" /> -->
                     <el-link type="primary" class="ml-1" @click="readNotice(item.id)">
                       {{ item.title }}
                     </el-link>
@@ -116,7 +116,7 @@
       </template>
     </el-dropdown>
 
-    <NoticeDetail ref="noticeDetailRef" />
+    <!-- <NoticeDetail ref="noticeDetailRef" /> -->
   </div>
 </template>
 

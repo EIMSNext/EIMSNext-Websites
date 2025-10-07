@@ -1,8 +1,13 @@
 <template>
   <div class="formdata-container">
-    <et-dialog v-model="showAddEditDialog" :title="formDef?.name" :show-footer="false">
+    <et-dialog v-model="showAddEditDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true">
       <div class="form-container">
-        <AddEditFormData :formId="formId" :edit="false"></AddEditFormData>
+        <AddEditFormData :formId="formId" :isView="false"></AddEditFormData>
+      </div>
+    </et-dialog>
+    <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true">
+      <div class="form-container">
+        <FormDataView :formId="formId" :dataId="selectedData!.id"></FormDataView>
       </div>
     </et-dialog>
     <div class="top-bar">
@@ -38,7 +43,8 @@
     </div>
     <div class="data-list" style="height:100%">
       <el-table :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%;height: 100%;"
-        show-overflow-tooltip :tooltip-formatter="tableToolFormatter">
+        show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName"
+        @row-click="showDetails">
         <template v-for="col in columns">
           <template v-if="col.children">
             <el-table-column :label="col.title" :fieldSetting="col">
@@ -74,6 +80,7 @@ import { IConditionList } from "@/components/ConditionList/type";
 import { IFieldSortList } from "@/components/FieldSortList/type";
 import DataSort from "./components/DataSort.vue";
 import DataField from "./components/DataField.vue";
+import FormDataView from "./components/FormDataView.vue";
 
 const displayItemCount = 3; //最多显示3条明细
 const showAddEditDialog = ref(false);
@@ -111,6 +118,8 @@ const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
 const showSort = ref(false);
 const sortList = ref<IFieldSortList>({ items: [] });
+const selectedData = ref<FormData>()
+const showDetailsDialog = ref(false)
 
 const createFormData = () => {
   showAddEditDialog.value = true;
@@ -160,10 +169,14 @@ const loadData = () => {
     })
     .then((res: FormData[]) => {
       dataRef.value = res;
-      // console.log("dataref", dataRef.value);
+      console.log("dataref", dataRef.value);
       processData();
     });
 };
+
+const rowClassName = (row: any) => {
+  return "pointer"
+}
 
 const formatter = (row: any, column: any, cellValue: any, index: number) => {
   // console.log("formatter", row, column, column.$attrs);
@@ -211,6 +224,11 @@ const tableToolFormatter = (data: TableTooltipData<FormData>) => {
   return `${data.cellValue}`;
 };
 
+const showDetails = (row: FormData) => {
+  selectedData.value = row
+  showDetailsDialog.value = true
+}
+
 //#region Flat Data
 const childrenFields = ref<string[]>([]);
 const flattedData = ref<any[]>([]);
@@ -237,24 +255,30 @@ const processData = () => {
           (childField) => (maxItemCount = Math.max(maxItemCount, (dataItem[childField] || []).length))
         );
         maxItemCount = Math.min(maxItemCount, displayItemCount);
+        console.log("maxItemCount", maxItemCount)
+        if (maxItemCount == 0) {
+          //可能没有子表数据
+          flattedData.value.push({ ...dataItem });
+        }
+        else {
+          for (var i = 0; i < maxItemCount; i++) {
+            var flat = {};
 
-        for (var i = 0; i < maxItemCount; i++) {
-          var flat = {};
+            childrenFields.value.forEach((childField) => {
+              const children = dataItem[childField] || [];
+              let child = children[i] || {};
+              // 动态复制父级所有字段（排除子字段）
+              const parentFields = { ...dataItem };
+              delete parentFields[childField];
+              flat = {
+                ...parentFields,
+                ...child,
+              };
+            });
 
-          childrenFields.value.forEach((childField) => {
-            const children = dataItem[childField] || [];
-            let child = children[i] || {};
-            // 动态复制父级所有字段（排除子字段）
-            const parentFields = { ...dataItem };
-            delete parentFields[childField];
-            flat = {
-              ...parentFields,
-              ...child,
-            };
-          });
-
-          // console.log("flat", item, flat);
-          flattedData.value.push(flat);
+            // console.log("flat", item, flat);
+            flattedData.value.push(flat);
+          }
         }
       }
       else {
@@ -263,7 +287,7 @@ const processData = () => {
     });
 
     // 计算合并规则
-    const mergeField = "_id";
+    const mergeField = "id";
     let pos = 0;
     spanMap.value = [];
 

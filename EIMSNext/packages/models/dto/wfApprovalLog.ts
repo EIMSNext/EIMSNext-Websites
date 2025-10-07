@@ -1,4 +1,5 @@
 ﻿import { CorpModelBase, IdBase, Operator } from "./modelBase";
+import { BriefField } from "./wfTodo";
 import { ApproveAction } from "./workflow";
 
 export interface WfApprovalLog extends CorpModelBase {
@@ -16,4 +17,5 @@ export interface WfApprovalLog extends CorpModelBase {
   comment?: string;
   signature?: string;
   approvalTime: Date;
+  dataBrief: BriefField[];
 }

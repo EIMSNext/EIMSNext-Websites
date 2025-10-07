@@ -5,7 +5,7 @@ import { ServiceBase } from "./serviceBase";
 export abstract class ApiServiceBase<T = IdBase, R = any> extends ServiceBase {
   protected abstract modelName(): string;
 
-  get<T>(id: string, query: any): Promise<T> {
+  get<T>(id: string, query?: any): Promise<T> {
     let url = this.getUrl(this.modelName(), id);
     return this.http().api.get<T>(url, query);
   }
