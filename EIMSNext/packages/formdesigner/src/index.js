@@ -1,12 +1,3 @@
-// +-----------------------------------------------------------------------
-// | FormCreate商业版 [ 让表单设计更简单 ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2018~2025 https://form-create.com All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed FormCreate商业版并不是自由软件，未经授权不得使用、修改或移除版权信息
-// +----------------------------------------------------------------------
-// | Author: FormCreate Team <admin@form-create.com>
-// +----------------------------------------------------------------------
 import FcDesigner from './components/FcDesigner.vue';
 import DragTool from './components/DragTool.vue';
 import Struct from './components/Struct.vue';

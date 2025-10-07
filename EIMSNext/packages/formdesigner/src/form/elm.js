@@ -1,12 +1,3 @@
-// +-----------------------------------------------------------------------
-// | FormCreate商业版 [ 让表单设计更简单 ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2018~2025 https://form-create.com All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed FormCreate商业版并不是自由软件，未经授权不得使用、修改或移除版权信息
-// +----------------------------------------------------------------------
-// | Author: FormCreate Team <admin@form-create.com>
-// +----------------------------------------------------------------------
 import formCreate from '@eimsnext/form-render/element-plus';
 import DataTable from '../components/dataTable/DataTable.vue';
 import Table from '../components/table/Table.vue';
