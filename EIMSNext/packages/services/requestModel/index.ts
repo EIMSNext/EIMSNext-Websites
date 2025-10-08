@@ -1,5 +1,3 @@
-import { ODataQueryModel } from "./odataQueryModel";
-import  type { BatchDeleteModel } from "./batchDeleteModel";
-import  type { LoginModel } from "./loginModel";
-
-export { ODataQueryModel, BatchDeleteModel, LoginModel }
+export * from "./odataQueryModel";
+export * from "./batchDeleteModel";
+export * from "./loginModel";

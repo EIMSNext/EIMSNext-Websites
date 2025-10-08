@@ -1,9 +1,5 @@
 import { IFormFieldDef } from "../FieldList/type";
-
-export enum SortDirection {
-  Asc = 1,
-  Desc = -1,
-}
+import { SortDirection } from "@eimsnext/services";
 
 export interface IFieldSortItem {
   field: IFormFieldDef;

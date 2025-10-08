@@ -6,7 +6,7 @@ import { IFormFieldList } from "./components/FieldSetting/type";
 import { IFieldSortList } from "../FieldSortList/type";
 
 export enum FlowNodeType {
-  None,
+  None=0,
   Start,
   End,
   Branch,
@@ -28,13 +28,13 @@ export enum FlowNodeType {
   Branch2,
 }
 export enum CascadeMode {
-  All,
+  All=0,
   Specified,
   Never,
 }
 export enum UpdateMode {
-  Form,
-  Node,
+  Form=0,
+  Node=1,
 }
 export interface IFlowNodeData {
   id: string;
