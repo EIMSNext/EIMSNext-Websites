@@ -196,7 +196,6 @@ export interface util<
   (
     rule: FormRule<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>[],
     option?: Options<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>,
-    isView?: Boolean
   ): Api<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>;
 
   fetch(option: FetchOption, effectArgs: Object): void;

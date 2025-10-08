@@ -126,10 +126,9 @@ export default {
     });
   },
   render(children) {
-    // Jacky: don't display btns here
-    // if (children.slotLen() && !this.$handle.preview) {
-    //   children.setSlot(undefined, () => this.makeFormBtn());
-    // }
+    if (children.slotLen() && !this.$handle.preview) {
+      children.setSlot(undefined, () => this.makeFormBtn());
+    }
 
     return this.$r(
       this.rule,
@@ -275,18 +274,6 @@ export default {
         type: "row",
         props: row,
         class: this.$render.mergeClass(row.class, "fc-form-row"),
-        key: `${this.key}row`,
-      },
-      children
-    );
-  },
-  makeBtnsRow(children) {
-    const row = this.options.row || {};
-    return this.$r(
-      {
-        type: "row",
-        props: row,
-        class: this.$render.mergeClass(row.class, "fc-form-row btns-row"),
         key: `${this.key}row`,
       },
       children
