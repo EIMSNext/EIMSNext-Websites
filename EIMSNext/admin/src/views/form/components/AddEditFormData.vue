@@ -7,7 +7,7 @@ defineOptions({
   name: "AddEditFormData",
 });
 
-import { FormDef, FormData as FormData_2, FormContent, FormDataRequest } from "@eimsnext/models";
+import { FormDef, FormData, FormContent, FormDataRequest } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
@@ -16,7 +16,7 @@ const props = withDefaults(
   defineProps<{
     formId: string;
     isView: boolean;
-    data?: FormData_2;
+    data?: FormData;
   }>(),
   {
     isView: false,
@@ -32,7 +32,6 @@ const formData = ref(props.data);
 
 if (props.formId) {
   let form = formStore.items.find((x: FormDef) => x.id == props.formId);
-  console.log("form", form);
   if (form) {
     appId.value = form.appId;
     formDef.value = form.content!;
@@ -67,7 +66,7 @@ const submitData = (data: any) => {
     data: data,
   };
 
-  formDataService.post<FormData_2>(fdata).then((res) => {
+  formDataService.post<FormData>(fdata).then((res) => {
     // console.log("ressss", res);
     formData.value = res.data;
     emit("submit", res);

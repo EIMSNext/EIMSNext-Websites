@@ -1,6 +1,6 @@
 <template>
   <div class="form-wrapper">
-    <formCreate ref="fcInst" :modelValue="dataRef" :rule="rules" :option="options" :isView="isView" />
+    <formCreate ref="fcInst" :modelValue="dataRef" :rule="rules" :option="options" :preview="isView" />
     <div v-if="actions" class="form-actions">
       <el-button v-if="actions.submit && actions.submit.visible" type="primary" @click="handleSubmit">
         {{ t(actions.submit.text || "提交") }}</el-button>

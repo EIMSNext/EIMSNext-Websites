@@ -85,18 +85,18 @@ export default function form({ t }) {
       value: false,
       title: t("form.inlineMessage"),
     },
-    {
-      type: "switch",
-      field: "_submitBtn>show",
-      value: true,
-      title: t("form.submitBtn"),
-    },
-    {
-      type: "switch",
-      field: "_resetBtn>show",
-      value: false,
-      title: t("form.resetBtn"),
-    },
+    // {
+    //   type: "switch",
+    //   field: "_submitBtn>show",
+    //   value: false,
+    //   title: t("form.submitBtn"),
+    // },
+    // {
+    //   type: "switch",
+    //   field: "_resetBtn>show",
+    //   value: false,
+    //   title: t("form.resetBtn"),
+    // },
     {
       type: "switch",
       field: ">ignoreHiddenFields",
