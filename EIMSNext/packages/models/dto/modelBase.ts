@@ -43,6 +43,17 @@ export enum SystemField {
   FlowStatus = "flowStatus",
 }
 
+export function isSystemField(field: string) {
+  return (
+    field === SystemField.Id ||
+    field === SystemField.CreateBy ||
+    field === SystemField.CreateTime ||
+    field === SystemField.UpdateBy ||
+    field === SystemField.UpdateTime ||
+    field === SystemField.FlowStatus
+  );
+}
+
 export function getIdDef(title: string): FieldDef {
   let field = new FieldDef();
   field.field = SystemField.Id;

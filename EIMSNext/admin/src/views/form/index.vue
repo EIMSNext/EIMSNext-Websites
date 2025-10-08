@@ -60,8 +60,8 @@
           </template>
         </template>
       </el-table>
-      <pagination v-if="totalRef > 0" v-model:total="totalRef" v-model:page="queryParams.pageNum"
-        v-model:limit="queryParams.pageSize" @pagination="handleQuery" />
+      <pagination v-if="totalRef > 0" v-model:total="totalRef" v-model:page="pageNum" v-model:limit="pageSize"
+        @pagination="handleQuery" />
     </div>
   </div>
 </template>
@@ -70,13 +70,12 @@ import { useRoute } from "vue-router";
 import { useFormStore } from "@eimsnext/store";
 import { FormDef, FormData, FieldDef, SystemField, FlowStatus } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
-import { formDataService } from "@eimsnext/services";
-import { ODataQuery } from "@/utils/query";
+import { IDynamicFindOptions, formDataService } from "@eimsnext/services";
 import AddEditFormData from "./components/AddEditFormData.vue";
 import { EtDialog } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
 import DataFilter from "./components/DataFilter.vue";
-import { IConditionList } from "@/components/ConditionList/type";
+import { IConditionList, toDynamicFindOptions } from "@/components/ConditionList/type";
 import { IFieldSortList } from "@/components/FieldSortList/type";
 import DataSort from "./components/DataSort.vue";
 import DataField from "./components/DataField.vue";
@@ -90,26 +89,19 @@ const formStore = useFormStore();
 const formId = route.params.formId.toString();
 
 const formDef = ref<FormDef>();
-// console.log("formdef id", formId);
 
 formStore.get(formId).then((form: FormDef | undefined) => {
   if (form) {
-    // console.log("formdef", form.content?.items);
     formDef.value = form;
     initChildrenField(form.content?.items!);
     columns.value = buildColumns(form.content?.items!, form.usingWorkflow);
-
-    // console.log("columns", columns.value);
-
     handleQuery();
   }
 });
 
-const queryParams = reactive<ODataQuery<any>>({
-  pageNum: 1,
-  pageSize: 10,
-  deptId: "",
-  keywords: "",
+const queryParams = ref<IDynamicFindOptions>({
+  skip: 0,
+  take: 20,
 });
 
 const totalRef = ref(0);
@@ -118,6 +110,8 @@ const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
 const showSort = ref(false);
 const sortList = ref<IFieldSortList>({ items: [] });
+const pageNum = ref(1)
+const pageSize = ref(20)
 const selectedData = ref<FormData>()
 const showDetailsDialog = ref(false)
 
@@ -128,16 +122,24 @@ const createFormData = () => {
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
   showFilter.value = false;
-  // console.log("condList", filter);
+  console.log("condList", filter);
+
+  updateQueryParams()
   handleQuery();
 };
 
 const setSort = (sort: IFieldSortList) => {
   sortList.value = sort;
   showSort.value = false;
-  // console.log("sortList", sort);
+  console.log("sortList", sort);
+
+  updateQueryParams()
   handleQuery();
 };
+
+const updateQueryParams = () => {
+  queryParams.value = toDynamicFindOptions(condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value, { field: "formId", type: "none", op: "eq", value: formDef.value!.id })
+}
 
 const handleQuery = () => {
   loadCount();
@@ -145,28 +147,15 @@ const handleQuery = () => {
 };
 
 const loadCount = () => {
-  let filter = {
-    rel: "and",
-    items: [{ field: "formId", type: "none", op: "eq", value: formDef.value!.id }],
-  };
-
-  formDataService.count(filter).then((cnt: number) => {
+  console.log("queryParams", queryParams.value)
+  formDataService.count(queryParams.value).then((cnt: number) => {
     console.log("cnt", cnt);
     totalRef.value = cnt;
   });
 };
 const loadData = () => {
-  let filter = {
-    rel: "and",
-    items: [{ field: "formId", type: "none", op: "eq", value: formDef.value!.id }],
-  };
-
   formDataService
-    .query<FormData>({
-      filter: filter,
-      skip: 0,
-      take: 20,
-    })
+    .query<FormData>(queryParams.value)
     .then((res: FormData[]) => {
       dataRef.value = res;
       console.log("dataref", dataRef.value);

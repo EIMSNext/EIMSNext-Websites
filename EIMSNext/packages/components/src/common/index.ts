@@ -10,7 +10,7 @@ export interface ITreeNode {
   data?: any;
 }
 export enum TreeNodeType {
-  None,
+  None=0,
   Dept,
   Form,
   Field,
