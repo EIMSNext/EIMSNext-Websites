@@ -20,17 +20,17 @@
         </div>
         <div>
           <el-popover :visible="showFilter" :show-arrow="false" :offset="0" placement="bottom-end" width="500"
-            :teleported="false" trigger="click">
+            :teleported="false" trigger="click" :destroy-on-close="true">
             <DataFilter :model-value="condList" :formId="formId" @ok="setFilter" @cancel="showFilter = false">
             </DataFilter>
             <template #reference>
-              <el-button icon="search" class="data-filter" @click="showFilter = !showFilter">
+              <el-button icon="filter" class="data-filter" @click="showFilter = !showFilter">
                 筛选
               </el-button>
             </template>
           </el-popover>
           <el-popover :visible="showSort" :show-arrow="false" :offset="0" placement="bottom-end" width="500"
-            :teleported="false" trigger="click">
+            :teleported="false" trigger="click" :destroy-on-close="true">
             <DataSort :model-value="sortList" :formId="formId" @ok="setSort" @cancel="showSort = false"></DataSort>
             <template #reference>
               <el-button icon="sort" class="data-sort" @click="showSort = !showSort">
@@ -39,15 +39,14 @@
             </template>
           </el-popover>
           <el-popover :visible="showField" :show-arrow="false" :offset="0" placement="bottom-end" width="500"
-            :teleported="false" trigger="click">
+            :teleported="false" trigger="click" :destroy-on-close="true">
             <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
             <template #reference>
-              <el-button icon="sort" class="data-field" @click="showField = !showField">
+              <el-button icon="list" class="data-field" @click="showField = !showField">
                 字段
               </el-button>
             </template>
           </el-popover>
-
         </div>
       </div>
     </div>
@@ -90,6 +89,7 @@ import { IFieldSortList } from "@/components/FieldSortList/type";
 import DataSort from "./components/DataSort.vue";
 import FormDataView from "./components/FormDataView.vue";
 import DataField from "./components/DataField.vue";
+import { IFormFieldDef } from "@/components/FieldList/type";
 
 const displayItemCount = 3; //最多显示3条明细
 const showAddEditDialog = ref(false);
@@ -103,8 +103,8 @@ const formDef = ref<FormDef>();
 formStore.get(formId).then((form: FormDef | undefined) => {
   if (form) {
     formDef.value = form;
-    initChildrenField(form.content?.items!);
-    columns.value = buildColumns(form.content?.items!, form.usingWorkflow);
+    initChildrenField(form.content?.items!, []);
+    columns.value = buildColumns(form.content?.items!, form.usingWorkflow, []);
     handleQuery();
   }
 });
@@ -121,7 +121,7 @@ const condList = ref<IConditionList>({ id: "", rel: "and" });
 const showSort = ref(false);
 const sortList = ref<IFieldSortList>({ items: [] });
 const showField = ref(false)
-const fieldList = ref()
+const fieldList = ref<IFormFieldDef[]>([])
 const pageNum = ref(1)
 const pageSize = ref(20)
 const selectedData = ref<FormData>()
@@ -149,17 +149,20 @@ const setSort = (sort: IFieldSortList) => {
   handleQuery();
 };
 
-const setField = (sort: IFieldSortList) => {
-  fieldList.value = sort;
+const setField = (fields: IFormFieldDef[]) => {
+  fieldList.value = fields;
   showField.value = false;
-  // console.log("sortList", sort);
+  initChildrenField(formDef.value!.content?.items!, fieldList.value);
+  columns.value = buildColumns(formDef.value!.content?.items!, formDef.value!.usingWorkflow, fieldList.value);
+
+  // console.log("fieldList", fields);
 
   updateQueryParams()
   handleQuery();
 };
 
 const updateQueryParams = () => {
-  queryParams.value = toDynamicFindOptions(condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value, { field: "formId", type: "none", op: "eq", value: formDef.value!.id })
+  queryParams.value = toDynamicFindOptions(fieldList.value, condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value, { field: "formId", type: "none", op: "eq", value: formDef.value!.id })
 }
 
 const handleQuery = () => {
@@ -242,7 +245,7 @@ const childrenFields = ref<string[]>([]);
 const flattedData = ref<any[]>([]);
 const spanMap = ref<number[]>([]);
 
-const initChildrenField = (fields: FieldDef[]) => {
+const initChildrenField = (fields: FieldDef[], displayFields: IFormFieldDef[]) => {
   childrenFields.value = [];
   fields.forEach((x) => {
     if (x.columns && x.columns.length > 0) childrenFields.value.push(x.field);
@@ -263,7 +266,7 @@ const processData = () => {
           (childField) => (maxItemCount = Math.max(maxItemCount, (dataItem[childField] || []).length))
         );
         maxItemCount = Math.min(maxItemCount, displayItemCount);
-        console.log("maxItemCount", maxItemCount)
+        // console.log("maxItemCount", maxItemCount)
         if (maxItemCount == 0) {
           //可能没有子表数据
           flattedData.value.push({ ...dataItem });

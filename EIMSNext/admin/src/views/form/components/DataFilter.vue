@@ -50,7 +50,9 @@ const onClickOutside = (e: MouseEvent) => {
 </script>
 <style lang="scss" scoped>
 .actions {
-  border-top: solid 1px #ddd;
+  // border-top: solid 1px #ddd;
+  display: flex;
+  justify-content: flex-end;
   margin-top: 5px;
   padding-top: 5px;
 }

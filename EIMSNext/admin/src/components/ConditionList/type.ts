@@ -70,6 +70,7 @@ export interface IConditionList {
 }
 
 export function toDynamicFindOptions(
+  fields: IFormFieldDef[],
   filter: IConditionList,
   sort: IFieldSortList,
   skip: number,
@@ -99,6 +100,14 @@ export function toDynamicFindOptions(
   const findOpt = {} as IDynamicFindOptions;
   findOpt.skip = skip;
   findOpt.take = take;
+
+  if (fields.length > 0) {
+    findOpt.select = [];
+    fields.forEach((x) => {
+      let field = isSystemField(x.field) ? x.field : `data.${x.field}`;
+      findOpt.select?.push({ field: field, visible: true });
+    });
+  }
 
   if (sort.items.length > 0) {
     findOpt.sort = [];

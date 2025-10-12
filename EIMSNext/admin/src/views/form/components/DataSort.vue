@@ -1,6 +1,5 @@
 <template>
   <div v-click-outside="onClickOutside">
-    <!-- <div> -->
     <FieldSortList v-model="sortList" :form-id="formId" @change="onChange"></FieldSortList>
     <div class="actions">
       <el-button type="primary" @click="onSort">排序</el-button>
@@ -45,7 +44,9 @@ const onClickOutside = (e: MouseEvent) => {
 </script>
 <style lang="scss" scoped>
 .actions {
-  border-top: solid 1px #ddd;
+  // border-top: solid 1px #ddd;
+  display: flex;
+  justify-content: flex-end;
   margin-top: 5px;
   padding-top: 5px;
 }
