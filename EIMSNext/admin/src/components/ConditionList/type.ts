@@ -46,6 +46,7 @@ export function getConditionFieldType(fieldtype: string): ConditionFieldType {
       dataType = ConditionFieldType.Number;
       break;
   }
+
   return dataType;
 }
 
