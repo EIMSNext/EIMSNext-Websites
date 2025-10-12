@@ -15,6 +15,8 @@
         <div>
           <el-button type="success" icon="plus" @click="createFormData">新增</el-button>
           <el-button type="danger" icon="delete">删除</el-button>
+          <el-button icon="upload">导入</el-button>
+          <el-button icon="download">导出</el-button>
         </div>
         <div>
           <el-popover :visible="showFilter" :show-arrow="false" :offset="0" placement="bottom-end" width="500"
@@ -36,8 +38,16 @@
               </el-button>
             </template>
           </el-popover>
-          <el-button icon="upload">导入</el-button>
-          <el-button icon="download">导出</el-button>
+          <el-popover :visible="showField" :show-arrow="false" :offset="0" placement="bottom-end" width="500"
+            :teleported="false" trigger="click">
+            <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
+            <template #reference>
+              <el-button icon="sort" class="data-field" @click="showField = !showField">
+                字段
+              </el-button>
+            </template>
+          </el-popover>
+
         </div>
       </div>
     </div>
@@ -78,8 +88,8 @@ import DataFilter from "./components/DataFilter.vue";
 import { IConditionList, toDynamicFindOptions } from "@/components/ConditionList/type";
 import { IFieldSortList } from "@/components/FieldSortList/type";
 import DataSort from "./components/DataSort.vue";
-import DataField from "./components/DataField.vue";
 import FormDataView from "./components/FormDataView.vue";
+import DataField from "./components/DataField.vue";
 
 const displayItemCount = 3; //最多显示3条明细
 const showAddEditDialog = ref(false);
@@ -110,6 +120,8 @@ const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
 const showSort = ref(false);
 const sortList = ref<IFieldSortList>({ items: [] });
+const showField = ref(false)
+const fieldList = ref()
 const pageNum = ref(1)
 const pageSize = ref(20)
 const selectedData = ref<FormData>()
@@ -122,7 +134,7 @@ const createFormData = () => {
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
   showFilter.value = false;
-  console.log("condList", filter);
+  // console.log("condList", filter);
 
   updateQueryParams()
   handleQuery();
@@ -131,7 +143,16 @@ const setFilter = (filter: IConditionList) => {
 const setSort = (sort: IFieldSortList) => {
   sortList.value = sort;
   showSort.value = false;
-  console.log("sortList", sort);
+  // console.log("sortList", sort);
+
+  updateQueryParams()
+  handleQuery();
+};
+
+const setField = (sort: IFieldSortList) => {
+  fieldList.value = sort;
+  showField.value = false;
+  // console.log("sortList", sort);
 
   updateQueryParams()
   handleQuery();
@@ -147,9 +168,8 @@ const handleQuery = () => {
 };
 
 const loadCount = () => {
-  console.log("queryParams", queryParams.value)
+  // console.log("queryParams", queryParams.value)
   formDataService.count(queryParams.value).then((cnt: number) => {
-    console.log("cnt", cnt);
     totalRef.value = cnt;
   });
 };
@@ -158,7 +178,6 @@ const loadData = () => {
     .query<FormData>(queryParams.value)
     .then((res: FormData[]) => {
       dataRef.value = res;
-      console.log("dataref", dataRef.value);
       processData();
     });
 };

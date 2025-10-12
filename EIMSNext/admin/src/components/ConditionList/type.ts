@@ -77,7 +77,6 @@ export function toDynamicFindOptions(
   fixedFilter?: IDynamicFilter
 ) {
   let toDynamicFilter = (filter: IConditionList) => {
-    console.log("filter1", filter.items);
     let dfilter: IDynamicFilter = {};
 
     if (filter.items && filter.items.length > 0) {
@@ -86,7 +85,6 @@ export function toDynamicFindOptions(
         dfilter.items?.push(toDynamicFilter(x));
       });
     } else if (filter.field?.field) {
-      console.log("filter2", filter);
       dfilter.field = isSystemField(filter.field.field)
         ? filter.field.field
         : `data.${filter.field.field}`;
@@ -105,7 +103,8 @@ export function toDynamicFindOptions(
   if (sort.items.length > 0) {
     findOpt.sort = [];
     sort.items.forEach((x) => {
-      findOpt.sort?.push({ field: x.field.field, dir: x.sort });
+      let sField = isSystemField(x.field.field) ? x.field.field : `data.${x.field.field}`;
+      findOpt.sort?.push({ field: sField, dir: x.sort });
     });
   }
 

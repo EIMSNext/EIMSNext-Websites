@@ -1,23 +1,14 @@
 <template>
   <div class="field-list">
-    <el-dropdown
-      :hide-on-click="false"
-      trigger="click"
-      popper-class="data-triggers"
-      @command="addField"
-    >
+    <el-dropdown :hide-on-click="false" trigger="click" popper-class="data-triggers" @command="addField">
       <el-button class="btn-add-trigger">
         {{ "+ " + t("添加排序规则") }}
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">
-          <el-dropdown-item
-            v-for="field in allFields"
-            class="add-trigger"
+          <el-dropdown-item v-for="field in allFields" class="add-trigger"
             :disabled="!!selectedFields.items.find((x) => x.field.field == field.id)"
-            :class="{ notAllow: selectedFields.items.find((x) => x.field.field == field.id) }"
-            :command="field.data"
-          >
+            :class="{ notAllow: selectedFields.items.find((x) => x.field.field == field.id) }" :command="field.data">
             {{ field.label }}
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -53,7 +44,7 @@ const props = withDefaults(
 
 const formStore = useFormStore();
 
-const selectedFields = ref<IFieldSortList>(props.modelValue);
+const selectedFields = toRef<IFieldSortList>(props.modelValue);
 const allFields = ref<IListItem[]>([]);
 
 const emit = defineEmits(["update:modelValue", "change"]);
@@ -84,8 +75,8 @@ const onChange = (sortItem: IFieldSortItem) => {
 };
 
 const emitChange = () => {
-  emit("update:modelValue", selectedFields);
-  emit("change", selectedFields);
+  emit("update:modelValue", selectedFields.value);
+  emit("change", selectedFields.value);
 };
 
 watch(

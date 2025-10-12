@@ -25,14 +25,14 @@ const props = withDefaults(
   {}
 );
 
-const sortList = ref<IFieldSortList>(props.modelValue);
+const sortList = toRef<IFieldSortList>(props.modelValue);
 const onChange = (sort: IFieldSortList) => {
   sortList.value = sort;
 };
 
 const emit = defineEmits(["ok", "cancel"]);
 const onSort = () => {
-  emit("ok", sortList);
+  emit("ok", sortList.value);
 };
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement;

@@ -10,7 +10,7 @@ export default defineConfig({
     //压缩
     minify: true,
     //css分离
-    //cssCodeSplit: true,
+    cssCodeSplit: true,
     emptyOutDir: true,
     sourcemap: false,
     rollupOptions: {
