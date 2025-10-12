@@ -6,11 +6,7 @@
           <!-- <span v-if="groupLevel == 1">条件组，</span> -->
           满足以下
         </div>
-        <el-select
-          v-model="list.rel"
-          size="small"
-          style="width: 65px; margin-left: 5px; margin-right: 5px"
-        >
+        <el-select v-model="list.rel" size="small" style="width: 65px; margin-left: 5px; margin-right: 5px">
           <el-option label="所有" value="and" />
           <el-option label="任意" value="or" />
         </el-select>
@@ -34,27 +30,12 @@
     <div class="cond-item-wrapper">
       <template v-for="(item, idx) in list.items" :key="idx">
         <template v-if="item.isGroup">
-          <ConditionList
-            :modelValue="item"
-            :formId="formId"
-            :nodes="nodes"
-            :condType="condType"
-            :maxLevel="maxLevel"
-            :fieldBuildRule="fieldBuildRule"
-            @change="onInput"
-            @remove="removeGroup(idx)"
-          ></ConditionList>
+          <ConditionList :modelValue="item" :formId="formId" :nodes="nodes" :condType="condType" :maxLevel="maxLevel"
+            :fieldBuildRule="fieldBuildRule" @change="onInput" @remove="removeGroup(idx)"></ConditionList>
         </template>
         <template v-else>
-          <ConditionItem
-            :modelValue="item"
-            :formId="formId"
-            :nodes="nodes"
-            :condType="condType"
-            :fieldBuildRule="fieldBuildRule"
-            @change="onInput"
-            @remove="removeItem(idx)"
-          ></ConditionItem>
+          <ConditionItem :modelValue="item" :formId="formId" :nodes="nodes" :condType="condType"
+            :fieldBuildRule="fieldBuildRule" @change="onInput" @remove="removeItem(idx)"></ConditionItem>
         </template>
       </template>
     </div>
@@ -92,7 +73,7 @@ const props = withDefaults(
   }
 );
 
-const list = ref(props.modelValue);
+const list = toRef(props.modelValue);
 const groupLevel = ref(1);
 
 const addItem = () => {
@@ -102,7 +83,7 @@ const addItem = () => {
     id: uniqueId(),
     field: { formId: props.formId, field: "", label: "", type: FieldType.Input },
     op: "eq",
-    value: { type: ConditionValueType.Custom, value: "" },
+    value: { type: ConditionValueType.Custom, value: null },
   });
 };
 const removeItem = (idx: number) => {
@@ -136,8 +117,8 @@ const onInput = (condItem?: IConditionList) => {
     }
   }
 
-  emit("update:modelValue", list);
-  emit("change", list);
+  emit("update:modelValue", list.value);
+  emit("change", list.value);
 };
 const onRemove = () => {
   emit("remove", props.modelValue);
@@ -172,9 +153,11 @@ watch(
       display: flex;
     }
   }
+
   .cond-item-wrapper {
     padding: 0 10px 10px 10px;
   }
+
   .btn-add-item {
     margin: 10px;
     display: flex;

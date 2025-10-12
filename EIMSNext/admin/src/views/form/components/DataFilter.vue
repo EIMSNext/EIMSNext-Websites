@@ -30,14 +30,14 @@ const props = withDefaults(
   {}
 );
 
-const condList = ref<IConditionList>(props.modelValue);
+const condList = toRef<IConditionList>(props.modelValue);
 const onChange = (filter: IConditionList) => {
   condList.value = filter;
 };
 
 const emit = defineEmits(["ok", "cancel"]);
 const onSearch = () => {
-  emit("ok", condList);
+  emit("ok", condList.value);
 };
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement;

@@ -134,7 +134,7 @@ const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 const subCondNeeded = ref(false);
 const showEditPanel = ref("1");
-console.log("ref....", showEditPanel);
+console.log("showEditPanel", showEditPanel);
 
 const modeChanged = (mode: UpdateMode) => {
   formId.value = "";
