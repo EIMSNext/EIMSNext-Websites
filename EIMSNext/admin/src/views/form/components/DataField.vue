@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-click-outside="onClickOutside">
         <et-list v-model="value" :data="fieldList" :selectable="true"></et-list>
         <div class="actions">
             <el-button type="primary" @click="onOk">确定</el-button>
@@ -12,7 +12,7 @@
 import { IFormFieldDef, buildFieldListItems } from "@/components/FieldList/type";
 import { IListItem } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
-
+import { ClickOutside as vClickOutside } from "element-plus";
 
 defineOptions({
     name: "DataField",
@@ -36,7 +36,14 @@ const onOk = () => {
 const onCancel = () => {
     emit("cancel");
 };
-
+const onClickOutside = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    let excludedClasses = ["data-field", "el-select__popper"];
+    if (excludedClasses.some((cls) => target.closest(`.${cls}`))) {
+        return;
+    }
+    emit("cancel");
+};
 onBeforeMount(() => {
     formStore.get(props.formId).then((form) => {
         if (form?.content?.items)

@@ -1,8 +1,10 @@
 <template>
   <div class="formdata-container">
-    <et-dialog v-model="showAddEditDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true">
+    <et-dialog v-model="showAddEditDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
+      :close-on-click-modal="false">
       <div class="form-container">
-        <AddEditFormData :formId="formId" :isView="false"></AddEditFormData>
+        <AddEditFormData :formId="formId" :isView="false" @save="onDataSaved" @submit="onDataSaved">
+        </AddEditFormData>
       </div>
     </et-dialog>
     <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true">
@@ -47,6 +49,9 @@
               </el-button>
             </template>
           </el-popover>
+          <el-button icon="refresh" class="data-field" @click="handleQuery">
+            刷新
+          </el-button>
         </div>
       </div>
     </div>
@@ -54,9 +59,10 @@
       <el-table :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%;height: 100%;"
         show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName"
         @row-click="showDetails">
+        <el-table-column type="selection" width="30" />
         <template v-for="col in columns">
           <template v-if="col.children">
-            <el-table-column :label="col.title" :fieldSetting="col">
+            <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip>
               <template v-if="col.children" v-for="sub in col.children">
                 <el-table-column :prop="sub.field" :formatter="formatter" :label="sub.title" :width="sub.width"
                   :fieldSetting="sub"></el-table-column>
@@ -65,21 +71,20 @@
           </template>
           <template v-else>
             <el-table-column :prop="col.field" :formatter="formatter" :label="col.title" :width="col.width"
-              :fieldSetting="col"></el-table-column>
+              :fieldSetting="col" show-overflow-tooltip></el-table-column>
           </template>
         </template>
       </el-table>
-      <pagination v-if="totalRef > 0" v-model:total="totalRef" v-model:page="pageNum" v-model:limit="pageSize"
-        @pagination="handleQuery" />
+      <pagination :total="totalRef" @change="pageChanged" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
 import { useFormStore } from "@eimsnext/store";
-import { FormDef, FormData, FieldDef, SystemField, FlowStatus } from "@eimsnext/models";
+import { FormDef, FormData, FieldDef, SystemField, FlowStatus, FieldType } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
-import { IDynamicFindOptions, formDataService } from "@eimsnext/services";
+import { IDynamicFindOptions, SortDirection, formDataService } from "@eimsnext/services";
 import AddEditFormData from "./components/AddEditFormData.vue";
 import { EtDialog } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
@@ -105,6 +110,7 @@ formStore.get(formId).then((form: FormDef | undefined) => {
     formDef.value = form;
     initChildrenField(form.content?.items!, []);
     columns.value = buildColumns(form.content?.items!, form.usingWorkflow, []);
+    updateQueryParams()
     handleQuery();
   }
 });
@@ -119,7 +125,7 @@ const dataRef = ref<FormData[]>();
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
 const showSort = ref(false);
-const sortList = ref<IFieldSortList>({ items: [] });
+const sortList = ref<IFieldSortList>({ items: [{ field: { formId: formId, field: SystemField.CreateTime, label: "提交时间", type: FieldType.DatePicker }, sort: SortDirection.Desc }] });
 const showField = ref(false)
 const fieldList = ref<IFormFieldDef[]>([])
 const pageNum = ref(1)
@@ -171,8 +177,7 @@ const handleQuery = () => {
 };
 
 const loadCount = () => {
-  // console.log("queryParams", queryParams.value)
-  formDataService.count(queryParams.value).then((cnt: number) => {
+  formDataService.count(queryParams.value.filter).then((cnt: number) => {
     totalRef.value = cnt;
   });
 };
@@ -184,7 +189,18 @@ const loadData = () => {
       processData();
     });
 };
-
+const pageChanged = (curPage: number, pSize: number) => {
+  pageNum.value = curPage;
+  pageSize.value = pSize;
+  updateQueryParams();
+  loadData()
+}
+const onDataSaved = () => {
+  showAddEditDialog.value = false
+  pageNum.value = 1
+  updateQueryParams()
+  handleQuery()
+};
 const rowClassName = (row: any) => {
   return "pointer"
 }
