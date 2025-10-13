@@ -7,7 +7,7 @@ defineOptions({
   name: "AddEditFormData",
 });
 
-import { FormDef, FormData, FormContent, FormDataRequest } from "@eimsnext/models";
+import { FormDef, FormData, FormContent, FormDataRequest, DataAction } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
@@ -38,28 +38,14 @@ if (props.formId) {
   }
 }
 
-const emit = defineEmits(["update:modelValue", "cancel", "submit"]);
+const emit = defineEmits(["update:modelValue", "cancel", "save", "submit"]);
 const cancel = () => {
   emit("update:modelValue", false);
   emit("cancel");
 };
 const saveDraft = (data: any) => {
-  alert("TODO:")
-  // let fdata: FormDataRequest = {
-  //   id: dataId.value ?? "",
-  //   appId: appId.value,
-  //   formId: props.formId,
-  //   data: data,
-  // };
-
-  // formDataService.post<FormData_2>(fdata).then((res) => {
-  //   // console.log("ressss", res);
-  //   formData.value = res.data;
-  //   emit("submit", res);
-  // });
-};
-const submitData = (data: any) => {
   let fdata: FormDataRequest = {
+    action: DataAction.SaveDraft,
     id: dataId.value ?? "",
     appId: appId.value,
     formId: props.formId,
@@ -67,7 +53,20 @@ const submitData = (data: any) => {
   };
 
   formDataService.post<FormData>(fdata).then((res) => {
-    // console.log("ressss", res);
+    formData.value = res.data;
+    emit("save", res);
+  });
+};;
+const submitData = (data: any) => {
+  let fdata: FormDataRequest = {
+    action: DataAction.Submit,
+    id: dataId.value ?? "",
+    appId: appId.value,
+    formId: props.formId,
+    data: data,
+  };
+
+  formDataService.post<FormData>(fdata).then((res) => {
     formData.value = res.data;
     emit("submit", res);
   });

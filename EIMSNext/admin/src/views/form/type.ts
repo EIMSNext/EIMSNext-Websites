@@ -43,9 +43,9 @@ export function buildColumns(
     columns.push({
       field: SystemField.FlowStatus,
       title: "流程状态",
-      type: "input",
+      type: FieldType.Input,
       mergeField: "_id",
-      oriField: "flowStatus",
+      oriField: SystemField.FlowStatus,
     });
   }
 
@@ -78,10 +78,10 @@ export function buildColumns(
     columns.push({
       field: SystemField.CreateTime,
       title: "提交时间",
-      type: "datetime",
+      type: FieldType.DatePicker,
       format: "yyyy-MM-dd",
       mergeField: "_id",
-      oriField: "createTime",
+      oriField: SystemField.CreateTime,
     });
   }
 
