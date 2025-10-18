@@ -31,7 +31,7 @@ const props = withDefaults(
     iconClass?: string;
   }>(),
   {
-    color: "#1296db",
+    color: "currentcolor",
     size: "1em",
     iconClass: "",
   }

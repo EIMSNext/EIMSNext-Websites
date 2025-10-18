@@ -12,49 +12,19 @@
         <FormDataView :formId="formId" :dataId="selectedData!.id"></FormDataView>
       </div>
     </et-dialog>
-    <div class="top-bar">
-      <div class="flex-x-between mb-10px">
-        <div>
-          <el-button type="success" icon="plus">新增</el-button>
-          <el-button type="danger" icon="delete">删除</el-button>
-          <el-button icon="upload">导入</el-button>
-          <el-button icon="download">导出</el-button>
-        </div>
-        <div>
-          <el-popover :visible="showFilter" :show-arrow="false" :offset="0" placement="bottom-end" width="500"
-            :teleported="false" trigger="click" :destroy-on-close="true">
-            <DataFilter :model-value="condList" :formId="formId" @ok="setFilter" @cancel="showFilter = false">
-            </DataFilter>
-            <template #reference>
-              <el-button icon="filter" class="data-filter" @click="showFilter = !showFilter">
-                筛选
-              </el-button>
-            </template>
-          </el-popover>
-          <el-popover :visible="showSort" :show-arrow="false" :offset="0" placement="bottom-end" width="500"
-            :teleported="false" trigger="click" :destroy-on-close="true">
-            <DataSort :model-value="sortList" :formId="formId" @ok="setSort" @cancel="showSort = false"></DataSort>
-            <template #reference>
-              <el-button icon="sort" class="data-sort" @click="showSort = !showSort">
-                排序
-              </el-button>
-            </template>
-          </el-popover>
-          <el-popover :visible="showField" :show-arrow="false" :offset="0" placement="bottom-end" width="500"
-            :teleported="false" trigger="click" :destroy-on-close="true">
-            <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
-            <template #reference>
-              <el-button icon="list" class="data-field" @click="showField = !showField">
-                字段
-              </el-button>
-            </template>
-          </el-popover>
-          <el-button icon="refresh" class="data-field" @click="handleQuery">
-            刷新
-          </el-button>
-        </div>
-      </div>
-    </div>
+    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataFilter :model-value="condList" :formId="formId" @ok="setFilter" @cancel="showFilter = false">
+      </DataFilter>
+    </el-popover>
+    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataSort :model-value="sortList" :formId="formId" @ok="setSort" @cancel="showSort = false"></DataSort>
+    </el-popover>
+    <el-popover :visible="showField" :virtual-ref="fieldBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
+    </el-popover>
     <et-toolbar :left-group="leftBars" :right-group="rightBars"></et-toolbar>
     <div class="data-list" style="height:100%">
       <el-table :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%;height: 100%;"
@@ -104,6 +74,9 @@ const route = useRoute();
 const formStore = useFormStore();
 const formId = route.params.formId.toString();
 const formDef = ref<FormDef>();
+const filterBtnRef = ref();
+const sortBtnRef = ref();
+const fieldBtnRef = ref();
 
 const leftBars = ref<ToolbarItem[]>([
   { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddEditDialog.value = true; } } },
@@ -113,10 +86,10 @@ const leftBars = ref<ToolbarItem[]>([
 ])
 
 const rightBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "筛选", class: "data-filter", command: "filter", icon: "el-icon-filter", onCommand: () => { showFilter.value = !showFilter.value; } } },
-  { type: "button", config: { text: "排序", class: "data-sort", command: "sort", icon: "el-icon-sort", onCommand: () => { showSort.value = !showSort.value; } } },
-  { type: "button", config: { text: "字段", class: "data-field", command: "list", icon: "el-icon-list", onCommand: () => { showField.value = !showField.value; } } },
-  { type: "button", config: { text: "刷新", class: "data-field", command: "refresh", icon: "el-icon-refresh", onCommand: () => { handleQuery() } } }
+  { type: "button", config: { text: "筛选", class: "data-filter", command: "filter", icon: "el-icon-filter", onCommand: (cmd: string, e: MouseEvent) => { filterBtnRef.value = e.currentTarget, showSort.value = showField.value = false; showFilter.value = !showFilter.value; } } },
+  { type: "button", config: { text: "排序", class: "data-filter", command: "sort", icon: "el-icon-sort", onCommand: (cmd: string, e: MouseEvent) => { sortBtnRef.value = e.currentTarget, showFilter.value = showField.value = false; showSort.value = !showSort.value; } } },
+  { type: "button", config: { text: "字段", class: "data-filter", command: "list", icon: "el-icon-list", onCommand: (cmd: string, e: MouseEvent) => { fieldBtnRef.value = e.currentTarget, showFilter.value = showSort.value = false; showField.value = !showField.value; } } },
+  { type: "button", config: { text: "刷新", class: "data-filter", command: "refresh", icon: "el-icon-refresh", onCommand: () => { handleQuery() } } }
 ])
 
 formStore.get(formId).then((form: FormDef | undefined) => {
@@ -356,5 +329,9 @@ const idBasedSpanMethod = (data: {
 <style lang="scss" scoped>
 .formdata-container {
   height: calc(100% - 90px)
+}
+
+:deep(.data-filter) {
+  margin-left: 0px;
 }
 </style>
