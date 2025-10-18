@@ -5,6 +5,7 @@ import { SelectedTags } from "./selectedTags";
 import { EtList } from "./list";
 import { MemberSelect, MemberSelectDialog } from "./memberSelect";
 import { EtCard } from "./card";
+import { EtToolbar, EtToolbarItem } from "./toolbar";
 
 export default [
   SvgIcon,
@@ -17,4 +18,6 @@ export default [
   MemberSelect,
   MemberSelectDialog,
   EtCard,
+  EtToolbar,
+  EtToolbarItem,
 ];

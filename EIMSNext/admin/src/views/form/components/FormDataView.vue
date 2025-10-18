@@ -1,4 +1,5 @@
 <template>
+    <et-toolbar :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
     <FormView v-if="formData" :def="formDef" :data="formData" :isView="isView" :actions="actions" @draft="saveDraft"
         @submit="submitData">
     </FormView>
@@ -8,10 +9,11 @@ defineOptions({
     name: "FormDataView",
 });
 
-import { FormData, FormContent, FormDataRequest } from "@eimsnext/models";
+import { FormData, FormContent, FormDataRequest, DataAction } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
+import { ToolbarItem } from "@eimsnext/components";
 
 const props = withDefaults(
     defineProps<{
@@ -29,28 +31,23 @@ const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());
 const formData = ref<FormData>();
 
-const emit = defineEmits(["update:modelValue", "cancel", "submit"]);
+const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "Edit", command: "edit", icon: "el-icon-edit" } }, { type: "dropdown", config: { text: "Print", command: "", icon: "el-icon-print", menuItems: [{ text: "system print", command: "sysprint" }], onCommand: (cmd: string) => { alert(cmd) } } }])
+const toolbarHandler = (cmd: string, e: MouseEvent) => {
+    switch (cmd) {
+        case 'edit':
+            isView.value = false;
+            break;
+    }
+}
+
+const emit = defineEmits(["update:modelValue", "cancel", "save", "submit"]);
 const cancel = () => {
     emit("update:modelValue", false);
     emit("cancel");
 };
 const saveDraft = (data: any) => {
-    alert("TODO:")
-    // let fdata: FormDataRequest = {
-    //   id: dataId.value ?? "",
-    //   appId: appId.value,
-    //   formId: props.formId,
-    //   data: data,
-    // };
-
-    // formDataService.post<FormData_2>(fdata).then((res) => {
-    //   // console.log("ressss", res);
-    //   formData.value = res.data;
-    //   emit("submit", res);
-    // });
-};
-const submitData = (data: any) => {
     let fdata: FormDataRequest = {
+        action: DataAction.Save,
         id: props.dataId,
         appId: appId.value,
         formId: props.formId,
@@ -58,7 +55,20 @@ const submitData = (data: any) => {
     };
 
     formDataService.post<FormData>(fdata).then((res) => {
-        console.log("ressss", res);
+        formData.value = res.data;
+        emit("save", res);
+    });
+};;
+const submitData = (data: any) => {
+    let fdata: FormDataRequest = {
+        action: DataAction.Submit,
+        id: props.dataId,
+        appId: appId.value,
+        formId: props.formId,
+        data: data,
+    };
+
+    formDataService.post<FormData>(fdata).then((res) => {
         formData.value = res.data;
         emit("submit", res);
     });
@@ -66,14 +76,12 @@ const submitData = (data: any) => {
 
 onBeforeMount(async () => {
     let form = await formStore.get(props.formId);
-    // console.log("form def11111", form?.appId)
     if (form) {
         appId.value = form.appId;
         formDef.value = form.content!;
     }
 
     let data = await formDataService.get<FormData>(props.dataId);
-    console.log("dataid11111", data, props.dataId)
     if (data) {
         formData.value = data;
     }
