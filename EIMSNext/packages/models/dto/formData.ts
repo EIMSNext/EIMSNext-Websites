@@ -26,6 +26,6 @@ export enum FlowStatus {
 
 export enum DataAction {
   None = 0,
-  SaveDraft = 1,
+  Save = 1,
   Submit = 2,
 }

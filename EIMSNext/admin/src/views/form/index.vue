@@ -15,7 +15,7 @@
     <div class="top-bar">
       <div class="flex-x-between mb-10px">
         <div>
-          <el-button type="success" icon="plus" @click="createFormData">新增</el-button>
+          <el-button type="success" icon="plus">新增</el-button>
           <el-button type="danger" icon="delete">删除</el-button>
           <el-button icon="upload">导入</el-button>
           <el-button icon="download">导出</el-button>
@@ -55,6 +55,7 @@
         </div>
       </div>
     </div>
+    <et-toolbar :left-group="leftBars" :right-group="rightBars"></et-toolbar>
     <div class="data-list" style="height:100%">
       <el-table :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%;height: 100%;"
         show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName"
@@ -86,7 +87,7 @@ import { FormDef, FormData, FieldDef, SystemField, FlowStatus, FieldType } from 
 import { ITableColumn, buildColumns } from "./type";
 import { IDynamicFindOptions, SortDirection, formDataService } from "@eimsnext/services";
 import AddEditFormData from "./components/AddEditFormData.vue";
-import { EtDialog } from "@eimsnext/components";
+import { EtDialog, ToolbarItem } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
 import DataFilter from "./components/DataFilter.vue";
 import { IConditionList, toDynamicFindOptions } from "@/components/ConditionList/type";
@@ -102,8 +103,21 @@ const columns = ref<ITableColumn[]>([]);
 const route = useRoute();
 const formStore = useFormStore();
 const formId = route.params.formId.toString();
-
 const formDef = ref<FormDef>();
+
+const leftBars = ref<ToolbarItem[]>([
+  { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddEditDialog.value = true; } } },
+  { type: "button", config: { text: "删除", type: "danger", command: "delete", icon: "el-icon-delete" } },
+  { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
+  { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
+])
+
+const rightBars = ref<ToolbarItem[]>([
+  { type: "button", config: { text: "筛选", class: "data-filter", command: "filter", icon: "el-icon-filter", onCommand: () => { showFilter.value = !showFilter.value; } } },
+  { type: "button", config: { text: "排序", class: "data-sort", command: "sort", icon: "el-icon-sort", onCommand: () => { showSort.value = !showSort.value; } } },
+  { type: "button", config: { text: "字段", class: "data-field", command: "list", icon: "el-icon-list", onCommand: () => { showField.value = !showField.value; } } },
+  { type: "button", config: { text: "刷新", class: "data-field", command: "refresh", icon: "el-icon-refresh", onCommand: () => { handleQuery() } } }
+])
 
 formStore.get(formId).then((form: FormDef | undefined) => {
   if (form) {
@@ -132,10 +146,6 @@ const pageNum = ref(1)
 const pageSize = ref(20)
 const selectedData = ref<FormData>()
 const showDetailsDialog = ref(false)
-
-const createFormData = () => {
-  showAddEditDialog.value = true;
-};
 
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;

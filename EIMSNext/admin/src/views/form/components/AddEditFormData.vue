@@ -45,7 +45,7 @@ const cancel = () => {
 };
 const saveDraft = (data: any) => {
   let fdata: FormDataRequest = {
-    action: DataAction.SaveDraft,
+    action: DataAction.Save,
     id: dataId.value ?? "",
     appId: appId.value,
     formId: props.formId,
