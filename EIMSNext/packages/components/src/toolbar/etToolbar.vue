@@ -1,10 +1,10 @@
 <template>
     <div class="toolbar-container">
-        <div v-if="leftGroup && leftGroup.length > 0" class="left-group">
+        <div v-if="leftGroup && leftGroup.length > 0" class="left-group" :class="leftGroupClass">
             <EtToolbarItem v-for="(item, index) in leftGroup" :key="'left-' + index" :data="item"
                 @command="handleCommand" />
         </div>
-        <div v-if="rightGroup && rightGroup.length > 0" class="right-group">
+        <div v-if="rightGroup && rightGroup.length > 0" class="right-group" :class="rightGroupClass">
             <EtToolbarItem v-for="(item, index) in rightGroup" :key="'left-' + index" :data="item"
                 @command="handleCommand" />
         </div>
@@ -23,6 +23,8 @@ const props = withDefaults(
     defineProps<{
         leftGroup?: ToolbarItem[],
         rightGroup?: ToolbarItem[]
+        leftGroupClass?: string;
+        rightGroupClass?: string;
     }>(),
     {
     }
@@ -40,18 +42,14 @@ const handleCommand = (cmd: string, e: MouseEvent, callback: any) => {
 
 <style scoped>
 .toolbar-container {
-    padding: 12px;
-    background-color: #f5f7fa;
-    border-radius: 4px;
-    margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
 }
 
 .left-group,
 .right-group {
     display: flex;
-    gap: 8px;
 }
 </style>
