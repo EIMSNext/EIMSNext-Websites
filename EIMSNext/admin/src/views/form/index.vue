@@ -1,15 +1,19 @@
 <template>
   <div class="formdata-container">
-    <et-dialog v-model="showAddEditDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
+    <et-dialog v-model="showAddDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
       :close-on-click-modal="false">
       <div class="form-container">
-        <AddEditFormData :formId="formId" :isView="false" @save="onDataSaved" @submit="onDataSaved">
-        </AddEditFormData>
+        <AddFormData :formId="formId" :isView="false" @save="onDataSaved" @submit="onDataSaved">
+        </AddFormData>
       </div>
     </et-dialog>
+    <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
+      :showNoSave="false" okText="确定" @ok="execDelete">
+      <div>你当前选中了{{ checkedDatas.length }}条数据，数据删除后将不可恢复</div>
+    </EtConfirmDialog>
     <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true">
       <div class="form-container">
-        <FormDataView :formId="formId" :dataId="selectedData!.id"></FormDataView>
+        <FormDataView :formId="formId" :dataId="selectedData!.id" @ok="handleViewOk"></FormDataView>
       </div>
     </et-dialog>
     <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
@@ -25,12 +29,12 @@
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
-    <et-toolbar :left-group="leftBars" :right-group="rightBars"></et-toolbar>
+    <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="handleToolbarCommand"></et-toolbar>
     <div class="data-list" style="height:100%">
       <el-table :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%;height: 100%;"
         show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName"
-        @row-click="showDetails">
-        <el-table-column type="selection" width="30" />
+        @selection-change="selectionChanged" @row-click="showDetails">
+        <el-table-column type="selection" width="30" :selectable="selectable" />
         <template v-for="col in columns">
           <template v-if="col.children">
             <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip>
@@ -56,8 +60,8 @@ import { useFormStore } from "@eimsnext/store";
 import { FormDef, FormData, FieldDef, SystemField, FlowStatus, FieldType } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
 import { IDynamicFindOptions, SortDirection, formDataService } from "@eimsnext/services";
-import AddEditFormData from "./components/AddEditFormData.vue";
-import { EtDialog, ToolbarItem } from "@eimsnext/components";
+import AddFormData from "./components/AddFormData.vue";
+import { MessageIcon, ToolbarItem } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
 import DataFilter from "./components/DataFilter.vue";
 import { IConditionList, toDynamicFindOptions } from "@/components/ConditionList/type";
@@ -68,7 +72,8 @@ import DataField from "./components/DataField.vue";
 import { IFormFieldDef } from "@/components/FieldList/type";
 
 const displayItemCount = 3; //最多显示3条明细
-const showAddEditDialog = ref(false);
+const showAddDialog = ref(false);
+const showDeleteConfirmDialog = ref(false)
 const columns = ref<ITableColumn[]>([]);
 const route = useRoute();
 const formStore = useFormStore();
@@ -79,8 +84,8 @@ const sortBtnRef = ref();
 const fieldBtnRef = ref();
 
 const leftBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddEditDialog.value = true; } } },
-  { type: "button", config: { text: "删除", type: "danger", command: "delete", icon: "el-icon-delete" } },
+  { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddDialog.value = true; } } },
+  { type: "button", config: { text: "删除", type: "danger", command: "delete", icon: "el-icon-delete", disabled: true } },
   { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
   { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
 ])
@@ -91,6 +96,18 @@ const rightBars = ref<ToolbarItem[]>([
   { type: "button", config: { text: "字段", class: "data-filter", command: "list", icon: "el-icon-list", onCommand: (cmd: string, e: MouseEvent) => { fieldBtnRef.value = e.currentTarget, showFilter.value = showSort.value = false; showField.value = !showField.value; } } },
   { type: "button", config: { text: "刷新", class: "data-filter", command: "refresh", icon: "el-icon-refresh", onCommand: () => { handleQuery() } } }
 ])
+
+const handleToolbarCommand = (cmd: string, e: MouseEvent) => {
+  switch (cmd) {
+    case "delete":
+      {
+        if (checkedDatas.value.length > 0) {
+          showDeleteConfirmDialog.value = true
+        }
+      }
+      break;
+  }
+}
 
 formStore.get(formId).then((form: FormDef | undefined) => {
   if (form) {
@@ -119,6 +136,18 @@ const pageNum = ref(1)
 const pageSize = ref(20)
 const selectedData = ref<FormData>()
 const showDetailsDialog = ref(false)
+const checkedDatas = ref<any[]>([])
+
+const selectionChanged = (rows: any[]) => {
+  checkedDatas.value = rows
+  leftBars.value.find(x => x.config.command == "delete")!.config.disabled = checkedDatas.value.length == 0
+}
+const execDelete = () => {
+  formDataService.delete("batch", { keys: checkedDatas.value.map(x => x[SystemField.Id]) })
+    .then(() => {
+      handleQuery()
+    })
+}
 
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
@@ -179,7 +208,7 @@ const pageChanged = (curPage: number, pSize: number) => {
   loadData()
 }
 const onDataSaved = () => {
-  showAddEditDialog.value = false
+  showAddDialog.value = false
   pageNum.value = 1
   updateQueryParams()
   handleQuery()
@@ -188,6 +217,9 @@ const rowClassName = (row: any) => {
   return "pointer"
 }
 
+const selectable = (row: any, index: number) => {
+  return row[SystemField.FlowStatus] == FlowStatus.Draft
+}
 const formatter = (row: any, column: any, cellValue: any, index: number) => {
   // console.log("formatter", row, column, column.$attrs);
   if (column.property == SystemField.FlowStatus) {
@@ -238,7 +270,9 @@ const showDetails = (row: FormData) => {
   selectedData.value = row
   showDetailsDialog.value = true
 }
-
+const handleViewOk = () => {
+  loadData()
+}
 //#region Flat Data
 const childrenFields = ref<string[]>([]);
 const flattedData = ref<any[]>([]);
