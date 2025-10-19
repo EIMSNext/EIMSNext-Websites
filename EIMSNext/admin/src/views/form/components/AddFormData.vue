@@ -4,7 +4,7 @@
 </template>
 <script lang="ts" setup>
 defineOptions({
-  name: "AddEditFormData",
+  name: "AddFormData",
 });
 
 import { FormDef, FormData, FormContent, FormDataRequest, DataAction } from "@eimsnext/models";
