@@ -96,7 +96,7 @@ export default function createStore<T extends IIdentity>(
     };
 
     const clear = () => {
-      items.value = [];
+      items.value = initData;
     };
 
     return { loading, items, load, get, update, remove, clear };

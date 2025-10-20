@@ -1,6 +1,6 @@
 <template>
   <div class="pagination">
-    <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 50]"
+    <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[20, 30, 50, 100]"
       :background="background" :layout="layout" :total="totalCount" @change="onChange" />
   </div>
 </template>
@@ -20,7 +20,7 @@ const props = withDefaults(
 );
 
 const currentPage = ref(1);
-const pageSize = ref(10)
+const pageSize = ref(20)
 const totalCount = computed(() => props.total)
 
 const emit = defineEmits(["change"]);

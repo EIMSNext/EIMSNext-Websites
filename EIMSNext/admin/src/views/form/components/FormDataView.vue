@@ -29,7 +29,7 @@ const props = withDefaults(
 );
 
 const isView = ref(true)
-const actions = ref<FormActionSettings>({ submit: { text: "Submit", visible: true } })
+const actions = ref<FormActionSettings>({})
 const appId = ref("");
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());
@@ -99,6 +99,7 @@ onBeforeMount(async () => {
     let data = await formDataService.get<FormData>(props.dataId);
     if (data) {
         formData.value = data;
+        leftBars.value.find(x => x.config.command == "edit")!.config.disabled = formData.value.flowStatus != FlowStatus.Draft;
         leftBars.value.find(x => x.config.command == "delete")!.config.disabled = formData.value.flowStatus != FlowStatus.Draft;
     }
 });
