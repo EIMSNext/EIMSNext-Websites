@@ -1,7 +1,7 @@
 import { IFormFieldDef } from "@/components/FieldList/type";
 import { FieldType, SystemField, isSystemField } from "@eimsnext/models";
 import { IFieldSortList } from "../FieldSortList/type";
-import { IDynamicFindOptions, IDynamicFilter } from "@eimsnext/services";
+import { IDynamicFindOptions, IDynamicFilter, ODataQueryModel } from "@eimsnext/services";
 export enum ConditionType {
   Form = 0,
   Node = 1,
@@ -127,12 +127,13 @@ export function toDynamicFindOptions(
   return findOpt;
 }
 
-export function toODataQueryModel(
+export function toODataQuery(
   filter: IConditionList,
   sort: IFieldSortList,
   skip: number,
   take: number
 ) {
+  var query= {}
   // var filter = new DynamicFilter();
   // if (Items?.Count > 0)
   // {

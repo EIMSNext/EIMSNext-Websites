@@ -29,7 +29,7 @@
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
-    <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="handleToolbarCommand"></et-toolbar>
+    <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
     <div class="data-list" style="height:100%">
       <el-table :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%;height: 100%;"
         show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName"
@@ -50,7 +50,7 @@
           </template>
         </template>
       </el-table>
-      <pagination :total="totalRef" @change="pageChanged" />
+      <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
     </div>
   </div>
 </template>
@@ -97,7 +97,7 @@ const rightBars = ref<ToolbarItem[]>([
   { type: "button", config: { text: "刷新", class: "data-filter", command: "refresh", icon: "el-icon-refresh", onCommand: () => { handleQuery() } } }
 ])
 
-const handleToolbarCommand = (cmd: string, e: MouseEvent) => {
+const toolbarHandler = (cmd: string, e: MouseEvent) => {
   switch (cmd) {
     case "delete":
       {

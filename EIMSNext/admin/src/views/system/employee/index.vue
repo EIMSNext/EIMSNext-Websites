@@ -9,11 +9,15 @@
             <div class="org-menu">员工</div>
             <div class="menu-items">
               <div class="menu-item">
-                <el-icon :size="14" color="#2f7deb"><UserFilled /></el-icon>
+                <el-icon :size="14" color="#2f7deb">
+                  <UserFilled />
+                </el-icon>
                 <span class="ml-5px">在职员工</span>
               </div>
               <div class="menu-item">
-                <el-icon :size="14"><UserFilled /></el-icon>
+                <el-icon :size="14">
+                  <UserFilled />
+                </el-icon>
                 <span class="ml-5px">离职员工</span>
               </div>
             </div>
@@ -29,42 +33,11 @@
       <!-- 用户列表 -->
       <el-col :lg="18" :xs="24">
         <div class="search-bar">
-          <el-form ref="queryFormRef" :model="queryParams" :inline="true">
+          <el-form ref="queryFormRef" :inline="true">
             <el-form-item label="关键字" prop="keywords">
-              <el-input
-                v-model="queryParams.keywords"
-                placeholder="用户名/昵称/手机号"
-                clearable
-                style="width: 200px"
-                @keyup.enter="handleQuery"
-              />
+              <el-input v-model="keyword" placeholder="用户名/昵称/手机号" clearable style="width: 200px"
+                @keyup.enter="handleQuery" />
             </el-form-item>
-
-            <!-- <el-form-item label="状态" prop="status">
-              <el-select
-                v-model="queryParams.status"
-                placeholder="全部"
-                clearable
-                class="!w-[100px]"
-              >
-                <el-option label="正常" :value="1" />
-                <el-option label="禁用" :value="0" />
-              </el-select>
-            </el-form-item> -->
-
-            <!-- <el-form-item label="创建时间">
-              <el-date-picker
-                v-model="queryParams.createTime"
-                :editable="false"
-                class="!w-[240px]"
-                type="daterange"
-                range-separator="~"
-                start-placeholder="开始时间"
-                end-placeholder="截止时间"
-                value-format="YYYY-MM-DD"
-              />
-            </el-form-item> -->
-
             <el-form-item>
               <el-button type="primary" icon="search" @click="handleQuery()">搜索</el-button>
               <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
@@ -73,102 +46,49 @@
         </div>
 
         <el-card shadow="never">
-          <div class="flex-x-between mb-10px">
-            <div>
-              <el-button
-                v-hasPerm="['sys:user:add']"
-                type="success"
-                icon="plus"
-                @click="handleAddClick()"
-              >
-                新增
-              </el-button>
-              <el-button
-                v-hasPerm="'sys:user:delete'"
-                type="danger"
-                icon="delete"
-                :disabled="selectIds.length === 0"
-                @click="handleBatchDeleteClick()"
-              >
-                删除
-              </el-button>
-            </div>
-            <div>
-              <el-button
-                v-hasPerm="'sys:user:import'"
-                icon="upload"
-                @click="handleOpenImportDialog"
-              >
-                导入
-              </el-button>
-
-              <el-button v-hasPerm="'sys:user:export'" icon="download" @click="handleExport">
-                导出
-              </el-button>
-            </div>
-          </div>
-          <el-table v-loading="loading" :data="pageData" @selection-change="handleSelectionChange">
+          <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+          <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="50" align="center" />
             <el-table-column label="姓名" width="150" prop="empName" />
             <el-table-column label="编码" width="150" prop="code" />
             <el-table-column label="工作电话" width="150" prop="workPhone" />
             <el-table-column label="工作邮箱" width="150" prop="workEmail" />
             <el-table-column label="部门" prop="departmentName" />
-            <el-table-column label="操作" fixed="right" width="150">
+            <!-- <el-table-column label="操作" fixed="right" width="150">
               <template #default="scope">
-                <el-button
-                  v-hasPerm="'sys:user:edit'"
-                  type="primary"
-                  icon="edit"
-                  link
-                  size="small"
-                  @click="handleEditClick(scope.row)"
-                >
+                <el-button v-hasPerm="'sys:user:edit'" type="primary" icon="edit" link size="small"
+                  @click="handleEditClick(scope.row)">
                   编辑
                 </el-button>
-                <el-button
-                  v-hasPerm="'sys:user:delete'"
-                  type="danger"
-                  icon="delete"
-                  link
-                  size="small"
-                  @click="handleDeleteClick(scope.row)"
-                >
+                <el-button v-hasPerm="'sys:user:delete'" type="danger" icon="delete" link size="small"
+                  @click="handleDeleteClick(scope.row)">
                   删除
                 </el-button>
               </template>
-            </el-table-column>
+</el-table-column> -->
           </el-table>
 
-          <pagination
-            v-if="total > 0"
-            v-model:total="total"
-            v-model:page="queryParams.pageNum"
-            v-model:limit="queryParams.pageSize"
-            @pagination="handleQuery"
-          />
+          <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
         </el-card>
       </el-col>
     </el-row>
-    <AddEditEmp
-      v-if="showAddEditDialog"
-      :edit="editMode"
-      :emp="selectedEmp"
-      @cancel="showAddEditDialog = false"
-      @ok="handleSaved"
-    />
-    <et-confirm-dialog
-      v-model="showDeleteDialog"
-      title="确认要删除吗?"
-      :showNoSave="false"
-      okText="确认"
-      @cancel="showDeleteDialog = false"
-      @ok="handleDeleteConfirm"
-    >
-      确认删除已选中的数据项?
+    <AddEditEmp v-if="showAddEditDialog" :edit="editMode" :emp="selectedEmp" @cancel="showAddEditDialog = false"
+      @ok="handleSaved" />
+    <et-confirm-dialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :showNoSave="false" okText="确认"
+      @ok="execDelete">
+      你当前选中了{{ checkedDatas.length }}条数据，数据删除后将不可恢复
     </et-confirm-dialog>
     <!-- 用户导入 -->
     <EmpImport v-model="importDialogVisible" @import-success="handleQuery()" />
+    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false">
+      </DataFilter>
+    </el-popover>
+    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
+    </el-popover>
   </div>
 </template>
 
@@ -176,10 +96,13 @@
 import DeptTree from "./components/DeptTree.vue";
 import EmpImport from "./components/EmpImport.vue";
 import { ODataQuery } from "@/utils/query";
-import { Department, Employee } from "@eimsnext/models";
-import { employeeService } from "@eimsnext/services";
+import { Department, Employee, FieldType, SystemField } from "@eimsnext/models";
+import { SortDirection, employeeService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import AddEditEmp from "./components/AddEditEmp.vue";
+import { ToolbarItem } from "@eimsnext/components";
+import { IConditionList, toODataQuery } from "@/components/ConditionList/type";
+import { IFieldSortList } from "@/components/FieldSortList/type";
 
 defineOptions({
   name: "Employee",
@@ -190,26 +113,85 @@ const activeTab = ref("dept");
 const selectedEmp = ref<Employee>();
 const showAddEditDialog = ref(false);
 const editMode = ref(false);
-const showDeleteDialog = ref(false);
+const showDeleteConfirmDialog = ref(false);
+const showFilter = ref(false);
+const condList = ref<IConditionList>({ id: "", rel: "and" });
+const showSort = ref(false);
+const sortList = ref<IFieldSortList>({ items: [{ field: { formId: "employee", field: SystemField.CreateTime, label: "提交时间", type: FieldType.DatePicker }, sort: SortDirection.Desc }] });
+
+const filterBtnRef = ref();
+const sortBtnRef = ref();
+const checkedDatas = ref<any[]>([])
+const pageNum = ref(1)
+const pageSize = ref(20)
+
+const leftBars = ref<ToolbarItem[]>([
+  { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddEditDialog.value = true; } } },
+  { type: "button", config: { text: "删除", type: "danger", command: "delete", icon: "el-icon-delete", disabled: true } },
+  { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
+  { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
+])
+
+const rightBars = ref<ToolbarItem[]>([
+  { type: "button", config: { text: "筛选", class: "data-filter", command: "filter", icon: "el-icon-filter", onCommand: (cmd: string, e: MouseEvent) => { filterBtnRef.value = e.currentTarget, showSort.value = false; showFilter.value = !showFilter.value; } } },
+  { type: "button", config: { text: "排序", class: "data-filter", command: "sort", icon: "el-icon-sort", onCommand: (cmd: string, e: MouseEvent) => { sortBtnRef.value = e.currentTarget, showFilter.value = false; showSort.value = !showSort.value; } } },
+  { type: "button", config: { text: "刷新", class: "data-filter", command: "refresh", icon: "el-icon-refresh", onCommand: () => { handleQuery() } } }
+])
+
+const toolbarHandler = (cmd: string, e: MouseEvent) => {
+  switch (cmd) {
+    case "delete":
+      {
+        if (checkedDatas.value.length > 0) {
+          showDeleteConfirmDialog.value = true
+        }
+      }
+      break;
+  }
+}
+
+const setFilter = (filter: IConditionList) => {
+  condList.value = filter;
+  showFilter.value = false;
+  // console.log("condList", filter);
+
+  updateQueryParams()
+  handleQuery();
+};
+
+const setSort = (sort: IFieldSortList) => {
+  sortList.value = sort;
+  showSort.value = false;
+  // console.log("sortList", sort);
+
+  updateQueryParams()
+  handleQuery();
+};
+
+const updateQueryParams = () => {
+  queryParams.value = toODataQuery(condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value)
+}
 
 const queryFormRef = ref(ElForm);
-
 const queryParams = reactive<ODataQuery<Employee>>({
   pageNum: 1,
-  pageSize: 10,
-  deptId: "",
-  keywords: "",
+  pageSize: 20
 });
 
-const pageData = ref<Employee[]>();
-const total = ref(0);
+const dataRef = ref<Employee[]>();
+const totalRef = ref(0);
 const loading = ref(false);
+const deptId = ref("")
+const keyword = ref("")
 
-// 选中的用户ID
-const selectIds = ref<number[]>([]);
 // 导入弹窗显示状态
 const importDialogVisible = ref(false);
-
+const pageChanged = (curPage: number, pSize: number) => {
+  pageNum.value = curPage;
+  pageSize.value = pSize;
+  updateQueryParams();
+  loadData()
+}
 // 查询
 const handleQuery = (dept?: Department) => {
   loading.value = true;
@@ -217,19 +199,25 @@ const handleQuery = (dept?: Department) => {
   if (dept) queryParams.deptId = dept.id;
   if (queryParams.deptId) filter["departmentId"] = queryParams.deptId;
 
-  let query = buildQuery({ filter: filter });
-  // console.log("query", query);
+  loadCount()
+  loadData()
+};
+const loadCount = () => {
+  let query = buildQuery({ filter: queryParams.filter });
+  employeeService.count(query).then((cnt: number) => {
+    totalRef.value = cnt;
+  });
+};
+const loadData = () => {
+  loading.value = true;
+  let query = buildQuery(queryParams);
   employeeService
     .query<Employee>(query)
-    .then((data) => {
-      // console.log("emps", data);
-      pageData.value = data;
+    .then((res: Employee[]) => {
+      dataRef.value = res;
     })
-    .finally(() => {
-      loading.value = false;
-    });
+    .finally(() => loading.value = false);
 };
-
 // 重置查询
 const handleResetQuery = () => {
   queryFormRef.value.resetFields();
@@ -241,7 +229,7 @@ const handleResetQuery = () => {
 
 // 选中项发生变化
 const handleSelectionChange = (selection: any[]) => {
-  selectIds.value = selection.map((item) => item.id);
+  checkedDatas.value = selection;
 };
 
 // 重置密码
@@ -265,36 +253,34 @@ const handleSelectionChange = (selection: any[]) => {
 //   );
 // }
 
-const handleAddClick = () => {
-  editMode.value = false;
-  selectedEmp.value = undefined;
-  showAddEditDialog.value = true;
-};
+// const handleAddClick = () => {
+//   editMode.value = false;
+//   selectedEmp.value = undefined;
+//   showAddEditDialog.value = true;
+// };
 
-const handleEditClick = (data: Employee) => {
-  // console.log("data", data);
-  editMode.value = true;
-  selectedEmp.value = data;
-  showAddEditDialog.value = true;
-};
+// const handleEditClick = (data: Employee) => {
+//   // console.log("data", data);
+//   editMode.value = true;
+//   selectedEmp.value = data;
+//   showAddEditDialog.value = true;
+// };
 const handleSaved = (data: Employee) => {
   showAddEditDialog.value = false;
   //TODO?刷新列表？？？ 还是关闭新增框才刷新？
 };
-const handleBatchDeleteClick = () => {
-  if (selectIds.value.length > 0) showDeleteDialog.value = true;
-};
-const handleDeleteClick = (data?: Employee) => {
-  selectedEmp.value = data;
-  if (selectedEmp.value) showDeleteDialog.value = true;
-};
-const handleDeleteConfirm = async () => {
-  await employeeService.delete(selectedEmp.value?.id!);
-
-  let index = pageData.value?.findIndex((x) => x.id == selectedEmp.value?.id) ?? -1;
-  if (index > -1) pageData.value?.splice(index, 1);
-
-  showDeleteDialog.value = false;
+// const handleBatchDeleteClick = () => {
+//   if (selectIds.value.length > 0) showDeleteConfirmDialog.value = true;
+// };
+// const handleDeleteClick = (data?: Employee) => {
+//   selectedEmp.value = data;
+//   if (selectedEmp.value) showDeleteConfirmDialog.value = true;
+// };
+const execDelete = async () => {
+  await employeeService.delete("batch", { keys: checkedDatas.value.map(x => x.id) })
+    .then(() => {
+      handleQuery()
+    })
 };
 
 // 提交用户表单（防抖）
@@ -390,10 +376,12 @@ onMounted(() => {
   font-size: 14px;
   height: 28px;
   line-height: 28px;
+
   &:not(:first-child) {
     margin-top: 10px;
   }
 }
+
 .menu-items {
   margin: 0 16px;
   font-size: 14px;
@@ -413,5 +401,9 @@ onMounted(() => {
     height: 30px;
     justify-content: flex-start;
   }
+}
+
+:deep(.data-filter) {
+  margin-left: 0px;
 }
 </style>
