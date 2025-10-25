@@ -6,9 +6,9 @@ export interface IIdentity {
 
 export interface IDataModel {
   createBy?: Operator;
-  createTime?: Date;
+  createTime?: number;
   updateBy?: Operator;
-  updateTime?: Date;
+  updateTime?: number;
 }
 
 export interface ICorpModel {
@@ -20,9 +20,9 @@ export interface IdBase extends IIdentity {
 }
 export interface ModelBase extends IdBase, IDataModel {
   createBy?: Operator;
-  createTime?: Date;
+  createTime?: number;
   updateBy?: Operator;
-  updateTime?: Date;
+  updateTime?: number;
 }
 
 export interface CorpModelBase extends ModelBase, ICorpModel {
