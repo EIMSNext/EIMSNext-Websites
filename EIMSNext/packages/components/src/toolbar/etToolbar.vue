@@ -51,5 +51,6 @@ const handleCommand = (cmd: string, e: MouseEvent, callback: any) => {
 .left-group,
 .right-group {
     display: flex;
+    justify-content: center;
 }
 </style>

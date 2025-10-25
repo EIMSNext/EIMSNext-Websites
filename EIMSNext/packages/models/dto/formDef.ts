@@ -25,7 +25,7 @@ export interface FormDef extends CorpModelBase {
 export class FormContent {
   layout?: string;
   options?: string;
-  items?: [];
+  items?: FieldDef[];
 }
 export class FieldDef {
   field: string = "";
