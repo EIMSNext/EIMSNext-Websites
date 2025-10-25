@@ -16,6 +16,6 @@ export interface WfApprovalLog extends CorpModelBase {
   result: ApproveAction;
   comment?: string;
   signature?: string;
-  approvalTime: Date;
+  approvalTime: number;
   dataBrief: BriefField[];
 }

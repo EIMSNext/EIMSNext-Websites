@@ -158,6 +158,7 @@ const updateQueryParams = () => {
     deptFilter = { departmentId: { eq: deptId.value } }
   }
   queryParams.value = toODataQuery(condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value, deptFilter)
+  queryParams.value.expand = "department"
 
   // console.log("queryParams list", queryParams.value);
 }
