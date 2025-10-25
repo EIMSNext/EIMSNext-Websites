@@ -90,17 +90,19 @@ export function buildFieldListItems(
     }
   });
 
-  let createTime: IFormFieldDef = toFormFieldDef(
-    formId,
-    getCreateTime("提交时间"),
-    undefined,
-    nodeId
-  );
-  items.push({
-    id: createTime.field,
-    label: createTime.label,
-    data: createTime,
-  });
+  if (formId != "employee") {
+    let createTime: IFormFieldDef = toFormFieldDef(
+      formId,
+      getCreateTime("提交时间"),
+      undefined,
+      nodeId
+    );
+    items.push({
+      id: createTime.field,
+      label: createTime.label,
+      data: createTime,
+    });
+  }
 
   return items;
 }

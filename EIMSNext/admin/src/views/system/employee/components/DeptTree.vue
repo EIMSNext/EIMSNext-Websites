@@ -75,7 +75,7 @@ const showAddEditDialog = ref(false);
 const editMode = ref(false);
 const showDeleteDialog = ref(false);
 
-const emits = defineEmits(["node-click"]);
+const emit = defineEmits(["node-click"]);
 
 watch(keyword, (val) => {
   deptTreeRef.value!.filter(val);
@@ -100,7 +100,7 @@ const handleFilter = (value: string, data: any) => {
 /** 部门树节点 Click */
 const handleNodeClick = (data: ITreeNode) => {
   selectedDept.value = data.data;
-  emits("node-click", data.data);
+  emit("node-click", data.data);
 };
 
 const handleAddClick = (data: ITreeNode) => {

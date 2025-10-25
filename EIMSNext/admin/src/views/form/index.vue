@@ -86,8 +86,8 @@ const fieldBtnRef = ref();
 const leftBars = ref<ToolbarItem[]>([
   { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddDialog.value = true; } } },
   { type: "button", config: { text: "删除", type: "danger", command: "delete", icon: "el-icon-delete", disabled: true } },
-  { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
-  { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
+  // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
+  // { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
 ])
 
 const rightBars = ref<ToolbarItem[]>([

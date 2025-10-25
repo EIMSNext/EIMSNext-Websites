@@ -1,7 +1,15 @@
 import { IFormFieldDef } from "@/components/FieldList/type";
 import { FieldType, SystemField, isSystemField } from "@eimsnext/models";
 import { IFieldSortList } from "../FieldSortList/type";
-import { IDynamicFindOptions, IDynamicFilter, ODataQueryModel } from "@eimsnext/services";
+import {
+  IDynamicFindOptions,
+  IDynamicFilter,
+  ODataQueryModel,
+  SortDirection,
+} from "@eimsnext/services";
+import { ODataQuery } from "@/utils/query";
+import buildQuery, { Filter } from "odata-query";
+
 export enum ConditionType {
   Form = 0,
   Node = 1,
@@ -127,27 +135,71 @@ export function toDynamicFindOptions(
   return findOpt;
 }
 
-export function toODataQuery(
+export function toODataQuery<T>(
   filter: IConditionList,
   sort: IFieldSortList,
   skip: number,
-  take: number
+  take: number,
+  fixedFilter?: any
 ) {
-  var query= {}
-  // var filter = new DynamicFilter();
-  // if (Items?.Count > 0)
-  // {
-  //     filter.Rel = string.IsNullOrEmpty(Rel) ? FilterRel.And : Rel;
-  //     filter.Items = new List<DynamicFilter>();
-  //     Items.ForEach(x => filter.Items.Add(x.ToDynamicFilter()));
+  let getODataOp = (op: string) => {
+    switch (op) {
+      default:
+        return op;
+    }
+  };
+
+  var query: ODataQuery<T> = { skip: skip, top: take };
+
+  // if (fields.length > 0) {
+  //   findOpt.select = [];
+  //   fields.forEach((x) => {
+  //     let field = isSystemField(x.field) ? x.field : `data.${x.field}`;
+  //     findOpt.select?.push({ field: field, visible: true });
+  //   });
   // }
-  // else if (Field != null)
-  // {
-  //     filter.Field = Constants.SystemFields.Contains(Field.Field, StringComparer.OrdinalIgnoreCase) ? Field.Field : "data." + Field.Field;
-  //     filter.Type = Field.Type;
-  //     filter.Op = Op;
-  //     filter.Value = ParseValue(Value, out FieldValueType valueType);
-  //     filter.ValueIsExp = valueType != FieldValueType.Custom;
-  //     filter.ValueIsField = valueType == FieldValueType.Field;
-  // }
+
+  if (sort.items.length > 0) {
+    query.orderBy = sort.items
+      .map((x) => (x.sort == SortDirection.Desc ? `${x.field.field} desc` : x.field.field))
+      .join(",");
+  }
+
+  var oFilter: any = undefined;
+
+  if (filter.items && filter.items.length > 0) {
+    let subFilters: any[] = [];
+    filter.items.forEach((x) => {
+      if (x.field?.field) {
+        let op = getODataOp(x.op || ConditionOperator.Equals);
+        let subFilter: any = {};
+        subFilter[x.field.field] = {};
+        subFilter[x.field.field][op] = x.value?.value;
+        subFilters.push(subFilter);
+      }
+    });
+    if (subFilters.length > 0) {
+      oFilter = {};
+
+      if (subFilters.length == 1) oFilter = subFilters[0];
+      else if (subFilters.length > 1) {
+        oFilter[filter.rel || "and"] = subFilters;
+      }
+    }
+  } else if (filter.field?.field) {
+    let op = getODataOp(filter.op || ConditionOperator.Equals);
+    let subFilter: any = {};
+    subFilter[filter.field.field] = {};
+    subFilter[filter.field.field][op] = filter.value?.value;
+    oFilter = subFilter;
+  }
+
+  if (fixedFilter) {
+    if (oFilter) oFilter = { and: [oFilter, fixedFilter] };
+    else oFilter = fixedFilter;
+  }
+
+  query.filter = oFilter;
+
+  return query;
 }
