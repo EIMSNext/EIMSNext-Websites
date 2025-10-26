@@ -31,10 +31,10 @@
     </el-popover>
     <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
     <div class="data-list" style="height:100%">
-      <el-table :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%;height: 100%;"
+      <el-table ref="tableRef" :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%;height: 100%;"
         show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName"
         @selection-change="selectionChanged" @row-click="showDetails">
-        <el-table-column type="selection" width="30" :selectable="selectable" />
+        <el-table-column type="selection" width="40" :selectable="selectable" />
         <template v-for="col in columns">
           <template v-if="col.children">
             <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip>
@@ -65,7 +65,9 @@ import { TableTooltipData } from "element-plus";
 import { IConditionList, toDynamicFindOptions } from "@/components/ConditionList/type";
 import { IFieldSortList } from "@/components/FieldSortList/type";
 import { IFormFieldDef } from "@/components/FieldList/type";
+import type { TableInstance } from 'element-plus'
 
+const tableRef = ref<TableInstance>();
 const displayItemCount = 3; //最多显示3条明细
 const showAddDialog = ref(false);
 const showDeleteConfirmDialog = ref(false)
@@ -270,9 +272,15 @@ const tableToolFormatter = (data: TableTooltipData<FormData>) => {
   return `${data.cellValue}`;
 };
 
-const showDetails = (row: FormData) => {
-  selectedData.value = row
-  showDetailsDialog.value = true
+const showDetails = (row: FormData, column: any) => {
+  let selectable = row[SystemField.FlowStatus] == FlowStatus.Draft
+  if (column.type == "selection" && selectable) {
+    tableRef.value?.toggleRowSelection(row)
+  }
+  else {
+    selectedData.value = row
+    showDetailsDialog.value = true
+  }
 }
 const handleViewOk = () => {
   loadData()
