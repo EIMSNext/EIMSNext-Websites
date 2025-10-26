@@ -9,7 +9,6 @@
     @ok="save"
   >
     <el-form
-      ref="deptFormRef"
       :model="formData"
       :rules="rules"
       label-width="80px"
@@ -56,7 +55,6 @@ else {
   formData.value.parentName = props.pDept.name;
 }
 const rules = reactive({
-  //   parentId: [{ required: true, message: "上级部门不能为空", trigger: "change" }],
   code: [{ required: true, message: "部门编码不能为空", trigger: "blur" }],
   name: [{ required: true, message: "部门名称不能为空", trigger: "blur" }],
 });

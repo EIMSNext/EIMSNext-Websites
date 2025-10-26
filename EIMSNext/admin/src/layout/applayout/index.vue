@@ -26,8 +26,8 @@
 import Layout from "@/layout/index.vue";
 import { useSystemStore, useSettingsStore } from "@/store";
 import { useContextStore } from "@eimsnext/store";
-import defaultSettings from "@/settings";
 import { DeviceEnum } from "@/enums/DeviceEnum";
+import AppMain from "./AppMain/index.vue"
 
 const contextStore = useContextStore();
 const systemStore = useSystemStore();

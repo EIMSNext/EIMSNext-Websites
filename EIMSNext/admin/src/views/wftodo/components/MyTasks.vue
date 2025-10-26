@@ -79,10 +79,8 @@ const dataRef = ref<WfTodo[]>();
 const selectedTask = ref<WfTodo>()
 
 const queryParams = reactive<ODataQuery<any>>({
-  pageNum: 1,
-  pageSize: 10,
-  deptId: "",
-  keywords: "",
+  skip: 0,
+  top: 10,
 });
 
 const loadCount = () => {
