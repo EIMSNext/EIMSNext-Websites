@@ -65,7 +65,12 @@ export function buildColumns(
       };
       if (x.columns && x.columns.length > 0) {
         delete col["mergeField"];
-        col.children = buildSubColumns(col.field, x.columns, subDisplayFields.get(x.field));
+        col.children = buildSubColumns(
+          col.field,
+          x.columns,
+          dispalyAll,
+          subDisplayFields.get(x.field)
+        );
       } else {
         col.width = 120;
       }
@@ -91,12 +96,13 @@ export function buildColumns(
 function buildSubColumns(
   pField: string,
   fields: FieldDef[],
+  dispalyAll: boolean,
   subDisplayFields?: IFormFieldDef[]
 ): ITableColumn[] {
   const columns: ITableColumn[] = [];
-  if (subDisplayFields) {
+  if (dispalyAll || subDisplayFields) {
     fields.forEach((x) => {
-      if (subDisplayFields.find((d) => d.field == x.field)) {
+      if (dispalyAll || subDisplayFields?.find((d) => d.field == x.field)) {
         let col: ITableColumn = {
           field: x.field,
           title: x.title,
@@ -105,7 +111,7 @@ function buildSubColumns(
           oriField: `${pField}>${x.field}`,
         };
         if (x.columns && x.columns.length > 0) {
-          col.children = buildSubColumns(col.field, x.columns);
+          col.children = buildSubColumns(col.field, x.columns, dispalyAll);
         } else {
           col.width = 120;
         }
