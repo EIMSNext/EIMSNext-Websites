@@ -109,7 +109,7 @@ onMounted(() => {
 </script>
 <style lang="scss" scoped>
 .mytasks-container {
-  padding: 20px;
+  // padding: 20px;
   display: flex;
 
   .task-space {

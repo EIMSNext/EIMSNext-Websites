@@ -29,7 +29,7 @@
             <template v-if="app.id != 'system'">
               <el-tooltip :content="app.name" placement="right" :hide-after="0">
                 <AppLink :to="{
-                  path: `/app/${app.id}`,
+                  path: `/app/${app.id}/mytasks`,
                 }">
                   <div class="main-left-menu-item">
                     <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor()"></et-icon>

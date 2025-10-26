@@ -74,7 +74,7 @@ const handleSaved = () => {
 
 const gotoApp = async (app: App) => {
   await contextStore.setAppId(app.id);
-  const path = "/app/" + app.id;
+  const path = "/app/" + app.id + "/mytasks";
   router.push(path);
 };
 const handleDeleteClick = (app: App) => {

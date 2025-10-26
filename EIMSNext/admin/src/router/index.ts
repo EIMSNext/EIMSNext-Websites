@@ -6,17 +6,6 @@ export const SysLayout = () => import("@/layout/syslayout/index.vue");
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
-  // {
-  //   path: "/redirect",
-  //   component: AppLayout,
-  //   meta: { hidden: true },
-  //   children: [
-  //     {
-  //       path: "/redirect/:path(.*)",
-  //       component: () => import("@/views/redirect/index.vue"),
-  //     },
-  //   ],
-  // },
   {
     path: "/401",
     component: () => import("@/views/error/401.vue"),
@@ -93,36 +82,6 @@ export const constantRoutes: RouteRecordRaw[] = [
     redirect: "/system/$route.params.formId",
     children: [
       {
-        path: "",
-        component: () => import("@/views/system/department/index.vue"),
-        meta: {
-          title: "department",
-          icon: "collection",
-          keepAlive: true,
-          requiresAuth: true,
-        },
-      },
-      {
-        path: "role",
-        component: () => import("@/views/system/role/index.vue"),
-        meta: {
-          title: "role",
-          icon: "collection",
-          keepAlive: true,
-          requiresAuth: true,
-        },
-      },
-      {
-        path: "admin",
-        component: () => import("@/views/system/admin/index.vue"),
-        meta: {
-          title: "admin",
-          icon: "collection",
-          keepAlive: true,
-          requiresAuth: true,
-        },
-      },
-      {
         path: "401",
         component: () => import("@/views/error/401.vue"),
         meta: { hidden: true },
@@ -167,12 +126,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/profile/index.vue"),
         meta: { title: "个人中心", icon: "user", hidden: true, requiresAuth: true },
       },
-      // {
-      //   path: "myNotice",
-      //   name: "MyNotice",
-      //   component: () => import("@/views/system/notice/components/MyNotice.vue"),
-      //   meta: { title: "我的通知", icon: "user", hidden: true, requiresAuth: true },
-      // },
     ],
   },
   {
@@ -250,11 +203,11 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  {
-    path: "/app/:appId",
-    component: () => import("@/views/app/index.vue"),
-    meta: { hidden: true, requiresAuth: true },
-  },
+  // {
+  //   path: "/app/:appId",
+  //   component: () => import("@/views/app/index.vue"),
+  //   meta: { hidden: true, requiresAuth: true },
+  // },
   {
     path: "/",
     redirect: "/dashboard",
