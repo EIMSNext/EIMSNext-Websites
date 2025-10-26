@@ -39,14 +39,14 @@
           <template v-if="col.children">
             <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip>
               <template v-if="col.children" v-for="sub in col.children">
-                <el-table-column :prop="sub.field" :formatter="formatter" :label="sub.title" :width="sub.width"
-                  :fieldSetting="sub"></el-table-column>
+                <el-table-column :prop="sub.field" :formatter="formatter" :label="sub.title"
+                  :width="sub.width"></el-table-column>
               </template>
             </el-table-column>
           </template>
           <template v-else>
             <el-table-column :prop="col.field" :formatter="formatter" :label="col.title" :width="col.width"
-              :fieldSetting="col" show-overflow-tooltip></el-table-column>
+              show-overflow-tooltip></el-table-column>
           </template>
         </template>
       </el-table>
@@ -60,15 +60,10 @@ import { useFormStore } from "@eimsnext/store";
 import { FormDef, FormData, FieldDef, SystemField, FlowStatus, FieldType } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
 import { IDynamicFindOptions, SortDirection, formDataService } from "@eimsnext/services";
-import AddFormData from "./components/AddFormData.vue";
 import { MessageIcon, ToolbarItem } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
-import DataFilter from "./components/DataFilter.vue";
 import { IConditionList, toDynamicFindOptions } from "@/components/ConditionList/type";
 import { IFieldSortList } from "@/components/FieldSortList/type";
-import DataSort from "./components/DataSort.vue";
-import FormDataView from "./components/FormDataView.vue";
-import DataField from "./components/DataField.vue";
 import { IFormFieldDef } from "@/components/FieldList/type";
 
 const displayItemCount = 3; //最多显示3条明细
@@ -221,29 +216,38 @@ const selectable = (row: any, index: number) => {
   return row[SystemField.FlowStatus] == FlowStatus.Draft
 }
 const formatter = (row: any, column: any, cellValue: any, index: number) => {
-  // console.log("formatter", row, column, column.$attrs);
   if (column.property == SystemField.FlowStatus) {
     return getFlowStatusName(cellValue)
   }
-  // if (column.property.indexOf(">") > 1) {
-  //   var all = column.property.split(">");
-  //   var pPath = all[0].split(".");
-  //   var path = [...pPath, index, all[1]];
-  //   let value = path.reduce((obj: any, key: string) => (obj || {})[key], row);
+  const colSetting = getColumnSetting(column.property);
+  if (colSetting) {
+    if (colSetting.type == FieldType.DatePicker)
+      return new Date(cellValue).toLocaleString()
+  }
 
-  //   return value || "-";
-  //   // console.log("pa", path);
-  //   // var pObj = pPath.reduce((obj: any, key: string) => (obj || {})[key], row);
-  //   // console.log("sub obj", row, pObj, typeof pObj, all[1].split("."));
-  //   // return all[1].split(".").reduce((obj: any, key: string) => (obj || {})[key], pObj[index]);
-  // } else {
-  //   const path = column.property.split(".");
-  //   let value = path.reduce((obj: any, key: string) => (obj || {})[key], row);
-
-  //   return value || "-";
-  // }
   return cellValue;
 };
+const getColumnSetting = (field: string) => {
+  const findSub = (children: ITableColumn[], field: string) => {
+    let col: any = undefined;
+
+    for (let i = 0; i < children.length; i++) {
+      if (children[i].field == field) {
+        col = children[i];
+        break;
+      }
+
+      if (children[i].children && children[i].children!.length > 0)
+        col = findSub(children[i].children!, field)
+
+      if (col) break
+    }
+
+    return col;
+  };
+
+  return findSub(columns.value, field)
+}
 const getFlowStatusName = (status: FlowStatus) => {
   switch (status) {
     case FlowStatus.Draft:

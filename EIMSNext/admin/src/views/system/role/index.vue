@@ -56,7 +56,6 @@ import buildQuery from "odata-query";
 import { ToolbarItem } from "@eimsnext/components";
 import { IConditionList, toODataQuery } from "@/components/ConditionList/type";
 import { IFieldSortList } from "@/components/FieldSortList/type";
-import RoleTree from "./components/RoleTree.vue";
 
 defineOptions({
   name: "RoleManager",
