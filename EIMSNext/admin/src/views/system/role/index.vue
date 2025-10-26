@@ -1,33 +1,10 @@
 <!-- 用户管理 -->
 <template>
-  <div class="app-container">
+  <div>
     <el-row :gutter="20">
       <!-- 部门树 -->
       <el-col :lg="6" :xs="24" class="mb-[12px]">
-        <el-tabs v-model="activeTab" style="flex: 1">
-          <el-tab-pane label="组织架构" name="dept">
-            <div class="org-menu">员工</div>
-            <div class="menu-items">
-              <div class="menu-item">
-                <el-icon :size="14" color="#2f7deb">
-                  <UserFilled />
-                </el-icon>
-                <span class="ml-5px">在职员工</span>
-              </div>
-              <div class="menu-item">
-                <el-icon :size="14">
-                  <UserFilled />
-                </el-icon>
-                <span class="ml-5px">离职员工</span>
-              </div>
-            </div>
-            <div class="org-menu">部门</div>
-            <dept-tree :editable="true" @node-click="handleDeptQuery" />
-          </el-tab-pane>
-          <el-tab-pane label="角色" name="role">
-            <!-- <dept-tree :editable="true" @node-click="handleQuery" /> -->
-          </el-tab-pane>
-        </el-tabs>
+        <role-tree :editable="true" @role-click="handleRoleQuery" />
       </el-col>
 
       <!-- 用户列表 -->
@@ -59,12 +36,6 @@
         </el-card>
       </el-col>
     </el-row>
-    <AddEditEmp v-if="showAddEditDialog" :edit="editMode" :emp="selectedEmp" @cancel="showAddEditDialog = false"
-      @ok="handleSaved" />
-    <et-confirm-dialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :showNoSave="false" okText="确认"
-      @ok="execDelete">
-      你当前选中了{{ checkedDatas.length }}条数据，数据删除后将不可恢复
-    </et-confirm-dialog>
     <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false">
@@ -78,25 +49,22 @@
 </template>
 
 <script setup lang="ts">
-import DeptTree from "./components/DeptTree.vue";
 import { ODataQuery } from "@/utils/query";
-import { Department, Employee, FieldType } from "@eimsnext/models";
+import { Department, Employee, FieldType, Role } from "@eimsnext/models";
 import { SortDirection, employeeService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import AddEditEmp from "./components/AddEditEmp.vue";
 import { ToolbarItem } from "@eimsnext/components";
 import { IConditionList, toODataQuery } from "@/components/ConditionList/type";
 import { IFieldSortList } from "@/components/FieldSortList/type";
+import RoleTree from "./components/RoleTree.vue";
 
 defineOptions({
-  name: "Employee",
+  name: "RoleManager",
   inheritAttrs: false,
 });
 
-const activeTab = ref("dept");
 const selectedEmp = ref<Employee>();
 const showAddEditDialog = ref(false);
-const editMode = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
@@ -110,8 +78,8 @@ const pageNum = ref(1)
 const pageSize = ref(20)
 
 const leftBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddEditDialog.value = true; } } },
-  { type: "button", config: { text: "删除", type: "danger", command: "delete", icon: "el-icon-delete", disabled: true } },
+  { type: "button", config: { text: "添加", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddEditDialog.value = true; } } },
+  { type: "button", config: { text: "移除", type: "danger", command: "delete", icon: "el-icon-delete", disabled: true } },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
   // { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
 ])
@@ -153,11 +121,11 @@ const setSort = (sort: IFieldSortList) => {
 };
 
 const updateQueryParams = () => {
-  let deptFilter = undefined;
-  if (deptId.value) {
-    deptFilter = { departmentId: { eq: deptId.value } }
-  }
-  queryParams.value = toODataQuery(condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value, deptFilter)
+  let roleFilter = undefined;
+  // if (deptId.value) {
+  //   deptFilter = { departmentId: { eq: deptId.value } }
+  // }
+  queryParams.value = toODataQuery(condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value, roleFilter)
   queryParams.value.expand = "department"
 
   // console.log("queryParams list", queryParams.value);
@@ -171,7 +139,7 @@ const queryParams = ref<ODataQuery<Employee>>({
 const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
-const deptId = ref("")
+const roleId = ref("")
 
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
@@ -180,8 +148,8 @@ const pageChanged = (curPage: number, pSize: number) => {
   updateQueryParams();
   loadData()
 }
-const handleDeptQuery = (dept?: Department) => {
-  deptId.value = dept?.id ?? ""
+const handleRoleQuery = (role?: Role) => {
+  roleId.value = role?.id ?? ""
 
   updateQueryParams()
   handleQuery()
@@ -240,15 +208,15 @@ const handleSelectionChange = (selection: any[]) => {
 // }
 
 const handleSaved = (data: Employee) => {
-  showAddEditDialog.value = false;
-  handleQuery()
+  // showAddEditDialog.value = false;
+  // handleQuery()
 };
 
 const execDelete = async () => {
-  await employeeService.delete("batch", { keys: checkedDatas.value.map(x => x.id) })
-    .then(() => {
-      handleQuery()
-    })
+  // await employeeService.delete("batch", { keys: checkedDatas.value.map(x => x.id) })
+  //   .then(() => {
+  //     handleQuery()
+  //   })
 };
 
 onMounted(() => {

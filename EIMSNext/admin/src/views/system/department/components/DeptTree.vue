@@ -1,49 +1,25 @@
 <!-- 部门树 -->
 <template>
-  <AddEditDept
-    v-if="showAddEditDialog"
-    :edit="editMode"
-    :p-dept="selectedDept!"
-    @cancel="showAddEditDialog = false"
-    @ok="handleSaved"
-  ></AddEditDept>
-  <et-confirm-dialog
-    v-model="showDeleteDialog"
-    title="确认要删除吗?"
-    :showNoSave="false"
-    okText="确认"
-    @cancel="showDeleteDialog = false"
-    @ok="handleDeleteConfirm"
-  >
+  <AddEditDept v-if="showAddEditDialog" :edit="editMode" :p-dept="selectedDept!" @cancel="showAddEditDialog = false"
+    @ok="handleSaved"></AddEditDept>
+  <et-confirm-dialog v-model="showDeleteDialog" title="确认要删除吗?" :showNoSave="false" okText="确认"
+    @cancel="showDeleteDialog = false" @ok="handleDeleteConfirm">
     确认删除已选中的数据项?
   </et-confirm-dialog>
   <el-card shadow="never">
-    <el-input
-      v-model="keyword"
-      class="search-input"
-      prefix-icon="Search"
-      clearable
-      placeholder="请输入"
-    />
-    <el-tree
-      ref="deptTreeRef"
-      class="dept-tree mt-2"
-      :data="deptList"
-      :props="{ children: 'children', label: 'label', disabled: '' }"
-      :expand-on-click-node="false"
-      :filter-node-method="handleFilter"
-      default-expand-all
-      @node-click="handleNodeClick"
-    >
+    <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
+    <el-tree ref="deptTreeRef" class="dept-tree mt-2" :data="deptList"
+      :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false"
+      :filter-node-method="handleFilter" default-expand-all @node-click="handleNodeClick">
       <template #default="{ node, data }">
         <div class="node-data" :title="data.label">
           <div class="node-wrapper">
-            <el-icon class="node-icon"><UserFilled /></el-icon>
+            <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
-              <el-icon class="action-item" @click="handleAddClick(data)"><Plus /></el-icon>
-              <el-icon class="action-item" @click="handleEditClick(data)"><Edit /></el-icon>
-              <el-icon class="action-item" @click="handleDeleteClick(data)"><Delete /></el-icon>
+              <et-icon icon="el-icon-Plus" class="action-item" @click="handleAddClick(data)" />
+              <et-icon icon="el-icon-Edit" class="action-item" @click="handleEditClick(data)" />
+              <et-icon icon="el-icon-Delete" class="action-item" @click="handleDeleteClick(data)" />
             </div>
           </div>
         </div>
@@ -57,7 +33,7 @@ import { Department } from "@eimsnext/models";
 import { useDeptStore } from "@eimsnext/store";
 import { departmentService } from "@eimsnext/services";
 import { ITreeNode, buildDeptTree } from "@eimsnext/components";
-import AddEditDept from "./AddEditDept.vue";
+import { TreeInstance } from "element-plus";
 
 const props = defineProps({
   editable: {
@@ -68,7 +44,7 @@ const props = defineProps({
 
 const deptStore = useDeptStore();
 const deptList = ref<ITreeNode[]>(); // 部门列表
-const deptTreeRef = ref(ElTree); // 部门树
+const deptTreeRef = ref<TreeInstance>(); // 部门树
 const keyword = ref(); // 部门名称
 const selectedDept = ref<Department>();
 const showAddEditDialog = ref(false);
@@ -136,6 +112,7 @@ const handleDeleteConfirm = async () => {
   .node-label {
     margin-right: 55px;
   }
+
   .node-action {
     position: absolute;
     right: 0px;
@@ -143,9 +120,11 @@ const handleDeleteConfirm = async () => {
 
     .action-item {
       margin-right: 5px;
+
       &:last-child {
         margin-right: 0;
       }
+
       &:hover {
         color: #409eff;
       }

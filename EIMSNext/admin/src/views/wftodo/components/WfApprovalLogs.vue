@@ -90,10 +90,8 @@ const filterRef = ref(props.filter)
 filterRef.value.appId = appId;
 
 const queryParams = reactive<ODataQuery<any>>({
-    pageNum: 1,
-    pageSize: 10,
-    deptId: "",
-    keywords: "",
+    skip: 0,
+    top: 10,
 });
 
 const loadCount = () => {

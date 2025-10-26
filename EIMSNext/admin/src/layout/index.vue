@@ -7,22 +7,18 @@
       <el-container style="border-top: 1px solid var(--el-menu-border-color)">
         <el-aside width="45px" class="main-left-menu">
           <el-tooltip content="工作台" placement="right" :hide-after="0">
-            <AppLink
-              :to="{
-                path: '/dashboard',
-              }"
-            >
+            <AppLink :to="{
+              path: '/dashboard',
+            }">
               <div class="main-left-menu-item">
                 <et-icon icon="homepage" size="20px" :color="getAppIconColor()"></et-icon>
               </div>
             </AppLink>
           </el-tooltip>
           <el-tooltip content="通讯录" placement="right" :hide-after="0">
-            <AppLink
-              :to="{
-                path: '/system',
-              }"
-            >
+            <AppLink :to="{
+              path: '/system/department',
+            }">
               <div class="main-left-menu-item">
                 <et-icon icon="el-icon-Notebook" size="20px" :color="getAppIconColor()"></et-icon>
               </div>
@@ -30,17 +26,16 @@
           </el-tooltip>
           <el-divider style="margin: 3px 0" />
           <template v-for="app in appsRef">
-            <el-tooltip :content="app.name" placement="right" :hide-after="0">
-              <AppLink
-                :to="{
+            <template v-if="app.id != 'system'">
+              <el-tooltip :content="app.name" placement="right" :hide-after="0">
+                <AppLink :to="{
                   path: `/app/${app.id}`,
-                }"
-              >
-                <div class="main-left-menu-item">
-                  <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor()"></et-icon>
-                </div>
-              </AppLink>
-            </el-tooltip>
+                }">
+                  <div class="main-left-menu-item">
+                    <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor()"></et-icon>
+                  </div>
+                </AppLink>
+              </el-tooltip></template>
           </template>
         </el-aside>
         <el-main style="padding: 0">

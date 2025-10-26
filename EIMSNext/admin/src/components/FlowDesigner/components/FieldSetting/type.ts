@@ -22,7 +22,7 @@ export enum FieldValueType {
 
 export function buildFormFieldList(
   formId: string,
-  fields: [],
+  fields: FieldDef[],
   existingFields: IFormFieldItem[],
   mergeAll: boolean
 ): IFormFieldItem[] {
