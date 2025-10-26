@@ -3,17 +3,14 @@
     <!-- 公用侧边栏 -->
     <Sidebar class="sidebar-container" />
     <!-- 遮罩层 -->
-    <div
-      v-if="isMobile && isOpenSidebar"
-      class="wh-full fixed-lt z-999 bg-black bg-opacity-30"
-      @click="handleOutsideClick"
-    />
+    <div v-if="isMobile && isOpenSidebar" class="wh-full fixed-lt z-999 bg-black bg-opacity-30"
+      @click="handleOutsideClick" />
     <!-- 左侧和顶部布局 -->
     <div :class="{ hasTagsView: showTagsView }" class="main-container">
-      <div :class="{ 'fixed-header': fixedHeader }">
+      <div :class="{ 'fixed-header': fixedHeader }" style="padding: 0 5px;">
         <TagsView v-if="showTagsView" />
       </div>
-      <AppMain />      
+      <AppMain />
       <!-- 返回顶部 -->
       <el-backtop target=".main-container">
         <et-icon icon="backtop" size="24px" />

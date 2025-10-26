@@ -311,26 +311,6 @@ function findOutermostParent(tree: any[], findName: string) {
 
   return null;
 }
-
-// const againActiveTop = (newVal: string) => {
-//   if (layout.value !== "mix") return;
-//   const parent = findOutermostParent(permissionStore.routes, newVal);
-//   if (appStore.activeTopMenu !== parent.path) {
-//     appStore.activeTopMenu(parent.path);
-//   }
-// };
-// 如果是混合模式，更改selectedTag，需要对应高亮的activeTop
-// watch(
-// () => route.name,
-// (newVal) => {
-//   if (newVal) {
-//     againActiveTop(newVal as string);
-//   }
-// },
-// {
-//   deep: true,
-// }
-// );
 onMounted(() => {
   initTags();
 });
@@ -341,7 +321,8 @@ onMounted(() => {
   width: 100%;
   height: 36px;
   background-color: var(--el-bg-color);
-  border: 1px solid var(--el-border-color-light);
+  border: none;
+  border-bottom: 1px solid var(--el-border-color-light);
   box-shadow: 0 1px 1px var(--el-box-shadow-light);
 
   .tags-item {
