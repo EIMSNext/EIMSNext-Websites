@@ -12,7 +12,7 @@
         <el-card shadow="never">
           <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
           <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="50" align="center" />
+            <el-table-column type="selection" width="40" />
             <el-table-column label="姓名" width="150" prop="empName" />
             <el-table-column label="编码" width="150" prop="code" />
             <el-table-column label="工作电话" width="150" prop="workPhone" />
@@ -184,6 +184,17 @@ const loadData = () => {
 const handleSelectionChange = (selection: any[]) => {
   checkedDatas.value = selection;
 };
+
+const showDetails = (row: FormData, column: any) => {
+  // let selectable = row[SystemField.FlowStatus] == FlowStatus.Draft
+  // if (column.type == "selection" && selectable) {
+  //   tableRef.value?.toggleRowSelection(row)
+  // }
+  // else {
+  //   selectedData.value = row
+  //   showDetailsDialog.value = true
+  // }
+}
 
 // 重置密码
 // function hancleResetPassword(row: any) {
