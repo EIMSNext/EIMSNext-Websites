@@ -18,8 +18,10 @@
       <el-col :lg="18" :xs="24">
         <el-card shadow="never">
           <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
-          <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="40"/>
+          <el-table ref="tableRef" v-loading="loading" :data="dataRef" show-overflow-tooltip
+            :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" @selection-change="selectionChanged"
+            @row-click="edit">
+            <el-table-column type="selection" width="40" />
             <el-table-column label="姓名" width="150" prop="empName" />
             <el-table-column label="编码" width="150" prop="code" />
             <el-table-column label="工作电话" width="150" prop="workPhone" />
@@ -69,12 +71,14 @@ import buildQuery from "odata-query";
 import { ToolbarItem } from "@eimsnext/components";
 import { IConditionList, toODataQuery } from "@/components/ConditionList/type";
 import { IFieldSortList } from "@/components/FieldSortList/type";
+import { TableInstance, TableTooltipData } from "element-plus";
 
 defineOptions({
   name: "DeptManager",
   inheritAttrs: false,
 });
 
+const tableRef = ref<TableInstance>();
 const selectedEmp = ref<Employee>();
 const showAddEditDialog = ref(false);
 const editMode = ref(false);
@@ -91,7 +95,7 @@ const pageNum = ref(1)
 const pageSize = ref(20)
 
 const leftBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddEditDialog.value = true; } } },
+  { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { editMode.value = false; showAddEditDialog.value = true; } } },
   { type: "button", config: { text: "删除", type: "danger", command: "delete", icon: "el-icon-delete", disabled: true } },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
   // { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
@@ -183,6 +187,9 @@ const handleQuery = () => {
   loadCount()
   loadData()
 };
+const rowClassName = (row: any) => {
+  return "pointer"
+}
 
 const loadCount = () => {
   let query = buildQuery({ filter: queryParams.value.filter });
@@ -205,19 +212,23 @@ const loadData = () => {
 };
 
 // 选中项发生变化
-const handleSelectionChange = (selection: any[]) => {
-  checkedDatas.value = selection;
+const selectionChanged = (rows: any[]) => {
+  checkedDatas.value = rows
+  leftBars.value.find(x => x.config.command == "delete")!.config.disabled = checkedDatas.value.length == 0
+}
+const tableToolFormatter = (data: TableTooltipData<FormData>) => {
+  return `${data.cellValue}`;
 };
 
-const showDetails = (row: FormData, column: any) => {
-  // let selectable = row[SystemField.FlowStatus] == FlowStatus.Draft
-  // if (column.type == "selection" && selectable) {
-  //   tableRef.value?.toggleRowSelection(row)
-  // }
-  // else {
-  //   selectedData.value = row
-  //   showDetailsDialog.value = true
-  // }
+const edit = (row: Employee, column: any) => {
+  if (column.type == "selection") {
+    tableRef.value?.toggleRowSelection(row)
+  }
+  else {
+    editMode.value = true
+    selectedEmp.value = row
+    showAddEditDialog.value = true
+  }
 }
 
 // 重置密码
