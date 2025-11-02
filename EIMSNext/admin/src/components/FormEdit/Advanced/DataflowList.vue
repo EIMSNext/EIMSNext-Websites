@@ -1,4 +1,14 @@
 <template>
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
+    :showNoSave="false" okText="确定" @ok="execDelete">
+    <div>数据删除后将不可恢复</div>
+  </EtConfirmDialog>
+  <CustomDrawer v-model="showDrawer" @close="close">
+    <template #title>
+      <el-input v-model="selectedFlow!.name" class="title-editor" />
+    </template>
+    <DataflowDesigner :appId="formDef.appId" :formId="formDef.id" :flow-def="selectedFlow!" />
+  </CustomDrawer>
   <AdvanceLayout title="智能助手" desc="实现自动同步更新表单数据、执行插件等智能化操作">
     <div class="flow-container">
       <div class="panel-header">
@@ -15,7 +25,7 @@
                 <div class="flow-header">
                   <el-button @click="edit(flow)">编辑</el-button>
                   <el-button @click="remove(flow)">删除</el-button>
-                  <el-switch :model-value="!flow.disabled" @change="toggleDisable(flow)"></el-switch>
+                  <el-switch :model-value="flow.disabled" @change="toggleDisable(flow)"></el-switch>
                 </div>
               </template>
               <div class="flow-content">触发: {{ flow.eventSource }}</div>
@@ -25,13 +35,6 @@
       </div>
     </div>
   </AdvanceLayout>
-  <CustomDrawer v-model="showDrawer" @close="close">
-    <template #title>
-      <el-input v-model="selectedFlow!.name" class="title-editor" />
-    </template>
-
-    <DataflowDesigner :appId="formDef.appId" :formId="formDef.id" :flow-def="selectedFlow!" />
-  </CustomDrawer>
 </template>
 <script setup lang="ts">
 import DataflowDesigner from "../../FlowDesigner/Dataflow/index.vue";
@@ -40,6 +43,7 @@ import { wfDefinitionService } from "@eimsnext/services";
 import CustomDrawer from "@/components/CustomDrawer/index.vue";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
+import { MessageIcon } from "@eimsnext/components";
 
 defineOptions({
   name: "DataflowList",
@@ -50,7 +54,7 @@ const props = defineProps<{
 }>();
 
 const showDrawer = ref(false);
-
+const showDeleteConfirmDialog = ref(false)
 const dataflows = ref<WfDefinition[]>([]);
 const selectedFlow = ref<WfDefinition>();
 
@@ -87,12 +91,18 @@ const edit = (flow: WfDefinition) => {
 };
 
 const remove = (flow: WfDefinition) => {
-  wfDefinitionService.delete<WfDefinition>(flow.id).then((res) => {
-    loadDataflows(props.formDef.id)
-  });
+  selectedFlow.value = flow
+  showDeleteConfirmDialog.value = true
 };
+const execDelete = () => {
+  wfDefinitionService.delete<WfDefinition>(selectedFlow.value!.id).then((res) => {
+    loadDataflows(props.formDef.id)
+    showDeleteConfirmDialog.value = false
+  });
+}
 const toggleDisable = (flow: WfDefinition) => {
-  wfDefinitionService.patch<WfDefinition>(flow.id, { id: flow.id, disabled: flow.disabled }).then((res) => {
+  wfDefinitionService.patch<WfDefinition>(flow.id, { id: flow.id, disabled: !flow.disabled }).then((res) => {
+    flow.disabled = !flow.disabled
   });
 }
 
