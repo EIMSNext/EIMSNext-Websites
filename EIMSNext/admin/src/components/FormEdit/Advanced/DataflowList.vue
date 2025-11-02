@@ -14,8 +14,8 @@
               <template #action>
                 <div class="flow-header">
                   <el-button @click="edit(flow)">编辑</el-button>
-                  <el-button @click="edit(flow)">删除</el-button>
-                  <el-switch></el-switch>
+                  <el-button @click="remove(flow)">删除</el-button>
+                  <el-switch :model-value="!flow.disabled" @change="toggleDisable(flow)"></el-switch>
                 </div>
               </template>
               <div class="flow-content">触发: {{ flow.eventSource }}</div>
@@ -34,7 +34,6 @@
   </CustomDrawer>
 </template>
 <script setup lang="ts">
-import { createDataflowData } from "@/components/FlowDesigner/FlowData";
 import DataflowDesigner from "../../FlowDesigner/Dataflow/index.vue";
 import { FormDef, EventSourceType, WfDefinition, FlowType } from "@eimsnext/models";
 import { wfDefinitionService } from "@eimsnext/services";
@@ -86,6 +85,16 @@ const edit = (flow: WfDefinition) => {
 
   showDrawer.value = true;
 };
+
+const remove = (flow: WfDefinition) => {
+  wfDefinitionService.delete<WfDefinition>(flow.id).then((res) => {
+    loadDataflows(props.formDef.id)
+  });
+};
+const toggleDisable = (flow: WfDefinition) => {
+  wfDefinitionService.patch<WfDefinition>(flow.id, { id: flow.id, disabled: flow.disabled }).then((res) => {
+  });
+}
 
 // const emit = defineEmits(["close"]);
 

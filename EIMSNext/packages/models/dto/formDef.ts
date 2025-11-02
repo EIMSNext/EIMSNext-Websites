@@ -5,10 +5,10 @@ export enum FormType {
   Group = "2",
 }
 export interface FormDefRequest extends IdBase {
-  appId: string;
-  name: string;
+  appId?: string;
+  name?: string;
   type?: FormType;
-  content: FormContent;
+  content?: FormContent;
   isLedger?: boolean;
   usingWorkflow?: boolean;
 }
