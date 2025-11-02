@@ -2,12 +2,12 @@ import { Department } from "./department";
 import { CorpModelBase, IdBase } from "./modelBase";
 
 export interface EmployeeRequest extends IdBase {
-  code: string;
-  empName: string;
+  code?: string;
+  empName?: string;
   workPhone?: string;
   workEmail?: string;
-  departmentId: string;
-  isManager: boolean;
+  departmentId?: string;
+  isManager?: boolean;
   invite?: string;
 }
 

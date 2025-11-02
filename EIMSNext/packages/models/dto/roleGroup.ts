@@ -1,9 +1,9 @@
 ﻿import { CorpModelBase, IdBase } from "./modelBase";
 
 export interface RoleGroupRequest extends IdBase {
-  name: string;
-  description: string;
-  sortValue: number;
+  name?: string;
+  description?: string;
+  sortValue?: number;
 }
 
 export interface RoleGroup extends CorpModelBase {

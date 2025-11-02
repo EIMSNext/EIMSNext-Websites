@@ -2,10 +2,10 @@
 import { RoleGroup } from "./roleGroup";
 
 export interface RoleRequest extends IdBase {
-  name: string;
-  description: string;
-  roleGroupId: string;
-  sortValue: number;
+  name?: string;
+  description?: string;
+  roleGroupId?: string;
+  sortValue?: number;
 }
 
 export interface Role extends CorpModelBase {
