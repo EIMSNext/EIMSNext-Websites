@@ -1,26 +1,30 @@
 <template>
-  <div class="flow-container">
-    <div><el-button @click="addNew(EventSourceType.Form)">Add</el-button></div>
-    <el-space direction="vertical" class="flow-space">
-      <template v-for="flow in dataflows">
-        <et-card class="flow-card">
-          <template #header>
-            <div class="flex-y-center">
-              <div class="flow-header">
-                <div class="flow-name" :title="flow.name">
-                  <span>{{ flow.name }}</span>
-                </div>
-                <div style="margin-left: 50px">
+  <AdvanceLayout title="智能助手" desc="实现自动同步更新表单数据、执行插件等智能化操作">
+    <div class="flow-container">
+      <div class="panel-header">
+        <div class="header-left"> <el-button type="primary" icon="plus"
+            @click="addNew(EventSourceType.Form)">新建智能助手</el-button>
+        </div>
+        <div class="header-right"></div>
+      </div>
+      <div>
+        <el-space direction="vertical" class="flow-space">
+          <template v-for="flow in dataflows">
+            <et-card class="flow-card" :title="flow.name">
+              <template #action>
+                <div class="flow-header">
                   <el-button @click="edit(flow)">编辑</el-button>
+                  <el-button @click="edit(flow)">删除</el-button>
+                  <el-switch></el-switch>
                 </div>
-              </div>
-            </div>
+              </template>
+              <div class="flow-content">触发: {{ flow.eventSource }}</div>
+            </et-card>
           </template>
-          <div class="flow-content">触发: {{ flow.eventSource }}</div>
-        </et-card>
-      </template>
-    </el-space>
-  </div>
+        </el-space>
+      </div>
+    </div>
+  </AdvanceLayout>
   <CustomDrawer v-model="showDrawer" @close="close">
     <template #title>
       <el-input v-model="selectedFlow!.name" class="title-editor" />
@@ -36,6 +40,7 @@ import { FormDef, EventSourceType, WfDefinition, FlowType } from "@eimsnext/mode
 import { wfDefinitionService } from "@eimsnext/services";
 import CustomDrawer from "@/components/CustomDrawer/index.vue";
 import buildQuery from "odata-query";
+import AdvanceLayout from "./AdvanceLayout.vue";
 
 defineOptions({
   name: "DataflowList",
@@ -100,8 +105,16 @@ onBeforeMount(() => {
 </script>
 <style lang="scss" scoped>
 .flow-container {
-  padding: 20px;
   display: flex;
+  flex-direction: column;
+
+  .panel-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 16px;
+  }
+
   .flow-space {
     width: 100%;
     align-items: normal !important;
@@ -112,6 +125,7 @@ onBeforeMount(() => {
 
     .flow-header {
       display: flex;
+      justify-content: space-between;
 
       .flow-name {
         font-size: 15px;
@@ -120,6 +134,11 @@ onBeforeMount(() => {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+
+      .el-button {
+        margin: 0px;
+        border: none;
       }
     }
 
