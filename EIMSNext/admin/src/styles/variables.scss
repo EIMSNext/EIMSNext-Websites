@@ -30,7 +30,8 @@
   --et-menu-active-text: var(--el-menu-active-color);
   --et-menu-hover: var(--el-menu-hover-bg-color);
   --et-sidebar-logo-background: #2d3748;
-  --et-color-text-tertiary: #626262;
+  --et-color-text: #141e31;
+  --et-color-text-tertiary: #838892;
 
   // 修复表格 fixed 列被选中后由于透明色导致叠字的 bug
   .el-table {
@@ -45,6 +46,8 @@ html.dark {
   --et-menu-active-text: var(--el-menu-active-color);
   --et-menu-hover: rgb(0 0 0 / 20%);
   --et-sidebar-logo-background: rgb(0 0 0 / 20%);
+  --et-color-text: #fff;
+  --et-color-text-tertiary: #838892;
 }
 
 $menu-background: var(--et-menu-background); // 菜单背景色

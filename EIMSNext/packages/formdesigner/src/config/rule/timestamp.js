@@ -42,7 +42,7 @@ export default {
       title: t("com.timestamp.name"),
       info: "",
       $required: false,
-      props: {},
+      props: { valueFormat: "x" },
     };
   },
   props(_, { t }) {
