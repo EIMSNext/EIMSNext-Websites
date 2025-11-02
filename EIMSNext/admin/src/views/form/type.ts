@@ -83,7 +83,7 @@ export function buildColumns(
     columns.push({
       field: SystemField.CreateTime,
       title: "提交时间",
-      type: FieldType.DatePicker,
+      type: FieldType.TimeStamp,
       format: "yyyy-MM-dd",
       mergeField: "_id",
       oriField: SystemField.CreateTime,

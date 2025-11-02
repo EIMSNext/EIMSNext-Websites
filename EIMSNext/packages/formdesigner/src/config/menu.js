@@ -12,7 +12,7 @@ export default function createMenu() {
         },
         {
             name: 'subform',
-            title: '子表单组件',
+            title: '高级组件',
             list: []
         },
         {

@@ -787,7 +787,7 @@ const ZhCn = {
         predefine: "预定义颜色",
       },
     },
-    datePicker: {
+    timestamp: {
       name: "日期选择器",
       props: {
         pickerOptions: "当前时间日期选择器特有的选项",
@@ -1277,7 +1277,7 @@ const ZhCn = {
         value: "默认值",
       },
     },
-    inputNumber: {
+    number: {
       name: "数字",
       props: {
         precision: "数值精度",
@@ -1331,12 +1331,33 @@ const ZhCn = {
       },
     },
     select: {
-      name: "下拉选择框",
+      name: "单选下拉框",
+      event: {},
+      props: {
+        // multiple: "是否多选",
+        disabled: "是否禁用",
+        clearable: "是否可以清空选项",
+        collapseTags: "多选时是否将选中值按文字的形式展示",
+        multipleLimit: "多选时用户最多可以选择的项目数，为 0 则不限制",
+        placeholder: "占位符",
+        filterable: "是否可搜索",
+        allowCreate: "是否允许用户创建新条目",
+        noMatchText: "搜索条件无匹配时显示的文字",
+        noDataText: "选项为空时显示的文字",
+        reserveKeyword:
+          "多选且可搜索时，是否在选中一个选项后保留当前的搜索关键词",
+        defaultFirstOption: "在输入框按下回车，选择第一个匹配项",
+        remote: "其中的选项是否从服务器远程加载",
+        remoteMethod: "自定义远程搜索方法",
+      },
+    },
+    select2: {
+      name: "多选下拉框",
       event: {
         removeTag: "多选模式下移除tag时触发",
       },
       props: {
-        multiple: "是否多选",
+        // multiple: "是否多选",
         disabled: "是否禁用",
         clearable: "是否可以清空选项",
         collapseTags: "多选时是否将选中值按文字的形式展示",
@@ -1413,8 +1434,11 @@ const ZhCn = {
         inactiveColor: "关闭时的背景色",
       },
     },
-    tableForm: {
-      name: "表格表单",
+    tableform: {
+      name: "子表单",
+      event: {
+        handleClick: "点击操作按钮时会触发该事件",
+      },
       props: {
         disabled: "是否禁用",
         filterEmptyColumn: "是否过滤空行的数据",
@@ -1437,12 +1461,6 @@ const ZhCn = {
         "page>props>pageSize": "每页显示条目个数",
         "page>props>small": "使用小型分页样式",
         "page>props>background": "为分页按钮添加背景色",
-      },
-    },
-    tableFormPro: {
-      name: "子表单",
-      event: {
-        handleClick: "点击操作按钮时会触发该事件",
       },
     },
     nestedTableForm: {
@@ -1468,6 +1486,7 @@ const ZhCn = {
     tableFormColumn: {
       name: "表格格子",
       label: "自定义名称",
+      header: "配置当前列的表头名称，重复的表头将自动合并。",
       props: {
         label: "标题",
         header: "表头",
@@ -1477,10 +1496,6 @@ const ZhCn = {
         hidden: "是否隐藏",
         required: "是否显示必填星号",
       },
-    },
-    tableFormColumn2: {
-      name: "表格格子",
-      header: "配置当前列的表头名称，重复的表头将自动合并。",
     },
     dataTable: {
       name: "数据表格",
@@ -1639,8 +1654,38 @@ const ZhCn = {
         nodeKey: "每个树节点用来作为唯一标识的属性，整棵树应该是唯一的",
       },
     },
-    upload: {
-      name: "上传",
+    imageupload: {
+      name: "图片",
+      info: "上传成功后，将接口返回的 URL 赋值给 file.url，或将返回结果赋值给 file.value，以便在后续的表单提交时获取这些数据。",
+      event: {
+        remove: "文件列表移除文件时触发",
+        preview: "点击文件列表中已上传的文件时触发",
+        error: "文件上传失败时触发",
+        progress: "文件上传时触发",
+        exceed: "当超出限制时触发",
+      },
+      slots: {
+        tip: "说明",
+      },
+      props: {
+        listType: "上传类型",
+        multiple: "是否支持多选文件",
+        action: "上传的地址(必填)",
+        beforeUpload: "上传文件之前触发",
+        onSuccess: "上传成功时触发",
+        beforeRemove: "删除文件之前触发",
+        headers: "设置上传的请求头部",
+        data: "上传时附带的额外参数",
+        name: "上传的文件字段名",
+        withCredentials: "支持发送 cookie 凭证信息",
+        accept: "接受上传的文件类型",
+        autoUpload: "是否在选取文件后立即进行上传",
+        disabled: "是否禁用",
+        limit: "最大允许上传个数",
+      },
+    },
+    fileupload: {
+      name: "文件",
       info: "上传成功后，将接口返回的 URL 赋值给 file.url，或将返回结果赋值给 file.value，以便在后续的表单提交时获取这些数据。",
       event: {
         remove: "文件列表移除文件时触发",

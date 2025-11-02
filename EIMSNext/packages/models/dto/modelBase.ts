@@ -74,7 +74,7 @@ export function getCreateTime(title: string): FieldDef {
   let field = new FieldDef();
   field.field = SystemField.CreateTime;
   field.title = title;
-  field.type = FieldType.DatePicker;
+  field.type = FieldType.TimeStamp;
   return field;
 }
 
@@ -90,7 +90,7 @@ export function getUpdateTime(title: string): FieldDef {
   let field = new FieldDef();
   field.field = SystemField.UpdateTime;
   field.title = title;
-  field.type = FieldType.DatePicker;
+  field.type = FieldType.TimeStamp;
   return field;
 }
 

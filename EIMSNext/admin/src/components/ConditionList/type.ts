@@ -50,12 +50,17 @@ export const dataOperators: Record<string, string[]> = {
 export function getConditionFieldType(fieldtype: string): ConditionFieldType {
   let dataType = ConditionFieldType.Input;
   switch (fieldtype) {
-    case FieldType.InputNumber:
+    case FieldType.Number:
       dataType = ConditionFieldType.Number;
       break;
   }
 
   return dataType;
+}
+
+export function isFieldTypeMatched(conFieldType: ConditionFieldType, fieldType: FieldType) {
+  //TODO: match
+  return true;
 }
 
 export interface IConditonValue {
