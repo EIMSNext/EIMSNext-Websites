@@ -1,6 +1,6 @@
 import {uniqueId} from '@eimsnext/form-render-core';
 import {localeOptions, localeProps} from '../../utils';
-import date from './date';
+import date from './timestamp';
 
 const label = '日期区间';
 const name = 'dateRange';

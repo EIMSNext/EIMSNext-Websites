@@ -29,8 +29,8 @@ export function buildFormFieldList(
   const items: IFormFieldItem[] = [];
   // console.log("buildFormFieldList", formId, fields, existingFields);
   fields.forEach((x: FieldDef) => {
-    // console.log("x", x, x.type == FieldType.TableFormPro, x.type, FieldType.TableFormPro);
-    if (x.type == FieldType.TableFormPro && x.columns && x.columns.length > 0) {
+    // console.log("x", x, x.type == FieldType.TableForm, x.type, FieldType.TableForm);
+    if (x.type == FieldType.TableForm && x.columns && x.columns.length > 0) {
       x.columns.forEach((sub: FieldDef) => {
         let fieldDef = toFormFieldDef(formId, sub, x);
         let e = existingFields.find((f) => f.field.field == fieldDef.field);

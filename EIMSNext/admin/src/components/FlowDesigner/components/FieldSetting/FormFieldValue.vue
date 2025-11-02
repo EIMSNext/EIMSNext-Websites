@@ -20,7 +20,7 @@
         <template v-if="fieldType == FieldType.Input">
           <el-input v-model="value" size="default" @change="onInput"></el-input>
         </template>
-        <template v-if="fieldType == FieldType.InputNumber">
+        <template v-if="fieldType == FieldType.Number">
           <el-input-number
             v-model="value"
             size="default"

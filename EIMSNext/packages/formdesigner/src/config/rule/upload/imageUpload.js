@@ -1,8 +1,8 @@
 import {uniqueId} from '@eimsnext/form-render-core';
-import {getInjectArg, localeOptions, localeProps} from '../../utils';
+import {getInjectArg, localeOptions, localeProps} from '../../../utils';
 
-const label = '上传';
-const name = 'upload';
+const label = '图片';
+const name = 'imageupload';
 
 export default {
     menu: 'subform',
@@ -25,7 +25,7 @@ export default {
         return {
             type: name,
             field: uniqueId(),
-            title: t('com.upload.name'),
+            title: t('com.imageupload.name'),
             info: '',
             $required: false,
             props: {

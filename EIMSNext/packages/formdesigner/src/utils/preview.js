@@ -41,7 +41,7 @@ export default function renderPreview(_, ctx) {
         ctx.prop.title.title += '：';
     }
     // ctx.prop.wrap.labelWidth = '100px';
-    if (readMode === false || readMode === 'custom' || !ctx.input || ctx.rule.subForm || (Array.isArray(subForm) ? subForm.length : subForm) || ['fcGroup', 'fcSubForm', 'tableForm', 'stepForm', 'nestedTableForm', 'infiniteTableForm', 'fcUpload'].indexOf(ctx.trueType) > -1) {
+    if (readMode === false || readMode === 'custom' || !ctx.input || ctx.rule.subForm || (Array.isArray(subForm) ? subForm.length : subForm) || ['fcGroup', 'fcSubForm', 'tableform', 'stepForm', 'nestedTableForm', 'infiniteTableForm', 'fcUpload'].indexOf(ctx.trueType) > -1) {
         if(ctx.trueType === 'fcUpload') {
             ctx.prop.props.disabled = true;
         }

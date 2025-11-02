@@ -7,7 +7,7 @@ import {
 } from "../../utils/index";
 
 const label = "选择器";
-const name = "select";
+const name = "select2";
 
 export default {
   menu: "main",
@@ -15,8 +15,8 @@ export default {
   label,
   name,
   input: true,
-  event: ["change", "visibleChange", "clear", "blur", "focus"],
-  validate: ["string", "number"],
+  event: ["change", "visibleChange", "removeTag", "clear", "blur", "focus"],
+  validate: ["array"],
   condition: {
     type: "select",
     options: "options",
@@ -37,13 +37,13 @@ export default {
     return {
       type: name,
       field: uniqueId(),
-      title: t("com.select.name"),
+      title: t("com.select2.name"),
       info: "",
       effect: {
         fetch: "",
       },
       $required: false,
-      props: {},
+      props: { multiple: true },
       options: makeTreeOptions(
         t("props.option"),
         { label: "label", value: "value" },

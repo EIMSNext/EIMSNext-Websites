@@ -67,7 +67,7 @@ export function buildFieldListItems(
   }
 
   fields.forEach((x: FieldDef) => {
-    if (x.type && x.type == FieldType.TableFormPro && x.columns && x.columns.length > 0) {
+    if (x.type && x.type == FieldType.TableForm && x.columns && x.columns.length > 0) {
       x.columns.forEach((sub: FieldDef) => {
         var fieldDef: IFormFieldDef = toFormFieldDef(formId, sub, x, nodeId);
         let item: IListItem = {

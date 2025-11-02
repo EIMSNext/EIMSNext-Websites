@@ -176,7 +176,6 @@ export default {
           "group",
           "subForm",
           "stepForm",
-          "tableForm",
           "nestedTableForm",
           "infiniteTableForm",
           "html",
@@ -213,7 +212,10 @@ export default {
           "iframeBox",
           "fcInlineForm",
           "fcFlex",
-          "fcFlex2"
+          "fcFlex2",
+          "timePicker",
+          "switch",
+          "rate"
         ],
         hiddenItemConfig: {
           default: ["field"],

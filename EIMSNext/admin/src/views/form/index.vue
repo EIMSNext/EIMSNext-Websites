@@ -57,7 +57,7 @@
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
 import { useFormStore } from "@eimsnext/store";
-import { FormDef, FormData, FieldDef, SystemField, FlowStatus, FieldType } from "@eimsnext/models";
+import { FormDef, FormData, FieldDef, SystemField, FlowStatus, FieldType, getCreateTime } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
 import { IDynamicFindOptions, SortDirection, formDataService } from "@eimsnext/services";
 import { MessageIcon, ToolbarItem } from "@eimsnext/components";
@@ -126,7 +126,7 @@ const dataRef = ref<FormData[]>();
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
 const showSort = ref(false);
-const sortList = ref<IFieldSortList>({ items: [{ field: { formId: formId, field: SystemField.CreateTime, label: "提交时间", type: FieldType.DatePicker }, sort: SortDirection.Desc }] });
+const sortList = ref<IFieldSortList>({ items: [{ field: { formId: formId, field: SystemField.CreateTime, label: "提交时间", type: FieldType.TimeStamp }, sort: SortDirection.Desc }] });
 const showField = ref(false)
 const fieldList = ref<IFormFieldDef[]>([])
 const pageNum = ref(1)
@@ -223,7 +223,7 @@ const formatter = (row: any, column: any, cellValue: any, index: number) => {
   }
   const colSetting = getColumnSetting(column.property);
   if (colSetting) {
-    if (colSetting.type == FieldType.DatePicker)
+    if (colSetting.type == FieldType.TimeStamp)
       return new Date(cellValue).toLocaleString()
   }
 

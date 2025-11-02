@@ -23,7 +23,7 @@ export function buildNodeFieldTree(
     const children = forms.find((x) => x.nodeId == pNode.id)?.form?.content?.items;
     if (children && children.length > 0) {
       children.forEach((x: FieldDef) => {
-        if (x.type && x.type == FieldType.TableFormPro && x.columns && x.columns.length > 0) {
+        if (x.type && x.type == FieldType.TableForm && x.columns && x.columns.length > 0) {
           if (!ignoreTable) {
             x.columns.forEach((sub: FieldDef) => {
               let fieldDef = toFormFieldDef(pNode.data.form.id, sub, x, pNode.id, singleResult);
