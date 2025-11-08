@@ -33,6 +33,7 @@ const actions = ref<FormActionSettings>({})
 const appId = ref("");
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());
+const usingWorkflow = ref(false)
 const formData = ref<FormData>();
 const showDeleteConfirmDialog = ref(false)
 
@@ -93,14 +94,15 @@ onBeforeMount(async () => {
     let form = await formStore.get(props.formId);
     if (form) {
         appId.value = form.appId;
+        usingWorkflow.value = form.usingWorkflow
         formDef.value = form.content!;
     }
 
     let data = await formDataService.get<FormData>(props.dataId);
     if (data) {
         formData.value = data;
-        leftBars.value.find(x => x.config.command == "edit")!.config.disabled = formData.value.flowStatus != FlowStatus.Draft;
-        leftBars.value.find(x => x.config.command == "delete")!.config.disabled = formData.value.flowStatus != FlowStatus.Draft;
+        leftBars.value.find(x => x.config.command == "edit")!.config.disabled = usingWorkflow.value && formData.value.flowStatus != FlowStatus.Draft;
+        leftBars.value.find(x => x.config.command == "delete")!.config.disabled = usingWorkflow.value && formData.value.flowStatus != FlowStatus.Draft;
     }
 });
 </script>
