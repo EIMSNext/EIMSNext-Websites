@@ -66,6 +66,7 @@ import { IConditionList, toDynamicFindOptions } from "@/components/ConditionList
 import { IFieldSortList } from "@/components/FieldSortList/type";
 import { IFormFieldDef } from "@/components/FieldList/type";
 import type { TableInstance } from 'element-plus'
+import dayjs from "dayjs";
 
 const tableRef = ref<TableInstance>();
 const displayItemCount = 3; //最多显示3条明细
@@ -223,8 +224,10 @@ const formatter = (row: any, column: any, cellValue: any, index: number) => {
   }
   const colSetting = getColumnSetting(column.property);
   if (colSetting) {
-    if (colSetting.type == FieldType.TimeStamp)
-      return new Date(cellValue).toLocaleString()
+    if (colSetting.type == FieldType.TimeStamp) {
+      const format = colSetting.format || "YYYY-MM-DD"
+      return cellValue ? dayjs(cellValue).format(format) : "";
+    }
   }
 
   return cellValue;

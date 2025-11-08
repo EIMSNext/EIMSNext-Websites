@@ -84,7 +84,7 @@ export function buildColumns(
       field: SystemField.CreateTime,
       title: "提交时间",
       type: FieldType.TimeStamp,
-      format: "yyyy-MM-dd",
+      format: "YYYY-MM-dd HH:mm:ss",
       mergeField: "_id",
       oriField: SystemField.CreateTime,
     });
