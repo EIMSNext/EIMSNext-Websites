@@ -1,7 +1,7 @@
 import { AxiosHeaders } from "axios";
 import { HttpRequest } from "./httpRequest";
 import { ContentType, PageResult } from "./interface";
-import appSetting from "../appSetting";
+import { getApiUrl } from "../appSetting";
 
 export class ApiClient {
   private httpRequest: HttpRequest;
@@ -73,22 +73,20 @@ export class ApiClient {
     return this.httpRequest.delete<T>({ url, data, headers, withToken });
   }
 
-  upload(url: string, file: any, withToken?: true) {
-    url = this.formatUrl(url);
-    let headers = new AxiosHeaders();
-    headers.setContentType(ContentType.FORM_DATA);
-    return this.httpRequest.request({ url, headers, withToken });
-  }
+  // upload(url: string, file: any, withToken?: true) {
+  //   url = this.formatUrl(url);
+  //   let headers = new AxiosHeaders();
+  //   headers.setContentType(ContentType.FORM_DATA);
+  //   return this.httpRequest.request({ url, data: file, headers, withToken });
+  // }
 
-  download(url: string, withToken?: true) {
-    url = this.formatUrl(url);
-    let headers = new AxiosHeaders();
-    return this.httpRequest.request({ url, headers, withToken });
-  }
+  // download(url: string, withToken?: true) {
+  //   url = this.formatUrl(url);
+  //   let headers = new AxiosHeaders();
+  //   return this.httpRequest.request({ url, headers, withToken });
+  // }
 
   private formatUrl(url: string) {
-    return url.startsWith("http")
-      ? url
-      : `${appSetting.apiUrl}/api/${this.apiVersion}${url}`;
+    return getApiUrl(url, this.apiVersion);
   }
 }

@@ -1,5 +1,5 @@
 import { IFormFieldDef } from "@/components/FieldList/type";
-import { FieldDef, FieldType, SystemField } from "@eimsnext/models";
+import { FieldDef, SystemField, getCreateTime, getFlowStatus } from "@eimsnext/models";
 import { Dictionary } from "@eimsnext/utils";
 
 export interface ITableColumn {
@@ -40,10 +40,11 @@ export function buildColumns(
 
   const columns: ITableColumn[] = [];
   if (usingWf && (dispalyAll || displayFields.find((d) => d.field == SystemField.FlowStatus))) {
+    const statusField = getFlowStatus("流程状态");
     columns.push({
-      field: SystemField.FlowStatus,
-      title: "流程状态",
-      type: FieldType.Input,
+      field: statusField.field,
+      title: statusField.title,
+      type: statusField.type,
       mergeField: "_id",
       oriField: SystemField.FlowStatus,
     });
@@ -79,12 +80,13 @@ export function buildColumns(
     }
   });
 
-  if (usingWf && (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateTime))) {
+  if (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateTime)) {
+    const createTimeField = getCreateTime("提交时间");
     columns.push({
-      field: SystemField.CreateTime,
-      title: "提交时间",
-      type: FieldType.TimeStamp,
-      format: "YYYY-MM-dd HH:mm:ss",
+      field: createTimeField.field,
+      title: createTimeField.title,
+      type: createTimeField.type,
+      format: createTimeField.options?.format,
       mergeField: "_id",
       oriField: SystemField.CreateTime,
     });

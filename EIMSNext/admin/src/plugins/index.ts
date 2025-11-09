@@ -16,14 +16,14 @@ import setupHttp from "../utils/http";
 
 export default {
   install(app: App<Element>) {
+    //http初始化
+    app.use(setupHttp);
     // 自定义指令(directive)
     setupDirective(app);
     // 路由(router)
     setupRouter(app);
     // Element-plus图标
     setupElIcons(app);
-    //http初始化
-    app.use(setupHttp);
     // 状态管理(store)
     setupStore(app);
     // 路由守卫

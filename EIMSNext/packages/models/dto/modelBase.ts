@@ -1,4 +1,4 @@
-import { FieldDef, FieldType } from "./formDef";
+import { FieldDef, FieldOpt, FieldType } from "./formDef";
 
 export interface IIdentity {
   id: string;
@@ -75,6 +75,7 @@ export function getCreateTime(title: string): FieldDef {
   field.field = SystemField.CreateTime;
   field.title = title;
   field.type = FieldType.TimeStamp;
+  field.options = { format: "YYYY-MM-DD HH:mm:ss" };
   return field;
 }
 
@@ -91,6 +92,7 @@ export function getUpdateTime(title: string): FieldDef {
   field.field = SystemField.UpdateTime;
   field.title = title;
   field.type = FieldType.TimeStamp;
+  field.options = { format: "YYYY-MM-DD HH:mm:ss" };
   return field;
 }
 

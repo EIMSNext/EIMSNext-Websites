@@ -51,7 +51,7 @@ export const useContextStore = defineStore("context", () => {
       if (appId.value !== id) {
         appId.value = id;
         setAppChanged();
-        needReload = true;
+        // needReload = true;
       }
       if (needReload || foreceReload) {
         formStore
