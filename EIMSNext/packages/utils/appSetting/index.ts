@@ -11,9 +11,9 @@ export interface IAppSetting {
 
 class AppSetting implements IAppSetting {
   clientId: string = "EIMSD160507G0401S171201B1014Next";
-  authUrl: string = "http://auth.eimsnext.com";
-  apiUrl: string = "http://api.eimsnext.com";
-  uploadUrl: string = "http://upload.eimsnext.com";
+  authUrl: string = "https://auth.eimsnext.com";
+  apiUrl: string = "https://api.eimsnext.com";
+  uploadUrl: string = "https://upload.eimsnext.com";
   tokenKey: string = "jat";
   httpTimeout: number = 10000;
 
@@ -22,6 +22,30 @@ class AppSetting implements IAppSetting {
       if (env[p]) Reflect.set(this, p, env[p]);
     }
   }
+}
+
+export function getAuthUrl(url: string, isApi: boolean = true) {
+  return url.startsWith("http")
+    ? url
+    : isApi
+      ? `${appSetting.authUrl}/api${url}`
+      : `${appSetting.authUrl}${url}`;
+}
+
+export function getApiUrl(url: string, ver: string = "v1") {
+  return url.startsWith("http") ? url : `${appSetting.apiUrl}/api/${ver}${url}`;
+}
+
+export function getODataUrl(url: string, ver: string = "v1") {
+  return url.startsWith("http")
+    ? url
+    : `${appSetting.apiUrl}/odata/${ver}${url}`;
+}
+
+export function getUploadUrl(url: string, ver: string = "v1") {
+  return url.startsWith("http")
+    ? url
+    : `${appSetting.uploadUrl}/api/${ver}${url}`;
 }
 
 const appSetting = new AppSetting();

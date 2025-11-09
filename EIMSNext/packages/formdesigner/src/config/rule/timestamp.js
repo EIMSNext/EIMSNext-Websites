@@ -87,11 +87,11 @@ export default {
         type: "input",
         field: "placeholder",
       },
-      {
-        type: "input",
-        field: "startPlaceholder",
-      },
-      { type: "input", field: "endPlaceholder" },
+      // {
+      //   type: "input",
+      //   field: "startPlaceholder",
+      // },
+      // { type: "input", field: "endPlaceholder" },
       // {
       //   type: "input",
       //   field: "format",

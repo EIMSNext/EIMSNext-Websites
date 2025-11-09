@@ -143,6 +143,8 @@ const selectionChanged = (rows: any[]) => {
 const execDelete = () => {
   formDataService.delete("batch", { keys: checkedDatas.value.map(x => x[SystemField.Id]) })
     .then(() => {
+      showDeleteConfirmDialog.value = false
+      checkedDatas.value = []
       handleQuery()
     })
 }
@@ -166,13 +168,12 @@ const setSort = (sort: IFieldSortList) => {
 };
 
 const setField = (fields: IFormFieldDef[]) => {
+  // console.log("fieldList", fields);  
   fieldList.value = fields;
   showField.value = false;
   initChildrenField(formDef.value!.content?.items!, fieldList.value);
   columns.value = buildColumns(formDef.value!.content?.items!, formDef.value!.usingWorkflow, fieldList.value);
-
-  // console.log("fieldList", fields);
-
+  // console.log("columns", columns.value);  
   updateQueryParams()
   handleQuery();
 };
@@ -216,9 +217,9 @@ const rowClassName = (row: any) => {
 }
 
 const selectable = (row: any, index: number) => {
-  return row[SystemField.FlowStatus] == FlowStatus.Draft
+  return !formDef.value?.usingWorkflow || row[SystemField.FlowStatus] == FlowStatus.Draft
 }
-const formatter = (row: any, column: any, cellValue: any, index: number) => {
+const formatter = (row: any, column: any, cellValue: any) => {
   if (column.property == SystemField.FlowStatus) {
     return getFlowStatusName(cellValue)
   }
@@ -272,7 +273,7 @@ const getFlowStatusName = (status: FlowStatus) => {
   }
 }
 const tableToolFormatter = (data: TableTooltipData<FormData>) => {
-  return `${data.cellValue}`;
+  return formatter(data.row, data.column, data.cellValue);
 };
 
 const showDetails = (row: FormData, column: any) => {

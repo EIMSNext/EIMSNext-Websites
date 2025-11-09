@@ -7,7 +7,7 @@
       <div class="bg-banner"></div>
     </div>
     <div class="main">
-      <div class="lang-switch">        
+      <div class="lang-switch">
         <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny" @change="toggleTheme" />
         <lang-select class="ml-5 cursor-pointer" />
       </div>
@@ -124,7 +124,7 @@ async function handleLoginSubmit() {
       userStore
         .login(loginData.value)
         .then(async () => {
-          await userStore.initialize();
+          await userStore.initialize(true);
 
           const { path, queryParams } = parseRedirect();
           router.push({ path: path, query: queryParams });
