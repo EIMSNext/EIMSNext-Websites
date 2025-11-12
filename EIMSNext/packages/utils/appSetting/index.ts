@@ -13,7 +13,7 @@ class AppSetting implements IAppSetting {
   clientId: string = "EIMSD160507G0401S171201B1014Next";
   authUrl: string = "https://auth.eimsnext.com";
   apiUrl: string = "https://api.eimsnext.com";
-  uploadUrl: string = "https://upload.eimsnext.com";
+  uploadUrl: string = "https://file.eimsnext.com";
   tokenKey: string = "jat";
   httpTimeout: number = 10000;
 
