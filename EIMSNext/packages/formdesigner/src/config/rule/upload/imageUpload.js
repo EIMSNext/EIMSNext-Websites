@@ -19,7 +19,7 @@ export default {
     if (!rule.props.listType) {
       rule.props.listType = "picture-card";
     }
-    // rule._sfc.modelField = "fileList";
+     rule._sfc.modelField = "fileList";
   },
   rule({ t }) {
     return {
@@ -32,8 +32,10 @@ export default {
         action: "/upload",
         uploadType: "image",
         listType: "picture-card",
+        multiple:true,
+        autoUpload:true,
         accept: "image/*",
-        onSuccess: "$FNX:const res = $inject.args[0];\nconst file = $inject.args[1];\n\nfile.id = res.value[0].id;\nfile.url = res.value[0].url;",
+        onSuccess: "$FNX:const res = $inject.args[0];\nconst file = $inject.args[1];\n\nfile.url = res.value[0].url;\nfile.value = {id:res.value[0].id, name:res.value[0].fileName,url:res.value[0].url};",
       },
     };
   },
@@ -43,22 +45,22 @@ export default {
         type: "switch",
         field: "disabled",
       },
-      {
-        type: "select",
-        field: "listType",
-        options: localeOptions(t, [
-          { label: "text", value: "text" },
-          {
-            label: "picture",
-            value: "picture",
-          },
-          {
-            label: "picture-card",
-            value: "picture-card",
-          },
-        ]),
-      },
-      { type: "switch", field: "multiple" },
+      // {
+      //   type: "select",
+      //   field: "listType",
+      //   options: localeOptions(t, [
+      //     { label: "text", value: "text" },
+      //     {
+      //       label: "picture",
+      //       value: "picture",
+      //     },
+      //     {
+      //       label: "picture-card",
+      //       value: "picture-card",
+      //     },
+      //   ]),
+      // },
+      // { type: "switch", field: "multiple" },
       // { type: "input", field: "name" },
       //   {
       //     type: "PromptInput",
@@ -147,11 +149,11 @@ export default {
       //     type: "switch",
       //     field: "withCredentials",
       //   },
-      {
-        type: "switch",
-        field: "autoUpload",
-        value: true,
-      },
+      // {
+      //   type: "switch",
+      //   field: "autoUpload",
+      //   value: true,
+      // },
       {
         type: "inputNumber",
         field: "limit",
