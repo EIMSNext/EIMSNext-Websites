@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
-import vueJsx from '@vitejs/plugin-vue-jsx'
-import vue from '@vitejs/plugin-vue'
+import vueJsx from "@vitejs/plugin-vue-jsx";
+import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
   build: {
@@ -14,13 +14,23 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     rollupOptions: {
-      external: ["vue"],
+      external: [
+        "vue",
+        "@eimsnext/models",
+        "@eimsnext/services",
+        "@eimsnext/store",
+        "@eimsnext/utils",
+      ],
       input: ["src/index.js"],
       output: {
         compact: true,
         exports: "named",
         globals: {
-          "vue": "vue"
+          vue: "vue",
+          "@eimsnext/models": "@eimsnext/models",
+          "@eimsnext/services": "@eimsnext/services",
+          "@eimsnext/store": "@eimsnext/store",
+          "@eimsnext/utils": "@eimsnext/utils",
         },
       },
     },
@@ -32,11 +42,11 @@ export default defineConfig({
     },
   },
   esbuild: {
-    drop: ["console", "debugger"]
+    // drop: ["console", "debugger"]
   },
   plugins: [
     vue(),
-    vueJsx()
+    vueJsx(),
     // dts({
     //   outDir: resolve(__dirname, "./dist"),
     //   tsconfigPath: "./tsconfig.json",

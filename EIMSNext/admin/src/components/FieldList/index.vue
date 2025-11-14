@@ -32,7 +32,6 @@ const onInput = (val: string) => {
 watch(
   [() => props.formId, () => props.modelValue],
   ([newFormId, newModel], [oldFormId, oldModel]) => {
-    // console.log("field list wath", newFormId, oldFormId);
     if (newFormId && newFormId != oldFormId) {
       formStore.get(newFormId).then((form) => {
         if (form?.content?.items)

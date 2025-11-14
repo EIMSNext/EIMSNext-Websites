@@ -1,12 +1,3 @@
-// +-----------------------------------------------------------------------
-// | FormCreate商业版 [ 让表单设计更简单 ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2018~2025 https://form-create.com All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed FormCreate商业版并不是自由软件，未经授权不得使用、修改或移除版权信息
-// +----------------------------------------------------------------------
-// | Author: FormCreate Team <admin@form-create.com>
-// +----------------------------------------------------------------------
 import FcDesigner from './components/FcDesigner.vue';
 import DragTool from './components/DragTool.vue';
 import Struct from './components/Struct.vue';
@@ -57,7 +48,6 @@ import NestedTableForm from './components/nestedTableForm/NestedTableForm.vue';
 import InfiniteTableFormView from './components/infiniteTableForm/InfiniteTableFormView.vue';
 import InfiniteTableForm from './components/infiniteTableForm/InfiniteTableForm.vue';
 import TableForm from './components/tableForm/TableForm.vue';
-import TableFormPro from './components/tableForm/TableFormPro.vue';
 import TableFormColumnView from './components/tableForm/TableFormColumnView.vue';
 import StepFormItemView from './components/stepForm/StepFormItemView.vue';
 import DialogView from './components/dialog/DialogView.vue';
@@ -155,7 +145,6 @@ designerForm.component('Required', Required);
 designerForm.component('TableOptions', TableOptions);
 designerForm.component('TreeOptions', TreeOptions);
 designerForm.component('TableFormColumn', TableFormColumnView);
-designerForm.component('TableFormColumn2', TableFormColumnView);
 designerForm.component('EventConfig', EventConfig);
 designerForm.component('FetchConfig', FetchConfig);
 designerForm.component('TableColumnConfig', TableColumnConfig);
@@ -193,8 +182,7 @@ addComponent('DataTable', DataTable);
 addComponent('FcEditor', FcEditor);
 addComponent('fcInlineForm', InlineForm);
 addComponent('FcCell', Cell, CellView);
-addComponent('TableForm', TableForm, TableFormView);
-addComponent('TableFormPro', TableFormPro, TableFormView);
+addComponent('tableform', TableForm, TableFormView);
 addComponent('StepForm', StepForm, StepFormView);
 addComponent('FcValue', Value, ValueView);
 addComponent('FcTable', Table, TableView);

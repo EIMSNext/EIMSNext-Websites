@@ -2,37 +2,21 @@
   <div class="cond-item">
     <div class="cond-detail">
       <template v-if="condType == ConditionType.Node">
-        <NodeFieldList
-          class="cond-field"
-          v-model="field"
-          :nodes="nodes!"
-          :fieldBuildRule="fieldBuildRule"
-          @change="changeField"
-        ></NodeFieldList>
+        <NodeFieldList class="cond-field" v-model="field" :nodes="nodes!" :fieldBuildRule="fieldBuildRule"
+          @change="changeField"></NodeFieldList>
       </template>
       <template v-else>
-        <FieldList
-          class="cond-field"
-          v-model="field"
-          :formId="formId"
-          @change="changeField"
-        ></FieldList>
+        <FieldList class="cond-field" v-model="field" :formId="formId" @change="changeField"></FieldList>
       </template>
 
-      <el-dropdown
-        v-model="op"
-        class="cond-op"
-        size="default"
-        trigger="click"
-        @command="onOpChanged"
-      >
+      <el-dropdown v-model="op" class="cond-op" size="default" trigger="click" @command="onOpChanged">
         <span style="display: flex; align-items: center">
           {{ opLabel }}
           <et-icon icon="el-icon-arrow-down"></et-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <template v-for="item in dataOperators[fDataType]" :key="item">
+            <template v-for="item in dataOperators[dataType]" :key="item">
               <el-dropdown-item :command="item">{{ opLabels[item] }}</el-dropdown-item>
             </template>
           </el-dropdown-menu>
@@ -42,13 +26,8 @@
       <div><et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon></div>
     </div>
     <div class="cond-detail mt-[10px]">
-      <ConditionValue
-        v-model="value"
-        :data-type="fDataType"
-        :nodes="nodes"
-        :fieldBuildRule="fieldBuildRule"
-        @change="onInput"
-      ></ConditionValue>
+      <ConditionValue v-model="value" :field-type="fieldType" :nodes="nodes" :fieldBuildRule="fieldBuildRule"
+        @change="onInput"></ConditionValue>
     </div>
   </div>
 </template>
@@ -87,12 +66,14 @@ const props = defineProps<{
 const field = ref<IFormFieldDef>(
   props.modelValue.field ?? { formId: props.formId, field: "", label: "", type: FieldType.Input }
 );
-const op = ref(props.modelValue.op);
-const value = ref(props.modelValue.value ?? { type: ConditionValueType.Custom, value: "" });
+const op = toRef(props.modelValue.op);
+const value = ref(props.modelValue.value ?? { type: ConditionValueType.Custom, value: null });
 
-const fDataType = ref<ConditionFieldType>(
-  getConditionFieldType(field.value?.type ?? FieldType.Input)
-);
+const fieldType = ref<FieldType>(field.value?.type ?? FieldType.Input);
+
+const dataType = computed(() => {
+  return getConditionFieldType(fieldType.value)
+});
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
 
@@ -112,9 +93,12 @@ const opLabel = computed(() => {
 const changeField = (item: IFormFieldDef) => {
   field.value = item;
 
-  if (fDataType.value != getConditionFieldType(item.type)) {
+  if (dataType.value != getConditionFieldType(item.type)) {
+    value.value.value = null;
     value.value.type = ConditionValueType.Custom;
-    value.value.value = undefined;
+    value.value.fieldValue = undefined
+
+    fieldType.value = item.type
   }
 
   emitChange();

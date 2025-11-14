@@ -1,4 +1,4 @@
-import { Department } from "@eimsnext/models";
+import { Department, Role, RoleGroup } from "@eimsnext/models";
 
 export interface ITreeNode {
   id: string;
@@ -10,10 +10,12 @@ export interface ITreeNode {
   data?: any;
 }
 export enum TreeNodeType {
-  None,
+  None = 0,
   Dept,
   Form,
   Field,
+  Group,
+  Role,
 }
 
 export function findNode(
@@ -78,6 +80,42 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
     attachChildren(rootNode);
     treeNoes.push(rootNode);
   }
+
+  return treeNoes;
+}
+
+export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
+  const attachChildren = (pNode: ITreeNode) => {
+    const children = roles.filter((x) => x.roleGroupId == pNode.id);
+    children.forEach((x) => {
+      const node: ITreeNode = {
+        id: x.id,
+        label: x.name,
+        nodeType: TreeNodeType.Role,
+        children: [],
+        data: x,
+        icon: "el-icon-UserFilled",
+      };
+      attachChildren(node);
+      if (!pNode.children) pNode.children = [];
+      pNode.children.push(node);
+    });
+  };
+
+  const treeNoes: ITreeNode[] = [];
+  groups.forEach((x) => {
+    const rootNode: ITreeNode = {
+      id: x.id,
+      label: x.name,
+      nodeType: TreeNodeType.Group,
+      children: [],
+      data: x,
+      icon: "el-icon-Folder",
+    };
+
+    attachChildren(rootNode);
+    treeNoes.push(rootNode);
+  });
 
   return treeNoes;
 }

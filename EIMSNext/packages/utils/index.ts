@@ -1,5 +1,6 @@
 import type { IAppSetting } from "./appSetting";
 import appSetting from "./appSetting";
+import { getAuthUrl, getApiUrl, getODataUrl, getUploadUrl } from "./appSetting";
 import accessToken from "./http/token";
 import {
   http,
@@ -9,6 +10,7 @@ import {
   AuthClient,
   ApiClient,
   ODataClient,
+  UploadClient,
   PageResult,
   ContentType,
   ODataMetadata,
@@ -40,5 +42,10 @@ export {
   ApiClient,
   AuthClient,
   ODataClient,
+  UploadClient,
   AccessToken,
+  getAuthUrl,
+  getApiUrl,
+  getODataUrl,
+  getUploadUrl,
 };

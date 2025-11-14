@@ -1,6 +1,7 @@
 ﻿import { CorpModelBase, IdBase } from "./modelBase";
 
 export interface FormDataRequest extends IdBase {
+  action: DataAction;
   appId: string;
   formId: string;
   data: any;
@@ -21,4 +22,10 @@ export enum FlowStatus {
   Rejected = 4,
   Suspended = 5,
   Discarded = 6,
+}
+
+export enum DataAction {
+  None = 0,
+  Save = 1,
+  Submit = 2,
 }

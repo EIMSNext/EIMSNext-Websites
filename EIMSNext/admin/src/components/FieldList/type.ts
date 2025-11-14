@@ -67,7 +67,7 @@ export function buildFieldListItems(
   }
 
   fields.forEach((x: FieldDef) => {
-    if (x.type && x.type == FieldType.TableFormPro && x.columns && x.columns.length > 0) {
+    if (x.type && x.type == FieldType.TableForm && x.columns && x.columns.length > 0) {
       x.columns.forEach((sub: FieldDef) => {
         var fieldDef: IFormFieldDef = toFormFieldDef(formId, sub, x, nodeId);
         let item: IListItem = {
@@ -90,17 +90,19 @@ export function buildFieldListItems(
     }
   });
 
-  let createTime: IFormFieldDef = toFormFieldDef(
-    formId,
-    getCreateTime("提交时间"),
-    undefined,
-    nodeId
-  );
-  items.push({
-    id: createTime.field,
-    label: createTime.label,
-    data: createTime,
-  });
+  if (formId != "employee") {
+    let createTime: IFormFieldDef = toFormFieldDef(
+      formId,
+      getCreateTime("提交时间"),
+      undefined,
+      nodeId
+    );
+    items.push({
+      id: createTime.field,
+      label: createTime.label,
+      data: createTime,
+    });
+  }
 
   return items;
 }

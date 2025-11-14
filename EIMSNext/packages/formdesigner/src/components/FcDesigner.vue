@@ -1,91 +1,56 @@
 <template>
     <el-container class="_fc-designer" :style="height ? `height:${dragHeight};flex:initial;` : ''"
-                  @dragenter="handleDragenter" @dragleave="handleDragleave" @drop="handleDrop">
+        @dragenter="handleDragenter" @dragleave="handleDragleave" @drop="handleDrop">
         <el-config-provider :locale="elmLocale">
             <el-main>
                 <el-container style="height: 100%;" :key="locale && locale.name">
                     <el-aside class="_fc-l-menu" width="40px" v-if="false !== getConfig('showMenuBar')">
-                        <el-tooltip
-                            effect="dark"
-                            :content="t('designer.formList')"
-                            placement="right"
-                            :hide-after="0"
-                            v-if="formListRef && formListRef.length"
-                        >
-                            <div class="_fc-l-menu-item _fc-l-menu-form" :class="{active: activeModule === 'form'}"
-                                 @click="activeModule = 'form'">
+                        <el-tooltip effect="dark" :content="t('designer.formList')" placement="right" :hide-after="0"
+                            v-if="formListRef && formListRef.length">
+                            <div class="_fc-l-menu-item _fc-l-menu-form" :class="{ active: activeModule === 'form' }"
+                                @click="activeModule = 'form'">
                                 <i class="fc-icon icon-menu2"></i>
                             </div>
                         </el-tooltip>
-                        <el-tooltip
-                            effect="dark"
-                            :content="t('designer.comList')"
-                            placement="right"
-                            :hide-after="0"
-                        >
-                            <div class="_fc-l-menu-item" :class="{active: activeModule === 'base'}"
-                                 @click="activeModule = 'base'">
+                        <el-tooltip effect="dark" :content="t('designer.comList')" placement="right" :hide-after="0">
+                            <div class="_fc-l-menu-item" :class="{ active: activeModule === 'base' }"
+                                @click="activeModule = 'base'">
                                 <i class="fc-icon icon-menu"></i>
                             </div>
                         </el-tooltip>
-                        <el-tooltip
-                            effect="dark"
-                            :content="t('designer.pageManage')"
-                            placement="right"
-                            :hide-after="0"
-                            v-if="getConfig('showPageManage', true)"
-                        >
-                            <div class="_fc-l-menu-item" :class="{active: activeModule === 'page'}"
-                                 @click="activeModule = 'page'">
+                        <el-tooltip effect="dark" :content="t('designer.pageManage')" placement="right" :hide-after="0"
+                            v-if="getConfig('showPageManage', true)">
+                            <div class="_fc-l-menu-item" :class="{ active: activeModule === 'page' }"
+                                @click="activeModule = 'page'">
                                 <el-badge :value="pageCount" :hidden="pageCount < 1">
                                     <i class="fc-icon icon-page"></i>
                                 </el-badge>
                             </div>
                         </el-tooltip>
-                        <el-tooltip
-                            effect="dark"
-                            :content="t('form.globalConfig')"
-                            placement="right"
-                            :hide-after="0"
-                        >
-                            <div class="_fc-l-menu-item" :class="{active: activeModule === 'global'}"
-                                 @click="activeModule = 'global'">
+                        <el-tooltip effect="dark" :content="t('form.globalConfig')" placement="right" :hide-after="0">
+                            <div class="_fc-l-menu-item" :class="{ active: activeModule === 'global' }"
+                                @click="activeModule = 'global'">
                                 <i class="fc-icon icon-data"></i>
                             </div>
                         </el-tooltip>
-                        <el-tooltip
-                            v-if="getConfig('showLanguage', true)"
-                            effect="dark"
-                            :content="t('language.name')"
-                            placement="right"
-                            :hide-after="0"
-                        >
-                            <div class="_fc-l-menu-item" :class="{active: activeModule === 'language'}"
-                                 @click="activeModule = 'language'">
+                        <el-tooltip v-if="getConfig('showLanguage', true)" effect="dark" :content="t('language.name')"
+                            placement="right" :hide-after="0">
+                            <div class="_fc-l-menu-item" :class="{ active: activeModule === 'language' }"
+                                @click="activeModule = 'language'">
                                 <i class="fc-icon icon-language"></i>
                             </div>
                         </el-tooltip>
-                        <el-tooltip
-                            v-if="getConfig('showJsonPreview', true)"
-                            effect="dark"
-                            content="JSON"
-                            placement="right"
-                            :hide-after="0"
-                        >
-                            <div class="_fc-l-menu-item" :class="{active: activeModule === 'json'}"
-                                 @click="activeModule = 'json'">
+                        <el-tooltip v-if="getConfig('showJsonPreview', true)" effect="dark" content="JSON"
+                            placement="right" :hide-after="0">
+                            <div class="_fc-l-menu-item" :class="{ active: activeModule === 'json' }"
+                                @click="activeModule = 'json'">
                                 <i class="fc-icon icon-script"></i>
                             </div>
                         </el-tooltip>
-                        <el-tooltip
-                            v-if="getConfig('showAi', true)"
-                            effect="dark"
-                            :content="t('ai.name')"
-                            placement="right"
-                            :hide-after="0"
-                        >
-                            <div class="_fc-l-menu-item" :class="{active: activeModule === 'ai'}"
-                                 @click="activeModule = 'ai'">
+                        <el-tooltip v-if="getConfig('showAi', true)" effect="dark" :content="t('ai.name')"
+                            placement="right" :hide-after="0">
+                            <div class="_fc-l-menu-item" :class="{ active: activeModule === 'ai' }"
+                                @click="activeModule = 'ai'">
                                 <i class="fc-icon icon-ai bright"></i>
                             </div>
                         </el-tooltip>
@@ -106,23 +71,23 @@
                                     <div class="_fc-l-label">
                                         {{ t('form.globalEvent') }}
                                     </div>
-                                    <GlobalEventConfig ref="globalEvent"
-                                                       v-model="formOptions.globalEvent"></GlobalEventConfig>
+                                    <GlobalEventConfig ref="globalEvent" v-model="formOptions.globalEvent">
+                                    </GlobalEventConfig>
                                     <div class="_fc-l-label">
                                         {{ t('form.globalFetch') }}
                                     </div>
-                                    <GlobalFetchConfig ref="globalFetch"
-                                                       v-model="formOptions.globalData"></GlobalFetchConfig>
+                                    <GlobalFetchConfig ref="globalFetch" v-model="formOptions.globalData">
+                                    </GlobalFetchConfig>
                                     <div class="_fc-l-label">
                                         {{ t('form.globalClass') }}
                                     </div>
-                                    <GlobalClassConfig ref="globalClass"
-                                                       v-model="formOptions.globalClass"></GlobalClassConfig>
+                                    <GlobalClassConfig ref="globalClass" v-model="formOptions.globalClass">
+                                    </GlobalClassConfig>
                                     <div class="_fc-l-label">
                                         {{ t('computed.variable.title') }}
                                     </div>
-                                    <GlobalVariableConfig ref="globalVariable"
-                                                          v-model="formOptions.globalVariable"></GlobalVariableConfig>
+                                    <GlobalVariableConfig ref="globalVariable" v-model="formOptions.globalVariable">
+                                    </GlobalVariableConfig>
                                 </div>
                             </el-main>
                         </el-container>
@@ -147,51 +112,49 @@
                                 <div class="_fc-l-info">
                                     {{ t('warning.pageManage') }}
                                 </div>
-                                <PageInput @delete="deletePage" @copy="copyPage" @add="addPage"
-                                           @change="changePage"></PageInput>
+                                <PageInput @delete="deletePage" @copy="copyPage" @add="addPage" @change="changePage">
+                                </PageInput>
                             </el-main>
                         </el-container>
                         <el-container v-if="activeModule === 'base'">
                             <el-header height="40px" class="_fc-l-tabs">
-                                <div class="_fc-l-tab" :class="{active: activeMenuTab==='menu'}"
-                                     @click="activeMenuTab='menu'"> {{ t('menu.component') }}
+                                <div class="_fc-l-tab" :class="{ active: activeMenuTab === 'menu' }"
+                                    @click="activeMenuTab = 'menu'"> {{ t('menu.component') }}
                                 </div>
                                 <div class="_fc-l-tab" v-if="field && field.length > 0"
-                                     :class="{active: activeMenuTab==='field'}"
-                                     @click="activeMenuTab='field'"> {{ t('props.field') }}
+                                    :class="{ active: activeMenuTab === 'field' }" @click="activeMenuTab = 'field'"> {{
+                                    t('props.field') }}
                                 </div>
-                                <div class="_fc-l-tab" :class="{active: activeMenuTab==='tree'}"
-                                     @click="activeMenuTab='tree'"> {{ t('menu.tree') }}
+                                <div class="_fc-l-tab" :class="{ active: activeMenuTab === 'tree' }"
+                                    @click="activeMenuTab = 'tree'"> {{ t('menu.tree') }}
                                 </div>
                             </el-header>
                             <el-main v-show="activeMenuTab === 'menu'">
                                 <template v-for="(item, index) in menuList" :key="index">
-                                    <div class="_fc-l-group" :class="{'is-template': item.name === 'template'}"
-                                         v-if="(item.name === 'template' ? config.showTemplate !== false : true) && hiddenMenu.indexOf(item.name) === -1">
+                                    <div class="_fc-l-group" :class="{ 'is-template': item.name === 'template' }"
+                                        v-if="(item.name === 'template' ? config.showTemplate !== false : true) && hiddenMenu.indexOf(item.name) === -1">
                                         <h4 class="_fc-l-title" @click="item.hidden = !item.hidden">
                                             {{ t('menu.' + item.name) || item.title }}
-                                            <i class="fc-icon icon-arrow" :class="{down: !item.hidden}"/>
+                                            <i class="fc-icon icon-arrow" :class="{ down: !item.hidden }" />
                                         </h4>
-                                        <fcDraggable :group="{name:'default', pull:'clone', put:false}" :sort="false"
-                                                     itemKey="name"
-                                                     class="_fc-l-list"
-                                                     :list="item.list" v-show="!item.hidden">
-                                            <template #item="{element}">
-                                                <div class="_fc-l-item" :class="{'is-inline': element.inline}"
-                                                     v-if="hiddenItem.indexOf(element.name) === -1"
-                                                     @click="clickMenu(element)">
+                                        <fcDraggable :group="{ name: 'default', pull: 'clone', put: false }" :sort="false"
+                                            itemKey="name" class="_fc-l-list" :list="item.list" v-show="!item.hidden">
+                                            <template #item="{ element }">
+                                                <div class="_fc-l-item" :class="{ 'is-inline': element.inline }"
+                                                    v-if="hiddenItem.indexOf(element.name) === -1"
+                                                    @click="clickMenu(element)">
                                                     <template v-if="item.name !== 'template'">
                                                         <div class="_fc-l-icon">
                                                             <i class="fc-icon"
-                                                               :class="element.icon || 'icon-input'"></i>
+                                                                :class="element.icon || 'icon-input'"></i>
                                                         </div>
                                                         <span class="_fc-l-name">{{
-                                                                t('com.' + element.name + '.name') || element.label
-                                                            }}</span>
+                                                            t('com.' + element.name + '.name') || element.label
+                                                        }}</span>
                                                     </template>
                                                     <span class="_fc-l-name" v-else>{{
-                                                            t('tmp.' + element.name) || element.label
-                                                        }}</span>
+                                                        t('tmp.' + element.name) || element.label
+                                                    }}</span>
                                                 </div>
                                             </template>
                                         </fcDraggable>
@@ -202,46 +165,37 @@
                                 <FieldList :field="fieldRef"></FieldList>
                             </el-main>
                             <el-main v-if="activeMenuTab === 'tree'">
-                                <el-tree
-                                    ref="treeRef"
-                                    class="_fc-struct-tree"
-                                    :data="treeInfo"
-                                    default-expand-all
-                                    :expand-on-click-node="false"
-                                    :indent="10"
-                                    @currentChange="treeChange"
-                                >
+                                <el-tree ref="treeRef" class="_fc-struct-tree" :data="treeInfo" default-expand-all
+                                    :expand-on-click-node="false" :indent="10" @currentChange="treeChange">
                                     <template #default="{ node, data }">
-                                        <div class="_fc-tree-node" :class="{active: activeRule === data.rule}">
+                                        <div class="_fc-tree-node" :class="{ active: activeRule === data.rule }">
                                             <div class="_fc-tree-label">
                                                 <i class="fc-icon"
-                                                   :class="(data.rule._menu && data.rule._menu.icon) || 'icon-cell'"></i>
+                                                    :class="(data.rule._menu && data.rule._menu.icon) || 'icon-cell'"></i>
                                                 <span>{{
-                                                        getTitle(data.rule)
-                                                    }}</span>
+                                                    getTitle(data.rule)
+                                                }}</span>
                                             </div>
                                             <div class="_fc-tree-more" @click.stop
-                                                 v-if="!data.slot && !data.rule._fc_page_tag">
+                                                v-if="!data.slot && !data.rule._fc_page_tag">
                                                 <i class="fc-icon"
-                                                   :class="data.rule._hidden === true ? 'icon-eye-close' : 'icon-eye'"
-                                                   @click="toolHidden(data.rule)" style="margin-right: 8px;"></i>
+                                                    :class="data.rule._hidden === true ? 'icon-eye-close' : 'icon-eye'"
+                                                    @click="toolHidden(data.rule)" style="margin-right: 8px;"></i>
                                                 <el-dropdown trigger="click" size="default">
                                                     <i class="fc-icon icon-more"></i>
                                                     <template #dropdown>
                                                         <el-dropdown-menu>
                                                             <el-dropdown-item v-if="data.rule._fc_drag_tag !== '_'"
-                                                                              key="1"
-                                                                              @click="toolHandle(data.rule ,'copy')">
+                                                                key="1" @click="toolHandle(data.rule, 'copy')">
                                                                 {{ t('props.copy') }}
                                                             </el-dropdown-item>
                                                             <el-dropdown-item
                                                                 v-if="data.rule._menu && data.rule._menu.children && data.rule._fc_drag_tag !== '_'"
-                                                                key="2"
-                                                                @click="toolHandle(data.rule, 'addChild')">
+                                                                key="2" @click="toolHandle(data.rule, 'addChild')">
                                                                 {{ t('form.appendChild') }}
                                                             </el-dropdown-item>
                                                             <el-dropdown-item key="3"
-                                                                              @click="toolHandle(data.rule, 'delete')">
+                                                                @click="toolHandle(data.rule, 'delete')">
                                                                 {{ t('props.delete') }}
                                                             </el-dropdown-item>
                                                         </el-dropdown-menu>
@@ -260,12 +214,12 @@
                                 <template v-if="!inputForm.state">
                                     <template v-if="getConfig('showDevice') !== false">
                                         <div class="devices">
-                                            <i class="fc-icon icon-pc" :class="{active: device === 'pc'}"
-                                               @click="setDevice('pc')"></i>
-                                            <i class="fc-icon icon-pad" :class="{active: device === 'pad'}"
-                                               @click="setDevice('pad')"></i>
-                                            <i class="fc-icon icon-mobile" :class="{active: device === 'mobile'}"
-                                               @click="setDevice('mobile')"></i>
+                                            <i class="fc-icon icon-pc" :class="{ active: device === 'pc' }"
+                                                @click="setDevice('pc')"></i>
+                                            <i class="fc-icon icon-pad" :class="{ active: device === 'pad' }"
+                                                @click="setDevice('pad')"></i>
+                                            <i class="fc-icon icon-mobile" :class="{ active: device === 'mobile' }"
+                                                @click="setDevice('mobile')"></i>
                                         </div>
                                         <div class="line"></div>
                                     </template>
@@ -275,11 +229,11 @@
                                     </template>
                                     <div>
                                         <i class="fc-icon icon-pre-step"
-                                           :class="{disabled: !operation.list[operation.idx - 1]}"
-                                           @click="prevOperationRecord"></i>
+                                            :class="{ disabled: !operation.list[operation.idx - 1] }"
+                                            @click="prevOperationRecord"></i>
                                         <i class="fc-icon icon-next-step"
-                                           :class="{disabled: !operation.list[operation.idx + 1]}"
-                                           @click="nextOperationRecord"></i>
+                                            :class="{ disabled: !operation.list[operation.idx + 1] }"
+                                            @click="nextOperationRecord"></i>
                                     </div>
                                 </template>
                             </div>
@@ -287,24 +241,21 @@
                                 <template v-if="!inputForm.state">
                                     <slot name="handle"></slot>
                                     <el-button v-if="getConfig('showSaveBtn', false)" type="success" plain size="small"
-                                               @click="handleSave"><i class="fc-icon icon-save"></i> {{
+                                        @click="handleSave"><i class="fc-icon icon-save"></i> {{
                                             t('props.save')
                                         }}
                                     </el-button>
-                                    <el-button v-if="false !== getConfig('showPreviewBtn')" type="primary" plain size="small"
-                                               @click="openPreview"><i class="fc-icon icon-preview"></i> {{
+                                    <el-button v-if="false !== getConfig('showPreviewBtn')" type="primary" plain
+                                        size="small" @click="openPreview"><i class="fc-icon icon-preview"></i> {{
                                             t('props.preview')
                                         }}
                                     </el-button>
-                                    <el-popconfirm
-                                        :title="t('designer.clearWarn')"
-                                        width="200px"
-                                        :confirm-button-text="t('props.clear')"
-                                        :cancel-button-text="t('props.cancel')"
+                                    <el-popconfirm :title="t('designer.clearWarn')" width="200px"
+                                        :confirm-button-text="t('props.clear')" :cancel-button-text="t('props.cancel')"
                                         @confirm="clearDragRule">
                                         <template #reference>
                                             <el-button type="danger" plain size="small"><i
-                                                class="fc-icon icon-delete"></i>{{ t('props.clear') }}
+                                                    class="fc-icon icon-delete"></i>{{ t('props.clear') }}
                                             </el-button>
                                         </template>
                                     </el-popconfirm>
@@ -315,7 +266,7 @@
                                         <template #dropdown>
                                             <el-dropdown-menu>
                                                 <el-dropdown-item v-for="item in handle"
-                                                                  @click.stop="triggerHandle(item)">
+                                                    @click.stop="triggerHandle(item)">
                                                     <div>{{ item.label }}</div>
                                                 </el-dropdown-item>
                                             </el-dropdown-menu>
@@ -328,37 +279,35 @@
                                     <div class="_fd-input-btn">
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
-                                        }}：</span>
+                                            }}：</span>
                                         <el-switch size="small" :model-value="inputForm.state" inline-prompt
-                                                   @update:model-value="openInputData"/>
+                                            @update:model-value="openInputData" />
                                     </div>
                                 </template>
                             </div>
                         </el-header>
                         <el-main class="_fc-m-con">
-                            <div class="_fc-m-drag" :class="device"
-                                 ref="dragCon"
-                                 :style="{'--fc-drag-empty': `'${t('designer.dragEmpty')}'`,'--fc-child-empty': `'${t('designer.childEmpty')}'`}">
+                            <div class="_fc-m-drag" :class="device" ref="dragCon"
+                                :style="{ '--fc-drag-empty': `'${t('designer.dragEmpty')}'`, '--fc-child-empty': `'${t('designer.childEmpty')}'` }">
                                 <div class="_fc-m-input" v-if="inputForm.state">
                                     <ViewForm :key="inputForm.key" :rule="inputForm.rule" :option="inputForm.option"
-                                              v-model:api="inputForm.api" :disabled="false">
+                                        v-model:api="inputForm.api" :disabled="false">
                                         <template v-for="(_, name) in $slots" #[name]="scope">
-                                            <slot :name="name" v-bind="scope ?? {}"/>
+                                            <slot :name="name" v-bind="scope ?? {}" />
                                         </template>
                                     </ViewForm>
                                 </div>
                                 <template v-else-if="device === 'mobile' && !onlyPC">
                                     <DragFormMobile driver="elm" :rule="dragForm.rule" :option="formOptions"
-                                                    v-model:api="dragForm.api">
+                                        v-model:api="dragForm.api">
                                         <template v-for="(_, name) in $slots" #[name]="scope">
-                                            <slot :name="name" v-bind="scope ?? {}"/>
+                                            <slot :name="name" v-bind="scope ?? {}" />
                                         </template>
                                     </DragFormMobile>
                                 </template>
-                                <DragForm v-else :rule="dragForm.rule" :option="formOptions"
-                                          v-model:api="dragForm.api">
+                                <DragForm v-else :rule="dragForm.rule" :option="formOptions" v-model:api="dragForm.api">
                                     <template v-for="(_, name) in $slots" #[name]="scope">
-                                        <slot :name="name" v-bind="scope ?? {}"/>
+                                        <slot :name="name" v-bind="scope ?? {}" />
                                     </template>
                                 </DragForm>
                             </div>
@@ -372,21 +321,20 @@
                     <el-aside class="_fc-r" width="320px" v-if="!config || config.showConfig !== false">
                         <el-container style="height: 100%;">
                             <el-header height="auto" class="_fc-r-tabs">
-                                <div class="_fc-r-tab" :class="{active: activeTab==='props'}"
-                                     v-if="!!activeRule || customForm.isShow || (config && config.showFormConfig === false)"
-                                     @click="activeTab='props'"> {{ t('designer.component') }}
+                                <div class="_fc-r-tab" :class="{ active: activeTab === 'props' }"
+                                    v-if="!!activeRule || customForm.isShow || (config && config.showFormConfig === false)"
+                                    @click="activeTab = 'props'"> {{ t('designer.component') }}
                                 </div>
                                 <div class="_fc-r-tab" v-if="!config || config.showFormConfig !== false"
-                                     :class="{active: activeTab==='form'}"
-                                     @click="activeTab='form'">{{ t('designer.form') }}
+                                    :class="{ active: activeTab === 'form' }" @click="activeTab = 'form'">{{
+                                    t('designer.form') }}
                                 </div>
-                                <ToolsBar v-if="activeTab==='props'"></ToolsBar>
+                                <ToolsBar v-if="activeTab === 'props'"></ToolsBar>
                             </el-header>
-                            <el-main class="_fc-r-tab-form" v-show="activeTab==='form'"
-                                     v-if="!config || config.showFormConfig !== false">
-                                <DragForm :rule="form.rule" :option="form.option"
-                                          :modelValue="form.value" @change="formOptChange"
-                                          v-model:api="form.api">
+                            <el-main class="_fc-r-tab-form" v-show="activeTab === 'form'"
+                                v-if="!config || config.showFormConfig !== false">
+                                <DragForm :rule="form.rule" :option="form.option" :modelValue="form.value"
+                                    @change="formOptChange" v-model:api="form.api">
                                     <template #title="scope">
                                         <template v-if="scope.rule.warning">
                                             <Warning :tooltip="scope.rule.warning">
@@ -394,13 +342,13 @@
                                             </Warning>
                                         </template>
                                         <template v-else>
-                                            {{scope.rule.title}}
+                                            {{ scope.rule.title }}
                                         </template>
                                     </template>
                                 </DragForm>
                             </el-main>
-                            <el-main class="_fc-r-tab-props" v-show="activeTab==='props'"
-                                     :key="activeRule ? activeRule._fc_id: (customForm.config ? customForm.key : '')">
+                            <el-main class="_fc-r-tab-props" v-show="activeTab === 'props'"
+                                :key="activeRule ? activeRule._fc_id : (customForm.config ? customForm.key : '')">
                                 <template
                                     v-if="activeRule || (customForm.config && (customForm.config.name || customForm.config.label))">
                                     <p class="_fc-r-title">{{ t('designer.type') }}</p>
@@ -412,9 +360,8 @@
                                                 {{ t('designer.name') }}
                                             </Warning>
                                         </p>
-                                        <el-input size="small" class="_fc-r-name-input"
-                                                  :model-value="activeRule.name"
-                                                  readonly>
+                                        <el-input size="small" class="_fc-r-name-input" :model-value="activeRule.name"
+                                            readonly>
                                             <template #suffix>
                                                 <i class="fc-icon icon-group" @click="copyName"></i>
                                             </template>
@@ -427,17 +374,15 @@
                                 <template v-if="activeRuleChildren">
                                     <SubList></SubList>
                                 </template>
-                                <div class="_fc-r-config" :style="{'grid-template-areas': configFormOrderStyle}">
+                                <div class="_fc-r-config" :style="{ 'grid-template-areas': configFormOrderStyle }">
                                     <div style="grid-area: base;">
                                         <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
-                                                t('designer.rule')
-                                            }}
+                                            t('designer.rule')
+                                        }}
                                         </ConfigTitle>
                                         <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api"
-                                                  :rule="baseForm.rule"
-                                                  :option="baseForm.options"
-                                                  :modelValue="baseForm.value"
-                                                  @change="baseChange">
+                                            :rule="baseForm.rule" :option="baseForm.options"
+                                            :modelValue="baseForm.value" @change="baseChange">
                                             <template #title="scope">
                                                 <template v-if="scope.rule.warning">
                                                     <Warning :tooltip="scope.rule.warning">
@@ -445,31 +390,32 @@
                                                     </Warning>
                                                 </template>
                                                 <template v-else>
-                                                    {{scope.rule.title}}
+                                                    {{ scope.rule.title }}
                                                 </template>
                                             </template>
                                         </DragForm>
                                     </div>
                                     <div style="grid-area: advanced;">
                                         <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
-                                                t('designer.advanced')
-                                            }}
+                                            t('designer.advanced')
+                                        }}
                                         </ConfigTitle>
                                         <DragForm v-show="advancedForm.isShow" v-model:api="advancedForm.api"
-                                                  :rule="advancedForm.rule"
-                                                  :option="advancedForm.options"
-                                                  :modelValue="advancedForm.value"
-                                                  @change="computedChange"></DragForm>
+                                            :rule="advancedForm.rule" :option="advancedForm.options"
+                                            :modelValue="advancedForm.value" @change="computedChange">
+                                        </DragForm>
                                     </div>
                                     <div style="grid-area: props;">
-                                        <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{ t('designer.props') }}
+                                        <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
+                                            t('designer.props') }}
                                             <VariableConfig v-if="propsForm.variable"></VariableConfig>
-                                            <PropsInput v-if="activeRule && getConfig('showCustomProps', true)"></PropsInput>
+                                            <PropsInput v-if="activeRule && getConfig('showCustomProps', true)">
+                                            </PropsInput>
                                         </ConfigTitle>
-                                        <DragForm v-show="propsForm.isShow" v-model:api="propsForm.api" :rule="propsForm.rule"
-                                                  :option="propsForm.options"
-                                                  :modelValue="propsForm.value"
-                                                  @change="propChange" @removeField="propRemoveField">
+                                        <DragForm v-show="propsForm.isShow" v-model:api="propsForm.api"
+                                            :rule="propsForm.rule" :option="propsForm.options"
+                                            :modelValue="propsForm.value" @change="propChange"
+                                            @removeField="propRemoveField">
                                             <template #title="scope">
                                                 <template v-if="scope.rule.warning">
                                                     <Warning :tooltip="scope.rule.warning">
@@ -477,20 +423,22 @@
                                                     </Warning>
                                                 </template>
                                                 <template v-else>
-                                                    {{scope.rule.title}}
+                                                    {{ scope.rule.title }}
                                                 </template>
                                             </template>
                                         </DragForm>
-                                        <ConfigTitle v-if="customForm.isShow && customForm.propsShow" id="_fd-config-props">
+                                        <ConfigTitle v-if="customForm.isShow && customForm.propsShow"
+                                            id="_fd-config-props">
                                             {{ t('designer.props') }}
                                         </ConfigTitle>
-                                        <DragForm v-if="customForm.isShow && customForm.propsShow" v-model:api="customForm.api"
-                                                  :rule="customForm.rule"
-                                                  :option="customForm.options" :key="customForm.key"
-                                                  @change="customFormChange"></DragForm>
+                                        <DragForm v-if="customForm.isShow && customForm.propsShow"
+                                            v-model:api="customForm.api" :rule="customForm.rule"
+                                            :option="customForm.options" :key="customForm.key"
+                                            @change="customFormChange"></DragForm>
                                     </div>
                                     <div style="grid-area: slots;">
-                                        <template v-if="activeRule && config?.showSlotsConfig !== false && activeRule._menu.easySlots && activeRule._menu.easySlots.length">
+                                        <template
+                                            v-if="activeRule && config?.showSlotsConfig !== false && activeRule._menu.easySlots && activeRule._menu.easySlots.length">
                                             <ConfigTitle id="_fd-config-slots">
                                                 {{ t('designer.slots') }}
                                             </ConfigTitle>
@@ -501,34 +449,31 @@
                                         <ConfigTitle v-if="styleForm.isShow" id="_fd-config-style">
                                             {{ t('designer.style') }}
                                         </ConfigTitle>
-                                        <DragForm v-show="styleForm.isShow" :rule="styleForm.rule" :option="styleForm.options"
-                                                  :modelValue="styleForm.value"
-                                                  @change="styleChange" v-model:api="styleForm.api"></DragForm>
+                                        <DragForm v-show="styleForm.isShow" :rule="styleForm.rule"
+                                            :option="styleForm.options" :modelValue="styleForm.value"
+                                            @change="styleChange" v-model:api="styleForm.api"></DragForm>
                                     </div>
                                     <div style="grid-area: event;">
-                                        <ConfigTitle
-                                            v-if="eventShow" id="_fd-config-event">
+                                        <ConfigTitle v-if="eventShow" id="_fd-config-event">
                                             {{ t('designer.event') }}
                                         </ConfigTitle>
-                                        <EventConfig
-                                            v-if="eventShow"
+                                        <EventConfig v-if="eventShow"
                                             :event-name="(activeRule && activeRule._menu.event) || []"
                                             :component-name="(activeRule && activeRule._menu.name) || ''"
                                             :model-value="(activeRule && activeRule._on) || {}"
-                                            @update:modelValue="changeEvent"></EventConfig>
+                                            @update:modelValue="changeEvent">
+                                        </EventConfig>
                                     </div>
                                     <div style="grid-area: validate;">
                                         <template v-if="activeRule">
                                             <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
-                                                    t('designer.validate')
-                                                }}
+                                                t('designer.validate')
+                                            }}
                                             </ConfigTitle>
                                             <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api"
-                                                      :rule="validateForm.rule"
-                                                      :option="validateForm.options"
-                                                      :modelValue="validateForm.value"
-                                                      @change="validateChange"
-                                                      :key="activeRule._fc_id"></DragForm>
+                                                :rule="validateForm.rule" :option="validateForm.options"
+                                                :modelValue="validateForm.value" @change="validateChange"
+                                                :key="activeRule._fc_id"></DragForm>
                                         </template>
                                     </div>
                                 </div>
@@ -541,18 +486,19 @@
                             <el-tab-pane :label="t('form.previewMode')" name="preview"></el-tab-pane>
                             <el-tab-pane :label="t('form.componentMode')" name="component"></el-tab-pane>
                             <el-tab-pane :label="t('form.sfcMode')" name="sfc"
-                                         v-if="previewDevice !== 'mobile'"></el-tab-pane>
+                                v-if="previewDevice !== 'mobile'"></el-tab-pane>
                         </el-tabs>
                         <div class="_fd-preview-device" v-if="previewStatus !== 'sfc' && !onlyPC">
-                            <div :class="{active: previewDevice === 'pc'}" @click="previewDevice = 'pc'"><i
-                                class="fc-icon icon-pc2"></i>{{ t('props.pc') }}
+                            <div :class="{ active: previewDevice === 'pc' }" @click="previewDevice = 'pc'"><i
+                                    class="fc-icon icon-pc2"></i>{{
+                                t('props.pc') }}
                             </div>
-                            <div :class="{active: previewDevice === 'mobile'}" @click="previewDevice = 'mobile'"><i
-                                class="fc-icon icon-mobile2"></i>{{ t('props.mobile') }}
+                            <div :class="{ active: previewDevice === 'mobile' }" @click="previewDevice = 'mobile'"><i
+                                    class="fc-icon icon-mobile2"></i>{{ t('props.mobile') }}
                             </div>
                         </div>
                         <div class="_fd-preview-copy" v-if="['component', 'sfc'].indexOf(previewStatus) > -1"
-                             @click="copyCode">
+                            @click="copyCode">
                             <i class="fc-icon icon-copy"></i>
                         </div>
                         <template v-if="previewStatus === 'form' || previewStatus === 'preview'">
@@ -560,31 +506,26 @@
                                 <div class="_fd-preview-mobile">
                                     <div>
                                         <ViewFormMobile driver="elm" :rule="preview.rule" :option="preview.option"
-                                                        @submit="previewSubmit"
-                                                        @reset="previewReset"
-                                                        v-model:api="preview.api"
-                                                        v-if="preview.state">
+                                            @submit="previewSubmit" @reset="previewReset" v-model:api="preview.api"
+                                            v-if="preview.state">
                                             <template v-for="(_, name) in $slots" #[name]="scope">
-                                                <slot :name="name" v-bind="scope ?? {}"/>
+                                                <slot :name="name" v-bind="scope ?? {}" />
                                             </template>
                                         </ViewFormMobile>
                                     </div>
                                 </div>
                             </template>
                             <template v-else>
-                                <ViewForm :rule="preview.rule" :option="preview.option"
-                                          @submit="previewSubmit"
-                                          @reset="previewReset"
-                                          v-model:api="preview.api"
-                                          v-if="preview.state">
+                                <ViewForm :rule="preview.rule" :option="preview.option" @submit="previewSubmit"
+                                    @reset="previewReset" v-model:api="preview.api" v-if="preview.state">
                                     <template v-for="(_, name) in $slots" #[name]="scope">
-                                        <slot :name="name" v-bind="scope ?? {}"/>
+                                        <slot :name="name" v-bind="scope ?? {}" />
                                     </template>
                                 </ViewForm>
                             </template>
                         </template>
                         <pre class="_fd-preview-code" ref="previewCode" v-else-if="previewStatus === 'component'"><code
-                            v-html="previewDevice === 'mobile' ? preview.mobileHtml : preview.html"></code></pre>
+            v-html="previewDevice === 'mobile' ? preview.mobileHtml : preview.html"></code></pre>
                         <pre class="_fd-preview-code" ref="previewCode" v-else><code v-html="preview.sfc"></code></pre>
                     </el-dialog>
                 </el-container>
@@ -593,27 +534,16 @@
     </el-container>
 </template>
 
-<style>
-
-</style>
+<style></style>
 
 <script>
-// +-----------------------------------------------------------------------
-// | FormCreate商业版 [ 让表单设计更简单 ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2018~2025 https://form-create.com All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed FormCreate商业版并不是自由软件，未经授权不得使用、修改或移除版权信息
-// +----------------------------------------------------------------------
-// | Author: FormCreate Team <admin@form-create.com>
-// +----------------------------------------------------------------------
-import { deepCopy, is, hasProperty, lower, Mitt, uniqueId, debounce, deepSet, toArray, mergeProps} from "@eimsnext/form-render-core";
+import { deepCopy, is, hasProperty, lower, Mitt, uniqueId, debounce, deepSet, toArray, mergeProps } from "@eimsnext/form-render-core";
 import form from '../config/base/form';
 import field from '../config/base/field';
 import style from '../config/base/style';
 import advanced from '../config/base/advanced';
 import validate from '../config/base/validate';
-import ruleList, {defaultDrag} from '../config';
+import ruleList, { defaultDrag } from '../config';
 import fcDraggable from 'vuedraggable/src/vuedraggable';
 import createMenu from '../config/menu';
 import {
@@ -631,11 +561,11 @@ import {
     upper,
     useLocale,
 } from '../utils/index';
-import viewForm, {designerForm} from '../utils/form';
+import viewForm, { designerForm } from '../utils/form';
 // #if !ONLY_PC
-import viewFormMobile, {designerFormMobile} from '../utils/mobileForm';
+import viewFormMobile, { designerFormMobile } from '../utils/mobileForm';
 // #endif
-import {t as globalT} from '../utils/locale';
+import { t as globalT } from '../utils/locale';
 import EventConfig from './EventConfig.vue';
 import VNode from './VNode.vue';
 import {
@@ -748,9 +678,9 @@ export default defineComponent({
         // #else
         onlyPC = false;
         // #endif
-        const {menu, height, mask, locale, handle} = toRefs(props);
+        const { menu, height, mask, locale, handle } = toRefs(props);
         const vm = getCurrentInstance();
-        const fcx = reactive({active: null});
+        const fcx = reactive({ active: null });
         provide('fcx', fcx);
         provide('designer', vm);
 
@@ -866,7 +796,7 @@ export default defineComponent({
             activeRule: null,
             children: ref([]),
             treeInfo: [],
-            menuList: menu.value || createMenu({t}),
+            menuList: menu.value || createMenu({ t }),
             dragRuleList: {},
             eventShow: false,
             unloadStatus: false,
@@ -894,7 +824,7 @@ export default defineComponent({
             formOptions: {},
             oldOptionsKeys: [],
             form: {
-                rule: tidyRuleConfig(form, formRule.value, {t}),
+                rule: tidyRuleConfig(form, formRule.value, { t }),
                 api: {},
                 option: {
                     global: {
@@ -920,7 +850,7 @@ export default defineComponent({
             },
             baseForm: {
                 isShow: false,
-                rule: tidyRuleConfig(field, baseRule.value, {t}),
+                rule: tidyRuleConfig(field, baseRule.value, { t }),
                 api: {},
                 value: {},
                 options: {
@@ -947,7 +877,7 @@ export default defineComponent({
             },
             advancedForm: {
                 isShow: false,
-                rule: advanced({t}),
+                rule: advanced({ t }),
                 api: {},
                 value: {},
                 options: {
@@ -974,7 +904,7 @@ export default defineComponent({
             },
             styleForm: {
                 isShow: false,
-                rule: style({t}),
+                rule: style({ t }),
                 api: {},
                 value: {},
                 options: {
@@ -991,7 +921,7 @@ export default defineComponent({
             },
             validateForm: {
                 isShow: false,
-                rule: tidyRuleConfig(validate, validateRule.value, {t}),
+                rule: tidyRuleConfig(validate, validateRule.value, { t }),
                 api: {},
                 value: [],
                 options: {
@@ -1120,7 +1050,7 @@ export default defineComponent({
                 }
                 source = source[id];
             });
-            call({source, field: lastField});
+            call({ source, field: lastField });
         }
 
         const pageCount = computed(() => {
@@ -1133,11 +1063,11 @@ export default defineComponent({
             const formVal = data.form.api.formData && data.form.api.formData();
             const baseFormVal = data.baseForm.api.formData && data.baseForm.api.formData();
             const validateFormVal = data.validateForm.api.formData && data.validateForm.api.formData();
-            data.validateForm.rule = tidyRuleConfig(validate, validateRule.value, {t});
-            data.baseForm.rule = tidyRuleConfig(field, baseRule.value, {t});
-            data.form.rule = tidyRuleConfig(form, formRule.value, {t});
-            data.styleForm.rule = style({t});
-            data.advancedForm.rule = advanced({t});
+            data.validateForm.rule = tidyRuleConfig(validate, validateRule.value, { t });
+            data.baseForm.rule = tidyRuleConfig(field, baseRule.value, { t });
+            data.form.rule = tidyRuleConfig(form, formRule.value, { t });
+            data.styleForm.rule = style({ t });
+            data.advancedForm.rule = advanced({ t });
             data.cacheProps = {};
             const rule = data.activeRule;
             let propsVal = null;
@@ -1152,14 +1082,6 @@ export default defineComponent({
                 propsVal && data.propsForm.api.setValue(propsVal);
             });
         });
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // 本软件商业授权机制，没有任何影响，甲方和第三方不得进行反编译、逆向工程、破解或篡改本软件的授权机制。
-        watch(() => configRef.value.license, (n) => {
-            viewForm.license = n;
-            designerForm.license = n;
-            window && window.formCreate && (window.formCreate.license = n);
-        }, {immediate: true});
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         const methods = {
             setDevice(device) {
@@ -1270,10 +1192,10 @@ export default defineComponent({
                 methods.unWatchActiveRule();
                 unWatchActiveRule = watch(() => data.activeRule, function (n) {
                     n && methods.updateRuleFormData()
-                }, {deep: true, flush: 'post'});
+                }, { deep: true, flush: 'post' });
             },
             makeChildren(children) {
-                return reactive({children}).children;
+                return reactive({ children }).children;
             },
             addMenu(config) {
                 if (!config.name || !config.list) return;
@@ -1386,7 +1308,7 @@ export default defineComponent({
                     rule = parent;
                     parent = parent.__fc__.parent.rule;
                 }
-                return {root: parent, parent: rule};
+                return { root: parent, parent: rule };
             },
             copyName() {
                 copyTextToClipboard(data.activeRule.name);
@@ -1485,15 +1407,15 @@ export default defineComponent({
                 data.preview.rule = designerForm.parseJson(rule);
                 data.preview.html = hljs.highlight(
                     useV2 ? formTemplate(rule, options) : formTemplateV3(rule, options),
-                    {language: 'xml'}
+                    { language: 'xml' }
                 ).value
                 data.preview.mobileHtml = hljs.highlight(
                     useV2 ? mobileTemplate(rule, options) : mobileTemplateV3(rule, options),
-                    {language: 'xml'}
+                    { language: 'xml' }
                 ).value
                 data.preview.sfc = hljs.highlight(
                     sfcTemplate(data.children, data.preview.option, data.dragRuleList, useV2),
-                    {language: 'xml'}
+                    { language: 'xml' }
                 ).value
             },
             copyCode() {
@@ -1580,10 +1502,10 @@ export default defineComponent({
                 return options;
             },
             subRender(render, rule, subRule) {
-                const vnode = render({h, resolveComponent, rule, subRule, t});
+                const vnode = render({ h, resolveComponent, rule, subRule, t });
                 if (Array.isArray(vnode)) {
                     return vnode.map(item => {
-                        return h(ConfigItem, {label: item.label}, () => item.vnode);
+                        return h(ConfigItem, { label: item.label }, () => item.vnode);
                     });
                 }
                 return vnode;
@@ -1618,11 +1540,11 @@ export default defineComponent({
                 methods.updateTree();
             },
             setBaseRuleConfig(rule, append) {
-                baseRule.value = {rule, append};
-                data.baseForm.rule = tidyRuleConfig(field, baseRule.value, {t});
+                baseRule.value = { rule, append };
+                data.baseForm.rule = tidyRuleConfig(field, baseRule.value, { t });
             },
             setComponentRuleConfig(name, rule, append) {
-                componentRule.value[name] = {rule, append};
+                componentRule.value[name] = { rule, append };
                 data.cacheProps = {};
                 const activeRule = data.activeRule;
                 if (activeRule) {
@@ -1638,12 +1560,12 @@ export default defineComponent({
                 }
             },
             setValidateRuleConfig(rule, append) {
-                validateRule.value = {rule, append};
-                data.validateForm.rule = tidyRuleConfig(field, validateRule.value, {t});
+                validateRule.value = { rule, append };
+                data.validateForm.rule = tidyRuleConfig(field, validateRule.value, { t });
             },
             setFormRuleConfig(rule, append) {
-                formRule.value = {rule, append};
-                data.form.rule = tidyRuleConfig(field, formRule.value, {t});
+                formRule.value = { rule, append };
+                data.form.rule = tidyRuleConfig(field, formRule.value, { t });
             },
             clearActiveRule() {
                 data.activeRule = null;
@@ -1655,7 +1577,7 @@ export default defineComponent({
                 const defOptions = deepCopy(methods.getConfig('formOptions', {}));
                 const defForm = defOptions.form || {};
                 delete defOptions.form;
-                let options = {...defOptions, ...is.String(opt) ? JSON.parse(opt) : deepCopy(opt || {})};
+                let options = { ...defOptions, ...is.String(opt) ? JSON.parse(opt) : deepCopy(opt || {}) };
                 options.form = {
                     inline: false,
                     hideRequiredAsterisk: false,
@@ -1683,8 +1605,8 @@ export default defineComponent({
                 if (!hasProperty(options, 'language')) {
                     options.language = {};
                 }
-                options._resetBtn = typeof options.resetBtn === 'object' ? options.resetBtn : {show: options.resetBtn === true};
-                options._submitBtn = typeof options.submitBtn === 'object' ? options.submitBtn : {show: options.submitBtn !== false};
+                options._resetBtn = typeof options.resetBtn === 'object' ? options.resetBtn : { show: false };
+                options._submitBtn = typeof options.submitBtn === 'object' ? options.submitBtn : { show: false };
                 options.submitBtn = options.resetBtn = false;
                 data.inputForm.data = options.formData || {};
                 data.oldOptionsKeys = Object.keys(data.form.value);
@@ -1698,10 +1620,10 @@ export default defineComponent({
             mergeOptions(options) {
                 ['globalEvent', 'globalData', 'globalClass', 'globalVariable', 'form'].forEach((key) => {
                     if (options[key]) {
-                        data.formOptions[key] = {...(data.formOptions[key] || {}), ...options[key]};
+                        data.formOptions[key] = { ...(data.formOptions[key] || {}), ...options[key] };
                     }
                 });
-                if(options.style && (!data.formOptions.style || data.formOptions.style.indexOf(options.style) === -1))  {
+                if (options.style && (!data.formOptions.style || data.formOptions.style.indexOf(options.style) === -1)) {
                     data.formOptions.style = (data.formOptions.style || '') + '\n' + options.style;
                 }
                 if (!data.formOptions.language) {
@@ -1709,20 +1631,20 @@ export default defineComponent({
                 }
                 if (options.language) {
                     Object.keys(options.language).forEach((key) => {
-                        data.formOptions.language[key] = {...(data.formOptions.language[key] || {}), ...options.language[key]};
+                        data.formOptions.language[key] = { ...(data.formOptions.language[key] || {}), ...options.language[key] };
                     })
                 }
-                if(options.languageKey) {
-                    const language =  methods.getConfig('localeOptions', [
-                        {value: 'zh-cn', label: '简体中文'},
-                        {value: 'en', label: 'English'},
+                if (options.languageKey) {
+                    const language = methods.getConfig('localeOptions', [
+                        { value: 'zh-cn', label: '简体中文' },
+                        { value: 'en', label: 'English' },
                     ]);
                     options.languageKey.forEach((key) => {
-                        language.forEach(({value}) => {
-                            if(!data.formOptions.language[value]){
+                        language.forEach(({ value }) => {
+                            if (!data.formOptions.language[value]) {
                                 data.formOptions.language[value] = {};
                             }
-                            if(!data.formOptions.language[value][key]){
+                            if (!data.formOptions.language[value][key]) {
                                 data.formOptions.language[value][key] = '';
                             }
                         })
@@ -1734,7 +1656,7 @@ export default defineComponent({
                 data.oldOptionsKeys.forEach(k => {
                     old[k] = undefined;
                 });
-                const value = {...old, ...data.formOptions.form};
+                const value = { ...old, ...data.formOptions.form };
                 Object.keys(data.formOptions).forEach(key => {
                     const item = data.formOptions[key];
                     value['>' + key] = item;
@@ -1747,19 +1669,19 @@ export default defineComponent({
                 data.form.value = value;
             },
             setGlobalEvent(config) {
-                data.formOptions.globalEvent = {...data.formOptions.globalEvent || {}, ...config};
+                data.formOptions.globalEvent = { ...data.formOptions.globalEvent || {}, ...config };
                 methods.updateOptionsValue();
             },
             setGlobalData(config) {
-                data.formOptions.globalData = {...data.formOptions.globalData || {}, ...config};
+                data.formOptions.globalData = { ...data.formOptions.globalData || {}, ...config };
                 methods.updateOptionsValue();
             },
             setGlobalClass(config) {
-                data.formOptions.globalClass = {...data.formOptions.globalClass || {}, ...config};
+                data.formOptions.globalClass = { ...data.formOptions.globalClass || {}, ...config };
                 methods.updateOptionsValue();
             },
             setGlobalVariable(config) {
-                data.formOptions.globalVariable = {...data.formOptions.globalVariable || {}, ...config};
+                data.formOptions.globalVariable = { ...data.formOptions.globalVariable || {}, ...config };
                 methods.updateOptionsValue();
             },
             tidyRule(rule) {
@@ -1838,7 +1760,7 @@ export default defineComponent({
                         }
                     }
                     if (!rule || rule._fc_drag_skip) return initial;
-                    rule = {...rule};
+                    rule = { ...rule };
                     if (slot && slot !== 'default') {
                         rule.slot = slot;
                     }
@@ -1929,7 +1851,7 @@ export default defineComponent({
                             if (field.indexOf('formCreate') < 0) {
                                 field = 'props>' + field;
                             }
-                            propFieldDeepFn(field, ({source, field}) => {
+                            propFieldDeepFn(field, ({ source, field }) => {
                                 delete source[field];
                             })
                         } else {
@@ -1969,7 +1891,7 @@ export default defineComponent({
                             if (field.indexOf('formCreate') < 0) {
                                 field = (key ? key + '>' : '') + field;
                             }
-                            propFieldDeepFn(field, ({source, field}) => {
+                            propFieldDeepFn(field, ({ source, field }) => {
                                 if (isNull(value)) {
                                     delete source[field];
                                 } else {
@@ -2043,7 +1965,7 @@ export default defineComponent({
                 data.customForm.isShow = true;
                 data.customForm.propsShow = config.props && methods.getConfig('showPropsForm') !== false;
                 data.customForm.key = uniqueId();
-                data.customForm.rule = data.customForm.propsShow ? config.props({t}) : [];
+                data.customForm.rule = data.customForm.propsShow ? config.props({ t }) : [];
                 data.customForm.options.formData = config.formData;
                 if (config.style) {
                     data.styleForm.value = config.style.formData || {};
@@ -2161,7 +2083,7 @@ export default defineComponent({
                 };
                 const appendConfigData = configRef.value.appendConfigData;
                 if (is.Function(appendConfigData)) {
-                    formData = {...formData, ...appendConfigData(rule)};
+                    formData = { ...formData, ...appendConfigData(rule) };
                 } else if (Array.isArray(appendConfigData)) {
                     appendConfigData.forEach(v => {
                         formData[v] = undefined;
@@ -2191,7 +2113,7 @@ export default defineComponent({
                 })
                 const configAttrs = rule._menu.attrs || {};
                 Object.keys(configAttrs).forEach(k => {
-                    formData['__' + k] = configAttrs[k]({rule});
+                    formData['__' + k] = configAttrs[k]({ rule });
                 });
                 data.propsForm.value = formData;
                 data.styleForm.value = {
@@ -2233,10 +2155,10 @@ export default defineComponent({
                 };
             },
             clickMenu(menu) {
-                methods.dragMenu({menu, children: data.children, index: data.children.length});
+                methods.dragMenu({ menu, children: data.children, index: data.children.length });
             },
             clickField(menu, children, index, slot) {
-                const update = {...menu.update || {}};
+                const update = { ...menu.update || {} };
                 if (!update.title) {
                     update.title = menu.label;
                 }
@@ -2267,11 +2189,11 @@ export default defineComponent({
                     flag = flag || rule._fc_template === menu.name || (rule._menu && rule._menu.name === menu.name);
                 });
                 if (flag) {
-                    errorMessage(data.t('struct.only', {label: t('com.' + menu.name + '.name') || menu.label}));
+                    errorMessage(data.t('struct.only', { label: t('com.' + menu.name + '.name') || menu.label }));
                 }
                 return flag;
             },
-            dragMenu({rule, menu, children, index, slot, update}) {
+            dragMenu({ rule, menu, children, index, slot, update }) {
                 if (data.inputForm.state) {
                     return;
                 }
@@ -2309,7 +2231,7 @@ export default defineComponent({
                 } else if (dragRule.template) {
                     let template = '';
                     if (is.Function(dragRule.template)) {
-                        template = designerForm.toJson(dragRule.template({t}));
+                        template = designerForm.toJson(dragRule.template({ t }));
                     } else if (Array.isArray(dragRule.template)) {
                         template = designerForm.toJson(dragRule.template);
                     } else {
@@ -2338,7 +2260,7 @@ export default defineComponent({
                 if (dragRule && dragRule.formOptions) {
                     methods.mergeOptions(typeof dragRule.formOptions === 'string' ? designerForm.parseJson(dragRule.formOptions) : dragRule.formOptions);
                 }
-                methods.handleAddAfter((dragRule && dragRule.template) ? {template: rules} : {rule: firstRule});
+                methods.handleAddAfter((dragRule && dragRule.template) ? { template: rules } : { rule: firstRule });
                 if (firstRule && methods.getConfig('autoActive', true)) {
                     nextTick(() => {
                         methods.triggerActive(firstRule);
@@ -2355,7 +2277,7 @@ export default defineComponent({
                         }
                         rule.props.disabled = !!update.disabled;
                     } else if (k === 'props') {
-                        rule.props = {...rule.props || {}, ...deepCopy(update[k])};
+                        rule.props = { ...rule.props || {}, ...deepCopy(update[k]) };
                     } else {
                         rule[k] = deepCopy(update[k]);
                     }
@@ -2387,7 +2309,7 @@ export default defineComponent({
                 const matches = [];
                 json = json.replace(regex, (match, p1) => {
                     const key = uniqueId();
-                    matches.push({old: p1, key: key});
+                    matches.push({ old: p1, key: key });
                     return `"field":"${key}"`;
                 }).replace(/"computed"\s*:\s*(\{\s*(?:"[^"]*"\s*:\s*"(?:\\"|[^"])*"(?:,\s*)?)*\})/g, (match, p1) => {
                     const obj = JSON.parse(p1);
@@ -2405,7 +2327,7 @@ export default defineComponent({
                 let match;
                 const matches = [];
                 while ((match = regex.exec(json)) !== null) {
-                    matches.push({old: match[1], key: uniqueId()});
+                    matches.push({ old: match[1], key: uniqueId() });
                 }
                 matches.forEach(item => {
                     json = json.replaceAll(item.old, item.key);
@@ -2442,7 +2364,7 @@ export default defineComponent({
             checkAllowDrag(from, to) {
                 function checkDragCondition(tmp) {
                     if (Array.isArray(tmp)) {
-                        tmp = {item: tmp};
+                        tmp = { item: tmp };
                     }
                     if (toArray(tmp.item).indexOf(from.name) > -1) {
                         return true;
@@ -2484,16 +2406,16 @@ export default defineComponent({
                             delete rule.slot;
                         }
                         children.splice(newIndex, 0, rule);
-                        methods.handleSortAfter({rule: rule});
+                        methods.handleSortAfter({ rule: rule });
                     }
                 } else if (menu._field) {
                     methods.clickField(menu, children, newIndex, slot)
                 } else {
-                    methods.dragMenu({menu, children, index: newIndex, slot});
+                    methods.dragMenu({ menu, children, index: newIndex, slot });
                 }
                 // data.dragForm.api.refresh();
             },
-            dragEnd(children, {newIndex, oldIndex}, slot) {
+            dragEnd(children, { newIndex, oldIndex }, slot) {
                 // console.log('top dragEnd')
                 if (!data.added && !(data.moveRule === children && newIndex === oldIndex)) {
                     methods.handleSortBefore();
@@ -2502,7 +2424,7 @@ export default defineComponent({
                         rule[0].slot = slot;
                     }
                     children.splice(newIndex, 0, rule[0]);
-                    methods.handleSortAfter({rule: rule[0]});
+                    methods.handleSortAfter({ rule: rule[0] });
                 }
                 data.moveRule = null;
                 data.addRule = null;
@@ -2517,16 +2439,16 @@ export default defineComponent({
                         slotConfig = item.config || {};
                     }
                 });
-                return {...config, dragBtn: false, handleBtn: config.children ? ['addChild'] : false, ...slotConfig}
+                return { ...config, dragBtn: false, handleBtn: config.children ? ['addChild'] : false, ...slotConfig }
             },
             makeRule(config, _rule) {
-                let rule = _rule || config.rule({t});
+                let rule = _rule || config.rule({ t });
                 const updateRule = updateDefaultRule.value && updateDefaultRule.value[config.name];
                 if (!_rule && updateRule) {
                     if (typeof updateRule === 'function') {
-                        try{
+                        try {
                             updateRule(rule);
-                        }catch (e){
+                        } catch (e) {
                             console.error(e);
                         }
                     } else {
@@ -2692,25 +2614,25 @@ export default defineComponent({
                         props: toolProps,
                         inject: true,
                         on: {
-                            action({self}, idx) {
+                            action({ self }, idx) {
                                 const parent = methods.getParent(self).parent;
                                 config.actions[idx].handler(parent);
                                 if (data.activeRule === parent) {
                                     methods.updateRuleFormData();
                                 }
                             },
-                            delete: ({self}) => {
+                            delete: ({ self }) => {
                                 const parent = methods.getParent(self).parent;
-                                if (methods.handleRemoveBefore({parent, rule: parent}) !== false) {
+                                if (methods.handleRemoveBefore({ parent, rule: parent }) !== false) {
                                     parent.__fc__.rm();
                                     vm.emit('delete', parent);
                                     if (data.activeRule === parent) {
                                         methods.clearActiveRule();
                                     }
-                                    methods.handleRemoveAfter({rule: parent});
+                                    methods.handleRemoveAfter({ rule: parent });
                                 }
                             },
-                            create: ({self}) => {
+                            create: ({ self }) => {
                                 methods.handleAddBefore();
                                 const top = methods.getParent(self);
                                 vm.emit('create', top.parent);
@@ -2719,9 +2641,9 @@ export default defineComponent({
                                     rule.slot = top.parent.slot;
                                 }
                                 top.root.children.splice(top.root.children.indexOf(top.parent) + 1, 0, rule);
-                                methods.handleAddAfter({rule: top.parent});
+                                methods.handleAddAfter({ rule: top.parent });
                             },
-                            addChild: ({self}) => {
+                            addChild: ({ self }) => {
                                 methods.handleAddBefore();
                                 const top = methods.getParent(self);
                                 const config = top.parent._menu;
@@ -2729,17 +2651,17 @@ export default defineComponent({
                                 if (!item) return;
                                 const rule = methods.makeRule(item);
                                 (!config.drag ? top.parent : top.parent.children[0]).children[0].children.push(rule);
-                                methods.handleAddAfter({rule});
+                                methods.handleAddAfter({ rule });
                             },
-                            copy: ({self}) => {
+                            copy: ({ self }) => {
                                 methods.handleCopyBefore();
                                 const top = methods.getParent(self);
                                 vm.emit('copy', top.parent);
                                 const temp = methods.replaceField(top.parent);
                                 top.root.children.splice(top.root.children.indexOf(top.parent) + 1, 0, temp);
-                                methods.handleCopyAfter({rule: top.parent});
+                                methods.handleCopyAfter({ rule: top.parent });
                             },
-                            active: ({self}) => {
+                            active: ({ self }) => {
                                 const top = methods.getParent(self);
                                 vm.emit('active', top.parent);
                                 setTimeout(() => {
@@ -2759,23 +2681,23 @@ export default defineComponent({
                         inject: true,
                         display: !!rule.display,
                         on: {
-                            action({self}, idx) {
+                            action({ self }, idx) {
                                 config.actions[idx].handler(self.children[0]);
                                 if (data.activeRule === self.children[0]) {
                                     methods.updateRuleFormData();
                                 }
                             },
-                            delete: ({self}) => {
-                                if (methods.handleRemoveBefore({parent: self, rule: self.children[0]}) !== false) {
+                            delete: ({ self }) => {
+                                if (methods.handleRemoveBefore({ parent: self, rule: self.children[0] }) !== false) {
                                     vm.emit('delete', self.children[0]);
                                     self.__fc__.rm();
                                     if (data.activeRule === self.children[0]) {
                                         methods.clearActiveRule();
                                     }
-                                    methods.handleRemoveAfter({rule: self.children[0]});
+                                    methods.handleRemoveAfter({ rule: self.children[0] });
                                 }
                             },
-                            create: ({self}) => {
+                            create: ({ self }) => {
                                 methods.handleAddBefore();
                                 vm.emit('create', self.children[0]);
                                 const top = methods.getParent(self);
@@ -2784,18 +2706,18 @@ export default defineComponent({
                                     rule.slot = top.parent.slot;
                                 }
                                 top.root.children.splice(top.root.children.indexOf(top.parent) + 1, 0, rule);
-                                methods.handleAddAfter({rule})
+                                methods.handleAddAfter({ rule })
                             },
-                            addChild: ({self}) => {
+                            addChild: ({ self }) => {
                                 methods.handleAddBefore();
                                 const config = self.children[0]._menu;
                                 const item = data.dragRuleList[config.children];
                                 if (!item) return;
                                 const rule = methods.makeRule(item);
                                 (!config.drag ? self : self.children[0]).children[0].children.push(rule);
-                                methods.handleAddAfter({rule})
+                                methods.handleAddAfter({ rule })
                             },
-                            copy: ({self}) => {
+                            copy: ({ self }) => {
                                 methods.handleCopyBefore();
                                 vm.emit('copy', self.children[0]);
                                 const top = methods.getParent(self);
@@ -2804,9 +2726,9 @@ export default defineComponent({
                                     temp.slot = self.slot;
                                 }
                                 top.root.children.splice(top.root.children.indexOf(top.parent) + 1, 0, temp);
-                                methods.handleCopyAfter({rule: self.children[0]});
+                                methods.handleCopyAfter({ rule: self.children[0] });
                             },
-                            active: ({self}) => {
+                            active: ({ self }) => {
                                 vm.emit('active', self.children[0]);
                                 setTimeout(() => {
                                     methods.toolActive(self.children[0]);
@@ -2845,7 +2767,7 @@ export default defineComponent({
             },
             handleAddBefore() {
             },
-            handleRemoveBefore({parent, rule}) {
+            handleRemoveBefore({ parent, rule }) {
                 // let rules;
                 // if (rule._menu && ['array', 'object'].indexOf(rule._menu.subForm) > -1) {
                 //     rules = [rule];
@@ -2874,7 +2796,7 @@ export default defineComponent({
                 const rule = methods.getPageJson();
                 const formData = deepCopy(data.inputForm.data);
                 const list = data.operation.list.slice(0, data.operation.idx + 1);
-                list.push({rule, formData});
+                list.push({ rule, formData });
                 data.operation.list = list;
                 data.operation.idx = list.length - 1;
                 data.unloadStatus = list.length !== 1;
@@ -2988,7 +2910,7 @@ export default defineComponent({
                     let rule = data.activeRule;
                     if (event.key === 'c') {
                         copyTextToClipboard('FormCreate:' + designerForm.toJson(methods.parseRule([rule])[0]));
-                        vm.emit('copyRule', {event, rule});
+                        vm.emit('copyRule', { event, rule });
                         return;
                     }
                     if (data.inputForm.state) {
@@ -3006,7 +2928,7 @@ export default defineComponent({
                         if (direction && idx + direction >= 0 && idx + direction < parentRule.children.length) {
                             parentRule.children.splice(idx, 1);
                             parentRule.children.splice(idx + direction, 0, rule);
-                            vm.emit('sort' + (event.key === 'ArrowUp' ? 'Up' : 'Down'), {event, rule});
+                            vm.emit('sort' + (event.key === 'ArrowUp' ? 'Up' : 'Down'), { event, rule });
                         }
                     }
                 }
@@ -3035,7 +2957,7 @@ export default defineComponent({
                         children.push(copyRule);
                     }
                     methods.updateTree();
-                    vm.emit('pasteRule', {event, copyRule});
+                    vm.emit('pasteRule', { event, copyRule });
                 }
             }
         }

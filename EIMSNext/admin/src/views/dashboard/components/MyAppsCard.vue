@@ -12,7 +12,7 @@
           <ul class="app-items-container">
             <el-space>
               <template v-for="app in appsRef">
-                <li class="app-item" style="width: 16%">
+                <li v-if="app.id != 'system'" class="app-item" style="width: 16%">
                   <div class="item-container">
                     <div class="item-link" @click="gotoApp(app)">
                       <div class="app-wrapper">
@@ -74,7 +74,7 @@ const handleSaved = () => {
 
 const gotoApp = async (app: App) => {
   await contextStore.setAppId(app.id);
-  const path = "/app/" + app.id;
+  const path = "/app/" + app.id + "/mytasks";
   router.push(path);
 };
 const handleDeleteClick = (app: App) => {

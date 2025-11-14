@@ -1,12 +1,3 @@
-// +-----------------------------------------------------------------------
-// | FormCreate商业版 [ 让表单设计更简单 ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2018~2025 https://form-create.com All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed FormCreate商业版并不是自由软件，未经授权不得使用、修改或移除版权信息
-// +----------------------------------------------------------------------
-// | Author: FormCreate Team <admin@form-create.com>
-// +----------------------------------------------------------------------
 import formCreate from '@eimsnext/form-render/element-plus';
 import DataTable from '../components/dataTable/DataTable.vue';
 import Table from '../components/table/Table.vue';
@@ -18,7 +9,6 @@ import InlineForm from '../components/InlineForm.vue';
 import NestedTableForm from '../components/nestedTableForm/NestedTableForm.vue';
 import InfiniteTableForm from '../components/infiniteTableForm/InfiniteTableForm.vue';
 import TableForm from '../components/tableForm/TableForm.vue';
-import TableFormPro from '../components/tableForm/TableFormPro.vue';
 import FcCity from '../components/City.vue';
 import Dialog from '../components/dialog/Dialog.vue';
 import Drawer from '../components/drawer/Drawer.vue';
@@ -62,7 +52,6 @@ formCreate.component('FcJson', Json);
 formCreate.component('DataTable', DataTable);
 formCreate.component('FcCell', Cell);
 formCreate.component('TableForm', TableForm);
-formCreate.component('TableFormPro', TableFormPro);
 formCreate.component('StepForm', StepForm);
 formCreate.component('FcValue', Value);
 formCreate.component('FcCity', FcCity);

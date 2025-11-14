@@ -1,10 +1,10 @@
 import { CorpModelBase, IdBase } from "./modelBase";
 
 export interface DepartmentRequest extends IdBase {
-  code: string;
-  name: string;
+  code?: string;
+  name?: string;
   parentId?: string;
-  isCompany: boolean;
+  isCompany?: boolean;
 }
 
 export interface Department extends CorpModelBase {

@@ -1,76 +1,37 @@
 <template>
-  <el-scrollbar>
-    <div :class="{ hidden: hidden }" class="pagination">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :background="background"
-        :layout="layout"
-        :page-sizes="pageSizes"
-        :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
-  </el-scrollbar>
+  <div class="pagination">
+    <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[20, 30, 50, 100]"
+      :background="background" :layout="layout" :total="totalCount" @change="onChange" />
+  </div>
 </template>
 
 <script setup lang="ts">
-defineProps({
-  total: {
-    required: true,
-    type: Number as PropType<number>,
-    default: 0,
-  },
-  pageSizes: {
-    type: Array as PropType<number[]>,
-    default() {
-      return [10, 20, 30, 50];
-    },
-  },
-  layout: {
-    type: String,
-    default: "total, sizes, prev, pager, next, jumper",
-  },
-  background: {
-    type: Boolean,
-    default: true,
-  },
-  autoScroll: {
-    type: Boolean,
-    default: true,
-  },
-  hidden: {
-    type: Boolean,
-    default: false,
-  },
-});
+const props = withDefaults(
+  defineProps<{
+    total: number,
+    layout?: string,
+    background?: boolean,
+  }>(),
+  {
+    total: 0,
+    layout: "total, sizes, prev, pager, next, jumper",
+    background: true,
+  }
+);
 
-const emit = defineEmits(["pagination"]);
+const currentPage = ref(1);
+const pageSize = ref(20)
+const totalCount = computed(() => props.total)
 
-const currentPage = defineModel("page", {
-  type: Number,
-  required: true,
-  default: 1,
-});
-const pageSize = defineModel("limit", {
-  type: Number,
-  required: true,
-  default: 10,
-});
-
-function handleSizeChange(val: number) {
-  emit("pagination", { page: currentPage.value, limit: val });
-}
-
-function handleCurrentChange(val: number) {
-  emit("pagination", { page: val, limit: pageSize.value });
+const emit = defineEmits(["change"]);
+function onChange(curPage: number, pSize: number) {
+  emit("change", curPage, pSize);
 }
 </script>
 
 <style lang="scss" scoped>
 .pagination {
-  padding: 12px;
+  padding: 5px 12px 12px 12px;
 
   &.hidden {
     display: none;

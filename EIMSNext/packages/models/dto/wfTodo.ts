@@ -12,7 +12,7 @@ export interface WfTodo extends CorpModelBase {
   formType: number;
   starter?: Operator;
   dataBrief: BriefField[];
-  approveNodeStartTime: Date;
+  approveNodeStartTime: number;
 }
 export interface BriefField {
   field: string;

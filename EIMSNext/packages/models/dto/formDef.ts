@@ -5,10 +5,10 @@ export enum FormType {
   Group = "2",
 }
 export interface FormDefRequest extends IdBase {
-  appId: string;
-  name: string;
+  appId?: string;
+  name?: string;
   type?: FormType;
-  content: FormContent;
+  content?: FormContent;
   isLedger?: boolean;
   usingWorkflow?: boolean;
 }
@@ -25,7 +25,7 @@ export interface FormDef extends CorpModelBase {
 export class FormContent {
   layout?: string;
   options?: string;
-  items?: [];
+  items?: FieldDef[];
 }
 export class FieldDef {
   field: string = "";
@@ -40,21 +40,23 @@ export class FieldOpt {
 export enum FieldType {
   None = "none",
   Input = "input",
-  InputNumber = "inputNumber",
-  DatePicker = "datePicker",
-  Phone = "phone",
-  Email = "email",
+  Number = "number",
+  TimeStamp = "timestamp",
+  // Phone = "phone",
+  // Email = "email",
   TextArea = "textarea",
   Radio = "radio",
   CheckBox = "checkbox",
   Select = "select",
+  Select2 = "select2",
+  // Address = "address",
+  // Location = "location",
+  ImageUpload = "imageupload",
+  FileUpload = "fileupload",
+  // Signature = "signature",
+  TableForm = "tableform",
   Employee = "employee",
+  Employee2 = "employee2",
   Department = "department",
-  Address = "address",
-  Location = "location",
-  Pictures = "pictures",
-  Files = "files",
-  Signature = "signature",
-  // TableForm = "tableForm",
-  TableFormPro = "tableFormPro",
+  Department2 = "department2",
 }
