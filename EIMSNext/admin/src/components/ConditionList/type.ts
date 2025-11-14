@@ -1,8 +1,18 @@
 import { IFormFieldDef } from "@/components/FieldList/type";
-import { FieldType } from "@eimsnext/models";
+import { FieldType, SystemField, isSystemField } from "@eimsnext/models";
+import { IFieldSortList } from "../FieldSortList/type";
+import {
+  IDynamicFindOptions,
+  IDynamicFilter,
+  ODataQueryModel,
+  SortDirection,
+} from "@eimsnext/services";
+import { ODataQuery } from "@/utils/query";
+import buildQuery, { Filter } from "odata-query";
+
 export enum ConditionType {
-  Form,
-  Node,
+  Form = 0,
+  Node = 1,
 }
 export enum ConditionFieldType {
   Input = "input",
@@ -40,11 +50,17 @@ export const dataOperators: Record<string, string[]> = {
 export function getConditionFieldType(fieldtype: string): ConditionFieldType {
   let dataType = ConditionFieldType.Input;
   switch (fieldtype) {
-    case FieldType.InputNumber:
+    case FieldType.Number:
       dataType = ConditionFieldType.Number;
       break;
   }
+
   return dataType;
+}
+
+export function isFieldTypeMatched(conFieldType: ConditionFieldType, fieldType: FieldType) {
+  //TODO: match
+  return true;
 }
 
 export interface IConditonValue {
@@ -64,4 +80,131 @@ export interface IConditionList {
   field?: IFormFieldDef;
   op?: string;
   value?: IConditonValue;
+}
+
+export function toDynamicFindOptions(
+  fields: IFormFieldDef[],
+  filter: IConditionList,
+  sort: IFieldSortList,
+  skip: number,
+  take: number,
+  fixedFilter?: IDynamicFilter
+) {
+  let toDynamicFilter = (filter: IConditionList) => {
+    let dfilter: IDynamicFilter = {};
+
+    if (filter.items && filter.items.length > 0) {
+      dfilter = { rel: filter.rel || "and", items: [] };
+      filter.items.forEach((x) => {
+        dfilter.items?.push(toDynamicFilter(x));
+      });
+    } else if (filter.field?.field) {
+      dfilter.field = isSystemField(filter.field.field)
+        ? filter.field.field
+        : `data.${filter.field.field}`;
+      dfilter.type = filter.field.type;
+      dfilter.op = filter.op;
+      dfilter.value = filter.value?.value;
+    }
+
+    return dfilter;
+  };
+
+  const findOpt = {} as IDynamicFindOptions;
+  findOpt.skip = skip;
+  findOpt.take = take;
+
+  if (fields.length > 0) {
+    findOpt.select = [];
+    fields.forEach((x) => {
+      let field = isSystemField(x.field) ? x.field : `data.${x.field}`;
+      findOpt.select?.push({ field: field, visible: true });
+    });
+  }
+
+  if (sort.items.length > 0) {
+    findOpt.sort = [];
+    sort.items.forEach((x) => {
+      let sField = isSystemField(x.field.field) ? x.field.field : `data.${x.field.field}`;
+      findOpt.sort?.push({ field: sField, dir: x.sort });
+    });
+  }
+
+  let userFilter = toDynamicFilter(filter);
+  if (fixedFilter) {
+    findOpt.filter = { rel: "and", items: [fixedFilter, userFilter] };
+  } else {
+    findOpt.filter = userFilter;
+  }
+
+  return findOpt;
+}
+
+export function toODataQuery<T>(
+  filter: IConditionList,
+  sort: IFieldSortList,
+  skip: number,
+  take: number,
+  fixedFilter?: any
+) {
+  let getODataOp = (op: string) => {
+    switch (op) {
+      default:
+        return op;
+    }
+  };
+
+  var query: ODataQuery<T> = { skip: skip, top: take };
+
+  // if (fields.length > 0) {
+  //   findOpt.select = [];
+  //   fields.forEach((x) => {
+  //     let field = isSystemField(x.field) ? x.field : `data.${x.field}`;
+  //     findOpt.select?.push({ field: field, visible: true });
+  //   });
+  // }
+
+  if (sort.items.length > 0) {
+    query.orderBy = sort.items
+      .map((x) => (x.sort == SortDirection.Desc ? `${x.field.field} desc` : x.field.field))
+      .join(",");
+  }
+
+  var oFilter: any = undefined;
+
+  if (filter.items && filter.items.length > 0) {
+    let subFilters: any[] = [];
+    filter.items.forEach((x) => {
+      if (x.field?.field) {
+        let op = getODataOp(x.op || ConditionOperator.Equals);
+        let subFilter: any = {};
+        subFilter[x.field.field] = {};
+        subFilter[x.field.field][op] = x.value?.value;
+        subFilters.push(subFilter);
+      }
+    });
+    if (subFilters.length > 0) {
+      oFilter = {};
+
+      if (subFilters.length == 1) oFilter = subFilters[0];
+      else if (subFilters.length > 1) {
+        oFilter[filter.rel || "and"] = subFilters;
+      }
+    }
+  } else if (filter.field?.field) {
+    let op = getODataOp(filter.op || ConditionOperator.Equals);
+    let subFilter: any = {};
+    subFilter[filter.field.field] = {};
+    subFilter[filter.field.field][op] = filter.value?.value;
+    oFilter = subFilter;
+  }
+
+  if (fixedFilter) {
+    if (oFilter) oFilter = { and: [oFilter, fixedFilter] };
+    else oFilter = fixedFilter;
+  }
+
+  query.filter = oFilter;
+
+  return query;
 }

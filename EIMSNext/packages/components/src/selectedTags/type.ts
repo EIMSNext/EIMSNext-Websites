@@ -6,7 +6,7 @@ export interface ISelectedTag {
   data?: any;
 }
 export enum TagType {
-  None,
+  None=0,
   Department,
   Employee,
   Role,

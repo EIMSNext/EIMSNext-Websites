@@ -111,7 +111,16 @@ export default {
   beforeRender() {
     const { key, ref, $handle } = this;
     const form = this.options.form;
-    extend(this.rule, {key, ref, class: [form.className, form.class, 'form-create', this.$handle.preview ? 'is-preview' : '']});
+    extend(this.rule, {
+      key,
+      ref,
+      class: [
+        form.className,
+        form.class,
+        "form-create",
+        this.$handle.preview ? "is-preview" : "",
+      ],
+    });
     extend(this.rule.props, {
       model: $handle.formData,
     });
@@ -120,6 +129,7 @@ export default {
     if (children.slotLen() && !this.$handle.preview) {
       children.setSlot(undefined, () => this.makeFormBtn());
     }
+
     return this.$r(
       this.rule,
       isFalse(this.options.row.show)
@@ -149,7 +159,7 @@ export default {
                 prop: ctx.id,
                 rules: ctx.injectValidate(),
               },
-              class: this.$render.mergeClass(rule.className, 'fc-form-item'),
+              class: this.$render.mergeClass(rule.className, "fc-form-item"),
               key: `${uni}fi`,
               ref: ctx.wrapRef,
               type: "formItem",
@@ -234,7 +244,7 @@ export default {
       {
         props: tidyRule(titleProp),
         key: `${uni}tit`,
-        class: 'fc-form-title',
+        class: "fc-form-title",
         type: titleProp.type || "span",
       },
     ]);
@@ -249,7 +259,7 @@ export default {
     const col = rule.col;
     return this.$r(
       {
-        class: this.$render.mergeClass(col.class, 'fc-form-col'),
+        class: this.$render.mergeClass(col.class, "fc-form-col"),
         type: "col",
         props: col || { span: 24 },
         key: `${uni}col`,
@@ -263,7 +273,7 @@ export default {
       {
         type: "row",
         props: row,
-        class: this.$render.mergeClass(row.class, 'fc-form-row'),
+        class: this.$render.mergeClass(row.class, "fc-form-row"),
         key: `${this.key}row`,
       },
       children
@@ -283,7 +293,7 @@ export default {
     const item = this.$r(
       {
         type: "formItem",
-        class: 'fc-form-item',
+        class: "fc-form-item",
         key: `${this.key}fb`,
       },
       vn
@@ -294,7 +304,7 @@ export default {
       : this.$r(
           {
             type: "col",
-            class: 'fc-form-col fc-form-footer',
+            class: "fc-form-col fc-form-footer",
             props: { span: 24 },
             key: `${this.key}fc`,
           },
@@ -304,7 +314,8 @@ export default {
 
   makeResetBtn() {
     const resetBtn = { ...this.options.resetBtn };
-    const innerText = resetBtn.innerText || this.$handle.api.t('reset') || '重置';
+    const innerText =
+      resetBtn.innerText || this.$handle.api.t("reset") || "重置";
     delete resetBtn.innerText;
     delete resetBtn.click;
     delete resetBtn.col;
@@ -313,7 +324,7 @@ export default {
       {
         type: "button",
         props: resetBtn,
-        class: 'fc-reset-btn',
+        class: "fc-reset-btn",
         style: { width: resetBtn.width },
         on: {
           click: () => {
@@ -330,7 +341,8 @@ export default {
   },
   makeSubmitBtn() {
     const submitBtn = { ...this.options.submitBtn };
-    const innerText = submitBtn.innerText || this.$handle.api.t('submit') || '提交';
+    const innerText =
+      submitBtn.innerText || this.$handle.api.t("submit") || "提交";
     delete submitBtn.innerText;
     delete submitBtn.click;
     delete submitBtn.col;
@@ -339,7 +351,7 @@ export default {
       {
         type: "button",
         props: submitBtn,
-        class: 'fc-submit-btn',
+        class: "fc-submit-btn",
         style: { width: submitBtn.width },
         on: {
           click: () => {

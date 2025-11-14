@@ -14,8 +14,10 @@
 </template>
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { IFieldSortItem } from "./type";
+import { SortDirection } from "@eimsnext/services";
+
 import { useLocale } from "element-plus";
-import { IFieldSortItem, SortDirection } from "./type";
 const { t } = useLocale();
 
 defineOptions({

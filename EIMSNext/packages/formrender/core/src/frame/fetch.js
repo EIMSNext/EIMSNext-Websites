@@ -1,5 +1,12 @@
 import { is, parseFn } from "../utils";
 import { deepGet } from "./util";
+import {
+  accessToken,
+  appSetting,
+  getApiUrl,
+  getODataUrl,
+  getUploadUrl,
+} from "@eimsnext/utils";
 
 function getError(action, option, xhr) {
   const msg = `fail to ${action} ${xhr.status}'`;
@@ -46,6 +53,18 @@ export default function fetch(option) {
     }
   }
 
+  switch (option.source) {
+    case "upload":
+      action = getUploadUrl(action);
+      break;
+    case "odata":
+      action = getODataUrl(action);
+      break;
+    default:
+      action = getApiUrl(action);
+      break;
+  }
+
   xhr.onerror = function error(e) {
     option.onError(e);
   };
@@ -55,7 +74,14 @@ export default function fetch(option) {
       return option.onError(getError(action, option, xhr), getBody(xhr));
     }
 
-    option.onSuccess(getBody(xhr));
+    var result = getBody(xhr);
+    if (option.source == "upload") {
+      result.value.forEach((f) => {
+        f.url = `${appSetting.uploadUrl}/${f.savePath}`;
+        f.thumbUrl = `${appSetting.uploadUrl}/${f.thumbPath}`;
+      });
+    }
+    option.onSuccess(result);
   };
 
   xhr.open(option.method || "get", action, true);
@@ -80,6 +106,9 @@ export default function fetch(option) {
   }
 
   const headers = option.headers || {};
+  const token = accessToken.get();
+  // console.log("token", token);
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   Object.keys(headers).forEach((item) => {
     if (headers[item] != null) {

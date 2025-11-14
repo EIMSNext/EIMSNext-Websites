@@ -1,23 +1,23 @@
 <template>
   <div class="wh-full" :class="classObj">
     <el-container>
-      <el-header style="height: 50px; padding:0 12px">
+      <el-header style="height: 50px; padding: 0 12px">
         <NavBar />
       </el-header>
-      <el-container style="border-top: 1px solid var(--el-menu-border-color);">
+      <el-container style="border-top: 1px solid var(--el-menu-border-color)">
         <el-aside width="45px" class="main-left-menu">
           <el-tooltip content="工作台" placement="right" :hide-after="0">
             <AppLink :to="{
               path: '/dashboard',
             }">
               <div class="main-left-menu-item">
-                <et-icon icon="homepage" size="20px"></et-icon>
+                <et-icon icon="homepage" size="20px" :color="getAppIconColor()"></et-icon>
               </div>
             </AppLink>
           </el-tooltip>
           <el-tooltip content="通讯录" placement="right" :hide-after="0">
             <AppLink :to="{
-              path: '/system',
+              path: '/system/department',
             }">
               <div class="main-left-menu-item">
                 <et-icon icon="el-icon-Notebook" size="20px" :color="getAppIconColor()"></et-icon>
@@ -26,15 +26,16 @@
           </el-tooltip>
           <el-divider style="margin: 3px 0" />
           <template v-for="app in appsRef">
-            <el-tooltip :content="app.name" placement="right" :hide-after="0">
-              <AppLink :to="{
-                path: `/app/${app.id}`,
-              }">
-                <div class="main-left-menu-item">
-                  <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor()"></et-icon>
-                </div>
-              </AppLink>
-            </el-tooltip>
+            <template v-if="app.id != 'system'">
+              <el-tooltip :content="app.name" placement="right" :hide-after="0">
+                <AppLink :to="{
+                  path: `/app/${app.id}/mytasks`,
+                }">
+                  <div class="main-left-menu-item">
+                    <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor()"></et-icon>
+                  </div>
+                </AppLink>
+              </el-tooltip></template>
           </template>
         </el-aside>
         <el-main style="padding: 0">
@@ -51,7 +52,7 @@ import { useSystemStore, useSettingsStore, usePermissionStore } from "@/store";
 import { useAppStore } from "@eimsnext/store";
 import { DeviceEnum } from "@/enums/DeviceEnum";
 import NavBar from "./components/NavBar/index.vue";
-import defaultSettings from "@/settings"
+import defaultSettings from "@/settings";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 
 defineOptions({

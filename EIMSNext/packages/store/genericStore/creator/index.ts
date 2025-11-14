@@ -25,7 +25,7 @@ export default function createStore<T extends IIdentity>(
           http.odata
             .query<T>(url, query)
             .then((res) => {
-              items.value = res;
+              items.value = [...initData, ...res];
               resolve(res);
             })
             .catch((error) => {
@@ -96,7 +96,7 @@ export default function createStore<T extends IIdentity>(
     };
 
     const clear = () => {
-      items.value = [];
+      items.value = initData;
     };
 
     return { loading, items, load, get, update, remove, clear };

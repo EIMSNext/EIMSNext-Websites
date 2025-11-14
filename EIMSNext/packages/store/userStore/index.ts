@@ -70,8 +70,8 @@ export const useUserStore = defineStore("currentuser", () => {
   //初始化
   const isInitialized = () => initialized.value;
 
-  const initialize = async (): Promise<any> => {
-    if (!initialized.value) {
+  const initialize = async (force: boolean = false): Promise<any> => {
+    if (force || !initialized.value) {
       await get(false);
 
       let promises = [];

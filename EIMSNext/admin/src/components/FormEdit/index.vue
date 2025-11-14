@@ -5,27 +5,21 @@
     </template>
     <template #top-center>
       <el-tabs v-model="activeName" class="nav-tabs" @tab-click="handleClick">
-        <el-tab-pane label="表单设计" name="edit" />
-        <el-tab-pane v-if="usingFlow" label="流程设定" name="flow" />
-        <el-tab-pane label="扩展功能" name="extension" />
+        <el-tab-pane label="表单设计" name="formedit" />
+        <el-tab-pane v-if="usingFlow" label="流程设定" name="workflow" />
+        <el-tab-pane label="高级功能" name="advance" />
         <el-tab-pane label="表单发布" name="publish" />
-        <el-tab-pane label="数据管理" name="data" />
+        <el-tab-pane label="数据管理" name="datamanage" />
       </el-tabs>
     </template>
-    <div v-if="activeName == 'edit'">
-      <form-builder
-        :locale="locale"
-        :formName="formName"
-        :formDef="formDef"
-        :usingFlow="usingFlow"
-        :isLedger="isLedger"
-        @save="onSaved"
-      />
+    <div v-if="activeName == 'formedit'">
+      <form-builder :locale="locale" :formName="formName" :formDef="formDef" :usingFlow="usingFlow" :isLedger="isLedger"
+        @save="onSaved" />
     </div>
-    <div v-if="usingFlow && activeName == 'flow'" style="height: 100%; width: 100%">
+    <div v-if="usingFlow && activeName == 'workflow'" style="height: 100%; width: 100%">
       <WorkflowDesigner :appId="appId" :formId="formId" />
     </div>
-    <div v-if="activeName == 'extension'" style="height: 100%; width: 100%">
+    <div v-if="activeName == 'advance'" style="height: 100%; width: 100%">
       <Advanced :formDef="formDef!"></Advanced>
     </div>
   </CustomDrawer>
@@ -60,7 +54,7 @@ const locale = computed(() => systemStore.locale);
 
 const appId = ref("");
 const formName = ref("测试表单");
-const activeName = ref("edit");
+const activeName = ref("formedit");
 const formDef = ref<FormDef>();
 
 // console.log("formid", props.formId);
@@ -113,24 +107,30 @@ onBeforeMount(() => {
     box-shadow: none;
   }
 }
+
 .top-nav-bar .nav-tabs {
   height: 60px;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__header {
   margin: 0;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__nav {
   height: 60px;
   align-items: center;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__content {
   display: none;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__item:last-child {
   margin-left: 46px;
   overflow: visible;
   position: relative;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__item:last-child:after {
   background: #e1e3e5;
   content: "";

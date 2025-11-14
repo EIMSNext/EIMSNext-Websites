@@ -14,7 +14,7 @@ export default {
     validate: ['string'],
     rule({t}) {
         return {
-            type: 'input',
+            type: 'textarea',
             field: uniqueId(),
             title: t('com.textarea.name'),
             info: '',
