@@ -1,27 +1,14 @@
 import { IFormFieldDef } from "@/components/FieldList/type";
 import { FieldType, SystemField, isSystemField } from "@eimsnext/models";
 import { IFieldSortList } from "../FieldSortList/type";
-import {
-  IDynamicFindOptions,
-  IDynamicFilter,
-  ODataQueryModel,
-  SortDirection,
-} from "@eimsnext/services";
+import { IDynamicFindOptions, IDynamicFilter, SortDirection } from "@eimsnext/services";
 import { ODataQuery } from "@/utils/query";
-import buildQuery, { Filter } from "odata-query";
 
 export enum ConditionType {
   Form = 0,
   Node = 1,
 }
-export enum ConditionFieldType {
-  Input = "input",
-  Number = "number",
-  Select = "select",
-  Switch = "switch",
-  DateTime = "datetime",
-  Other = "other",
-}
+
 export enum ConditionOperator {
   Equals = "eq",
   NotEquals = "ne",
@@ -41,27 +28,11 @@ export enum ConditionValueType {
 export const dataOperators: Record<string, string[]> = {
   input: ["eq", "ne", "in", "nin", "empty", "notempty"],
   number: ["eq", "ne", "gt", "gte", "lt", "lte", "empty", "notempty"],
+  timestamp: ["eq", "ne", "gt", "gte", "lt", "lte", "empty", "notempty"],
   select: ["eq", "ne", "in", "nin", "empty", "notempty"],
-  switch: ["eq", "ne"],
-  datetime: ["eq", "ne", "gt", "gte", "lt", "lte", "empty", "notempty"],
+  select2: ["in", "nin", "empty", "notempty"],
   other: ["empty", "notempty"],
 };
-
-export function getConditionFieldType(fieldtype: string): ConditionFieldType {
-  let dataType = ConditionFieldType.Input;
-  switch (fieldtype) {
-    case FieldType.Number:
-      dataType = ConditionFieldType.Number;
-      break;
-  }
-
-  return dataType;
-}
-
-export function isFieldTypeMatched(conFieldType: ConditionFieldType, fieldType: FieldType) {
-  //TODO: match
-  return true;
-}
 
 export interface IConditonValue {
   type: ConditionValueType;
