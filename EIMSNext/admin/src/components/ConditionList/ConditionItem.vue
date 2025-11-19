@@ -2,8 +2,8 @@
   <div class="cond-item">
     <div class="cond-detail">
       <template v-if="condType == ConditionType.Node">
-        <NodeFieldList class="cond-field" v-model="field" :nodes="nodes!" :match-type="false"
-          :field-def="modelValue.field" :fieldBuildRule="fieldBuildRule" @change="changeField"></NodeFieldList>
+        <NodeFieldList class="cond-field" v-model="field" :nodes="nodes!" :fieldBuildSetting="fieldBuildSetting"
+          :field-def="modelValue.field" @change="changeField"></NodeFieldList>
       </template>
       <template v-else>
         <FieldList class="cond-field" v-model="field" :formId="formId" @change="changeField"></FieldList>
@@ -26,7 +26,7 @@
       <div><et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon></div>
     </div>
     <div v-if="op != 'empty' && op != 'notempty'" class="cond-detail mt-[10px]">
-      <ConditionValue v-model="value" :field-def="modelValue.field" :nodes="nodes" :fieldBuildRule="fieldBuildRule"
+      <ConditionValue v-model="value" :field-def="modelValue.field" :nodes="nodes" :fieldBuildSetting="valueBuildSetting"
         @change="onInput"></ConditionValue>
     </div>
   </div>
@@ -44,7 +44,7 @@ import FieldList from "../FieldList/index.vue";
 
 import { useLocale } from "element-plus";
 import { IFormFieldDef } from "@/components/FieldList/type";
-import { ConditionFieldType, FieldBuildRule, INodeForm, getConditionFieldType } from "../FlowDesigner/components/NodeFieldList/type";
+import { ConditionFieldType, FieldBuildRule, IFieldBuildSetting, INodeForm, getConditionFieldType } from "../FlowDesigner/components/NodeFieldList/type";
 import NodeFieldList from "../FlowDesigner/components/NodeFieldList/index.vue";
 const { t } = useLocale();
 
@@ -53,11 +53,12 @@ defineOptions({
 });
 
 const props = defineProps<{
-  formId: string;
   modelValue: IConditionList;
-  nodes?: INodeForm[];
+  formId: string;
   condType: ConditionType;
-  fieldBuildRule?: FieldBuildRule;
+  fieldBuildSetting: IFieldBuildSetting;
+  valueBuildSetting: IFieldBuildSetting;
+  nodes?: INodeForm[];
 }>();
 
 const field = ref<IFormFieldDef>(

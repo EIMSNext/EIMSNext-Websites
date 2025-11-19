@@ -322,7 +322,7 @@ html.dark {
 ._fc-r-config {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
-    grid-template-areas: "base" "advanced" "props" "slots" "style" "event" "validate";
+    grid-template-areas: "base" "props" "advanced" "slots" "style" "event" "validate";
 }
 
 ._fc-r-name-input .el-input-group__append {

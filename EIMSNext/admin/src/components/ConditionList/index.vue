@@ -31,11 +31,13 @@
       <template v-for="(item, idx) in list.items" :key="idx">
         <template v-if="item.isGroup">
           <ConditionList :modelValue="item" :formId="formId" :nodes="nodes" :condType="condType" :maxLevel="maxLevel"
-            :fieldBuildRule="fieldBuildRule" @change="onInput" @remove="removeGroup(idx)"></ConditionList>
+            :fieldBuildSetting="fieldBuildSettingRef" :valueBuildSetting="valueBuildSettingRef" @change="onInput"
+            @remove="removeGroup(idx)"></ConditionList>
         </template>
         <template v-else>
           <ConditionItem :modelValue="item" :formId="formId" :nodes="nodes" :condType="condType"
-            :fieldBuildRule="fieldBuildRule" @change="onInput" @remove="removeItem(idx)"></ConditionItem>
+            :fieldBuildSetting="fieldBuildSettingRef" :valueBuildSetting="valueBuildSettingRef" @change="onInput"
+            @remove="removeItem(idx)"></ConditionItem>
         </template>
       </template>
     </div>
@@ -47,7 +49,7 @@ import ConditionItem from "./ConditionItem.vue";
 import { useLocale } from "element-plus";
 import { ConditionType, ConditionValueType, IConditionList } from "./type";
 import { uniqueId } from "@eimsnext/utils";
-import { FieldBuildRule, INodeForm } from "../FlowDesigner/components/NodeFieldList/type";
+import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../FlowDesigner/components/NodeFieldList/type";
 
 const { t } = useLocale();
 
@@ -63,16 +65,18 @@ const props = withDefaults(
     nodes?: INodeForm[];
     condType?: ConditionType;
     maxLevel?: number;
-    fieldBuildRule?: FieldBuildRule;
+    fieldBuildSetting?: IFieldBuildSetting;
+    valueBuildSetting?: IFieldBuildSetting;
   }>(),
   {
     showTitle: true,
     condType: ConditionType.Form,
-    maxLevel: 3,
-    fieldBuildRule: FieldBuildRule.All,
+    maxLevel: 3
   }
 );
 
+const fieldBuildSettingRef = toRef(props.fieldBuildSetting ?? { rule: FieldBuildRule.All, matchType: false })
+const valueBuildSettingRef = toRef(props.fieldBuildSetting ?? { rule: FieldBuildRule.All, matchType: true })
 const list = toRef(props.modelValue);
 const groupLevel = ref(1);
 

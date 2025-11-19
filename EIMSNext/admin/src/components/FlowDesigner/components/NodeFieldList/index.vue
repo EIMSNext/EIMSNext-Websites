@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { IListItem, ITreeNode, TreeNodeType, findNode } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
-import { FieldBuildRule, INodeForm, buildNodeFieldTree } from "./type";
+import { FieldBuildRule, IFieldBuildSetting, INodeForm, buildNodeFieldTree } from "./type";
 import { IFormFieldDef } from "../../../FieldList/type";
 import { FilterNodeMethodFunction, TreeNodeData } from "element-plus";
 
@@ -17,19 +17,17 @@ const props =
   withDefaults(
     defineProps<{
       modelValue: IFormFieldDef;
+      fieldBuildSetting: IFieldBuildSetting;
       nodes: INodeForm[];
-      fieldDef?: IFormFieldDef,
-      fieldBuildRule?: FieldBuildRule;
-      matchType?: boolean
+      fieldDef?: IFormFieldDef;
     }>(),
     {
-      matchType: true,
     }
   );
 
 const selectProps = { value: "id" };
 const formStore = useFormStore();
-const nodeList = ref<ITreeNode[]>(buildNodeFieldTree(props.nodes, props.matchType, props.fieldDef, props.fieldBuildRule));
+const nodeList = ref<ITreeNode[]>(buildNodeFieldTree(props.nodes, props.fieldBuildSetting, props.fieldDef));
 const defaultExpand = ref<string[]>([]);
 const selectedNode = ref<ITreeNode>();
 nodeList.value.forEach((x) => {

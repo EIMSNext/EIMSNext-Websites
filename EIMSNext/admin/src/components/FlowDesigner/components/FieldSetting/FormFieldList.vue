@@ -16,7 +16,8 @@
       </template>
     </el-dropdown>
     <template v-for="(item, idx) in selectedFields.items" :key="idx">
-      <FormFieldItem :modelValue="item" :nodes="nodes" :removable="!showAll" @change="onInput" @remove="onRemove">
+      <FormFieldItem :modelValue="item" :nodes="nodes" :fieldItems="selectedFields" :removable="!showAll"
+        @change="onInput" @remove="onRemove">
       </FormFieldItem>
     </template>
   </div>
@@ -46,7 +47,7 @@ const props = withDefaults(
 );
 
 const allFields = ref<IFormFieldItem[]>([]);
-const selectedFields = ref<IFormFieldList>(props.modelValue);
+const selectedFields = toRef<IFormFieldList>(props.modelValue);
 
 const formStore = useFormStore();
 const formDef = ref<FormDef>();

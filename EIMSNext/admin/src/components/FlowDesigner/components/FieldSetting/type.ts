@@ -41,7 +41,7 @@ export function buildFormFieldList(
           if (mergeAll) {
             items.push({
               field: fieldDef,
-              value: { type: FieldValueType.Custom },
+              value: { type: FieldValueType.Field },
             });
           }
         }
@@ -56,7 +56,7 @@ export function buildFormFieldList(
         if (mergeAll) {
           items.push({
             field: fieldDef,
-            value: { type: FieldValueType.Custom },
+            value: { type: FieldValueType.Field },
           });
         }
       }

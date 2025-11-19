@@ -567,6 +567,7 @@ const En = {
     enable: "Enable",
     time: "time",
     email: "email",
+    phone: "phone",
     number: "number",
     globalData: "Global data",
     mobile: "Mobile",
@@ -1550,7 +1551,7 @@ const En = {
       name: "TableFormColumn",
       label: "TableFormColumn",
       header:
-      "Configure the column headers. Duplicate headers will be automatically merged.",
+        "Configure the column headers. Duplicate headers will be automatically merged.",
       props: {
         label: "Title",
         header: "Header",

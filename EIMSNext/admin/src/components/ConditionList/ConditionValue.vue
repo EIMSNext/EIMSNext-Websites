@@ -7,8 +7,8 @@
     </div>
     <div class="value-value">
       <template v-if="nodes && condValueType == ConditionValueType.Field">
-        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="props.fieldDef"
-          :fieldBuildRule="fieldBuildRule" @change="onValueChange">
+        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="props.fieldDef" :fieldBuildSetting="fieldBuildSetting"
+          @change="onValueChange">
         </NodeFieldList>
       </template>
       <template v-else>
@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { IListItem } from "@eimsnext/components";
 import { ConditionValueType, IConditonValue } from "./type";
-import { FieldBuildRule, INodeForm, ConditionFieldType, getConditionFieldType } from "../FlowDesigner/components/NodeFieldList/type";
+import { FieldBuildRule, INodeForm, ConditionFieldType, getConditionFieldType, IFieldBuildSetting } from "../FlowDesigner/components/NodeFieldList/type";
 import { FieldType } from "@eimsnext/models";
 import { IFormFieldDef } from "../FieldList/type";
 import NodeFieldList from "../FlowDesigner/components/NodeFieldList/index.vue";
@@ -59,10 +59,10 @@ defineOptions({
 });
 const props = defineProps<{
   modelValue: IConditonValue;
+  fieldBuildSetting: IFieldBuildSetting;
   nodes?: INodeForm[];
   fieldDef?: IFormFieldDef;
   options?: IListItem[];
-  fieldBuildRule?: FieldBuildRule;
 }>();
 
 const dataType = computed(() => {

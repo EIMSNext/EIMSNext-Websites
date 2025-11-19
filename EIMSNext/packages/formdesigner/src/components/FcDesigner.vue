@@ -123,7 +123,7 @@
                                 </div>
                                 <div class="_fc-l-tab" v-if="field && field.length > 0"
                                     :class="{ active: activeMenuTab === 'field' }" @click="activeMenuTab = 'field'"> {{
-                                    t('props.field') }}
+                                        t('props.field') }}
                                 </div>
                                 <div class="_fc-l-tab" :class="{ active: activeMenuTab === 'tree' }"
                                     @click="activeMenuTab = 'tree'"> {{ t('menu.tree') }}
@@ -137,8 +137,9 @@
                                             {{ t('menu.' + item.name) || item.title }}
                                             <i class="fc-icon icon-arrow" :class="{ down: !item.hidden }" />
                                         </h4>
-                                        <fcDraggable :group="{ name: 'default', pull: 'clone', put: false }" :sort="false"
-                                            itemKey="name" class="_fc-l-list" :list="item.list" v-show="!item.hidden">
+                                        <fcDraggable :group="{ name: 'default', pull: 'clone', put: false }"
+                                            :sort="false" itemKey="name" class="_fc-l-list" :list="item.list"
+                                            v-show="!item.hidden">
                                             <template #item="{ element }">
                                                 <div class="_fc-l-item" :class="{ 'is-inline': element.inline }"
                                                     v-if="hiddenItem.indexOf(element.name) === -1"
@@ -327,7 +328,7 @@
                                 </div>
                                 <div class="_fc-r-tab" v-if="!config || config.showFormConfig !== false"
                                     :class="{ active: activeTab === 'form' }" @click="activeTab = 'form'">{{
-                                    t('designer.form') }}
+                                        t('designer.form') }}
                                 </div>
                                 <ToolsBar v-if="activeTab === 'props'"></ToolsBar>
                             </el-header>
@@ -395,16 +396,6 @@
                                             </template>
                                         </DragForm>
                                     </div>
-                                    <div style="grid-area: advanced;">
-                                        <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
-                                            t('designer.advanced')
-                                        }}
-                                        </ConfigTitle>
-                                        <DragForm v-show="advancedForm.isShow" v-model:api="advancedForm.api"
-                                            :rule="advancedForm.rule" :option="advancedForm.options"
-                                            :modelValue="advancedForm.value" @change="computedChange">
-                                        </DragForm>
-                                    </div>
                                     <div style="grid-area: props;">
                                         <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
                                             t('designer.props') }}
@@ -436,7 +427,17 @@
                                             :option="customForm.options" :key="customForm.key"
                                             @change="customFormChange"></DragForm>
                                     </div>
-                                    <div style="grid-area: slots;">
+                                    <div style="grid-area: advanced;">
+                                        <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
+                                            t('designer.advanced')
+                                        }}
+                                        </ConfigTitle>
+                                        <DragForm v-show="advancedForm.isShow" v-model:api="advancedForm.api"
+                                            :rule="advancedForm.rule" :option="advancedForm.options"
+                                            :modelValue="advancedForm.value" @change="computedChange">
+                                        </DragForm>
+                                    </div>
+                                    <!-- <div style="grid-area: slots;">
                                         <template
                                             v-if="activeRule && config?.showSlotsConfig !== false && activeRule._menu.easySlots && activeRule._menu.easySlots.length">
                                             <ConfigTitle id="_fd-config-slots">
@@ -444,7 +445,7 @@
                                             </ConfigTitle>
                                             <SlotsConfig></SlotsConfig>
                                         </template>
-                                    </div>
+                                    </div> -->
                                     <div style="grid-area: style;">
                                         <ConfigTitle v-if="styleForm.isShow" id="_fd-config-style">
                                             {{ t('designer.style') }}
@@ -491,7 +492,7 @@
                         <div class="_fd-preview-device" v-if="previewStatus !== 'sfc' && !onlyPC">
                             <div :class="{ active: previewDevice === 'pc' }" @click="previewDevice = 'pc'"><i
                                     class="fc-icon icon-pc2"></i>{{
-                                t('props.pc') }}
+                                        t('props.pc') }}
                             </div>
                             <div :class="{ active: previewDevice === 'mobile' }" @click="previewDevice = 'mobile'"><i
                                     class="fc-icon icon-mobile2"></i>{{ t('props.mobile') }}
@@ -729,7 +730,7 @@ export default defineComponent({
             return null;
         });
         const configFormOrderStyle = computed(() => {
-            const def = ['base', 'advanced', 'props', 'slots', 'style', 'event', 'validate'];
+            const def = ['base', 'props', 'advanced', 'slots', 'style', 'event', 'validate'];
             let sort = configRef.value.configFormOrder ? [...configRef.value.configFormOrder] : [];
             let value = [];
             if (!sort.length) {
