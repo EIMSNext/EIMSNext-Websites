@@ -1,4 +1,9 @@
 <template>
+<!-- 删除确认对话框 -->
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除这个表单吗？" :icon="MessageIcon.Warning"
+    :showNoSave="false" okText="确定删除" @ok="handleDeleteConfirm">
+    <div>表单删除后将不可恢复，包括所有相关数据</div>
+  </EtConfirmDialog>
   <form-edit v-if="showFormEditor" :formId="selectedFormId" :usingFlow="usingWorkflow" :isLedger="isLedger"
     @close="closeEditor" />
   <div v-if="!item.meta || !item.meta.hidden">
@@ -59,8 +64,9 @@ defineOptions({
 import path from "path-browserify";
 import { RouteMeta, RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
-import { useFormStore } from "@eimsnext/store";
+import { useContextStore, useFormStore } from "@eimsnext/store";
 import { FormDef } from "@eimsnext/models";
+import { MessageIcon } from "@eimsnext/components";
 
 const props = defineProps({
   /**
@@ -88,6 +94,7 @@ const props = defineProps({
   },
 });
 
+const contextStore = useContextStore();
 const formStore = useFormStore();
 // 可见的唯一子节点
 const onlyOneChild = ref();
@@ -95,6 +102,7 @@ const selectedFormId = ref("");
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
+const showDeleteConfirmDialog = ref(false);
 /**
  * 检查是否仅有一个可见子节点
  *
@@ -155,10 +163,19 @@ async function editForm(formId?: string) {
 function deleteForm(formId?: string) {
   if (formId) {
     selectedFormId.value = formId;
-    showFormEditor.value = true;
+    showDeleteConfirmDialog.value = true;
   }
 }
 
+async function handleDeleteConfirm() {
+  if (selectedFormId.value) {
+    await formStore.remove(selectedFormId.value);
+    selectedFormId.value = "";
+    contextStore.setAppChanged();
+  }
+
+  showDeleteConfirmDialog.value = false;
+};
 function closeEditor() {
   showFormEditor.value = false;
 }
