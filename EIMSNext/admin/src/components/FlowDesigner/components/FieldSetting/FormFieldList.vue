@@ -1,37 +1,23 @@
 <template>
   <div class="field-list">
-    <el-dropdown
-      v-if="!showAll"
-      :hide-on-click="false"
-      trigger="click"
-      popper-class="data-triggers"
-      @command="addField"
-    >
+    <el-dropdown v-if="!showAll" :hide-on-click="false" trigger="click" popper-class="data-triggers"
+      @command="addField">
       <el-button class="btn-add-trigger">
         {{ "+ " + t("选择字段") }}
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">
-          <el-dropdown-item
-            v-for="field in allFields"
-            class="add-trigger"
+          <el-dropdown-item v-for="field in allFields" class="add-trigger"
             :disabled="!!selectedFields.items.find((x) => x.field == field.field)"
-            :class="{ notAllow: selectedFields.items.find((x) => x.field == field.field) }"
-            :command="field"
-          >
+            :class="{ notAllow: selectedFields.items.find((x) => x.field == field.field) }" :command="field">
             {{ field.field.label }}
           </el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
     <template v-for="(item, idx) in selectedFields.items" :key="idx">
-      <FormFieldItem
-        :modelValue="item"
-        :nodes="nodes"
-        :removable="!showAll"
-        @change="onInput"
-        @remove="onRemove"
-      ></FormFieldItem>
+      <FormFieldItem :modelValue="item" :nodes="nodes" :removable="!showAll" @change="onInput" @remove="onRemove">
+      </FormFieldItem>
     </template>
   </div>
 </template>
@@ -41,7 +27,6 @@ import { useFormStore } from "@eimsnext/store";
 import FormFieldItem from "./FormFieldItem.vue";
 import { useLocale } from "element-plus";
 import { IFormFieldList, IFormFieldItem, buildFormFieldList } from "./type";
-import { uniqueId } from "@eimsnext/utils";
 import { INodeForm } from "../NodeFieldList/type";
 const { t } = useLocale();
 
@@ -51,11 +36,11 @@ defineOptions({
 
 const props = withDefaults(
   defineProps<{
+    modelValue: IFormFieldList;
     nodeId: string;
     formId: string;
     nodes: INodeForm[];
     showAll?: boolean;
-    modelValue: IFormFieldList;
   }>(),
   {}
 );

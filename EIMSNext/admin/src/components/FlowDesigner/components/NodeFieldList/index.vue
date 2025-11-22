@@ -1,13 +1,6 @@
 <template>
-  <el-tree-select
-    v-model="selectedNode"
-    :data="nodeList"
-    :props="selectProps"
-    :render-after-expand="true"
-    node-key="id"
-    :default-expanded-keys="defaultExpand"
-    @change="onInput"
-  />
+  <el-tree-select v-model="selectedNode" :data="nodeList" :props="selectProps" :render-after-expand="true" node-key="id"
+    :default-expanded-keys="defaultExpand" :filterable="true" :filter-node-method="filterNode" @change="onInput" />
 </template>
 
 <script setup lang="ts">
@@ -15,19 +8,28 @@ import { IListItem, ITreeNode, TreeNodeType, findNode } from "@eimsnext/componen
 import { useFormStore } from "@eimsnext/store";
 import { FieldBuildRule, INodeForm, buildNodeFieldTree } from "./type";
 import { IFormFieldDef } from "../../../FieldList/type";
+import { FilterNodeMethodFunction, TreeNodeData } from "element-plus";
 
 defineOptions({
   name: "NodeFieldList",
 });
-const props = defineProps<{
-  nodes: INodeForm[];
-  fieldBuildRule?: FieldBuildRule;
-  modelValue: IFormFieldDef;
-}>();
+const props =
+  withDefaults(
+    defineProps<{
+      modelValue: IFormFieldDef;
+      nodes: INodeForm[];
+      fieldDef?: IFormFieldDef,
+      fieldBuildRule?: FieldBuildRule;
+      matchType?: boolean
+    }>(),
+    {
+      matchType: true,
+    }
+  );
 
 const selectProps = { value: "id" };
 const formStore = useFormStore();
-const nodeList = ref<ITreeNode[]>(buildNodeFieldTree(props.nodes, props.fieldBuildRule));
+const nodeList = ref<ITreeNode[]>(buildNodeFieldTree(props.nodes, props.matchType, props.fieldDef, props.fieldBuildRule));
 const defaultExpand = ref<string[]>([]);
 const selectedNode = ref<ITreeNode>();
 nodeList.value.forEach((x) => {
@@ -40,6 +42,12 @@ nodeList.value.forEach((x) => {
   }
 });
 
+// const nodeList=computed(()=>)
+
+const filterNode: FilterNodeMethodFunction = (value: string, data: TreeNodeData) => {
+  if (!value) return true
+  return data.label.includes(value)
+}
 const emit = defineEmits(["update:modelValue", "change"]);
 const onInput = (val: string) => {
   let listItem = findNode(nodeList.value, val)!;
