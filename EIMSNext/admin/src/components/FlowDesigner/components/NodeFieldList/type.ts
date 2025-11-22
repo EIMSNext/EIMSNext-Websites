@@ -1,6 +1,12 @@
-import { IFormFieldDef, getFieldIcon, toFormFieldDef } from "@/components/FieldList/type";
+import {
+  IFormFieldDef,
+  getFieldIcon,
+  splitSubField,
+  toFormFieldDef,
+} from "@/components/FieldList/type";
 import { ITreeNode, TreeNodeType } from "@eimsnext/components";
 import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
+
 export interface INodeForm {
   nodeId: string;
   nodeName: string;
@@ -74,37 +80,35 @@ export function buildNodeFieldTree(
           if (!ignoreTable) {
             let shouldHidden = true;
             if (setting.fieldMapping) {
-              // console.log("buildNodeFieldTree sub", setting.fieldMapping, fieldDef, x);
-              if (fieldDef?.isSubField) {
-                let mapped = setting.fieldMapping[fieldDef.field];
-                if (mapped && mapped.nodeId == pNode.id && mapped.field == x.field) {
-                  shouldHidden = false;
-                }
-              } else {
-                let mapped = setting.fieldMapping["master"];
-                if (mapped && mapped.nodeId == pNode.id && mapped.field == x.field) {
-                  shouldHidden = false;
-                }
+              var mappedField = fieldDef?.isSubField ? splitSubField(fieldDef.field)[0] : "master";
+              let mapped = setting.fieldMapping[mappedField];
+              // console.log("buid sub tree", fieldDef, mapped, pNode.id, mappedField, x.field);
+              if (!mapped) {
+                shouldHidden = false;
+              } else if (mapped.nodeId == pNode.id && splitSubField(mapped.field)[0] == x.field) {
+                shouldHidden = false;
               }
             }
-            x.columns.forEach((sub: FieldDef) => {
-              //sub fields
-              if (!setting.matchType || isFieldTypeMatched(fieldDataType, sub.type)) {
-                let fieldDef = toFormFieldDef(pNode.data.form.id, sub, x, pNode.id, singleResult);
-                const node: ITreeNode = {
-                  id: `${pNode.id}-${fieldDef.field}`,
-                  code: fieldDef.field,
-                  label: fieldDef.label,
-                  nodeType: TreeNodeType.Field,
-                  children: [],
-                  data: fieldDef,
-                  icon: getFieldIcon(fieldDef.type),
-                };
-                attachChildren(node, singleResult, ignoreTable);
-                if (!pNode.children) pNode.children = [];
-                pNode.children.push(node);
-              }
-            });
+            if (!shouldHidden) {
+              x.columns.forEach((sub: FieldDef) => {
+                //sub fields
+                if (!setting.matchType || isFieldTypeMatched(fieldDataType, sub.type)) {
+                  let fieldDef = toFormFieldDef(pNode.data.form.id, sub, x, pNode.id, singleResult);
+                  const node: ITreeNode = {
+                    id: `${pNode.id}-${fieldDef.field}`,
+                    code: fieldDef.field,
+                    label: fieldDef.label,
+                    nodeType: TreeNodeType.Field,
+                    children: [],
+                    data: fieldDef,
+                    icon: getFieldIcon(fieldDef.type),
+                  };
+                  attachChildren(node, singleResult, ignoreTable);
+                  if (!pNode.children) pNode.children = [];
+                  pNode.children.push(node);
+                }
+              });
+            }
           }
         } else {
           if (!setting.matchType || isFieldTypeMatched(fieldDataType, x.type)) {

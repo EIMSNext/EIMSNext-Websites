@@ -70,7 +70,7 @@ watch(
 watch(
   () => buildSetting,
   (newVal) => {
-    console.log("nodefield fieldBuildSetting", newVal);
+    // console.log("nodefield fieldBuildSetting", newVal);
     nodeList.value = buildNodeFieldTree(props.nodes, props.fieldBuildSetting, props.fieldDef);
   },
   {

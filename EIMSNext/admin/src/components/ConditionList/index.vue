@@ -28,7 +28,7 @@
       <div class="flex-1"></div>
     </div>
     <div class="cond-item-wrapper">
-      <template v-for="(item, idx) in list.items" :key="idx">
+      <template v-for="(item, idx) in list.items" :key="item.id">
         <template v-if="item.isGroup">
           <ConditionList :modelValue="item" :formId="formId" :nodes="nodes" :condType="condType" :maxLevel="maxLevel"
             :fieldBuildSetting="fieldBuildSettingRef" :valueBuildSetting="valueBuildSettingRef" @change="onInput"
@@ -75,8 +75,8 @@ const props = withDefaults(
   }
 );
 
-const fieldBuildSettingRef = toRef(props.fieldBuildSetting ?? { rule: FieldBuildRule.All, matchType: false })
-const valueBuildSettingRef = toRef(props.fieldBuildSetting ?? { rule: FieldBuildRule.All, matchType: true })
+const fieldBuildSettingRef = toRef(props.fieldBuildSetting ?? { version: 0, rule: FieldBuildRule.All, matchType: false })
+const valueBuildSettingRef = toRef(props.fieldBuildSetting ?? { version: 0, rule: FieldBuildRule.All, matchType: true })
 const list = toRef(props.modelValue);
 const groupLevel = ref(1);
 
