@@ -33,7 +33,7 @@
             </div>
         </div>
         <!-- 遮罩层 -->
-        <div v-if="isMobile && isOpenSidebar" class="wh-full fixed-lt z-999 bg-black bg-opacity-30"
+        <div v-if="isOpenSidebar" class="wh-full fixed-lt z-999 bg-black bg-opacity-30"
             @click="handleOutsideClick" />
         <!-- 左侧和顶部布局 -->
         <div class="main-container">
@@ -49,12 +49,9 @@
 <script setup lang="ts">
 import Layout from "@/layout/index.vue";
 import { useSystemStore } from "@/store";
-import { DeviceEnum } from "@/enums/DeviceEnum";
 import SysMain from "./SysMain/index.vue"
 
 const systemStore = useSystemStore();
-
-const isMobile = computed(() => systemStore.device === DeviceEnum.MOBILE);
 const isOpenSidebar = computed(() => systemStore.sidebar.opened);
 
 function handleOutsideClick() {
@@ -96,39 +93,20 @@ onBeforeMount(async () => {
     }
 }
 
-.hideSidebar {
-    .main-container {
-        margin-left: $sidebar-width-collapsed;
-    }
-}
+// .hideSidebar {
+//     .main-container {
+//         margin-left: $sidebar-width-collapsed;
+//     }
+// }
 
-.layout-left.hideSidebar {
-    .sidebar-container {
-        width: $sidebar-width-collapsed !important;
-    }
+// .layout-left.hideSidebar {
+//     .sidebar-container {
+//         width: $sidebar-width-collapsed !important;
+//     }
 
-    .main-container {
-        margin-left: $sidebar-width-collapsed;
-    }
-
-    &.mobile {
-        .sidebar-container {
-            pointer-events: none;
-            transition-duration: 0.3s;
-            transform: translate3d(-210px, 0, 0);
-        }
-
-        .main-container {
-            margin-left: 0;
-        }
-    }
-}
-
-.mobile {
-    .main-container {
-        margin-left: 0;
-    }
-}
+//     .main-container {
+//         margin-left: $sidebar-width-collapsed;
+//     }
 
 .step-image {
     color: #1296db;

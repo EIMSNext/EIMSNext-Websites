@@ -16,7 +16,7 @@
       </template>
     </el-dropdown>
     <template v-for="(item, idx) in selectedFields.items" :key="idx">
-      <FormFieldItem :modelValue="item" :nodes="nodes" :fieldItems="selectedFields" :removable="!showAll"
+      <FormFieldItem :modelValue="item" :nodes="nodes" :field-setting="fieldSetting" :removable="!showAll"
         @change="onInput" @remove="onRemove">
       </FormFieldItem>
     </template>
@@ -27,8 +27,9 @@ import { FormDef, FieldDef, FieldType } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import FormFieldItem from "./FormFieldItem.vue";
 import { useLocale } from "element-plus";
-import { IFormFieldList, IFormFieldItem, buildFormFieldList } from "./type";
-import { INodeForm } from "../NodeFieldList/type";
+import { IFormFieldList, IFormFieldItem, buildFormFieldList, FieldValueType } from "./type";
+import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
+import { IFormFieldDef } from "@/components/FieldList/type";
 const { t } = useLocale();
 
 defineOptions({
@@ -48,6 +49,7 @@ const props = withDefaults(
 
 const allFields = ref<IFormFieldItem[]>([]);
 const selectedFields = toRef<IFormFieldList>(props.modelValue);
+const fieldSetting = ref<IFieldBuildSetting>({ version: 0, rule: FieldBuildRule.OneLevelTable, matchType: true, fieldMapping: {} })
 
 const formStore = useFormStore();
 const formDef = ref<FormDef>();
@@ -76,10 +78,32 @@ const onInput = (fieldItem: IFormFieldItem) => {
     if (item) {
       item.field = fieldItem.field;
       item.value = fieldItem.value;
+
+      console.log("field .... changed", selectedFields.value)
+      updateFieldSetting()
     }
   }
   emitChange();
 };
+
+const updateFieldSetting = () => {
+  console.log("field mapping1111", selectedFields.value)
+  let mapping: Record<string, IFormFieldDef> = {}
+  selectedFields.value.items.forEach(x => {
+    if (x.value.type == FieldValueType.Field && x.value.fieldValue && x.value.fieldValue.isSubField) {
+      if (x.field.isSubField && !mapping[x.field.field]) {
+        mapping[x.field.field] = x.value.fieldValue
+      }
+      else if (!mapping["master"]) {
+        mapping["master"] = x.value.fieldValue
+      }
+    }
+  })
+
+  fieldSetting.value.fieldMapping = mapping
+  fieldSetting.value.version += 1
+  console.log("field mapping", fieldSetting)
+}
 
 const emitChange = () => {
   emit("update:modelValue", selectedFields);
@@ -89,7 +113,7 @@ const emitChange = () => {
 watch(
   [() => props.formId, () => props.modelValue],
   async ([newFormId, newModel], [oldFormId, oldModel]) => {
-    // console.log("formfieldlist watch", newFormId, oldFormId, newModel, oldModel);
+    console.log("formfieldlist watch", newFormId, oldFormId, newModel, oldModel, fieldSetting.value);
     if (newFormId && newFormId != oldFormId) {
       let form = await formStore.get(newFormId);
       if (form && form.content && form.content.items) {

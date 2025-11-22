@@ -1,7 +1,6 @@
 import defaultSettings from "@/settings";
 
 import { store } from "@eimsnext/store";
-import { DeviceEnum } from "@/enums/DeviceEnum";
 import { SidebarStatusEnum } from "@/enums/SidebarStatusEnum";
 
 // 导入 Element Plus 中英文语言包
@@ -30,8 +29,6 @@ const locales = {
 };
 
 export const useSystemStore = defineStore("system", () => {
-  // 设备类型
-  const device = useStorage("device", DeviceEnum.DESKTOP);
   // 布局大小
   const size = useStorage("size", defaultSettings.size);
   // 语言
@@ -72,12 +69,7 @@ export const useSystemStore = defineStore("system", () => {
     sidebarStatus.value = SidebarStatusEnum.OPENED;
   }
 
-  // 切换设备
-  function toggleDevice(val: string) {
-    device.value = val;
-  }
-
-  /**
+   /**
    * 改变布局大小
    *
    * @param val 布局大小 default | small | large
@@ -95,12 +87,10 @@ export const useSystemStore = defineStore("system", () => {
   }
 
   return {
-    device,
     sidebar,
     language,
     locale,
     size,
-    toggleDevice,
     changeSize,
     changeLanguage,
     toggleSidebar,

@@ -15,7 +15,7 @@
         path: resolvePath(onlyOneChild.path),
         query: onlyOneChild.meta.params,
       }">
-        <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'submenu-title-noDropdown': !isNest }">
+        <el-menu-item :index="resolvePath(onlyOneChild.path)">
           <SidebarMenuItemTitle :icon="onlyOneChild.meta.icon || item.meta?.icon" :title="onlyOneChild.meta.title"
             :iconColor="item.meta?.iconColor" />
           <span class="more-wrapper">
@@ -166,42 +166,6 @@ function closeEditor() {
 
 <style lang="scss" scoped>
 .hideSidebar {
-  .submenu-title-noDropdown {
-    position: relative;
-    padding: 0 !important;
-
-    .el-tooltip {
-      padding: 0 !important;
-
-      .sub-el-icon {
-        margin-left: 19px;
-      }
-    }
-
-    &>span {
-      width: 0;
-      height: 0;
-      overflow: hidden;
-      display: none;
-    }
-  }
-
-  .el-sub-menu {
-    overflow: hidden;
-
-    &>.el-sub-menu__title {
-      padding: 0 !important;
-
-      .sub-el-icon {
-        margin-left: 19px;
-      }
-
-      .el-sub-menu__icon-arrow {
-        display: none;
-      }
-    }
-  }
-
   .el-menu--collapse {
     width: $sidebar-width-collapsed;
 

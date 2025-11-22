@@ -26,13 +26,12 @@ defineOptions({
 const props = defineProps<{
   modelValue: IFormFieldItem;
   nodes: INodeForm[];
-  fieldItems: IFormFieldList;
+  fieldSetting: IFieldBuildSetting;
   removable?: boolean;
 }>();
 
 const field = ref(props.modelValue.field);
 const value = ref(props.modelValue.value);
-const fieldSetting = ref<IFieldBuildSetting>({ rule: FieldBuildRule.OneLevelTable, matchType: true, fieldMapping: {} })
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
 
@@ -44,22 +43,22 @@ const onInput = () => {
   emitChange();
 };
 
-watch(() => props.fieldItems, (newVal) => {
-  console.log("field mapping1111", newVal)
-  let mapping: Record<string, IFormFieldDef> = {}
-  newVal.items.forEach(x => {
-    if (x.value.type == FieldValueType.Field && x.value.fieldValue && x.value.fieldValue.isSubField) {
-      if (x.field.isSubField && !mapping[x.field.field]) {
-        mapping[x.field.field] = x.value.fieldValue
-      }
-      else if (!mapping["master"]) {
-        mapping["master"] = x.value.fieldValue
-      }
-    }
-  })
-  console.log("field mapping", mapping)
-  fieldSetting.value.fieldMapping = mapping
-})
+// watch(() => props.fieldItems, (newVal) => {
+//   console.log("field mapping1111", newVal)
+//   let mapping: Record<string, IFormFieldDef> = {}
+//   newVal.items.forEach(x => {
+//     if (x.value.type == FieldValueType.Field && x.value.fieldValue && x.value.fieldValue.isSubField) {
+//       if (x.field.isSubField && !mapping[x.field.field]) {
+//         mapping[x.field.field] = x.value.fieldValue
+//       }
+//       else if (!mapping["master"]) {
+//         mapping["master"] = x.value.fieldValue
+//       }
+//     }
+//   })
+//   console.log("field mapping", mapping)
+//   fieldSetting.value.fieldMapping = mapping
+// })
 
 const emitChange = () => {
   let newModel = { field: field.value, value: value.value };

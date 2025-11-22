@@ -37,7 +37,7 @@ watch(
   ([newAppId, newModel], [oldAppId, oldModel]) => {
     if (newAppId && newAppId != oldAppId) {
       appStore.get(newAppId).then(app => {
-        formList.value = buildFormListItems(app);
+        formList.value = buildFormListItems(app!);
       })
     }
     if (newModel && newModel != oldModel) value.value = newModel.id;

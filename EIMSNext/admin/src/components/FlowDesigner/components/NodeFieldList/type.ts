@@ -13,6 +13,7 @@ export enum FieldBuildRule {
   OneLevelTable = 2,
 }
 export interface IFieldBuildSetting {
+  version: number;
   rule: FieldBuildRule;
   matchType: boolean;
   fieldMapping?: Record<string, IFormFieldDef>;

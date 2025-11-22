@@ -26,6 +26,7 @@ const props =
   );
 
 const selectProps = { value: "id" };
+const buildSetting = toRef(props.fieldBuildSetting)
 const formStore = useFormStore();
 const nodeList = ref<ITreeNode[]>(buildNodeFieldTree(props.nodes, props.fieldBuildSetting, props.fieldDef));
 const defaultExpand = ref<string[]>([]);
@@ -39,8 +40,6 @@ nodeList.value.forEach((x) => {
     return;
   }
 });
-
-// const nodeList=computed(()=>)
 
 const filterNode: FilterNodeMethodFunction = (value: string, data: TreeNodeData) => {
   if (!value) return true
@@ -56,7 +55,7 @@ const onInput = (val: string) => {
 };
 
 watch(
-  props.modelValue,
+  () => props.modelValue,
   (newVal) => {
     // console.log("nodefield modelvalue", newVal);
     selectedNode.value = findNode(
@@ -68,4 +67,15 @@ watch(
     immediate: true,
   }
 );
+watch(
+  () => buildSetting,
+  (newVal) => {
+    console.log("nodefield fieldBuildSetting", newVal);
+    nodeList.value = buildNodeFieldTree(props.nodes, props.fieldBuildSetting, props.fieldDef);
+  },
+  {
+    deep: true,
+  }
+);
+
 </script>

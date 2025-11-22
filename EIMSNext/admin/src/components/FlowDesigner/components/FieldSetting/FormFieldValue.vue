@@ -39,7 +39,7 @@
 </template>
 <script setup lang="ts">
 import { IListItem } from "@eimsnext/components";
-import { IFormFieldValue, FieldTypeMapping, FieldValueType } from "./type";
+import { IFormFieldValue, FieldValueType } from "./type";
 import { FieldDef, FieldType } from "@eimsnext/models";
 import NodeFieldList from "../NodeFieldList/index.vue";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
