@@ -2,7 +2,6 @@ import { IListItem } from "@eimsnext/components";
 import { FlowNodeType, IFlowData, IFlowNodeData, getFlowNodeById } from "../FlowData";
 import { INodeForm } from "../components/NodeFieldList/type";
 import { useFormStore } from "@eimsnext/store";
-import { FlowType } from "@eimsnext/models";
 
 export function buildWfNodeListItems(wfFlowData: IFlowData): IListItem[] {
   const items: IListItem[] = [];
@@ -30,13 +29,20 @@ export async function getPrevNodes(
   // console.log("prev node init ", prevNode, flowData);
   do {
     prevNode = getPrevNode(flowData, prevNode);
-    // console.log("prev node", prevNode);
+
     if (
       prevNode &&
       prevNode.nodeType != FlowNodeType.Branch &&
-      prevNode.nodeType != FlowNodeType.BranchItem
+      prevNode.nodeType != FlowNodeType.BranchItem &&
+      prevNode.nodeType != FlowNodeType.Condition &&
+      prevNode.nodeType != FlowNodeType.ConditionOther &&
+      prevNode.nodeType != FlowNodeType.Branch2
     ) {
-      let node: INodeForm = { nodeId: prevNode.id, nodeName: prevNode.name, singleResult: false };
+      let node: INodeForm | undefined = {
+        nodeId: prevNode.id,
+        nodeName: prevNode.name,
+        singleResult: false,
+      };
       let formId: string | undefined = undefined;
       switch (prevNode.nodeType) {
         case FlowNodeType.Start:

@@ -2,8 +2,8 @@
   <div class="cond-item">
     <div class="cond-detail">
       <template v-if="condType == ConditionType.Node">
-        <NodeFieldList class="cond-field" v-model="field" :nodes="nodes!" :fieldBuildRule="fieldBuildRule"
-          @change="changeField"></NodeFieldList>
+        <NodeFieldList class="cond-field" v-model="field" :nodes="nodes!" :match-type="false"
+          :field-def="modelValue.field" :fieldBuildRule="fieldBuildRule" @change="changeField"></NodeFieldList>
       </template>
       <template v-else>
         <FieldList class="cond-field" v-model="field" :formId="formId" @change="changeField"></FieldList>
@@ -25,29 +25,26 @@
       <div class="flex-1"></div>
       <div><et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon></div>
     </div>
-    <div class="cond-detail mt-[10px]">
-      <ConditionValue v-model="value" :field-type="fieldType" :nodes="nodes" :fieldBuildRule="fieldBuildRule"
+    <div v-if="op != 'empty' && op != 'notempty'" class="cond-detail mt-[10px]">
+      <ConditionValue v-model="value" :field-def="modelValue.field" :nodes="nodes" :fieldBuildRule="fieldBuildRule"
         @change="onInput"></ConditionValue>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { IListItem } from "@eimsnext/components";
-import { FieldDef, FieldType } from "@eimsnext/models";
+import { FieldType } from "@eimsnext/models";
 import {
-  ConditionFieldType,
   ConditionType,
   ConditionValueType,
   IConditionList,
   dataOperators,
-  getConditionFieldType,
 } from "./type";
 import ConditionValue from "./ConditionValue.vue";
 import FieldList from "../FieldList/index.vue";
 
 import { useLocale } from "element-plus";
 import { IFormFieldDef } from "@/components/FieldList/type";
-import { FieldBuildRule, INodeForm } from "../FlowDesigner/components/NodeFieldList/type";
+import { ConditionFieldType, FieldBuildRule, INodeForm, getConditionFieldType } from "../FlowDesigner/components/NodeFieldList/type";
 import NodeFieldList from "../FlowDesigner/components/NodeFieldList/index.vue";
 const { t } = useLocale();
 
@@ -64,15 +61,15 @@ const props = defineProps<{
 }>();
 
 const field = ref<IFormFieldDef>(
-  props.modelValue.field ?? { formId: props.formId, field: "", label: "", type: FieldType.Input }
+  props.modelValue.field ?? { formId: props.formId, field: "", label: "", type: FieldType.None }
 );
-const op = toRef(props.modelValue.op);
+const op = toRef(props.modelValue.op ?? "empty");
 const value = ref(props.modelValue.value ?? { type: ConditionValueType.Custom, value: null });
 
 const fieldType = ref<FieldType>(field.value?.type ?? FieldType.Input);
 
 const dataType = computed(() => {
-  return getConditionFieldType(fieldType.value)
+  return field.value.field ? getConditionFieldType(fieldType.value) : ConditionFieldType.Other
 });
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
@@ -87,16 +84,20 @@ const buildOpLabels = () => {
 };
 const opLabels = ref(buildOpLabels());
 const opLabel = computed(() => {
-  return opLabels.value[op.value ?? "eq"];
+  return opLabels.value[op.value];
 });
 
 const changeField = (item: IFormFieldDef) => {
   field.value = item;
+  let newDataType = item.field ? getConditionFieldType(item.type) : ConditionFieldType.None
 
-  if (dataType.value != getConditionFieldType(item.type)) {
+  if (dataType.value != newDataType) {
     value.value.value = null;
     value.value.type = ConditionValueType.Custom;
     value.value.fieldValue = undefined
+
+    if (dataOperators[newDataType].indexOf(op.value) == -1)
+      op.value = dataOperators[newDataType][0]
 
     fieldType.value = item.type
   }

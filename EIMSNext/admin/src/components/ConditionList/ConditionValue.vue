@@ -7,33 +7,46 @@
     </div>
     <div class="value-value">
       <template v-if="nodes && condValueType == ConditionValueType.Field">
-        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :fieldBuildRule="fieldBuildRule" @change="onValueChange">
+        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="props.fieldDef"
+          :fieldBuildRule="fieldBuildRule" @change="onValueChange">
         </NodeFieldList>
       </template>
       <template v-else>
-        <template v-if="dataType == ConditionFieldType.Number">
-          <el-input-number size="default" v-bind="props || {}" v-model="value" @change="onInput"></el-input-number>
+        <template v-if="dataType == ConditionFieldType.Input">
+          <el-input size="default" v-model="value" @blur="onInput"></el-input>
+        </template>
+        <template v-else-if="dataType == ConditionFieldType.Number">
+          <el-input-number size="default" v-model="value" @change="onInput"></el-input-number>
+        </template>
+        <template v-else-if="dataType == ConditionFieldType.TimeStamp">
+          <el-date-picker size="default" v-model="value" value-format="x" :format="fieldDef?.format"
+            @change="onInput"></el-date-picker>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select">
-          <el-select size="default" filterable allow-create default-first-option v-bind="props || {}" v-model="value"
+          <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
+            <el-option v-for="opt in options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+          </el-select>
+        </template>
+        <template v-else-if="dataType == ConditionFieldType.Select2">
+          <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
             @change="onInput">
             <el-option v-for="opt in options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
           </el-select>
         </template>
-        <template v-else-if="dataType == ConditionFieldType.Switch">
+        <!-- <template v-else-if="dataType == ConditionFieldType.Switch">
           <el-switch size="default" v-bind="props || {}" v-model="value" @change="onInput"></el-switch>
-        </template>
-        <template v-else>
-          <el-input size="default" v-bind="props || {}" v-model="value" @blur="onInput"></el-input>
-        </template>
+        </template> -->
+        <!-- <template v-else>
+          <el-input size="default" v-model="value" @blur="onInput"></el-input>
+        </template> -->
       </template>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { IListItem } from "@eimsnext/components";
-import { ConditionFieldType, ConditionValueType, IConditonValue, getConditionFieldType } from "./type";
-import { FieldBuildRule, INodeForm } from "../FlowDesigner/components/NodeFieldList/type";
+import { ConditionValueType, IConditonValue } from "./type";
+import { FieldBuildRule, INodeForm, ConditionFieldType, getConditionFieldType } from "../FlowDesigner/components/NodeFieldList/type";
 import { FieldType } from "@eimsnext/models";
 import { IFormFieldDef } from "../FieldList/type";
 import NodeFieldList from "../FlowDesigner/components/NodeFieldList/index.vue";
@@ -45,16 +58,15 @@ defineOptions({
   name: "ConditionValue",
 });
 const props = defineProps<{
-  fieldType: FieldType;
-  options?: IListItem[];
-  props?: object;
   modelValue: IConditonValue;
   nodes?: INodeForm[];
+  fieldDef?: IFormFieldDef;
+  options?: IListItem[];
   fieldBuildRule?: FieldBuildRule;
 }>();
 
 const dataType = computed(() => {
-  return getConditionFieldType(props.fieldType)
+  return getConditionFieldType(props.fieldDef?.type ?? FieldType.None)
 });
 
 const condValueType = toRef(props.modelValue.type);

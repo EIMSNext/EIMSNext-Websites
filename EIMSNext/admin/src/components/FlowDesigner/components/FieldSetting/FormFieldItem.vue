@@ -4,12 +4,7 @@
       <el-input :value="field.label" :title="field.label" size="default"></el-input>
     </div>
     <div class="field-op">=</div>
-    <FormFieldValue
-      :fieldDef="field"
-      v-model="value"
-      :nodes="nodes"
-      @change="onInput"
-    ></FormFieldValue>
+    <FormFieldValue :fieldDef="field" v-model="value" :nodes="nodes" @change="onInput"></FormFieldValue>
     <div v-if="removable" class="ml-[5px]" style="align-content: center">
       <et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon>
     </div>
@@ -27,8 +22,8 @@ defineOptions({
 });
 
 const props = defineProps<{
-  nodes: INodeForm[];
   modelValue: IFormFieldItem;
+  nodes: INodeForm[];
   removable?: boolean;
 }>();
 

@@ -81,8 +81,8 @@ const addItem = () => {
 
   list.value.items.push({
     id: uniqueId(),
-    field: { formId: props.formId, field: "", label: "", type: FieldType.Input },
-    op: "eq",
+    field: { formId: props.formId, field: "", label: "", type: FieldType.None },
+    op: "empty",
     value: { type: ConditionValueType.Custom, value: null },
   });
 };

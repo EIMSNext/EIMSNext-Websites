@@ -1,41 +1,38 @@
 <template>
   <div class="field-value">
     <div class="value-type">
-      <el-select
-        size="default"
-        default-first-option
-        v-model="fieldValueType"
-        @change="onValueTypeChange"
-      >
-        <el-option
-          v-for="opt in fieldValueTypes"
-          :label="opt.label"
-          :value="opt.id"
-          :key="opt.id"
-        ></el-option>
+      <el-select size="default" default-first-option v-model="fieldValueType" @change="onValueTypeChange">
+        <el-option v-for="opt in fieldValueTypes" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
       </el-select>
     </div>
     <div class="value-value">
       <template v-if="fieldValueType == FieldValueType.Custom">
-        <template v-if="fieldType == FieldType.Input">
+        <template
+          v-if="fieldType == FieldType.Input || fieldType == FieldType.Radio || fieldType == FieldType.CheckBox || fieldType == FieldType.Select || fieldType == FieldType.Select2">
           <el-input v-model="value" size="default" @change="onInput"></el-input>
         </template>
         <template v-if="fieldType == FieldType.Number">
-          <el-input-number
-            v-model="value"
-            size="default"
-            style="width: auto"
-            @change="onInput"
-          ></el-input-number>
+          <el-input-number v-model="value" size="default" style="width: auto" @change="onInput"></el-input-number>
         </template>
+        <template v-if="fieldType == FieldType.TimeStamp">
+          <el-date-picker size="default" v-model="value" value-format="x" :format="fieldDef?.format" :type="dateType"
+            @change="onInput"></el-date-picker>
+        </template>
+        <!-- <template v-else-if="fieldType == FieldType.Select || fieldType == FieldType.Radio">
+          <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
+            <el-option v-for="opt in fieldDef." :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+          </el-select>
+        </template>
+        <template v-else-if="dataType == ConditionFieldType.Select2">
+          <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
+            @change="onInput">
+            <el-option v-for="opt in options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+          </el-select>
+        </template> -->
       </template>
       <template v-if="fieldValueType == FieldValueType.Field">
-        <NodeFieldList
-          v-model="fieldFieldValue"
-          :nodes="nodes"
-          :fieldBuildRule="FieldBuildRule.OneLevelTable"
-          @change="onValueChange"
-        ></NodeFieldList>
+        <NodeFieldList ref="nodefieldlist" v-model="fieldFieldValue" :nodes="nodes" :field-def="fieldDef"
+          :fieldBuildRule="FieldBuildRule.OneLevelTable" @change="onValueChange"></NodeFieldList>
       </template>
     </div>
   </div>
@@ -43,7 +40,7 @@
 <script setup lang="ts">
 import { IListItem } from "@eimsnext/components";
 import { IFormFieldValue, FieldTypeMapping, FieldValueType } from "./type";
-import { FieldType } from "@eimsnext/models";
+import { FieldDef, FieldType } from "@eimsnext/models";
 import NodeFieldList from "../NodeFieldList/index.vue";
 import { FieldBuildRule, INodeForm } from "../NodeFieldList/type";
 
@@ -60,6 +57,7 @@ const props = defineProps<{
   modelValue: IFormFieldValue;
 }>();
 
+const nodefieldlist = ref()
 const fieldValueType = ref(props.modelValue.type);
 const value = ref<any>(props.modelValue.value);
 const fieldFieldValue = ref<IFormFieldDef>(
@@ -79,10 +77,13 @@ const fieldValueTypes: IListItem[] = [
 ];
 
 const fieldType = computed(() => props.fieldDef.type);
+const dateType = computed(() => ((props.fieldDef.type == FieldType.TimeStamp ? props.fieldDef.format : undefined) ?? "yyyy-MM-dd").includes("HH") ? "datetime" : "date");
 
 const emit = defineEmits(["update:modelValue", "change"]);
 const onValueTypeChange = () => {
   props.modelValue.type = fieldValueType.value;
+  // if (props.modelValue.type == FieldValueType.Field && nodefieldlist.value)
+  //   nodefieldlist.value.rebuildValueNodes();
 
   emitChange();
 };
@@ -111,6 +112,7 @@ const emitChange = () => {
     width: 100px;
     margin-right: 5px;
   }
+
   .value-value {
     flex: 1;
   }
