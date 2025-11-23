@@ -22,7 +22,16 @@ export interface IFieldBuildSetting {
   version: number;
   rule: FieldBuildRule;
   matchType: boolean;
+  fieldLimit?: string;
   fieldMapping?: Record<string, IFormFieldDef>;
+}
+export interface IFormFieldMap {
+  mainField: string;
+  sorceField: string;
+  mapMainField: string;
+  mapField: string;
+  mapNodeId: string;
+  mapCount: number;
 }
 export enum ConditionFieldType {
   None = "none",

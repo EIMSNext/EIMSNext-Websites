@@ -150,12 +150,14 @@ const onSubCondition = (list: IConditionList) => {
   activeData.value.metadata.updateMeta!.subCondition = list;
 };
 const fieldChanged = (fields: IFormFieldList) => {
-  // console.log("fieldChanged", fields.items);
+   console.log("fieldChanged", fields.items);
   // formFieldList.value = fields;
+  subCondNeeded.value = fields.items.findIndex((x) => x.field.isSubField || (x.value.type == FieldValueType.Field && (x.value.fieldValue && (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField)))) > -1;
+
   activeData.value.metadata.updateMeta!.formFieldList = fields;
 };
 const showEditPanelChanged = (val: any) => {
-  console.log("showEditPanelChanged", val);
+  // console.log("showEditPanelChanged", val);
   showEditPanel.value = val;
 };
 const insertFieldChanged = (fields: IFormFieldList) => {
