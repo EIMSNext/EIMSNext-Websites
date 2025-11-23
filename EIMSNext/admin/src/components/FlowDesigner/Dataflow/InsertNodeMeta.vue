@@ -65,23 +65,25 @@ const fieldChanged = (fields: IFormFieldList) => {
   activeData.value.metadata.insertMeta!.formFieldList = fields;
 };
 
-const init = async () => {
-  activeData.value = flowContextRef.activeData;
-  nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
+const init = () => {
+  nextTick(async () => {
+    activeData.value = flowContextRef.activeData;
+    nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
 
-  nodeId.value = activeData.value.id;
-  formId.value = activeData.value.metadata.insertMeta!.formId;
-  formItem.value = { id: formId.value };
+    nodeId.value = activeData.value.id;
+    formId.value = activeData.value.metadata.insertMeta!.formId;
+    formItem.value = { id: formId.value };
 
-  let formDef = await formStore.get(formId.value);
-  if (formDef)
-    formFieldList.value.items = mergeFieldList(
-      formDef,
-      activeData.value.metadata.insertMeta!.formFieldList.items,
-      true
-    );
+    let formDef = await formStore.get(formId.value);
+    if (formDef)
+      formFieldList.value.items = mergeFieldList(
+        formDef,
+        activeData.value.metadata.insertMeta!.formFieldList.items,
+        true
+      );
 
-  ready.value = true
+    ready.value = true
+  })
 }
 
 init()

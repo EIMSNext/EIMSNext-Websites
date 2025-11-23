@@ -1,16 +1,13 @@
 <template>
-  <MetaItemHeader :label="t('目标表单')" :required="true"></MetaItemHeader>
-  <FormList v-model="formItem" :appId="appId" @change="formChanged"></FormList>
-  <MetaItemHeader class="mt-[8px]" :label="t('查询条件')" :required="true"></MetaItemHeader>
-  <ConditionList
-    v-model="condList"
-    :formId="formId"
-    :nodeId="nodeId"
-    :nodes="nodes"
-    @change="onCondition"
-  ></ConditionList>
-  <MetaItemHeader class="mt-[8px]" :label="t('排序规则')"></MetaItemHeader>
-  <FieldSortList v-model="sortList" :form-id="formId" @change="onSort"></FieldSortList>
+  <template v-if="ready">
+    <MetaItemHeader :label="t('目标表单')" :required="true"></MetaItemHeader>
+    <FormList v-model="formItem" :appId="appId" @change="formChanged"></FormList>
+    <MetaItemHeader class="mt-[8px]" :label="t('查询条件')" :required="true"></MetaItemHeader>
+    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition">
+    </ConditionList>
+    <MetaItemHeader class="mt-[8px]" :label="t('排序规则')"></MetaItemHeader>
+    <FieldSortList v-model="sortList" :form-id="formId" @change="onSort"></FieldSortList>
+  </template>
 </template>
 <script lang="ts" setup>
 import {
@@ -37,6 +34,7 @@ defineOptions({
   name: "QueryOneNodeMeta",
 });
 
+const ready = ref(false)
 const condList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
 const sortList = ref<IFieldSortList>({ items: [] });
 const flowContext = inject<IFlowContext>("flowContext");
@@ -54,9 +52,12 @@ const formChanged = async (form: IFormItem) => {
   formId.value = form.id;
   formItem.value.id = formId.value;
 
+  condList.value.items = []
+  sortList.value.items = []
+
   activeData.value.metadata.queryOneMeta!.formId = form.id;
-  activeData.value.metadata.queryOneMeta!.condition = { id: uniqueId(), rel: "and", items: [] };
-  activeData.value.metadata.queryOneMeta!.sort = { items: [] };
+  activeData.value.metadata.queryOneMeta!.condition = condList.value;
+  activeData.value.metadata.queryOneMeta!.sort = sortList.value;
 };
 
 const onCondition = (list: IConditionList) => {
@@ -65,11 +66,11 @@ const onCondition = (list: IConditionList) => {
 const onSort = (list: IFieldSortList) => {
   activeData.value.metadata.queryOneMeta!.sort = list;
 };
-watch(
-  flowContextRef,
-  async (newValue: IFlowContext) => {
-    activeData.value = newValue.activeData;
-    nodes.value = await getPrevNodes(newValue.flowData, activeData.value);
+
+const init = () => {
+  nextTick(async () => {
+    activeData.value = flowContextRef.activeData;
+    nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
 
     nodeId.value = activeData.value.id;
     formId.value = activeData.value.metadata.queryOneMeta!.formId;
@@ -85,7 +86,34 @@ watch(
     if (activeData.value.metadata.queryOneMeta!.sort) {
       sortList.value = activeData.value.metadata.queryOneMeta!.sort;
     }
-  },
-  { immediate: true }
-);
+
+    ready.value = true
+  })
+}
+
+init()
+
+// watch(
+//   flowContextRef,
+//   async (newValue: IFlowContext) => {
+//     activeData.value = newValue.activeData;
+//     nodes.value = await getPrevNodes(newValue.flowData, activeData.value);
+
+//     nodeId.value = activeData.value.id;
+//     formId.value = activeData.value.metadata.queryOneMeta!.formId;
+//     formItem.value = { id: formId.value };
+
+//     // console.log("query one cond nodes", newValue, nodes.value);
+
+//     condList.value = { id: uniqueId(), rel: "and", items: [] };
+//     if (activeData.value.metadata.queryOneMeta!.condition) {
+//       condList.value = activeData.value.metadata.queryOneMeta!.condition;
+//     }
+//     sortList.value = { items: [] };
+//     if (activeData.value.metadata.queryOneMeta!.sort) {
+//       sortList.value = activeData.value.metadata.queryOneMeta!.sort;
+//     }
+//   },
+//   { immediate: true }
+// );
 </script>
