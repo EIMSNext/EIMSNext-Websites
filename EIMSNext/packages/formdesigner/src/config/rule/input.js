@@ -12,7 +12,7 @@ export default {
   input: true,
   // easySlots: ["prefix", "suffix", "prepend", "append"],
   event: ["blur", "focus", "change", "input", "clear"],
-  validate: ["string"],//, "url", "email"],
+  validate: ["string"], //, "url", "email"],
   rule({ t }) {
     return {
       type: name,
@@ -31,7 +31,8 @@ export default {
         value: "text",
         options: localeOptions(t, [
           { label: "text", value: "text" },
-          // {label: 'number', value: 'number'},
+          { label: "email", value: "email" },
+          { label: "phone", value: "phone" },
           // {label: 'time', value: 'time'},
           // {label: 'date', value: 'date'},
           // {label: 'month', value: 'month'},
@@ -39,9 +40,9 @@ export default {
         ]),
       },
       {
-        type: 'DefaultValueConfig',
-        field: 'value',
-    },
+        type: "DefaultValueConfig",
+        field: "value",
+      },
       {
         type: "inputNumber",
         field: "maxlength",

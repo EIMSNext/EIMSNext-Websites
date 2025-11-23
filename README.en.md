@@ -1,6 +1,6 @@
 # EIMSNext-Websites
 
-EIMSNext-Websites is an enterprise-level management system frontend project built with Vue 3 and TypeScript, featuring a modular design and scalable architecture suitable for applications such as internal enterprise management systems, workflow approval systems, and form systems.
+EIMSNext-Websites is an enterprise low-code application system frontend project built with Vue 3 and TypeScript, featuring a modular design and scalable architecture suitable for applications such as internal enterprise management systems, workflow approval systems, and form systems.
 
 ## Project Structure Overview
 

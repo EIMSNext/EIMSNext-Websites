@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { IListItem, ITreeNode, TreeNodeType, findNode } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
-import { FieldBuildRule, INodeForm, buildNodeFieldTree } from "./type";
+import { FieldBuildRule, IFieldBuildSetting, INodeForm, buildNodeFieldTree } from "./type";
 import { IFormFieldDef } from "../../../FieldList/type";
 import { FilterNodeMethodFunction, TreeNodeData } from "element-plus";
 
@@ -17,19 +17,18 @@ const props =
   withDefaults(
     defineProps<{
       modelValue: IFormFieldDef;
+      fieldBuildSetting: IFieldBuildSetting;
       nodes: INodeForm[];
-      fieldDef?: IFormFieldDef,
-      fieldBuildRule?: FieldBuildRule;
-      matchType?: boolean
+      fieldDef?: IFormFieldDef;
     }>(),
     {
-      matchType: true,
     }
   );
 
 const selectProps = { value: "id" };
+const buildSetting = toRef(props.fieldBuildSetting)
 const formStore = useFormStore();
-const nodeList = ref<ITreeNode[]>(buildNodeFieldTree(props.nodes, props.matchType, props.fieldDef, props.fieldBuildRule));
+const nodeList = ref<ITreeNode[]>(buildNodeFieldTree(props.nodes, props.fieldBuildSetting, props.fieldDef));
 const defaultExpand = ref<string[]>([]);
 const selectedNode = ref<ITreeNode>();
 nodeList.value.forEach((x) => {
@@ -41,8 +40,6 @@ nodeList.value.forEach((x) => {
     return;
   }
 });
-
-// const nodeList=computed(()=>)
 
 const filterNode: FilterNodeMethodFunction = (value: string, data: TreeNodeData) => {
   if (!value) return true
@@ -58,7 +55,7 @@ const onInput = (val: string) => {
 };
 
 watch(
-  props.modelValue,
+  () => props.modelValue,
   (newVal) => {
     // console.log("nodefield modelvalue", newVal);
     selectedNode.value = findNode(
@@ -70,4 +67,15 @@ watch(
     immediate: true,
   }
 );
+watch(
+  () => buildSetting,
+  (newVal) => {
+    // console.log("nodefield fieldBuildSetting", newVal);
+    nodeList.value = buildNodeFieldTree(props.nodes, props.fieldBuildSetting, props.fieldDef);
+  },
+  {
+    deep: true,
+  }
+);
+
 </script>

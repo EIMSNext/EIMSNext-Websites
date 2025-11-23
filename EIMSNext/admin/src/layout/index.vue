@@ -48,9 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import { useSystemStore, useSettingsStore, usePermissionStore } from "@/store";
+import { useSystemStore } from "@/store";
 import { useAppStore } from "@eimsnext/store";
-import { DeviceEnum } from "@/enums/DeviceEnum";
 import NavBar from "./components/NavBar/index.vue";
 import defaultSettings from "@/settings";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
@@ -60,38 +59,15 @@ defineOptions({
 });
 
 const systemStore = useSystemStore();
-const settingsStore = useSettingsStore();
+
 const appStore = useAppStore();
 const { items: appsRef } = storeToRefs(appStore);
-const width = useWindowSize().width;
-
-const WIDTH_DESKTOP = 992; // 响应式布局容器固定宽度  大屏（>=1200px） 中屏（>=992px） 小屏（>=768px）
-const isMobile = computed(() => systemStore.device === DeviceEnum.MOBILE);
-const isOpenSidebar = computed(() => systemStore.sidebar.opened);
-// const layout = computed(() => settingsStore.layout); // 布局模式 left top mix
 
 const classObj = computed(() => ({
   hideSidebar: !systemStore.sidebar.opened,
   openSidebar: systemStore.sidebar.opened,
-  mobile: systemStore.device === DeviceEnum.MOBILE,
-  // [`layout-${settingsStore.layout}`]: true,
 }));
 
-watchEffect(() => {
-  systemStore.toggleDevice(width.value < WIDTH_DESKTOP ? DeviceEnum.MOBILE : DeviceEnum.DESKTOP);
-  if (width.value >= WIDTH_DESKTOP) {
-    systemStore.openSideBar();
-  } else {
-    systemStore.closeSideBar();
-  }
-});
-
-const route = useRoute();
-watch(route, () => {
-  if (isMobile.value && isOpenSidebar.value) {
-    systemStore.closeSideBar();
-  }
-});
 </script>
 
 <style lang="scss" scoped>

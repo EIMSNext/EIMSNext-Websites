@@ -4,12 +4,8 @@
       <div class="attr-content">
         <div class="attr-item has-padding" style="padding-bottom: 0">
           <MetaItemHeader :label="t('节点名称')" :required="true"></MetaItemHeader>
-          <el-input
-            v-model="activeData.name"
-            :readonly="activeData.nodeType == FlowNodeType.Start"
-            size="default"
-            style="width: 100%"
-          />
+          <el-input v-model="activeData.name" :readonly="activeData.nodeType == FlowNodeType.Start" size="default"
+            style="width: 100%" />
         </div>
         <div v-if="nodeType == FlowNodeType.Start" class="attr-item has-padding">
           <TriggerNodeMeta></TriggerNodeMeta>
@@ -59,10 +55,10 @@ const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
 const nodeType = ref(FlowNodeType.None);
 
 watch(
-  flowContextRef,
-  (newValue: IFlowContext) => {
+  () => flowContextRef.activeData,
+  (newValue: IFlowNodeData) => {
     nodeType.value = FlowNodeType.None;
-    activeData.value = newValue.activeData;
+    activeData.value = newValue;
     nextTick(() => {
       nodeType.value = activeData.value.nodeType;
     });
@@ -79,5 +75,4 @@ watch(
 //   font-size: 16px;
 //   line-height: 20px;
 //   margin-left: 2px;
-// }
-</style>
+// }</style>

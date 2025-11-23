@@ -1,7 +1,7 @@
 <template>
   <div class="navbar__right">
     <!-- 非手机设备（窄屏）才显示 -->
-    <template v-if="!isMobile">
+    <template>
 
       <!-- 全屏 -->
       <Fullscreen />
@@ -23,14 +23,11 @@
 </template>
 <script setup lang="ts">
 import defaultSettings from "@/settings";
-import { DeviceEnum } from "@/enums/DeviceEnum";
 import { useSystemStore, useSettingsStore } from "@/store";
 import UserProfile from "./UserProfile.vue";
 
 const appStore = useSystemStore();
 const settingStore = useSettingsStore();
-
-const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE);
 </script>
 
 <style lang="scss" scoped>

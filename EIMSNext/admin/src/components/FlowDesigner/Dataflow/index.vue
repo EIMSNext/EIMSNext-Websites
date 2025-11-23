@@ -12,7 +12,7 @@
         <DataflowDiagram :flow-data="flowData" />
       </div>
       <div class="flow-meta-container" style="width: 500px">
-        <DataflowMetaEditor />
+        <DataflowMetaEditor v-if="ready" />
       </div>
     </div>
   </div>
@@ -29,8 +29,6 @@ import DataflowDiagram from "./DataflowDiagram.vue";
 import DataflowMetaEditor from "./DataflowMetaEditor.vue";
 import { FlowType, EventSourceType, WfDefinition, WfDefinitionRequest } from "@eimsnext/models";
 import { wfDefinitionService } from "@eimsnext/services";
-import { ODataQuery } from "@/utils/query";
-import buildQuery from "odata-query";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
 
@@ -43,6 +41,7 @@ const props = defineProps<{
   flowDef: WfDefinition;
 }>();
 
+const ready = ref(false)
 const currentWfDef = ref<WfDefinition>(props.flowDef);
 
 const flowData = ref<IFlowData>(createDataflowData(EventSourceType.Form));
@@ -58,15 +57,20 @@ const flowContext: IFlowContext = {
   activeData: flowData.value.startNode,
   flowData: flowData.value,
 };
+
 provide("flowContext", flowContext);
 
 onBeforeMount(() => {
-  if (currentWfDef.value.content) flowData.value = JSON.parse(currentWfDef.value.content);
+  if (currentWfDef.value.content) {
+    flowData.value = JSON.parse(currentWfDef.value.content);
 
-  flowContext.flowData = flowData.value;
-  flowContext.eventSource = currentWfDef.value.eventSource;
-  flowContext.sourceId = currentWfDef.value.sourceId;
-  flowContext.activeData = flowData.value.startNode;
+    flowContext.flowData = flowData.value;
+    flowContext.eventSource = currentWfDef.value.eventSource;
+    flowContext.sourceId = currentWfDef.value.sourceId;
+    flowContext.activeData = flowData.value.startNode;
+  }
+
+  ready.value = true
 });
 
 const save = () => {
@@ -81,7 +85,7 @@ const save = () => {
     eventSource: currentWfDef.value.eventSource,
     sourceId: currentWfDef.value.sourceId,
   };
-  console.log("wf req", req);
+  // console.log("wf req", req);
   if (req.id)
     wfDefinitionService.put<WfDefinition>(req.id, req).then((res) => (currentWfDef.value = res));
   else wfDefinitionService.post<WfDefinition>(req).then((res) => (currentWfDef.value = res));

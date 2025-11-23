@@ -15,7 +15,7 @@
         <WorkflowDiagram :flow-data="flowData" />
       </div>
       <div class="flow-meta-container">
-        <WorkflowMetaEditor />
+        <WorkflowMetaEditor v-if="ready" />
       </div>
     </div>
   </div>
@@ -45,6 +45,7 @@ const props = defineProps<{
   formId: string;
 }>();
 
+const ready = ref(false)
 const currentWfDef = ref<WfDefinition>({
   id: "",
   name: "",
@@ -76,6 +77,8 @@ onBeforeMount(() => {
       flowContext.flowData = flowData.value;
     }
   });
+
+  ready.value = true
 });
 
 const save = () => {

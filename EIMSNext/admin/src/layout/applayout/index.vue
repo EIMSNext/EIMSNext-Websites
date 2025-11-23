@@ -3,11 +3,10 @@
     <!-- 公用侧边栏 -->
     <Sidebar class="sidebar-container" />
     <!-- 遮罩层 -->
-    <div v-if="isMobile && isOpenSidebar" class="wh-full fixed-lt z-999 bg-black bg-opacity-30"
-      @click="handleOutsideClick" />
+    <div v-if="isOpenSidebar" class="wh-full fixed-lt z-999 bg-black bg-opacity-30" @click="handleOutsideClick" />
     <!-- 左侧和顶部布局 -->
     <div :class="{ hasTagsView: showTagsView }" class="main-container">
-      <div :class="{ 'fixed-header': fixedHeader }" style="padding: 0 5px;">
+      <div :class="{ 'fixed-header': fixedHeader }" class="tag-header">
         <TagsView v-if="showTagsView" />
       </div>
       <AppMain />
@@ -23,14 +22,11 @@
 import Layout from "@/layout/index.vue";
 import { useSystemStore, useSettingsStore } from "@/store";
 import { useContextStore } from "@eimsnext/store";
-import { DeviceEnum } from "@/enums/DeviceEnum";
 import AppMain from "./AppMain/index.vue"
 
 const contextStore = useContextStore();
 const systemStore = useSystemStore();
 const settingsStore = useSettingsStore();
-
-const isMobile = computed(() => systemStore.device === DeviceEnum.MOBILE);
 const isOpenSidebar = computed(() => systemStore.sidebar.opened);
 const fixedHeader = computed(() => settingsStore.fixedHeader); // 是否固定header
 const showTagsView = computed(() => settingsStore.tagsView); // 是否显示tagsView
@@ -72,39 +68,27 @@ onBeforeMount(async () => {
     z-index: 9;
     transition: width 0.28s;
   }
-}
 
-.hideSidebar {
-  .main-container {
-    margin-left: $sidebar-width-collapsed;
+  .tag-header {
+    padding: 0 12px;
+    background-color: var(--el-bg-color-page);
   }
 }
 
-.layout-left.hideSidebar {
-  .sidebar-container {
-    width: $sidebar-width-collapsed !important;
-  }
+// .hideSidebar {
+//   .main-container {
+//     margin-left: $sidebar-width-collapsed;
+//   }
+// }
 
-  .main-container {
-    margin-left: $sidebar-width-collapsed;
-  }
+// .layout-left.hideSidebar {
+//   .sidebar-container {
+//     width: $sidebar-width-collapsed !important;
+//   }
 
-  &.mobile {
-    .sidebar-container {
-      pointer-events: none;
-      transition-duration: 0.3s;
-      transform: translate3d(-210px, 0, 0);
-    }
+//   .main-container {
+//     margin-left: $sidebar-width-collapsed;
+//   }
+// }
 
-    .main-container {
-      margin-left: 0;
-    }
-  }
-}
-
-.mobile {
-  .main-container {
-    margin-left: 0;
-  }
-}
-</style>
+// }</style>

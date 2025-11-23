@@ -1,7 +1,7 @@
 ```markdown
 # EIMSNext-Websites
 
-EIMSNext-Websites 是一个基于 Vue 3 和 TypeScript 的企业级管理系统前端项目，提供模块化设计和可扩展的架构，适用于构建企业内部管理系统、流程审批系统、表单系统等应用场景。
+EIMSNext-Websites 是企业低代码应用系统前端项目，基于 Vue 3 和 TypeScript 的提供模块化设计和可扩展的架构，适用于构建企业内部管理系统、流程审批系统、表单系统等应用场景。
 
 ## 项目结构概览
 
