@@ -60,11 +60,21 @@ export default {
     return localeProps(t, name + ".props", [
       makeOptionsRule(t, "options"),
     //   { type: "switch", field: "multiple" },
+      // {
+      //   type: "switch",
+      //   field: "disabled",
+      // },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "disabled",
+        wrap: { show: false },
       },
-      { type: "switch", field: "clearable" },
+      // { type: "switch", field: "clearable" },
+      {
+        type: "CheckBoxInput",
+        field: "clearable",
+        wrap: { show: false },
+      },
       // {
       //     type: 'switch',
       //     field: 'collapseTags'
@@ -75,9 +85,14 @@ export default {
       //     props: {min: 0}
       // },
       { type: "input", field: "placeholder" },
+      // {
+      //   type: "switch",
+      //   field: "filterable",
+      // },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "filterable",
+        wrap: { show: false },
       },
       // {
       //     type: 'switch',
@@ -102,7 +117,7 @@ export default {
       //     type: 'switch',
       //     field: 'reserveKeyword'
       // },
-      { type: "switch", field: "defaultFirstOption" },
+      // { type: "switch", field: "defaultFirstOption" },
     ]);
   },
 };

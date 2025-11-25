@@ -55,19 +55,17 @@ export default {
       {
         type: "CheckBoxInput",
         field: "hidden",
-        props: { title: "props.is_hidden" },
+        props: { title: t("props.is_hidden") },
         wrap: { show: false },
       },
       {
         type: "CheckBoxInput",
         field: "readonly",
-        props: { title: "props.is_readonly" },
         wrap: { show: false },
       },
       {
         type: "CheckBoxInput",
         field: "clearable",
-        props: { title: "props.is_clearable" },
         wrap: { show: false },
       },
     ]);
