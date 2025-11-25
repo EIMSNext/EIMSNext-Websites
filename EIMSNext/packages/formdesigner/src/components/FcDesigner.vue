@@ -354,7 +354,7 @@
                                     v-if="activeRule || (customForm.config && (customForm.config.name || customForm.config.label))">
                                     <p class="_fc-r-title">{{ t('designer.type') }}</p>
                                     <TypeSelect></TypeSelect>
-                                    <template
+                                    <!-- <template
                                         v-if="(activeRule && activeRule.name && config.showComponentName !== false)">
                                         <p class="_fc-r-title">
                                             <Warning :tooltip="t('warning.name')">
@@ -370,7 +370,7 @@
                                                 <i class="fc-icon icon-auto" @click="updateName"></i>
                                             </template>
                                         </el-input>
-                                    </template>
+                                    </template> -->
                                 </template>
                                 <template v-if="activeRuleChildren">
                                     <SubList></SubList>

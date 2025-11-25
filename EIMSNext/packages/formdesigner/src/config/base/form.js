@@ -61,12 +61,12 @@ export default function form({ t }) {
     //   value: "125px",
     //   title: t("form.labelWidth"),
     // },
-    {
-      type: "SizeInput",
-      field: "wrap>style>marginBottom",
-      value: "",
-      title: t("form.formItemMarginBottom"),
-    },
+    // {
+    //   type: "SizeInput",
+    //   field: "wrap>style>marginBottom",
+    //   value: "",
+    //   title: t("form.formItemMarginBottom"),
+    // },
     // {
     //   type: "switch",
     //   field: "hideRequiredAsterisk",
@@ -77,7 +77,7 @@ export default function form({ t }) {
       type: "CheckBoxInput",
       field: "hideRequiredAsterisk",
       value: false,
-      props: { title: "form.hideRequiredAsterisk" },
+      props: { title: t("form.hideRequiredAsterisk") },
       wrap: { show: false },
     },
     // {
@@ -90,7 +90,7 @@ export default function form({ t }) {
       type: "CheckBoxInput",
       field: "showMessage",
       value: true,
-      props: { title: "form.showMessage" },
+      props: { title: t("form.showMessage") },
       wrap: { show: false },
     },
     // {
@@ -103,7 +103,7 @@ export default function form({ t }) {
       type: "CheckBoxInput",
       field: "inlineMessage",
       value: false,
-      props: { title: "form.inlineMessage" },
+      props: { title: t("form.inlineMessage") },
       wrap: { show: false },
     },
     // {
