@@ -52,10 +52,20 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      { type: "switch", field: "readonly" },
+      // { type: "switch", field: "readonly" },
       {
-        type: "switch",
+        type: "CheckBoxInput",
+        field: "readonly",
+        wrap: { show: false },
+      },
+      // {
+      //   type: "switch",
+      //   field: "disabled",
+      // },
+      {
+        type: "CheckBoxInput",
         field: "disabled",
+        wrap: { show: false },
       },
       {
         type: "select",
@@ -82,7 +92,13 @@ export default {
       //     field: 'pickerOptions',
       //     props: {defaultValue: {}}
       // },
-      { type: "switch", field: "editable", value: true },
+      // { type: "switch", field: "editable", value: true },
+      {
+        type: "CheckBoxInput",
+        field: "editable",
+        value: true,
+        wrap: { show: false },
+      },
       {
         type: "input",
         field: "placeholder",

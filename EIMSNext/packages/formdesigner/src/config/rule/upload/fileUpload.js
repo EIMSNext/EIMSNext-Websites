@@ -43,9 +43,14 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
+      // {
+      //   type: "switch",
+      //   field: "disabled",
+      // },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "disabled",
+        wrap: { show: false },
       },
       // {
       //   type: "select",

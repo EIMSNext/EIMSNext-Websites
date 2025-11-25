@@ -1,6 +1,6 @@
 <template>
   <div class="_fd-checkbox-input" :class="{ disabled: !!disabled }">
-    <el-checkbox v-model="checked">{{ t(title) }}</el-checkbox>
+    <el-checkbox v-model="checked">{{ title }}</el-checkbox>
   </div>
 </template>
 <script>
@@ -15,12 +15,6 @@ export default defineComponent({
     disabled: Boolean,
   },
   emits: ["update:modelValue"],
-  inject: ["designer"],
-  computed: {
-    t() {
-      return this.designer.setupState.t;
-    },
-  },
   watch: {
     checked() {
       this.update();
