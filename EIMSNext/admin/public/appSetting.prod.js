@@ -1,6 +1,6 @@
 window.appSetting = {
-  authUrl: "http://auth.eimsnext.com",
-  apiUrl: "http://api.eimsnext.com",
-  uploadUrl: "http://file.eimsnext.com",
+  authUrl: "https://auth.eimsnext.com",
+  apiUrl: "https://api.eimsnext.com",
+  uploadUrl: "https://file.eimsnext.com",
   httpTimeout: 100000,
 };
