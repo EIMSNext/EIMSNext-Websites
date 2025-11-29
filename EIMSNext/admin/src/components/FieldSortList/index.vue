@@ -14,7 +14,7 @@
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <template v-for="(item, idx) in selectedFields.items" :key="idx">
+    <template v-for="(item, idx) in selectedFields.items" :key="item.field.field">
       <FieldSortItem :modelValue="item" @change="onChange" @remove="onRemove"></FieldSortItem>
     </template>
   </div>

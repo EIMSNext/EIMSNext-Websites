@@ -7,16 +7,17 @@
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">
-          <el-dropdown-item v-for="field in allFields" class="add-trigger"
-            :disabled="!!selectedFields.items.find((x) => x.field == field.field)"
-            :class="{ notAllow: selectedFields.items.find((x) => x.field == field.field) }" :command="field">
-            {{ field.field.label }}
-          </el-dropdown-item>
+          <template v-for="field in allFields" :key="field.field">
+            <el-dropdown-item class="add-trigger" :disabled="!!selectedFields.items.find((x) => x.field == field.field)"
+              :class="{ notAllow: selectedFields.items.find((x) => x.field == field.field) }" :command="field">
+              {{ field.field.label }}
+            </el-dropdown-item></template>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <template v-for="(item, idx) in selectedFields.items" :key="idx">
-      <FormFieldItem :modelValue="item" :nodes="nodes" :removable="!showAll" @change="onInput" @remove="onRemove">
+    <template v-for="(item, idx) in selectedFields.items" :key="item.field.field">
+      <FormFieldItem :modelValue="item" :nodes="nodes" :field-setting="fieldSetting" :removable="!showAll"
+        @change="onInput" @remove="onRemove">
       </FormFieldItem>
     </template>
   </div>
@@ -26,8 +27,9 @@ import { FormDef, FieldDef, FieldType } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import FormFieldItem from "./FormFieldItem.vue";
 import { useLocale } from "element-plus";
-import { IFormFieldList, IFormFieldItem, buildFormFieldList } from "./type";
-import { INodeForm } from "../NodeFieldList/type";
+import { IFormFieldList, IFormFieldItem, buildFormFieldList, FieldValueType } from "./type";
+import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
+import { IFormFieldDef, splitSubField } from "@/components/FieldList/type";
 const { t } = useLocale();
 
 defineOptions({
@@ -46,7 +48,8 @@ const props = withDefaults(
 );
 
 const allFields = ref<IFormFieldItem[]>([]);
-const selectedFields = ref<IFormFieldList>(props.modelValue);
+const selectedFields = toRef<IFormFieldList>(props.modelValue);
+const fieldSetting = ref<IFieldBuildSetting>({ version: 0, rule: FieldBuildRule.OneLevelTable, matchType: true, fieldMapping: {} })
 
 const formStore = useFormStore();
 const formDef = ref<FormDef>();
@@ -75,10 +78,34 @@ const onInput = (fieldItem: IFormFieldItem) => {
     if (item) {
       item.field = fieldItem.field;
       item.value = fieldItem.value;
+
+      // console.log("field .... changed", selectedFields.value)
+      updateFieldSetting()
     }
   }
   emitChange();
 };
+
+const updateFieldSetting = () => {
+  // console.log("field mapping1111", selectedFields.value)
+  let mapping: Record<string, IFormFieldDef> = {}
+  selectedFields.value.items.forEach(x => {
+    if (x.value.type == FieldValueType.Field && x.value.fieldValue && x.value.fieldValue.isSubField) {
+      if (x.field.isSubField) {
+        let mainField = splitSubField(x.field.field)[0]
+        if (!mapping[mainField])
+          mapping[mainField] = x.value.fieldValue
+      }
+      else if (!mapping["master"]) {
+        mapping["master"] = x.value.fieldValue
+      }
+    }
+  })
+
+  fieldSetting.value.fieldMapping = mapping
+  fieldSetting.value.version += 1
+  // console.log("field mapping", fieldSetting)
+}
 
 const emitChange = () => {
   emit("update:modelValue", selectedFields);
@@ -88,15 +115,19 @@ const emitChange = () => {
 watch(
   [() => props.formId, () => props.modelValue],
   async ([newFormId, newModel], [oldFormId, oldModel]) => {
-    // console.log("formfieldlist watch", newFormId, oldFormId, newModel, oldModel);
+    // console.log("formfieldlist watch", newFormId, oldFormId, newModel, oldModel, fieldSetting.value);
     if (newFormId && newFormId != oldFormId) {
       let form = await formStore.get(newFormId);
       if (form && form.content && form.content.items) {
         allFields.value = buildFormFieldList(newFormId, form.content.items, [], true);
+        fieldSetting.value.fieldMapping = {}
+        fieldSetting.value.version = 0;
       }
     }
+    console.log("selectedFields changed1111", newModel, oldModel)
     if (newModel != oldModel) {
-      selectedFields.value = newModel;
+      console.log("selectedFields changed2222", newModel, oldModel)
+      selectedFields.value.items = newModel.items;
     }
   },
   { immediate: true }

@@ -5,13 +5,9 @@
         <div class="flow-node-meta">
           <div class="attr-content">
             <div class="attr-item has-padding">
-              <MetaItemHeader :label="t('节点名称')" :required="true"></MetaItemHeader>             
-              <el-input
-                v-model="activeData.name"
-                :readonly="nodeType == FlowNodeType.Start"
-                size="default"
-                style="width: 100%"
-              />
+              <MetaItemHeader :label="t('节点名称')" :required="true"></MetaItemHeader>
+              <el-input v-model="activeData.name" :readonly="nodeType == FlowNodeType.Start" size="default"
+                style="width: 100%" />
             </div>
             <div v-if="nodeType == FlowNodeType.Approve" class="attr-item has-padding">
               <ApproveNodeMeta></ApproveNodeMeta>
@@ -51,10 +47,10 @@ const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
 const nodeType = ref(FlowNodeType.None);
 
 watch(
-  flowContextRef,
-  (newValue: IFlowContext) => {
+  () => flowContextRef.activeData,
+  (newValue: IFlowNodeData) => {
     nodeType.value = FlowNodeType.None;
-    activeData.value = newValue.activeData;
+    activeData.value = newValue;
     nextTick(() => {
       nodeType.value = activeData.value.nodeType;
     });
@@ -69,6 +65,7 @@ watch(
     overflow: auto;
     padding: 8px 8px 8px;
     position: relative;
+
     .attr-content {
       -webkit-box-orient: vertical;
       -webkit-box-direction: normal;
@@ -99,18 +96,21 @@ watch(
           }
         }
 
-        .sub-item + .sub-item {
+        .sub-item+.sub-item {
           margin-top: 8px;
         }
       }
+
       .has-padding {
         padding: 12px;
       }
     }
   }
+
   .required {
     color: #eb5050;
   }
+
   .help-icon {
     color: #b5b8be;
     font-size: 16px;

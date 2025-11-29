@@ -41,7 +41,7 @@ export function buildFormFieldList(
           if (mergeAll) {
             items.push({
               field: fieldDef,
-              value: { type: FieldValueType.Custom },
+              value: { type: FieldValueType.Field },
             });
           }
         }
@@ -56,7 +56,7 @@ export function buildFormFieldList(
         if (mergeAll) {
           items.push({
             field: fieldDef,
-            value: { type: FieldValueType.Custom },
+            value: { type: FieldValueType.Field },
           });
         }
       }
@@ -71,11 +71,3 @@ export function mergeFieldList(form: FormDef, existingFields: IFormFieldItem[], 
     return buildFormFieldList(form.id, form.content.items, existingFields, mergeAll);
   } else return existingFields;
 }
-
-const FieldTypeMapping: Record<string, string[]> = {
-  input: ["input", "textarea"],
-  textarea: ["input", "textarea"],
-  inputnumber: ["inputnumber"],
-};
-
-export { FieldTypeMapping };

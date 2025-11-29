@@ -4,16 +4,18 @@
       <el-input :value="field.label" :title="field.label" size="default"></el-input>
     </div>
     <div class="field-op">=</div>
-    <FormFieldValue :fieldDef="field" v-model="value" :nodes="nodes" @change="onInput"></FormFieldValue>
+    <FormFieldValue :fieldDef="field" v-model="value" :nodes="nodes" :fieldSetting="fieldSetting" @change="onInput">
+    </FormFieldValue>
     <div v-if="removable" class="ml-[5px]" style="align-content: center">
       <et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { INodeForm } from "../NodeFieldList/type";
+import { IFormFieldDef } from "@/components/FieldList/type";
+import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
 import FormFieldValue from "./FormFieldValue.vue";
-import { IFormFieldItem, FieldValueType } from "./type";
+import { IFormFieldItem, FieldValueType, IFormFieldList } from "./type";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
 
@@ -24,6 +26,7 @@ defineOptions({
 const props = defineProps<{
   modelValue: IFormFieldItem;
   nodes: INodeForm[];
+  fieldSetting: IFieldBuildSetting;
   removable?: boolean;
 }>();
 
@@ -39,6 +42,24 @@ const onRemove = () => {
 const onInput = () => {
   emitChange();
 };
+
+// watch(() => props.fieldItems, (newVal) => {
+//   console.log("field mapping1111", newVal)
+//   let mapping: Record<string, IFormFieldDef> = {}
+//   newVal.items.forEach(x => {
+//     if (x.value.type == FieldValueType.Field && x.value.fieldValue && x.value.fieldValue.isSubField) {
+//       if (x.field.isSubField && !mapping[x.field.field]) {
+//         mapping[x.field.field] = x.value.fieldValue
+//       }
+//       else if (!mapping["master"]) {
+//         mapping["master"] = x.value.fieldValue
+//       }
+//     }
+//   })
+//   console.log("field mapping", mapping)
+//   fieldSetting.value.fieldMapping = mapping
+// })
+
 const emitChange = () => {
   let newModel = { field: field.value, value: value.value };
   emit("update:modelValue", newModel);

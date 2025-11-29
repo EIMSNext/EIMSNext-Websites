@@ -1,6 +1,10 @@
 # EIMSNext-Websites
 
-EIMSNext-Websites is an enterprise-level management system frontend project built with Vue 3 and TypeScript, featuring a modular design and scalable architecture suitable for applications such as internal enterprise management systems, workflow approval systems, and form systems.
+EIMSNext-Websites is an enterprise low-code application system frontend project built with Vue 3 and TypeScript, featuring a modular design and scalable architecture suitable for applications such as internal enterprise management systems, workflow approval systems, and form systems.
+
+WebSite： [www.eimsnext.com](https://www.eimsnext.com)
+
+Demo： [work.eimsnext.com](https://work.eimsnext.com)
 
 ## Project Structure Overview
 
@@ -81,10 +85,20 @@ pnpm build
 pnpm lint
 ```
 
+### Donate
+If you feel that our open source software is helpful to you, please scan the QR code below to enjoy a cup of coffee.
+1. Click on the link [Paypal](https://www.paypal.com/ncp/payment/VF39PBVWQ7VVS) or scan the QR code to make a donation via Paypal
+
+![Paypal Donation ](https://foruda.gitee.com/images/1764387152456008244/97ecd31c_12828486.png "paypal200.png")
+
+2. Scan the QR code to make a donation via WeChat
+
+![WeChat Donation ](https://foruda.gitee.com/images/1763474049128942966/bada62bb_12828486.jpeg "wxpay200.jpg")
+
 ## Contribution Guidelines
 
 Pull requests and issues are welcome. Please follow the project’s code conventions and ensure new features are accompanied by appropriate tests.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache 2.0 License. See the [LICENSE](LICENSE) file for details.

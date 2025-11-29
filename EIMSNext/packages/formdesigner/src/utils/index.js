@@ -442,6 +442,12 @@ export const localeProps = (t, prefix, rules) => {
     if (rule.type === "template" && is.trueArray(rule.children)) {
       rule.children = localeProps(t, prefix, rule.children);
     }
+    if (rule.type === "CheckBoxInput" && rule.field) {
+      if (!rule.props) rule.props = {};
+      rule.props.title =
+        rule.props.title || t("com." + prefix + "." + rule.field);
+    }
+
     return rule;
   });
 };

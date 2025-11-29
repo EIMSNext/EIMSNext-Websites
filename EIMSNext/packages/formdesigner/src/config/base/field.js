@@ -45,31 +45,31 @@ export default function field({ t }) {
       wrap: { show: false },
       value: true,
       props: {
-        title: "props.is_showTitle",
+        title: t("props.is_showTitle"),
       },
     },
-    {
-      type: "Struct",
-      field: "_control",
-      name: "control",
-      value: [],
-      title: t("form.control"),
-      warning: t("form.controlDocument", {
-        doc:
-          '<a target="_blank" href="https://form-create.com/v3/guide/control" style="color: inherit;text-decoration: underline;">' +
-          t("form.document") +
-          "</a>",
-      }),
-      props: {
-        defaultValue: [],
-        validate(val) {
-          if (!Array.isArray(val)) return false;
-          if (!val.length) return true;
-          return !val.some(({ rule }) => {
-            return !Array.isArray(rule);
-          });
-        },
-      },
-    },
+    // {
+    //   type: "Struct",
+    //   field: "_control",
+    //   name: "control",
+    //   value: [],
+    //   title: t("form.control"),
+    //   warning: t("form.controlDocument", {
+    //     doc:
+    //       '<a target="_blank" href="https://form-create.com/v3/guide/control" style="color: inherit;text-decoration: underline;">' +
+    //       t("form.document") +
+    //       "</a>",
+    //   }),
+    //   props: {
+    //     defaultValue: [],
+    //     validate(val) {
+    //       if (!Array.isArray(val)) return false;
+    //       if (!val.length) return true;
+    //       return !val.some(({ rule }) => {
+    //         return !Array.isArray(rule);
+    //       });
+    //     },
+    //   },
+    // },
   ];
 }

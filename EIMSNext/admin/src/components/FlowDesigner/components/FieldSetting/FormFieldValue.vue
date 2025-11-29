@@ -32,17 +32,17 @@
       </template>
       <template v-if="fieldValueType == FieldValueType.Field">
         <NodeFieldList ref="nodefieldlist" v-model="fieldFieldValue" :nodes="nodes" :field-def="fieldDef"
-          :fieldBuildRule="FieldBuildRule.OneLevelTable" @change="onValueChange"></NodeFieldList>
+          :fieldBuildSetting="fieldSetting" @change="onValueChange"></NodeFieldList>
       </template>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { IListItem } from "@eimsnext/components";
-import { IFormFieldValue, FieldTypeMapping, FieldValueType } from "./type";
+import { IFormFieldValue, FieldValueType } from "./type";
 import { FieldDef, FieldType } from "@eimsnext/models";
 import NodeFieldList from "../NodeFieldList/index.vue";
-import { FieldBuildRule, INodeForm } from "../NodeFieldList/type";
+import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
 
 import { useLocale } from "element-plus";
 import { IFormFieldDef } from "@/components/FieldList/type";
@@ -52,9 +52,10 @@ defineOptions({
   name: "FormFieldValue",
 });
 const props = defineProps<{
+  modelValue: IFormFieldValue;
   fieldDef: IFormFieldDef;
   nodes: INodeForm[];
-  modelValue: IFormFieldValue;
+  fieldSetting: IFieldBuildSetting;
 }>();
 
 const nodefieldlist = ref()

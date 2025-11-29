@@ -1,7 +1,11 @@
 ```markdown
 # EIMSNext-Websites
 
-EIMSNext-Websites 是一个基于 Vue 3 和 TypeScript 的企业级管理系统前端项目，提供模块化设计和可扩展的架构，适用于构建企业内部管理系统、流程审批系统、表单系统等应用场景。
+EIMSNext-Websites 是企业低代码应用系统前端项目，基于 Vue 3 和 TypeScript 的提供模块化设计和可扩展的架构，适用于构建企业内部管理系统、流程审批系统、表单系统等应用场景。
+
+官方网站： [www.eimsnext.com](https://www.eimsnext.com)
+
+示例网站： [work.eimsnext.com](https://work.eimsnext.com)
 
 ## 项目结构概览
 
@@ -82,11 +86,21 @@ pnpm build
 pnpm lint
 ```
 
+### 捐助
+如果您觉得我们的开源软件对你有所帮助，请扫下方二维码打赏我们一杯咖啡。
+1. 点击链接[Paypal](https://www.paypal.com/ncp/payment/VF39PBVWQ7VVS)或扫描二维码通过Paypal打赏
+
+![Paypal打赏](https://foruda.gitee.com/images/1764387152456008244/97ecd31c_12828486.png "paypal200.png")
+
+2. 扫描二维码通过微信打赏
+
+![微信打赏](https://foruda.gitee.com/images/1763474049128942966/bada62bb_12828486.jpeg "wxpay200.jpg")
+
 ## 贡献指南
 
 欢迎提交 PR 或 Issue。请遵循项目代码规范，并确保新增功能有相应测试覆盖。
 
 ## 许可证
 
-本项目采用 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
+本项目采用 Apache 2.0 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
 ```

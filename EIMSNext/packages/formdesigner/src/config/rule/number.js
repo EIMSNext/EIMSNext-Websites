@@ -26,7 +26,12 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      { type: "switch", field: "disabled" },
+      // { type: "switch", field: "disabled" },
+      {
+        type: "CheckBoxInput",
+        field: "disabled",
+        wrap: { show: false },
+      },
       {
         type: "inputNumber",
         field: "min",
@@ -45,10 +50,15 @@ export default {
       //     type: 'switch',
       //     field: 'stepStrictly'
       // },
+      // {
+      //   type: "switch",
+      //   field: "controls",
+      //   value: true,
+      // },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "controls",
-        value: true,
+        wrap: { show: false },
       },
       {
         type: "select",

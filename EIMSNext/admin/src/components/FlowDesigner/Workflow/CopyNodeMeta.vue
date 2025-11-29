@@ -1,12 +1,9 @@
 <template>
-   <MetaItemHeader :label="t('节点负责人')" :required="true" tips="最多选择100人"></MetaItemHeader> 
-  <selected-tags
-    v-model="selectedCandidateTags"
-    :editable="true"
-    :empty-text="'选择成员或部门'"
-    @editTag="editTag"
-  />
-  <member-select-dialog v-model="showMemberDialog" @ok="finishSelect" />
+  <template v-if="ready">
+    <MetaItemHeader :label="t('节点负责人')" :required="true" tips="最多选择100人"></MetaItemHeader>
+    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="'选择成员或部门'" @editTag="editTag" />
+    <member-select-dialog v-model="showMemberDialog" @ok="finishSelect" />
+  </template>
 </template>
 <script lang="ts" setup>
 import {
@@ -28,6 +25,7 @@ defineOptions({
   name: "CopyNodeMeta",
 });
 
+const ready = ref(false)
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
@@ -39,7 +37,7 @@ const editTag = () => {
 };
 const finishSelect = (tags: ISelectedTag[]) => {
   //   console.log("sel tags", tags);
-  selectedCandidateTags.value = tags;
+  // selectedCandidateTags.value = tags;
   let candidate: IApprovalCandidate[] = [];
   tags.forEach((x) => candidate.push(convertTagToCandidate(x)));
   activeData.value.metadata.copytoMeta!.approvalCandidates = candidate;
@@ -47,11 +45,9 @@ const finishSelect = (tags: ISelectedTag[]) => {
   showMemberDialog.value = false;
 };
 
-watch(
-  flowContextRef,
-  (newValue: IFlowContext) => {
-    // console.log("activeData", newValue.activeData.metadata);
-    activeData.value = newValue.activeData;
+const init = () => {
+  nextTick(async () => {
+    activeData.value = flowContextRef.activeData;
 
     selectedCandidateTags.value = [];
     if (activeData.value.metadata.copytoMeta!.approvalCandidates) {
@@ -61,7 +57,28 @@ watch(
       );
       selectedCandidateTags.value = tags;
     }
-  },
-  { immediate: true }
-);
+
+    ready.value = true
+  })
+}
+
+init()
+
+// watch(
+//   flowContextRef,
+//   (newValue: IFlowContext) => {
+//     // console.log("activeData", newValue.activeData.metadata);
+//     activeData.value = newValue.activeData;
+
+//     selectedCandidateTags.value = [];
+//     if (activeData.value.metadata.copytoMeta!.approvalCandidates) {
+//       let tags: ISelectedTag[] = [];
+//       activeData.value.metadata.copytoMeta!.approvalCandidates.forEach((x: IApprovalCandidate) =>
+//         tags.push(convertCandidateToTag(x))
+//       );
+//       selectedCandidateTags.value = tags;
+//     }
+//   },
+//   { immediate: true }
+// );
 </script>

@@ -11,6 +11,9 @@ export interface IFormFieldDef {
   nodeId?: string;
   singleResultNode?: boolean;
 }
+export function splitSubField(subField: string) {
+  return subField.split(">");
+}
 export function toFormFieldDef(
   formId: string,
   field: FieldDef,

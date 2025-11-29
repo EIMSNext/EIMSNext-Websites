@@ -1,12 +1,6 @@
 <template>
-  <ConditionList
-    v-model="condList"
-    :formId="flowContext!.formId"
-    :nodeId="nodeId"
-    :nodes="nodes"
-    :condType="ConditionType.Node"
-    @change="onInput"
-  ></ConditionList>
+  <ConditionList v-if="ready" v-model="condList" :formId="flowContext!.formId" :nodeId="nodeId" :nodes="nodes"
+    :condType="ConditionType.Node" @change="onInput"></ConditionList>
 </template>
 <script lang="ts" setup>
 import {
@@ -28,6 +22,7 @@ defineOptions({
   name: "DfConditionNodeMeta",
 });
 
+const ready = ref(false)
 const nodeId = ref("");
 const nodes = ref<INodeForm[]>([]);
 
@@ -40,20 +35,40 @@ const onInput = (list: IConditionList) => {
   activeData.value.metadata.conditionMeta!.condition = list;
 };
 
-watch(
-  flowContextRef,
-  async (newValue: IFlowContext) => {
-    activeData.value = newValue.activeData;
-    nodeId.value = activeData.value.id;
-    nodes.value = await getPrevNodes(newValue.flowData, activeData.value);
+const init = () => {
+  nextTick(async () => {
 
-    console.log("df cond nodes", newValue, nodes.value);
+    activeData.value = flowContextRef.activeData;
+    nodeId.value = activeData.value.id;
+    nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
+
+    console.log("df cond nodes", flowContextRef, nodes.value);
 
     condList.value = { id: uniqueId(), rel: "and", items: [] };
     if (activeData.value.metadata.conditionMeta!.condition) {
       condList.value = activeData.value.metadata.conditionMeta!.condition;
     }
-  },
-  { immediate: true }
-);
+
+    ready.value = true
+  })
+}
+
+init()
+
+// watch(
+//   flowContextRef,
+//   async (newValue: IFlowContext) => {
+//     activeData.value = newValue.activeData;
+//     nodeId.value = activeData.value.id;
+//     nodes.value = await getPrevNodes(newValue.flowData, activeData.value);
+
+//     console.log("df cond nodes", newValue, nodes.value);
+
+//     condList.value = { id: uniqueId(), rel: "and", items: [] };
+//     if (activeData.value.metadata.conditionMeta!.condition) {
+//       condList.value = activeData.value.metadata.conditionMeta!.condition;
+//     }
+//   },
+//   { immediate: true }
+// );
 </script>
