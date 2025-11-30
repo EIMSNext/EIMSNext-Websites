@@ -28,7 +28,7 @@ import { useFormStore } from "@eimsnext/store";
 import FormFieldItem from "./FormFieldItem.vue";
 import { useLocale } from "element-plus";
 import { IFormFieldList, IFormFieldItem, buildFormFieldList, FieldValueType } from "./type";
-import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
+import { FieldBuildRule, IFieldBuildSetting, IFormFieldMap, INodeForm } from "../NodeFieldList/type";
 import { IFormFieldDef, splitSubField } from "@/components/FieldList/type";
 const { t } = useLocale();
 
@@ -88,16 +88,28 @@ const onInput = (fieldItem: IFormFieldItem) => {
 
 const updateFieldSetting = () => {
   // console.log("field mapping1111", selectedFields.value)
-  let mapping: Record<string, IFormFieldDef> = {}
+  let mapping: Record<string, IFormFieldMap> = {}
   selectedFields.value.items.forEach(x => {
     if (x.value.type == FieldValueType.Field && x.value.fieldValue && x.value.fieldValue.isSubField) {
+      let mapMainField = splitSubField(x.value.fieldValue.field)[0]
       if (x.field.isSubField) {
         let mainField = splitSubField(x.field.field)[0]
-        if (!mapping[mainField])
-          mapping[mainField] = x.value.fieldValue
+        if (!mapping[mainField]) {
+          let fieldMap: IFormFieldMap = { mainField: mainField, sorceField: x.field.field, mapMainField: mapMainField, mapField: x.value.fieldValue.field, mapNodeId: x.value.fieldValue.nodeId, mapCount: 1 }
+          mapping[mainField] = fieldMap
+        }
+        else {
+          mapping[mainField].mapCount++;
+        }
       }
-      else if (!mapping["master"]) {
-        mapping["master"] = x.value.fieldValue
+      else {
+        if (!mapping["master"]) {
+          let fieldMap: IFormFieldMap = { mainField: "master", sorceField: x.field.field, mapMainField: mapMainField, mapField: x.value.fieldValue.field, mapNodeId: x.value.fieldValue.nodeId, mapCount: 1 }
+          mapping["master"] = fieldMap
+        }
+        else {
+          mapping["master"].mapCount++;
+        }
       }
     }
   })
@@ -124,11 +136,13 @@ watch(
         fieldSetting.value.version = 0;
       }
     }
-    console.log("selectedFields changed1111", newModel, oldModel)
+    // console.log("selectedFields changed1111", newModel, oldModel)
     if (newModel != oldModel) {
-      console.log("selectedFields changed2222", newModel, oldModel)
+      // console.log("selectedFields changed2222", newModel, oldModel)
       selectedFields.value.items = newModel.items;
     }
+
+    updateFieldSetting()
   },
   { immediate: true }
 );

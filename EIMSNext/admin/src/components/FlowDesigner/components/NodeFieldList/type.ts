@@ -23,14 +23,14 @@ export interface IFieldBuildSetting {
   rule: FieldBuildRule;
   matchType: boolean;
   fieldLimit?: string;
-  fieldMapping?: Record<string, IFormFieldDef>;
+  fieldMapping?: Record<string, IFormFieldMap>;
 }
 export interface IFormFieldMap {
   mainField: string;
   sorceField: string;
   mapMainField: string;
   mapField: string;
-  mapNodeId: string;
+  mapNodeId?: string;
   mapCount: number;
 }
 export enum ConditionFieldType {
@@ -94,8 +94,23 @@ export function buildNodeFieldTree(
               // console.log("buid sub tree", fieldDef, mapped, pNode.id, mappedField, x.field);
               if (!mapped) {
                 shouldHidden = false;
-              } else if (mapped.nodeId == pNode.id && splitSubField(mapped.field)[0] == x.field) {
-                shouldHidden = false;
+              } else {
+                //当同级字段只有一个在MAP并且是当前字段时，不过滤。
+                if (
+                  mapped.mapCount == 1 &&
+                  mapped.mapMainField == x.field &&
+                  mapped.mapField != fieldDef?.field
+                ) {
+                  shouldHidden = false;
+                }
+
+                if (
+                  shouldHidden &&
+                  mapped.mapNodeId == pNode.id &&
+                  mapped.mapMainField == x.field
+                ) {
+                  shouldHidden = false;
+                }
               }
             }
             if (!shouldHidden) {
