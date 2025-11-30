@@ -96,10 +96,10 @@ export function buildNodeFieldTree(
                 shouldHidden = false;
               } else {
                 //当同级字段只有一个在MAP并且是当前字段时，不过滤。
+                // console.log("one map", mapped, x.field, fieldDef?.field);
                 if (
                   mapped.mapCount == 1 &&
-                  mapped.mapMainField == x.field &&
-                  mapped.mapField != fieldDef?.field
+                  mapped.sorceField == fieldDef?.field
                 ) {
                   shouldHidden = false;
                 }

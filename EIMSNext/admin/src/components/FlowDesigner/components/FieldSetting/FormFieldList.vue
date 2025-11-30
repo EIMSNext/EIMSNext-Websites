@@ -120,8 +120,8 @@ const updateFieldSetting = () => {
 }
 
 const emitChange = () => {
-  emit("update:modelValue", selectedFields);
-  emit("change", selectedFields);
+  emit("update:modelValue", selectedFields.value);
+  emit("change", selectedFields.value);
 };
 
 watch(
@@ -137,10 +137,10 @@ watch(
       }
     }
     // console.log("selectedFields changed1111", newModel, oldModel)
-    if (newModel != oldModel) {
-      // console.log("selectedFields changed2222", newModel, oldModel)
-      selectedFields.value.items = newModel.items;
-    }
+    // if (newModel != oldModel) {
+    //   console.log("selectedFields changed2222", newModel, oldModel)
+    //   selectedFields.value.items = newModel.items;
+    // }
 
     updateFieldSetting()
   },
