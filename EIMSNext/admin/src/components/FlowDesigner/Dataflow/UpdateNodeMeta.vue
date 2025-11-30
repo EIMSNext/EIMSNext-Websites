@@ -28,7 +28,7 @@
     </div>
     <div v-if="!activeData.metadata.updateMeta!.insertIfNoData || showEditPanel == '1'">
       <FormFieldList v-if="nodes.length > 0" v-model="formFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
-        :show-all="false" @change="fieldChanged"></FormFieldList>
+        :show-all="false" @addingField="fieldAdding" @change="fieldChanged"></FormFieldList>
       <div v-if="subCondNeeded" class="mt-[8px]" style="background-color: #f5f6f8; padding: 10px">
         <div class="mb-[8px]">修改数据选择了子表单字段，请设置子表单的修改条件</div>
         <ConditionList v-model="subCondList" :formId="formId" :nodeId="nodeId" :nodes="nodes" :maxLevel="1"
@@ -62,6 +62,7 @@ import { getPrevNodes } from "./type";
 import MetaItemHeader from "../components/MetaItemHeader/index.vue";
 import { IConditionList } from "@/components/ConditionList/type";
 import { uniqueId } from "@eimsnext/utils";
+import { splitSubField } from "@/components/FieldList/type";
 const { t } = useLocale();
 
 defineOptions({
@@ -90,6 +91,7 @@ const appId = ref(flowContext!.appId);
 const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 const subCondNeeded = ref(false);
+const subCondLimitField = ref("")
 const showEditPanel = ref("1");
 // console.log("showEditPanel", showEditPanel);
 
@@ -150,6 +152,10 @@ const onSubCondition = (list: IConditionList) => {
   // subCondList.value = list;
   activeData.value.metadata.updateMeta!.subCondition = list;
 };
+const fieldAdding = (field: IFormFieldItem, cancel: boolean) => {
+
+
+}
 const fieldChanged = (fields: IFormFieldList) => {
   console.log("fieldChanged", fields.items);
   // formFieldList.value = fields;
@@ -195,7 +201,15 @@ const init = () => {
       );
 
       //TODO: 将来进一步区分需要主字段条件还是子表单字段条件
-      subCondNeeded.value = formFieldList.value.items.findIndex((x) => x.field.isSubField || (x.value.type == FieldValueType.Field && (x.value.fieldValue && (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField)))) > -1;
+      let conField = formFieldList.value.items.find((x) => x.field.isSubField || (x.value.type == FieldValueType.Field && (x.value.fieldValue && (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField))));
+      if (conField) {
+        subCondLimitField.value = conField.field.isSubField ? splitSubField(conField.field.field)[0] : "master";
+        subCondNeeded.value = true;
+      }
+      else {
+        subCondLimitField.value = ""
+        subCondNeeded.value = false;
+      }
 
       insertFieldList.value.items = mergeFieldList(
         formDef.value,

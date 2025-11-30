@@ -46,7 +46,9 @@ const props = withDefaults(
     nodes: INodeForm[];
     showAll?: boolean;
   }>(),
-  {}
+  {
+    showAll: true
+  }
 );
 
 const allFields = ref<IFormFieldItem[]>([]);
@@ -56,10 +58,13 @@ const fieldSetting = ref<IFieldBuildSetting>({ version: 0, rule: FieldBuildRule.
 const formStore = useFormStore();
 const formDef = ref<FormDef>();
 
-const emit = defineEmits(["update:modelValue", "change"]);
+const emit = defineEmits(["update:modelValue", "addingField", "change"]);
 
 const addField = (fieldItem: IFormFieldItem) => {
-  selectedFields.value.items.push(fieldItem);
+  const addingArgs = ref({ field: fieldItem, cancel: false })
+  emit("addingField", addingArgs.value);
+  if (!addingArgs.value.cancel)
+    selectedFields.value.items.push(fieldItem);
 };
 
 const onRemove = (fieldItem: IFormFieldItem) => {
@@ -92,12 +97,12 @@ const updateFieldSetting = () => {
   // console.log("field mapping1111", selectedFields.value)
   let mapping: Record<string, IFormFieldMap> = {}
   selectedFields.value.items.forEach(x => {
-    if (x.value.type == FieldValueType.Field && x.value.fieldValue && x.value.fieldValue.isSubField) {
-      let mapMainField = splitSubField(x.value.fieldValue.field)[0]
+    if (x.value.type == FieldValueType.Field && x.value.fieldValue && (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField)) {
+      let mapMainField = x.value.fieldValue.isSubField ? splitSubField(x.value.fieldValue.field)[0] : "master"
       if (x.field.isSubField) {
         let mainField = splitSubField(x.field.field)[0]
         if (!mapping[mainField]) {
-          let fieldMap: IFormFieldMap = { mainField: mainField, sorceField: x.field.field, mapMainField: mapMainField, mapField: x.value.fieldValue.field, mapNodeId: x.value.fieldValue.nodeId, mapCount: 1 }
+          let fieldMap: IFormFieldMap = { mainField: mainField, sourceField: x.field.field, mapMainField: mapMainField, mapField: x.value.fieldValue.field, mapNodeId: x.value.fieldValue.nodeId, mapSingleResult: x.value.fieldValue.singleResultNode ?? true, mapCount: 1 }
           mapping[mainField] = fieldMap
         }
         else {
@@ -106,7 +111,7 @@ const updateFieldSetting = () => {
       }
       else {
         if (!mapping["master"]) {
-          let fieldMap: IFormFieldMap = { mainField: "master", sorceField: x.field.field, mapMainField: mapMainField, mapField: x.value.fieldValue.field, mapNodeId: x.value.fieldValue.nodeId, mapCount: 1 }
+          let fieldMap: IFormFieldMap = { mainField: "master", sourceField: x.field.field, mapMainField: mapMainField, mapField: x.value.fieldValue.field, mapNodeId: x.value.fieldValue.nodeId, mapSingleResult: x.value.fieldValue.singleResultNode ?? true, mapCount: 1 }
           mapping["master"] = fieldMap
         }
         else {
