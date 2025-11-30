@@ -97,10 +97,7 @@ export function buildNodeFieldTree(
               } else {
                 //当同级字段只有一个在MAP并且是当前字段时，不过滤。
                 // console.log("one map", mapped, x.field, fieldDef?.field);
-                if (
-                  mapped.mapCount == 1 &&
-                  mapped.sorceField == fieldDef?.field
-                ) {
+                if (mapped.mapCount == 1 && mapped.sorceField == fieldDef?.field) {
                   shouldHidden = false;
                 }
 
@@ -186,5 +183,10 @@ export function buildNodeFieldTree(
     });
   }
 
+  //remove empty node
+  for (let i = treeNodes.length - 1; i > -1; i--) {
+    if (treeNodes[i].children?.length == 0) treeNodes.splice(i, 1);
+  }
+  
   return treeNodes;
 }

@@ -16,7 +16,8 @@
     <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition">
     </ConditionList>
     <div>
-      <el-checkbox v-model="activeData.metadata.updateMeta!.insertIfNoData" label="没有可修改的数据时，向对应表单新增数据" />
+      <el-checkbox v-model="activeData.metadata.updateMeta!.insertIfNoData" label="没有可修改的数据时，向对应表单新增数据"
+        @change="insertIfNoDataChanged" />
     </div>
     <MetaItemHeader class="mt-[8px]" :label="t('设置字段数据')" :required="true"></MetaItemHeader>
     <div v-if="activeData.metadata.updateMeta!.insertIfNoData">
@@ -61,7 +62,6 @@ import { getPrevNodes } from "./type";
 import MetaItemHeader from "../components/MetaItemHeader/index.vue";
 import { IConditionList } from "@/components/ConditionList/type";
 import { uniqueId } from "@eimsnext/utils";
-import { cloneDeep } from "lodash";
 const { t } = useLocale();
 
 defineOptions({
@@ -71,6 +71,7 @@ defineOptions({
 const ready = ref(false)
 const nodeId = ref("");
 const formId = ref("");
+const formDef = ref<FormDef>()
 const formFieldList = ref<IFormFieldList>({ items: [] });
 const insertFieldList = ref<IFormFieldList>({ items: [] });
 
@@ -90,7 +91,7 @@ const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 const subCondNeeded = ref(false);
 const showEditPanel = ref("1");
-console.log("showEditPanel", showEditPanel);
+// console.log("showEditPanel", showEditPanel);
 
 const modeChanged = (mode: UpdateMode) => {
   formId.value = "";
@@ -129,9 +130,9 @@ const formChanged = async (form: IFormItem) => {
   subCondNeeded.value = false;
 
   ////
-  let formDef = await formStore.get(formId.value);
-  if (formDef) {
-    insertFieldList.value.items = mergeFieldList(formDef, [], true);
+  formDef.value = await formStore.get(formId.value);
+  if (formDef.value) {
+    insertFieldList.value.items = mergeFieldList(formDef.value, [], true);
   }
   ////
 
@@ -150,7 +151,7 @@ const onSubCondition = (list: IConditionList) => {
   activeData.value.metadata.updateMeta!.subCondition = list;
 };
 const fieldChanged = (fields: IFormFieldList) => {
-   console.log("fieldChanged", fields.items);
+  console.log("fieldChanged", fields.items);
   // formFieldList.value = fields;
   subCondNeeded.value = fields.items.findIndex((x) => x.field.isSubField || (x.value.type == FieldValueType.Field && (x.value.fieldValue && (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField)))) > -1;
 
@@ -165,6 +166,15 @@ const insertFieldChanged = (fields: IFormFieldList) => {
   // insertFieldList.value = fields;
   activeData.value.metadata.updateMeta!.insertFieldList = fields;
 };
+const insertIfNoDataChanged = () => {
+  if (activeData.value.metadata.updateMeta!.insertIfNoData && formDef.value) {
+    insertFieldList.value.items = mergeFieldList(
+      formDef.value,
+      activeData.value.metadata.updateMeta!.insertFieldList.items,
+      true
+    );
+  }
+}
 
 const init = () => {
   nextTick(async () => {
@@ -176,10 +186,10 @@ const init = () => {
     formId.value = activeData.value.metadata.updateMeta!.formId;
     formItem.value = { id: formId.value };
 
-    let formDef = await formStore.get(formId.value);
-    if (formDef) {
+    formDef.value = await formStore.get(formId.value);
+    if (formDef.value) {
       formFieldList.value.items = mergeFieldList(
-        formDef,
+        formDef.value,
         activeData.value.metadata.updateMeta!.formFieldList.items,
         false
       );
@@ -188,7 +198,7 @@ const init = () => {
       subCondNeeded.value = formFieldList.value.items.findIndex((x) => x.field.isSubField || (x.value.type == FieldValueType.Field && (x.value.fieldValue && (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField)))) > -1;
 
       insertFieldList.value.items = mergeFieldList(
-        formDef,
+        formDef.value,
         activeData.value.metadata.updateMeta!.insertFieldList.items,
         true
       );

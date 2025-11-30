@@ -7,9 +7,11 @@
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">
-          <template v-for="field in allFields" :key="field.field">
-            <el-dropdown-item class="add-trigger" :disabled="!!selectedFields.items.find((x) => x.field == field.field)"
-              :class="{ notAllow: selectedFields.items.find((x) => x.field == field.field) }" :command="field">
+          <template v-for="field in allFields" :key="field.field.field">
+            <el-dropdown-item class="add-trigger"
+              :disabled="!!selectedFields.items.find((x) => x.field.field == field.field.field)"
+              :class="{ notAllow: selectedFields.items.find((x) => x.field.field == field.field.field) }"
+              :command="field">
               {{ field.field.label }}
             </el-dropdown-item></template>
         </el-dropdown-menu>
@@ -125,9 +127,8 @@ const emitChange = () => {
 };
 
 watch(
-  [() => props.formId, () => props.modelValue],
-  async ([newFormId, newModel], [oldFormId, oldModel]) => {
-    // console.log("formfieldlist watch", newFormId, oldFormId, newModel, oldModel, fieldSetting.value);
+  [() => props.formId],
+  async ([newFormId], [oldFormId]) => {
     if (newFormId && newFormId != oldFormId) {
       let form = await formStore.get(newFormId);
       if (form && form.content && form.content.items) {
@@ -136,11 +137,6 @@ watch(
         fieldSetting.value.version = 0;
       }
     }
-    // console.log("selectedFields changed1111", newModel, oldModel)
-    // if (newModel != oldModel) {
-    //   console.log("selectedFields changed2222", newModel, oldModel)
-    //   selectedFields.value.items = newModel.items;
-    // }
 
     updateFieldSetting()
   },
