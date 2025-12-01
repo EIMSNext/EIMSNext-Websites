@@ -13,8 +13,9 @@ defineOptions({
   name: "FieldList",
 });
 const props = defineProps<{
-  formId: string;
   modelValue: IFormFieldDef;
+  formId: string;
+  fieldLimit?: string;
 }>();
 
 const formStore = useFormStore();
@@ -30,15 +31,14 @@ const onInput = (val: string) => {
 };
 
 watch(
-  [() => props.formId, () => props.modelValue],
-  ([newFormId, newModel], [oldFormId, oldModel]) => {
+  () => props.formId,
+  (newFormId, oldFormId) => {
     if (newFormId && newFormId != oldFormId) {
       formStore.get(newFormId).then((form) => {
         if (form?.content?.items)
-          fieldList.value = buildFieldListItems(newFormId, form.content.items, form.usingWorkflow);
+          fieldList.value = buildFieldListItems(newFormId, form.content.items, form.usingWorkflow, undefined, props.fieldLimit);
       });
     }
-    if (newModel && newModel != oldModel) value.value = newModel.field;
   },
   { immediate: true }
 );

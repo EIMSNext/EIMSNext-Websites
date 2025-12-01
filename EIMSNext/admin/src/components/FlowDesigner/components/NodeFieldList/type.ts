@@ -150,7 +150,7 @@ export function buildNodeFieldTree(
                 singleOnly
               );
               if (!mapped) {
-                shouldHidden = !singleResult || (singleOnly && showLv2);
+                shouldHidden = !singleResult || showLv2;
                 console.log("1.2.1", shouldHidden);
               } else {
                 if (singleOnly) {

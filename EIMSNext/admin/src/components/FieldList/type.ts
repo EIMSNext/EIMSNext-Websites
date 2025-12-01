@@ -55,27 +55,43 @@ export function buildFieldListItems(
   formId: string,
   fields: FieldDef[],
   usingWf: boolean,
-  nodeId?: string
+  nodeId?: string,
+  fieldLimit?: string
 ): IListItem[] {
   const items: IListItem[] = [];
-  if (usingWf) {
-    let status: IFormFieldDef = toFormFieldDef(
-      formId,
-      getFlowStatus("流程状态"),
-      undefined,
-      nodeId
-    );
-    items.push({
-      id: status.field,
-      label: status.label,
-      data: status,
-    });
-  }
 
+  if (!fieldLimit || fieldLimit == "master") {
+    if (usingWf) {
+      let status: IFormFieldDef = toFormFieldDef(
+        formId,
+        getFlowStatus("流程状态"),
+        undefined,
+        nodeId
+      );
+      items.push({
+        id: status.field,
+        label: status.label,
+        data: status,
+      });
+    }
+  }
   fields.forEach((x: FieldDef) => {
-    if (x.type && x.type == FieldType.TableForm && x.columns && x.columns.length > 0) {
-      x.columns.forEach((sub: FieldDef) => {
-        var fieldDef: IFormFieldDef = toFormFieldDef(formId, sub, x, nodeId);
+    if (x.type == FieldType.TableForm) {
+      if ((!fieldLimit || fieldLimit == x.field) && x.columns && x.columns.length > 0) {
+        x.columns.forEach((sub: FieldDef) => {
+          var fieldDef: IFormFieldDef = toFormFieldDef(formId, sub, x, nodeId);
+          let item: IListItem = {
+            id: fieldDef.field,
+            label: fieldDef.label,
+            data: fieldDef,
+          };
+
+          items.push(item);
+        });
+      }
+    } else {
+      if (!fieldLimit || fieldLimit == "master") {
+        var fieldDef: IFormFieldDef = toFormFieldDef(formId, x, undefined, nodeId);
         let item: IListItem = {
           id: fieldDef.field,
           label: fieldDef.label,
@@ -83,31 +99,24 @@ export function buildFieldListItems(
         };
 
         items.push(item);
-      });
-    } else {
-      var fieldDef: IFormFieldDef = toFormFieldDef(formId, x, undefined, nodeId);
-      let item: IListItem = {
-        id: fieldDef.field,
-        label: fieldDef.label,
-        data: fieldDef,
-      };
-
-      items.push(item);
+      }
     }
   });
 
-  if (formId != "employee") {
-    let createTime: IFormFieldDef = toFormFieldDef(
-      formId,
-      getCreateTime("提交时间"),
-      undefined,
-      nodeId
-    );
-    items.push({
-      id: createTime.field,
-      label: createTime.label,
-      data: createTime,
-    });
+  if (!fieldLimit || fieldLimit == "master") {
+    if (formId != "employee") {
+      let createTime: IFormFieldDef = toFormFieldDef(
+        formId,
+        getCreateTime("提交时间"),
+        undefined,
+        nodeId
+      );
+      items.push({
+        id: createTime.field,
+        label: createTime.label,
+        data: createTime,
+      });
+    }
   }
 
   return items;
