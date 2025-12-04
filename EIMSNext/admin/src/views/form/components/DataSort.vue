@@ -8,8 +8,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import FieldSortList from "@/components/FieldSortList/index.vue";
-import { IFieldSortList } from "@/components/FieldSortList/type";
+import { IFieldSortList } from "@eimsnext/components";
 import { ClickOutside as vClickOutside } from "element-plus";
 
 defineOptions({

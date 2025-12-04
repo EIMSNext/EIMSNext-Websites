@@ -9,8 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { IFormFieldDef, buildFieldListItems } from "@/components/FieldList/type";
-import { IListItem } from "@eimsnext/components";
+import { IListItem,IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import { ClickOutside as vClickOutside } from "element-plus";
 

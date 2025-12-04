@@ -20,14 +20,10 @@
 <script lang="ts" setup>
 import { FlowNodeType, IFlowContext, IFlowNodeData, UpdateMode, createFlowNode } from "../FlowData";
 import { useContextStore, useFormStore } from "@eimsnext/store";
-import FormList from "../../FormList/index.vue";
-import ConditionList from "../../ConditionList/index.vue";
 import { useLocale } from "element-plus";
-import { IFormItem } from "@/components/FormList/type";
-import { FieldBuildRule, INodeForm } from "../components/NodeFieldList/type";
+import { IFormItem,FieldBuildRule, INodeForm,IConditionList } from "@eimsnext/components";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../components/MetaItemHeader/index.vue";
-import { IConditionList } from "@/components/ConditionList/type";
 import { uniqueId } from "@eimsnext/utils";
 const { t } = useLocale();
 

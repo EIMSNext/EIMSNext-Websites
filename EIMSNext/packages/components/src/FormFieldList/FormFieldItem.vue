@@ -12,9 +12,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { IFormFieldDef } from "@/components/FieldList/type";
+import { ref } from "vue";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
-import FormFieldValue from "./FormFieldValue.vue";
 import { IFormFieldItem, FieldValueType, IFormFieldList } from "./type";
 import { useLocale } from "element-plus";
 const { t } = useLocale();

@@ -10,7 +10,11 @@
       <!-- 用户列表 -->
       <el-col :lg="18" :xs="24">
         <el-card shadow="never">
-          <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+          <et-toolbar
+            :left-group="leftBars"
+            :right-group="rightBars"
+            @command="toolbarHandler"
+          ></et-toolbar>
           <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="40" />
             <el-table-column label="姓名" width="150" prop="empName" />
@@ -36,14 +40,41 @@
         </el-card>
       </el-col>
     </el-row>
-    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
-      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false">
-      </DataFilter>
+    <el-popover
+      :visible="showFilter"
+      :virtual-ref="filterBtnRef"
+      :show-arrow="false"
+      :offset="0"
+      placement="bottom-end"
+      width="500"
+      :teleported="false"
+      trigger="click"
+      :destroy-on-close="true"
+    >
+      <DataFilter
+        :model-value="condList"
+        formId="employee"
+        @ok="setFilter"
+        @cancel="showFilter = false"
+      ></DataFilter>
     </el-popover>
-    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
-      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
+    <el-popover
+      :visible="showSort"
+      :virtual-ref="sortBtnRef"
+      :show-arrow="false"
+      :offset="0"
+      placement="bottom-end"
+      width="500"
+      :teleported="false"
+      trigger="click"
+      :destroy-on-close="true"
+    >
+      <DataSort
+        :model-value="sortList"
+        formId="employee"
+        @ok="setSort"
+        @cancel="showSort = false"
+      ></DataSort>
     </el-popover>
   </div>
 </template>
@@ -53,9 +84,7 @@ import { ODataQuery } from "@/utils/query";
 import { Department, Employee, FieldType, Role } from "@eimsnext/models";
 import { SortDirection, employeeService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem } from "@eimsnext/components";
-import { IConditionList, toODataQuery } from "@/components/ConditionList/type";
-import { IFieldSortList } from "@/components/FieldSortList/type";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList } from "@eimsnext/components";
 
 defineOptions({
   name: "RoleManager",
@@ -68,45 +97,107 @@ const showDeleteConfirmDialog = ref(false);
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
 const showSort = ref(false);
-const sortList = ref<IFieldSortList>({ items: [{ field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input }, sort: SortDirection.Asc }] });
+const sortList = ref<IFieldSortList>({
+  items: [
+    {
+      field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input },
+      sort: SortDirection.Asc,
+    },
+  ],
+});
 
 const filterBtnRef = ref();
 const sortBtnRef = ref();
-const checkedDatas = ref<any[]>([])
-const pageNum = ref(1)
-const pageSize = ref(20)
+const checkedDatas = ref<any[]>([]);
+const pageNum = ref(1);
+const pageSize = ref(20);
 
 const leftBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "添加", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddEditDialog.value = true; } } },
-  { type: "button", config: { text: "移除", type: "danger", command: "delete", icon: "el-icon-delete", disabled: true } },
+  {
+    type: "button",
+    config: {
+      text: "添加",
+      type: "success",
+      command: "add",
+      icon: "el-icon-plus",
+      onCommand: () => {
+        showAddEditDialog.value = true;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "移除",
+      type: "danger",
+      command: "delete",
+      icon: "el-icon-delete",
+      disabled: true,
+    },
+  },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
   // { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
-])
+]);
 
 const rightBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "筛选", class: "data-filter", command: "filter", icon: "el-icon-filter", onCommand: (cmd: string, e: MouseEvent) => { filterBtnRef.value = e.currentTarget, showSort.value = false; showFilter.value = !showFilter.value; } } },
-  { type: "button", config: { text: "排序", class: "data-filter", command: "sort", icon: "el-icon-sort", onCommand: (cmd: string, e: MouseEvent) => { sortBtnRef.value = e.currentTarget, showFilter.value = false; showSort.value = !showSort.value; } } },
-  { type: "button", config: { text: "刷新", class: "data-filter", command: "refresh", icon: "el-icon-refresh", onCommand: () => { handleQuery() } } }
-])
+  {
+    type: "button",
+    config: {
+      text: "筛选",
+      class: "data-filter",
+      command: "filter",
+      icon: "el-icon-filter",
+      onCommand: (cmd: string, e: MouseEvent) => {
+        ((filterBtnRef.value = e.currentTarget), (showSort.value = false));
+        showFilter.value = !showFilter.value;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "排序",
+      class: "data-filter",
+      command: "sort",
+      icon: "el-icon-sort",
+      onCommand: (cmd: string, e: MouseEvent) => {
+        ((sortBtnRef.value = e.currentTarget), (showFilter.value = false));
+        showSort.value = !showSort.value;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "刷新",
+      class: "data-filter",
+      command: "refresh",
+      icon: "el-icon-refresh",
+      onCommand: () => {
+        handleQuery();
+      },
+    },
+  },
+]);
 
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
   switch (cmd) {
     case "delete":
       {
         if (checkedDatas.value.length > 0) {
-          showDeleteConfirmDialog.value = true
+          showDeleteConfirmDialog.value = true;
         }
       }
       break;
   }
-}
+};
 
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
   showFilter.value = false;
   // console.log("condList", filter);
 
-  updateQueryParams()
+  updateQueryParams();
   handleQuery();
 };
 
@@ -115,7 +206,7 @@ const setSort = (sort: IFieldSortList) => {
   showSort.value = false;
   // console.log("sortList", sort);
 
-  updateQueryParams()
+  updateQueryParams();
   handleQuery();
 };
 
@@ -124,41 +215,47 @@ const updateQueryParams = () => {
   // if (deptId.value) {
   //   deptFilter = { departmentId: { eq: deptId.value } }
   // }
-  queryParams.value = toODataQuery(condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value, roleFilter)
-  queryParams.value.expand = "department"
+  queryParams.value = toODataQuery(
+    condList.value,
+    sortList.value,
+    (pageNum.value - 1) * pageSize.value,
+    pageSize.value,
+    roleFilter
+  );
+  queryParams.value.expand = "department";
 
   // console.log("queryParams list", queryParams.value);
-}
+};
 
 const queryParams = ref<ODataQuery<Employee>>({
   skip: 0,
-  top: pageSize.value
+  top: pageSize.value,
 });
 
 const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
-const roleId = ref("")
+const roleId = ref("");
 
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
   pageSize.value = pSize;
 
   updateQueryParams();
-  loadData()
-}
+  loadData();
+};
 const handleRoleQuery = (role?: Role) => {
-  roleId.value = role?.id ?? ""
+  roleId.value = role?.id ?? "";
 
-  updateQueryParams()
-  handleQuery()
-}
+  updateQueryParams();
+  handleQuery();
+};
 // 查询
 const handleQuery = () => {
   loading.value = true;
 
-  loadCount()
-  loadData()
+  loadCount();
+  loadData();
 };
 
 const loadCount = () => {
@@ -177,7 +274,7 @@ const loadData = () => {
     .then((res: Employee[]) => {
       dataRef.value = res;
     })
-    .finally(() => loading.value = false);
+    .finally(() => (loading.value = false));
 };
 
 // 选中项发生变化
@@ -194,7 +291,7 @@ const showDetails = (row: FormData, column: any) => {
   //   selectedData.value = row
   //   showDetailsDialog.value = true
   // }
-}
+};
 
 // 重置密码
 // function hancleResetPassword(row: any) {

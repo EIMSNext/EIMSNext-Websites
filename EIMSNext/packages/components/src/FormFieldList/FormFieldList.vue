@@ -42,7 +42,6 @@
 <script setup lang="ts">
 import { FormDef, FieldDef, FieldType } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
-import FormFieldItem from "./FormFieldItem.vue";
 import { useLocale } from "element-plus";
 import { IFormFieldList, IFormFieldItem, buildFormFieldList, FieldValueType } from "./type";
 import {
@@ -51,7 +50,8 @@ import {
   IFormFieldMap,
   INodeForm,
 } from "../NodeFieldList/type";
-import { IFormFieldDef, splitSubField } from "@/components/FieldList/type";
+import { ref, toRef, watch } from "vue";
+import { splitSubField } from "@/FieldList/type";
 const { t } = useLocale();
 
 defineOptions({

@@ -1,8 +1,8 @@
-import { IFormFieldDef } from "@/components/FieldList/type";
+import { IFormFieldDef } from "@/FieldList/type";
+import { IFieldSortList } from "@/FieldSortList/type";
 import { FieldType, SystemField, isSystemField } from "@eimsnext/models";
-import { IFieldSortList } from "../FieldSortList/type";
 import { IDynamicFindOptions, IDynamicFilter, SortDirection } from "@eimsnext/services";
-import { ODataQuery } from "@/utils/query";
+// import { ODataQuery } from "@/utils/query";
 
 export enum ConditionType {
   Form = 0,
@@ -125,7 +125,8 @@ export function toODataQuery<T>(
     }
   };
 
-  var query: ODataQuery<T> = { skip: skip, top: take };
+  // var query: ODataQuery<T> = { skip: skip, top: take };
+  var query: any = { skip: skip, top: take };
 
   // if (fields.length > 0) {
   //   findOpt.select = [];

@@ -57,19 +57,11 @@
 <script setup lang="ts">
 import { FieldType } from "@eimsnext/models";
 import { ConditionType, ConditionValueType, IConditionList, dataOperators } from "./type";
-import ConditionValue from "./ConditionValue.vue";
-import FieldList from "../FieldList/index.vue";
-
 import { useLocale } from "element-plus";
-import { IFormFieldDef } from "@/components/FieldList/type";
-import {
-  ConditionFieldType,
-  FieldBuildRule,
-  IFieldBuildSetting,
-  INodeForm,
-  getConditionFieldType,
-} from "../FlowDesigner/components/NodeFieldList/type";
-import NodeFieldList from "../FlowDesigner/components/NodeFieldList/index.vue";
+import { ConditionFieldType, IFieldBuildSetting, INodeForm, getConditionFieldType } from "@/NodeFieldList/type";
+import { IFormFieldDef } from "@/FieldList/type";
+import { computed, ref, toRef } from "vue";
+
 const { t } = useLocale();
 
 defineOptions({

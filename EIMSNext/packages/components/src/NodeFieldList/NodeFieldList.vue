@@ -4,11 +4,12 @@
 </template>
 
 <script setup lang="ts">
-import { IListItem, ITreeNode, TreeNodeType, findNode } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm, buildNodeFieldTree } from "./type";
-import { IFormFieldDef } from "../../../FieldList/type";
 import { FilterNodeMethodFunction, TreeNodeData } from "element-plus";
+import { IFormFieldDef } from "@/FieldList/type";
+import { ref, toRef, watch } from "vue";
+import { ITreeNode, TreeNodeType, findNode } from "@/common";
 
 defineOptions({
   name: "NodeFieldList",

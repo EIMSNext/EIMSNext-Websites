@@ -17,10 +17,21 @@
       <!-- 用户列表 -->
       <el-col :lg="18" :xs="24">
         <el-card shadow="never">
-          <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
-          <el-table ref="tableRef" v-loading="loading" :data="dataRef" show-overflow-tooltip
-            :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" @selection-change="selectionChanged"
-            @row-click="edit">
+          <et-toolbar
+            :left-group="leftBars"
+            :right-group="rightBars"
+            @command="toolbarHandler"
+          ></et-toolbar>
+          <el-table
+            ref="tableRef"
+            v-loading="loading"
+            :data="dataRef"
+            show-overflow-tooltip
+            :tooltip-formatter="tableToolFormatter"
+            :row-class-name="rowClassName"
+            @selection-change="selectionChanged"
+            @row-click="edit"
+          >
             <el-table-column type="selection" width="40" />
             <el-table-column label="姓名" width="150" prop="empName" />
             <el-table-column label="编码" width="150" prop="code" />
@@ -45,20 +56,57 @@
         </el-card>
       </el-col>
     </el-row>
-    <AddEditEmp v-if="showAddEditDialog" :edit="editMode" :emp="selectedEmp" @cancel="showAddEditDialog = false"
-      @ok="handleSaved" />
-    <et-confirm-dialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :showNoSave="false" okText="确认"
-      @ok="execDelete">
+    <AddEditEmp
+      v-if="showAddEditDialog"
+      :edit="editMode"
+      :emp="selectedEmp"
+      @cancel="showAddEditDialog = false"
+      @ok="handleSaved"
+    />
+    <et-confirm-dialog
+      v-model="showDeleteConfirmDialog"
+      title="你确定要删除所选数据吗？"
+      :showNoSave="false"
+      okText="确认"
+      @ok="execDelete"
+    >
       你当前选中了{{ checkedDatas.length }}条数据，数据删除后将不可恢复
     </et-confirm-dialog>
-    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
-      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false">
-      </DataFilter>
+    <el-popover
+      :visible="showFilter"
+      :virtual-ref="filterBtnRef"
+      :show-arrow="false"
+      :offset="0"
+      placement="bottom-end"
+      width="500"
+      :teleported="false"
+      trigger="click"
+      :destroy-on-close="true"
+    >
+      <DataFilter
+        :model-value="condList"
+        formId="employee"
+        @ok="setFilter"
+        @cancel="showFilter = false"
+      ></DataFilter>
     </el-popover>
-    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
-      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
+    <el-popover
+      :visible="showSort"
+      :virtual-ref="sortBtnRef"
+      :show-arrow="false"
+      :offset="0"
+      placement="bottom-end"
+      width="500"
+      :teleported="false"
+      trigger="click"
+      :destroy-on-close="true"
+    >
+      <DataSort
+        :model-value="sortList"
+        formId="employee"
+        @ok="setSort"
+        @cancel="showSort = false"
+      ></DataSort>
     </el-popover>
   </div>
 </template>
@@ -68,9 +116,7 @@ import { ODataQuery } from "@/utils/query";
 import { Department, Employee, FieldType } from "@eimsnext/models";
 import { SortDirection, employeeService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem } from "@eimsnext/components";
-import { IConditionList, toODataQuery } from "@/components/ConditionList/type";
-import { IFieldSortList } from "@/components/FieldSortList/type";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList } from "@eimsnext/components";
 import { TableInstance, TableTooltipData } from "element-plus";
 
 defineOptions({
@@ -86,45 +132,108 @@ const showDeleteConfirmDialog = ref(false);
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
 const showSort = ref(false);
-const sortList = ref<IFieldSortList>({ items: [{ field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input }, sort: SortDirection.Asc }] });
+const sortList = ref<IFieldSortList>({
+  items: [
+    {
+      field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input },
+      sort: SortDirection.Asc,
+    },
+  ],
+});
 
 const filterBtnRef = ref();
 const sortBtnRef = ref();
-const checkedDatas = ref<any[]>([])
-const pageNum = ref(1)
-const pageSize = ref(20)
+const checkedDatas = ref<any[]>([]);
+const pageNum = ref(1);
+const pageSize = ref(20);
 
 const leftBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "新增", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { editMode.value = false; showAddEditDialog.value = true; } } },
-  { type: "button", config: { text: "删除", type: "danger", command: "delete", icon: "el-icon-delete", disabled: true } },
+  {
+    type: "button",
+    config: {
+      text: "新增",
+      type: "success",
+      command: "add",
+      icon: "el-icon-plus",
+      onCommand: () => {
+        editMode.value = false;
+        showAddEditDialog.value = true;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "删除",
+      type: "danger",
+      command: "delete",
+      icon: "el-icon-delete",
+      disabled: true,
+    },
+  },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
   // { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
-])
+]);
 
 const rightBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "筛选", class: "data-filter", command: "filter", icon: "el-icon-filter", onCommand: (cmd: string, e: MouseEvent) => { filterBtnRef.value = e.currentTarget, showSort.value = false; showFilter.value = !showFilter.value; } } },
-  { type: "button", config: { text: "排序", class: "data-filter", command: "sort", icon: "el-icon-sort", onCommand: (cmd: string, e: MouseEvent) => { sortBtnRef.value = e.currentTarget, showFilter.value = false; showSort.value = !showSort.value; } } },
-  { type: "button", config: { text: "刷新", class: "data-filter", command: "refresh", icon: "el-icon-refresh", onCommand: () => { handleQuery() } } }
-])
+  {
+    type: "button",
+    config: {
+      text: "筛选",
+      class: "data-filter",
+      command: "filter",
+      icon: "el-icon-filter",
+      onCommand: (cmd: string, e: MouseEvent) => {
+        ((filterBtnRef.value = e.currentTarget), (showSort.value = false));
+        showFilter.value = !showFilter.value;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "排序",
+      class: "data-filter",
+      command: "sort",
+      icon: "el-icon-sort",
+      onCommand: (cmd: string, e: MouseEvent) => {
+        ((sortBtnRef.value = e.currentTarget), (showFilter.value = false));
+        showSort.value = !showSort.value;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "刷新",
+      class: "data-filter",
+      command: "refresh",
+      icon: "el-icon-refresh",
+      onCommand: () => {
+        handleQuery();
+      },
+    },
+  },
+]);
 
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
   switch (cmd) {
     case "delete":
       {
         if (checkedDatas.value.length > 0) {
-          showDeleteConfirmDialog.value = true
+          showDeleteConfirmDialog.value = true;
         }
       }
       break;
   }
-}
+};
 
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
   showFilter.value = false;
   // console.log("condList", filter);
 
-  updateQueryParams()
+  updateQueryParams();
   handleQuery();
 };
 
@@ -133,7 +242,7 @@ const setSort = (sort: IFieldSortList) => {
   showSort.value = false;
   // console.log("sortList", sort);
 
-  updateQueryParams()
+  updateQueryParams();
   handleQuery();
 };
 
@@ -141,55 +250,63 @@ const updateQueryParams = () => {
   let statusFilter = { status: { eq: empStatus.value } };
   let preFilter: any = statusFilter;
   if (deptHeriarchyId.value) {
-    preFilter = { and: [statusFilter, { "department/heriarchyId": { startswith: deptHeriarchyId.value } }] }
+    preFilter = {
+      and: [statusFilter, { "department/heriarchyId": { startswith: deptHeriarchyId.value } }],
+    };
   }
 
-  queryParams.value = toODataQuery(condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value, preFilter)
-  queryParams.value.expand = "department"
+  queryParams.value = toODataQuery(
+    condList.value,
+    sortList.value,
+    (pageNum.value - 1) * pageSize.value,
+    pageSize.value,
+    preFilter
+  );
+  queryParams.value.expand = "department";
 
   // console.log("queryParams list", queryParams.value);
-}
+};
 
 const queryParams = ref<ODataQuery<Employee>>({
   skip: 0,
-  top: pageSize.value
+  top: pageSize.value,
 });
 
 const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
-const deptHeriarchyId = ref("")
-const empStatus = ref(0)
+const deptHeriarchyId = ref("");
+const empStatus = ref(0);
 
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
   pageSize.value = pSize;
 
   updateQueryParams();
-  loadData()
-}
+  loadData();
+};
 
 const handleStatusChanged = () => {
-  updateQueryParams()
-  handleQuery()
-}
+  updateQueryParams();
+  handleQuery();
+};
 
 const handleDeptChanged = (dept?: Department) => {
-  deptHeriarchyId.value = dept?.heriarchyId ?? ""
+  deptHeriarchyId.value = dept?.heriarchyId ?? "";
 
-  updateQueryParams()
-  handleQuery()
-}
+  updateQueryParams();
+  handleQuery();
+};
 // 查询
 const handleQuery = () => {
   loading.value = true;
 
-  loadCount()
-  loadData()
+  loadCount();
+  loadData();
 };
 const rowClassName = (row: any) => {
-  return "pointer"
-}
+  return "pointer";
+};
 
 const loadCount = () => {
   let query = buildQuery({ filter: queryParams.value.filter });
@@ -206,30 +323,30 @@ const loadData = () => {
     .query<Employee>(query)
     .then((res: Employee[]) => {
       dataRef.value = res;
-      console.log("data.....", dataRef.value)
+      console.log("data.....", dataRef.value);
     })
-    .finally(() => loading.value = false);
+    .finally(() => (loading.value = false));
 };
 
 // 选中项发生变化
 const selectionChanged = (rows: any[]) => {
-  checkedDatas.value = rows
-  leftBars.value.find(x => x.config.command == "delete")!.config.disabled = checkedDatas.value.length == 0
-}
+  checkedDatas.value = rows;
+  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
+    checkedDatas.value.length == 0;
+};
 const tableToolFormatter = (data: TableTooltipData<FormData>) => {
   return `${data.cellValue}`;
 };
 
 const edit = (row: Employee, column: any) => {
   if (column.type == "selection") {
-    tableRef.value?.toggleRowSelection(row)
+    tableRef.value?.toggleRowSelection(row);
+  } else {
+    editMode.value = true;
+    selectedEmp.value = row;
+    showAddEditDialog.value = true;
   }
-  else {
-    editMode.value = true
-    selectedEmp.value = row
-    showAddEditDialog.value = true
-  }
-}
+};
 
 // 重置密码
 // function hancleResetPassword(row: any) {
@@ -254,18 +371,17 @@ const edit = (row: Employee, column: any) => {
 
 const handleSaved = (data: Employee) => {
   showAddEditDialog.value = false;
-  handleQuery()
+  handleQuery();
 };
 
 const execDelete = async () => {
-  await employeeService.delete("batch", { keys: checkedDatas.value.map(x => x.id) })
-    .then(() => {
-      handleQuery()
-    })
+  await employeeService.delete("batch", { keys: checkedDatas.value.map((x) => x.id) }).then(() => {
+    handleQuery();
+  });
 };
 
 onMounted(() => {
-  updateQueryParams()
+  updateQueryParams();
   handleQuery();
 });
 </script>

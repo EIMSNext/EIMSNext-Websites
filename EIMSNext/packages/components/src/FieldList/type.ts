@@ -1,5 +1,5 @@
+import { IListItem } from "@/list/type";
 import { FieldDef, FieldType, getFlowStatus, getCreateTime } from "@eimsnext/models";
-import { IListItem } from "@eimsnext/components";
 
 export interface IFormFieldDef {
   formId: string;

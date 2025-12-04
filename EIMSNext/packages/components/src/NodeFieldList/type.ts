@@ -1,10 +1,5 @@
-import {
-  IFormFieldDef,
-  getFieldIcon,
-  splitSubField,
-  toFormFieldDef,
-} from "@/components/FieldList/type";
-import { ITreeNode, TreeNodeType } from "@eimsnext/components";
+import { IFormFieldDef, getFieldIcon, splitSubField, toFormFieldDef } from "@/FieldList/type";
+import { ITreeNode, TreeNodeType } from "@/common";
 import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
 
 export interface INodeForm {

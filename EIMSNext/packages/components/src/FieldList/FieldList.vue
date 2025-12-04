@@ -5,9 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { IListItem } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import { IFormFieldDef, buildFieldListItems } from "./type";
+import { ref, watch } from "vue";
+import { IListItem } from "@/list/type";
 
 defineOptions({
   name: "FieldList",

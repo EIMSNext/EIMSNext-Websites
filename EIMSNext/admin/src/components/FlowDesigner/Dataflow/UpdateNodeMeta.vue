@@ -94,24 +94,20 @@
 import { FlowNodeType, IFlowContext, IFlowNodeData, UpdateMode, createFlowNode } from "../FlowData";
 import { FormDef } from "@eimsnext/models";
 import { useContextStore, useFormStore } from "@eimsnext/store";
-import FormList from "../../FormList/index.vue";
-import ConditionList from "../../ConditionList/index.vue";
-import FormFieldList from "../components/FieldSetting/FormFieldList.vue";
 import { useLocale } from "element-plus";
-import { IFormItem } from "@/components/FormList/type";
 import {
   FieldValueType,
   IFormFieldItem,
   IFormFieldList,
   buildFormFieldList,
   mergeFieldList,
-} from "../components/FieldSetting/type";
-import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../components/NodeFieldList/type";
+  IFormItem,
+  FieldBuildRule, IFieldBuildSetting, INodeForm,splitSubField,IConditionList
+} from "@eimsnext/components";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../components/MetaItemHeader/index.vue";
-import { IConditionList } from "@/components/ConditionList/type";
 import { uniqueId } from "@eimsnext/utils";
-import { splitSubField } from "@/components/FieldList/type";
+
 const { t } = useLocale();
 
 defineOptions({

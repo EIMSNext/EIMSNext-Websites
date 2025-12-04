@@ -1,6 +1,5 @@
-import { IListItem } from "@eimsnext/components";
+import { IListItem,INodeForm } from "@eimsnext/components";
 import { FlowNodeType, IFlowData, IFlowNodeData, getFlowNodeById } from "../FlowData";
-import { INodeForm } from "../components/NodeFieldList/type";
 import { useFormStore } from "@eimsnext/store";
 
 export function buildWfNodeListItems(wfFlowData: IFlowData): IListItem[] {

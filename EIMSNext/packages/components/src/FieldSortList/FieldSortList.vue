@@ -20,14 +20,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, toRef, watch } from "vue";
 import { useFormStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
-import FieldSortItem from "./FieldSortItem.vue";
 import { IFieldSortItem, IFieldSortList } from "./type";
 import { IFormFieldDef, buildFieldListItems } from "../FieldList/type";
-import { IListItem } from "@eimsnext/components";
 import { SortDirection } from "@eimsnext/services";
+import { IListItem } from "@/list/type";
 const { t } = useLocale();
 
 defineOptions({

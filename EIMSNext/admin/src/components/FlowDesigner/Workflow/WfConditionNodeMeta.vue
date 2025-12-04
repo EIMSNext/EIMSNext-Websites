@@ -10,8 +10,7 @@ import {
   createFlowNode,
 } from "../FlowData";
 import { useLocale } from "element-plus";
-import { IConditionList } from "../../ConditionList/type";
-import ConditionList from "../../ConditionList/index.vue";
+import { IConditionList } from "@eimsnext/components";
 import { uniqueId } from "@eimsnext/utils";
 const { t } = useLocale();
 
