@@ -11,10 +11,8 @@ import {
   createFlowNode,
 } from "../FlowData";
 import { useLocale } from "element-plus";
-import { ConditionType, IConditionList } from "../../ConditionList/type";
-import ConditionList from "../../ConditionList/index.vue";
+import { ConditionType, IConditionList,INodeForm } from "@eimsnext/components";
 import { uniqueId } from "@eimsnext/utils";
-import { INodeForm } from "../components/NodeFieldList/type";
 import { getPrevNodes } from "./type";
 const { t } = useLocale();
 

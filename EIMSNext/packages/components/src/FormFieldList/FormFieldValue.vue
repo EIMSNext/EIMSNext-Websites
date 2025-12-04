@@ -41,11 +41,11 @@
 import { IListItem } from "@eimsnext/components";
 import { IFormFieldValue, FieldValueType } from "./type";
 import { FieldDef, FieldType } from "@eimsnext/models";
-import NodeFieldList from "../NodeFieldList/index.vue";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
-
 import { useLocale } from "element-plus";
-import { IFormFieldDef } from "@/components/FieldList/type";
+import { IFormFieldDef } from "@/FieldList/type";
+import { computed, ref } from "vue";
+
 const { t } = useLocale();
 
 defineOptions({

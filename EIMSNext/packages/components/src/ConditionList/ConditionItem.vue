@@ -2,14 +2,32 @@
   <div class="cond-item">
     <div class="cond-detail">
       <template v-if="condType == ConditionType.Node">
-        <NodeFieldList class="cond-field" v-model="field" :nodes="nodes!" :fieldBuildSetting="fieldBuildSetting"
-          :field-def="modelValue.field" @change="changeField"></NodeFieldList>
+        <NodeFieldList
+          class="cond-field"
+          v-model="field"
+          :nodes="nodes!"
+          :fieldBuildSetting="fieldBuildSetting"
+          :field-def="modelValue.field"
+          @change="changeField"
+        ></NodeFieldList>
       </template>
       <template v-else>
-        <FieldList class="cond-field" v-model="field" :formId="formId" @change="changeField"></FieldList>
+        <FieldList
+          class="cond-field"
+          v-model="field"
+          :formId="formId"
+          :fieldLimit="fieldBuildSetting.fieldLimit"
+          @change="changeField"
+        ></FieldList>
       </template>
 
-      <el-dropdown v-model="op" class="cond-op" size="default" trigger="click" @command="onOpChanged">
+      <el-dropdown
+        v-model="op"
+        class="cond-op"
+        size="default"
+        trigger="click"
+        @command="onOpChanged"
+      >
         <span style="display: flex; align-items: center">
           {{ opLabel }}
           <et-icon icon="el-icon-arrow-down"></et-icon>
@@ -26,26 +44,24 @@
       <div><et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon></div>
     </div>
     <div v-if="op != 'empty' && op != 'notempty'" class="cond-detail mt-[10px]">
-      <ConditionValue v-model="value" :field-def="modelValue.field" :nodes="nodes" :fieldBuildSetting="valueBuildSetting"
-        @change="onInput"></ConditionValue>
+      <ConditionValue
+        v-model="value"
+        :field-def="modelValue.field"
+        :nodes="nodes"
+        :fieldBuildSetting="valueBuildSetting"
+        @change="onInput"
+      ></ConditionValue>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { FieldType } from "@eimsnext/models";
-import {
-  ConditionType,
-  ConditionValueType,
-  IConditionList,
-  dataOperators,
-} from "./type";
-import ConditionValue from "./ConditionValue.vue";
-import FieldList from "../FieldList/index.vue";
-
+import { ConditionType, ConditionValueType, IConditionList, dataOperators } from "./type";
 import { useLocale } from "element-plus";
-import { IFormFieldDef } from "@/components/FieldList/type";
-import { ConditionFieldType, FieldBuildRule, IFieldBuildSetting, INodeForm, getConditionFieldType } from "../FlowDesigner/components/NodeFieldList/type";
-import NodeFieldList from "../FlowDesigner/components/NodeFieldList/index.vue";
+import { ConditionFieldType, IFieldBuildSetting, INodeForm, getConditionFieldType } from "@/NodeFieldList/type";
+import { IFormFieldDef } from "@/FieldList/type";
+import { computed, ref, toRef } from "vue";
+
 const { t } = useLocale();
 
 defineOptions({
@@ -70,7 +86,7 @@ const value = ref(props.modelValue.value ?? { type: ConditionValueType.Custom, v
 const fieldType = ref<FieldType>(field.value?.type ?? FieldType.Input);
 
 const dataType = computed(() => {
-  return field.value.field ? getConditionFieldType(fieldType.value) : ConditionFieldType.Other
+  return field.value.field ? getConditionFieldType(fieldType.value) : ConditionFieldType.Other;
 });
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
@@ -90,17 +106,17 @@ const opLabel = computed(() => {
 
 const changeField = (item: IFormFieldDef) => {
   field.value = item;
-  let newDataType = item.field ? getConditionFieldType(item.type) : ConditionFieldType.None
+  let newDataType = item.field ? getConditionFieldType(item.type) : ConditionFieldType.None;
 
   if (dataType.value != newDataType) {
     value.value.value = null;
     value.value.type = ConditionValueType.Custom;
-    value.value.fieldValue = undefined
+    value.value.fieldValue = undefined;
 
     if (dataOperators[newDataType].indexOf(op.value) == -1)
-      op.value = dataOperators[newDataType][0]
+      op.value = dataOperators[newDataType][0];
 
-    fieldType.value = item.type
+    fieldType.value = item.type;
   }
 
   emitChange();

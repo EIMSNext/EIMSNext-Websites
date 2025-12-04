@@ -98,7 +98,15 @@ pnpm lint
 
 ## 贡献指南
 
-欢迎提交 PR 或 Issue。请遵循项目代码规范，并确保新增功能有相应测试覆盖。
+欢迎贡献代码和文档。请遵循以下步骤：
+1. Fork `https://gitee.com/eimsnext/EIMSNext-Websites`。
+2. 创建新分支。
+3. 提交更改。
+4. 创建 Pull Request。
+
+## 联系方式
+
+如有问题或建议，请提交 Issue 或联系项目维护者。
 
 ## 许可证
 

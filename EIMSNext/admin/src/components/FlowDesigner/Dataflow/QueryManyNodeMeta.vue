@@ -22,15 +22,9 @@ import {
   createFlowNode,
 } from "../FlowData";
 import { useLocale } from "element-plus";
-import FormList from "../../FormList/index.vue";
-import { IConditionList } from "../../ConditionList/type";
-import ConditionList from "../../ConditionList/index.vue";
+import { IConditionList,INodeForm,IFormItem,IFieldSortList } from "@eimsnext/components";
 import { uniqueId } from "@eimsnext/utils";
-import { INodeForm } from "../components/NodeFieldList/type";
 import { getPrevNodes } from "./type";
-import { IFormItem } from "@/components/FormList/type";
-import FieldSortList from "../../FieldSortList/index.vue";
-import { IFieldSortList } from "@/components/FieldSortList/type";
 import MetaItemHeader from "../components/MetaItemHeader/index.vue";
 const { t } = useLocale();
 

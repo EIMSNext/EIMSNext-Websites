@@ -44,12 +44,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { IListItem } from "@eimsnext/components";
 import { ConditionValueType, IConditonValue } from "./type";
-import { FieldBuildRule, INodeForm, ConditionFieldType, getConditionFieldType, IFieldBuildSetting } from "../FlowDesigner/components/NodeFieldList/type";
 import { FieldType } from "@eimsnext/models";
 import { IFormFieldDef } from "../FieldList/type";
-import NodeFieldList from "../FlowDesigner/components/NodeFieldList/index.vue";
+import { IFieldBuildSetting, INodeForm, getConditionFieldType,ConditionFieldType } from "@/NodeFieldList/type";
+import { IListItem } from "@/list/type";
+import { computed, ref, toRef } from "vue";
 
 // import { useLocale } from "element-plus";
 // const { t } = useLocale();

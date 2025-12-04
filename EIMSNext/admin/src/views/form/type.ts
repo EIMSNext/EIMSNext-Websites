@@ -1,4 +1,4 @@
-import { IFormFieldDef } from "@/components/FieldList/type";
+import { IFormFieldDef } from "@eimsnext/components";
 import { FieldDef, SystemField, getCreateTime, getFlowStatus } from "@eimsnext/models";
 import { Dictionary } from "@eimsnext/utils";
 

@@ -3,25 +3,30 @@
     <MetaItemHeader :label="t('目标表单')" :required="true"></MetaItemHeader>
     <FormList v-model="formItem" :appId="appId" @change="formChanged"></FormList>
     <MetaItemHeader class="mt-[8px]" :label="t('设置字段数据')" :required="true"></MetaItemHeader>
-    <FormFieldList v-if="nodes.length > 0" v-model="formFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
-      :show-all="true" @change="fieldChanged"></FormFieldList>
+    <FormFieldList
+      v-if="nodes.length > 0"
+      v-model="formFieldList"
+      :node-id="nodeId"
+      :formId="formId"
+      :nodes="nodes"
+      :show-all="true"
+      @change="fieldChanged"
+    ></FormFieldList>
   </template>
 </template>
 <script lang="ts" setup>
 import { FlowNodeType, IFlowContext, IFlowNodeData, createFlowNode } from "../FlowData";
 import { FormDef } from "@eimsnext/models";
 import { useContextStore, useFormStore } from "@eimsnext/store";
-import FormList from "../../FormList/index.vue";
-import FormFieldList from "../components/FieldSetting/FormFieldList.vue";
 import { useLocale } from "element-plus";
-import { IFormItem } from "@/components/FormList/type";
 import {
   IFormFieldItem,
   IFormFieldList,
   buildFormFieldList,
   mergeFieldList,
-} from "../components/FieldSetting/type";
-import { INodeForm } from "../components/NodeFieldList/type";
+  INodeForm,
+  IFormItem,
+} from "@eimsnext/components";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../components/MetaItemHeader/index.vue";
 
@@ -31,7 +36,7 @@ defineOptions({
   name: "InsertNodeMeta",
 });
 
-const ready = ref(false)
+const ready = ref(false);
 const nodeId = ref("");
 const formId = ref("");
 const formFieldList = ref<IFormFieldList>({ items: [] });
@@ -82,11 +87,11 @@ const init = () => {
         true
       );
 
-    ready.value = true
-  })
-}
+    ready.value = true;
+  });
+};
 
-init()
+init();
 
 // watch(
 //   flowContextRef,

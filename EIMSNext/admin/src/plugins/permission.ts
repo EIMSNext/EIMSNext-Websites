@@ -1,5 +1,4 @@
 import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } from "vue-router";
-import NProgress from "@/utils/nprogress";
 import { accessToken } from "@eimsnext/utils";
 import router from "@/router";
 import { usePermissionStore } from "@/store";
@@ -12,7 +11,6 @@ export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
     // console.log("router before", accessToken, to);
 
-    NProgress.start();
     if (!to.meta?.requiresAuth) {
       next();
     } else {
@@ -61,21 +59,18 @@ export function setupPermission() {
               //TODO:需要清除更多，需要包装
               accessToken.clear();
               redirectToLogin(to, next);
-              NProgress.done();
             }
           }
         }
       } else {
         // 不在白名单，重定向到登录页
         redirectToLogin(to, next);
-        NProgress.done();
       }
     }
   });
 
   // 后置守卫，保证每次路由跳转结束时关闭进度条
   router.afterEach(() => {
-    NProgress.done();
   });
 }
 

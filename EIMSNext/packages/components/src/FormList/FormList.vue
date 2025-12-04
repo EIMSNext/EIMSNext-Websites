@@ -5,9 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { IListItem } from "@eimsnext/components";
 import { useFormStore, useAppStore } from "@eimsnext/store";
 import { IFormItem, buildFormListItems } from "./type";
+import { IListItem } from "@/list/type";
+import { ref, watch } from "vue";
 
 defineOptions({
   name: "FormList",

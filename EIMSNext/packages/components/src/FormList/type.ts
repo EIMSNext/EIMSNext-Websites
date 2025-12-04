@@ -1,5 +1,5 @@
+import { IListItem } from "@/list/type";
 import { App, FormDef, FormType } from "@eimsnext/models";
-import { IListItem } from "@eimsnext/components";
 
 export interface IFormItem {
   id: string;

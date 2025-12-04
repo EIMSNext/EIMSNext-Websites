@@ -136,11 +136,9 @@ import {
   createFlowNode,
   EventType,
 } from "../FlowData";
-import { IListItem } from "@eimsnext/components";
+import { IListItem,IConditionList } from "@eimsnext/components";
 import { FormDef, WfDefinition } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
-import { IConditionList } from "../../ConditionList/type";
-import ConditionList from "../../ConditionList/index.vue";
 import { uniqueId } from "@eimsnext/utils";
 import { wfDefinitionService } from "@eimsnext/services";
 import { ODataQuery } from "@/utils/query";

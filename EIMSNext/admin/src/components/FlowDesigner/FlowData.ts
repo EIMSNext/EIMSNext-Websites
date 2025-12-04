@@ -1,12 +1,10 @@
 import { cloneDeep, flow } from "lodash";
 import { uniqueId } from "@eimsnext/utils";
 import { FlowType, EventSourceType } from "@eimsnext/models";
-import { IConditionList } from "../ConditionList/type";
-import { IFormFieldList } from "./components/FieldSetting/type";
-import { IFieldSortList } from "../FieldSortList/type";
+import { IConditionList, IFormFieldList, IFieldSortList } from "@eimsnext/components";
 
 export enum FlowNodeType {
-  None=0,
+  None = 0,
   Start,
   End,
   Branch,
@@ -28,13 +26,13 @@ export enum FlowNodeType {
   Branch2,
 }
 export enum CascadeMode {
-  All=0,
+  All = 0,
   Specified,
   Never,
 }
 export enum UpdateMode {
-  Form=0,
-  Node=1,
+  Form = 0,
+  Node = 1,
 }
 export interface IFlowNodeData {
   id: string;

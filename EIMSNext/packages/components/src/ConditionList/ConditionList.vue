@@ -45,11 +45,11 @@
 </template>
 <script setup lang="ts">
 import { FieldDef, FieldType } from "@eimsnext/models";
-import ConditionItem from "./ConditionItem.vue";
 import { useLocale } from "element-plus";
 import { ConditionType, ConditionValueType, IConditionList } from "./type";
 import { uniqueId } from "@eimsnext/utils";
-import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../FlowDesigner/components/NodeFieldList/type";
+import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "@/NodeFieldList/type";
+import { ref, toRef, watch } from "vue";
 
 const { t } = useLocale();
 
