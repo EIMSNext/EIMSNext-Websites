@@ -94,7 +94,10 @@ const onInput = () => {
   emitChange();
 };
 const onValueChange = () => {
-  props.modelValue.fieldValue = fieldFieldValue.value;
+  if (fieldFieldValue.value.field == "")
+    delete props.modelValue.fieldValue
+  else
+    props.modelValue.fieldValue = fieldFieldValue.value;
 
   emitChange();
 };
