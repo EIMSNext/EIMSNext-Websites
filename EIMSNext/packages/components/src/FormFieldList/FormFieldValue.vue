@@ -56,9 +56,9 @@ const props = defineProps<{
   fieldDef: IFormFieldDef;
   nodes: INodeForm[];
   fieldSetting: IFieldBuildSetting;
+  fieldValueChanging?: () => boolean;
 }>();
 
-const nodefieldlist = ref()
 const fieldValueType = ref(props.modelValue.type);
 const value = ref<any>(props.modelValue.value);
 const fieldFieldValue = ref<IFormFieldDef>(
@@ -94,6 +94,7 @@ const onInput = () => {
   emitChange();
 };
 const onValueChange = () => {
+  console.log("value change", fieldFieldValue.value, props.modelValue.fieldValue)
   if (fieldFieldValue.value.field == "")
     delete props.modelValue.fieldValue
   else

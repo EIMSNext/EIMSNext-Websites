@@ -1,7 +1,7 @@
 <template>
   <div class="field-list">
     <el-dropdown v-if="!showAll" :hide-on-click="false" trigger="click" popper-class="data-triggers"
-      @command="addField">
+      @command="addingField">
       <el-button class="btn-add-trigger">
         {{ "+ " + t("选择字段") }}
       </el-button>
@@ -20,7 +20,7 @@
     </el-dropdown>
     <template v-for="(item, idx) in selectedFields.items" :key="item.field.field">
       <FormFieldItem :modelValue="item" :nodes="nodes" :field-setting="fieldSetting" :removable="!showAll"
-        @change="onInput" @remove="onRemove"></FormFieldItem>
+        :fieldValueChanging="fieldValueChanging" @change="onInput" @remove="onRemove"></FormFieldItem>
     </template>
   </div>
 </template>
@@ -28,7 +28,7 @@
 import { FormDef, FieldDef, FieldType } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
-import { IFormFieldList, IFormFieldItem, buildFormFieldList, FieldValueType } from "./type";
+import { IFormFieldList, IFormFieldItem, buildFormFieldList, FieldValueType, FormFieldListInstance } from "./type";
 import {
   FieldBuildRule,
   IFieldBuildSetting,
@@ -50,6 +50,8 @@ const props = withDefaults(
     formId: string;
     nodes: INodeForm[];
     showAll?: boolean;
+    fieldSelecting?: (fieldItem: IFormFieldItem) => boolean;
+    fieldValueChanging?: () => boolean;
   }>(),
   {
     showAll: true,
@@ -68,13 +70,11 @@ const fieldSetting = ref<IFieldBuildSetting>({
 const formStore = useFormStore();
 const formDef = ref<FormDef>();
 
-const emit = defineEmits(["update:modelValue", "addingField", "change"]);
+const emit = defineEmits(["update:modelValue", "change"]);
 
-const addField = (fieldItem: IFormFieldItem) => {
-  const addingArgs = ref({ field: fieldItem, cancel: false });
-  emit("addingField", addingArgs.value);
-  alert("addingArgs.cancel:" + addingArgs.value.cancel);
-  if (!addingArgs.value.cancel) selectedFields.value.items.push(fieldItem);
+const addingField = (fieldItem: IFormFieldItem) => {
+  if (!props.fieldSelecting || props.fieldSelecting(fieldItem))
+    selectedFields.value.items.push(fieldItem);
 };
 
 const onRemove = (fieldItem: IFormFieldItem) => {
@@ -181,6 +181,9 @@ watch(
   },
   { immediate: true }
 );
+
+// 暴露的属性和方法
+// defineExpose<FormFieldListInstance>({ addField });
 </script>
 <style lang="scss" scoped>
 .field-list {
