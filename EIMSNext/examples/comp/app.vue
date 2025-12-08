@@ -1,25 +1,39 @@
 <template>
-  <jl-dialog v-model="showDialog" :title="title" :show-footer="false">
-    <jl-card title="test card">
+  <et-dialog v-model="showDialog" :title="title" :show-footer="false">
+    <et-card title="test card">
       <template #action>
         <el-button icon="plus">创建新应用</el-button>
       </template>
       <div>test content</div>
-    </jl-card>
+    </et-card>
     <div style="padding: 12px">
-      <selected-tags v-model="selected" :editable="false" :closable="true" :empty-text="'选择成员或部门'" @editTag="editTag"
-        @tagRemoved="tagRemoved" />
-      <!-- <jl-list v-model="selectedList" :data="listData" :selectable="true">
-      </jl-list> -->
-      <button @click="changeTags"> change Tags</button>
+      <selected-tags
+        v-model="selected"
+        :editable="false"
+        :closable="true"
+        :empty-text="'选择成员或部门'"
+        @editTag="editTag"
+        @tagRemoved="tagRemoved"
+      />
+      <!-- <et-list v-model="selectedList" :data="listData" :selectable="true">
+      </et-list> -->
+      <button @click="changeTags">change Tags</button>
     </div>
-  </jl-dialog>
-  <member-select-dialog v-model="showMemberDialog" @cancel="cancelSelect" @ok="finishSelect" />
-  <jl-confirm-dialog v-model="showConfirmDialog" :icon="MessageIcon.Error" @ok="onConfirmed">
+  </et-dialog>
+  <member-select-dialog
+    v-model="showMemberDialog"
+    @cancel="cancelSelect"
+    @ok="finishSelect"
+  />
+  <et-confirm-dialog
+    v-model="showConfirmDialog"
+    :icon="MessageIcon.Error"
+    @ok="onConfirmed"
+  >
     <div>效果如何</div>
-  </jl-confirm-dialog>
+  </et-confirm-dialog>
   <div class="shake">
-    <jl-icon icon="iconfont-mycced" size="64px" color="#1296db"/>
+    <et-icon icon="iconfont-mycced" size="64px" color="#1296db" />
     <el-button @click="onClick">show dialog</el-button>
     <el-button @click="onMemberClick">show member dialog</el-button>
     <el-button @click="onConfirmClick">show confirm dialog</el-button>
@@ -45,6 +59,7 @@ import {
   TagType,
   MessageIcon,
   IListItem,
+  EtConfirm,
 } from "@eimsnext/components";
 import { formDefService } from "@eimsnext/services";
 
@@ -69,11 +84,19 @@ const selected = ref([
   { id: "333", label: "ccc", type: TagType.Role, error: true },
 ]);
 const changeTags = () => {
-  selected.value = [{ id: "222", label: "bbb", type: TagType.Department },
-  { id: "333", label: "ccc", type: TagType.Role, error: true },];
+  selected.value = [
+    { id: "222", label: "bbb", type: TagType.Department },
+    { id: "333", label: "ccc", type: TagType.Role, error: true },
+  ];
 };
 
-const tagRemoved = () => {
+const tagRemoved = async () => {
+  let ok = await EtConfirm.showDialog("要删除吗？", {
+    title: "删除确认",
+    icon: MessageIcon.Error,
+    iconColor: "red",
+  });
+  alert("删除确认杠:" + ok);
   console.log("sel", selected);
 };
 const editTag = () => {
