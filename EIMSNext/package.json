@@ -14,6 +14,7 @@
     "type-check": "cd admin & vue-tsc --noEmit",
     "preinstall": "npx only-allow pnpm",
     "exm:elplus": "pnpm run --filter ./examples/el-plus dev",
+    "exm:vant": "pnpm run --filter ./examples/vant dev",
     "exm:bld": "pnpm run --filter ./examples/formbuilder dev",
     "exm:utils": "pnpm run --filter ./examples/utils dev",
     "exm:service": "pnpm run --filter ./examples/service dev",
