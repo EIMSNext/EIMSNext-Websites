@@ -56,7 +56,11 @@ import {
   mergeFieldList,
   IFormItem,
   FieldBuildRule, IFieldBuildSetting, INodeForm, splitSubField, IConditionList,
-  FormFieldListInstance
+  FormFieldListInstance,
+  EtConfirmDialog,
+  EtConfirm,
+  MessageIcon,
+  IFormFieldDef
 } from "@eimsnext/components";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../components/MetaItemHeader/index.vue";
@@ -155,7 +159,7 @@ const onCondition = (list: IConditionList) => {
 const onSubCondition = (list: IConditionList) => {
   activeData.value.metadata.updateMeta!.subCondition = list;
 };
-const fieldSelecting = (field: IFormFieldItem) => {
+const fieldSelecting = async (field: IFormFieldItem) => {
   let allowed = true;
   if (subCondNeeded.value && subCondBuildSetting.value.fieldLimit) {
     let subMapped = getSubFieldMap(formFieldList.value)
@@ -166,15 +170,28 @@ const fieldSelecting = (field: IFormFieldItem) => {
 
       //TODO: 如果新字段和已有的限制不符则不允许填加
       if (fieldLimit != subCondBuildSetting.value.fieldLimit) {
-        alert("字段冲突，不允许填加")
+        await EtConfirm.showDialog("和现有字段冲突，不允许添加", { title: "字段冲突", icon: MessageIcon.Warning, showCancel: false })
         allowed = false
       }
     }
   }
   return allowed
 };
-const fieldValueChanging = () => {
-  return true;
+const fieldValueChanging = async (oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => {
+  if (!newVal || !newVal.field)
+    return true;
+
+  let allowed = true;
+  if (subCondNeeded.value && subCondBuildSetting.value.fieldLimit) {
+    let fieldLimit = newVal.isSubField ? splitSubField(newVal.field)[0]
+      : "master";
+    //TODO: 如果新字段和已有的限制不符则不允许填加
+    if (fieldLimit != subCondBuildSetting.value.fieldLimit) {
+      await EtConfirm.showDialog("和现有字段冲突，不允许添加", { title: "字段冲突", icon: MessageIcon.Warning, showCancel: false })
+      allowed = false
+    }
+  }
+  return allowed
 }
 
 const fieldChanged = (fields: IFormFieldList) => {

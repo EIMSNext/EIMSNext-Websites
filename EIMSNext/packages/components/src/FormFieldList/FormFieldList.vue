@@ -36,7 +36,7 @@ import {
   INodeForm,
 } from "../NodeFieldList/type";
 import { nextTick, onMounted, ref, toRef, watch } from "vue";
-import { splitSubField } from "@/FieldList/type";
+import { IFormFieldDef, splitSubField } from "@/FieldList/type";
 const { t } = useLocale();
 
 defineOptions({
@@ -51,7 +51,7 @@ const props = withDefaults(
     nodes: INodeForm[];
     showAll?: boolean;
     fieldSelecting?: (fieldItem: IFormFieldItem) => boolean;
-    fieldValueChanging?: () => boolean;
+    fieldValueChanging?: (oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => boolean;
   }>(),
   {
     showAll: true,
