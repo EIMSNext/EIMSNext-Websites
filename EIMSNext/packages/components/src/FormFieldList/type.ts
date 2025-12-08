@@ -20,6 +20,10 @@ export enum FieldValueType {
   Empty = "empty",
 }
 
+export interface FormFieldListInstance {
+  addField: (fieldItem: IFormFieldItem) => void;
+}
+
 export function buildFormFieldList(
   formId: string,
   fields: FieldDef[],
@@ -66,8 +70,17 @@ export function buildFormFieldList(
   return items;
 }
 
-export function mergeFieldList(form: FormDef, existingFields: IFormFieldItem[], mergeAll: boolean) {
+export function mergeFieldList(
+  form: FormDef,
+  existingFields: IFormFieldItem[],
+  mergeAll: boolean
+) {
   if (form && form.content && form.content.items) {
-    return buildFormFieldList(form.id, form.content.items, existingFields, mergeAll);
+    return buildFormFieldList(
+      form.id,
+      form.content.items,
+      existingFields,
+      mergeAll
+    );
   } else return existingFields;
 }

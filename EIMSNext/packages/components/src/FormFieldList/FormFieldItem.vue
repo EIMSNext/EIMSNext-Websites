@@ -4,7 +4,8 @@
       <el-input :value="field.label" :title="field.label" size="default"></el-input>
     </div>
     <div class="field-op">=</div>
-    <FormFieldValue :fieldDef="field" v-model="value" :nodes="nodes" :fieldSetting="fieldSetting" @change="onInput">
+    <FormFieldValue :fieldDef="field" v-model="value" :nodes="nodes" :fieldSetting="fieldSetting"
+      :fieldValueChanging="fieldValueChanging" @change="onInput">
     </FormFieldValue>
     <div v-if="removable" class="ml-[5px]" style="align-content: center">
       <et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon>
@@ -27,6 +28,7 @@ const props = defineProps<{
   nodes: INodeForm[];
   fieldSetting: IFieldBuildSetting;
   removable?: boolean;
+  fieldValueChanging?: () => boolean;
 }>();
 
 const field = ref(props.modelValue.field);

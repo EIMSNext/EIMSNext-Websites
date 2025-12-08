@@ -2,49 +2,22 @@
   <template v-if="ready">
     <MetaItemHeader :label="t('修改对象')" :required="true"></MetaItemHeader>
     <div class="mode-container">
-      <el-select
-        v-model="mode"
-        size="default"
-        style="width: 300px; margin-right: 5px"
-        @change="modeChanged"
-      >
+      <el-select v-model="mode" size="default" style="width: 300px; margin-right: 5px" @change="modeChanged">
         <el-option label="选择表单修改数据" :value="UpdateMode.Form" />
         <el-option label="选择节点修改数据" :value="UpdateMode.Node" />
       </el-select>
-      <FormList
-        v-if="mode == UpdateMode.Form"
-        v-model="formItem"
-        :appId="appId"
-        @change="formChanged"
-      ></FormList>
-      <el-select
-        v-if="mode == UpdateMode.Node"
-        v-model="activeData.metadata.updateMeta!.nodeId"
-        size="default"
-        @change="nodeChanged"
-      >
-        <el-option
-          v-for="node in nodes"
-          :key="node.nodeId"
-          :label="node.nodeName"
-          :value="node.nodeId"
-        />
+      <FormList v-if="mode == UpdateMode.Form" v-model="formItem" :appId="appId" @change="formChanged"></FormList>
+      <el-select v-if="mode == UpdateMode.Node" v-model="activeData.metadata.updateMeta!.nodeId" size="default"
+        @change="nodeChanged">
+        <el-option v-for="node in nodes" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId" />
       </el-select>
     </div>
     <MetaItemHeader class="mt-[8px]" :label="t('数据筛选条件')" :required="true"></MetaItemHeader>
-    <ConditionList
-      v-model="condList"
-      :formId="formId"
-      :nodeId="nodeId"
-      :nodes="nodes"
-      @change="onCondition"
-    ></ConditionList>
+    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition">
+    </ConditionList>
     <div>
-      <el-checkbox
-        v-model="activeData.metadata.updateMeta!.insertIfNoData"
-        label="没有可修改的数据时，向对应表单新增数据"
-        @change="insertIfNoDataChanged"
-      />
+      <el-checkbox v-model="activeData.metadata.updateMeta!.insertIfNoData" label="没有可修改的数据时，向对应表单新增数据"
+        @change="insertIfNoDataChanged" />
     </div>
     <MetaItemHeader class="mt-[8px]" :label="t('设置字段数据')" :required="true"></MetaItemHeader>
     <div v-if="activeData.metadata.updateMeta!.insertIfNoData">
@@ -54,39 +27,19 @@
       </el-radio-group>
     </div>
     <div v-if="!activeData.metadata.updateMeta!.insertIfNoData || showEditPanel == '1'">
-      <FormFieldList
-        v-if="nodes.length > 0"
-        v-model="formFieldList"
-        :node-id="nodeId"
-        :formId="formId"
-        :nodes="nodes"
-        :show-all="false"
-        @addingField="fieldAdding"
-        @change="fieldChanged"
-      ></FormFieldList>
+      <FormFieldList v-if="nodes.length > 0" v-model="formFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
+        :show-all="false" :fieldSelecting="fieldSelecting" :fieldValueChanging="fieldValueChanging"
+        @change="fieldChanged">
+      </FormFieldList>
       <div v-if="subCondNeeded" class="mt-[8px]" style="background-color: #f5f6f8; padding: 10px">
         <div class="mb-[8px]">修改数据选择了子表单字段，请设置子表单的修改条件</div>
-        <ConditionList
-          v-model="subCondList"
-          :formId="formId"
-          :nodeId="nodeId"
-          :nodes="nodes"
-          :maxLevel="1"
-          :field-build-setting="subCondBuildSetting"
-          @change="onSubCondition"
-        ></ConditionList>
+        <ConditionList v-model="subCondList" :formId="formId" :nodeId="nodeId" :nodes="nodes" :maxLevel="1"
+          :field-build-setting="subCondBuildSetting" @change="onSubCondition"></ConditionList>
       </div>
     </div>
     <div v-if="activeData.metadata.updateMeta!.insertIfNoData && showEditPanel == '0'">
-      <FormFieldList
-        v-if="nodes.length > 0"
-        v-model="insertFieldList"
-        :node-id="nodeId"
-        :formId="formId"
-        :nodes="nodes"
-        :show-all="true"
-        @change="insertFieldChanged"
-      ></FormFieldList>
+      <FormFieldList v-if="nodes.length > 0" v-model="insertFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
+        :show-all="true" @change="insertFieldChanged"></FormFieldList>
     </div>
   </template>
 </template>
@@ -102,7 +55,8 @@ import {
   buildFormFieldList,
   mergeFieldList,
   IFormItem,
-  FieldBuildRule, IFieldBuildSetting, INodeForm,splitSubField,IConditionList
+  FieldBuildRule, IFieldBuildSetting, INodeForm, splitSubField, IConditionList,
+  FormFieldListInstance
 } from "@eimsnext/components";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../components/MetaItemHeader/index.vue";
@@ -142,6 +96,7 @@ const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 const subCondNeeded = ref(false);
 const showEditPanel = ref("1");
+const v_updateFields = ref<FormFieldListInstance>()
 // console.log("showEditPanel", showEditPanel);
 
 const modeChanged = (mode: UpdateMode) => {
@@ -200,41 +155,60 @@ const onCondition = (list: IConditionList) => {
 const onSubCondition = (list: IConditionList) => {
   activeData.value.metadata.updateMeta!.subCondition = list;
 };
-const fieldAdding = (field: IFormFieldItem, cancel: boolean) => {
+const fieldSelecting = (field: IFormFieldItem) => {
+  let allowed = true;
   if (subCondNeeded.value && subCondBuildSetting.value.fieldLimit) {
-    alert("add field no allowed");
-    cancel = true;
+    let subMapped = getSubFieldMap(formFieldList.value)
+    if (subMapped) {
+      let fieldLimit = subMapped.field.isSubField
+        ? splitSubField(subMapped.field.field)[0]
+        : "master";
+
+      //TODO: 如果新字段和已有的限制不符则不允许填加
+      if (fieldLimit != subCondBuildSetting.value.fieldLimit) {
+        alert("字段冲突，不允许填加")
+        allowed = false
+      }
+    }
   }
+  return allowed
 };
+const fieldValueChanging = () => {
+  return true;
+}
+
 const fieldChanged = (fields: IFormFieldList) => {
   console.log("fieldChanged", fields.items);
 
-  let mappedField = fields.items.find(
-    (x) =>
-      x.field.isSubField ||
-      (x.value.type == FieldValueType.Field &&
-        x.value.fieldValue &&
-        (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField))
-  );
-  if (mappedField) {
+  let subMapped = getSubFieldMap(fields)
+  if (subMapped) {
     subCondNeeded.value = true;
-    subCondBuildSetting.value.fieldLimit = mappedField.field.isSubField
-      ? splitSubField(mappedField.field.field)[0]
+    subCondBuildSetting.value.fieldLimit = subMapped.field.isSubField
+      ? splitSubField(subMapped.field.field)[0]
       : "master";
   } else {
     subCondNeeded.value = false;
     subCondBuildSetting.value.fieldLimit = "";
   }
 
+  //TODO:更新subCondition
   activeData.value.metadata.updateMeta!.formFieldList = fields;
 };
+
+const getSubFieldMap = (fields: IFormFieldList) => {
+  return fields.items.find(
+    (x) =>
+      x.field.isSubField ||
+      (x.value.type == FieldValueType.Field &&
+        x.value.fieldValue &&
+        (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField))
+  );
+}
+
 const showEditPanelChanged = (val: any) => {
-  // console.log("showEditPanelChanged", val);
   showEditPanel.value = val;
 };
 const insertFieldChanged = (fields: IFormFieldList) => {
-  // console.log("insertFieldChanged", fields.items);
-  // insertFieldList.value = fields;
   activeData.value.metadata.updateMeta!.insertFieldList = fields;
 };
 const insertIfNoDataChanged = () => {
