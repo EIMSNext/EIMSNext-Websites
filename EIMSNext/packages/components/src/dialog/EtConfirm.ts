@@ -6,6 +6,7 @@ export interface ConfirmOptions {
   title?: string;
   icon?: MessageIcon;
   iconColor?: string;
+  width?: string;
 }
 
 /**
@@ -44,23 +45,37 @@ const confirm = (
       }, 300);
     };
 
-    const messageVNode =
-      typeof message === "string" ? h("div", { innerHTML: message }) : message;
+    // 处理消息内容
+    const processMessage = (message: string | VNode): VNode => {
+      if (typeof message === "string") {
+        // 检测是否包含HTML标签
+        if (/<[^>]+>/.test(message)) {
+          return h("div", { innerHTML: message });
+        }
+        return h("div", [message]);
+      }
+      return h("div", [message]);
+    };
+
+    const messageVNode = processMessage(message);
 
     const props = {
       modelValue: visible.value,
       title: options.title || "确认操作吗？",
-      messageVNode,
       showNoSave: false,
       okText: "确定",
       icon: options.icon || MessageIcon.Warning,
       iconColor: options.iconColor,
+      width: options.width || "500px",
       onOk: handleOk,
       onCancel: handleCancel,
     };
 
     // 渲染到容器
-    render(h(EtConfirmDialog, props), container);
+    render(
+      h(EtConfirmDialog, props, { default: () => messageVNode }),
+      container
+    );
   });
 };
 

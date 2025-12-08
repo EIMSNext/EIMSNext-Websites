@@ -90,8 +90,8 @@ const changeTags = () => {
   ];
 };
 
-const tagRemoved = () => {
-  let ok = EtConfirm.showDialog("要删除吗？", {
+const tagRemoved = async () => {
+  let ok = await EtConfirm.showDialog("要删除吗？", {
     title: "删除确认",
     icon: MessageIcon.Error,
     iconColor: "red",
