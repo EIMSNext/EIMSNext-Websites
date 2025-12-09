@@ -132,7 +132,7 @@ export function makeOptionsRule(t, to, label, value) {
       value: 3,
       rule: [
         {
-          type: "FetchConfig",
+          type: "FormFieldSelect",
           field: "formCreateEffect>fetch",
           props: {
             to,
@@ -155,6 +155,7 @@ export function makeOptionsRule(t, to, label, value) {
               { value: true, label: "value", key: value || "value" },
             ],
             keyValue: label || "label",
+            showHeader: false,
           },
         },
       ],
@@ -162,13 +163,13 @@ export function makeOptionsRule(t, to, label, value) {
   ];
 
   return {
-    type: "radio",
+    type: "select",
     title: t("props.options"),
     field: "_optionType",
     value: 2,
     options,
     props: {
-      type: "button",
+     clearable: false
     },
     control,
   };

@@ -4,6 +4,7 @@ export interface ITreeNode {
   id: string;
   code?: string;
   label: string;
+  displayLabel?: string;
   nodeType: TreeNodeType;
   icon?: string;
   children?: ITreeNode[];

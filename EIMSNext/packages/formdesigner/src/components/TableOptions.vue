@@ -1,6 +1,6 @@
 <template>
     <div class="_td-table-opt">
-        <el-table :data="value" :key="checked ? '2' : '1'" border :size="size || 'small'" style="width: 100%">
+        <el-table :data="value" :key="checked ? '2' : '1'" border :size="size || 'small'" style="width: 100%" :show-header="showHeader">
             <template v-for="(col, idx) in overColumn" :key="col.label + idx">
                 <el-table-column :label="col.label">
                     <template #default="scope">
@@ -53,6 +53,10 @@ export default defineComponent({
         keyValue: String,
         max: Number,
         size: String,
+        showHeader: {
+            type: Boolean,
+            default: true
+        }
     },
     inject: ['designer'],
     watch: {

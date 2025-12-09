@@ -292,9 +292,9 @@ const ZhCn = {
     remote: "远程数据",
     static: "静态数据",
     optionsType: {
-      fetch: "远程数据",
-      global: "全局数据源",
-      struct: "静态数据",
+      fetch: "关联其他表单数据",
+      global: "数据联动",
+      struct: "自定义",
     },
   },
   style: {
