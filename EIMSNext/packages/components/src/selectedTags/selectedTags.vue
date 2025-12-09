@@ -12,7 +12,7 @@
         :closable="closable"
         :color="getTagBgColor(tag)"
         @close="removeTag(tag)"
-        @click.stop=""
+        @click.stop="tagClick(tag)"
       >
         <et-icon
           icon="el-icon-UserFilled"
@@ -73,7 +73,7 @@ const getIconColor = (tag: ISelectedTag) => {
   }
 };
 
-const emit = defineEmits(["update:modelValue", "tagRemoved", "editTag"]);
+const emit = defineEmits(["update:modelValue", "tagRemoved", "editTag", "tagClick"]);
 const removeTag = (tag: ISelectedTag) => {
   let index = tagsRef.value.indexOf(tag);
   tagsRef.value.splice(index, 1);
@@ -83,5 +83,8 @@ const removeTag = (tag: ISelectedTag) => {
 };
 const editTag = () => {
   if (props.editable) emit("editTag");
+};
+const tagClick = (tag: ISelectedTag) => {
+  emit("tagClick", tag);
 };
 </script>

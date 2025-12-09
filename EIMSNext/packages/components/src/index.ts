@@ -12,6 +12,7 @@ import { FieldSortList, FieldSortItem } from "./FieldSortList";
 import { FormFieldList, FormFieldItem ,FormFieldValue} from "./FormFieldList";
 import { FormList } from "./FormList";
 import { NodeFieldList } from "./NodeFieldList";
+import { DepartmentSelectDialog } from "./departmentSelect";
 
 export default [
   SvgIcon,
@@ -36,5 +37,6 @@ export default [
   FormFieldItem,
   FormFieldValue,
   FormList,
-  NodeFieldList
+  NodeFieldList,
+  DepartmentSelectDialog
 ];

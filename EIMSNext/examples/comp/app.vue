@@ -18,14 +18,37 @@
   <jl-confirm-dialog v-model="showConfirmDialog" :icon="MessageIcon.Error" @ok="onConfirmed">
     <div>效果如何</div>
   </jl-confirm-dialog>
-  <div class="shake">
+  <!-- 部门选择组件测试 -->
+  <div class="department-select" style="margin: 20px;">
+    <h3>部门选择组件测试</h3>    
+    <!-- 单选模式 -->
+    <div style="margin-bottom: 20px;">
+      <h4>1. 单选模式：</h4>
+      <div class="current-selected" >
+        <selected-tags v-if="dialogSelectedDepartment.length" v-model="dialogSelectedDepartment" :closable="true" @tagRemoved="removeDialogDepartment" @tagClick="editDepartment" />
+        <el-button v-else type="primary" link @click="showDepartmentDialog = true">+ 选择部门</el-button>
+      </div>
+      <department-select-dialog v-model="showDepartmentDialog" :department="dialogSelectedDepartment" @ok="finishDepartmentSelect" />
+    </div>
+    
+    <!-- 多选模式 -->
+    <div>
+      <h4>2. 多选模式：</h4>
+      <div class="current-selected" >
+        <selected-tags v-if="multiSelectedDepartments.length" v-model="multiSelectedDepartments" :closable="true" @tagRemoved="removeMultiDepartment" @tagClick="editMultiDepartment" />
+        <el-button v-else type="primary" link @click="showMultiDepartmentDialog = true">+ 选择多个部门</el-button>
+      </div>
+      <department-select-dialog v-model="showMultiDepartmentDialog" :department="multiSelectedDepartments" :multiple="true" @ok="finishMultiDepartmentSelect" />
+    </div>
+  </div>
+  <!-- <div class="shake">
     <jl-icon icon="iconfont-mycced" size="64px" color="#1296db"/>
     <el-button @click="onClick">show dialog</el-button>
     <el-button @click="onMemberClick">show member dialog</el-button>
     <el-button @click="onConfirmClick">show confirm dialog</el-button>
     <el-button @click="changeName">change name</el-button>
     <el-button @click="save">save</el-button>
-  </div>
+  </div> -->
 </template>
 
 <script lang="ts" setup>
@@ -47,6 +70,7 @@ import {
   IListItem,
 } from "@eimsnext/components";
 import { formDefService } from "@eimsnext/services";
+import { DepartmentSelectDialog } from "@eimsnext/components";
 
 const userStore = useUserStore();
 
@@ -68,6 +92,14 @@ const selected = ref([
   { id: "222", label: "bbb", type: TagType.Department },
   { id: "333", label: "ccc", type: TagType.Role, error: true },
 ]);
+
+// 部门选择组件相关变量
+const showDepartmentDialog = ref(false);
+const dialogSelectedDepartment = ref<ISelectedTag[]>([]);
+
+// 多选模式变量
+const showMultiDepartmentDialog = ref(false);
+const multiSelectedDepartments = ref<ISelectedTag[]>([]);
 const changeTags = () => {
   selected.value = [{ id: "222", label: "bbb", type: TagType.Department },
   { id: "333", label: "ccc", type: TagType.Role, error: true },];
@@ -130,4 +162,66 @@ const save = () => {
     console.log("form res", res);
   });
 };
+
+// 部门选择组件相关方法
+const finishDepartmentSelect = (departments: ISelectedTag[]) => {
+  // 单选模式下，dialog返回的是包含单个部门的数组
+  if (departments && Array.isArray(departments) && departments.length > 0) {
+    const department = departments[0];
+    if (department && department.id && department.label) {
+      dialogSelectedDepartment.value = [department];
+      console.log("选择的部门：", department);
+    } else {
+      dialogSelectedDepartment.value = [];
+      console.log("取消部门选择");
+    }
+  } else {
+    dialogSelectedDepartment.value = [];
+    console.log("取消部门选择");
+  }
+};
+
+const removeDialogDepartment = () => {
+  dialogSelectedDepartment.value = [];
+};
+
+// 编辑部门，点击tag时调用
+const editDepartment = (tag: ISelectedTag) => {
+  // 打开部门选择对话框，当前部门会通过props.department传递给对话框
+  showDepartmentDialog.value = true;
+};
+
+// 多选部门相关方法
+const finishMultiDepartmentSelect = (departments: ISelectedTag[]) => {
+  // 检查部门是否有效，如果无效则清空选择
+  if (departments && Array.isArray(departments) && departments.length > 0) {
+    multiSelectedDepartments.value = departments;
+    console.log("选择的多个部门：", departments);
+  } else {
+    multiSelectedDepartments.value = [];
+    console.log("取消部门选择");
+  }
+};
+
+const removeMultiDepartment = (tag: ISelectedTag) => {
+  const index = multiSelectedDepartments.value.findIndex(dept => dept.id === tag.id);
+  if (index > -1) {
+    multiSelectedDepartments.value.splice(index, 1);
+  }
+};
+
+// 编辑多个部门，点击tag时调用
+const editMultiDepartment = (tag: ISelectedTag) => {
+  // 打开部门选择对话框，当前部门会通过props.department传递给对话框
+  showMultiDepartmentDialog.value = true;
+};
 </script>
+<style scoped lang="less">
+.selected-tags{
+ height: auto;
+}
+
+.current-selected :deep(.selected-tags) {
+  cursor: pointer;
+}
+</style>

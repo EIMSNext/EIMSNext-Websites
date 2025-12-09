@@ -1,0 +1,155 @@
+@import "../../common/index.less";
+
+.department-select-dialog {
+  width: 750px;
+  
+  .department-select {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dialog-content{
+    padding: 12px 20px;
+    height:650px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .el-tabs {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .el-tabs__content {
+    flex: 1;
+    overflow: auto;
+  }
+  
+  .dept-select {
+    height: 100%;
+    
+    :deep(.el-tree) {
+      height: 100%;
+      overflow: auto;
+    }
+  }
+  
+  .selected-dept {
+    display: flex;
+    align-items: center;
+    background-color: #ecf5ff;
+    color: #409eff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    
+    .selected-dept-label {
+      margin-right: 8px;
+    }
+    
+    .el-button {
+      padding: 0;
+      height: auto;
+      line-height: normal;
+      color: #409eff;
+      
+      &:hover {
+        color: #66b1ff;
+      }
+    }
+  }
+
+  .search-header{
+    .search-tag{
+      display: none;
+    }
+  }
+}
+
+.dept-tree {
+  .node-data {
+    width: 100%;
+    
+    .node-wrapper {
+      display: flex;
+      align-items: center;
+      
+      .node-icon {
+        width: 20px;
+        height: 20px;
+      }
+      
+      .node-label {
+        margin-left: 5px;
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      
+      .node-action {
+        margin: 0 5px;
+        flex: none;
+        .el-radio__label,
+        .el-checkbox__label {
+          display:none;
+        }
+      }
+    }
+  }
+}
+
+/* 多选模式下的已选部门标签列表样式 */
+.selected-dept-list {
+  margin-bottom: 12px;
+  
+  .selected-dept-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    
+    .selected-dept-label {
+      font-weight: 500;
+      color: #303133;
+    }
+  }
+  
+  .selected-dept-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 80px; /* 默认显示2行左右 */
+    overflow-y: auto;
+    padding-right: 4px;
+    
+    /* 滚动条样式 */
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  }
+  
+  .dept-tag {
+    margin: 0;
+  }
+}

@@ -16,3 +16,4 @@ export * from "./FieldSortList/type";
 export * from "./FormFieldList/type";
 export * from "./FormList/type";
 export * from "./NodeFieldList/type";
+export * from "./departmentSelect";
