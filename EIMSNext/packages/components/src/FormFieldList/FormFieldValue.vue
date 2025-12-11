@@ -38,13 +38,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { IListItem } from "@eimsnext/components";
 import { IFormFieldValue, FieldValueType } from "./type";
 import { FieldDef, FieldType } from "@eimsnext/models";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
 import { useLocale } from "element-plus";
 import { IFormFieldDef } from "@/FieldList/type";
 import { computed, ref } from "vue";
+import { IListItem } from "@/list/type";
 
 const { t } = useLocale();
 
