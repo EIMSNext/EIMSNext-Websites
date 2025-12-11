@@ -2,59 +2,151 @@
   <template v-if="ready">
     <MetaItemHeader :label="t('修改对象')" :required="true"></MetaItemHeader>
     <div class="mode-container">
-      <el-select v-model="mode" size="default" style="width: 300px; margin-right: 5px" @change="modeChanged">
+      <el-select
+        v-model="mode"
+        size="default"
+        style="width: 300px; margin-right: 5px"
+        @change="modeChanged"
+      >
         <el-option label="选择表单修改数据" :value="UpdateMode.Form" />
         <el-option label="选择节点修改数据" :value="UpdateMode.Node" />
       </el-select>
-      <FormList v-if="mode == UpdateMode.Form" v-model="formItem" :appId="appId" @change="formChanged"></FormList>
-      <el-select v-if="mode == UpdateMode.Node" v-model="activeData.metadata.updateMeta!.nodeId" size="default"
-        @change="nodeChanged">
-        <el-option v-for="node in nodes" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId" />
+      <FormList
+        v-if="mode == UpdateMode.Form"
+        v-model="formItem"
+        :appId="appId"
+        @change="formChanged"
+      ></FormList>
+      <el-select
+        v-if="mode == UpdateMode.Node"
+        v-model="activeData.metadata.updateMeta!.nodeId"
+        size="default"
+        @change="nodeChanged"
+      >
+        <el-option
+          v-for="node in nodes"
+          :key="node.nodeId"
+          :label="node.nodeName"
+          :value="node.nodeId"
+        />
       </el-select>
     </div>
-    <MetaItemHeader class="mt-[8px]" :label="t('数据筛选条件')" :required="true"></MetaItemHeader>
-    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition">
+    <MetaItemHeader
+      class="mt-[8px]"
+      :label="t('数据筛选条件')"
+      :required="true"
+    ></MetaItemHeader>
+    <ConditionList
+      v-model="condList"
+      :formId="formId"
+      :nodeId="nodeId"
+      :nodes="nodes"
+      @change="onCondition"
+    >
     </ConditionList>
     <div>
-      <el-checkbox v-model="activeData.metadata.updateMeta!.insertIfNoData" label="没有可修改的数据时，向对应表单新增数据"
-        @change="insertIfNoDataChanged" />
+      <el-checkbox
+        v-model="activeData.metadata.updateMeta!.insertIfNoData"
+        label="没有可修改的数据时，向对应表单新增数据"
+        @change="insertIfNoDataChanged"
+      />
     </div>
-    <MetaItemHeader class="mt-[8px]" :label="t('设置字段数据')" :required="true"></MetaItemHeader>
+    <MetaItemHeader
+      class="mt-[8px]"
+      :label="t('设置字段数据')"
+      :required="true"
+    ></MetaItemHeader>
     <div v-if="activeData.metadata.updateMeta!.insertIfNoData">
-      <el-radio-group :model-value="showEditPanel" size="large" @change="showEditPanelChanged">
+      <el-radio-group
+        :model-value="showEditPanel"
+        size="large"
+        @change="showEditPanelChanged"
+      >
         <el-radio-button label="修改数据" value="1" />
         <el-radio-button label="新增数据" value="0" />
       </el-radio-group>
     </div>
-    <div v-if="!activeData.metadata.updateMeta!.insertIfNoData || showEditPanel == '1'">
-      <FormFieldList v-if="nodes.length > 0" v-model="formFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
-        :show-all="false" :fieldSelecting="fieldSelecting" :fieldValueChanging="fieldValueChanging"
-        @change="fieldChanged">
+    <div
+      v-if="
+        !activeData.metadata.updateMeta!.insertIfNoData || showEditPanel == '1'
+      "
+    >
+      <FormFieldList
+        v-if="nodes.length > 0"
+        v-model="formFieldList"
+        :node-id="nodeId"
+        :formId="formId"
+        :nodes="nodes"
+        :show-all="false"
+        :fieldSelecting="fieldSelecting"
+        :fieldValueChanging="fieldValueChanging"
+        @change="fieldChanged"
+      >
       </FormFieldList>
-      <div v-if="subCondNeeded" class="mt-[8px]" style="background-color: #f5f6f8; padding: 10px">
-        <div class="mb-[8px]">修改数据选择了子表单字段，请设置子表单的修改条件</div>
-        <ConditionList v-model="subCondList" :formId="formId" :nodeId="nodeId" :nodes="nodes" :maxLevel="1"
-          :field-build-setting="subCondBuildSetting" @change="onSubCondition"></ConditionList>
+      <div
+        v-if="subCondNeeded"
+        class="mt-[8px]"
+        style="background-color: #f5f6f8; padding: 10px"
+      >
+        <div class="mb-[8px]">
+          修改数据选择了子表单字段，请设置子表单的修改条件
+        </div>
+        <ConditionList
+          v-model="subCondList"
+          :formId="formId"
+          :nodeId="nodeId"
+          :nodes="nodes"
+          :maxLevel="1"
+          :field-build-setting="subCondBuildSetting"
+          @change="onSubCondition"
+        ></ConditionList>
       </div>
     </div>
-    <div v-if="activeData.metadata.updateMeta!.insertIfNoData && showEditPanel == '0'">
-      <FormFieldList v-if="nodes.length > 0" v-model="insertFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
-        :show-all="true" @change="insertFieldChanged"></FormFieldList>
+    <div
+      v-if="
+        activeData.metadata.updateMeta!.insertIfNoData && showEditPanel == '0'
+      "
+    >
+      <FormFieldList
+        v-if="nodes.length > 0"
+        v-model="insertFieldList"
+        :node-id="nodeId"
+        :formId="formId"
+        :nodes="nodes"
+        :show-all="true"
+        @change="insertFieldChanged"
+      ></FormFieldList>
     </div>
   </template>
 </template>
 <script lang="ts" setup>
 import { inject, nextTick, reactive, ref, watch } from "vue";
-import { FlowNodeType, IFlowContext, IFlowNodeData, UpdateMode, createFlowNode } from "../Common/FlowData";
+import {
+  FlowNodeType,
+  IFlowContext,
+  IFlowNodeData,
+  UpdateMode,
+  createFlowNode,
+} from "../Common/FlowData";
 import { FormDef } from "@eimsnext/models";
 import { useContextStore, useFormStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { uniqueId } from "@eimsnext/utils";
-import { FieldValueType, FormFieldListInstance, IFormFieldItem, IFormFieldList, mergeFieldList } from "@/FormFieldList/type";
+import {
+  FieldValueType,
+  FormFieldListInstance,
+  IFormFieldItem,
+  IFormFieldList,
+  mergeFieldList,
+} from "@/FormFieldList/type";
 import { IConditionList } from "@/ConditionList/type";
-import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "@/NodeFieldList/type";
+import {
+  FieldBuildRule,
+  IFieldBuildSetting,
+  INodeForm,
+} from "@/NodeFieldList/type";
 import { IFormItem } from "@/FormList/type";
 import { IFormFieldDef, splitSubField } from "@/FieldList/type";
 import { EtConfirm } from "@/dialog/EtConfirm";
@@ -78,7 +170,11 @@ const formStore = useFormStore();
 const mode = ref(UpdateMode.Form);
 
 const condList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
-const subCondList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
+const subCondList = ref<IConditionList>({
+  id: uniqueId(),
+  rel: "and",
+  items: [],
+});
 const subCondBuildSetting = ref<IFieldBuildSetting>({
   version: 0,
   rule: FieldBuildRule.All,
@@ -94,7 +190,6 @@ const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 const subCondNeeded = ref(false);
 const showEditPanel = ref("1");
-const v_updateFields = ref<FormFieldListInstance>()
 // console.log("showEditPanel", showEditPanel);
 
 const modeChanged = (mode: UpdateMode) => {
@@ -112,7 +207,9 @@ const modeChanged = (mode: UpdateMode) => {
 };
 const nodeChanged = () => {
   if (activeData.value.metadata.updateMeta!.nodeId) {
-    var node = nodes.value.find((x) => x.nodeId == activeData.value.metadata.updateMeta!.nodeId);
+    var node = nodes.value.find(
+      (x) => x.nodeId == activeData.value.metadata.updateMeta!.nodeId
+    );
     if (node) {
       formId.value = node.form?.id ?? "";
       formItem.value.id = formId.value;
@@ -156,7 +253,7 @@ const onSubCondition = (list: IConditionList) => {
 const fieldSelecting = async (field: IFormFieldItem) => {
   let allowed = true;
   if (subCondNeeded.value && subCondBuildSetting.value.fieldLimit) {
-    let subMapped = getSubFieldMap(formFieldList.value)
+    let subMapped = getSubFieldMap(formFieldList.value);
     if (subMapped) {
       let fieldLimit = subMapped.field.isSubField
         ? splitSubField(subMapped.field.field)[0]
@@ -164,43 +261,45 @@ const fieldSelecting = async (field: IFormFieldItem) => {
 
       //TODO: 如果新字段和已有的限制不符则不允许填加
       if (fieldLimit != subCondBuildSetting.value.fieldLimit) {
-        await EtConfirm.showDialog("和现有字段冲突，不允许添加", { title: "字段冲突", icon: MessageIcon.Warning, showCancel: false })
-        allowed = false
+        await EtConfirm.showDialog("和现有字段冲突，不允许添加", {
+          title: "字段冲突",
+          icon: MessageIcon.Warning,
+          showCancel: false,
+        });
+        allowed = false;
       }
     }
   }
-  return allowed
+  return allowed;
 };
-const fieldValueChanging = async (oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => {
-  if (!newVal || !newVal.field)
-    return true;
+const fieldValueChanging = async (
+  oldVal?: IFormFieldDef,
+  newVal?: IFormFieldDef
+) => {
+  if (!newVal || !newVal.field) return true;
 
   let allowed = true;
   if (subCondNeeded.value && subCondBuildSetting.value.fieldLimit) {
-    let fieldLimit = newVal.isSubField ? splitSubField(newVal.field)[0]
+    let fieldLimit = newVal.isSubField
+      ? splitSubField(newVal.field)[0]
       : "master";
     //TODO: 如果新字段和已有的限制不符则不允许填加
     if (fieldLimit != subCondBuildSetting.value.fieldLimit) {
-      await EtConfirm.showDialog("和现有字段冲突，不允许添加", { title: "字段冲突", icon: MessageIcon.Warning, showCancel: false })
-      allowed = false
+      await EtConfirm.showDialog("和现有字段冲突，不允许添加", {
+        title: "字段冲突",
+        icon: MessageIcon.Warning,
+        showCancel: false,
+      });
+      allowed = false;
     }
   }
-  return allowed
-}
+  return allowed;
+};
 
 const fieldChanged = (fields: IFormFieldList) => {
   console.log("fieldChanged", fields.items);
 
-  let subMapped = getSubFieldMap(fields)
-  if (subMapped) {
-    subCondNeeded.value = true;
-    subCondBuildSetting.value.fieldLimit = subMapped.field.isSubField
-      ? splitSubField(subMapped.field.field)[0]
-      : "master";
-  } else {
-    subCondNeeded.value = false;
-    subCondBuildSetting.value.fieldLimit = "";
-  }
+  updateSubCondList(fields);
 
   //TODO:更新subCondition
   activeData.value.metadata.updateMeta!.formFieldList = fields;
@@ -214,7 +313,21 @@ const getSubFieldMap = (fields: IFormFieldList) => {
         x.value.fieldValue &&
         (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField))
   );
-}
+};
+const updateSubCondList = (fields: IFormFieldList) => {
+  let mappedField = getSubFieldMap(fields);
+  if (mappedField) {
+    subCondNeeded.value = true;
+    subCondBuildSetting.value.fieldLimit = mappedField.field.isSubField
+      ? splitSubField(mappedField.field.field)[0]
+      : "master";
+  } else {
+    subCondNeeded.value = false;
+    subCondBuildSetting.value.fieldLimit = "";
+    subCondList.value.items = [];
+    activeData.value.metadata.updateMeta!.subCondition = undefined;
+  }
+};
 
 const showEditPanelChanged = (val: any) => {
   showEditPanel.value = val;
@@ -242,38 +355,6 @@ const init = () => {
     formId.value = activeData.value.metadata.updateMeta!.formId;
     formItem.value = { id: formId.value };
 
-    formDef.value = await formStore.get(formId.value);
-    if (formDef.value) {
-      formFieldList.value.items = mergeFieldList(
-        formDef.value,
-        activeData.value.metadata.updateMeta!.formFieldList.items,
-        false
-      );
-
-      let mappedField = formFieldList.value.items.find(
-        (x) =>
-          x.field.isSubField ||
-          (x.value.type == FieldValueType.Field &&
-            x.value.fieldValue &&
-            (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField))
-      );
-      if (mappedField) {
-        subCondNeeded.value = true;
-        subCondBuildSetting.value.fieldLimit = mappedField.field.isSubField
-          ? splitSubField(mappedField.field.field)[0]
-          : "master";
-      } else {
-        subCondNeeded.value = false;
-        subCondBuildSetting.value.fieldLimit = "";
-      }
-
-      insertFieldList.value.items = mergeFieldList(
-        formDef.value,
-        activeData.value.metadata.updateMeta!.insertFieldList.items,
-        true
-      );
-    }
-
     condList.value = { id: uniqueId(), rel: "and", items: [] };
     subCondList.value = { id: uniqueId(), rel: "and", items: [] };
 
@@ -283,6 +364,23 @@ const init = () => {
 
     if (activeData.value.metadata.updateMeta!.subCondition) {
       subCondList.value = activeData.value.metadata.updateMeta!.subCondition;
+    }
+
+    formDef.value = await formStore.get(formId.value);
+    if (formDef.value) {
+      formFieldList.value.items = mergeFieldList(
+        formDef.value,
+        activeData.value.metadata.updateMeta!.formFieldList.items,
+        false
+      );
+
+      updateSubCondList(formFieldList.value);
+
+      insertFieldList.value.items = mergeFieldList(
+        formDef.value,
+        activeData.value.metadata.updateMeta!.insertFieldList.items,
+        true
+      );
     }
 
     ready.value = true;
