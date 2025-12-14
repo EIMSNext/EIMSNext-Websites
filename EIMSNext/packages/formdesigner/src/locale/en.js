@@ -1495,6 +1495,14 @@ const En = {
         inactiveColor: "Background color when closed",
       },
     },
+    departmentSelect: {
+      name: "Department Select",
+      props: {
+        multiple: "Multiple selection",
+        disabled: "Disabled",
+        placeholder: "Placeholder",
+      },
+    },
     tableform: {
       name: "Sub Form",
       event: {

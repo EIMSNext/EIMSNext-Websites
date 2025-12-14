@@ -271,9 +271,23 @@ const getCurrentUserDepts = async (allDepts: Department[]) => {
       
       // 检查员工是否有departmentId
       if (employee.departmentId) {
-        // 根据员工的departmentId获取对应的部门
-        const userDepts = allDepts.filter(dept => dept.id === employee.departmentId);
-        return buildDeptTree(userDepts);
+        // 获取用户所在部门
+        const userDept = allDepts.find(dept => dept.id === employee.departmentId);
+        if (userDept) {
+          // 收集用户部门及其所有父部门
+          const userDepts: Department[] = [];
+          let currentDept: Department | undefined = userDept;
+          
+          // 递归查找所有父部门，直到根部门
+          while (currentDept) {
+            userDepts.push(currentDept);
+            // 查找父部门
+            currentDept = allDepts.find(dept => dept.id === (currentDept as Department).parentId);
+          }
+          
+          // 调用buildDeptTree构建部门树
+          return buildDeptTree(userDepts);
+        }
       }
     }
     
