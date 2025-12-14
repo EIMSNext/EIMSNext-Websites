@@ -17,6 +17,7 @@ import { ref } from "vue";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
 import { IFormFieldItem, FieldValueType, IFormFieldList } from "./type";
 import { useLocale } from "element-plus";
+import { IFormFieldDef } from "@/FieldList/type";
 const { t } = useLocale();
 
 defineOptions({
@@ -28,7 +29,7 @@ const props = defineProps<{
   nodes: INodeForm[];
   fieldSetting: IFieldBuildSetting;
   removable?: boolean;
-  fieldValueChanging?: () => boolean;
+  fieldValueChanging?: (field:IFormFieldDef,oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => Promise<boolean>;
 }>();
 
 const field = ref(props.modelValue.field);

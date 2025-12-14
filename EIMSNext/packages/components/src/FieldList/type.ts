@@ -1,5 +1,11 @@
+import { IFieldLimit } from "@/NodeFieldList/type";
 import { IListItem } from "@/list/type";
-import { FieldDef, FieldType, getFlowStatus, getCreateTime } from "@eimsnext/models";
+import {
+  FieldDef,
+  FieldType,
+  getFlowStatus,
+  getCreateTime,
+} from "@eimsnext/models";
 
 export interface IFormFieldDef {
   formId: string;
@@ -56,11 +62,11 @@ export function buildFieldListItems(
   fields: FieldDef[],
   usingWf: boolean,
   nodeId?: string,
-  fieldLimit?: string
+  fieldLimit?: IFieldLimit
 ): IListItem[] {
   const items: IListItem[] = [];
 
-  if (!fieldLimit || fieldLimit == "master") {
+  if (!fieldLimit || fieldLimit.limitField == "master") {
     if (usingWf) {
       let status: IFormFieldDef = toFormFieldDef(
         formId,
@@ -77,7 +83,11 @@ export function buildFieldListItems(
   }
   fields.forEach((x: FieldDef) => {
     if (x.type == FieldType.TableForm) {
-      if ((!fieldLimit || fieldLimit == x.field) && x.columns && x.columns.length > 0) {
+      if (
+        (!fieldLimit || fieldLimit.limitField == x.field) &&
+        x.columns &&
+        x.columns.length > 0
+      ) {
         x.columns.forEach((sub: FieldDef) => {
           var fieldDef: IFormFieldDef = toFormFieldDef(formId, sub, x, nodeId);
           let item: IListItem = {
@@ -90,8 +100,13 @@ export function buildFieldListItems(
         });
       }
     } else {
-      if (!fieldLimit || fieldLimit == "master") {
-        var fieldDef: IFormFieldDef = toFormFieldDef(formId, x, undefined, nodeId);
+      if (!fieldLimit || fieldLimit.limitField == "master") {
+        var fieldDef: IFormFieldDef = toFormFieldDef(
+          formId,
+          x,
+          undefined,
+          nodeId
+        );
         let item: IListItem = {
           id: fieldDef.field,
           label: fieldDef.label,
@@ -103,7 +118,7 @@ export function buildFieldListItems(
     }
   });
 
-  if (!fieldLimit || fieldLimit == "master") {
+  if (!fieldLimit || fieldLimit.limitField == "master") {
     if (formId != "employee") {
       let createTime: IFormFieldDef = toFormFieldDef(
         formId,

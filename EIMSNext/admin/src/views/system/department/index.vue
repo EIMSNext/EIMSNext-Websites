@@ -323,7 +323,7 @@ const loadData = () => {
     .query<Employee>(query)
     .then((res: Employee[]) => {
       dataRef.value = res;
-      console.log("data.....", dataRef.value);
+      // console.log("data.....", dataRef.value);
     })
     .finally(() => (loading.value = false));
 };

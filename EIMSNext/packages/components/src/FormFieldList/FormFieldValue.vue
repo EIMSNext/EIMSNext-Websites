@@ -38,13 +38,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { IListItem } from "@eimsnext/components";
 import { IFormFieldValue, FieldValueType } from "./type";
 import { FieldDef, FieldType } from "@eimsnext/models";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
 import { useLocale } from "element-plus";
 import { IFormFieldDef } from "@/FieldList/type";
 import { computed, ref } from "vue";
+import { IListItem } from "@/list/type";
 
 const { t } = useLocale();
 
@@ -56,7 +56,7 @@ const props = defineProps<{
   fieldDef: IFormFieldDef;
   nodes: INodeForm[];
   fieldSetting: IFieldBuildSetting;
-  fieldValueChanging?: () => boolean;
+  fieldValueChanging?: (field: IFormFieldDef, oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => Promise<boolean>;
 }>();
 
 const fieldValueType = ref(props.modelValue.type);
@@ -93,14 +93,30 @@ const onInput = () => {
 
   emitChange();
 };
-const onValueChange = () => {
-  console.log("value change", fieldFieldValue.value, props.modelValue.fieldValue)
-  if (fieldFieldValue.value.field == "")
-    delete props.modelValue.fieldValue
-  else
-    props.modelValue.fieldValue = fieldFieldValue.value;
-
-  emitChange();
+const onValueChange = async (newVal?: IFormFieldDef) => {
+  let oldVal = props.modelValue.fieldValue
+  // console.log("value change", oldVal, newVal)
+  if (!props.fieldValueChanging || await props.fieldValueChanging(props.fieldDef, props.modelValue.fieldValue, fieldFieldValue.value)) {
+    // console.log("ok changing")
+    if (fieldFieldValue.value.field == "")
+      delete props.modelValue.fieldValue
+    else
+      props.modelValue.fieldValue = fieldFieldValue.value;
+  } else {
+    // console.log("cancel changing")
+    if (oldVal) {
+      fieldFieldValue.value = oldVal
+    }
+    else {
+      fieldFieldValue.value = {
+        nodeId: "",
+        formId: "",
+        field: "",
+        label: "",
+        type: FieldType.None,
+      }
+    }
+  }
 };
 const emitChange = () => {
   emit("update:modelValue", props.modelValue);

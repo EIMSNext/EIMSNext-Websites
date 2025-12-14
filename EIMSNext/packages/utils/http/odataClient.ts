@@ -92,6 +92,12 @@ export class ODataClient {
     return this.httpRequest.delete<T>({ url, data, headers, withToken: true });
   }
 
+  exec<T = any>(url: string, data: any) {
+    url = this.formatUrl(url);
+    let headers = this.getAxiosHeaders(ContentType.JSON);
+    return this.httpRequest.post<T>({ url, data, headers, withToken: true });
+  }
+
   private formatUrl<T>(url: string, id?: string) {
     let idPath = id ? "/" + id : "";
     url = url.startsWith("/") ? url : "/" + url;

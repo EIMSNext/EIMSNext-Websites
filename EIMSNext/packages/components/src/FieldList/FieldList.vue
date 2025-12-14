@@ -9,6 +9,7 @@ import { useFormStore } from "@eimsnext/store";
 import { IFormFieldDef, buildFieldListItems } from "./type";
 import { ref, watch } from "vue";
 import { IListItem } from "@/list/type";
+import { IFieldLimit } from "@/NodeFieldList/type";
 
 defineOptions({
   name: "FieldList",
@@ -16,7 +17,7 @@ defineOptions({
 const props = defineProps<{
   modelValue: IFormFieldDef;
   formId: string;
-  fieldLimit?: string;
+  fieldLimit?: IFieldLimit;
 }>();
 
 const formStore = useFormStore();
