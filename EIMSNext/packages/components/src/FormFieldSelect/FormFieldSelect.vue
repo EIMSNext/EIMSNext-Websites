@@ -122,9 +122,7 @@ const filterNode: FilterNodeMethodFunction = (value: string, data: TreeNodeData)
 async function buildTree(): Promise<ITreeNode[]> {
   try {
     const forms = await formStore.load(`$filter=appId eq '${appId.value}'`, false);
-    const treeNodes: ITreeNode[] = [];
-    console.log('forms 数据:', forms); // 添加这行，看返回了几个表单
-    console.log('forms 数量:', forms?.length);
+    const treeNodes: ITreeNode[] = [];   
     forms.forEach(form => {
       const formNode: ITreeNode = {
         id: form.id,
@@ -168,8 +166,7 @@ async function buildTree(): Promise<ITreeNode[]> {
           };
           formNode.children?.push(fieldNode);
         }
-      });
-      console.log('form load: ' + formNode.label);
+      });      
       treeNodes.push(formNode);
     });
 
