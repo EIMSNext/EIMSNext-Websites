@@ -50,8 +50,8 @@ const props = withDefaults(
     formId: string;
     nodes: INodeForm[];
     showAll?: boolean;
-    fieldSelecting?: (fieldItem: IFormFieldItem) => boolean;
-    fieldValueChanging?: (oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => boolean;
+    fieldSelecting?: (fieldItem: IFormFieldItem) => Promise<boolean>;
+    fieldValueChanging?: (field: IFormFieldDef, oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => Promise<boolean>;
   }>(),
   {
     showAll: true,
@@ -72,9 +72,12 @@ const formDef = ref<FormDef>();
 
 const emit = defineEmits(["update:modelValue", "change"]);
 
-const addingField = (fieldItem: IFormFieldItem) => {
-  if (!props.fieldSelecting || props.fieldSelecting(fieldItem))
+const addingField = async (fieldItem: IFormFieldItem) => {
+  // console.log("addingField", fieldItem)
+  if (!props.fieldSelecting || await props.fieldSelecting(fieldItem)) {
     selectedFields.value.items.push(fieldItem);
+    emitChange()
+  }
 };
 
 const onRemove = (fieldItem: IFormFieldItem) => {

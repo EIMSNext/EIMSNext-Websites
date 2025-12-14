@@ -22,7 +22,7 @@ export interface IFieldBuildSetting {
   version: number;
   rule: FieldBuildRule;
   matchType: boolean;
-  fieldLimit?: string;
+  fieldLimit?: IFieldLimit;
   fieldMapping?: Record<string, IFormFieldMap>;
 }
 export interface IFormFieldMap {
@@ -33,6 +33,15 @@ export interface IFormFieldMap {
   mapNodeId?: string;
   mapSingleResult: boolean;
   mapCount: number;
+}
+export interface IFieldLimit {
+  limitField: string;
+  limitType: FieldLimitType;
+}
+export enum FieldLimitType {
+  None,
+  SubField,
+  MultiResult,
 }
 export enum ConditionFieldType {
   None = "none",

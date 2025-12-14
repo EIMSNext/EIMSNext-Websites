@@ -29,7 +29,7 @@ const props = defineProps<{
   nodes: INodeForm[];
   fieldSetting: IFieldBuildSetting;
   removable?: boolean;
-  fieldValueChanging?: (oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => boolean;
+  fieldValueChanging?: (field:IFormFieldDef,oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => Promise<boolean>;
 }>();
 
 const field = ref(props.modelValue.field);
