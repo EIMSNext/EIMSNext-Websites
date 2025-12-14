@@ -414,6 +414,18 @@ const formatter = (row: any, column: any, cellValue: any) => {
       return cellValue ? dayjs(cellValue).format(format) : "";
     }
   }
+  
+  // 添加对部门选择器返回对象和数组的处理
+  if (cellValue && typeof cellValue === 'object') {
+    // 处理单选情况：{ label: '部门名称', value: '部门ID' }
+    if (cellValue.label) {
+      return cellValue.label;
+    }
+    // 处理多选情况：[{ label: '部门1', value: 'id1' }, { label: '部门2', value: 'id2' }]
+    if (Array.isArray(cellValue)) {
+      return cellValue.map(item => item.label || '').filter(Boolean).join(', ');
+    }
+  }
 
   return cellValue;
 };
