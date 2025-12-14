@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { useFormStore } from "@eimsnext/store";
+import { useFormStore, useContextStore } from "@eimsnext/store";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "./type";
 import { FilterNodeMethodFunction, TreeNodeData } from "element-plus";
 import { IFormFieldDef, getFieldIcon, toFormFieldDef } from "@/FieldList/type";
@@ -42,7 +42,7 @@ const props = withDefaults(
 );
 
 const selectProps = computed(() => ({
-  value: 'id',
+  value: "id",
   label: 'displayLabel',
   children: 'children',
   disabled: (data: ITreeNode) => data.nodeType === TreeNodeType.Form
@@ -50,10 +50,12 @@ const selectProps = computed(() => ({
 
 const buildSetting = toRef(props.fieldBuildSetting)
 const formStore = useFormStore();
+const contextStore = useContextStore();
 const nodeList = ref<ITreeNode[]>([]);
 const defaultExpand = ref<string[]>([]);
-const selectedNode = ref<ITreeNode>();
+const selectedNode = ref<string>();
 const loading = ref(false);
+const appId = computed(() => contextStore.appId);
 
 // 加载数据
 const loadData = async () => {
@@ -76,7 +78,7 @@ const loadData = async () => {
       const nodeId = `${props.modelValue.nodeId}-${props.modelValue.field}`;
       const foundNode = findNode(data, nodeId);
       if (foundNode) {
-        selectedNode.value = foundNode;
+        selectedNode.value = foundNode.id;
       }
     }
   } catch (error) {
@@ -119,7 +121,7 @@ const filterNode: FilterNodeMethodFunction = (value: string, data: TreeNodeData)
 
 async function buildTree(): Promise<ITreeNode[]> {
   try {
-    const forms = await formStore.load("", false);
+    const forms = await formStore.load(`$filter=appId eq '${appId.value}'`, false);
     const treeNodes: ITreeNode[] = [];
     console.log('forms 数据:', forms); // 添加这行，看返回了几个表单
     console.log('forms 数量:', forms?.length);
@@ -182,26 +184,48 @@ const emit = defineEmits(["update:modelValue", "change"]);
 
 // 监听 selectedNode 变化
 watch(selectedNode, (newNode) => {
-  const data = newNode?.data ?? {
+  let data = {
     nodeId: "",
     formId: "",
     field: "",
     label: "",
     type: FieldType.None,
   };
-  emit("update:modelValue", data);
-  emit("change", data);
-}, { deep: true });
+  if(newNode)
+  {
+      var node = findNode(nodeList.value, newNode);
+      if(node)
+      {
+        data.nodeId = node.id;
+        data.formId = node.data.formId;
+        data.field = node.data.field;
+        data.label = node.data.label;
+        data.type = node.data.type;
+      }
+    }
+  console.log('newNode:', newNode);
+  console.log('node:', node);
+  console.log("data:", data);
+  
+  // 只有当数据实际发生变化时才触发更新，避免死循环
+  if (props.modelValue?.nodeId !== data.nodeId) {
+    emit("update:modelValue", data);
+    emit("change", data);
+  }
+});
 
 // 监听外部 modelValue 变化
 watch(
   () => props.modelValue,
   (newVal) => {
-    if (newVal?.nodeId && newVal?.field && nodeList.value.length > 0) {
+    if (newVal?.nodeId && nodeList.value.length > 0) {
       const nodeId = `${newVal.nodeId}-${newVal.field}`;
       const foundNode = findNode(nodeList.value, nodeId);
       if (foundNode) {
-        selectedNode.value = foundNode;
+        // 只有当选中的节点ID实际发生变化时才更新，避免死循环
+        if (selectedNode.value !== foundNode.id) {
+          selectedNode.value = foundNode.id;
+        }
       }
     }
   },
