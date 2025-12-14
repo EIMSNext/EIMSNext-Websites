@@ -17,3 +17,4 @@ export * from "./FormFieldList/type";
 export * from "./FormList/type";
 export * from "./NodeFieldList/type";
 export * from "./departmentSelect";
+export * from "./dialog/EtConfirm";

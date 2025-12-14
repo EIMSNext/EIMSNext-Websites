@@ -1,26 +1,17 @@
 <template>
   <div class="field-list">
-    <el-dropdown
-      v-if="!showAll"
-      :hide-on-click="false"
-      trigger="click"
-      popper-class="data-triggers"
-      @command="addField"
-    >
+    <el-dropdown v-if="!showAll" :hide-on-click="false" trigger="click" popper-class="data-triggers"
+      @command="addingField">
       <el-button class="btn-add-trigger">
         {{ "+ " + t("选择字段") }}
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">
           <template v-for="field in allFields" :key="field.field.field">
-            <el-dropdown-item
-              class="add-trigger"
-              :disabled="!!selectedFields.items.find((x) => x.field.field == field.field.field)"
-              :class="{
+            <el-dropdown-item class="add-trigger"
+              :disabled="!!selectedFields.items.find((x) => x.field.field == field.field.field)" :class="{
                 notAllow: selectedFields.items.find((x) => x.field.field == field.field.field),
-              }"
-              :command="field"
-            >
+              }" :command="field">
               {{ field.field.label }}
             </el-dropdown-item>
           </template>
@@ -28,14 +19,8 @@
       </template>
     </el-dropdown>
     <template v-for="(item, idx) in selectedFields.items" :key="item.field.field">
-      <FormFieldItem
-        :modelValue="item"
-        :nodes="nodes"
-        :field-setting="fieldSetting"
-        :removable="!showAll"
-        @change="onInput"
-        @remove="onRemove"
-      ></FormFieldItem>
+      <FormFieldItem :modelValue="item" :nodes="nodes" :field-setting="fieldSetting" :removable="!showAll"
+        :fieldValueChanging="fieldValueChanging" @change="onInput" @remove="onRemove"></FormFieldItem>
     </template>
   </div>
 </template>
@@ -43,14 +28,14 @@
 import { FormDef, FieldDef, FieldType } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
-import { IFormFieldList, IFormFieldItem, buildFormFieldList, FieldValueType } from "./type";
+import { IFormFieldList, IFormFieldItem, buildFormFieldList, FieldValueType, FormFieldListInstance } from "./type";
 import {
   FieldBuildRule,
   IFieldBuildSetting,
   IFormFieldMap,
   INodeForm,
 } from "../NodeFieldList/type";
-import { ref, toRef, watch } from "vue";
+import { nextTick, onMounted, ref, toRef, watch } from "vue";
 import { splitSubField } from "@/FieldList/type";
 const { t } = useLocale();
 
@@ -65,6 +50,8 @@ const props = withDefaults(
     formId: string;
     nodes: INodeForm[];
     showAll?: boolean;
+    fieldSelecting?: (fieldItem: IFormFieldItem) => boolean;
+    fieldValueChanging?: () => boolean;
   }>(),
   {
     showAll: true,
@@ -83,13 +70,11 @@ const fieldSetting = ref<IFieldBuildSetting>({
 const formStore = useFormStore();
 const formDef = ref<FormDef>();
 
-const emit = defineEmits(["update:modelValue", "addingField", "change"]);
+const emit = defineEmits(["update:modelValue", "change"]);
 
-const addField = (fieldItem: IFormFieldItem) => {
-  const addingArgs = ref({ field: fieldItem, cancel: false });
-  emit("addingField", addingArgs.value);
-  alert("addingArgs.cancel:" + addingArgs.value.cancel);
-  if (!addingArgs.value.cancel) selectedFields.value.items.push(fieldItem);
+const addingField = (fieldItem: IFormFieldItem) => {
+  if (!props.fieldSelecting || props.fieldSelecting(fieldItem))
+    selectedFields.value.items.push(fieldItem);
 };
 
 const onRemove = (fieldItem: IFormFieldItem) => {
@@ -107,19 +92,19 @@ const onInput = (fieldItem: IFormFieldItem) => {
   // console.log("field item changed", fieldItem.field, selectedFields.value.items);
   if (fieldItem && selectedFields.value.items) {
     let item = selectedFields.value.items.find((x) => x.field.field == fieldItem.field.field);
+    // console.log("field item changed", fieldItem.field, item)
     if (item) {
       item.field = fieldItem.field;
       item.value = fieldItem.value;
-
-      // console.log("field .... changed", selectedFields.value)
-      updateFieldSetting();
     }
+
+    updateFieldSetting();
   }
   emitChange();
 };
 
 const updateFieldSetting = () => {
-  // console.log("field mapping1111", selectedFields.value)
+  // console.log("field mapping", selectedFields.value)
   let mapping: Record<string, IFormFieldMap> = {};
   selectedFields.value.items.forEach((x) => {
     if (
@@ -127,6 +112,7 @@ const updateFieldSetting = () => {
       x.value.fieldValue &&
       (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField)
     ) {
+      // console.log("field mapping xxx", x)
       let mapMainField = x.value.fieldValue.isSubField
         ? splitSubField(x.value.fieldValue.field)[0]
         : "master";
@@ -167,13 +153,17 @@ const updateFieldSetting = () => {
 
   fieldSetting.value.fieldMapping = mapping;
   fieldSetting.value.version += 1;
-  // console.log("field mapping", fieldSetting)
+  // console.log("field mapping updated", fieldSetting)
 };
 
 const emitChange = () => {
   emit("update:modelValue", selectedFields.value);
   emit("change", selectedFields.value);
 };
+
+onMounted(() => {
+  nextTick(() => updateFieldSetting());
+})
 
 watch(
   [() => props.formId],
@@ -191,6 +181,9 @@ watch(
   },
   { immediate: true }
 );
+
+// 暴露的属性和方法
+// defineExpose<FormFieldListInstance>({ addField });
 </script>
 <style lang="scss" scoped>
 .field-list {

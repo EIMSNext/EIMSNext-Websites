@@ -17,7 +17,7 @@ import { AxiosHeaders } from "axios";
 const app = createApp(App);
 
 //@ts-ignore
-appSetting.merge(window.appSetting);
+if (window.appSetting) appSetting.merge(window.appSetting);
 
 let interceptors = new HttpInterceptors();
 interceptors.errorHandler = (msg) => {
