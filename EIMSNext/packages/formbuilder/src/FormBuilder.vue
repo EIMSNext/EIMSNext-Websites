@@ -1,6 +1,13 @@
 <template>
   <div id="formbuilder" class="form-builder">
-    <fc-designer ref="designer" @save="onSave" :locale="locale" :handle="handle" :config="config">
+    <div class="flow-actions">
+      <div class="left"></div>
+      <div class="right">
+        <el-button @click="onSave">保存</el-button>
+        <el-button @click="onPreview">预览</el-button>
+      </div>
+    </div>
+    <fc-designer ref="designer" :locale="locale" :handle="handle" :config="config">
       <template #block_fff="scope">
         &lt;template #block_fff="scope"&gt; 自定义内容 &lt;/template&gt;
       </template>
@@ -340,6 +347,9 @@ export default {
 
         this.$emit("save", true);
       }
+    },
+    onPreview() {
+      this.$refs.designer.openPreview()
     },
     handleChat() {
       this.$refs.designer.activeModule = "ai";

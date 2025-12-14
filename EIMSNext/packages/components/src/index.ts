@@ -6,12 +6,19 @@ import { EtList } from "./list";
 import { MemberSelect, MemberSelectDialog } from "./memberSelect";
 import { EtCard } from "./card";
 import { EtToolbar, EtToolbarItem } from "./toolbar";
-import { ConditionList, ConditionItem,ConditionValue } from "./ConditionList";
+import { ConditionList, ConditionItem, ConditionValue } from "./ConditionList";
 import { FieldList } from "./FieldList";
 import { FieldSortList, FieldSortItem } from "./FieldSortList";
-import { FormFieldList, FormFieldItem ,FormFieldValue} from "./FormFieldList";
+import { FormFieldList, FormFieldItem, FormFieldValue } from "./FormFieldList";
 import { FormList } from "./FormList";
 import { NodeFieldList } from "./NodeFieldList";
+import { EtDrawer } from "./drawer";
+import {
+  WorkflowDiagram,
+  WorkflowMetaEditor,
+  DataflowDiagram,
+  DataflowMetaEditor,
+} from "./FlowDesigner";
 
 export default [
   SvgIcon,
@@ -36,5 +43,10 @@ export default [
   FormFieldItem,
   FormFieldValue,
   FormList,
-  NodeFieldList
+  NodeFieldList,
+  EtDrawer,
+  WorkflowDiagram,
+  WorkflowMetaEditor,
+  DataflowDiagram,
+  DataflowMetaEditor,
 ];

@@ -151,11 +151,11 @@
                                                         </div>
                                                         <span class="_fc-l-name">{{
                                                             t('com.' + element.name + '.name') || element.label
-                                                        }}</span>
+                                                            }}</span>
                                                     </template>
                                                     <span class="_fc-l-name" v-else>{{
                                                         t('tmp.' + element.name) || element.label
-                                                    }}</span>
+                                                        }}</span>
                                                 </div>
                                             </template>
                                         </fcDraggable>
@@ -175,7 +175,7 @@
                                                     :class="(data.rule._menu && data.rule._menu.icon) || 'icon-cell'"></i>
                                                 <span>{{
                                                     getTitle(data.rule)
-                                                }}</span>
+                                                    }}</span>
                                             </div>
                                             <div class="_fc-tree-more" @click.stop
                                                 v-if="!data.slot && !data.rule._fc_page_tag">
@@ -213,7 +213,7 @@
                         <el-header class="_fc-m-tools" height="40">
                             <div class="_fc-m-tools-l">
                                 <template v-if="!inputForm.state">
-                                    <template v-if="getConfig('showDevice') !== false">
+                                    <!-- <template v-if="getConfig('showDevice') !== false">
                                         <div class="devices">
                                             <i class="fc-icon icon-pc" :class="{ active: device === 'pc' }"
                                                 @click="setDevice('pc')"></i>
@@ -223,7 +223,7 @@
                                                 @click="setDevice('mobile')"></i>
                                         </div>
                                         <div class="line"></div>
-                                    </template>
+                                    </template> -->
                                     <template v-if="getConfig('showQuickLayout') !== false">
                                         <QuickLayout></QuickLayout>
                                         <div class="line"></div>
@@ -241,7 +241,7 @@
                             <div class="_fc-m-tools-r">
                                 <template v-if="!inputForm.state">
                                     <slot name="handle"></slot>
-                                    <el-button v-if="getConfig('showSaveBtn', false)" type="success" plain size="small"
+                                    <!-- <el-button v-if="getConfig('showSaveBtn', false)" type="success" plain size="small"
                                         @click="handleSave"><i class="fc-icon icon-save"></i> {{
                                             t('props.save')
                                         }}
@@ -250,7 +250,7 @@
                                         size="small" @click="openPreview"><i class="fc-icon icon-preview"></i> {{
                                             t('props.preview')
                                         }}
-                                    </el-button>
+                                    </el-button> -->
                                     <el-popconfirm :title="t('designer.clearWarn')" width="200px"
                                         :confirm-button-text="t('props.clear')" :cancel-button-text="t('props.cancel')"
                                         @confirm="clearDragRule">
@@ -280,7 +280,7 @@
                                     <div class="_fd-input-btn">
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
-                                            }}：</span>
+                                        }}：</span>
                                         <el-switch size="small" :model-value="inputForm.state" inline-prompt
                                             @update:model-value="openInputData" />
                                     </div>
@@ -366,11 +366,11 @@
                                             <template #suffix>
                                                 <i class="fc-icon icon-group" @click="copyName"></i>
                                             </template>
-                                            <template #append>
+            <template #append>
                                                 <i class="fc-icon icon-auto" @click="updateName"></i>
                                             </template>
-                                        </el-input>
-                                    </template> -->
+            </el-input>
+            </template> -->
                                 </template>
                                 <template v-if="activeRuleChildren">
                                     <SubList></SubList>
@@ -379,7 +379,7 @@
                                     <div style="grid-area: base;">
                                         <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
                                             t('designer.rule')
-                                        }}
+                                            }}
                                         </ConfigTitle>
                                         <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api"
                                             :rule="baseForm.rule" :option="baseForm.options"
@@ -430,7 +430,7 @@
                                     <div style="grid-area: advanced;">
                                         <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
                                             t('designer.advanced')
-                                        }}
+                                            }}
                                         </ConfigTitle>
                                         <DragForm v-show="advancedForm.isShow" v-model:api="advancedForm.api"
                                             :rule="advancedForm.rule" :option="advancedForm.options"
@@ -469,7 +469,7 @@
                                         <template v-if="activeRule">
                                             <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
                                                 t('designer.validate')
-                                            }}
+                                                }}
                                             </ConfigTitle>
                                             <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api"
                                                 :rule="validateForm.rule" :option="validateForm.options"
@@ -485,9 +485,9 @@
                         <el-tabs class="_fd-preview-tabs" v-model="previewStatus">
                             <el-tab-pane :label="t('form.formMode')" name="form"></el-tab-pane>
                             <el-tab-pane :label="t('form.previewMode')" name="preview"></el-tab-pane>
-                            <el-tab-pane :label="t('form.componentMode')" name="component"></el-tab-pane>
+                            <!-- <el-tab-pane :label="t('form.componentMode')" name="component"></el-tab-pane>
                             <el-tab-pane :label="t('form.sfcMode')" name="sfc"
-                                v-if="previewDevice !== 'mobile'"></el-tab-pane>
+                                v-if="previewDevice !== 'mobile'"></el-tab-pane> -->
                         </el-tabs>
                         <div class="_fd-preview-device" v-if="previewStatus !== 'sfc' && !onlyPC">
                             <div :class="{ active: previewDevice === 'pc' }" @click="previewDevice = 'pc'"><i

@@ -1,5 +1,5 @@
 <template>
-  <CustomDrawer v-model="showDrawer" @close="close">
+  <et-drawer v-model="showDrawer" @close="close">
     <template #title>
       <el-input v-model="formName" class="title-editor" />
     </template>
@@ -22,19 +22,18 @@
     <div v-if="activeName == 'advance'" style="height: 100%; width: 100%">
       <Advanced :formDef="formDef!"></Advanced>
     </div>
-  </CustomDrawer>
+  </et-drawer>
 </template>
 
 <script setup lang="ts">
 import { TabsPaneContext } from "element-plus";
 import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
-import WorkflowDesigner from "../FlowDesigner/Workflow/index.vue";
+import WorkflowDesigner from "../WorkflowDesigner/index.vue";
 import Advanced from "./Advanced/index.vue";
 import { useSystemStore } from "@/store/system";
 import { useFormStore } from "@eimsnext/store";
 import { FormDef, EventSourceType } from "@eimsnext/models";
-import CustomDrawer from "@/components/CustomDrawer/index.vue";
 
 defineOptions({
   name: "FormEdit",

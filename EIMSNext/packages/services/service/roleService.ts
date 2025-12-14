@@ -2,11 +2,14 @@
 import { Role, RoleRequest } from "@eimsnext/models";
 
 export class RoleService extends ODataServiceBase<Role, RoleRequest> {
-    protected modelName(): string {
-        return "Role";
-    }
+  protected modelName(): string {
+    return "Role";
+  }
+
+  addEmps(roleId: string, empIds: string[]): Promise<void> {
+    return this.http().odata.exec(this.modelName(), { roleId, empIds });
+  }
 }
 
-const roleService = new RoleService()
-export { roleService }
-
+const roleService = new RoleService();
+export { roleService };
