@@ -1,6 +1,6 @@
 <template>
   <el-tree-select
-    v-model="selectedNode"
+    v-model="selectedNodeId"
     :data="nodeList"
     :props="selectProps"
     :render-after-expand="true"
@@ -34,12 +34,12 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     modelValue: IFormFieldDef;
-    fieldBuildSetting: IFieldBuildSetting;
-    nodes: INodeForm[];
-    fieldDef?: IFormFieldDef;
+    fieldBuildSetting: IFieldBuildSetting; //可能将来会用到
   }>(),
   {}
 );
+
+const emit = defineEmits(["update:modelValue", "change"]);
 
 const selectProps = computed(() => ({
   value: "id",
@@ -53,76 +53,128 @@ const formStore = useFormStore();
 const contextStore = useContextStore();
 const nodeList = ref<ITreeNode[]>([]);
 const defaultExpand = ref<string[]>([]);
-const selectedNode = ref<string>();
+const selectedNodeId = ref<string>();
 const loading = ref(false);
 const appId = computed(() => contextStore.appId);
 
-// 加载数据
-const loadData = async () => {
-  try {
-    loading.value = true;
-    const data = await buildTree();
-    nodeList.value = data;
-    
-    // 设置默认展开
-    if (data.length > 1) {
-      data.forEach((x) => {
-        if (x.nodeType === TreeNodeType.Form) {
-          defaultExpand.value.push(x.id);
-        }
-      });
-    }
-    
-    // 如果有初始值，设置选中
-    if (props.modelValue?.nodeId && props.modelValue?.field) {
-      const nodeId = `${props.modelValue.nodeId}-${props.modelValue.field}`;
-      const foundNode = findNode(data, nodeId);
-      if (foundNode) {
-        selectedNode.value = foundNode.id;
-      }
-    }
-  } catch (error) {
-    console.error("加载表单树失败:", error);
-  } finally {
-    loading.value = false;
+// 辅助函数：构建节点ID
+const buildNodeId = (formId: string, field: string) => `${formId}-${field}`;
+
+// 辅助函数：查找节点
+const findNodeById = (nodeId: string) => findNode(nodeList.value, nodeId);
+
+// 辅助函数：从节点获取表单字段数据
+const getFieldDefFromNode = (node: ITreeNode | null): IFormFieldDef => {
+  if (!node) {
+    return { formId: "", field: "", label: "", type: FieldType.None };
   }
+  
+  // 如果是字段节点，node.data 应该是 IFormFieldDef 类型
+  if (node.nodeType === TreeNodeType.Field) {
+    const fieldData = node.data as IFormFieldDef;
+    return {
+      formId: fieldData.formId || "",
+      field: fieldData.field || "",
+      label: node.displayLabel || fieldData.label || "",
+      type: node.data.type || FieldType.None
+    };
+  }
+  
+  // 如果是表单节点或其它节点，返回空值
+  return { formId: "", field: "", label: "", type: FieldType.None };
 };
 
-// 组件挂载时加载
-onMounted(() => {
-  loadData();
-});
+// 辅助函数：从节点ID解析表单ID和字段名
+const parseNodeId = (nodeId: string): { formId: string; field: string } => {
+  const parts = nodeId.split('-');
+  if (parts.length >= 2) {
+    return {
+      formId: parts[0],
+      field: parts.slice(1).join('-') // 处理字段名中可能包含'-'的情况
+    };
+  }
+  return { formId: "", field: "" };
+};
+
+// 处理内部选择
+const handleInternalSelect = (nodeId: string | undefined) => {
+  if (!nodeId) {
+    emit("update:modelValue", { formId: "", field: "", label: "" });
+    emit("change", { formId: "", field: "", label: "" });
+    return;
+  }
+  
+  const node = findNodeById(nodeId);
+  if (!node || node.nodeType !== TreeNodeType.Field) {
+    emit("update:modelValue", { formId: "", field: "", label: "" });
+    emit("change", { formId: "", field: "", label: "" });
+    return;
+  }
+  
+  // 从节点ID解析表单ID和字段名（更可靠的方式）
+  const { formId, field } = parseNodeId(nodeId);
+  const label = node.displayLabel || node.label || "";
+  
+  const fieldDef: IFormFieldDef = {
+    formId,
+    field,
+    label,
+    type: node.data.type || FieldType.None
+  };
+  
+  console.log('内部选择:', { nodeId, node, fieldDef });
+  
+  emit("update:modelValue", fieldDef);
+  emit("change", fieldDef);
+};
+
+// 处理外部更新
+const handleExternalUpdate = (fieldDef: IFormFieldDef) => {
+  if (!fieldDef?.formId || !fieldDef?.field) {
+    if (selectedNodeId.value) {
+      selectedNodeId.value = undefined;
+    }
+    return;
+  }
+  
+  const targetNodeId = buildNodeId(fieldDef.formId, fieldDef.field);
+  
+  if (selectedNodeId.value === targetNodeId) {
+    return; // 已经是选中状态，避免不必要的更新
+  }
+  
+  // 如果树数据已加载，立即查找
+  if (nodeList.value.length > 0) {
+    const foundNode = findNodeById(targetNodeId);
+    selectedNodeId.value = foundNode?.id;
+    return;
+  }
+  
+  // 如果树数据未加载，延迟设置
+  setTimeout(() => {
+    if (nodeList.value.length > 0) {
+      const foundNode = findNodeById(targetNodeId);
+      selectedNodeId.value = foundNode?.id;
+    }
+  }, 100);
+};
 
 const filterNode: FilterNodeMethodFunction = (value: string, data: TreeNodeData) => {
   if (!value) return true;
   
-  // 安全的类型处理
   const node = data as unknown as Record<string, any>;
-  
-  // 转换为小写进行不区分大小写的搜索
   const searchValue = value.toLowerCase();
   
-  // 检查 label
-  if (node.label && typeof node.label === 'string') {
-    if (node.label.toLowerCase().includes(searchValue)) {
-      return true;
-    }
-  }
-  
-  // 检查 displayLabel
-  if (node.displayLabel && typeof node.displayLabel === 'string') {
-    if (node.displayLabel.toLowerCase().includes(searchValue)) {
-      return true;
-    }
-  }
-  
-  return false;
+  return [node.label, node.displayLabel].some(
+    text => text && typeof text === 'string' && text.toLowerCase().includes(searchValue)
+  );
 };
 
 async function buildTree(): Promise<ITreeNode[]> {
   try {
     const forms = await formStore.load(`$filter=appId eq '${appId.value}'`, false);
-    const treeNodes: ITreeNode[] = [];   
+    const treeNodes: ITreeNode[] = [];
+    
     forms.forEach(form => {
       const formNode: ITreeNode = {
         id: form.id,
@@ -140,33 +192,14 @@ async function buildTree(): Promise<ITreeNode[]> {
         if (field.type === FieldType.TableForm && field.columns) {
           field.columns.forEach(subField => {
             const fieldDef = toFormFieldDef(form.id, subField, field, form.id, !form.isLedger);
-            const fieldNode: ITreeNode = {
-              id: `${form.id}-${fieldDef.field}`,
-              code: fieldDef.field,
-              displayLabel: `${form.name}-${fieldDef.label}`,
-              label: fieldDef.label,
-              nodeType: TreeNodeType.Field,
-              children: [],
-              data: fieldDef,
-              icon: getFieldIcon(fieldDef.type)
-            };
-            formNode.children?.push(fieldNode);
+            formNode.children?.push(createFieldNode(form, fieldDef));
           });
         } else {
           const fieldDef = toFormFieldDef(form.id, field, undefined, form.id, !form.isLedger);
-          const fieldNode: ITreeNode = {
-            id: `${form.id}-${fieldDef.field}`,
-            code: fieldDef.field,
-            displayLabel: `${form.name}-${fieldDef.label}`,
-            label: fieldDef.label,
-            nodeType: TreeNodeType.Field,
-            children: [],
-            data: fieldDef,
-            icon: getFieldIcon(fieldDef.type)
-          };
-          formNode.children?.push(fieldNode);
+          formNode.children?.push(createFieldNode(form, fieldDef));
         }
-      });      
+      });
+      
       treeNodes.push(formNode);
     });
 
@@ -177,59 +210,69 @@ async function buildTree(): Promise<ITreeNode[]> {
   }
 }
 
-const emit = defineEmits(["update:modelValue", "change"]);
-
-// 监听 selectedNode 变化
-watch(selectedNode, (newNode) => {
-  let data = {
-    nodeId: "",
-    formId: "",
-    field: "",
-    label: "",
-    type: FieldType.None,
-  };
-  if(newNode)
-  {
-      var node = findNode(nodeList.value, newNode);
-      if(node)
-      {
-        data.nodeId = node.id;
-        data.formId = node.data.formId;
-        data.field = node.data.field;
-        data.label = node.data.label;
-        data.type = node.data.type;
-      }
-    }
-  console.log('newNode:', newNode);
-  console.log('node:', node);
-  console.log("data:", data);
-  
-  // 只有当数据实际发生变化时才触发更新，避免死循环
-  if (props.modelValue?.nodeId !== data.nodeId) {
-    emit("update:modelValue", data);
-    emit("change", data);
-  }
+// 辅助函数：创建字段节点
+const createFieldNode = (form: any, fieldDef: IFormFieldDef): ITreeNode => ({
+  id: buildNodeId(form.id, fieldDef.field),
+  code: fieldDef.field,
+  displayLabel: `${form.name}-${fieldDef.label}`,
+  label: fieldDef.label,
+  nodeType: TreeNodeType.Field,
+  children: [],
+  data: fieldDef, // 这里保存完整的 fieldDef 对象
+  icon: getFieldIcon(fieldDef.type)
 });
 
-// 监听外部 modelValue 变化
+// 加载数据
+const loadData = async () => {
+  try {
+    loading.value = true;
+    const data = await buildTree();
+    nodeList.value = data;
+    
+    // 设置默认展开
+    defaultExpand.value = data
+      .filter(x => x.nodeType === TreeNodeType.Form)
+      .map(x => x.id);
+    
+    // 树加载完成后，如果有外部值，设置选中
+    handleExternalUpdate(props.modelValue);
+  } catch (error) {
+    console.error("加载表单树失败:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 组件挂载时加载
+onMounted(() => {
+  loadData();
+});
+
+// 监听内部选择变化
+watch(selectedNodeId, (newNodeId) => {
+  handleInternalSelect(newNodeId);
+});
+
+// 监听外部modelValue变化
 watch(
   () => props.modelValue,
   (newVal) => {
-    if (newVal?.nodeId && nodeList.value.length > 0) {
-      const nodeId = `${newVal.nodeId}-${newVal.field}`;
-      const foundNode = findNode(nodeList.value, nodeId);
-      if (foundNode) {
-        // 只有当选中的节点ID实际发生变化时才更新，避免死循环
-        if (selectedNode.value !== foundNode.id) {
-          selectedNode.value = foundNode.id;
-        }
-      }
-    }
+    handleExternalUpdate(newVal);
   },
   { immediate: true }
 );
 
-// 监听 buildSetting 变化，重新加载
+// 监听nodeList变化，确保在树加载完成后设置初始值
+watch(
+  () => nodeList.value,
+  (newList) => {
+    if (newList.length > 0) {
+      handleExternalUpdate(props.modelValue);
+    }
+  }
+);
+
+// 监听buildSetting变化，重新加载
 watch(
   () => buildSetting.value,
   () => {
