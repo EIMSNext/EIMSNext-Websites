@@ -341,10 +341,17 @@ const selectDept = (data: ITreeNode) => {
       selectedDeptIds.value = selectedDepts.map(dept => dept.id);
     } else {
       // 如果未选中，则添加
-      const newDept: ISelectedTag = {
+      // 提取部门编码和名称
+      const code = data.code || '';
+      // 从label中提取部门名称（移除"编码 - "前缀）
+      const label = data.label.replace(`${code} - `, '');
+      
+      const newDept: ISelectedTag & { code?: string; value?: string } = {
         id: data.id,
-        label: data.label,
-        type: TagType.Department,
+        label: label,
+        code: code,
+        value: data.id,
+        type: TagType.Department, // 使用枚举类型，确保类型安全
         data: data.data,
       };
       selectedDepts.push(newDept);
@@ -357,11 +364,19 @@ const selectDept = (data: ITreeNode) => {
     // 单选模式
     // 更新选中部门ID，触发radio选中
     selectedDeptId.value = data.id;
+    
+    // 提取部门编码和名称
+    const code = data.code || '';
+    // 从label中提取部门名称（移除"编码 - "前缀）
+    const label = data.label.replace(`${code} - `, '');
+    
     // 更新选中部门对象
     selectedDepartment.value = {
       id: data.id,
-      label: data.label,
-      type: TagType.Department,
+      label: label,
+      code: code,
+      value: data.id,
+      type: TagType.Department, // 使用枚举类型，确保类型安全
       data: data.data,
     };
   }

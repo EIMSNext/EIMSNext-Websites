@@ -1,4 +1,4 @@
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, watch, computed } from 'vue';
 import { DepartmentSelectDialog } from '@eimsnext/components';
 
 export default defineComponent({
@@ -21,12 +21,31 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-
+    preview: {
+      type: Boolean,
+      default: undefined,
+    },
+    // 从FormRender的prop.props中接收formCreateInject
+    formCreateInject: {
+      type: Object,
+      default: null,
+    },
   },
   emits: ['update:modelValue', 'change'],
   setup(props, { emit }) {
     const showDialog = ref(false);
     const selectedValue = ref(props.modelValue);
+    // 结合props和上下文的preview属性，确定是否处于查看模式
+    // 优先使用props.preview，因为FormDataView组件会将isView=true传递给FormView组件，
+    // 然后FormView组件会将preview=isView传递给formCreate组件
+    const isPreviewMode = computed(() => {   
+      // 如果props.preview不是undefined，则使用它
+      if (props.preview !== undefined) {
+        return !!props.preview;
+      }
+      // 否则使用上下文的preview属性
+      return !!props.formCreateInject?.preview;
+    });
 
     watch(
       () => props.modelValue,
@@ -35,11 +54,26 @@ export default defineComponent({
       }
     );
 
+    // 移除部门对象中的data和value字段，只保留必要的字段
+    const removeUnnecessaryFields = (dept) => {
+      if (!dept || typeof dept !== 'object') return dept;
+      const { data, value, ...rest } = dept;
+      return rest;
+    };
+
     const handleDepartmentChange = (departments) => {
-      const newValue = props.multiple ? departments : departments[0] || '';
-      selectedValue.value = newValue;
-      emit('update:modelValue', newValue);
-      emit('change', newValue);
+      let processedDepartments;
+      if (props.multiple) {
+        // 多选模式：处理数组中的每个部门对象
+        processedDepartments = departments.map(removeUnnecessaryFields);
+      } else {
+        // 单选模式：处理单个部门对象
+        processedDepartments = departments.length > 0 ? removeUnnecessaryFields(departments[0]) : '';
+      }
+      
+      selectedValue.value = processedDepartments;
+      emit('update:modelValue', processedDepartments);
+      emit('change', processedDepartments);
     };
 
     const handleTagClick = () => {
@@ -47,14 +81,16 @@ export default defineComponent({
     };
 
     return () => {
-      const { placeholder, multiple, disabled, ...attrs } = props;
-      
+      const { placeholder, multiple, disabled, preview, ...attrs } = props;
+      // 计算最终的禁用状态：禁用属性或查看模式
+      const isDisabled = disabled || isPreviewMode.value;
+    
       return (
         <div>
           <div
-            class={`_fc-department-select ${disabled ? 'is-disabled' : ''}`}
+            class={`_fc-department-select ${isDisabled ? 'is-disabled' : ''}`}
             style={{
-              cursor: disabled ? 'not-allowed' : 'pointer',
+              cursor: isDisabled ? 'not-allowed' : 'pointer',
               padding: '10px',
               border: '1px solid #dcdfe6',
               borderRadius: '4px',
@@ -64,8 +100,9 @@ export default defineComponent({
               justifyContent: 'flex-start',
               flexWrap: 'wrap',
               gap: '4px',
+              backgroundColor: isDisabled ? '#f5f7fa' : '#ffffff',
             }}
-            onClick={() => !disabled && (showDialog.value = true)}
+            onClick={() => !isDisabled && (showDialog.value = true)}
           >
             {selectedValue.value && typeof selectedValue.value === 'object' && !Array.isArray(selectedValue.value) && selectedValue.value.label ? (
           <div
@@ -78,8 +115,9 @@ export default defineComponent({
               fontSize: '12px',
               height: '24px',
               lineHeight: '24px',
+              cursor: isDisabled ? 'not-allowed' : 'pointer',
             }}
-            onClick={handleTagClick}
+            onClick={() => !isDisabled && handleTagClick()}
           >
             {selectedValue.value.label}
           </div>
@@ -96,10 +134,11 @@ export default defineComponent({
                 fontSize: '12px',
                 height: '24px',
                 lineHeight: '24px',
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                handleTagClick();
+                !isDisabled && handleTagClick();
               }}
             >
               {dept.label}
@@ -119,7 +158,7 @@ export default defineComponent({
           </div>
         )}
           </div>
-          {showDialog.value && (
+          {!isDisabled && showDialog.value && (
             <DepartmentSelectDialog
               modelValue={showDialog.value}
               onUpdate:modelValue={(val) => showDialog.value = val}
