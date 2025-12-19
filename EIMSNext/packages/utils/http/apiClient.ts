@@ -86,6 +86,23 @@ export class ApiClient {
   //   return this.httpRequest.request({ url, headers, withToken });
   // }
 
+  exec<T = any>(
+    url: string,
+    data: any,
+    method: string = "post",
+    contentType: ContentType = ContentType.JSON,
+    withToken?: true
+  ) {
+    url = this.formatUrl(url);
+    let headers = new AxiosHeaders();
+    if (method == "post") {
+      headers.setContentType(contentType);
+      return this.httpRequest.post<T>({ url, data, headers, withToken });
+    } else {
+      return this.httpRequest.get<T>({ url, data, headers, withToken });
+    }
+  }
+
   private formatUrl(url: string) {
     return getApiUrl(url, this.apiVersion);
   }
