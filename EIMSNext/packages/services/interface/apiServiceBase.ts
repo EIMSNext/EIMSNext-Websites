@@ -5,13 +5,13 @@ import { ServiceBase } from "./serviceBase";
 export abstract class ApiServiceBase<T = IdBase, R = any> extends ServiceBase {
   protected abstract modelName(): string;
 
-  dynamiccount(query?: any): Promise<number> {
-    let url = this.getUrl(this.modelName(), "$dynamiccount");
+  dynamicCount(query?: any): Promise<number> {
+    let url = this.getUrl(this.modelName(), "dynamic/count");
     return this.http().api.count(url, query);
   }
 
-  dynamicquery<T>(query?: any): Promise<T[]> {
-    let url = this.getUrl(this.modelName(), "$dynamicquery");
+  dynamicQuery<T>(query?: any): Promise<T[]> {
+    let url = this.getUrl(this.modelName(), "dynamic/query");
     return this.http().api.query(url, query);
   }
 
