@@ -80,6 +80,7 @@ import { is } from "@eimsnext/form-render-core";
 import formCreate from "@eimsnext/form-render-elplus";
 import { copyTextToClipboard } from "@eimsnext/form-designer";
 import { ArrowDown } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 import { FormContent, FormType, FormDefRequest, FormDef } from "@eimsnext/models";
 import { formDefService } from "@eimsnext/services";
 import "@eimsnext/form-designer/dist/index.css";
@@ -338,13 +339,13 @@ export default {
         let resp = await formDefService.patch(req.id, req);
 
         formStore.update(resp);
-
+        ElMessage.success("保存成功");
         this.$emit("save", false);
       } else {
         let resp = await formDefService.post(req);
         contextStore.setAppChanged(); //reload 菜单
         formStore.update(resp);
-
+        ElMessage.success("保存成功");
         this.$emit("save", true);
       }
     },

@@ -3,7 +3,7 @@ export class ODataQueryModel {
   $expand?: string;
   $select?: string;
   $skip: number = 0;
-  $take: number = 20;
+  $top: number = 20;
 }
 
 export interface IDynamicFindOptions {

@@ -4,11 +4,11 @@
     <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
     <div class="search-result">
       <div class="result-container">
-        <el-tabs v-model="activeTab" style="flex: 1">
-          <el-tab-pane label="组织架构" name="dept">
+        <el-tabs v-model="activeTab" style="flex: 1" :class="{ 'hide-tabs-header': activeTab == showTabs }">
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Department)" label="组织架构" :name="MemberTabs.Department">
             <div class="dept-select">
               <el-tree ref="deptTree" class="dept-tree" style="margin-top: 12px" :data="deptData" :props="defaultProps"
-                :expand-on-click-node="true" node-key="id" :check-strictly="!orgCascade"
+                :expand-on-click-node="true" node-key="id" :show-checkbox="multiple" :check-strictly="!orgCascade"
                 :filter-node-method="deptFilter" @check-change="deptNodeChecked">
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label">
@@ -16,7 +16,11 @@
                       <et-icon :icon="data.icon" class="node-icon" />
                       <span class="node-label">{{ data.label }}</span>
                       <div class="node-action">
-                        <el-checkbox v-model="node.checked" @click.stop="" :disabled="!deptFilter(keyword, data)" />
+                        <el-checkbox v-if="multiple" v-model="node.checked" @click.stop=""
+                          :disabled="!deptFilter(keyword, data)" />
+                        <el-radio v-if="!multiple" v-model="singleDeptId" :value="data.id" @click.stop=""
+                          @change="(val: string) => singleDeptChecked(data, val)"
+                          :disabled="!deptFilter(keyword, data)" />
                       </div>
                     </div>
                   </div>
@@ -24,7 +28,7 @@
               </el-tree>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="角色" name="role">
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Role)" label="角色" :name="MemberTabs.Role">
             <div class="dept-select">
               <el-tree ref="roleTree" class="dept-tree" style="margin-top: 12px" :data="roleData" :props="defaultProps"
                 :expand-on-click-node="true" node-key="id" :check-strictly="false" :filter-node-method="roleFilter"
@@ -43,7 +47,7 @@
               </el-tree>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="员工" name="emp">
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Employee)" label="员工" :name="MemberTabs.Employee">
             <div class="emp-select">
               <div class="left-panel" style="left: 0px; width: 460px">
                 <div class="filter-items">
@@ -65,14 +69,37 @@
                 </el-tree>
               </div>
               <div class="right-panel" style="width: 250px; right: 0px">
-                <et-list v-model="selectedEmps" :data="empData" :selectable="true"
+                <et-list v-model="selectedEmps" :data="empData" :selectable="true" :multiple="multiple"
                   style="padding-top: 0px; height: 100%" @item-check="empChecked" @all-check="empCheckAll">
                 </et-list>
               </div>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="动态负责人" name="dynamic">
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Dynamic)" label="动态负责人" :name="MemberTabs.Dynamic">
             <div></div>
+          </el-tab-pane>
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.CurDept)" label="当前用户所处部门" :name="MemberTabs.CurDept">
+            <div class="dept-select">
+              <el-tree ref="curDeptTree" class="dept-tree" style="margin-top: 12px" :data="curDeptData"
+                :props="defaultProps" :expand-on-click-node="true" node-key="id" :show-checkbox="multiple"
+                :filter-node-method="deptFilter" @check-change="deptNodeChecked">
+                <template #default="{ node, data }">
+                  <div class="node-data" :title="data.label">
+                    <div class="node-wrapper">
+                      <et-icon :icon="data.icon" class="node-icon" />
+                      <span class="node-label">{{ data.label }}</span>
+                      <div class="node-action">
+                        <el-checkbox v-if="multiple" v-model="node.checked" @click.stop=""
+                          :disabled="!deptFilter(keyword, data)" />
+                        <el-radio v-if="!multiple" v-model="singleDeptId" :value="data.id" @click.stop=""
+                          @change="(val: string) => singleDeptChecked(data, val)"
+                          :disabled="!deptFilter(keyword, data)" />
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </el-tree>
+            </div>
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -83,12 +110,14 @@
 import "./style/index.less";
 import { ref, reactive, watch, onBeforeMount, toRef } from "vue";
 import { TreeInstance } from "element-plus";
-import { ITreeNode, TreeNodeType, buildDeptTree, buildRoleTree } from "../common";
+import { DeptToTreeNode, ITreeNode, TreeNodeType, buildDeptTree, buildRoleTree } from "../common";
 import { ISelectedTag, TagType } from "../selectedTags/type";
 import { Department, Employee, RoleGroup, Role } from "@eimsnext/models";
-import { useDeptStore } from "@eimsnext/store";
+import { useDeptStore, useUserStore } from "@eimsnext/store";
 import { employeeService, roleGroupService, roleService } from "@eimsnext/services";
 import { IListItem } from "../list/type";
+import { MemberTabs } from "./type";
+import { FlagEnum } from "@eimsnext/utils";
 
 defineOptions({
   name: "MemberSelect",
@@ -97,18 +126,22 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     modelValue: ISelectedTag[];
+    showTabs?: MemberTabs | number,
     showCascade?: boolean;
+    multiple?: boolean;
   }>(),
   {
+    showTabs: 7,
     showCascade: false,
+    multiple: true
   }
 );
-
+const userStore = useUserStore()
 const orgCascade = ref(false);
 const defaultProps = { children: "children", label: "label" };
 const tagsRef = toRef(props.modelValue);
 const keyword = ref("");
-const activeTab = ref("dept");
+const activeTab = ref(FlagEnum.getMinValue(MemberTabs, props.showTabs));
 const deptTree = ref<TreeInstance>();
 const deptStore = useDeptStore();
 const deptData = ref<ITreeNode[]>(); // 部门列表
@@ -120,6 +153,9 @@ const selectedEmps = ref<string[]>();
 const deptChanging = ref(false);
 const roleTree = ref<TreeInstance>();
 const roleData = ref<ITreeNode[]>(); // 角色列表
+const curDeptTree = ref<TreeInstance>();
+const curDeptData = ref<ITreeNode[]>()
+const singleDeptId = ref<string>("")
 
 watch([keyword], ([newKeyword], [oldKeyword]) => {
   if (newKeyword != oldKeyword) {
@@ -134,6 +170,11 @@ onBeforeMount(() => {
     let detps = buildDeptTree(data);
     deptData.value = JSON.parse(JSON.stringify(detps));
     empDeptData.value = JSON.parse(JSON.stringify(detps));
+
+    if (userStore.currentUser.deptId)
+      deptStore.get(userStore.currentUser.deptId).then(x => {
+        if (x) curDeptData.value = [DeptToTreeNode(x)]
+      })
   });
 
   let roleGroups: RoleGroup[] = [];
@@ -143,6 +184,11 @@ onBeforeMount(() => {
     roleService.query<Role>().then(data => { roles = data })
   ]
   ).then(() => roleData.value = buildRoleTree(roleGroups, roles))
+
+  if (!props.multiple && props.modelValue?.length > 0) {
+    if (props.modelValue[0].type == TagType.Department)
+      singleDeptId.value = props.modelValue[0].id
+  }
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -157,23 +203,43 @@ const deptFilter = (value: string, data: any) => {
   return data.label.indexOf(value) !== -1;
 };
 const deptNodeChecked = (data: ITreeNode, checked: boolean) => {
-  if (checked) {
-    tagsRef.value.push({
-      id: data.id,
-      label: data.label,
-      type: TagType.Department,
-      data: data.data,
-    });
-  } else {
-    let index = tagsRef.value.findIndex(
-      (x) => x.id == data.id && x.type == TagType.Department
-    );
-    if (index > -1) tagsRef.value.splice(index, 1);
-  }
+  if (props.multiple) {
+    if (checked) {
+      tagsRef.value.push({
+        id: data.id,
+        label: data.label,
+        type: TagType.Department,
+        data: data.data,
+      });
 
-  emit("update:modelValue", tagsRef.value);
+    } else {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Department
+      );
+      if (index > -1) tagsRef.value.splice(index, 1);
+    }
+    emit("update:modelValue", tagsRef.value);
+  }
 };
+const singleDeptChecked = (data: ITreeNode, val: string) => {
+  if (!props.multiple) {
+    if (singleDeptId.value) {
+      tagsRef.value = [{
+        id: data.id.toString(),
+        label: data.label,
+        type: TagType.Department,
+        data: data.data,
+      }]
+    }
+    else {
+      tagsRef.value = []
+    }
+    emit("update:modelValue", tagsRef.value);
+  }
+}
+
 const selectEmpDept = (deptId: string) => {
+  // console.log("selectEmpDept", deptId)
   deptChanging.value = true;
   selectedEmpDeptId.value = deptId;
 
@@ -199,7 +265,7 @@ const selectEmpDept = (deptId: string) => {
   });
 };
 const empChecked = (data: IListItem, checked: boolean) => {
-  // console.log("empCheck", data, checked);
+  //  console.log("empCheck", data, checked);
   if (checked) {
     let index = tagsRef.value.findIndex(
       (x) => x.id == data.id && x.type == TagType.Employee
@@ -216,7 +282,7 @@ const empChecked = (data: IListItem, checked: boolean) => {
     let index = tagsRef.value.findIndex(
       (x) => x.id == data.id && x.type == TagType.Employee
     );
-    // console.log("index", index, tagsRef);
+    //  console.log("index", index, tagsRef);
     if (index && index > -1) tagsRef.value.splice(index, 1);
   }
 
@@ -283,13 +349,29 @@ const roleNodeChecked = (data: ITreeNode, checked: boolean) => {
 const removeTag = (tag: ISelectedTag) => {
   //@ts-ignore
   if (tag.type == TagType.Department) {
-    deptTree.value!.setChecked(tag.id, false, orgCascade.value);
+    if (deptTree.value)
+      deptTree.value.setChecked(tag.id, false, orgCascade.value);
+    else
+      if (curDeptTree.value)
+        curDeptTree.value.setChecked(tag.id, false, false);
   }
   else if (tag.type == TagType.Role) {
-    roleTree.value!.setChecked(tag.id, false, false);
+    if (roleTree.value)
+      roleTree.value.setChecked(tag.id, false, false);
   }
   else if (tag.type == TagType.Employee) {
     selectedEmps.value = selectedEmps.value?.filter((x) => x != tag.id);
   }
 };
 </script>
+<style scoped>
+/* 隐藏标签栏 */
+:deep(.hide-tabs-header .el-tabs__header) {
+  display: none;
+}
+
+:deep(.hide-tabs-header .el-tabs__content) {
+  margin-top: 0 !important;
+  border: none !important;
+}
+</style>

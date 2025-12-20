@@ -1439,6 +1439,20 @@ const ZhCn = {
         inactiveColor: "关闭时的背景色",
       },
     },
+    departmentSelect: {
+      name: "部门单选",
+      props: {
+        disabled: "是否禁用",
+        placeholder: "输入框占位文本",
+      },
+    },
+    departmentSelect2: {
+      name: "部门多选",
+      props: {
+        disabled: "是否禁用",
+        placeholder: "输入框占位文本",
+      },
+    },
     tableform: {
       name: "子表单",
       event: {
