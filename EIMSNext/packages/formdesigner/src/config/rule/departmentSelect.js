@@ -11,7 +11,7 @@ export default {
   name,
   input: true,
   event: ["change"],
-  validate: ["string", "array"],
+  validate: ["object"],
   rule({ t }) {
     return {
       type: name,
@@ -21,18 +21,12 @@ export default {
       $required: false,
       props: {
         multiple: false,
-        placeholder: "+选择部门",
+        placeholder: "+ 选择部门",
       },
     };
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      makeTitleRule(t),
-      {
-        type: "input",
-        field: "placeholder",
-        title: t("props.placeholder"),
-      },
       {
         type: "CheckBoxInput",
         field: "disabled",

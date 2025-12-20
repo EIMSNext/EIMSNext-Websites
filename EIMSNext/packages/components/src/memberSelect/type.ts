@@ -5,4 +5,5 @@ export enum MemberTabs {
   Employee = 4,
   Dynamic = 8,
   CurDept = 16,
+  CurUser = 32,
 }

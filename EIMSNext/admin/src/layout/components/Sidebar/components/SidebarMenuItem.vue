@@ -1,5 +1,5 @@
 <template>
-<!-- 删除确认对话框 -->
+  <!-- 删除确认对话框 -->
   <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除这个表单吗？" :icon="MessageIcon.Warning"
     :showNoSave="false" okText="确定删除" @ok="handleDeleteConfirm">
     <div>表单删除后将不可恢复，包括所有相关数据</div>
@@ -199,11 +199,15 @@ function closeEditor() {
 
 .el-menu-item:hover {
   background-color: $menu-hover;
+
+  .more-wrapper {
+    display: flex;
+  }
 }
 
 .more-wrapper {
   position: absolute;
   right: 10px;
-  display: flex;
+  display: none;
 }
 </style>

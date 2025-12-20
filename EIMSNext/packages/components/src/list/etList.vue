@@ -31,7 +31,7 @@
 </template>
 <script lang="ts" setup>
 import "./style/index.less";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { IListItem } from "./type";
 
 defineOptions({
@@ -55,11 +55,19 @@ const props = withDefaults(
 const oldSingleItemId = ref<string>()
 const oldSingleItem = ref<IListItem>()
 const singleItemId = ref<string>()
-if (!props.multiple && props.modelValue?.length > 0) {
-  singleItemId.value = props.modelValue[0]
-  oldSingleItemId.value = singleItemId.value
-  oldSingleItem.value = props.data.find(x => x.id == oldSingleItemId.value)
-}
+
+
+watch(
+  () => props.modelValue,
+  () => {
+    if (!props.multiple && props.modelValue?.length > 0) {
+      singleItemId.value = props.modelValue[0]
+      oldSingleItemId.value = singleItemId.value
+      oldSingleItem.value = props.data.find(x => x.id == oldSingleItemId.value)
+    }
+  },
+  { immediate: true }
+);
 
 const headerText = computed(() => {
   let selCnt = 0;

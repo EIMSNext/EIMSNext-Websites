@@ -15,18 +15,19 @@
         <button @click="changeTags">change Tags</button>
       </div>
     </et-dialog>
-    <member-select-dialog v-model="showMemberDialog" :multiple="false" :showTabs="4" @ok="finishSelect" />
+    <member-select-dialog v-model="showMemberDialog" :multiple="false"
+      :showTabs="MemberTabs.Employee | MemberTabs.CurUser" @ok="finishSelect" />
     <et-confirm-dialog v-model="showConfirmDialog" :icon="MessageIcon.Error" @ok="onConfirmed">
       <div>效果如何</div>
     </et-confirm-dialog>
 
-    <div class="shake">    
-    <el-button @click="onClick">show dialog</el-button>
-    <el-button @click="onMemberClick">show member dialog</el-button>
-    <el-button @click="onConfirmClick">show confirm dialog</el-button>
-    <el-button @click="changeName">change name</el-button>
-    <el-button @click="save">save</el-button>
-  </div>
+    <div class="shake">
+      <el-button @click="onClick">show dialog</el-button>
+      <el-button @click="onMemberClick">show member dialog</el-button>
+      <el-button @click="onConfirmClick">show confirm dialog</el-button>
+      <el-button @click="changeName">change name</el-button>
+      <el-button @click="save">save</el-button>
+    </div>
   </div>
 </template>
 
