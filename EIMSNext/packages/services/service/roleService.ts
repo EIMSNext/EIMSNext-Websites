@@ -7,7 +7,17 @@ export class RoleService extends ODataServiceBase<Role, RoleRequest> {
   }
 
   addEmps(roleId: string, empIds: string[]): Promise<void> {
-    return this.http().odata.exec(this.modelName(), { roleId, empIds });
+    return this.http().api.exec(`/${this.modelName()}/AddEmps`, {
+      roleId,
+      empIds,
+    });
+  }
+
+  removeEmps(roleId: string, empIds: string[]): Promise<void> {
+    return this.http().api.exec(`/${this.modelName()}/RemoveEmps`, {
+      roleId,
+      empIds,
+    });
   }
 }
 
