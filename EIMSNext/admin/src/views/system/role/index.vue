@@ -44,8 +44,8 @@
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
+    <member-select-dialog v-model="showMemberDialog" destroy-on-close @ok="finishSelect" />
   </div>
-  <member-select-dialog v-model="showMemberDialog" destroy-on-close @ok="finishSelect" />
 </template>
 
 <script setup lang="ts">
@@ -60,7 +60,6 @@ defineOptions({
   inheritAttrs: false,
 });
 
-const selectedEmp = ref<Employee>();
 const showMemberDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const showFilter = ref(false);
@@ -245,6 +244,11 @@ const handleRoleQuery = (role?: Role) => {
 };
 // 查询
 const handleQuery = () => {
+  if (!roleId.value) {
+    totalRef.value = 0;
+    dataRef.value = []
+    return
+  }
   loading.value = true;
 
   loadCount();
@@ -286,18 +290,6 @@ const showDetails = (row: FormData, column: any) => {
   //   selectedData.value = row
   //   showDetailsDialog.value = true
   // }
-};
-
-const handleSaved = (data: Employee) => {
-  // showAddEditDialog.value = false;
-  // handleQuery()
-};
-
-const execDelete = async () => {
-  // await employeeService.delete("batch", { keys: checkedDatas.value.map(x => x.id) })
-  //   .then(() => {
-  //     handleQuery()
-  //   })
 };
 
 onMounted(() => {
