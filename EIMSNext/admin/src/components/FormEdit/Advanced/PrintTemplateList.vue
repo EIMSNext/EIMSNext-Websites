@@ -21,19 +21,18 @@
       </template>
     </el-space>
   </div>
-  <CustomDrawer v-model="showDrawer" @close="close">
+  <EtDrawer v-model="showDrawer" @close="close">
     <template #title>
       <el-input v-model="selectedPrint!.name" class="title-editor" />
     </template>
 
     <PdfPrintDesigner :form-def="formDef" :print-def="selectedPrint!" />
-  </CustomDrawer>
+  </EtDrawer>
 </template>
 <script setup lang="ts">
 import PdfPrintDesigner from "@/components/PrintDesigner/PdfPrintDesigner.vue";
 import { FormDef, PrintTemplate, PrintTemplateType } from "@eimsnext/models";
 import { printTemplateService } from "@eimsnext/services";
-import CustomDrawer from "@/components/CustomDrawer/index.vue";
 import buildQuery from "odata-query";
 
 defineOptions({

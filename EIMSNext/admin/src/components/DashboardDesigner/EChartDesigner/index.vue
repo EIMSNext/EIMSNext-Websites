@@ -487,68 +487,68 @@ const removeField = (field: IDataSourceField, index: number) => {};
             }
 
             .line {
-              background-image: url("../../assets/images/chartsBulider/Line.svg");
+              background-image: url("../../../assets/images/charts/Line.svg");
             }
 
             .linearea {
-              background-image: url("../../assets/images/chartsBulider/LineArea.svg");
+              background-image: url("../../../assets/images/charts/LineArea.svg");
             }
 
             .horizontalbar {
-              background-image: url("../../assets/images/chartsBulider/HorizontalBar.svg");
+              background-image: url("../../../assets/images/charts/HorizontalBar.svg");
             }
 
             .verticalbar {
-              background-image: url("../../assets/images/chartsBulider/VerticalBar.svg");
+              background-image: url("../../../assets/images/charts/VerticalBar.svg");
             }
 
             .pie {
-              background-image: url("../../assets/images/chartsBulider/Pie1.svg");
+              background-image: url("../../../assets/images/charts/Pie1.svg");
             }
 
             .index {
-              background-image: url("../../assets/images/chartsBulider/Index.svg");
+              background-image: url("../../../assets/images/charts/Index.svg");
             }
 
             .double {
-              background-image: url("../../assets/images/chartsBulider/Double.svg");
+              background-image: url("../../../assets/images/charts/Double.svg");
             }
 
             .funnel {
-              background-image: url("../../assets/images/chartsBulider/Funnel.svg");
+              background-image: url("../../../assets/images/charts/Funnel.svg");
             }
 
             .radar {
-              background-image: url("../../assets/images/chartsBulider/Radar.svg");
+              background-image: url("../../../assets/images/charts/Radar.svg");
             }
 
             .fittext {
-              background-image: url("../../assets/images/chartsBulider/FitText.svg");
+              background-image: url("../../../assets/images/charts/FitText.svg");
             }
 
             .gauge {
-              background-image: url("../../assets/images/chartsBulider/gauge.svg");
+              background-image: url("../../../assets/images/charts/gauge.svg");
             }
             .map {
-              background-image: url("../../assets/images/chartsBulider/map.svg");
+              background-image: url("../../../assets/images/charts/map.svg");
             }
             .scatter {
-              background-image: url("../../assets/images/chartsBulider/scatter.svg");
+              background-image: url("../../../assets/images/charts/scatter.svg");
             }
             .bubble {
-              background-image: url("../../assets/images/chartsBulider/bubble.svg");
+              background-image: url("../../../assets/images/charts/bubble.svg");
             }
             .detailtable {
-              background-image: url("../../assets/images/chartsBulider/detailtable.svg");
+              background-image: url("../../../assets/images/charts/detailtable.svg");
             }
             .treemap {
-              background-image: url("../../assets/images/chartsBulider/treemap.svg");
+              background-image: url("../../../assets/images/charts/treemap.svg");
             }
             .wordcloud {
-              background-image: url("../../assets/images/chartsBulider/wordcloud.svg");
+              background-image: url("../../../assets/images/charts/wordcloud.svg");
             }
             .heatmap {
-              background-image: url("../../assets/images/chartsBulider/heatmap.svg");
+              background-image: url("../../../assets/images/charts/heatmap.svg");
             }
           }
         }
@@ -697,68 +697,68 @@ const removeField = (field: IDataSourceField, index: number) => {};
         }
 
         .line {
-          background-image: url("../../assets/images/chartsBulider/Line.svg");
+          background-image: url("../../../assets/images/charts/Line.svg");
         }
 
         .linearea {
-          background-image: url("../../assets/images/chartsBulider/LineArea.svg");
+          background-image: url("../../../assets/images/charts/LineArea.svg");
         }
 
         .horizontalbar {
-          background-image: url("../../assets/images/chartsBulider/HorizontalBar.svg");
+          background-image: url("../../../assets/images/charts/HorizontalBar.svg");
         }
 
         .verticalbar {
-          background-image: url("../../assets/images/chartsBulider/VerticalBar.svg");
+          background-image: url("../../../assets/images/charts/VerticalBar.svg");
         }
 
         .pie {
-          background-image: url("../../assets/images/chartsBulider/Pie1.svg");
+          background-image: url("../../../assets/images/charts/Pie1.svg");
         }
 
         .index {
-          background-image: url("../../assets/images/chartsBulider/Index.svg");
+          background-image: url("../../../assets/images/charts/Index.svg");
         }
 
         .double {
-          background-image: url("../../assets/images/chartsBulider/Double.svg");
+          background-image: url("../../../assets/images/charts/Double.svg");
         }
 
         .funnel {
-          background-image: url("../../assets/images/chartsBulider/Funnel.svg");
+          background-image: url("../../../assets/images/charts/Funnel.svg");
         }
 
         .radar {
-          background-image: url("../../assets/images/chartsBulider/Radar.svg");
+          background-image: url("../../../assets/images/charts/Radar.svg");
         }
 
         .fittext {
-          background-image: url("../../assets/images/chartsBulider/FitText.svg");
+          background-image: url("../../../assets/images/charts/FitText.svg");
         }
 
         .gauge {
-          background-image: url("../../assets/images/chartsBulider/gauge.svg");
+          background-image: url("../../../assets/images/charts/gauge.svg");
         }
         .map {
-          background-image: url("../../assets/images/chartsBulider/map.svg");
+          background-image: url("../../../assets/images/charts/map.svg");
         }
         .scatter {
-          background-image: url("../../assets/images/chartsBulider/scatter.svg");
+          background-image: url("../../../assets/images/charts/scatter.svg");
         }
         .bubble {
-          background-image: url("../../assets/images/chartsBulider/bubble.svg");
+          background-image: url("../../../assets/images/charts/bubble.svg");
         }
         .detailtable {
-          background-image: url("../../assets/images/chartsBulider/detailtable.svg");
+          background-image: url("../../../assets/images/charts/detailtable.svg");
         }
         .treemap {
-          background-image: url("../../assets/images/chartsBulider/treemap.svg");
+          background-image: url("../../../assets/images/charts/treemap.svg");
         }
         .wordcloud {
-          background-image: url("../../assets/images/chartsBulider/wordcloud.svg");
+          background-image: url("../../../assets/images/charts/wordcloud.svg");
         }
         .heatmap {
-          background-image: url("../../assets/images/chartsBulider/heatmap.svg");
+          background-image: url("../../../assets/images/charts/heatmap.svg");
         }
       }
     }
