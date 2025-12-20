@@ -214,7 +214,7 @@ function checkCapslock(event: KeyboardEvent) {
     height: 100%;
 
     .bg-banner {
-      background-image: url("@/assets/images/login-image.jpg");
+      background-image: url("@/assets/images/login/login-image.jpg");
       background-position: 50%;
       background-repeat: no-repeat;
       background-size: cover;
@@ -274,7 +274,7 @@ function checkCapslock(event: KeyboardEvent) {
 
 html.dark {
   .login {
-    background: url("@/assets/images/login-background-dark.jpg") no-repeat center right;
+    background: url("@/assets/images/login/login-background-dark.jpg") no-repeat center right;
 
     .login-content {
       background: transparent;
