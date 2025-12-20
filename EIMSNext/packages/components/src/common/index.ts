@@ -47,15 +47,7 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
   const attachChildren = (pNode: ITreeNode) => {
     const children = depts.filter((x) => x.parentId == pNode.id);
     children.forEach((x) => {
-      const node: ITreeNode = {
-        id: x.id,
-        code: x.code,
-        label: `${x.code} - ${x.name}`,
-        nodeType: TreeNodeType.Dept,
-        children: [],
-        data: x,
-        icon: "el-icon-UserFilled",
-      };
+      const node: ITreeNode = DeptToTreeNode(x);
       attachChildren(node);
       if (!pNode.children) pNode.children = [];
       pNode.children.push(node);
@@ -67,16 +59,7 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
     (x) => x.parentId == undefined || x.parentId == ""
   );
   if (rootDept) {
-    const rootNode: ITreeNode = {
-      id: rootDept.id,
-      code: rootDept.code,
-      label: `${rootDept.code} - ${rootDept.name}`,
-      nodeType: TreeNodeType.Dept,
-      children: [],
-      data: rootDept,
-      icon: "el-icon-UserFilled",
-    };
-
+    const rootNode: ITreeNode = DeptToTreeNode(rootDept);
     attachChildren(rootNode);
     treeNoes.push(rootNode);
   }
@@ -84,18 +67,23 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
   return treeNoes;
 }
 
+export function DeptToTreeNode(dept: Department): ITreeNode {
+  return {
+    id: dept.id,
+    code: dept.code,
+    label: `${dept.code} - ${dept.name}`,
+    nodeType: TreeNodeType.Dept,
+    children: [],
+    data: dept,
+    icon: "el-icon-UserFilled",
+  };
+}
+
 export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
   const attachChildren = (pNode: ITreeNode) => {
     const children = roles.filter((x) => x.roleGroupId == pNode.id);
     children.forEach((x) => {
-      const node: ITreeNode = {
-        id: x.id,
-        label: x.name,
-        nodeType: TreeNodeType.Role,
-        children: [],
-        data: x,
-        icon: "el-icon-UserFilled",
-      };
+      const node: ITreeNode = RoleToTreeNode(x);
       attachChildren(node);
       if (!pNode.children) pNode.children = [];
       pNode.children.push(node);
@@ -118,4 +106,14 @@ export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
   });
 
   return treeNoes;
+}
+export function RoleToTreeNode(role: Role): ITreeNode {
+  return {
+    id: role.id,
+    label: role.name,
+    nodeType: TreeNodeType.Role,
+    children: [],
+    data: role,
+    icon: "el-icon-UserFilled",
+  };
 }

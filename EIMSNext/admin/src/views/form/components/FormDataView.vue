@@ -13,6 +13,7 @@ defineOptions({
     name: "FormDataView",
 });
 
+import { ref, onBeforeMount } from "vue";
 import { FormData, FormContent, FormDataRequest, DataAction, FlowStatus } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
@@ -70,7 +71,12 @@ const saveDraft = (data: any) => {
         data: data,
     };
 
-    formDataService.post<FormData>(fdata).then((res) => {
+    // 根据是否有dataId判断是新增还是编辑，编辑时使用put方法
+    const request = props.dataId ? 
+        formDataService.put<FormData>(props.dataId, fdata) : 
+        formDataService.post<FormData>(fdata);
+
+    request.then((res) => {
         formData.value = res.data;
         emit("ok");
     });
@@ -84,7 +90,12 @@ const submitData = (data: any) => {
         data: data,
     };
 
-    formDataService.post<FormData>(fdata).then((res) => {
+    // 根据是否有dataId判断是新增还是编辑，编辑时使用put方法
+    const request = props.dataId ? 
+        formDataService.put<FormData>(props.dataId, fdata) : 
+        formDataService.post<FormData>(fdata);
+
+    request.then((res) => {
         formData.value = res.data;
         emit("ok");
     });

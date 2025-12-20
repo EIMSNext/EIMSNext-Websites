@@ -1,68 +1,34 @@
 <template>
   <MetaItemHeader :label="t('触发表单')" :required="true"></MetaItemHeader>
   <el-input v-model="formName" readonly size="default" style="width: 100%" />
-  <MetaItemHeader
-    class="mt-[8px]"
-    :label="t('触发动作')"
-    :required="true"
-  ></MetaItemHeader>
+  <MetaItemHeader class="mt-[8px]" :label="t('触发动作')" :required="true"></MetaItemHeader>
   <div class="trigger-header ml-[8px]">
     <div style="color: #eb5050; font-size: 12px">
       {{ t("选择触发动作") }}
     </div>
-    <el-popover
-      popper-class="data-triggers"
-      placement="bottom"
-      :show-arrow="false"
-      width="200"
-      trigger="click"
-    >
+    <el-popover popper-class="data-triggers" placement="bottom" :show-arrow="false" width="200" trigger="click">
       <div class="trigger-header">
         <!-- <div class="trigger-desc">{{ t("表单事件") }}</div> -->
-        <div
-          class="add-trigger"
-          :class="{ notAllow: triggerBySubmit }"
-          @click="addTrigger(EventType.Submitted)"
-        >
+        <div class="add-trigger" :class="{ notAllow: triggerBySubmit }" @click="addTrigger(EventType.Submitted)">
           {{ t("提交数据时") }}
         </div>
         <template v-if="!usingFlow">
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByUpdate }"
-            @click="addTrigger(EventType.Modified)"
-          >
+          <div class="add-trigger" :class="{ notAllow: triggerByUpdate }" @click="addTrigger(EventType.Modified)">
             {{ t("修改数据时") }}
           </div>
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByDelete }"
-            @click="addTrigger(EventType.Removed)"
-          >
+          <div class="add-trigger" :class="{ notAllow: triggerByDelete }" @click="addTrigger(EventType.Removed)">
             {{ t("删除数据时") }}
           </div>
         </template>
         <template v-if="usingFlow">
           <!-- <div class="trigger-desc">{{ t("审批事件") }}</div> -->
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByApproved }"
-            @click="addTrigger(EventType.Approved)"
-          >
+          <div class="add-trigger" :class="{ notAllow: triggerByApproved }" @click="addTrigger(EventType.Approved)">
             {{ t("审批通过时") }}
           </div>
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByRejected }"
-            @click="addTrigger(EventType.Rejected)"
-          >
+          <div class="add-trigger" :class="{ notAllow: triggerByRejected }" @click="addTrigger(EventType.Rejected)">
             {{ t("审批驳回时") }}
           </div>
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByApproving }"
-            @click="addTrigger(EventType.Approving)"
-          >
+          <div class="add-trigger" :class="{ notAllow: triggerByApproving }" @click="addTrigger(EventType.Approving)">
             {{ t("节点流转时") }}
           </div>
         </template>
@@ -81,33 +47,13 @@
             <div style="flex-grow: 1; margin-left: 8px; display: flex">
               <div>{{ t("节点流转时") }}</div>
               <div style="flex: 1; margin: 0 5px; display: flex">
-                <el-select
-                  v-model="wfNodeId"
-                  placeholder="请选择节点"
-                  size="default"
-                  style="flex: 1"
-                  @change="onNodeInput"
-                >
-                  <el-option
-                    v-for="item in nodeList"
-                    :key="item.id"
-                    :label="item.label"
-                    :value="item.id"
-                  />
+                <el-select v-model="wfNodeId" placeholder="请选择节点" size="default" style="flex: 1" @change="onNodeInput">
+                  <el-option v-for="item in nodeList" :key="item.id" :label="item.label" :value="item.id" />
                 </el-select>
               </div>
-              <el-select
-                v-model="nodeAction"
-                size="default"
-                style="width: 100px; margin-right: 5px"
-                @change="onActionInput"
-              >
-                <el-option
-                  v-for="item in actionList"
-                  :key="item.id"
-                  :label="item.label"
-                  :value="item.id"
-                />
+              <el-select v-model="nodeAction" size="default" style="width: 100px; margin-right: 5px"
+                @change="onActionInput">
+                <el-option v-for="item in actionList" :key="item.id" :label="item.label" :value="item.id" />
               </el-select>
             </div>
           </template>
@@ -124,16 +70,8 @@
       </template>
     </div>
   </div>
-  <MetaItemHeader
-    class="mt-[12px]"
-    :label="t('触发条件')"
-    :required="true"
-  ></MetaItemHeader>
-  <ConditionList
-    v-model="condList"
-    :formId="flowContext!.formId"
-    @change="onCondInput"
-  ></ConditionList>
+  <MetaItemHeader class="mt-[12px]" :label="t('触发条件')" :required="true"></MetaItemHeader>
+  <ConditionList v-model="condList" :formId="flowContext!.formId" @change="onCondInput"></ConditionList>
 </template>
 <script lang="ts" setup>
 import {
@@ -155,7 +93,7 @@ import {
 } from "../Common/FlowData";
 import { FormDef, WfDefinition } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
-import { uniqueId } from "@eimsnext/utils";
+import { FlagEnum, uniqueId } from "@eimsnext/utils";
 import { wfDefinitionService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import { useLocale } from "element-plus";
@@ -188,23 +126,23 @@ const actionList = ref<IListItem[]>([
 ]);
 
 const triggerBySubmit = computed(() => {
-  return (selectedTriggers.value & EventType.Submitted) == EventType.Submitted;
+  return FlagEnum.has(selectedTriggers.value, EventType.Submitted);
 });
 const triggerByUpdate = computed(() => {
-  return (selectedTriggers.value & EventType.Modified) == EventType.Modified;
+  return FlagEnum.has(selectedTriggers.value, EventType.Modified)
 });
 const triggerByDelete = computed(() => {
-  return (selectedTriggers.value & EventType.Removed) == EventType.Removed;
+  return FlagEnum.has(selectedTriggers.value, EventType.Removed)
 });
 const triggerByApproving = computed(() => {
-  return (selectedTriggers.value & EventType.Approving) == EventType.Approving;
+  return FlagEnum.has(selectedTriggers.value, EventType.Approving)
 });
 const triggerByApproved = computed(() => {
-  return (selectedTriggers.value & EventType.Approved) == EventType.Approved;
+  return FlagEnum.has(selectedTriggers.value, EventType.Approved)
 });
 const triggerByRejected = computed(() => {
   // console.log("com trigger");
-  return (selectedTriggers.value & EventType.Rejected) == EventType.Rejected;
+  return FlagEnum.has(selectedTriggers.value, EventType.Rejected)
 });
 
 const triggerList = computed(() => {
@@ -230,13 +168,13 @@ const triggerList = computed(() => {
 });
 
 const addTrigger = (t: EventType) => {
-  selectedTriggers.value = selectedTriggers.value | t;
+  selectedTriggers.value = FlagEnum.add(selectedTriggers.value, t);
   // console.log("triggers", selectedTriggers.value);
 
   activeData.value.metadata.triggerMeta!.eventType = selectedTriggers.value;
 };
 const delTrigger = (t: EventType) => {
-  selectedTriggers.value = selectedTriggers.value ^ t;
+  selectedTriggers.value = FlagEnum.remove(selectedTriggers.value, t);
   activeData.value.metadata.triggerMeta!.eventType = selectedTriggers.value;
 };
 

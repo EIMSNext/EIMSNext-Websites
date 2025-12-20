@@ -6,6 +6,7 @@ export * from "./icon";
 export * from "./list";
 export * from "./list/type";
 export * from "./memberSelect";
+export * from "./memberSelect/type";
 export * from "./selectedTags";
 export * from "./selectedTags/type";
 export * from "./toolbar";

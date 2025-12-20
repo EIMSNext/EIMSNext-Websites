@@ -9,6 +9,7 @@ export class CurrentUser {
   empCode?: string;
   empName?: string;
   corpId?: string;
+  deptId?: string;
   userType: UserType = UserType.None;
   apps?: App[];
   /** 头像URL */

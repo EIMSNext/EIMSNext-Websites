@@ -1,4 +1,4 @@
-import appSetting from "../appSetting";
+import { appSetting } from "../appSetting";
 
 export class AccessToken {
   get(): string | null | undefined {
