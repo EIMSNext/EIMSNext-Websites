@@ -53,7 +53,7 @@ import { ODataQuery } from "@/utils/query";
 import { Department, Employee, FieldType, Role } from "@eimsnext/models";
 import { SortDirection, employeeService, roleService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag } from "@eimsnext/components";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm } from "@eimsnext/components";
 
 defineOptions({
   name: "RoleManager",
@@ -102,6 +102,17 @@ const leftBars = ref<ToolbarItem[]>([
       command: "delete",
       icon: "el-icon-delete",
       disabled: true,
+      onCommand: async () => {
+        if (checkedDatas.value.length > 0) {
+          var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
+          if (confirm) {
+            await roleService.removeEmps(roleId.value, checkedDatas.value.map(x => x.id))
+              .then(() => {
+                handleQuery()
+              })
+          }
+        }
+      }
     },
   },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
@@ -189,20 +200,24 @@ const setSort = (sort: IFieldSortList) => {
 };
 
 const updateQueryParams = () => {
-  let roleFilter = undefined;
-  // if (deptId.value) {
-  //   deptFilter = { departmentId: { eq: deptId.value } }
-  // }
+  let statusFilter = { status: { eq: 0 } };
+  let preFilter: any = statusFilter;
+  if (roleId.value) {
+    preFilter = {
+      and: [statusFilter, `roles/any(r: r/roleId eq '${roleId.value}')`],
+    };
+  }
+
   queryParams.value = toODataQuery(
     condList.value,
     sortList.value,
     (pageNum.value - 1) * pageSize.value,
     pageSize.value,
-    roleFilter
+    preFilter
   );
   queryParams.value.expand = "department";
 
-  // console.log("queryParams list", queryParams.value);
+  console.log("queryParams filter", queryParams.value.filter);
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -258,6 +273,8 @@ const loadData = () => {
 // 选中项发生变化
 const handleSelectionChange = (selection: any[]) => {
   checkedDatas.value = selection;
+  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
+    checkedDatas.value.length == 0;
 };
 
 const showDetails = (row: FormData, column: any) => {

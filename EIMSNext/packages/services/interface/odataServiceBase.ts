@@ -18,12 +18,12 @@ export abstract class ReadonlyODataServiceBase<T = IdBase> extends ServiceBase {
   }
 
   dynamicCount(query?: any): Promise<number> {
-    let url = this.getApiUrl(this.modelName(), "dynamic/count");
+    let url = this.getApiUrl(this.modelName(), "dynamic/$count");
     return this.http().api.count(url, query);
   }
 
   dynamicQuery<T>(query?: any): Promise<T[]> {
-    let url = this.getApiUrl(this.modelName(), "dynamic/query");
+    let url = this.getApiUrl(this.modelName(), "dynamic/$query");
     return this.http().api.query(url, query);
   }
 
