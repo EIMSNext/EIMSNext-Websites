@@ -44,7 +44,8 @@
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
-    <member-select-dialog v-model="showMemberDialog" destroy-on-close @ok="finishSelect" />
+    <member-select-dialog v-model="showMemberDialog" :show-tabs="MemberTabs.Employee" destroy-on-close
+      @ok="finishSelect" />
   </div>
 </template>
 
@@ -53,7 +54,7 @@ import { ODataQuery } from "@/utils/query";
 import { Department, Employee, FieldType, Role } from "@eimsnext/models";
 import { SortDirection, employeeService, roleService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm } from "@eimsnext/components";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm, MemberTabs } from "@eimsnext/components";
 
 defineOptions({
   name: "RoleManager",

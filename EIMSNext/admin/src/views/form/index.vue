@@ -104,19 +104,21 @@
         show-overflow-tooltip
         :tooltip-formatter="tableToolFormatter"
         :row-class-name="rowClassName"
+        :fit="true"
         @selection-change="selectionChanged"
         @row-click="showDetails"
       >
         <el-table-column type="selection" width="40" :selectable="selectable" />
         <template v-for="col in columns">
           <template v-if="col.children">
-            <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip>
+            <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip :resizable="true">
               <template v-if="col.children" v-for="sub in col.children">
                 <el-table-column
                   :prop="sub.field"
                   :formatter="formatter"
                   :label="sub.title"
                   :width="sub.width"
+                  :resizable="true"
                 ></el-table-column>
               </template>
             </el-table-column>
@@ -128,6 +130,7 @@
               :label="col.title"
               :width="col.width"
               show-overflow-tooltip
+              :resizable="true"
             ></el-table-column>
           </template>
         </template>
@@ -414,6 +417,18 @@ const formatter = (row: any, column: any, cellValue: any) => {
       return cellValue ? dayjs(cellValue).format(format) : "";
     }
   }
+  
+  // 添加对部门选择器返回对象和数组的处理
+  if (cellValue && typeof cellValue === 'object') {
+    // 处理单选情况：完整的部门对象 { label: '部门名称', code: '部门编码', value: '部门ID', type: 'department' }
+    if (cellValue.label) {
+      return cellValue.label;
+    }
+    // 处理多选情况：完整的部门对象数组 [{ label: '部门1', code: 'code1', value: 'id1', type: 'department' }, ...]
+    if (Array.isArray(cellValue)) {
+      return cellValue.map(item => item.label || '').filter(Boolean).join(', ');
+    }
+  }
 
   return cellValue;
 };
@@ -471,6 +486,7 @@ const showDetails = (row: FormData, column: any) => {
 };
 const handleViewOk = () => {
   loadData();
+  showDetailsDialog.value = false;
 };
 //#region Flat Data
 const childrenFields = ref<string[]>([]);
@@ -561,6 +577,11 @@ const idBasedSpanMethod = (data: {
 <style lang="scss" scoped>
 .formdata-container {
   height: calc(100% - 90px);
+  width: 100%;
+}
+
+.data-list {
+  width: 100%;
 }
 
 :deep(.data-filter) {

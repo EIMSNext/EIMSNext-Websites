@@ -88,7 +88,11 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
               nodeType: FlowNodeType.Condition,
               name: "分支条件",
               notes: "未设置",
-              metadata: { conditionMeta: { condition: { id: uniqueId(), rel: "and", items: [] } } },
+              metadata: {
+                conditionMeta: {
+                  condition: { id: uniqueId(), rel: "and", items: [] },
+                },
+              },
               prevId: bId1,
             },
             childNodes: [],
@@ -126,7 +130,11 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
           nodeType: FlowNodeType.Condition,
           name: "分支条件",
           notes: "未设置",
-          metadata: { conditionMeta: { condition: { id: uniqueId(), rel: "and", items: [] } } },
+          metadata: {
+            conditionMeta: {
+              condition: { id: uniqueId(), rel: "and", items: [] },
+            },
+          },
           prevId: bId,
         },
         childNodes: [],
@@ -191,7 +199,13 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
         id: uniqueId(),
         nodeType: FlowNodeType.Insert,
         name: "新增数据",
-        metadata: { insertMeta: { formId: "", formFieldList: { items: [] }, singleResult: true } },
+        metadata: {
+          insertMeta: {
+            formId: "",
+            formFieldList: { items: [] },
+            singleResult: true,
+          },
+        },
       };
     case FlowNodeType.Update:
       return {
@@ -239,7 +253,12 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
         metadata: { pluginMeta: { singleResult: true } },
       };
     default:
-      return { id: uniqueId(), nodeType: nodeType, name: "未知类型节点", metadata: {} };
+      return {
+        id: uniqueId(),
+        nodeType: nodeType,
+        name: "未知类型节点",
+        metadata: {},
+      };
   }
 }
 export function cloneFlowNode(nodeData: IFlowNodeData): IFlowNodeData {
@@ -286,7 +305,8 @@ function findFlowNodeFromChild(
   for (let i = 0; i < childNodes.length; i++) {
     let child = childNodes[i];
     if (child.id == nodeId) return child;
-    if (child.conditionData && child.conditionData.id == nodeId) return child.conditionData;
+    if (child.conditionData && child.conditionData.id == nodeId)
+      return child.conditionData;
     if (child.childNodes) {
       let subChild = findFlowNodeFromChild(child.childNodes, nodeId);
       if (subChild) return subChild;
@@ -353,7 +373,12 @@ export function createWorkflowData(): IFlowData {
       metadata: {},
     },
     nodes: [],
-    endNode: { id: uniqueId(), nodeType: FlowNodeType.End, name: "结束", metadata: {} },
+    endNode: {
+      id: uniqueId(),
+      nodeType: FlowNodeType.End,
+      name: "结束",
+      metadata: {},
+    },
     eventSource: EventSourceType.None,
   };
 }
@@ -441,6 +466,11 @@ export function createDataflowData(eventSource: EventSourceType): IFlowData {
       },
     },
     nodes: [],
-    endNode: { id: uniqueId(), nodeType: FlowNodeType.End, name: "结束", metadata: {} },
+    endNode: {
+      id: uniqueId(),
+      nodeType: FlowNodeType.End,
+      name: "结束",
+      metadata: {},
+    },
   };
 }
