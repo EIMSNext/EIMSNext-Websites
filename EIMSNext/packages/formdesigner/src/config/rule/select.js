@@ -59,7 +59,7 @@ export default {
   props(_, { t }) {
     return localeProps(t, name + ".props", [
       makeOptionsRule(t, "options"),
-    //   { type: "switch", field: "multiple" },
+      //   { type: "switch", field: "multiple" },
       // {
       //   type: "switch",
       //   field: "disabled",

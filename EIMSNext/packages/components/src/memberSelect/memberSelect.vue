@@ -101,6 +101,13 @@
               </el-tree>
             </div>
           </el-tab-pane>
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.CurUser)" label="当前用户" :name="MemberTabs.CurUser">
+            <div class="dept-select">
+              <et-list v-model="selectedEmps" :data="curEmpData" :selectable="true" :multiple="multiple"
+                style="border: none;" @item-check="empChecked" @all-check="curEmpCheckAll">
+              </et-list>
+            </div>
+          </el-tab-pane>
         </el-tabs>
       </div>
     </div>
@@ -110,7 +117,7 @@
 import "./style/index.less";
 import { ref, reactive, watch, onBeforeMount, toRef } from "vue";
 import { TreeInstance } from "element-plus";
-import { DeptToTreeNode, ITreeNode, TreeNodeType, buildDeptTree, buildRoleTree } from "../common";
+import { DeptToTreeNode, EmployeeToListItem, ITreeNode, TreeNodeType, buildDeptTree, buildRoleTree } from "../common";
 import { ISelectedTag, TagType } from "../selectedTags/type";
 import { Department, Employee, RoleGroup, Role } from "@eimsnext/models";
 import { useDeptStore, useUserStore } from "@eimsnext/store";
@@ -156,6 +163,7 @@ const roleData = ref<ITreeNode[]>(); // 角色列表
 const curDeptTree = ref<TreeInstance>();
 const curDeptData = ref<ITreeNode[]>()
 const singleDeptId = ref<string>("")
+const curEmpData = ref<IListItem[]>([])
 
 watch([keyword], ([newKeyword], [oldKeyword]) => {
   if (newKeyword != oldKeyword) {
@@ -171,10 +179,23 @@ onBeforeMount(() => {
     deptData.value = JSON.parse(JSON.stringify(detps));
     empDeptData.value = JSON.parse(JSON.stringify(detps));
 
-    if (userStore.currentUser.deptId)
+    if (userStore.currentUser.deptId) {
       deptStore.get(userStore.currentUser.deptId).then(x => {
         if (x) curDeptData.value = [DeptToTreeNode(x)]
       })
+    }
+    if (userStore.currentUser) {
+      let emp: Employee = {
+        id: userStore.currentUser.empId!,
+        code: userStore.currentUser.empCode!,
+        empName: userStore.currentUser.empName!,
+        status: 0,
+        departmentId: userStore.currentUser.deptId!,
+        approved: true,
+        isManager: false
+      }
+      curEmpData.value = [EmployeeToListItem(emp)]
+    }
   });
 
   let roleGroups: RoleGroup[] = [];
@@ -248,12 +269,7 @@ const selectEmpDept = (deptId: string) => {
   selectedEmps.value = [];
   employeeService.query<Employee>($filter).then((res) => {
     res.forEach((x) => {
-      empData.value.push({
-        id: x.id,
-        label: x.empName,
-        icon: "el-icon-UserFilled",
-        data: x,
-      });
+      empData.value.push(EmployeeToListItem(x));
 
       if (
         tagsRef.value.find((t) => t.id == x.id && t.type == TagType.Employee)
@@ -266,27 +282,39 @@ const selectEmpDept = (deptId: string) => {
 };
 const empChecked = (data: IListItem, checked: boolean) => {
   //  console.log("empCheck", data, checked);
-  if (checked) {
-    let index = tagsRef.value.findIndex(
-      (x) => x.id == data.id && x.type == TagType.Employee
-    );
-    if (index == undefined || index == -1) {
+  if (props.multiple) {
+    if (checked) {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Employee
+      );
+      if (index == undefined || index == -1) {
+        tagsRef.value.push({
+          id: data.id,
+          label: data.label,
+          type: TagType.Employee,
+          data: data.data,
+        });
+      }
+    } else {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Employee
+      );
+      //  console.log("index", index, tagsRef);
+      if (index && index > -1) tagsRef.value.splice(index, 1);
+    }
+
+    emit("update:modelValue", tagsRef.value);
+  } else {
+    tagsRef.value = tagsRef.value.filter(x => x.type != TagType.Employee)
+    if (checked)
       tagsRef.value.push({
         id: data.id,
         label: data.label,
         type: TagType.Employee,
         data: data.data,
       });
-    }
-  } else {
-    let index = tagsRef.value.findIndex(
-      (x) => x.id == data.id && x.type == TagType.Employee
-    );
-    //  console.log("index", index, tagsRef);
-    if (index && index > -1) tagsRef.value.splice(index, 1);
+    emit("update:modelValue", tagsRef.value);
   }
-
-  emit("update:modelValue", tagsRef.value);
 };
 const empCheckAll = (checked: boolean) => {
   if (checked) {
@@ -308,6 +336,40 @@ const empCheckAll = (checked: boolean) => {
     let indicesToRemove: number[] = [];
     tagsRef.value.forEach((item, index) => {
       if (item.type == TagType.Employee) {
+        indicesToRemove.splice(0, 0, index);
+      }
+    });
+
+    indicesToRemove.forEach((index) => {
+      tagsRef.value.splice(index, 1);
+    });
+  }
+
+  emit("update:modelValue", tagsRef.value);
+};
+
+const curEmpCheckAll = (checked: boolean) => {
+  if (checked) {
+    //全新增
+    curEmpData.value.forEach((data) => {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Employee
+      );
+      if (index == undefined || index == -1) {
+        tagsRef.value.push({
+          id: data.id,
+          label: data.label,
+          type: TagType.Employee,
+          data: data.data,
+        });
+      }
+    });
+  } else {
+    let indicesToRemove: number[] = [];
+    tagsRef.value.forEach((item, index) => {
+      if (item.type == TagType.Employee &&
+        curEmpData.value.find(x => x.id == item.id)
+      ) {
         indicesToRemove.splice(0, 0, index);
       }
     });
