@@ -1,4 +1,11 @@
-import { Department, Role, RoleGroup } from "@eimsnext/models";
+import { IListItem } from "@/component";
+import {
+  CurrentUser,
+  Department,
+  Employee,
+  Role,
+  RoleGroup,
+} from "@eimsnext/models";
 
 export interface ITreeNode {
   id: string;
@@ -115,5 +122,14 @@ export function RoleToTreeNode(role: Role): ITreeNode {
     children: [],
     data: role,
     icon: "el-icon-UserFilled",
+  };
+}
+
+export function EmployeeToListItem(emp: Employee): IListItem {
+  return {
+    id: emp.id,
+    label: emp.empName,
+    icon: "el-icon-UserFilled",
+    data: emp,
   };
 }
