@@ -23,7 +23,7 @@ export declare type Maker<
   OptionAttrs,
   CreatorAttrs,
   RuleAttrs,
-  ApiAttrs
+  ApiAttrs,
 > = BaseMaker<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs> & MakerAttrs;
 
 export declare type Api<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs> =
@@ -34,7 +34,7 @@ declare type FormCreateFactory<
   OptionAttrs,
   CreatorAttrs,
   RuleAttrs,
-  ApiAttrs
+  ApiAttrs,
 > = (
   config: FormCreateFactoryConfig<
     MakerAttrs,
@@ -52,7 +52,7 @@ export interface Install<
   OptionAttrs,
   CreatorAttrs,
   RuleAttrs,
-  ApiAttrs
+  ApiAttrs,
 > {
   (
     formCreate: FormCreate<
@@ -70,7 +70,7 @@ export interface FormCreateProps<
   OptionAttrs,
   CreatorAttrs,
   RuleAttrs,
-  ApiAttrs
+  ApiAttrs,
 > {
   rule: FormRule<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>[];
   option?: Options<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>;
@@ -155,7 +155,7 @@ export interface FormCreateFactoryConfig<
   OptionAttrs,
   CreatorAttrs,
   RuleAttrs,
-  ApiAttrs
+  ApiAttrs,
 > {
   manager: {
     [key: string]: Object | Function;
@@ -180,7 +180,7 @@ export interface util<
   OptionAttrs,
   CreatorAttrs,
   RuleAttrs,
-  ApiAttrs
+  ApiAttrs,
 > {
   readonly version: string;
   readonly ui: string;
@@ -195,7 +195,7 @@ export interface util<
 
   (
     rule: FormRule<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>[],
-    option?: Options<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>
+    option?: Options<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>,
   ): Api<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>;
 
   fetch(option: FetchOption, effectArgs: Object): void;
@@ -313,7 +313,7 @@ export type FormCreate<
   OptionAttrs,
   CreatorAttrs,
   RuleAttrs,
-  ApiAttrs
+  ApiAttrs,
 > = Component &
   util<MakerAttrs, OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs> & {
     util: util<MakerAttrs, OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>;
@@ -548,7 +548,7 @@ export declare interface CreatorFactory<
   OptionAttrs,
   CreatorAttrs,
   RuleAttrs,
-  ApiAttrs
+  ApiAttrs,
 > {
   (
     name: string,

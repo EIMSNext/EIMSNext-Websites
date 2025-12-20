@@ -49,7 +49,12 @@ export default {
     props(_, {t}) {
         return localeProps(t, name + '.props', [
             makeOptionsRule(t, 'options'),
-            {type: 'switch', field: 'disabled'}
+            // {type: 'switch', field: 'disabled'}
+            {
+                type: "CheckBoxInput",
+                field: "disabled",
+                wrap: { show: false },
+              },
             // ,
             // {type: 'switch', field: 'input'}
             // , 

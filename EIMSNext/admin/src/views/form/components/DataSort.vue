@@ -1,6 +1,5 @@
 <template>
   <div v-click-outside="onClickOutside">
-    <!-- <div> -->
     <FieldSortList v-model="sortList" :form-id="formId" @change="onChange"></FieldSortList>
     <div class="actions">
       <el-button type="primary" @click="onSort">排序</el-button>
@@ -9,8 +8,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import FieldSortList from "@/components/FieldSortList/index.vue";
-import { IFieldSortList } from "@/components/FieldSortList/type";
+import { IFieldSortList } from "@eimsnext/components";
 import { ClickOutside as vClickOutside } from "element-plus";
 
 defineOptions({
@@ -25,14 +23,14 @@ const props = withDefaults(
   {}
 );
 
-const sortList = ref<IFieldSortList>(props.modelValue);
+const sortList = toRef<IFieldSortList>(props.modelValue);
 const onChange = (sort: IFieldSortList) => {
   sortList.value = sort;
 };
 
 const emit = defineEmits(["ok", "cancel"]);
 const onSort = () => {
-  emit("ok", sortList);
+  emit("ok", sortList.value);
 };
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
@@ -45,7 +43,9 @@ const onClickOutside = (e: MouseEvent) => {
 </script>
 <style lang="scss" scoped>
 .actions {
-  border-top: solid 1px #ddd;
+  // border-top: solid 1px #ddd;
+  display: flex;
+  justify-content: flex-end;
   margin-top: 5px;
   padding-top: 5px;
 }

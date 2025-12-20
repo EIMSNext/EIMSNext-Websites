@@ -2,11 +2,11 @@ import { FormType } from "./formDef";
 import { CorpModelBase, IdBase } from "./modelBase";
 
 export interface AppRequest extends IdBase {
-  name: string;
+  name?: string;
   description?: string;
   icon?: string;
   iconColor?: string;
-  sortIndex: number;
+  sortIndex?: number;
 }
 
 export interface App extends CorpModelBase {
@@ -27,25 +27,27 @@ export interface AppMenu {
   /// <summary>
   /// 菜单名称
   /// </summary>
-  title: string;
+  title?: string;
 
   /// <summary>
   /// 图标
   /// </summary>
-  icon: string;
+  icon?: string;
+
   /// <summary>
   /// 图标颜色
   /// </summary>
   iconColor?: string;
+
   /// <summary>
   /// 菜单类型
   /// </summary>
-  menuType: FormType;
+  menuType?: FormType;
 
   /// <summary>
   /// 排序值
   /// </summary>
-  sortIndex: number;
+  sortIndex?: number;
 
   /// <summary>
   /// 子菜单

@@ -24,6 +24,11 @@ export default defineConfig({
         "@element-plus/icons-vue",
         "wangeditor",
         "@eimsnext/form-render-core",
+        "@eimsnext/components",
+        "@eimsnext/models",
+        "@eimsnext/services",
+        "@eimsnext/store",
+        "@eimsnext/utils",
       ],
       input: ["src/index.js"],
       output: {
@@ -36,6 +41,11 @@ export default defineConfig({
           "@element-plus/icons-vue": "@element-plus/icons-vue",
           wangeditor: "wangeditor",
           "@eimsnext/form-render-core": "@eimsnext/form-render-core",
+          "@eimsnext/components": "@eimsnext/components",
+          "@eimsnext/models": "@eimsnext/models",
+          "@eimsnext/services": "@eimsnext/services",
+          "@eimsnext/store": "@eimsnext/store",
+          "@eimsnext/utils": "@eimsnext/utils",
         },
       },
     },
@@ -46,9 +56,9 @@ export default defineConfig({
       fileName: (format) => `index.${format}.js`,
     },
   },
-  esbuild: {
-    drop: ["console", "debugger"],
-  },
+  // esbuild: {
+  //   drop: ["console", "debugger"],
+  // },
   plugins: [
     vue(),
     vueJsx(),

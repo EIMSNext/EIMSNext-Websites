@@ -25,11 +25,13 @@
 /** 全局SCSS变量 */
 
 :root {
-  --menu-background: var(--el-menu-bg-color);
-  --menu-text: var(--el-menu-text-color);
-  --menu-active-text: var(--el-menu-active-color);
-  --menu-hover: var(--el-menu-hover-bg-color);
-  --sidebar-logo-background: #2d3748;
+  --et-menu-background: var(--el-menu-bg-color);
+  --et-menu-text: var(--el-menu-text-color);
+  --et-menu-active-text: var(--el-menu-active-color);
+  --et-menu-hover: var(--el-menu-hover-bg-color);
+  --et-sidebar-logo-background: #2d3748;
+  --et-color-text: #141e31;
+  --et-color-text-tertiary: #838892;
 
   // 修复表格 fixed 列被选中后由于透明色导致叠字的 bug
   .el-table {
@@ -39,18 +41,20 @@
 
 /** 暗黑主题 */
 html.dark {
-  --menu-background: var(--el-bg-color-overlay);
-  --menu-text: #fff;
-  --menu-active-text: var(--el-menu-active-color);
-  --menu-hover: rgb(0 0 0 / 20%);
-  --sidebar-logo-background: rgb(0 0 0 / 20%);
+  --et-menu-background: var(--el-bg-color-overlay);
+  --et-menu-text: #fff;
+  --et-menu-active-text: var(--el-menu-active-color);
+  --et-menu-hover: rgb(0 0 0 / 20%);
+  --et-sidebar-logo-background: rgb(0 0 0 / 20%);
+  --et-color-text: #fff;
+  --et-color-text-tertiary: #838892;
 }
 
-$menu-background: var(--menu-background); // 菜单背景色
-$menu-text: var(--menu-text); // 菜单文字颜色
-$menu-active-text: var(--menu-active-text); // 菜单激活文字颜色
-$menu-hover: var(--menu-hover); // 菜单悬停背景色
-$sidebar-logo-background: var(--sidebar-logo-background); // 侧边栏 Logo 背景色
+$menu-background: var(--et-menu-background); // 菜单背景色
+$menu-text: var(--et-menu-text); // 菜单文字颜色
+$menu-active-text: var(--et-menu-active-text); // 菜单激活文字颜色
+$menu-hover: var(--et-menu-hover); // 菜单悬停背景色
+$sidebar-logo-background: var(--et-sidebar-logo-background); // 侧边栏 Logo 背景色
 
 $sidebar-width: 210px; // 侧边栏宽度
 $sidebar-width-collapsed: 54px; // 侧边栏收缩宽度

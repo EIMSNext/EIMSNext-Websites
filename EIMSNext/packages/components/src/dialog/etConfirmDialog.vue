@@ -55,8 +55,16 @@
 </template>
 <script lang="ts" setup>
 import "./style/index.less";
-import { ref, useAttrs } from "vue";
+import { computed, ref, useAttrs } from "vue";
 import { MessageIcon } from "./type";
+//下面的导入对于函数式调用是必须的
+import { ElDialog, ElIcon, ElButton } from "element-plus";
+import {
+  InfoFilled,
+  QuestionFilled,
+  WarningFilled,
+  CircleCloseFilled,
+} from "@element-plus/icons-vue";
 
 const attrs = useAttrs();
 // const ori = ref(null);
@@ -88,6 +96,16 @@ const props = withDefaults(
     okText: "保存并继续",
   }
 );
+const getIconClass = computed(() => {
+  let iconCls =
+    props.icon == MessageIcon.Error
+      ? "error"
+      : props.icon == MessageIcon.Warning
+        ? "warning"
+        : "info";
+
+  return `msg-icon ${iconCls}`;
+});
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
 const cancel = () => {

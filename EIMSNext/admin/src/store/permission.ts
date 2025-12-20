@@ -1,12 +1,12 @@
 import type { RouteRecordRaw } from "vue-router";
-import { constantRoutes } from "@/router";
+import { SysLayout, constantRoutes } from "@/router";
 import { store, useAppStoreHook, useContextStoreHook } from "@eimsnext/store";
 import router from "@/router";
 import { getAppIcon, getFormIcon, getAppIconColor } from "@/utils/common";
 
 import { AppMenu, FormType } from "@eimsnext/models";
 const modules = import.meta.glob("../../views/**/**.vue");
-const AppLayout = () => import("@/applayout/index.vue");
+const AppLayout = () => import("@/layout/applayout/index.vue");
 
 export const usePermissionStore = defineStore("permission", () => {
   // 所有路由，包括静态和动态路由
@@ -119,6 +119,8 @@ const transformRoutes = (routes: RouteViewModel[]) => {
     // 顶级目录，替换为 Layout 组件
     if (tmpRoute.component?.toString() == "AppLayout") {
       tmpRoute.component = AppLayout;
+    } else if (tmpRoute.component?.toString() == "SysLayout") {
+      tmpRoute.component = SysLayout;
     } else {
       // 其他菜单，根据组件路径动态加载组件
       const component = modules[`../../views/${tmpRoute.component}.vue`];

@@ -1,11 +1,6 @@
 <template>
-  <form-edit
-    v-if="showFormEditor"
-    :form-id="''"
-    :usingFlow="usingWorkflow"
-    :isLedger="isLedger"
-    @close="showFormEditor = false"
-  />
+  <form-edit v-if="showFormEditor" :form-id="''" :usingFlow="usingWorkflow" :isLedger="isLedger"
+    @close="showFormEditor = false" />
   <Layout>
     <div class="empty-app">
       <div class="empty-content">
@@ -45,13 +40,9 @@
 import Layout from "@/layout/index.vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore, useFormStore, useContextStore } from "@eimsnext/store";
-import { FormContent, FormDef, FormDefRequest, FormType } from "@eimsnext/models";
-import { formDefService } from "@eimsnext/services";
 import FormEdit from "@/components/FormEdit/index.vue";
 
 const router = useRouter();
-
-const appStore = useAppStore();
 const formStore = useFormStore();
 const contextStore = useContextStore();
 const route = useRoute();
@@ -140,12 +131,15 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
             margin: 42px auto 14px;
             width: 90px;
           }
+
           &.flow {
             background: #fff2e8;
           }
+
           &.generic {
             background: #eaf2fd;
           }
+
           .tip-title {
             flex: 1 1 auto;
             font-size: 16px;
@@ -153,6 +147,7 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
             line-height: 22px;
           }
         }
+
         .tip-desc {
           color: var(--color-text-secondary);
           font-size: 12px;

@@ -16,7 +16,7 @@
         <AppLink :to="{
           path: resolveFullPath('mytasks'),
         }">
-          <el-menu-item>
+          <el-menu-item index="mytodo">
             <et-icon icon="iconfont-mytodo" class="step-image" size="16px" />
             <span class="app-menu-text">我的待办</span>
           </el-menu-item>
@@ -24,7 +24,7 @@
         <AppLink :to="{
           path: resolveFullPath('mystarted'),
         }">
-          <el-menu-item>
+          <el-menu-item index="mystarted">
             <et-icon icon="iconfont-mystarted" class="step-image" size="16px" />
             <span class="app-menu-text">我发起的</span>
           </el-menu-item>
@@ -32,7 +32,7 @@
         <AppLink :to="{
           path: resolveFullPath('myapproved'),
         }">
-          <el-menu-item>
+          <el-menu-item index="myapproved">
             <et-icon icon="iconfont-myapproved" class="step-image" size="16px" />
             <span class="app-menu-text">我审批的</span>
           </el-menu-item>
@@ -40,7 +40,7 @@
         <AppLink :to="{
           path: resolveFullPath('cctome'),
         }">
-          <el-menu-item>
+          <el-menu-item index="mycced">
             <et-icon icon="iconfont-mycced" class="step-image" size="16px" />
             <span class="app-menu-text">抄送我的</span>
           </el-menu-item>
@@ -154,6 +154,7 @@ const resolveFullPath = (routePath: string) => wfbasePath + routePath;
 }
 
 :deep(.el-menu-item) {
+  line-height: 40px;
   height: 40px;
 }
 </style>

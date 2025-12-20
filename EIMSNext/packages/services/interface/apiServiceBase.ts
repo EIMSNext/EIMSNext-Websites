@@ -5,7 +5,17 @@ import { ServiceBase } from "./serviceBase";
 export abstract class ApiServiceBase<T = IdBase, R = any> extends ServiceBase {
   protected abstract modelName(): string;
 
-  get<T>(id: string, query: any): Promise<T> {
+  dynamicCount(query?: any): Promise<number> {
+    let url = this.getUrl(this.modelName(), "dynamic/$count");
+    return this.http().api.count(url, query);
+  }
+
+  dynamicQuery<T>(query?: any): Promise<T[]> {
+    let url = this.getUrl(this.modelName(), "dynamic/$query");
+    return this.http().api.query(url, query);
+  }
+
+  get<T>(id: string, query?: any): Promise<T> {
     let url = this.getUrl(this.modelName(), id);
     return this.http().api.get<T>(url, query);
   }

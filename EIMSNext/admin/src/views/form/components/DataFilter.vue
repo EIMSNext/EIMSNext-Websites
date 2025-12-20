@@ -14,8 +14,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import ConditionList from "@/components/ConditionList/index.vue";
-import { IConditionList } from "@/components/ConditionList/type";
+import { IConditionList } from "@eimsnext/components";
 import { ClickOutside as vClickOutside } from "element-plus";
 
 defineOptions({
@@ -30,14 +29,14 @@ const props = withDefaults(
   {}
 );
 
-const condList = ref<IConditionList>(props.modelValue);
+const condList = toRef<IConditionList>(props.modelValue);
 const onChange = (filter: IConditionList) => {
   condList.value = filter;
 };
 
 const emit = defineEmits(["ok", "cancel"]);
 const onSearch = () => {
-  emit("ok", condList);
+  emit("ok", condList.value);
 };
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
@@ -50,7 +49,9 @@ const onClickOutside = (e: MouseEvent) => {
 </script>
 <style lang="scss" scoped>
 .actions {
-  border-top: solid 1px #ddd;
+  // border-top: solid 1px #ddd;
+  display: flex;
+  justify-content: flex-end;
   margin-top: 5px;
   padding-top: 5px;
 }

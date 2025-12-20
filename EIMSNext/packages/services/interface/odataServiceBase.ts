@@ -16,11 +16,27 @@ export abstract class ReadonlyODataServiceBase<T = IdBase> extends ServiceBase {
   query<T>(query?: ODataQueryModel | string): Promise<T[]> {
     return this.http().odata.query(this.modelName(), query);
   }
+
+  dynamicCount(query?: any): Promise<number> {
+    let url = this.getApiUrl(this.modelName(), "dynamic/$count");
+    return this.http().api.count(url, query);
+  }
+
+  dynamicQuery<T>(query?: any): Promise<T[]> {
+    let url = this.getApiUrl(this.modelName(), "dynamic/$query");
+    return this.http().api.query(url, query);
+  }
+
+  private getApiUrl<T>(url: string, id?: string) {
+    let idPath = id ? "/" + id : "";
+    url = url.startsWith("/") ? url : "/" + url;
+    return url.startsWith("http") ? url : `${url}${idPath}`;
+  }
 }
 
 export abstract class ODataServiceBase<
   T = IdBase,
-  R = any
+  R = any,
 > extends ServiceBase {
   protected abstract modelName(): string;
 

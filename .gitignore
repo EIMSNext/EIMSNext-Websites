@@ -64,3 +64,4 @@ dist/
 */pnpm-lock.yaml
 
 EIMSNext/admin/src/types/components.d.ts
+.vite

@@ -7,7 +7,7 @@
       <div class="bg-banner"></div>
     </div>
     <div class="main">
-      <div class="lang-switch">        
+      <div class="lang-switch">
         <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny" @change="toggleTheme" />
         <lang-select class="ml-5 cursor-pointer" />
       </div>
@@ -16,11 +16,11 @@
         <div class="login-container">
           <div class="account-login">
             <div class="login-title">账号登录</div>
-            <div class="login-register"><span>没有账号？</span>
+            <!-- <div class="login-register"><span>没有账号？</span>
               <el-link type="primary" :underline="false" href="/register" target="_self">
                 免费注册
               </el-link>
-            </div>
+            </div> -->
             <el-form ref="loginFormRef" :model="loginData" :rules="loginRules">
               <div class="login-content">
                 <div class="login-form">
@@ -124,7 +124,7 @@ async function handleLoginSubmit() {
       userStore
         .login(loginData.value)
         .then(async () => {
-          await userStore.initialize();
+          await userStore.initialize(true);
 
           const { path, queryParams } = parseRedirect();
           router.push({ path: path, query: queryParams });
@@ -197,7 +197,7 @@ function checkCapslock(event: KeyboardEvent) {
 
   .lang-switch {
     align-items: center;
-    color: var(--fd-color-text-tertiary);
+    color: var(--et-color-text-tertiary);
     cursor: pointer;
     display: inline-flex;
     font-size: 14px;

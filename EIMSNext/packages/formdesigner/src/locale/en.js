@@ -567,6 +567,7 @@ const En = {
     enable: "Enable",
     time: "time",
     email: "email",
+    phone: "phone",
     number: "number",
     globalData: "Global data",
     mobile: "Mobile",
@@ -818,7 +819,7 @@ const En = {
         predefine: "Predefined color",
       },
     },
-    datePicker: {
+    timestamp: {
       name: "Date Picker",
       props: {
         pickerOptions: "Options specific to the current time and date picker",
@@ -1325,7 +1326,7 @@ const En = {
         value: "Default value",
       },
     },
-    inputNumber: {
+    number: {
       name: "Number",
       props: {
         precision: "Precision of input value",
@@ -1382,12 +1383,35 @@ const En = {
       },
     },
     select: {
-      name: "Select",
+      name: "Single Select",
+      props: {
+        // multiple: "Whether there are multiple selections",
+        disabled: "Disabled",
+        clearable: "Whether the option can be cleared",
+        collapseTags:
+          "Whether to display the selected value as text during multi-selection",
+        multipleLimit:
+          "The maximum number of items that the user can select when multiple-selecting, if it is 0, there is no limit",
+        placeholder: "Placeholder",
+        filterable: "Is it searchable",
+        allowCreate: "Whether users are allowed to create new entries",
+        noMatchText: "Text displayed when no search conditions match",
+        noDataText: "Text displayed when option is empty",
+        reserveKeyword:
+          "When multiple selections are searchable, whether to retain the current search keyword after selecting an option",
+        defaultFirstOption:
+          "Press Enter in the input box and select the first matching item",
+        remote: "Whether the options are loaded remotely from the server",
+        remoteMethod: "Custom remote search methods",
+      },
+    },
+    select2: {
+      name: "Multi Select",
       event: {
         removeTag: "Triggered when tag is removed in multi-select mode",
       },
       props: {
-        multiple: "Whether there are multiple selections",
+        // multiple: "Whether there are multiple selections",
         disabled: "Disabled",
         clearable: "Whether the option can be cleared",
         collapseTags:
@@ -1471,8 +1495,26 @@ const En = {
         inactiveColor: "Background color when closed",
       },
     },
-    tableForm: {
-      name: "TableForm",
+    departmentSelect: {
+      name: "Department Single Select",
+      props: {
+        disabled: "Disabled",
+        placeholder: "Placeholder",
+      },
+    },
+    departmentSelect2: {
+      name: "Department Multiple Select",
+      props: {
+        disabled: "Disabled",
+        placeholder: "Placeholder",
+      },
+    },
+    tableform: {
+      name: "Sub Form",
+      event: {
+        handleClick:
+          "This event is triggered when the operation button is clicked",
+      },
       props: {
         disabled: "Disabled",
         filterEmptyColumn: "Whether to filter empty rows",
@@ -1496,13 +1538,6 @@ const En = {
         "page>props>small": "Use small pagination style",
         "page>props>background":
           "Add a background color to the pagination button",
-      },
-    },
-    tableFormPro: {
-      name: "Sub Form",
-      event: {
-        handleClick:
-          "This event is triggered when the operation button is clicked",
       },
     },
     nestedTableForm: {
@@ -1529,6 +1564,8 @@ const En = {
     tableFormColumn: {
       name: "TableFormColumn",
       label: "TableFormColumn",
+      header:
+        "Configure the column headers. Duplicate headers will be automatically merged.",
       props: {
         label: "Title",
         header: "Header",
@@ -1538,11 +1575,6 @@ const En = {
         hidden: "Hidden",
         required: "Whether to display required asterisks",
       },
-    },
-    tableFormColumn2: {
-      name: "TableFormColumn",
-      header:
-        "Configure the column headers. Duplicate headers will be automatically merged.",
     },
     dataTable: {
       name: "DataTable",
@@ -1722,8 +1754,22 @@ const En = {
           "Each tree node is used as an attribute for unique identification, and the entire tree should be unique",
       },
     },
-    upload: {
-      name: "Upload",
+    imageupload: {
+      name: "Image",
+      info: "After a successful upload, assign the returned URL to file.url or the result to file.value for use in subsequent form submissions.",
+      event: {
+        remove: "Triggered when a file is removed from the file list",
+        preview: "Triggered when clicking an uploaded file in the file list",
+        error: "Triggered when file upload fails",
+        progress: "Triggered when file is uploaded",
+        exceed: "Triggered when the limit is exceeded",
+      },
+      slots: {
+        tip: "Description",
+      },
+    },
+    fileupload: {
+      name: "File",
       info: "After a successful upload, assign the returned URL to file.url or the result to file.value for use in subsequent form submissions.",
       event: {
         remove: "Triggered when a file is removed from the file list",
