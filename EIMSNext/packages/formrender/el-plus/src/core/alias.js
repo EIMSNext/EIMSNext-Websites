@@ -69,4 +69,5 @@ export default {
   object: "fc-sub-form",
   subForm: "fc-sub-form",
   departmentSelect2: "departmentSelect",
+  employeeSelect2: "employeeSelect",
 };

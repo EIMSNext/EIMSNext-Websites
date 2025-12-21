@@ -228,6 +228,7 @@ const deptNodeChecked = (data: ITreeNode, checked: boolean) => {
     if (checked) {
       tagsRef.value.push({
         id: data.id,
+        code: data.code,
         label: data.label,
         type: TagType.Department,
         data: data.data,
@@ -246,7 +247,8 @@ const singleDeptChecked = (data: ITreeNode, val: string) => {
   if (!props.multiple) {
     if (singleDeptId.value) {
       tagsRef.value = [{
-        id: data.id.toString(),
+        id: data.id,
+        code: data.code,
         label: data.label,
         type: TagType.Department,
         data: data.data,
@@ -290,6 +292,7 @@ const empChecked = (data: IListItem, checked: boolean) => {
       if (index == undefined || index == -1) {
         tagsRef.value.push({
           id: data.id,
+          code: data.code,
           label: data.label,
           type: TagType.Employee,
           data: data.data,
@@ -309,6 +312,7 @@ const empChecked = (data: IListItem, checked: boolean) => {
     if (checked)
       tagsRef.value.push({
         id: data.id,
+        code: data.code,
         label: data.label,
         type: TagType.Employee,
         data: data.data,
