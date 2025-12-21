@@ -500,12 +500,13 @@ html.dark {
     cursor: pointer;
     font-weight: 600;
     font-size: 14px;
-    padding: 12px;
+    padding: 10px;
     margin: 0;
 }
 
 ._fc-l-title i {
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: 400;
 }
 
 ._fc-l-title i.down {
@@ -516,16 +517,16 @@ html.dark {
     display: inline-flex;
     background: var(--fc-bg-color-1);
     color: var(--fc-text-color-1);
-    line-height: 1;
     text-align: center;
     transition: all .2s ease;
     cursor: move;
-    margin-bottom: 10px;
-    align-items: center;
+    margin-bottom: 5px;
+    align-items: center;    
+    border: 1px dashed var(--fc-bg-color-1);
 }
 
 ._fc-l-item i {
-    font-size: 21px;
+    font-size: 16px;
     display: inline-block;
 }
 
@@ -534,12 +535,12 @@ html.dark {
 }
 
 ._fc-l-item ._fc-l-icon {
-    padding: 0px 10px;
+    padding: 0px 8px 0 6px;
 }
 
 ._fc-l-item:hover {
-    background: var(--fc-style-color-1);
-    color: #fff;
+    border: 1px dashed var(--el-color-primary);
+    color: var(--el-color-primary);    
 }
 
 ._fc-m-tools {
