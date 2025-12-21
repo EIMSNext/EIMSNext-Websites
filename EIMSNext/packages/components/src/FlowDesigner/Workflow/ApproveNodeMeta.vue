@@ -51,6 +51,7 @@ const finishSelect = (tags: ISelectedTag[]) => {
   tags.forEach((x) => candidate.push(convertTagToCandidate(x)));
   activeData.value.metadata.approveMeta!.approvalCandidates = candidate;
 
+  selectedCandidateTags.value = tags;
   showMemberDialog.value = false;
 };
 
