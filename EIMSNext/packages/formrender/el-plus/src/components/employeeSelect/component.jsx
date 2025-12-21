@@ -2,7 +2,7 @@ import { defineComponent, ref, watch, computed } from "vue";
 import { MemberSelectDialog, MemberTabs } from "@eimsnext/components";
 
 export default defineComponent({
-  name: "FcDepartmentSelect",
+  name: "FcEmployeeSelect",
   inheritAttrs: false,
   props: {
     modelValue: {
@@ -11,7 +11,7 @@ export default defineComponent({
     },
     placeholder: {
       type: String,
-      default: "请选择部门",
+      default: "请选择成员",
     },
     multiple: {
       type: Boolean,
@@ -61,23 +61,23 @@ export default defineComponent({
       return rest;
     };
 
-    const handleDepartmentChange = (departments) => {
+    const handleEmployeeChange = (employees) => {
       showDialog.value = false;
-      let processedDepartments;
+      let processedEmployees;
       if (props.multiple) {
         // 多选模式：处理数组中的每个部门对象
-        processedDepartments = departments.map(removeUnnecessaryFields);
+        processedEmployees = employees.map(removeUnnecessaryFields);
       } else {
         // 单选模式：处理单个部门对象
-        processedDepartments =
-          departments.length > 0 ? removeUnnecessaryFields(departments[0]) : "";
+        processedEmployees =
+          employees.length > 0 ? removeUnnecessaryFields(employees[0]) : "";
       }
 
-      selectedValue.value = processedDepartments;
-      emit("update:modelValue", processedDepartments);
-      emit("change", processedDepartments);
+      selectedValue.value = processedEmployees;
+      emit("update:modelValue", processedEmployees);
+      emit("change", processedEmployees);
     };
-    const handleDeptCancel = () => {
+    const handleEmpCancel = () => {
       showDialog.value = false;
     };
     const handleTagClick = () => {
@@ -92,7 +92,7 @@ export default defineComponent({
       return (
         <div>
           <div
-            class={`_fc-department-select ${isDisabled ? "is-disabled" : ""}`}
+            class={`_fc-employee-select ${isDisabled ? "is-disabled" : ""}`}
             style={{
               cursor: isDisabled ? "not-allowed" : "pointer",
               padding: "10px",
@@ -113,7 +113,7 @@ export default defineComponent({
             !Array.isArray(selectedValue.value) &&
             selectedValue.value.label ? (
               <div
-                class="_fc-department-tag"
+                class="_fc-employee-tag"
                 style={{
                   background: "#ecf5ff",
                   color: "#409eff",
@@ -133,7 +133,7 @@ export default defineComponent({
               selectedValue.value.map((dept, index) => (
                 <div
                   key={index}
-                  class="_fc-department-tag"
+                  class="_fc-employee-tag"
                   style={{
                     background: "#ecf5ff",
                     color: "#409eff",
@@ -177,10 +177,10 @@ export default defineComponent({
                     ? [selectedValue.value]
                     : []
               }
-              showTabs={MemberTabs.Department | MemberTabs.CurDept}
+              showTabs={MemberTabs.Employee | MemberTabs.CurUser}
               multiple={multiple}
-              onOk={handleDepartmentChange}
-              onCancel={handleDeptCancel}
+              onOk={handleEmployeeChange}
+              onCancel={handleEmpCancel}
             />
           )}
         </div>

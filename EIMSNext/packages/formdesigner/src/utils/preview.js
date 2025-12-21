@@ -55,7 +55,7 @@ export default function renderPreview(_, ctx) {
     [
         "fcgroup", "fcsubform", "tableform", "stepform", 
         "nestedtableform", "infinitetableform", "fcupload",
-        "departmentselect"
+        "departmentselect","employeeSelect"
       ].indexOf(ctx.trueType.toLowerCase()) > -1
   ) {
     if (ctx.trueType.toLowerCase() === "fcupload") {

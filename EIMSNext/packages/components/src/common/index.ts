@@ -128,6 +128,7 @@ export function RoleToTreeNode(role: Role): ITreeNode {
 export function EmployeeToListItem(emp: Employee): IListItem {
   return {
     id: emp.id,
+    code: emp.code,
     label: emp.empName,
     icon: "el-icon-UserFilled",
     data: emp,
