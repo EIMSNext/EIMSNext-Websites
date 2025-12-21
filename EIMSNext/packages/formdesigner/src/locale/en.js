@@ -1499,14 +1499,24 @@ const En = {
       name: "Department Single Select",
       props: {
         disabled: "Disabled",
-        placeholder: "Placeholder",
       },
     },
     departmentSelect2: {
       name: "Department Multiple Select",
       props: {
         disabled: "Disabled",
-        placeholder: "Placeholder",
+      },
+    },
+    employeeSelect: {
+      name: "Employee Single Select",
+      props: {
+        disabled: "Disabled",
+      },
+    },
+    employeeSelect2: {
+      name: "Employee Multiple Select",
+      props: {
+        disabled: "Disabled",
       },
     },
     tableform: {

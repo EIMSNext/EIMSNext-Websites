@@ -92,6 +92,8 @@ import scatterChart from "./rule/charts/scatterChart";
 import customChart from "./rule/charts/customChart";
 import departmentSelect from "./rule/departmentSelect";
 import departmentSelect2 from "./rule/departmentSelect2";
+import employeeSelect from "./rule/employeeSelect";
+import employeeSelect2 from "./rule/employeeSelect2";
 
 const ruleList = [
   input,
@@ -121,6 +123,8 @@ const ruleList = [
   city,
   departmentSelect,
   departmentSelect2,
+  employeeSelect,
+  employeeSelect2,
   editor,
   dataTable,
   id,
