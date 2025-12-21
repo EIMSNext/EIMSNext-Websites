@@ -53,10 +53,10 @@ export default function renderPreview(_, ctx) {
     ctx.rule.subForm ||
     (Array.isArray(subForm) ? subForm.length : subForm) ||
     [
-        "fcgroup", "fcsubform", "tableform", "stepform", 
-        "nestedtableform", "infinitetableform", "fcupload",
-        "departmentselect","employeeSelect"
-      ].indexOf(ctx.trueType.toLowerCase()) > -1
+            "fcgroup", "fcsubform", "tableform", "stepform", 
+            "nestedtableform", "infinitetableform", "fcupload",
+            "departmentselect","employeeselect"
+          ].indexOf(ctx.trueType.toLowerCase()) > -1
   ) {
     if (ctx.trueType.toLowerCase() === "fcupload") {
       ctx.prop.props.disabled = true;

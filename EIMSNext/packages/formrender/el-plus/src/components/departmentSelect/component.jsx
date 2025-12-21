@@ -11,7 +11,7 @@ export default defineComponent({
     },
     placeholder: {
       type: String,
-      default: "请选择部门",
+      default: "+选择部门",
     },
     multiple: {
       type: Boolean,
@@ -83,6 +83,10 @@ export default defineComponent({
     const handleTagClick = () => {
       showDialog.value = true;
     };
+    const css_icon_dept_selected={
+      color:"#52B59A",
+      marginRight:"4px"
+    }
 
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
@@ -96,7 +100,7 @@ export default defineComponent({
             style={{
               cursor: isDisabled ? "not-allowed" : "pointer",
               padding: "10px",
-              border: "1px solid #dcdfe6",
+              border: "1px dashed #dcdfe6",
               borderRadius: "4px",
               minHeight: "32px",
               display: "flex",
@@ -115,17 +119,19 @@ export default defineComponent({
               <div
                 class="_fc-department-tag"
                 style={{
-                  background: "#ecf5ff",
-                  color: "#409eff",
+                  background: "#F5F6F8",
+                  color: "#525559",
                   padding: "0 8px",
                   borderRadius: "4px",
                   fontSize: "12px",
                   height: "24px",
                   lineHeight: "24px",
                   cursor: isDisabled ? "not-allowed" : "pointer",
+                  border: "1px solid #D7E3FD",
                 }}
                 onClick={() => !isDisabled && handleTagClick()}
               >
+                <et-icon icon="el-icon-UserFilled" style={css_icon_dept_selected}></et-icon>
                 {selectedValue.value.label}
               </div>
             ) : Array.isArray(selectedValue.value) &&
@@ -135,20 +141,22 @@ export default defineComponent({
                   key={index}
                   class="_fc-department-tag"
                   style={{
-                    background: "#ecf5ff",
-                    color: "#409eff",
+                    background: "#F5F6F8",
+                    color: "#525559",
                     padding: "0 8px",
                     borderRadius: "4px",
                     fontSize: "12px",
                     height: "24px",
                     lineHeight: "24px",
                     cursor: isDisabled ? "not-allowed" : "pointer",
+                    border: "1px solid #D7E3FD",
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     !isDisabled && handleTagClick();
                   }}
                 >
+                  <et-icon icon="el-icon-UserFilled" style={css_icon_dept_selected}></et-icon>
                   {dept.label}
                 </div>
               ))

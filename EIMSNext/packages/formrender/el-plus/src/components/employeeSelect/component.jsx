@@ -11,7 +11,7 @@ export default defineComponent({
     },
     placeholder: {
       type: String,
-      default: "请选择成员",
+      default: "+选择成员",
     },
     multiple: {
       type: Boolean,
@@ -34,7 +34,7 @@ export default defineComponent({
   emits: ["update:modelValue", "change"],
   setup(props, { emit }) {
     const showDialog = ref(false);
-    const selectedValue = ref(props.modelValue);
+    
     // 结合props和上下文的preview属性，确定是否处于查看模式
     // 优先使用props.preview，因为FormDataView组件会将isView=true传递给FormView组件，
     // 然后FormView组件会将preview=isView传递给formCreate组件
@@ -47,19 +47,23 @@ export default defineComponent({
       return !!props.formCreateInject?.preview;
     });
 
+    // 移除员工对象中的data和value字段，只保留必要的字段
+    const removeUnnecessaryFields = (emp) => {
+      if (!emp || typeof emp !== "object") return emp;
+      const { data, value, error, ...rest } = emp;
+      return rest;
+    };
+
+    // 直接使用props.modelValue作为初始值，不进行额外处理
+    const selectedValue = ref(props.modelValue);
+
+    // 监听props.modelValue变化，直接赋值，不进行额外处理
     watch(
       () => props.modelValue,
       (newVal) => {
         selectedValue.value = newVal;
       }
     );
-
-    // 移除部门对象中的data和value字段，只保留必要的字段
-    const removeUnnecessaryFields = (dept) => {
-      if (!dept || typeof dept !== "object") return dept;
-      const { data, value, error, ...rest } = dept;
-      return rest;
-    };
 
     const handleEmployeeChange = (employees) => {
       showDialog.value = false;
@@ -84,6 +88,11 @@ export default defineComponent({
       showDialog.value = true;
     };
 
+    const css_icon_user_selected={
+      color:"#52B59A",
+      marginRight:"4px"
+    }
+
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
       // 计算最终的禁用状态：禁用属性或查看模式
@@ -96,7 +105,7 @@ export default defineComponent({
             style={{
               cursor: isDisabled ? "not-allowed" : "pointer",
               padding: "10px",
-              border: "1px solid #dcdfe6",
+              border: "1px dashed #dcdfe6",
               borderRadius: "4px",
               minHeight: "32px",
               display: "flex",
@@ -115,43 +124,53 @@ export default defineComponent({
               <div
                 class="_fc-employee-tag"
                 style={{
-                  background: "#ecf5ff",
-                  color: "#409eff",
+                  background: "#F5F6F8",
+                  color: "#525559",
                   padding: "0 8px",
                   borderRadius: "4px",
                   fontSize: "12px",
                   height: "24px",
                   lineHeight: "24px",
                   cursor: isDisabled ? "not-allowed" : "pointer",
+                  border: "1px solid #D7E3FD",
                 }}
                 onClick={() => !isDisabled && handleTagClick()}
               >
+              <et-icon icon="el-icon-UserFilled" style={css_icon_user_selected}></et-icon>
                 {selectedValue.value.label}
               </div>
             ) : Array.isArray(selectedValue.value) &&
               selectedValue.value.length > 0 ? (
-              selectedValue.value.map((dept, index) => (
+              selectedValue.value.map((emp, index) => {
+                // 确保每个元素都有label字段，否则跳过
+                if (!emp || typeof emp !== "object" || !emp.label) {
+                  return null;
+                }
+                return (
                 <div
                   key={index}
                   class="_fc-employee-tag"
                   style={{
-                    background: "#ecf5ff",
-                    color: "#409eff",
+                    background: "#F5F6F8",
+                    color: "#525559",
                     padding: "0 8px",
                     borderRadius: "4px",
                     fontSize: "12px",
                     height: "24px",
                     lineHeight: "24px",
                     cursor: isDisabled ? "not-allowed" : "pointer",
+                    border: "1px solid #D7E3FD",
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     !isDisabled && handleTagClick();
                   }}
                 >
-                  {dept.label}
+                <et-icon icon="el-icon-UserFilled" style={css_icon_user_selected}></et-icon>
+                  {emp.label}
                 </div>
-              ))
+                );
+              }).filter(Boolean)
             ) : (
               <div
                 style={{
