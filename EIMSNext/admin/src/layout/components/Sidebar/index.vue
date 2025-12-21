@@ -12,33 +12,25 @@
     </div>
     <div>
       <el-menu mode="vertical">
-        <AppLink :to="{
-          path: resolveFullPath('mytasks'),
-        }">
+        <AppLink :to="{ name: 'mytasks', params: { appId: app?.id } }">
           <el-menu-item index="mytodo">
             <et-icon icon="iconfont-mytodo" class="step-image" size="16px" />
             <span class="app-menu-text">我的待办</span>
           </el-menu-item>
         </AppLink>
-        <AppLink :to="{
-          path: resolveFullPath('mystarted'),
-        }">
+        <AppLink :to="{ name: 'mystarted', params: { appId: app?.id } }">
           <el-menu-item index="mystarted">
             <et-icon icon="iconfont-mystarted" class="step-image" size="16px" />
             <span class="app-menu-text">我发起的</span>
           </el-menu-item>
         </AppLink>
-        <AppLink :to="{
-          path: resolveFullPath('myapproved'),
-        }">
+        <AppLink :to="{ name: 'myapproved', params: { appId: app?.id } }">
           <el-menu-item index="myapproved">
             <et-icon icon="iconfont-myapproved" class="step-image" size="16px" />
             <span class="app-menu-text">我审批的</span>
           </el-menu-item>
         </AppLink>
-        <AppLink :to="{
-          path: resolveFullPath('cctome'),
-        }">
+        <AppLink :to="{ name: 'cctome', params: { appId: app?.id } }">
           <el-menu-item index="mycced">
             <et-icon icon="iconfont-mycced" class="step-image" size="16px" />
             <span class="app-menu-text">抄送我的</span>
@@ -82,7 +74,6 @@ import { App } from "@eimsnext/models";
 import { useAppStore, useContextStore } from "@eimsnext/store";
 import NavbarRight from "../NavBar/components/NavbarRight.vue";
 import FormEdit from "@/components/FormEdit/index.vue";
-import { useRoute } from "vue-router";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 
 const showFormEditor = ref(false);
@@ -100,7 +91,12 @@ const appStore = useAppStore();
 const contextStore = useContextStore();
 
 const app = ref<App>();
-appStore.get(contextStore.appId).then((res) => (app.value = res));
+
+
+watch(() => contextStore.appId,
+  () => { appStore.get(contextStore.appId).then((res) => (app.value = res)); },
+  { immediate: true }
+)
 
 const createForm = (usingFlow: boolean, ledger: boolean) => {
   usingWorkflow.value = usingFlow;
@@ -114,10 +110,6 @@ const createDashboard = () => {
 };
 
 const createFolder = () => { };
-
-const route = useRoute();
-const wfbasePath = `/app/${route.params.appId}/`;
-const resolveFullPath = (routePath: string) => wfbasePath + routePath;
 </script>
 
 <style lang="scss" scoped>
