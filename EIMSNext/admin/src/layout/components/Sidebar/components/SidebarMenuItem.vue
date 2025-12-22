@@ -25,7 +25,7 @@
             :iconColor="item.meta?.iconColor" />
           <span class="more-wrapper">
             <el-dropdown placement="bottom-start" size="large">
-              <et-icon icon="el-icon-More"></et-icon>
+              <et-icon icon="el-icon-More" @click.prevent=""></et-icon>
               <template #dropdown>
                 <el-dropdown-menu style="min-width: 150px">
                   <el-dropdown-item @click="editForm(item.meta?.id)">编辑</el-dropdown-item>
@@ -201,13 +201,14 @@ function closeEditor() {
   background-color: $menu-hover;
 
   .more-wrapper {
-    display: flex;
+    visibility: visible;
   }
 }
 
 .more-wrapper {
   position: absolute;
   right: 10px;
-  display: none;
+  display: flex;
+  visibility: hidden;
 }
 </style>

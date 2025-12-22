@@ -255,7 +255,7 @@
                                         :confirm-button-text="t('props.clear')" :cancel-button-text="t('props.cancel')"
                                         @confirm="clearDragRule">
                                         <template #reference>
-                                            <el-button size="small" style="border:none"><i
+                                            <el-button size="small" class="btn-delete" style="border:none"><i
                                                     class="fc-icon icon-delete"></i>{{
                                                         t('props.clear') }}
                                             </el-button>
