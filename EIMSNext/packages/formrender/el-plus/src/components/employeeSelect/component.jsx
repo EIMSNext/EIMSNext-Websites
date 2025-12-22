@@ -1,5 +1,6 @@
 import { defineComponent, ref, watch, computed } from "vue";
 import { MemberSelectDialog, MemberTabs } from "@eimsnext/components";
+import "../departmentSelect/style.css";
 
 export default defineComponent({
   name: "FcEmployeeSelect",
@@ -11,7 +12,7 @@ export default defineComponent({
     },
     placeholder: {
       type: String,
-      default: "+选择成员",
+      default: "+ 选择成员",
     },
     multiple: {
       type: Boolean,
@@ -34,7 +35,7 @@ export default defineComponent({
   emits: ["update:modelValue", "change"],
   setup(props, { emit }) {
     const showDialog = ref(false);
-    
+
     // 结合props和上下文的preview属性，确定是否处于查看模式
     // 优先使用props.preview，因为FormDataView组件会将isView=true传递给FormView组件，
     // 然后FormView组件会将preview=isView传递给formCreate组件
@@ -88,10 +89,10 @@ export default defineComponent({
       showDialog.value = true;
     };
 
-    const css_icon_user_selected={
-      color:"#52B59A",
-      marginRight:"4px"
-    }
+    const css_icon_user_selected = {
+      color: "#52B59A",
+      marginRight: "4px",
+    };
 
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
@@ -99,20 +100,11 @@ export default defineComponent({
       const isDisabled = disabled || isPreviewMode.value;
 
       return (
-        <div>
+        <div style={{ width: "100%" }}>
           <div
-            class={`_fc-employee-select ${isDisabled ? "is-disabled" : ""}`}
+            class={`_fc-org-select ${isDisabled ? "is-disabled" : ""}`}
             style={{
               cursor: isDisabled ? "not-allowed" : "pointer",
-              padding: "10px",
-              border: "1px dashed #dcdfe6",
-              borderRadius: "4px",
-              minHeight: "32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              flexWrap: "wrap",
-              gap: "4px",
               backgroundColor: isDisabled ? "#f5f7fa" : "#ffffff",
             }}
             onClick={() => !isDisabled && (showDialog.value = true)}
@@ -122,67 +114,49 @@ export default defineComponent({
             !Array.isArray(selectedValue.value) &&
             selectedValue.value.label ? (
               <div
-                class="_fc-employee-tag"
+                class="_fc-org-tag"
                 style={{
-                  background: "#F5F6F8",
-                  color: "#525559",
-                  padding: "0 8px",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  height: "24px",
-                  lineHeight: "24px",
                   cursor: isDisabled ? "not-allowed" : "pointer",
-                  border: "1px solid #D7E3FD",
                 }}
                 onClick={() => !isDisabled && handleTagClick()}
               >
-              <et-icon icon="el-icon-UserFilled" style={css_icon_user_selected}></et-icon>
+                <et-icon
+                  icon="el-icon-UserFilled"
+                  style={css_icon_user_selected}
+                ></et-icon>
                 {selectedValue.value.label}
               </div>
             ) : Array.isArray(selectedValue.value) &&
               selectedValue.value.length > 0 ? (
-              selectedValue.value.map((emp, index) => {
-                // 确保每个元素都有label字段，否则跳过
-                if (!emp || typeof emp !== "object" || !emp.label) {
-                  return null;
-                }
-                return (
-                <div
-                  key={index}
-                  class="_fc-employee-tag"
-                  style={{
-                    background: "#F5F6F8",
-                    color: "#525559",
-                    padding: "0 8px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    height: "24px",
-                    lineHeight: "24px",
-                    cursor: isDisabled ? "not-allowed" : "pointer",
-                    border: "1px solid #D7E3FD",
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    !isDisabled && handleTagClick();
-                  }}
-                >
-                <et-icon icon="el-icon-UserFilled" style={css_icon_user_selected}></et-icon>
-                  {emp.label}
-                </div>
-                );
-              }).filter(Boolean)
+              selectedValue.value
+                .map((emp, index) => {
+                  // 确保每个元素都有label字段，否则跳过
+                  if (!emp || typeof emp !== "object" || !emp.label) {
+                    return null;
+                  }
+                  return (
+                    <div
+                      key={index}
+                      class="_fc-org-tag"
+                      style={{
+                        cursor: isDisabled ? "not-allowed" : "pointer",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        !isDisabled && handleTagClick();
+                      }}
+                    >
+                      <et-icon
+                        icon="el-icon-UserFilled"
+                        style={css_icon_user_selected}
+                      ></et-icon>
+                      {emp.label}
+                    </div>
+                  );
+                })
+                .filter(Boolean)
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#909399",
-                  fontSize: "14px",
-                }}
-              >
-                {placeholder}
-              </div>
+              <div class={"_fc-org-empty"}>{placeholder}</div>
             )}
           </div>
           {!isDisabled && showDialog.value && (
