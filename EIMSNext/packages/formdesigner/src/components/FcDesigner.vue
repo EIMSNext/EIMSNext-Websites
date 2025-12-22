@@ -55,7 +55,7 @@
                             </div>
                         </el-tooltip>
                     </el-aside>
-                    <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '266px'">
+                    <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '250px'">
                         <AiChat v-if="activeModule === 'ai'"></AiChat>
                         <LanguageConfig v-if="activeModule === 'language'"></LanguageConfig>
                         <JsonPreview v-if="activeModule === 'json'"></JsonPreview>
@@ -255,8 +255,9 @@
                                         :confirm-button-text="t('props.clear')" :cancel-button-text="t('props.cancel')"
                                         @confirm="clearDragRule">
                                         <template #reference>
-                                            <el-button type="danger" plain size="small"><i
-                                                    class="fc-icon icon-delete"></i>{{ t('props.clear') }}
+                                            <el-button size="small" style="border:none"><i
+                                                    class="fc-icon icon-delete"></i>{{
+                                                        t('props.clear') }}
                                             </el-button>
                                         </template>
                                     </el-popconfirm>
