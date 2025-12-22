@@ -1,5 +1,6 @@
 import { defineComponent, ref, watch, computed } from "vue";
 import { MemberSelectDialog, MemberTabs } from "@eimsnext/components";
+import "./style.css";
 
 export default defineComponent({
   name: "FcDepartmentSelect",
@@ -11,7 +12,7 @@ export default defineComponent({
     },
     placeholder: {
       type: String,
-      default: "+选择部门",
+      default: "+ 选择部门",
     },
     multiple: {
       type: Boolean,
@@ -83,10 +84,10 @@ export default defineComponent({
     const handleTagClick = () => {
       showDialog.value = true;
     };
-    const css_icon_dept_selected={
-      color:"#52B59A",
-      marginRight:"4px"
-    }
+    const css_icon_dept_selected = {
+      color: "#52B59A",
+      marginRight: "4px",
+    };
 
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
@@ -94,20 +95,11 @@ export default defineComponent({
       const isDisabled = disabled || isPreviewMode.value;
 
       return (
-        <div>
+        <div style={{ width: "100%" }}>
           <div
-            class={`_fc-department-select ${isDisabled ? "is-disabled" : ""}`}
+            class={`_fc-org-select ${isDisabled ? "is-disabled" : ""}`}
             style={{
               cursor: isDisabled ? "not-allowed" : "pointer",
-              padding: "10px",
-              border: "1px dashed #dcdfe6",
-              borderRadius: "4px",
-              minHeight: "32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              flexWrap: "wrap",
-              gap: "4px",
               backgroundColor: isDisabled ? "#f5f7fa" : "#ffffff",
             }}
             onClick={() => !isDisabled && (showDialog.value = true)}
@@ -117,21 +109,16 @@ export default defineComponent({
             !Array.isArray(selectedValue.value) &&
             selectedValue.value.label ? (
               <div
-                class="_fc-department-tag"
+                class="_fc-org-tag"
                 style={{
-                  background: "#F5F6F8",
-                  color: "#525559",
-                  padding: "0 8px",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  height: "24px",
-                  lineHeight: "24px",
                   cursor: isDisabled ? "not-allowed" : "pointer",
-                  border: "1px solid #D7E3FD",
                 }}
                 onClick={() => !isDisabled && handleTagClick()}
               >
-                <et-icon icon="el-icon-UserFilled" style={css_icon_dept_selected}></et-icon>
+                <et-icon
+                  icon="el-icon-UserFilled"
+                  style={css_icon_dept_selected}
+                ></et-icon>
                 {selectedValue.value.label}
               </div>
             ) : Array.isArray(selectedValue.value) &&
@@ -139,39 +126,24 @@ export default defineComponent({
               selectedValue.value.map((dept, index) => (
                 <div
                   key={index}
-                  class="_fc-department-tag"
+                  class="_fc-org-tag"
                   style={{
-                    background: "#F5F6F8",
-                    color: "#525559",
-                    padding: "0 8px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    height: "24px",
-                    lineHeight: "24px",
                     cursor: isDisabled ? "not-allowed" : "pointer",
-                    border: "1px solid #D7E3FD",
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     !isDisabled && handleTagClick();
                   }}
                 >
-                  <et-icon icon="el-icon-UserFilled" style={css_icon_dept_selected}></et-icon>
+                  <et-icon
+                    icon="el-icon-UserFilled"
+                    style={css_icon_dept_selected}
+                  ></et-icon>
                   {dept.label}
                 </div>
               ))
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#909399",
-                  fontSize: "14px",
-                }}
-              >
-                {placeholder}
-              </div>
+              <div class={"_fc-org-empty"}>{placeholder}</div>
             )}
           </div>
           {!isDisabled && showDialog.value && (

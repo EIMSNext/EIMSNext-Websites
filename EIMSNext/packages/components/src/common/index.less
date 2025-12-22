@@ -5,9 +5,12 @@
   --color-primary-bg: #e6f8f5;
   --color-text: #141e31;
   --color-text-secondary: #525967;
-  --color-error: #eb5050;
+  --color-text-tertiary: #838892;
   --color-warning: #f0a800;
   --color-info: #2f7deb;
+  --color-info-bg: #eaf2fd;
+  --color-error: #eb5050;
+  --color-error-bg: #fdeeee;
 }
 
 #colors() {
@@ -30,4 +33,22 @@
 .flex-y-center {
   display: flex;
   align-items: center;
+}
+
+.btn-info {
+  background-color: transparent;
+  color: var(--color-text-tertiary);
+  &:hover {
+    background-color: var(--color-info-bg) !important;
+    color: var(--color-info) !important;
+  }
+}
+
+.btn-delete {
+  background-color: transparent;
+  color: var(--color-text-tertiary);
+  &:hover {
+    background-color: var(--color-error-bg) !important;
+    color: var(--color-error) !important;
+  }
 }
