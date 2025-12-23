@@ -13,7 +13,7 @@ export default function field({ t }) {
       type: "LanguageInput",
       field: "title",
       value: "",
-      title: t("form.title"),
+      title: "",
     },
     {
       type: "SpanInput",
