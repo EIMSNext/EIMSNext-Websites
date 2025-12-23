@@ -114,24 +114,29 @@
             <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip :resizable="true">
               <template v-if="col.children" v-for="sub in col.children">
                 <el-table-column
-                  :prop="sub.field"
-                  :formatter="formatter"
-                  :label="sub.title"
-                  :width="sub.width"
-                  :resizable="true"
-                ></el-table-column>
+              :prop="sub.field"
+              :formatter="formatter"
+              :label="sub.title"
+              :width="sub.width"
+              :resizable="true"
+              :dangerouslyUseHTMLString="true"
+            ></el-table-column>
               </template>
             </el-table-column>
           </template>
           <template v-else>
             <el-table-column
               :prop="col.field"
-              :formatter="formatter"
               :label="col.title"
               :width="col.width"
               show-overflow-tooltip
               :resizable="true"
-            ></el-table-column>
+            >
+              <!-- 使用slot-scope方式渲染，支持HTML -->
+              <template #default="scope">
+                <div v-html="formatter(scope.row, { property: col.field }, scope.row[col.field])"></div>
+              </template>
+            </el-table-column>
           </template>
         </template>
       </el-table>
@@ -415,6 +420,34 @@ const formatter = (row: any, column: any, cellValue: any) => {
     if (colSetting.type == FieldType.TimeStamp) {
       const format = colSetting.format || "YYYY-MM-DD";
       return cellValue ? dayjs(cellValue).format(format) : "";
+    }
+    // 添加对图片字段的处理
+    if (colSetting.type == FieldType.ImageUpload) {
+      if (!cellValue) return '';
+      
+      // 处理图片对象数组，提取url属性
+      if (Array.isArray(cellValue)) {
+        // 过滤出有效的图片对象
+        const validImages = cellValue.filter(item => typeof item === 'object' && item !== null && item.url);
+        if (validImages.length === 0) return '';
+        
+        // 生成图片标签
+        return validImages.map(img => {
+          // 将反斜杠转换为正斜杠
+          const imgUrl = img.url.replace(/\\/g, '/');
+          return `<img src="${imgUrl}" style="width: 40px; height: 40px; border-radius: 4px; margin-right: 4px; object-fit: cover; cursor: pointer;" />`;
+        }).join('');
+      }
+      // 处理单个图片对象
+      else if (typeof cellValue === 'object' && cellValue !== null && cellValue.url) {
+        const imgUrl = cellValue.url.replace(/\\/g, '/');
+        return `<img src="${imgUrl}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" />`;
+      }
+      // 处理图片URL字符串
+      else if (typeof cellValue === 'string') {
+        const imgUrl = cellValue.replace(/\\/g, '/');
+        return `<img src="${imgUrl}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" />`;
+      }
     }
   }
   

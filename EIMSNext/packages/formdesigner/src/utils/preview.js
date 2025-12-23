@@ -54,8 +54,8 @@ export default function renderPreview(_, ctx) {
     (Array.isArray(subForm) ? subForm.length : subForm) ||
     [
             "fcgroup", "fcsubform", "tableform", "stepform", 
-            "nestedtableform", "infinitetableform", "fcupload",
-            "departmentselect","employeeselect"
+            "nestedtableform", "infinitetableform", "fcupload", "fc-upload",
+            "departmentselect","employeeselect", "fileupload", "imageupload"
           ].indexOf(ctx.trueType.toLowerCase()) > -1
   ) {
     if (ctx.trueType.toLowerCase() === "fcupload") {
