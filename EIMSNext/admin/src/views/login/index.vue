@@ -15,7 +15,7 @@
       <div class="content">
         <div class="login-container">
           <div class="account-login">
-            <div class="login-title">账号登录</div>
+            <div class="login-title">{{ t("login.loginTitle") }}</div>
             <!-- <div class="login-register"><span>没有账号？</span>
               <el-link type="primary" :underline="false" href="/register" target="_self">
                 免费注册

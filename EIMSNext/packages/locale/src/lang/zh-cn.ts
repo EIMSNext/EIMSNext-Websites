@@ -1,4 +1,5 @@
 export default {
+  //通用
   common: {
     ok: "确定",
     cancel: "取消",
@@ -31,6 +32,9 @@ export default {
       editConfirm_Title: "数据有修改，是否保存？",
     },
   },
+  //组件库，com已被设计器占用
+  comp: {},
+  //主项目
   admin: {},
   // 菜单国际化
   route: {
@@ -39,9 +43,10 @@ export default {
   },
   // 登录页面国际化
   login: {
+    loginTitle:"账号登录",
     username: "手机号/邮箱",
     password: "密码",
-    login: "登 录",
+    login: "登录",
     captchaCode: "验证码",
     capsLock: "大写锁定已打开",
     rememberMe: "记住我",
@@ -107,5 +112,4 @@ export default {
       lte: "小于等于",
     },
   },
-  form: {},
 };
