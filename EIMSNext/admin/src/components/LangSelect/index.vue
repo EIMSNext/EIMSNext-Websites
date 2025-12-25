@@ -6,12 +6,8 @@
     </div>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item
-          v-for="item in langOptions"
-          :key="item.value"
-          :disabled="systemStore.language === item.value"
-          :command="item.value"
-        >
+        <el-dropdown-item v-for="item in langOptions" :key="item.value" :disabled="systemStore.language === item.value"
+          :command="item.value">
           {{ item.label }}
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -22,6 +18,8 @@
 <script setup lang="ts">
 import { useSystemStore } from "@/store/system";
 import { LanguageEnum } from "@/enums/LanguageEnum";
+import { useI18n } from "vue-i18n";
+const { locale } = useI18n();
 
 defineProps({
   size: {
@@ -48,6 +46,7 @@ if (systemStore.language) {
     label: "简体中文",
     value: LanguageEnum.ZH_CN,
   };
+  locale.value = curLang.value.value
 }
 
 function handleLanguageChange(lang: string) {

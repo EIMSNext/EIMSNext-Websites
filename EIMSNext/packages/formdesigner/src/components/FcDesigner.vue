@@ -151,11 +151,11 @@
                                                         </div>
                                                         <span class="_fc-l-name">{{
                                                             t('com.' + element.name + '.name') || element.label
-                                                            }}</span>
+                                                        }}</span>
                                                     </template>
                                                     <span class="_fc-l-name" v-else>{{
                                                         t('tmp.' + element.name) || element.label
-                                                        }}</span>
+                                                    }}</span>
                                                 </div>
                                             </template>
                                         </fcDraggable>
@@ -175,7 +175,7 @@
                                                     :class="(data.rule._menu && data.rule._menu.icon) || 'icon-cell'"></i>
                                                 <span>{{
                                                     getTitle(data.rule)
-                                                    }}</span>
+                                                }}</span>
                                             </div>
                                             <div class="_fc-tree-more" @click.stop
                                                 v-if="!data.slot && !data.rule._fc_page_tag">
@@ -281,7 +281,7 @@
                                     <div class="_fd-input-btn">
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
-                                        }}：</span>
+                                            }}：</span>
                                         <el-switch size="small" :model-value="inputForm.state" inline-prompt
                                             @update:model-value="openInputData" />
                                     </div>
@@ -331,7 +331,7 @@
                                     :class="{ active: activeTab === 'form' }" @click="activeTab = 'form'">{{
                                         t('designer.form') }}
                                 </div>
-                                <ToolsBar v-if="activeTab === 'props'"></ToolsBar>
+                                <!-- <ToolsBar v-if="activeTab === 'props'"></ToolsBar> -->
                             </el-header>
                             <el-main class="_fc-r-tab-form" v-show="activeTab === 'form'"
                                 v-if="!config || config.showFormConfig !== false">
@@ -351,11 +351,11 @@
                             </el-main>
                             <el-main class="_fc-r-tab-props" v-show="activeTab === 'props'"
                                 :key="activeRule ? activeRule._fc_id : (customForm.config ? customForm.key : '')">
-                                <template
-                                    v-if="activeRule || (customForm.config && (customForm.config.name || customForm.config.label))">
-                                    <p class="_fc-r-title">{{ t('designer.type') }}</p>
-                                    <TypeSelect></TypeSelect>
-                                    <!-- <template
+                                <!-- <template
+                                    v-if="activeRule || (customForm.config && (customForm.config.name || customForm.config.label))"> -->
+                                <!-- <p class="_fc-r-title">{{ t('designer.type') }}</p>
+                                    <TypeSelect></TypeSelect> -->
+                                <!-- <template
                                         v-if="(activeRule && activeRule.name && config.showComponentName !== false)">
                                         <p class="_fc-r-title">
                                             <Warning :tooltip="t('warning.name')">
@@ -372,16 +372,25 @@
                                             </template>
             </el-input>
             </template> -->
-                                </template>
+                                <!-- </template>
                                 <template v-if="activeRuleChildren">
                                     <SubList></SubList>
-                                </template>
+                                </template> -->
                                 <div class="_fc-r-config" :style="{ 'grid-template-areas': configFormOrderStyle }">
                                     <div style="grid-area: base;">
-                                        <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
+                                        <!-- <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
                                             t('designer.rule')
                                             }}
-                                        </ConfigTitle>
+                                        </ConfigTitle> -->
+                                        <div style="display:flex;justify-content: space-between; margin-bottom: 10px;">
+                                            <div><span style="color:#eb5050">*</span><span class="_fc-field-title">{{
+                                                t('form.title')
+                                            }}</span></div>
+                                            <el-tag v-if="activeRule" type="success" effect="plain" disable-transitions>
+                                                {{ t('com.' + (activeRule._menu.name) + '.name') ||
+                                                    activeRule._menu.label }}
+                                            </el-tag> <!-- <TypeSelect></TypeSelect> -->
+                                        </div>
                                         <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api"
                                             :rule="baseForm.rule" :option="baseForm.options"
                                             :modelValue="baseForm.value" @change="baseChange">
@@ -431,7 +440,7 @@
                                     <div style="grid-area: advanced;">
                                         <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
                                             t('designer.advanced')
-                                            }}
+                                        }}
                                         </ConfigTitle>
                                         <DragForm v-show="advancedForm.isShow" v-model:api="advancedForm.api"
                                             :rule="advancedForm.rule" :option="advancedForm.options"
@@ -470,7 +479,7 @@
                                         <template v-if="activeRule">
                                             <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
                                                 t('designer.validate')
-                                                }}
+                                            }}
                                             </ConfigTitle>
                                             <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api"
                                                 :rule="validateForm.rule" :option="validateForm.options"

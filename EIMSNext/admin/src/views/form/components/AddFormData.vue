@@ -12,6 +12,8 @@ import { FormDef, FormData, FormContent, FormDataRequest, DataAction } from "@ei
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -24,7 +26,7 @@ const props = withDefaults(
   }
 );
 
-const actions = ref<FormActionSettings>({ draft: { text: "SaveDraft", visible: true }, submit: { text: "Submit", visible: true }, reset: { text: "Reset", visible: true } })
+const actions = ref<FormActionSettings>({ draft: { text: "common.saveDraft", visible: true }, submit: { text: "common.submit", visible: true }, reset: { text: "common.reset", visible: true } })
 const appId = ref("");
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());

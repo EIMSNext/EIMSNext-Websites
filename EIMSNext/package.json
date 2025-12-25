@@ -28,7 +28,8 @@
     "build:elplus": "cd packages/formrender/el-plus & vite build",
     "build:vant": "cd packages/formrender/vant & vite build",
     "build:des": "cd packages/formdesigner & vite build",
-    "build:bld": "cd packages/formbuilder & vite build"
+    "build:bld": "cd packages/formbuilder & vite build",
+    "build:lang": "cd packages/locale & vite build"
   },
   "dependencies": {
     "@eimsnext/components": "workspace:*",
@@ -37,6 +38,7 @@
     "@eimsnext/form-render-core": "workspace:*",
     "@eimsnext/form-render-elplus": "workspace:*",
     "@eimsnext/form-render-vant": "workspace:*",
+    "@eimsnext/locale": "workspace:*",
     "@eimsnext/models": "workspace:*",
     "@eimsnext/services": "workspace:*",
     "@eimsnext/store": "workspace:*",
@@ -76,6 +78,7 @@
     "sortablejs": "^1.15.6",
     "v-jsoneditor": "^1.4.5",
     "vant": "^4.9.21",
+    "vue-i18n": "^11.2.7",
     "vue-router": "^4.6.3",
     "vuedraggable": "4.1.0",
     "wangeditor": "^4.7.15"
