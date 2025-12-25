@@ -14,15 +14,26 @@ export default {
 
 <style scoped>
 .fc-employee-select-view {
-  padding: 10px;
-}
-
-.fc-employee-select-content {
-  border: 1px solid #dcdfe6;
+  width: 100%;
+  padding: 3px;
+  border: 1px dashed #dcdfe6;
   border-radius: 4px;
-  padding: 8px 12px;
   min-height: 32px;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.fc-employee-select-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #909399;
+  font-size: 14px;
+  height: 24px;
+  line-height: 24px;
 }
 </style>
