@@ -1,7 +1,7 @@
 <template>
-    <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConirm_Title')"
-        :icon="MessageIcon.Warning" :showNoSave="false" :okText="t('common.ok')" @ok="execDelete">
-        <div>{{ t("common.message.deleteConirm_Content2") }}</div>
+    <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')"
+        :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
+        <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
     </EtConfirmDialog>
     <et-toolbar :left-group="leftBars" @command="toolbarHandler" class="dataview-bar"></et-toolbar>
     <FormView v-if="formData" :def="formDef" :data="formData" :isView="isView" :actions="actions" @draft="saveDraft"

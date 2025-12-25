@@ -13,7 +13,7 @@
         <CircleCloseFilled v-if="icon == MessageIcon.Error" />
       </el-icon>
       <div class="confirm-body">
-        <div class="title">{{ title }}</div>
+        <div class="title">{{ titleRef }}</div>
         <div class="message">
           <slot></slot>
         </div>
@@ -27,13 +27,13 @@
         <div class="footer-right">
           <slot name="footer-right">
             <el-button v-if="showCancel" @click="cancel">{{
-              cancelText
+              cancelTextRef
             }}</el-button>
             <el-button v-if="showNoSave" @click="save(false)">{{
-              noSaveText
+              noSaveTextRef
             }}</el-button>
             <el-button type="primary" @click="save(true)">{{
-              okText
+              okTextRef
             }}</el-button>
           </slot>
         </div>
@@ -43,7 +43,7 @@
 </template>
 <script lang="ts" setup>
 import "./style/index.less";
-import { computed, ref, useAttrs } from "vue";
+import { computed, onMounted, ref, useAttrs } from "vue";
 import { MessageIcon } from "./type";
 //下面的导入对于函数式调用是必须的
 import { ElDialog, ElIcon, ElButton } from "element-plus";
@@ -55,6 +55,12 @@ import {
 } from "@element-plus/icons-vue";
 import { useLocale } from "element-plus";
 const { t } = useLocale()
+
+
+const defaultTitle = computed(() => t("common.message.editConfirm_Title"))
+const defaultCancelText = computed(() => t("common.cancel"))
+const defaultOKText = computed(() => t("common.ok"))
+const defaultNoSaveText = computed(() => t("common.noSave"))
 
 const attrs = useAttrs();
 // const ori = ref(null);
@@ -78,14 +84,16 @@ const props = withDefaults(
   }>(),
   {
     icon: MessageIcon.Question,
-    title: t("common.message.editConfirm_Title"),
     showCancel: true,
     showNoSave: true,
-    cancelText: t("common.cancel"),
-    noSaveText: t("common.noSave"),
-    okText: t("common.saveAndContinue"),
   }
 );
+
+const titleRef = computed(() => props.title || t("common.message.editConfirm_Title"));
+const cancelTextRef = computed(() => props.cancelText || t("common.cancel"));
+const okTextRef = computed(() => props.okText || t("common.ok"));
+const noSaveTextRef = computed(() => props.noSaveText || t("common.noSave"));
+
 const getIconClass = computed(() => {
   let iconCls =
     props.icon == MessageIcon.Error

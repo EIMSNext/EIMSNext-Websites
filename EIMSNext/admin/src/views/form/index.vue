@@ -6,9 +6,9 @@
         <AddFormData :formId="formId" :isView="false" @save="onDataSaved" @submit="onDataSaved"></AddFormData>
       </div>
     </et-dialog>
-    <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConirm_Title')"
-      :icon="MessageIcon.Warning" :showNoSave="false" :okText="t('common.ok')" @ok="execDelete">
-      <div>{{ t("common.message.deleteConirm_Content2", [checkedDatas.length]) }}</div>
+    <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')"
+      :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
+      <div>{{ t("common.message.deleteConfirm_Content", [checkedDatas.length]) }}</div>
     </EtConfirmDialog>
     <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true">
       <div class="form-container">
@@ -97,6 +97,8 @@ const formDef = ref<FormDef>();
 const filterBtnRef = ref();
 const sortBtnRef = ref();
 const fieldBtnRef = ref();
+
+console.log(t('common.message.deleteConfirm_Title'))
 
 const leftBars = ref<ToolbarItem[]>([
   {

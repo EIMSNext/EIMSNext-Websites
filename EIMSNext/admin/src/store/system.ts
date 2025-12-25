@@ -14,13 +14,11 @@ import { ZhCn as zhCn_App, En as en_App } from "@eimsnext/locale";
 
 const locales = {
   "zh-CN": {
-    caption: "简体中文",
     ...zhCn_EL,
     ...zhCn_Des,
     ...zhCn_App,
   },
   en: {
-    caption: "English",
     ...en_EL,
     ...en_Des,
     ...en_App,
