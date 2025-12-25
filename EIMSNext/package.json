@@ -14,6 +14,7 @@
     "type-check": "cd admin & vue-tsc --noEmit",
     "preinstall": "npx only-allow pnpm",
     "exm:elplus": "pnpm run --filter ./examples/el-plus dev",
+    "exm:vant": "pnpm run --filter ./examples/vant dev",
     "exm:bld": "pnpm run --filter ./examples/formbuilder dev",
     "exm:utils": "pnpm run --filter ./examples/utils dev",
     "exm:service": "pnpm run --filter ./examples/service dev",
@@ -27,7 +28,8 @@
     "build:elplus": "cd packages/formrender/el-plus & vite build",
     "build:vant": "cd packages/formrender/vant & vite build",
     "build:des": "cd packages/formdesigner & vite build",
-    "build:bld": "cd packages/formbuilder & vite build"
+    "build:bld": "cd packages/formbuilder & vite build",
+    "build:lang": "cd packages/locale & vite build"
   },
   "dependencies": {
     "@eimsnext/components": "workspace:*",
@@ -36,6 +38,7 @@
     "@eimsnext/form-render-core": "workspace:*",
     "@eimsnext/form-render-elplus": "workspace:*",
     "@eimsnext/form-render-vant": "workspace:*",
+    "@eimsnext/locale": "workspace:*",
     "@eimsnext/models": "workspace:*",
     "@eimsnext/services": "workspace:*",
     "@eimsnext/store": "workspace:*",
@@ -68,7 +71,6 @@
     "exceljs": "^4.4.0",
     "lodash-es": "^4.17.21",
     "nanoid": "^5.1.6",
-    "nprogress": "^0.2.0",
     "odata-query": "^7.0.9",
     "path-to-regexp": "^8.3.0",
     "pinia": "^2.3.1",
@@ -76,6 +78,7 @@
     "sortablejs": "^1.15.6",
     "v-jsoneditor": "^1.4.5",
     "vant": "^4.9.21",
+    "vue-i18n": "^11.2.7",
     "vue-router": "^4.6.3",
     "vuedraggable": "4.1.0",
     "wangeditor": "^4.7.15"
@@ -86,7 +89,6 @@
     "@types/less": "^3.0.8",
     "@types/lodash": "^4.17.20",
     "@types/node": "^22.18.12",
-    "@types/nprogress": "^0.2.3",
     "@types/path-browserify": "^1.0.3",
     "@types/qs": "^6.14.0",
     "@types/sortablejs": "^1.15.9",

@@ -1,5 +1,5 @@
 import { AxiosHeaders } from "axios";
-import appSetting from "../appSetting";
+import {appSetting} from "../appSetting";
 import { ApiClient } from "./apiClient";
 import { AuthClient } from "./authClient";
 import { HttpRequest } from "./httpRequest";

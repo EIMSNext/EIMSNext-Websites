@@ -1495,6 +1495,30 @@ const En = {
         inactiveColor: "Background color when closed",
       },
     },
+    departmentSelect: {
+      name: "Department Single Select",
+      props: {
+        disabled: "Disabled",
+      },
+    },
+    departmentSelect2: {
+      name: "Department Multiple Select",
+      props: {
+        disabled: "Disabled",
+      },
+    },
+    employeeSelect: {
+      name: "Employee Single Select",
+      props: {
+        disabled: "Disabled",
+      },
+    },
+    employeeSelect2: {
+      name: "Employee Multiple Select",
+      props: {
+        disabled: "Disabled",
+      },
+    },
     tableform: {
       name: "Sub Form",
       event: {

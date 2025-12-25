@@ -3,15 +3,15 @@
     <formCreate ref="fcInst" :modelValue="dataRef" :rule="rules" :option="options" :preview="isView" />
     <div v-if="actions" class="form-actions">
       <el-button v-if="actions.submit && actions.submit.visible" type="primary" @click="handleSubmit">
-        {{ t(actions.submit.text || "提交") }}</el-button>
+        {{ t(actions.submit.text) }}</el-button>
       <el-button v-if="actions.draft && actions.draft.visible" @click="handleDraft">
-        {{ t(actions.draft.text || "存为草稿") }}</el-button>
+        {{ t(actions.draft.text) }}</el-button>
       <el-button v-if="actions.reset && actions.reset.visible" @click="handleReset">
-        {{ t(actions.reset.text || "重置") }}</el-button>
+        {{ t(actions.reset.text) }}</el-button>
       <el-button v-if="actions.approve && actions.approve.visible" type="primary" @click="handleApprove">
-        {{ t(actions.approve.text || "同意") }}</el-button>
+        {{ t(actions.approve.text) }}</el-button>
       <el-button v-if="actions.reject && actions.reject.visible" @click="handleReject">
-        {{ t(actions.reject.text || "驳回") }}</el-button>
+        {{ t(actions.reject.text) }}</el-button>
     </div>
   </div>
 </template>

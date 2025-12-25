@@ -2,7 +2,7 @@
 
 .selected-tags {
   align-content: flex-start;
-  border: 1px dashed #d7d9dc;
+  border: 1px dashed #dcdfe6;
   display: flex;
   flex-wrap: wrap;
   height: 86px;
@@ -10,12 +10,25 @@
   position: relative;
 
   .el-tag {
-    border-radius: 1px;
-    padding: 0 6px;
+    border-radius: 4px;
+    padding: 0 8px;
+    background-color: transparent !important;
+    color: #909399 !important;
+    border: 1px solid #dcdfe6 !important;
+    
+    &.error-tag {
+      background-color: #fdeeee !important;
+      border-color: #eb5050 !important;
+      
+      .tag-label {
+        color: var(--color-error) !important;
+      }
+    }
 
     .tag-icon {
       font-size: 16px;
       margin-right: 4px;
+      color: #909399 !important;
     }
 
     .tag-label {
@@ -24,9 +37,19 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       padding-right: 2px;
+      color: #909399 !important;
 
       &.has-error {
-        color: var(--color-error);
+        color: var(--color-error) !important;
+      }
+    }
+    
+    .el-tag__close {
+      color: #909399 !important;
+      
+      &:hover {
+        color: #606266 !important;
+        background-color: transparent !important;
       }
     }
   }
@@ -34,7 +57,7 @@
   .empty-wrapper {
     align-items: center;
     bottom: 0;
-    color: var(--color-text-secondary);
+    color: #909399;
     display: flex;
     justify-content: center;
     left: 0;
@@ -45,6 +68,7 @@
 
     .empty-text {
       padding-left: 5px;
+      font-size: 14px;
     }
   }
 }

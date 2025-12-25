@@ -4,19 +4,23 @@
     <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
     <div class="search-result">
       <div class="result-container">
-        <el-tabs v-model="activeTab" style="flex: 1">
-          <el-tab-pane label="组织架构" name="dept">
+        <el-tabs v-model="activeTab" style="flex: 1" :class="{ 'hide-tabs-header': activeTab == showTabs }">
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Department)" label="组织架构" :name="MemberTabs.Department">
             <div class="dept-select">
               <el-tree ref="deptTree" class="dept-tree" style="margin-top: 12px" :data="deptData" :props="defaultProps"
-                :expand-on-click-node="true" node-key="id" :check-strictly="!orgCascade"
+                :expand-on-click-node="true" node-key="id" :show-checkbox="multiple" :check-strictly="!orgCascade"
                 :filter-node-method="deptFilter" @check-change="deptNodeChecked">
                 <template #default="{ node, data }">
-                  <div class="node-data" :title="data.label">
+                  <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, deptFilter, false)">
                     <div class="node-wrapper">
                       <et-icon :icon="data.icon" class="node-icon" />
                       <span class="node-label">{{ data.label }}</span>
                       <div class="node-action">
-                        <el-checkbox v-model="node.checked" @click.stop="" :disabled="!deptFilter(keyword, data)" />
+                        <el-checkbox v-if="multiple" v-model="node.checked" @click.stop=""
+                          :disabled="!deptFilter(keyword, data)" />
+                        <el-radio v-if="!multiple" v-model="singleDeptId" :value="data.id" @click.stop=""
+                          @change="(val: string) => singleDeptChecked(data, val)"
+                          :disabled="!deptFilter(keyword, data)" />
                       </div>
                     </div>
                   </div>
@@ -24,13 +28,13 @@
               </el-tree>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="角色" name="role">
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Role)" label="角色" :name="MemberTabs.Role">
             <div class="dept-select">
               <el-tree ref="roleTree" class="dept-tree" style="margin-top: 12px" :data="roleData" :props="defaultProps"
                 :expand-on-click-node="true" node-key="id" :check-strictly="false" :filter-node-method="roleFilter"
                 @check-change="roleNodeChecked">
                 <template #default="{ node, data }">
-                  <div class="node-data" :title="data.label">
+                  <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, roleFilter, true)">
                     <div class="node-wrapper">
                       <et-icon :icon="data.icon" class="node-icon" />
                       <span class="node-label">{{ data.label }}</span>
@@ -43,9 +47,9 @@
               </el-tree>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="员工" name="emp">
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Employee)" label="员工" :name="MemberTabs.Employee">
             <div class="emp-select">
-              <div class="left-panel" style="left: 0px; width: 460px">
+              <div class="left-panel">
                 <div class="filter-items">
                   <div class="filter-item" :class="{ active: selectedEmpDeptId == 'all' }"
                     @click.stop="selectEmpDept('all')">
@@ -64,15 +68,45 @@
                   </template>
                 </el-tree>
               </div>
-              <div class="right-panel" style="width: 250px; right: 0px">
-                <et-list v-model="selectedEmps" :data="empData" :selectable="true"
+              <div class="right-panel">
+                <et-list v-model="selectedEmps" :data="empData" :selectable="true" :multiple="multiple"
                   style="padding-top: 0px; height: 100%" @item-check="empChecked" @all-check="empCheckAll">
                 </et-list>
               </div>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="动态负责人" name="dynamic">
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Dynamic)" label="动态负责人" :name="MemberTabs.Dynamic">
             <div></div>
+          </el-tab-pane>
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.CurDept)" label="当前用户所处部门" :name="MemberTabs.CurDept">
+            <div class="dept-select">
+              <el-tree ref="curDeptTree" class="dept-tree" style="margin-top: 12px" :data="curDeptData"
+                :props="defaultProps" :expand-on-click-node="true" node-key="id" :show-checkbox="multiple"
+                :filter-node-method="deptFilter" @check-change="deptNodeChecked">
+                <template #default="{ node, data }">
+                  <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, deptFilter, false)">
+                    <div class="node-wrapper">
+                      <et-icon :icon="data.icon" class="node-icon" />
+                      <span class="node-label">{{ data.label }}</span>
+                      <div class="node-action">
+                        <el-checkbox v-if="multiple" v-model="node.checked" @click.stop=""
+                          :disabled="!deptFilter(keyword, data)" />
+                        <el-radio v-if="!multiple" v-model="singleDeptId" :value="data.id" @click.stop=""
+                          @change="(val: string) => singleDeptChecked(data, val)"
+                          :disabled="!deptFilter(keyword, data)" />
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </el-tree>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.CurUser)" label="当前用户" :name="MemberTabs.CurUser">
+            <div class="dept-select">
+              <et-list v-model="selectedEmps" :data="curEmpData" :selectable="true" :multiple="multiple"
+                style="border: none;" @item-check="empChecked" @all-check="curEmpCheckAll">
+              </et-list>
+            </div>
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -83,12 +117,14 @@
 import "./style/index.less";
 import { ref, reactive, watch, onBeforeMount, toRef } from "vue";
 import { TreeInstance } from "element-plus";
-import { ITreeNode, TreeNodeType, buildDeptTree, buildRoleTree } from "../common";
+import { DeptToTreeNode, EmployeeToListItem, ITreeNode, TreeNodeType, buildDeptTree, buildRoleTree } from "../common";
 import { ISelectedTag, TagType } from "../selectedTags/type";
 import { Department, Employee, RoleGroup, Role } from "@eimsnext/models";
-import { useDeptStore } from "@eimsnext/store";
+import { useDeptStore, useUserStore } from "@eimsnext/store";
 import { employeeService, roleGroupService, roleService } from "@eimsnext/services";
 import { IListItem } from "../list/type";
+import { MemberTabs } from "./type";
+import { FlagEnum } from "@eimsnext/utils";
 
 defineOptions({
   name: "MemberSelect",
@@ -97,18 +133,22 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     modelValue: ISelectedTag[];
+    showTabs?: MemberTabs | number,
     showCascade?: boolean;
+    multiple?: boolean;
   }>(),
   {
+    showTabs: 7,
     showCascade: false,
+    multiple: true
   }
 );
-
+const userStore = useUserStore()
 const orgCascade = ref(false);
 const defaultProps = { children: "children", label: "label" };
 const tagsRef = toRef(props.modelValue);
 const keyword = ref("");
-const activeTab = ref("dept");
+const activeTab = ref(FlagEnum.getMinValue(MemberTabs, props.showTabs));
 const deptTree = ref<TreeInstance>();
 const deptStore = useDeptStore();
 const deptData = ref<ITreeNode[]>(); // 部门列表
@@ -120,6 +160,10 @@ const selectedEmps = ref<string[]>();
 const deptChanging = ref(false);
 const roleTree = ref<TreeInstance>();
 const roleData = ref<ITreeNode[]>(); // 角色列表
+const curDeptTree = ref<TreeInstance>();
+const curDeptData = ref<ITreeNode[]>()
+const singleDeptId = ref<string>("")
+const curEmpData = ref<IListItem[]>([])
 
 watch([keyword], ([newKeyword], [oldKeyword]) => {
   if (newKeyword != oldKeyword) {
@@ -134,6 +178,24 @@ onBeforeMount(() => {
     let detps = buildDeptTree(data);
     deptData.value = JSON.parse(JSON.stringify(detps));
     empDeptData.value = JSON.parse(JSON.stringify(detps));
+
+    if (userStore.currentUser.deptId) {
+      deptStore.get(userStore.currentUser.deptId).then(x => {
+        if (x) curDeptData.value = [DeptToTreeNode(x)]
+      })
+    }
+    if (userStore.currentUser) {
+      let emp: Employee = {
+        id: userStore.currentUser.empId!,
+        code: userStore.currentUser.empCode!,
+        empName: userStore.currentUser.empName!,
+        status: 0,
+        departmentId: userStore.currentUser.deptId!,
+        approved: true,
+        isManager: false
+      }
+      curEmpData.value = [EmployeeToListItem(emp)]
+    }
   });
 
   let roleGroups: RoleGroup[] = [];
@@ -143,6 +205,67 @@ onBeforeMount(() => {
     roleService.query<Role>().then(data => { roles = data })
   ]
   ).then(() => roleData.value = buildRoleTree(roleGroups, roles))
+
+  if (!props.multiple && props.modelValue?.length > 0) {
+    if (props.modelValue[0].type == TagType.Department)
+      singleDeptId.value = props.modelValue[0].id
+  }
+});
+
+// 监听选中标签变化，同步更新当前tab的树组件选中状态
+watch([() => tagsRef.value, activeTab], () => {
+  // 确保树数据已加载
+  if (!deptData.value || !roleData.value) return;
+  
+  // 获取当前激活的树组件
+  let currentTree: TreeInstance | undefined;
+  let isRoleTree = false;
+  
+  switch (activeTab.value) {
+    case MemberTabs.Department:
+      currentTree = deptTree.value;
+      isRoleTree = false;
+      break;
+    case MemberTabs.Role:
+      currentTree = roleTree.value;
+      isRoleTree = true;
+      break;
+    case MemberTabs.CurDept:
+      currentTree = curDeptTree.value;
+      isRoleTree = false;
+      break;
+    default:
+      return;
+  }
+  
+  if (!currentTree) return;
+  
+  // 获取当前类型的选中项ID列表
+  const selectedIds = tagsRef.value
+    .filter(tag => {
+      return isRoleTree ? tag.type === TagType.Role : tag.type === TagType.Department;
+    })
+    .map(tag => tag.id);
+  
+  // 遍历树节点，设置选中状态
+  const setNodeChecked = (nodes: any[]) => {
+    nodes.forEach(node => {
+      // 设置当前节点的选中状态
+      const isChecked = selectedIds.includes(node.id);
+      currentTree!.setChecked(node, isChecked, false);
+      
+      // 递归处理子节点
+      if (node.children && node.children.length > 0) {
+        setNodeChecked(node.children);
+      }
+    });
+  };
+  
+  // 根据树类型获取数据
+  const treeData = isRoleTree ? roleData.value : activeTab.value === MemberTabs.CurDept ? curDeptData.value : deptData.value;
+  if (treeData) {
+    setNodeChecked(treeData);
+  }
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -157,23 +280,46 @@ const deptFilter = (value: string, data: any) => {
   return data.label.indexOf(value) !== -1;
 };
 const deptNodeChecked = (data: ITreeNode, checked: boolean) => {
-  if (checked) {
-    tagsRef.value.push({
+  if (props.multiple) {
+    if (checked) {
+      // 添加重复判断，防止重复添加
+      const existingIndex = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Department
+      );
+      if (existingIndex === -1) {
+        tagsRef.value.push({
+          id: data.id,
+          code: data.code,
+          label: data.label,
+          type: TagType.Department,
+          data: data.data,
+        });
+      }
+    } else {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Department
+      );
+      if (index > -1) tagsRef.value.splice(index, 1);
+    }
+    emit("update:modelValue", tagsRef.value);
+  }
+};
+const singleDeptChecked = (data: ITreeNode, val: string) => {
+  if (!props.multiple) {
+    // 直接替换整个数组，避免先删除再添加导致的闪烁
+    tagsRef.value = [{
       id: data.id,
+      code: data.code,
       label: data.label,
       type: TagType.Department,
       data: data.data,
-    });
-  } else {
-    let index = tagsRef.value.findIndex(
-      (x) => x.id == data.id && x.type == TagType.Department
-    );
-    if (index > -1) tagsRef.value.splice(index, 1);
+    }];
+    emit("update:modelValue", tagsRef.value);
   }
+}
 
-  emit("update:modelValue", tagsRef.value);
-};
 const selectEmpDept = (deptId: string) => {
+  // console.log("selectEmpDept", deptId)
   deptChanging.value = true;
   selectedEmpDeptId.value = deptId;
 
@@ -182,12 +328,7 @@ const selectEmpDept = (deptId: string) => {
   selectedEmps.value = [];
   employeeService.query<Employee>($filter).then((res) => {
     res.forEach((x) => {
-      empData.value.push({
-        id: x.id,
-        label: x.empName,
-        icon: "el-icon-UserFilled",
-        data: x,
-      });
+      empData.value.push(EmployeeToListItem(x));
 
       if (
         tagsRef.value.find((t) => t.id == x.id && t.type == TagType.Employee)
@@ -199,28 +340,53 @@ const selectEmpDept = (deptId: string) => {
   });
 };
 const empChecked = (data: IListItem, checked: boolean) => {
-  // console.log("empCheck", data, checked);
-  if (checked) {
-    let index = tagsRef.value.findIndex(
-      (x) => x.id == data.id && x.type == TagType.Employee
-    );
-    if (index == undefined || index == -1) {
-      tagsRef.value.push({
-        id: data.id,
-        label: data.label,
-        type: TagType.Employee,
-        data: data.data,
-      });
+  //  console.log("empCheck", data, checked);
+  if (props.multiple) {
+    if (checked) {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Employee
+      );
+      if (index == undefined || index == -1) {
+        tagsRef.value.push({
+          id: data.id,
+          code: data.code,
+          label: data.label,
+          type: TagType.Employee,
+          data: data.data,
+        });
+      }
+    } else {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Employee
+      );
+      //  console.log("index", index, tagsRef);
+      if (index && index > -1) tagsRef.value.splice(index, 1);
     }
-  } else {
-    let index = tagsRef.value.findIndex(
-      (x) => x.id == data.id && x.type == TagType.Employee
-    );
-    // console.log("index", index, tagsRef);
-    if (index && index > -1) tagsRef.value.splice(index, 1);
-  }
 
-  emit("update:modelValue", tagsRef.value);
+    emit("update:modelValue", tagsRef.value);
+  } else {
+    if (checked) {
+      // 直接创建新数组，保留非员工标签，替换为新的员工标签
+      const nonEmployeeTags = tagsRef.value.filter(x => x.type != TagType.Employee);
+      tagsRef.value = [
+        ...nonEmployeeTags,
+        {
+          id: data.id,
+          code: data.code,
+          label: data.label,
+          type: TagType.Employee,
+          data: data.data,
+        }
+      ];
+    } else {
+      // 只移除当前员工标签
+      const index = tagsRef.value.findIndex(x => x.id == data.id && x.type == TagType.Employee);
+      if (index > -1) {
+        tagsRef.value = [...tagsRef.value.slice(0, index), ...tagsRef.value.slice(index + 1)];
+      }
+    }
+    emit("update:modelValue", tagsRef.value);
+  }
 };
 const empCheckAll = (checked: boolean) => {
   if (checked) {
@@ -242,6 +408,40 @@ const empCheckAll = (checked: boolean) => {
     let indicesToRemove: number[] = [];
     tagsRef.value.forEach((item, index) => {
       if (item.type == TagType.Employee) {
+        indicesToRemove.splice(0, 0, index);
+      }
+    });
+
+    indicesToRemove.forEach((index) => {
+      tagsRef.value.splice(index, 1);
+    });
+  }
+
+  emit("update:modelValue", tagsRef.value);
+};
+
+const curEmpCheckAll = (checked: boolean) => {
+  if (checked) {
+    //全新增
+    curEmpData.value.forEach((data) => {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Employee
+      );
+      if (index == undefined || index == -1) {
+        tagsRef.value.push({
+          id: data.id,
+          label: data.label,
+          type: TagType.Employee,
+          data: data.data,
+        });
+      }
+    });
+  } else {
+    let indicesToRemove: number[] = [];
+    tagsRef.value.forEach((item, index) => {
+      if (item.type == TagType.Employee &&
+        curEmpData.value.find(x => x.id == item.id)
+      ) {
         indicesToRemove.splice(0, 0, index);
       }
     });
@@ -283,13 +483,54 @@ const roleNodeChecked = (data: ITreeNode, checked: boolean) => {
 const removeTag = (tag: ISelectedTag) => {
   //@ts-ignore
   if (tag.type == TagType.Department) {
-    deptTree.value!.setChecked(tag.id, false, orgCascade.value);
+    if (deptTree.value)
+      deptTree.value.setChecked(tag.id, false, orgCascade.value);
+    else
+      if (curDeptTree.value)
+        curDeptTree.value.setChecked(tag.id, false, false);
   }
   else if (tag.type == TagType.Role) {
-    roleTree.value!.setChecked(tag.id, false, false);
+    if (roleTree.value)
+      roleTree.value.setChecked(tag.id, false, false);
   }
   else if (tag.type == TagType.Employee) {
     selectedEmps.value = selectedEmps.value?.filter((x) => x != tag.id);
   }
 };
+
+// 处理节点点击事件，实现点击整行选中/取消选中
+const handleNodeClick = (node: any, data: ITreeNode, filterFn: (value: string, data: any) => boolean, isRole: boolean) => {
+  // 检查是否禁用
+  if (!filterFn(keyword.value, data)) {
+    return;
+  }
+
+  // 根据当前选中状态切换
+  const newCheckedState = !node.checked;
+  
+  if (isRole) {
+    // 角色选择
+    if (roleTree.value) {
+      roleTree.value.setChecked(node, newCheckedState, false);
+    }
+  } else {
+    // 部门选择
+    if (deptTree.value) {
+      deptTree.value.setChecked(node, newCheckedState, orgCascade.value);
+    } else if (curDeptTree.value) {
+      curDeptTree.value.setChecked(node, newCheckedState, false);
+    }
+  }
+};
 </script>
+<style scoped>
+/* 隐藏标签栏 */
+:deep(.hide-tabs-header .el-tabs__header) {
+  display: none;
+}
+
+:deep(.hide-tabs-header .el-tabs__content) {
+  margin-top: 0 !important;
+  border: none !important;
+}
+</style>

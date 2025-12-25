@@ -38,75 +38,155 @@
     </el-row>
     <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false">
-      </DataFilter>
+      <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
     </el-popover>
     <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
+    <member-select-dialog v-model="showMemberDialog" :show-tabs="MemberTabs.Employee" destroy-on-close
+      @ok="finishSelect" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
 import { Department, Employee, FieldType, Role } from "@eimsnext/models";
-import { SortDirection, employeeService } from "@eimsnext/services";
+import { SortDirection, employeeService, roleService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem } from "@eimsnext/components";
-import { IConditionList, toODataQuery } from "@/components/ConditionList/type";
-import { IFieldSortList } from "@/components/FieldSortList/type";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm, MemberTabs } from "@eimsnext/components";
 
 defineOptions({
   name: "RoleManager",
   inheritAttrs: false,
 });
 
-const selectedEmp = ref<Employee>();
-const showAddEditDialog = ref(false);
+const showMemberDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
 const showSort = ref(false);
-const sortList = ref<IFieldSortList>({ items: [{ field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input }, sort: SortDirection.Asc }] });
+const sortList = ref<IFieldSortList>({
+  items: [
+    {
+      field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input },
+      sort: SortDirection.Asc,
+    },
+  ],
+});
 
 const filterBtnRef = ref();
 const sortBtnRef = ref();
-const checkedDatas = ref<any[]>([])
-const pageNum = ref(1)
-const pageSize = ref(20)
+const checkedDatas = ref<any[]>([]);
+const pageNum = ref(1);
+const pageSize = ref(20);
 
 const leftBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "添加", type: "success", command: "add", icon: "el-icon-plus", onCommand: () => { showAddEditDialog.value = true; } } },
-  { type: "button", config: { text: "移除", type: "danger", command: "delete", icon: "el-icon-delete", disabled: true } },
+  {
+    type: "button",
+    config: {
+      text: "添加",
+      type: "success",
+      command: "add",
+      icon: "el-icon-plus",
+      onCommand: () => {
+        showMemberDialog.value = true;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "移除",
+      type: "danger",
+      command: "delete",
+      icon: "el-icon-delete",
+      disabled: true,
+      onCommand: async () => {
+        if (checkedDatas.value.length > 0) {
+          var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
+          if (confirm) {
+            await roleService.removeEmps(roleId.value, checkedDatas.value.map(x => x.id))
+              .then(() => {
+                handleQuery()
+              })
+          }
+        }
+      }
+    },
+  },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
   // { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
-])
+]);
 
 const rightBars = ref<ToolbarItem[]>([
-  { type: "button", config: { text: "筛选", class: "data-filter", command: "filter", icon: "el-icon-filter", onCommand: (cmd: string, e: MouseEvent) => { filterBtnRef.value = e.currentTarget, showSort.value = false; showFilter.value = !showFilter.value; } } },
-  { type: "button", config: { text: "排序", class: "data-filter", command: "sort", icon: "el-icon-sort", onCommand: (cmd: string, e: MouseEvent) => { sortBtnRef.value = e.currentTarget, showFilter.value = false; showSort.value = !showSort.value; } } },
-  { type: "button", config: { text: "刷新", class: "data-filter", command: "refresh", icon: "el-icon-refresh", onCommand: () => { handleQuery() } } }
-])
+  {
+    type: "button",
+    config: {
+      text: "筛选",
+      class: "data-filter",
+      command: "filter",
+      icon: "el-icon-filter",
+      onCommand: (cmd: string, e: MouseEvent) => {
+        ((filterBtnRef.value = e.currentTarget), (showSort.value = false));
+        showFilter.value = !showFilter.value;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "排序",
+      class: "data-filter",
+      command: "sort",
+      icon: "el-icon-sort",
+      onCommand: (cmd: string, e: MouseEvent) => {
+        ((sortBtnRef.value = e.currentTarget), (showFilter.value = false));
+        showSort.value = !showSort.value;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "刷新",
+      class: "data-filter",
+      command: "refresh",
+      icon: "el-icon-refresh",
+      onCommand: () => {
+        handleQuery();
+      },
+    },
+  },
+]);
 
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
   switch (cmd) {
     case "delete":
       {
         if (checkedDatas.value.length > 0) {
-          showDeleteConfirmDialog.value = true
+          showDeleteConfirmDialog.value = true;
         }
       }
       break;
   }
-}
+};
+
+const finishSelect = (tags: ISelectedTag[]) => {
+  //   console.log("sel tags", tags);
+  if (tags.length > 0) {
+    roleService.addEmps(roleId.value, tags.map(x => x.id)).then(() => handleQuery())
+  }
+
+  showMemberDialog.value = false;
+};
 
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
   showFilter.value = false;
   // console.log("condList", filter);
 
-  updateQueryParams()
+  updateQueryParams();
   handleQuery();
 };
 
@@ -115,50 +195,65 @@ const setSort = (sort: IFieldSortList) => {
   showSort.value = false;
   // console.log("sortList", sort);
 
-  updateQueryParams()
+  updateQueryParams();
   handleQuery();
 };
 
 const updateQueryParams = () => {
-  let roleFilter = undefined;
-  // if (deptId.value) {
-  //   deptFilter = { departmentId: { eq: deptId.value } }
-  // }
-  queryParams.value = toODataQuery(condList.value, sortList.value, (pageNum.value - 1) * pageSize.value, pageSize.value, roleFilter)
-  queryParams.value.expand = "department"
+  let statusFilter = { status: { eq: 0 } };
+  let preFilter: any = statusFilter;
+  if (roleId.value) {
+    preFilter = {
+      and: [statusFilter, `roles/any(r: r/roleId eq '${roleId.value}')`],
+    };
+  }
 
-  // console.log("queryParams list", queryParams.value);
-}
+  queryParams.value = toODataQuery(
+    condList.value,
+    sortList.value,
+    (pageNum.value - 1) * pageSize.value,
+    pageSize.value,
+    preFilter
+  );
+  queryParams.value.expand = "department";
+
+  console.log("queryParams filter", queryParams.value.filter);
+};
 
 const queryParams = ref<ODataQuery<Employee>>({
   skip: 0,
-  top: pageSize.value
+  top: pageSize.value,
 });
 
 const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
-const roleId = ref("")
+const roleId = ref("");
 
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
   pageSize.value = pSize;
 
   updateQueryParams();
-  loadData()
-}
+  loadData();
+};
 const handleRoleQuery = (role?: Role) => {
-  roleId.value = role?.id ?? ""
+  roleId.value = role?.id ?? "";
 
-  updateQueryParams()
-  handleQuery()
-}
+  updateQueryParams();
+  handleQuery();
+};
 // 查询
 const handleQuery = () => {
+  if (!roleId.value) {
+    totalRef.value = 0;
+    dataRef.value = []
+    return
+  }
   loading.value = true;
 
-  loadCount()
-  loadData()
+  loadCount();
+  loadData();
 };
 
 const loadCount = () => {
@@ -177,12 +272,14 @@ const loadData = () => {
     .then((res: Employee[]) => {
       dataRef.value = res;
     })
-    .finally(() => loading.value = false);
+    .finally(() => (loading.value = false));
 };
 
 // 选中项发生变化
 const handleSelectionChange = (selection: any[]) => {
   checkedDatas.value = selection;
+  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
+    checkedDatas.value.length == 0;
 };
 
 const showDetails = (row: FormData, column: any) => {
@@ -194,39 +291,6 @@ const showDetails = (row: FormData, column: any) => {
   //   selectedData.value = row
   //   showDetailsDialog.value = true
   // }
-}
-
-// 重置密码
-// function hancleResetPassword(row: any) {
-//   ElMessageBox.prompt("请输入用户【" + row.username + "】的新密码", "重置密码", {
-//     confirmButtonText: "确定",
-//     cancelButtonText: "取消",
-//   }).then(
-//     ({ value }) => {
-//       if (!value || value.length < 6) {
-//         ElMessage.warning("密码至少需要6位字符，请重新输入");
-//         return false;
-//       }
-//       UserAPI.resetPassword(row.id, value).then(() => {
-//         ElMessage.success("密码重置成功，新密码是：" + value);
-//       });
-//     },
-//     () => {
-//       ElMessage.info("已取消重置密码");
-//     }
-//   );
-// }
-
-const handleSaved = (data: Employee) => {
-  // showAddEditDialog.value = false;
-  // handleQuery()
-};
-
-const execDelete = async () => {
-  // await employeeService.delete("batch", { keys: checkedDatas.value.map(x => x.id) })
-  //   .then(() => {
-  //     handleQuery()
-  //   })
 };
 
 onMounted(() => {

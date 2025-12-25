@@ -6,21 +6,19 @@ import {
   HttpInterceptors,
   type HttpRequestConfig,
 } from "@eimsnext/utils";
-import JlPlus from "@eimsnext/components";
+import EtPlus from "@eimsnext/components";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import "@eimsnext/components/dist/index.css";
-import { createPinia } from "pinia";
 import { AxiosHeaders } from "axios";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import { setupStore, useUserStore } from "@eimsnext/store";
 
 // console.log(JlPlus);
 const app = createApp(App);
-app.use(createPinia());
 
 //@ts-ignore
-appSetting.merge(window.appSetting);
+if (window.appSetting) appSetting.merge(window.appSetting);
 
 let interceptors = new HttpInterceptors();
 interceptors.errorHandler = (msg: any) => {
@@ -41,7 +39,7 @@ await useUserStore().login({
 });
 
 app.use(ElementPlus);
-app.use(JlPlus);
+app.use(EtPlus);
 
 // 注册所有图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

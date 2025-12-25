@@ -55,7 +55,7 @@
                             </div>
                         </el-tooltip>
                     </el-aside>
-                    <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '266px'">
+                    <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '250px'">
                         <AiChat v-if="activeModule === 'ai'"></AiChat>
                         <LanguageConfig v-if="activeModule === 'language'"></LanguageConfig>
                         <JsonPreview v-if="activeModule === 'json'"></JsonPreview>
@@ -213,7 +213,7 @@
                         <el-header class="_fc-m-tools" height="40">
                             <div class="_fc-m-tools-l">
                                 <template v-if="!inputForm.state">
-                                    <template v-if="getConfig('showDevice') !== false">
+                                    <!-- <template v-if="getConfig('showDevice') !== false">
                                         <div class="devices">
                                             <i class="fc-icon icon-pc" :class="{ active: device === 'pc' }"
                                                 @click="setDevice('pc')"></i>
@@ -223,7 +223,7 @@
                                                 @click="setDevice('mobile')"></i>
                                         </div>
                                         <div class="line"></div>
-                                    </template>
+                                    </template> -->
                                     <template v-if="getConfig('showQuickLayout') !== false">
                                         <QuickLayout></QuickLayout>
                                         <div class="line"></div>
@@ -241,7 +241,7 @@
                             <div class="_fc-m-tools-r">
                                 <template v-if="!inputForm.state">
                                     <slot name="handle"></slot>
-                                    <el-button v-if="getConfig('showSaveBtn', false)" type="success" plain size="small"
+                                    <!-- <el-button v-if="getConfig('showSaveBtn', false)" type="success" plain size="small"
                                         @click="handleSave"><i class="fc-icon icon-save"></i> {{
                                             t('props.save')
                                         }}
@@ -250,13 +250,14 @@
                                         size="small" @click="openPreview"><i class="fc-icon icon-preview"></i> {{
                                             t('props.preview')
                                         }}
-                                    </el-button>
+                                    </el-button> -->
                                     <el-popconfirm :title="t('designer.clearWarn')" width="200px"
                                         :confirm-button-text="t('props.clear')" :cancel-button-text="t('props.cancel')"
                                         @confirm="clearDragRule">
                                         <template #reference>
-                                            <el-button type="danger" plain size="small"><i
-                                                    class="fc-icon icon-delete"></i>{{ t('props.clear') }}
+                                            <el-button size="small" class="btn-delete" style="border:none"><i
+                                                    class="fc-icon icon-delete"></i>{{
+                                                        t('props.clear') }}
                                             </el-button>
                                         </template>
                                     </el-popconfirm>
@@ -330,7 +331,7 @@
                                     :class="{ active: activeTab === 'form' }" @click="activeTab = 'form'">{{
                                         t('designer.form') }}
                                 </div>
-                                <ToolsBar v-if="activeTab === 'props'"></ToolsBar>
+                                <!-- <ToolsBar v-if="activeTab === 'props'"></ToolsBar> -->
                             </el-header>
                             <el-main class="_fc-r-tab-form" v-show="activeTab === 'form'"
                                 v-if="!config || config.showFormConfig !== false">
@@ -350,11 +351,11 @@
                             </el-main>
                             <el-main class="_fc-r-tab-props" v-show="activeTab === 'props'"
                                 :key="activeRule ? activeRule._fc_id : (customForm.config ? customForm.key : '')">
-                                <template
-                                    v-if="activeRule || (customForm.config && (customForm.config.name || customForm.config.label))">
-                                    <p class="_fc-r-title">{{ t('designer.type') }}</p>
-                                    <TypeSelect></TypeSelect>
-                                    <!-- <template
+                                <!-- <template
+                                    v-if="activeRule || (customForm.config && (customForm.config.name || customForm.config.label))"> -->
+                                <!-- <p class="_fc-r-title">{{ t('designer.type') }}</p>
+                                    <TypeSelect></TypeSelect> -->
+                                <!-- <template
                                         v-if="(activeRule && activeRule.name && config.showComponentName !== false)">
                                         <p class="_fc-r-title">
                                             <Warning :tooltip="t('warning.name')">
@@ -366,21 +367,30 @@
                                             <template #suffix>
                                                 <i class="fc-icon icon-group" @click="copyName"></i>
                                             </template>
-                                            <template #append>
+            <template #append>
                                                 <i class="fc-icon icon-auto" @click="updateName"></i>
                                             </template>
-                                        </el-input>
-                                    </template> -->
-                                </template>
+            </el-input>
+            </template> -->
+                                <!-- </template>
                                 <template v-if="activeRuleChildren">
                                     <SubList></SubList>
-                                </template>
+                                </template> -->
                                 <div class="_fc-r-config" :style="{ 'grid-template-areas': configFormOrderStyle }">
                                     <div style="grid-area: base;">
-                                        <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
+                                        <!-- <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
                                             t('designer.rule')
-                                        }}
-                                        </ConfigTitle>
+                                            }}
+                                        </ConfigTitle> -->
+                                        <div style="display:flex;justify-content: space-between; margin-bottom: 10px;">
+                                            <div><span style="color:#eb5050">*</span><span class="_fc-field-title">{{
+                                                t('form.title')
+                                            }}</span></div>
+                                            <el-tag v-if="activeRule" type="success" effect="plain" disable-transitions>
+                                                {{ t('com.' + (activeRule._menu.name) + '.name') ||
+                                                    activeRule._menu.label }}
+                                            </el-tag> <!-- <TypeSelect></TypeSelect> -->
+                                        </div>
                                         <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api"
                                             :rule="baseForm.rule" :option="baseForm.options"
                                             :modelValue="baseForm.value" @change="baseChange">
@@ -485,9 +495,9 @@
                         <el-tabs class="_fd-preview-tabs" v-model="previewStatus">
                             <el-tab-pane :label="t('form.formMode')" name="form"></el-tab-pane>
                             <el-tab-pane :label="t('form.previewMode')" name="preview"></el-tab-pane>
-                            <el-tab-pane :label="t('form.componentMode')" name="component"></el-tab-pane>
+                            <!-- <el-tab-pane :label="t('form.componentMode')" name="component"></el-tab-pane>
                             <el-tab-pane :label="t('form.sfcMode')" name="sfc"
-                                v-if="previewDevice !== 'mobile'"></el-tab-pane>
+                                v-if="previewDevice !== 'mobile'"></el-tab-pane> -->
                         </el-tabs>
                         <div class="_fd-preview-device" v-if="previewStatus !== 'sfc' && !onlyPC">
                             <div :class="{ active: previewDevice === 'pc' }" @click="previewDevice = 'pc'"><i

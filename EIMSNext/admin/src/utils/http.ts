@@ -29,7 +29,7 @@ export default {
   install(app: App<Element>) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-expect-error
-    appSetting.merge(window.appSetting);
+    if (window.appSetting) appSetting.merge(window.appSetting);
     // console.log("final app setting", appSetting);
     const httpConfig = initHttpConfig();
     http.setConfig(httpConfig, httpConfig);

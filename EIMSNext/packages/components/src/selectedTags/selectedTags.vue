@@ -10,9 +10,9 @@
         v-for="tag in modelValue.filter((x) => x.type != TagType.None)"
         :key="tag.id"
         :closable="closable"
-        :color="getTagBgColor(tag)"
+        :class="{ 'error-tag': tag.error }"
         @close="removeTag(tag)"
-        @click.stop=""
+        @click.stop="tagClick(tag)"
       >
         <et-icon
           icon="el-icon-UserFilled"
@@ -22,6 +22,7 @@
         <el-text
           class="tag-label"
           :class="{ 'has-error': tag.error, 'no-padding': closable }"
+          :style="{ color: '#909399' }"
           >{{ tag.label }}</el-text
         >
       </el-tag>
@@ -59,21 +60,16 @@ const props = withDefaults(
 );
 
 const tagsRef = toRef(props.modelValue);
-
-const getTagBgColor = (tag: ISelectedTag) => {
-  if (tag.error) return "#fdeeee";
-  return "rgba(5,30,80,.04)";
-};
 const getIconColor = (tag: ISelectedTag) => {
   switch (tag.type) {
     case TagType.Employee:
-      return "#00b899";
+      return "#909399"; // 灰色图标，与选择前的样式一致
     default:
-      return "#00b899";
+      return "#909399"; // 灰色图标，与选择前的样式一致
   }
 };
 
-const emit = defineEmits(["update:modelValue", "tagRemoved", "editTag"]);
+const emit = defineEmits(["update:modelValue", "tagRemoved", "editTag", "tagClick"]);
 const removeTag = (tag: ISelectedTag) => {
   let index = tagsRef.value.indexOf(tag);
   tagsRef.value.splice(index, 1);
@@ -83,5 +79,8 @@ const removeTag = (tag: ISelectedTag) => {
 };
 const editTag = () => {
   if (props.editable) emit("editTag");
+};
+const tagClick = (tag: ISelectedTag) => {
+  emit("tagClick", tag);
 };
 </script>

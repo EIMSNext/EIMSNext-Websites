@@ -76,7 +76,6 @@ export function deepMerge<T = any>(src: any = {}, target: any = {}): T {
   return res;
 }
 
-import { Dictionary } from "./dictionary";
-import { uniqueId, uniqueId36 } from "./unique";
-
-export { Dictionary, uniqueId, uniqueId36 };
+export * from "./flagEnum";
+export * from "./dictionary";
+export * from "./unique";

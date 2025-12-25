@@ -1,7 +1,7 @@
 <template>
-    <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
-        :showNoSave="false" okText="确定" @ok="execDelete">
-        <div>数据删除后将不可恢复</div>
+    <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')"
+        :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
+        <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
     </EtConfirmDialog>
     <et-toolbar :left-group="leftBars" @command="toolbarHandler" class="dataview-bar"></et-toolbar>
     <FormView v-if="formData" :def="formDef" :data="formData" :isView="isView" :actions="actions" @draft="saveDraft"
@@ -13,11 +13,14 @@ defineOptions({
     name: "FormDataView",
 });
 
+import { ref, onBeforeMount } from "vue";
 import { FormData, FormContent, FormDataRequest, DataAction, FlowStatus } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
 import { MessageIcon, ToolbarItem } from "@eimsnext/components";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = withDefaults(
     defineProps<{
@@ -37,11 +40,11 @@ const usingWorkflow = ref(false)
 const formData = ref<FormData>();
 const showDeleteConfirmDialog = ref(false)
 
-const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "Edit", command: "edit", icon: "el-icon-edit" } }, { type: "button", config: { text: "Delete", command: "delete", icon: "el-icon-delete", disabled: false } }])
+const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "编辑", command: "edit", icon: "el-icon-edit" } }, { type: "button", config: { text: "删除", command: "delete", icon: "el-icon-delete", disabled: false } }])
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
     switch (cmd) {
         case 'edit':
-            actions.value = { draft: { text: "SaveDraft", visible: true }, submit: { text: "Submit", visible: true } }
+            actions.value = { draft: { text: "存为草稿", visible: true }, submit: { text: "提交", visible: true } }
             isView.value = false;
             break;
         case 'delete':
@@ -70,7 +73,12 @@ const saveDraft = (data: any) => {
         data: data,
     };
 
-    formDataService.post<FormData>(fdata).then((res) => {
+    // 根据是否有dataId判断是新增还是编辑，编辑时使用put方法
+    const request = props.dataId ?
+        formDataService.put<FormData>(props.dataId, fdata) :
+        formDataService.post<FormData>(fdata);
+
+    request.then((res) => {
         formData.value = res.data;
         emit("ok");
     });
@@ -84,7 +92,12 @@ const submitData = (data: any) => {
         data: data,
     };
 
-    formDataService.post<FormData>(fdata).then((res) => {
+    // 根据是否有dataId判断是新增还是编辑，编辑时使用put方法
+    const request = props.dataId ?
+        formDataService.put<FormData>(props.dataId, fdata) :
+        formDataService.post<FormData>(fdata);
+
+    request.then((res) => {
         formData.value = res.data;
         emit("ok");
     });

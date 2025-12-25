@@ -14,8 +14,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import ConditionList from "@/components/ConditionList/index.vue";
-import { IConditionList } from "@/components/ConditionList/type";
+import { IConditionList } from "@eimsnext/components";
 import { ClickOutside as vClickOutside } from "element-plus";
 
 defineOptions({

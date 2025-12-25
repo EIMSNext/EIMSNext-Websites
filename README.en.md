@@ -97,7 +97,15 @@ If you feel that our open source software is helpful to you, please scan the QR 
 
 ## Contribution Guidelines
 
-Pull requests and issues are welcome. Please follow the project’s code conventions and ensure new features are accompanied by appropriate tests.
+Welcome to contribute code and documentation. Please follow the steps below:
+1. Fork `https://gitee.com/eimsnext/EIMSNext-Websites`.
+2. Create a new branch.
+3. Submit changes.
+4. Create Pull Request。
+
+## Contact Information
+
+If you have any questions or suggestions, please submit an Issue or contact the project maintainer.
 
 ## License
 

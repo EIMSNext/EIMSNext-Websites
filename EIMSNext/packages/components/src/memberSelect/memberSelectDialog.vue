@@ -1,15 +1,8 @@
 <template>
-  <et-dialog
-    :model-value="modelValue"
-    class="member-select-dialog"
-    title="部门成员列表"
-    destroy-on-close
-    width="750px"
-    @cancel="cancel"
-    @ok="save"
-  >
+  <et-dialog :model-value="modelValue" class="member-select-dialog" title="部门成员列表" destroy-on-close width="750px"
+    @cancel="cancel" @ok="save">
     <div style="padding: 12px 20px">
-      <member-select v-model="tagsRef" :showCascade="showCascade" />
+      <member-select v-model="tagsRef" :showTabs="showTabs" :showCascade="showCascade" :multiple="multiple" />
     </div>
     <template #footer-left>
       <el-button @click="openLink">通讯录</el-button>
@@ -20,6 +13,7 @@
 import "./style/index.less";
 import { ref, reactive, onBeforeMount } from "vue";
 import { ISelectedTag, TagType } from "../selectedTags/type";
+import { MemberTabs } from "./type";
 
 defineOptions({
   name: "MemberSelectDialog",
@@ -29,10 +23,14 @@ const props = withDefaults(
   defineProps<{
     modelValue: boolean;
     tags: ISelectedTag[];
+    showTabs?: MemberTabs | number,
     showCascade?: boolean;
+    multiple?: boolean;
   }>(),
   {
+    showTabs: 7,
     showCascade: false,
+    multiple: true
   }
 );
 
@@ -49,7 +47,7 @@ onBeforeMount(() => {
 });
 
 const openLink = () => {
-  window.open("https://www.baidu.com", "_blank");
+  window.open(`${location.origin}/#/system/department`, "_blank");
 };
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);

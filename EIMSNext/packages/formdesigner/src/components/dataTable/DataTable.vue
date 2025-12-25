@@ -347,24 +347,94 @@ export default defineComponent({
                 return col.render(scope, h, resolveComponent, this.formCreateInject.api);
             } else if (col.format === 'tag') {
                 return h(resolveComponent('el-tag'), {disableTransitions: true}, () => [this.deepGet(scope.row, col.prop, '')]);
-            } else if (col.format === 'image') {
+            } else if (col.format === 'image' || col.label === '图片') {
+                // 直接解析图片数据，生成img标签
                 return h('div', {
                     class: '_fc-data-table-img-list'
                 }, (() => {
-                    let img = this.deepGet(scope.row, col.prop, '');
-                    img = (Array.isArray(img) ? img : [img]).filter(src => !!src);
-                    return img.map((src, i) => {
-                        return h(resolveComponent('el-image'), {
-                            src: src,
-                            previewSrcList: img,
-                            previewTeleported: true,
-                            initialIndex: i,
-                            fit: 'cover'
-                        })
-                    })
-                })())
+                    // 从scope.row中获取所有可能的图片数据
+                    let imgData = [];
+                    
+                    // 1. 首先尝试从col.prop指定的路径获取
+                    let imgFromProp = this.deepGet(scope.row, col.prop, '');
+                    if (imgFromProp) {
+                        imgData = Array.isArray(imgFromProp) ? imgFromProp : [imgFromProp];
+                    } 
+                    // 2. 如果没有，尝试遍历整个data对象查找图片数据
+                    else if (scope.row.data) {
+                        const data = scope.row.data;
+                        for (const key in data) {
+                            if (Array.isArray(data[key]) && data[key].length > 0) {
+                                const firstItem = data[key][0];
+                                if (typeof firstItem === 'object' && firstItem !== null) {
+                                    // 检查是否包含图片相关属性
+                                    if (firstItem.url || firstItem.src || firstItem.name) {
+                                        imgData = data[key];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 处理图片数据，生成img标签
+                    const imgs = imgData.map((item, index) => {
+                        let imgUrl = '';
+                        
+                        // 提取图片URL
+                        if (typeof item === 'object' && item !== null) {
+                            // 如果是对象，提取url或src属性作为图片地址
+                            imgUrl = item.url || item.src || '';
+                            // 将反斜杠转换为正斜杠
+                            imgUrl = imgUrl.replace(/\\/g, '/');
+                        } else if (typeof item === 'string') {
+                            // 如果是字符串，直接作为图片地址
+                            imgUrl = item.replace(/\\/g, '/');
+                        }
+                        
+                        // 只有URL不为空时才生成img标签
+                        if (imgUrl) {
+                            return h('img', {
+                                src: imgUrl,
+                                style: {
+                                    maxWidth: '150px',
+                                    height: '60px',
+                                    objectFit: 'cover',
+                                    marginRight: '4px',
+                                    cursor: 'pointer',
+                                    borderRadius: '4px',
+                                    border: '1px solid #dcdfe6'
+                                }
+                            });
+                        }
+                        return null;
+                    }).filter(Boolean);
+                    
+                    // 如果没有生成图片，显示占位符
+                    if (imgs.length === 0) {
+                        return h('span', { style: { color: '#909399', fontSize: '12px' } }, '暂无图片');
+                    }
+                    
+                    return imgs;
+                })());
             } else {
-                return '' + this.deepGet(scope.row, col.prop, '')
+                const value = this.deepGet(scope.row, col.prop, '');
+                // 处理对象类型，避免显示[object Object]
+                if (typeof value === 'object' && value !== null) {
+                    if (Array.isArray(value)) {
+                        // 处理对象数组，提取name或其他有意义的属性
+                        return value.map(item => {
+                            if (typeof item === 'object' && item !== null) {
+                                return item.name || item.label || '';
+                            }
+                            return item;
+                        }).filter(item => !!item).join(', ');
+                    } else {
+                        // 处理单个对象，提取name或label属性
+                        return value.name || value.label || '';
+                    }
+                }
+                return '' + value;
             }
         },
     },
