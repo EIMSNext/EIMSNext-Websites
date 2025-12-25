@@ -10,8 +10,7 @@ import en_EL from "element-plus/es/locale/lang/en";
 //@ts-expect-error (the desinger is js lib)
 import { ZhCn as zhCn_Des, En as en_Des } from "@eimsnext/form-designer";
 // 本地语言包
-import en_App from "@/lang/en";
-import zhCn_App from "@/lang/zh-cn";
+import { ZhCn as zhCn_App, En as en_App } from "@eimsnext/locale";
 
 const locales = {
   "zh-CN": {
@@ -90,6 +89,7 @@ export const useSystemStore = defineStore("system", () => {
     sidebar,
     language,
     locale,
+    locales,
     size,
     changeSize,
     changeLanguage,

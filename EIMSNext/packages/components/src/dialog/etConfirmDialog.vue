@@ -1,24 +1,12 @@
 <template>
-  <el-dialog
-    class="et-confirm-dialog"
-    ref="ori"
-    :model-value="modelValue"
-    v-bind="attrs"
-    :show-close="false"
-    :append-to-body="true"
-    :destroy-on-close="true"
-    @close="cancel"
-  >
+  <el-dialog class="et-confirm-dialog" ref="ori" :model-value="modelValue" v-bind="attrs" :show-close="false"
+    :append-to-body="true" :destroy-on-close="true" @close="cancel">
     <div class="confirm-content">
-      <el-icon
-        class="msg-icon"
-        :class="{
-          error: icon == MessageIcon.Error,
-          warning: icon == MessageIcon.Warning,
-          info: icon == MessageIcon.Info || icon == MessageIcon.Question,
-        }"
-        :color="iconColor"
-      >
+      <el-icon class="msg-icon" :class="{
+        error: icon == MessageIcon.Error,
+        warning: icon == MessageIcon.Warning,
+        info: icon == MessageIcon.Info || icon == MessageIcon.Question,
+      }" :color="iconColor">
         <InfoFilled v-if="icon == MessageIcon.Info" />
         <QuestionFilled v-if="icon == MessageIcon.Question" />
         <WarningFilled v-if="icon == MessageIcon.Warning" />
@@ -65,6 +53,8 @@ import {
   WarningFilled,
   CircleCloseFilled,
 } from "@element-plus/icons-vue";
+import { useLocale } from "element-plus";
+const { t } = useLocale()
 
 const attrs = useAttrs();
 // const ori = ref(null);
@@ -88,12 +78,12 @@ const props = withDefaults(
   }>(),
   {
     icon: MessageIcon.Question,
-    title: "数据有修改，是否保存？",
+    title: t("common.message.editConfirm_Title"),
     showCancel: true,
     showNoSave: true,
-    cancelText: "取消",
-    noSaveText: "不保存",
-    okText: "保存并继续",
+    cancelText: t("common.cancel"),
+    noSaveText: t("common.noSave"),
+    okText: t("common.saveAndContinue"),
   }
 );
 const getIconClass = computed(() => {

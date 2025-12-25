@@ -1,8 +1,44 @@
 export default {
+  common: {
+    ok: "OK",
+    cancel: "Cancel",
+    addNew: "AddNew",
+    edit: "Edit",
+    delete: "Delete",
+    submit: "Submit",
+    saveDraft: "Save Draft",
+    reset: "Reset",
+    clear: "Clear",
+    save: "Save",
+    noSave: "No Save",
+    saveAndContinue: "Save And Continue",
+    filter: "Filter",
+    sort: "Sort",
+    fields: "Field",
+    refresh: "Refresh",
+    flowStatus: {
+      draft: "Draft",
+      approving: "Approving",
+      approved: "Approved",
+      rejected: "Rejected",
+      discarded: "Discarded",
+      suspended: "Suspended",
+    },
+    message: {
+      deleteConfirm_Title:
+        "Are you sure you want to delete the selected record(s)?",
+      deleteConfirm_Content:
+        "{0} record(s) selected. The deleted data cannot be recovered after deletion.",
+      deleteConfirm_Content2:
+        "The deleted data cannot be recovered after deletion.",
+      editConfirm_Title: "Do you want to save the change?",
+    },
+  },
+  admin: {},
   // 菜单国际化
   route: {
     dashboard: "Dashboard",
-    document: "Document",
+    system: "System Settings",
   },
   // 登录页面国际化
   login: {
