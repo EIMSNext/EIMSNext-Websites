@@ -34,6 +34,7 @@ export default {
       editConfirm_Title: "Do you want to save the change?",
     },
   },
+  comp: {},
   admin: {},
   // 菜单国际化
   route: {
@@ -42,6 +43,7 @@ export default {
   },
   // 登录页面国际化
   login: {
+    loginTitle:"Log in",
     username: "Username",
     password: "Password",
     login: "Login",
