@@ -12,10 +12,10 @@
 
     <!-- tag标签操作菜单 -->
     <ul v-show="contentMenuVisible" class="contextmenu" :style="{ left: left + 'px', top: top + 'px' }">
-      <li @click="refreshSelectedTag(selectedTag)">
+      <!-- <li @click="refreshSelectedTag(selectedTag)">
         <et-icon icon="refresh" />
         刷新
-      </li>
+      </li> -->
       <li v-if="!isAffix(selectedTag) || isClosable(selectedTag)" @click="closeSelectedTag(selectedTag)">
         <et-icon icon="close" />
         关闭
@@ -202,7 +202,7 @@ function refreshSelectedTag(view: TagView) {
   tagsViewStore.delCachedView(view);
   const { fullPath } = view;
   nextTick(() => {
-    router.replace("/redirect" + fullPath);
+    router.replace(fullPath);
   });
 }
 
@@ -237,6 +237,7 @@ function closeOtherTags() {
 }
 
 function closeAllTags(view: TagView) {
+  console.log("close all")
   tagsViewStore.delAllViews().then((res: any) => {
     tagsViewStore.toLastView(res.visitedViews, view);
   });
@@ -263,8 +264,9 @@ function openContentMenu(tag: TagView, e: MouseEvent) {
   // if (layout.value === "mix") {
   //   top.value = e.clientY - 50;
   // } else {
-  top.value = e.clientY;
+  // top.value = e.clientY;
   // }
+  top.value = 37;
 
   contentMenuVisible.value = true;
   selectedTag.value = tag;
@@ -347,6 +349,7 @@ onMounted(() => {
     max-width: 160px;
     text-overflow: ellipsis;
     white-space: nowrap;
+    border-left-color: var(--el-border-color-light);
 
     &::before {
       content: '';
@@ -361,8 +364,6 @@ onMounted(() => {
 
     &:hover {
       color: var(--el-color-primary);
-      border-color: var(--el-border-color-hover);
-      background-color: var(--el-fill-color-light);
       transform: translateY(-1px);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
@@ -391,7 +392,7 @@ onMounted(() => {
 
       &:hover {
         color: #fff;
-        background-color: var(--el-color-primary);
+        // background-color: var(--el-color-primary);
         opacity: 1;
         transform: scale(1.1);
       }
@@ -399,8 +400,8 @@ onMounted(() => {
 
     &.active {
       color: var(--el-color-primary);
-      background-color: #fff;
-      border-color: var(--el-border-color-light) var(--el-border-color-light) transparent;
+      // background-color: #fff;
+      // border-color: var(--el-border-color-light) var(--el-border-color-light) transparent;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       font-weight: 500;
 
@@ -410,8 +411,8 @@ onMounted(() => {
 
       &:hover {
         color: var(--el-color-primary);
-        border-color: var(--el-border-color-light) var(--el-border-color-light) transparent;
-        background-color: #fff;
+        // border-color: var(--el-border-color-light) var(--el-border-color-light) transparent;
+        // background-color: #fff;
         transform: none;
       }
 
@@ -510,8 +511,15 @@ onMounted(() => {
 
 // 动画效果增强
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .contextmenu {
