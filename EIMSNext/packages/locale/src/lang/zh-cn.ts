@@ -1,3 +1,5 @@
+import { reject } from "lodash";
+
 export default {
   //通用
   common: {
@@ -6,8 +8,7 @@ export default {
     addNew: "新增",
     edit: "编辑",
     delete: "删除",
-    submit: "提交",
-    saveDraft: "存为草稿",
+    deleteAll: "删除全部",
     reset: "重置",
     clear: "清空",
     save: "保存",
@@ -24,6 +25,12 @@ export default {
       rejected: "已驳回",
       discarded: "已废弃",
       suspended: "已挂起",
+    },
+    wfProcess: {
+      submit: "提交",
+      saveDraft: "存为草稿",
+      approve: "同意",
+      reject: "驳回",
     },
     message: {
       deleteConfirm_Title: "你确定要删除所选数据吗？",
@@ -43,7 +50,7 @@ export default {
   },
   // 登录页面国际化
   login: {
-    loginTitle:"账号登录",
+    loginTitle: "账号登录",
     username: "手机号/邮箱",
     password: "密码",
     login: "登录",

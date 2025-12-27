@@ -5,8 +5,7 @@ export default {
     addNew: "AddNew",
     edit: "Edit",
     delete: "Delete",
-    submit: "Submit",
-    saveDraft: "Save Draft",
+    deleteAll: "Delete All",
     reset: "Reset",
     clear: "Clear",
     save: "Save",
@@ -23,6 +22,12 @@ export default {
       rejected: "Rejected",
       discarded: "Discarded",
       suspended: "Suspended",
+    },
+    wfProcess: {
+      submit: "Submit",
+      saveDraft: "Save Draft",
+      approve: "Approve",
+      reject: "Reject",
     },
     message: {
       deleteConfirm_Title:
@@ -43,7 +48,7 @@ export default {
   },
   // 登录页面国际化
   login: {
-    loginTitle:"Log in",
+    loginTitle: "Log in",
     username: "Username",
     password: "Password",
     login: "Login",
