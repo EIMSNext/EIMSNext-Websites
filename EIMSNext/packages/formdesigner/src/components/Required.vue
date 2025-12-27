@@ -1,19 +1,20 @@
 <template>
     <div class="_fd-required">
-        <el-switch v-model="required"></el-switch>
+        <el-checkbox v-model="required">{{ t('validate.required') }}</el-checkbox>
+        <!-- <el-switch v-model="required"></el-switch>
         <LanguageInput v-model="requiredMsg" v-if="required"
-                        :placeholder="t('validate.requiredPlaceholder')"></LanguageInput>
+                        :placeholder="t('validate.requiredPlaceholder')"></LanguageInput> -->
     </div>
 </template>
 
 <script>
 import { is } from '@eimsnext/form-render-core';
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 import LanguageInput from './language/LanguageInput.vue';
 
 export default defineComponent({
     name: 'Required',
-    components: {LanguageInput},
+    components: { LanguageInput },
     emits: ['update:modelValue'],
     props: {
         modelValue: {}
@@ -60,16 +61,16 @@ export default defineComponent({
 
 <style>
 ._fd-required {
+    /* display: flex;
+    align-items: center;
+    width: 100%; */
     display: flex;
     align-items: center;
-    width: 100%;
+    cursor: pointer;
+    color: var(--fc-text-color-2);
 }
 
 ._fd-required .el-input {
     margin-left: 15px;
-}
-
-._fd-required .el-switch {
-    height: 28px;
 }
 </style>

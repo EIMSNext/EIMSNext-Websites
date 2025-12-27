@@ -44,14 +44,6 @@ export default {
       //   }),
       // },
       // {
-      //   type: "switch",
-      //   field: "required",
-      // },
-      // {
-      //   type: "switch",
-      //   field: "hidden",
-      // },
-      // {
       //   type: "input",
       //   field: "width",
       // },

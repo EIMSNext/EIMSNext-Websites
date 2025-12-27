@@ -211,7 +211,7 @@ export default {
         switchType: false, //禁止切换组件类型
         showStyleForm: false,
         showEventForm: false,
-        showValidateForm: false,
+        showValidateForm: true,
         formOptions: { info: { align: "left" } },
         varList: [
           {

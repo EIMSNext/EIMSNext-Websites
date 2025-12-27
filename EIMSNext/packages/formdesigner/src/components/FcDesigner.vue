@@ -40,13 +40,13 @@
                                 <i class="fc-icon icon-language"></i>
                             </div>
                         </el-tooltip>
-                        <el-tooltip v-if="getConfig('showJsonPreview', true)" effect="dark" content="JSON"
+                        <!-- <el-tooltip v-if="getConfig('showJsonPreview', true)" effect="dark" content="JSON"
                             placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'json' }"
                                 @click="activeModule = 'json'">
                                 <i class="fc-icon icon-script"></i>
                             </div>
-                        </el-tooltip>
+                        </el-tooltip> -->
                         <el-tooltip v-if="getConfig('showAi', true)" effect="dark" :content="t('ai.name')"
                             placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'ai' }"
@@ -58,7 +58,7 @@
                     <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '250px'">
                         <AiChat v-if="activeModule === 'ai'"></AiChat>
                         <LanguageConfig v-if="activeModule === 'language'"></LanguageConfig>
-                        <JsonPreview v-if="activeModule === 'json'"></JsonPreview>
+                        <!-- <JsonPreview v-if="activeModule === 'json'"></JsonPreview> -->
                         <el-container v-show="activeModule === 'global'">
                             <el-main>
                                 <div class="_fc-l-label">
@@ -407,12 +407,12 @@
                                         </DragForm>
                                     </div>
                                     <div style="grid-area: props;">
-                                        <!-- <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
+                                        <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
                                             t('designer.props') }}
-                                            <VariableConfig v-if="propsForm.variable"></VariableConfig>
+                                            <!-- <VariableConfig v-if="propsForm.variable"></VariableConfig>
                                             <PropsInput v-if="activeRule && getConfig('showCustomProps', true)">
-                                            </PropsInput>
-                                        </ConfigTitle> -->
+                                            </PropsInput> -->
+                                        </ConfigTitle>
                                         <DragForm v-show="propsForm.isShow" v-model:api="propsForm.api"
                                             :rule="propsForm.rule" :option="propsForm.options"
                                             :modelValue="propsForm.value" @change="propChange"
@@ -436,6 +436,25 @@
                                             v-model:api="customForm.api" :rule="customForm.rule"
                                             :option="customForm.options" :key="customForm.key"
                                             @change="customFormChange"></DragForm>
+
+                                        <!--隐藏-->
+                                        <div v-if="activeRule" class="_fd-checkbox-input">
+                                            <el-checkbox :modelValue="activeRule._hidden"
+                                                @update:modelValue="toolHidden(activeRule)">{{
+                                                    t('props.hide') }}</el-checkbox>
+                                        </div>
+                                    </div>
+                                    <div style="grid-area: validate;">
+                                        <template v-if="activeRule">
+                                            <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
+                                                t('designer.validate')
+                                            }}
+                                            </ConfigTitle>
+                                            <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api"
+                                                :rule="validateForm.rule" :option="validateForm.options"
+                                                :modelValue="validateForm.value" @change="validateChange"
+                                                :key="activeRule._fc_id"></DragForm>
+                                        </template>
                                     </div>
                                     <div style="grid-area: advanced;">
                                         <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
@@ -474,18 +493,6 @@
                                             :model-value="(activeRule && activeRule._on) || {}"
                                             @update:modelValue="changeEvent">
                                         </EventConfig>
-                                    </div>
-                                    <div style="grid-area: validate;">
-                                        <template v-if="activeRule">
-                                            <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
-                                                t('designer.validate')
-                                            }}
-                                            </ConfigTitle>
-                                            <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api"
-                                                :rule="validateForm.rule" :option="validateForm.options"
-                                                :modelValue="validateForm.value" @change="validateChange"
-                                                :key="activeRule._fc_id"></DragForm>
-                                        </template>
                                     </div>
                                 </div>
                             </el-main>
@@ -740,7 +747,7 @@ export default defineComponent({
             return null;
         });
         const configFormOrderStyle = computed(() => {
-            const def = ['base', 'props', 'advanced', 'slots', 'style', 'event', 'validate'];
+            const def = ['base', 'props', 'validate', 'advanced', 'slots', 'style', 'event'];
             let sort = configRef.value.configFormOrder ? [...configRef.value.configFormOrder] : [];
             let value = [];
             if (!sort.length) {
