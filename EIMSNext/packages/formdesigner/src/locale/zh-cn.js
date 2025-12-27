@@ -859,7 +859,7 @@ const ZhCn = {
           "切换当前活动面板，在手风琴模式下其类型是string，在其他模式下是array",
       },
       props: {
-        accordion: "是否手风琴模式",
+        accordion: "手风琴模式",
       },
     },
     elCollapseItem: {
@@ -867,7 +867,7 @@ const ZhCn = {
       props: {
         title: "面板标题",
         name: "唯一标志符",
-        disabled: "是否禁用",
+        disabled: "禁用",
       },
     },
     elDescriptions: {
@@ -908,9 +908,9 @@ const ZhCn = {
       name: "选项卡",
       props: {
         label: "选项卡标题",
-        disabled: "是否禁用",
+        disabled: "禁用",
         name: "选项卡的标识符",
-        lazy: "标签是否延迟渲染",
+        lazy: "标签延迟渲染",
       },
     },
     elTabs: {
@@ -924,9 +924,9 @@ const ZhCn = {
       },
       props: {
         type: "风格类型",
-        closable: "标签是否可关闭",
+        closable: "标签可关闭",
         tabPosition: "选项卡所在位置",
-        stretch: "标签的宽度是否自撑开",
+        stretch: "标签宽度自动撑开",
       },
     },
     elTag: {
@@ -936,7 +936,7 @@ const ZhCn = {
         type: "标签的类型",
         size: "标签的尺寸",
         effect: "标签的主题",
-        closable: "是否可关闭",
+        closable: "可关闭",
         disableTransitions: "是否禁用渐变动画",
         hit: "是否有边框描边",
         round: "是否为圆形",
@@ -1745,8 +1745,11 @@ const ZhCn = {
         withCredentials: "支持发送 cookie 凭证信息",
         accept: "接受上传的文件类型",
         autoUpload: "是否在选取文件后立即进行上传",
-        disabled: "是否禁用",
         limit: "最大允许上传个数",
+        required:"必填",
+        readonly: "只读",
+        disabled: "禁用",
+        hidden: "隐藏",
       },
     },
     fileupload: {
@@ -1775,8 +1778,11 @@ const ZhCn = {
         withCredentials: "支持发送 cookie 凭证信息",
         accept: "接受上传的文件类型",
         autoUpload: "是否在选取文件后立即进行上传",
-        disabled: "是否禁用",
         limit: "最大允许上传个数",
+        required:"必填",
+        readonly: "只读",
+        disabled: "禁用",
+        hidden: "隐藏",
       },
     },
     audioBox: {
