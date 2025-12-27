@@ -1,14 +1,14 @@
 <template>
   <AddEditApp v-if="showAddEditDialog" :edit="false" @cancel="showAddEditDialog = false" @ok="handleSaved"></AddEditApp>
-  <et-card title="我的应用">
+  <et-card :title="t('admin.myApp')">
     <template #action>
-      <el-button icon="plus" @click="createApp">创建新应用</el-button>
+      <el-button icon="plus" @click="createApp">{{ t("admin.newApp") }}</el-button>
     </template>
 
     <div class="content">
       <ul class="app-list">
         <li class="app-group">
-          <div class="group-name">其他</div>
+          <div class="group-name">{{ t("common.other") }}</div>
           <ul class="app-items-container">
             <el-space>
               <template v-for="app in appsRef">
@@ -31,11 +31,11 @@
                           <et-icon icon="el-icon-setting" size="large"></et-icon>
                         </template>
                         <el-menu class="app-menu">
-                          <el-menu-item class="app-menu-item">修改名称和图标</el-menu-item>
+                          <el-menu-item class="app-menu-item"> {{ t("admin.editNameAndIcon") }}</el-menu-item>
                           <!-- <el-menu-item class="app-menu-item">移动</el-menu-item>
                           <el-menu-item class="app-menu-item">复制</el-menu-item> -->
                           <el-menu-item class="app-menu-item app-remove" @click="handleDeleteClick(app)">
-                            删除
+                            {{ t("common.delete") }}
                           </el-menu-item>
                         </el-menu>
                       </el-popover>
@@ -58,6 +58,8 @@ import AddEditApp from "@/views/app/components/AddEditApp.vue";
 import { App } from "@eimsnext/models";
 import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n()
 
 const router = useRouter();
 const appStore = useAppStore();
@@ -150,16 +152,16 @@ const handleDeleteClick = (app: App) => {
 
           &:hover {
             .favorite-icon {
-              display: block;
+              visibility: visible
             }
 
             .setting-icon {
-              display: block;
+              visibility: visible
             }
           }
 
           .favorite-icon {
-            display: none;
+            display: block;
             left: 10px;
             top: 10px;
             color: #838892;
@@ -167,10 +169,11 @@ const handleDeleteClick = (app: App) => {
             font-size: 16px;
             line-height: 16px;
             position: absolute;
+            visibility: hidden;
           }
 
           .setting-icon {
-            display: none;
+            display: block;
             right: 10px;
             top: 10px;
             color: #838892;
@@ -178,6 +181,7 @@ const handleDeleteClick = (app: App) => {
             font-size: 16px;
             line-height: 16px;
             position: absolute;
+            visibility: hidden;
           }
         }
       }

@@ -18,6 +18,7 @@ export default {
     sort: "排序",
     fields: "字段",
     refresh: "刷新",
+    other: "其他",
     flowStatus: {
       draft: "草稿",
       approving: "审批中",
@@ -27,6 +28,10 @@ export default {
       suspended: "已挂起",
     },
     wfProcess: {
+      mytasks: "我的待办",
+      mystarted: "我发起的",
+      myapproved: "我审批的",
+      cctome: "抄送我的",
       submit: "提交",
       saveDraft: "存为草稿",
       approve: "同意",
@@ -42,10 +47,21 @@ export default {
   //组件库，com已被设计器占用
   comp: {},
   //主项目
-  admin: {},
+  admin: {
+    myApp: "我的应用",
+    newApp: "创建新应用",
+    editNameAndIcon: "修改名称和图标",
+    newForm: "创建普通表单",
+    newLedgerForm: "创建台账表单",
+    newFlowForm: "创建流程表单",
+    newDashboard: "创建仪表盘",
+    newGroup: "创建分组",
+    deleteFormConfirm_Title: '你确定要删除"{0}"吗？',
+    deleteFormConfirm_Content: "表单删除后将不可恢复，包括所有相关数据",
+  },
   // 菜单国际化
   route: {
-    dashboard: "首页",
+    workspace: "工作台",
     system: "系统设置",
   },
   // 登录页面国际化
@@ -74,7 +90,7 @@ export default {
   },
   // 导航栏国际化
   navbar: {
-    dashboard: "首页",
+    workspace: "工作台",
     logout: "注销登出",
     document: "项目文档",
     gitee: "项目地址",

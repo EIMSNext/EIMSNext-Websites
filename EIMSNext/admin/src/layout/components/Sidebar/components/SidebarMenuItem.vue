@@ -1,8 +1,8 @@
 <template>
   <!-- 删除确认对话框 -->
-  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除这个表单吗？" :icon="MessageIcon.Warning"
-    :showNoSave="false" okText="确定删除" @ok="handleDeleteConfirm">
-    <div>表单删除后将不可恢复，包括所有相关数据</div>
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('admin.deleteFormConfirm_Title', [selectedForm?.name])"
+    :icon="MessageIcon.Warning" :showNoSave="false" @ok="handleDeleteConfirm">
+    <div>{{ t("admin.deleteFormConfirm_Content") }}</div>
   </EtConfirmDialog>
   <form-edit v-if="showFormEditor" :formId="selectedFormId" :usingFlow="usingWorkflow" :isLedger="isLedger"
     @close="closeEditor" />
@@ -28,12 +28,13 @@
               <et-icon icon="el-icon-More" @click.prevent=""></et-icon>
               <template #dropdown>
                 <el-dropdown-menu style="min-width: 150px">
-                  <el-dropdown-item @click="editForm(item.meta?.id)">编辑</el-dropdown-item>
+                  <el-dropdown-item @click="editForm(item.meta?.id)">{{ t("common.edit") }}</el-dropdown-item>
                   <el-dropdown-item @click="editForm(item.meta?.id)">
-                    修改名称和图标
+                    {{ t("admin.editNameAndIcon") }}
                   </el-dropdown-item>
                   <el-divider style="margin: 3px 0" />
-                  <el-dropdown-item @click="deleteForm(item.meta?.id)">删除</el-dropdown-item>
+                  <el-dropdown-item @click="deleteForm(item.meta?.id)">{{ t("common.delete")
+                  }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -67,6 +68,8 @@ import { isExternal } from "@/utils";
 import { useContextStore, useFormStore } from "@eimsnext/store";
 import { FormDef } from "@eimsnext/models";
 import { MessageIcon } from "@eimsnext/components";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n()
 
 const props = defineProps({
   /**
@@ -99,6 +102,7 @@ const formStore = useFormStore();
 // 可见的唯一子节点
 const onlyOneChild = ref();
 const selectedFormId = ref("");
+const selectedForm = ref<FormDef>()
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
@@ -154,16 +158,21 @@ async function editForm(formId?: string) {
     let form = await formStore.get(formId);
     if (form) {
       selectedFormId.value = formId;
+      selectedForm.value = form
       usingWorkflow.value = form.usingWorkflow;
       isLedger.value = form.isLedger;
       showFormEditor.value = true;
     }
   }
 }
-function deleteForm(formId?: string) {
+async function deleteForm(formId?: string) {
   if (formId) {
-    selectedFormId.value = formId;
-    showDeleteConfirmDialog.value = true;
+    let form = await formStore.get(formId);
+    if (form) {
+      selectedFormId.value = formId;
+      selectedForm.value = form
+      showDeleteConfirmDialog.value = true;
+    }
   }
 }
 
