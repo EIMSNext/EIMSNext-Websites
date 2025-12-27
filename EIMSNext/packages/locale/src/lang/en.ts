@@ -5,8 +5,7 @@ export default {
     addNew: "AddNew",
     edit: "Edit",
     delete: "Delete",
-    submit: "Submit",
-    saveDraft: "Save Draft",
+    deleteAll: "Delete All",
     reset: "Reset",
     clear: "Clear",
     save: "Save",
@@ -16,6 +15,7 @@ export default {
     sort: "Sort",
     fields: "Field",
     refresh: "Refresh",
+    other: "Other",
     flowStatus: {
       draft: "Draft",
       approving: "Approving",
@@ -23,6 +23,16 @@ export default {
       rejected: "Rejected",
       discarded: "Discarded",
       suspended: "Suspended",
+    },
+    wfProcess: {
+      mytasks: "My Tasks",
+      mystarted: "My Initiated",
+      myapproved: "My Processed",
+      cctome: "CC Me",
+      submit: "Submit",
+      saveDraft: "Save Draft",
+      approve: "Approve",
+      reject: "Reject",
     },
     message: {
       deleteConfirm_Title:
@@ -35,15 +45,26 @@ export default {
     },
   },
   comp: {},
-  admin: {},
+  admin: {
+    myApp: "My Apps",
+    newApp: "New App",
+    editNameAndIcon: "Edit Name & Icon",
+    newForm: "New Form",
+    newLedgerForm: "New Ledger",
+    newFlowForm: "New Workflow Form",
+    newDashboard: "New Dashboard",
+    newGroup: "New Group",
+    deleteFormConfirm_Title: "Are you sure you want to delete {0}?",
+    deleteFormConfirm_Content: "If you delete it, the records will be cleared and cannot be restored.",
+  },
   // 菜单国际化
   route: {
-    dashboard: "Dashboard",
+    workspace: "Workspace",
     system: "System Settings",
   },
   // 登录页面国际化
   login: {
-    loginTitle:"Log in",
+    loginTitle: "Log in",
     username: "Username",
     password: "Password",
     login: "Login",
@@ -67,7 +88,7 @@ export default {
   },
   // 导航栏国际化
   navbar: {
-    dashboard: "Dashboard",
+    workspace: "Workspace",
     logout: "Logout",
     document: "Document",
     gitee: "Gitee",

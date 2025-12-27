@@ -1,8 +1,10 @@
 <template>
   <el-dropdown trigger="click" @command="handleLanguageChange">
-    <div style="display: inline-flex;">
-      <et-icon icon="language" :size="size" />
-      <span v-if="showLabel" class="ml-[5px]">{{ curLang.label }}</span>
+    <div>
+      <div style="display: inline-flex;">
+        <et-icon icon="language" :size="size" />
+        <span v-if="showLabel" class="ml-[5px]">{{ curLang.label }}</span>
+      </div>
     </div>
     <template #dropdown>
       <el-dropdown-menu>

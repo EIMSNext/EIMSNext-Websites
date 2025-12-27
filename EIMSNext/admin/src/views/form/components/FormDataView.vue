@@ -40,11 +40,11 @@ const usingWorkflow = ref(false)
 const formData = ref<FormData>();
 const showDeleteConfirmDialog = ref(false)
 
-const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "编辑", command: "edit", icon: "el-icon-edit" } }, { type: "button", config: { text: "删除", command: "delete", icon: "el-icon-delete", disabled: false } }])
+const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "common.edit", command: "edit", icon: "el-icon-edit" } }, { type: "button", config: { text: "common.delete", command: "delete", icon: "el-icon-delete", disabled: false } }])
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
     switch (cmd) {
         case 'edit':
-            actions.value = { draft: { text: "存为草稿", visible: true }, submit: { text: "提交", visible: true } }
+            actions.value = { draft: { text: "common.wfProcess.saveDraft" }, submit: { text: "common.wfProcess.submit" }, reset: { text: "common.reset" } }
             isView.value = false;
             break;
         case 'delete':
