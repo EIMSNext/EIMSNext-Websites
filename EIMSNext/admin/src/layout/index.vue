@@ -6,16 +6,16 @@
       </el-header>
       <el-container style="border-top: 1px solid var(--el-menu-border-color)">
         <el-aside width="45px" class="main-left-menu">
-          <el-tooltip content="工作台" placement="right" :hide-after="0">
+          <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
             <AppLink :to="{
-              path: '/dashboard',
+              path: '/workspace',
             }">
               <div class="main-left-menu-item">
                 <et-icon icon="homepage" size="20px" :color="getAppIconColor()"></et-icon>
               </div>
             </AppLink>
           </el-tooltip>
-          <el-tooltip content="通讯录" placement="right" :hide-after="0">
+          <el-tooltip :content="t('route.system')" placement="right" :hide-after="0">
             <AppLink :to="{
               path: '/system/department',
             }">
@@ -53,6 +53,8 @@ import { useAppStore } from "@eimsnext/store";
 import NavBar from "./components/NavBar/index.vue";
 import defaultSettings from "@/settings";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n()
 
 defineOptions({
   name: "Layout",

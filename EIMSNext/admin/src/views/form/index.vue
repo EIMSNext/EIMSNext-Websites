@@ -104,7 +104,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "新增",
+      text: "common.addNew",
       type: "success",
       command: "add",
       icon: "el-icon-plus",
@@ -116,7 +116,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "删除",
+      text: "common.delete",
       type: "danger",
       command: "delete",
       icon: "el-icon-delete",
@@ -131,7 +131,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "筛选",
+      text: "common.filter",
       class: "data-filter",
       command: "filter",
       icon: "el-icon-filter",
@@ -144,7 +144,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "排序",
+      text: "common.sort",
       class: "data-filter",
       command: "sort",
       icon: "el-icon-sort",
@@ -157,7 +157,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "字段",
+      text: "common.fields",
       class: "data-filter",
       command: "list",
       icon: "el-icon-list",
@@ -170,7 +170,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "刷新",
+      text: "common.refresh",
       class: "data-filter",
       command: "refresh",
       icon: "el-icon-refresh",

@@ -23,9 +23,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   {
-    name: "dashboard",
-    path: "/dashboard",
-    component: () => import("@/views/dashboard/index.vue"),
+    name: "workspace",
+    path: "/workspace",
+    component: () => import("@/views/workspace/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
   {
@@ -210,7 +210,7 @@ export const constantRoutes: RouteRecordRaw[] = [
   // },
   {
     path: "/",
-    redirect: "/dashboard",
+    redirect: "/workspace",
   },
 ];
 
