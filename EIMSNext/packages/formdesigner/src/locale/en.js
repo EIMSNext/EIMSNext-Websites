@@ -786,11 +786,14 @@ const En = {
       props: {
         input: "Whether to fill in",
         type: "Type",
-        disabled: "Disabled",
         min: "Minimum number that can be checked",
         max: "The maximum number that can be checked",
         textColor: "Font color when the button is active",
         fill: "Border and background color when the button is active",
+        required: "Required",
+        readonly: "Readonly",
+        disabled: "Disabled",
+        hidden: "Hidden",
       },
     },
     col: {
@@ -820,20 +823,23 @@ const En = {
       name: "Date Picker",
       props: {
         pickerOptions: "Options specific to the current time and date picker",
-        readonly: "Readonly",
-        disabled: "Disabled",
         type: "Type",
         editable: "Text box can be input",
         clearable: "Whether to display the clear button",
-        placeholder: "Placeholder content for non-range selection",
+        placeholder: "Placeholder",
         startPlaceholder:
           "Placeholder content for the start date when selecting the range",
         endPlaceholder:
           "Placeholder content for the end date when selecting the range",
-        format: "Format displayed in the input box",
+        format: "Format",
         align: "Alignment",
         rangeSeparator: "Separator when selecting range",
         unlinkPanels: "Unlink the two date panels in the range selector",
+        required: "Required",
+        readonly: "Readonly",
+        disabled: "Disabled",
+        hidden: "Hidden",
+        value: "Default Value",
       },
     },
     dateRange: {
@@ -1361,10 +1367,13 @@ const En = {
       name: "Radio",
       props: {
         input: "Whether to fill in",
-        disabled: "Disabled",
         type: "Type",
         textColor: "Text color when button form is activated",
         fill: "Fill color and border color when the button form is activated",
+        required: "Required",
+        readonly: "Readonly",
+        disabled: "Disabled",
+        hidden: "Hidden",
       },
     },
     rate: {
@@ -1388,14 +1397,13 @@ const En = {
       name: "Single Select",
       props: {
         // multiple: "Whether there are multiple selections",
-        disabled: "Disabled",
         clearable: "Whether the option can be cleared",
         collapseTags:
           "Whether to display the selected value as text during multi-selection",
         multipleLimit:
           "The maximum number of items that the user can select when multiple-selecting, if it is 0, there is no limit",
         placeholder: "Placeholder",
-        filterable: "Is it searchable",
+        filterable: "Searchable",
         allowCreate: "Whether users are allowed to create new entries",
         noMatchText: "Text displayed when no search conditions match",
         noDataText: "Text displayed when option is empty",
@@ -1405,6 +1413,10 @@ const En = {
           "Press Enter in the input box and select the first matching item",
         remote: "Whether the options are loaded remotely from the server",
         remoteMethod: "Custom remote search methods",
+        required: "Required",
+        readonly: "Readonly",
+        disabled: "Disabled",
+        hidden: "Hidden",
       },
     },
     select2: {
@@ -1414,14 +1426,13 @@ const En = {
       },
       props: {
         // multiple: "Whether there are multiple selections",
-        disabled: "Disabled",
         clearable: "Whether the option can be cleared",
         collapseTags:
           "Whether to display the selected value as text during multi-selection",
         multipleLimit:
           "The maximum number of items that the user can select when multiple-selecting, if it is 0, there is no limit",
         placeholder: "Placeholder",
-        filterable: "Is it searchable",
+        filterable: "Searchable",
         allowCreate: "Whether users are allowed to create new entries",
         noMatchText: "Text displayed when no search conditions match",
         noDataText: "Text displayed when option is empty",
@@ -1431,6 +1442,10 @@ const En = {
           "Press Enter in the input box and select the first matching item",
         remote: "Whether the options are loaded remotely from the server",
         remoteMethod: "Custom remote search methods",
+        required: "Required",
+        readonly: "Readonly",
+        disabled: "Disabled",
+        hidden: "Hidden",
       },
     },
     slider: {
@@ -1500,25 +1515,41 @@ const En = {
     departmentSelect: {
       name: "Department Single Select",
       props: {
+        required: "Required",
+        readonly: "Readonly",
         disabled: "Disabled",
+        hidden: "Hidden",
+        value: "Default Value",
       },
     },
     departmentSelect2: {
       name: "Department Multiple Select",
       props: {
+        required: "Required",
+        readonly: "Readonly",
         disabled: "Disabled",
+        hidden: "Hidden",
+        value: "Default Value",
       },
     },
     employeeSelect: {
       name: "Employee Single Select",
       props: {
+        required: "Required",
+        readonly: "Readonly",
         disabled: "Disabled",
+        hidden: "Hidden",
+        value: "Default Value",
       },
     },
     employeeSelect2: {
       name: "Employee Multiple Select",
       props: {
+        required: "Required",
+        readonly: "Readonly",
         disabled: "Disabled",
+        hidden: "Hidden",
+        value: "Default Value",
       },
     },
     tableform: {
@@ -1706,6 +1737,7 @@ const En = {
         required: "Required",
         hidden: "Hidden",
         clearable: "Clearable",
+        value: "Default Value",
       },
     },
     timePicker: {
