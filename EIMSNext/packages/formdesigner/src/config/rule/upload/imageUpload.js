@@ -19,7 +19,7 @@ export default {
     if (!rule.props.listType) {
       rule.props.listType = "picture-card";
     }
-     rule._sfc.modelField = "fileList";
+    rule._sfc.modelField = "fileList";
   },
   rule({ t }) {
     return {
@@ -32,22 +32,39 @@ export default {
         action: "/upload",
         uploadType: "image",
         listType: "picture-card",
-        multiple:true,
-        autoUpload:true,
+        multiple: true,
+        autoUpload: true,
         accept: "image/*",
-        onSuccess: "$FNX:const res = $inject.args[0];\nconst file = $inject.args[1];\n\nfile.url = res.value[0].url;\nfile.value = {id:res.value[0].id, name:res.value[0].fileName,url:res.value[0].url};",
+        onSuccess:
+          "$FNX:const res = $inject.args[0];\nconst file = $inject.args[1];\n\nfile.url = res.value[0].url;\nfile.value = {id:res.value[0].id, name:res.value[0].fileName,url:res.value[0].url};",
       },
     };
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      // {
-      //   type: "switch",
-      //   field: "disabled",
-      // },
+      {
+        type: "inputNumber",
+        field: "limit",
+        props: { min: 0 },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "required",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "readonly",
+        wrap: { show: false },
+      },
       {
         type: "CheckBoxInput",
         field: "disabled",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "hidden",
         wrap: { show: false },
       },
       // {
@@ -159,11 +176,6 @@ export default {
       //   field: "autoUpload",
       //   value: true,
       // },
-      {
-        type: "inputNumber",
-        field: "limit",
-        props: { min: 0 },
-      },
     ]);
   },
 };

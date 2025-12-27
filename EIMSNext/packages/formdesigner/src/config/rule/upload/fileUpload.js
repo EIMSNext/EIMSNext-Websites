@@ -43,13 +43,29 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      // {
-      //   type: "switch",
-      //   field: "disabled",
-      // },
+      {
+        type: "inputNumber",
+        field: "limit",
+        props: { min: 0 },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "required",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "readonly",
+        wrap: { show: false },
+      },
       {
         type: "CheckBoxInput",
         field: "disabled",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "hidden",
         wrap: { show: false },
       },
       // {
@@ -152,11 +168,7 @@ export default {
       //   field: "autoUpload",
       //   value: true,
       // },
-      {
-        type: "inputNumber",
-        field: "limit",
-        props: { min: 0 },
-      },
+     
     ]);
   },
 };

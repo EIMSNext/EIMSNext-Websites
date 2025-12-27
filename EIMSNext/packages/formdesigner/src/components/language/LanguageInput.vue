@@ -2,8 +2,7 @@
     <el-input class="_fd-language-input" :class="{'is-variable': isVar}" :placeholder="placeholder" :disabled="disabled"
               :modelValue="modelValue"
               @update:modelValue="onInput"
-              @blur="$emit('blur')"
-              :size="size || 'small'">
+              @blur="$emit('blur')">
         <template #append v-if="showLanguage !== false">
             <el-popover placement="bottom-end" :width="300" :hide-after="0" trigger="click" ref="pop"
                         popper-class="_fd-language-popover">

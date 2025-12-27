@@ -112,22 +112,22 @@ export function makeOptionsRule(t, to, label, value) {
   const options = [
     { label: t("fetch.optionsType.struct"), value: 2 },
     { label: t("fetch.optionsType.fetch"), value: 3 },
-    { label: t("fetch.optionsType.global"), value: 1 },
+    // { label: t("fetch.optionsType.global"), value: 1 },
   ];
 
   const control = [
-    {
-      value: 1,
-      rule: [
-        {
-          type: "GlobalFetchSelect",
-          field: "formCreateEffect>fetch",
-          props: {
-            to,
-          },
-        },
-      ],
-    },
+    // {
+    //   value: 1,
+    //   rule: [
+    //     {
+    //       type: "GlobalFetchSelect",
+    //       field: "formCreateEffect>fetch",
+    //       props: {
+    //         to,
+    //       },
+    //     },
+    //   ],
+    // },
     {
       value: 3,
       rule: [
@@ -178,22 +178,22 @@ export function makeDataRule(t, to, title) {
   const options = [
     { label: t("fetch.optionsType.struct"), value: 2 },
     { label: t("fetch.optionsType.fetch"), value: 3 },
-    { label: t("fetch.optionsType.global"), value: 1 },
+    // { label: t("fetch.optionsType.global"), value: 1 },
   ];
 
   const control = [
-    {
-      value: 1,
-      rule: [
-        {
-          type: "GlobalFetchSelect",
-          field: "formCreateEffect>fetch",
-          props: {
-            to,
-          },
-        },
-      ],
-    },
+    // {
+    //   value: 1,
+    //   rule: [
+    //     {
+    //       type: "GlobalFetchSelect",
+    //       field: "formCreateEffect>fetch",
+    //       props: {
+    //         to,
+    //       },
+    //     },
+    //   ],
+    // },
     {
       value: 3,
       rule: [
@@ -237,22 +237,22 @@ export function makeTreeOptionsRule(t, to, label, value) {
   const options = [
     { label: t("fetch.optionsType.struct"), value: 2 },
     { label: t("fetch.optionsType.fetch"), value: 3 },
-    { label: t("fetch.optionsType.global"), value: 1 },
+    // { label: t("fetch.optionsType.global"), value: 1 },
   ];
 
   const control = [
-    {
-      value: 1,
-      rule: [
-        {
-          type: "GlobalFetchSelect",
-          field: "formCreateEffect>fetch",
-          props: {
-            to,
-          },
-        },
-      ],
-    },
+    // {
+    //   value: 1,
+    //   rule: [
+    //     {
+    //       type: "GlobalFetchSelect",
+    //       field: "formCreateEffect>fetch",
+    //       props: {
+    //         to,
+    //       },
+    //     },
+    //   ],
+    // },
     {
       value: 3,
       rule: [

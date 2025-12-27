@@ -255,14 +255,14 @@
                                         :confirm-button-text="t('props.clear')" :cancel-button-text="t('props.cancel')"
                                         @confirm="clearDragRule">
                                         <template #reference>
-                                            <el-button size="small" class="btn-delete" style="border:none"><i
+                                            <el-button class="btn-delete" style="border:none"><i
                                                     class="fc-icon icon-delete"></i>{{
                                                         t('props.clear') }}
                                             </el-button>
                                         </template>
                                     </el-popconfirm>
                                     <el-dropdown trigger="click" size="default" v-if="handle && handle.length">
-                                        <el-button class="_fd-m-extend" plain size="small">
+                                        <el-button class="_fd-m-extend" plain>
                                             <i class="fc-icon icon-more"></i>
                                         </el-button>
                                         <template #dropdown>
@@ -282,7 +282,7 @@
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
                                             }}：</span>
-                                        <el-switch size="small" :model-value="inputForm.state" inline-prompt
+                                        <el-switch :model-value="inputForm.state" inline-prompt
                                             @update:model-value="openInputData" />
                                     </div>
                                 </template>
@@ -385,7 +385,7 @@
                                         <div style="display:flex;justify-content: space-between; margin-bottom: 10px;">
                                             <div><span style="color:#eb5050">*</span><span class="_fc-field-title">{{
                                                 t('form.title')
-                                            }}</span></div>
+                                                    }}</span></div>
                                             <el-tag v-if="activeRule" type="success" effect="plain" disable-transitions>
                                                 {{ t('com.' + (activeRule._menu.name) + '.name') ||
                                                     activeRule._menu.label }}
@@ -407,12 +407,12 @@
                                         </DragForm>
                                     </div>
                                     <div style="grid-area: props;">
-                                        <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
+                                        <!-- <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
                                             t('designer.props') }}
                                             <VariableConfig v-if="propsForm.variable"></VariableConfig>
                                             <PropsInput v-if="activeRule && getConfig('showCustomProps', true)">
                                             </PropsInput>
-                                        </ConfigTitle>
+                                        </ConfigTitle> -->
                                         <DragForm v-show="propsForm.isShow" v-model:api="propsForm.api"
                                             :rule="propsForm.rule" :option="propsForm.options"
                                             :modelValue="propsForm.value" @change="propChange"
@@ -850,7 +850,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false
                 },
@@ -877,7 +876,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -904,7 +902,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -921,7 +918,6 @@ export default defineComponent({
                 options: {
                     form: {
                         labelPosition: 'left',
-                        size: 'small',
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -938,7 +934,6 @@ export default defineComponent({
                 options: {
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -971,7 +966,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -999,7 +993,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                 }

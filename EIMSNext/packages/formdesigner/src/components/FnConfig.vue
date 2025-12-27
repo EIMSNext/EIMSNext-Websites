@@ -1,12 +1,10 @@
 <template>
     <div class="_fd-fn-list">
         <el-badge :value="eventNum" type="warning" :hidden="eventNum < 1">
-            <el-button class="_fd-plain-button" plain @click="visible=true" size="small">{{ t('event.title') }}</el-button>
+            <el-button class="_fd-plain-button" plain @click="visible = true">{{ t('event.title') }}</el-button>
         </el-badge>
-        <el-dialog class="_fd-fn-list-dialog _fd-config-dialog" :title="t('event.title')" v-model="visible" destroy-on-close
-                   :close-on-click-modal="false"
-                   append-to-body
-                   width="980px">
+        <el-dialog class="_fd-fn-list-dialog _fd-config-dialog" :title="t('event.title')" v-model="visible"
+            destroy-on-close :close-on-click-modal="false" append-to-body width="980px">
             <el-container class="_fd-fn-list-con" style="height: 600px">
                 <el-aside style="width:300px;">
                     <el-container class="_fd-fn-list-l">
@@ -16,9 +14,7 @@
                             </el-text>
                         </el-header>
                         <el-main>
-                            <el-menu
-                                :default-active="defActive"
-                                v-model="activeData">
+                            <el-menu :default-active="defActive" v-model="activeData">
                                 <template v-for="(item, name) in event">
                                     <el-menu-item :index="name">
                                         <div class="_fd-fn-list-method" @click.stop="edit(item)">
@@ -36,23 +32,23 @@
                         <el-header class="_fd-fn-list-head" height="40px" v-if="activeData">
                             <el-button size="small" @click="close">{{ t('props.cancel') }}</el-button>
                             <el-button size="small" type="primary" @click="save">{{
-                                    t('props.save')
-                                }}
+                                t('props.save')
+                            }}
                             </el-button>
                         </el-header>
                         <el-main v-if="activeData">
                             <FnEditor ref="fn" v-model="eventStr" :name="activeData.item.name"
-                                      :args="activeData.item.args"/>
+                                :args="activeData.item.args" />
                         </el-main>
                     </el-container>
                 </el-main>
             </el-container>
             <template #footer>
                 <div>
-                    <el-button size="default" @click="visible=false">{{ t('props.cancel') }}</el-button>
+                    <el-button size="default" @click="visible = false">{{ t('props.cancel') }}</el-button>
                     <el-button type="primary" size="default" @click="submit">{{
-                            t('props.ok')
-                        }}
+                        t('props.ok')
+                    }}
                     </el-button>
                 </div>
             </template>
@@ -62,7 +58,7 @@
 
 <script>
 import { uniqueId, deepExtend, parseFn } from '@eimsnext/form-render-core';
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 import FnEditor from './FnEditor.vue';
 
 const PREFIX = '[[FORM-CREATE-PREFIX-';
@@ -179,7 +175,8 @@ export default defineComponent({
 </script>
 
 <style>
-._fd-fn-list, ._fd-fn-list .el-badge {
+._fd-fn-list,
+._fd-fn-list .el-badge {
     width: 100%;
 }
 
@@ -192,7 +189,8 @@ export default defineComponent({
     padding: 0;
 }
 
-._fd-fn-list-l, ._fd-fn-list-r {
+._fd-fn-list-l,
+._fd-fn-list-r {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -220,7 +218,8 @@ export default defineComponent({
     justify-content: flex-end;
 }
 
-._fd-fn-list-l > .el-main, ._fd-fn-list-r > .el-main {
+._fd-fn-list-l>.el-main,
+._fd-fn-list-r>.el-main {
     display: flex;
     flex-direction: row;
     flex: 1;
@@ -230,7 +229,7 @@ export default defineComponent({
     width: 100%;
 }
 
-._fd-fn-list-r > .el-main {
+._fd-fn-list-r>.el-main {
     flex-direction: column;
 }
 
@@ -275,11 +274,13 @@ export default defineComponent({
     font-size: 12px;
 }
 
-._fd-fn-list-method-info > span:first-child, ._fd-fn-list-method > span:first-child {
+._fd-fn-list-method-info>span:first-child,
+._fd-fn-list-method>span:first-child {
     color: #9D238C;
 }
 
-._fd-fn-list-method-info > span:first-child > span, ._fd-fn-list-method > span:first-child > span {
+._fd-fn-list-method-info>span:first-child>span,
+._fd-fn-list-method>span:first-child>span {
     color: var(--fc-text-color-1);
     margin-left: 10px;
 }

@@ -50,11 +50,11 @@ export default {
         return localeProps(t, name + '.props', [
             makeOptionsRule(t, 'options'),
             // {type: 'switch', field: 'disabled'}
-            {
-                type: "CheckBoxInput",
-                field: "disabled",
-                wrap: { show: false },
-              },
+            // {
+            //     type: "CheckBoxInput",
+            //     field: "disabled",
+            //     wrap: { show: false },
+            //   },
             // ,
             // {type: 'switch', field: 'input'}
             // , 
@@ -66,6 +66,26 @@ export default {
             //     type: 'ColorInput',
             //     field: 'fill'
             // }
+            {
+                type: "CheckBoxInput",
+                field: "required",
+                wrap: { show: false },
+              },
+              {
+                type: "CheckBoxInput",
+                field: "readonly",
+                wrap: { show: false },
+              },
+              {
+                type: "CheckBoxInput",
+                field: "disabled",
+                wrap: { show: false },
+              },
+              {
+                type: "CheckBoxInput",
+                field: "hidden",
+                wrap: { show: false },
+              },
         ]);
     }
 };

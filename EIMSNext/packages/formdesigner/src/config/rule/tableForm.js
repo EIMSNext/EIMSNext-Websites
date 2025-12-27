@@ -199,62 +199,70 @@ export default {
           },
         ],
       },
+      // {
+      //   type: "select",
+      //   field: "size",
+      //   options: localeOptions(t, [
+      //     { label: "large", value: "large" },
+      //     { label: "default", value: "default" },
+      //     { label: "small", value: "small" },
+      //   ]),
+      // },
+      // {
+      //   type: "input",
+      //   field: "emptyText",
+      // },
       {
-        type: "switch",
-        field: "disabled",
-      },
-      {
-        type: "select",
-        field: "size",
-        options: localeOptions(t, [
-          { label: "large", value: "large" },
-          { label: "default", value: "default" },
-          { label: "small", value: "small" },
-        ]),
-      },
-      {
-        type: "input",
-        field: "emptyText",
-      },
-      {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "stripe",
+        wrap: { show: false },
       },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "border",
+        wrap: { show: false },
       },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "showIndex",
+        wrap: { show: false },
       },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "addable",
         value: true,
+        wrap: { show: false },
       },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "deletable",
         value: true,
+        wrap: { show: false },
       },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "newColumn",
+        wrap: { show: false },
       },
       {
-        type: "switch",
+        type: "CheckBoxInput",
         field: "filterEmptyColumn",
         value: true,
+        wrap: { show: false },
       },
+      // {
+      //   type: "SizeInput",
+      //   field: "height",
+      // },
+      // {
+      //   type: "inputNumber",
+      //   field: "max",
+      //   props: { min: 0 },
+      // },
       {
-        type: "SizeInput",
-        field: "height",
-      },
-      {
-        type: "inputNumber",
-        field: "max",
-        props: { min: 0 },
+        type: "CheckBoxInput",
+        field: "disabled",
+        wrap: { show: false },
       },
     ]);
   },
