@@ -16,38 +16,38 @@ export default function field({ t }) {
       title: "",
     },
     {
-      type: "SpanInput",
-      field: "formCreateCol>span",
-      title: t("form.formItemSpan"),
-    },
-    {
-      type: "ConfigItem",
-      col: { show: true },
-      style: "margin-bottom: 10px",
-      name: "ignoreConfig",
-      props: {
-        label: t("form.ignore"),
-        warning: t("warning.ignore"),
-      },
-      children: [
-        {
-          type: "switch",
-          field: "ignore",
-          value: false,
-          wrap: { show: false },
-          col: { show: false },
-        },
-      ],
-    },
-    {
       type: "CheckBoxInput",
       field: "formCreateWrap>title",
       wrap: { show: false },
       value: true,
       props: {
-        title: t("props.is_showTitle"),
+        title: t("props.showTitle"),
       },
     },
+    {
+      type: "SpanInput",
+      field: "formCreateCol>span",
+      title: t("form.formItemSpan"),
+    },
+    // {
+    //   type: "ConfigItem",
+    //   col: { show: true },
+    //   style: "margin-bottom: 10px",
+    //   name: "ignoreConfig",
+    //   props: {
+    //     label: t("form.ignore"),
+    //     warning: t("warning.ignore"),
+    //   },
+    //   children: [
+    //     {
+    //       type: "switch",
+    //       field: "ignore",
+    //       value: false,
+    //       wrap: { show: false },
+    //       col: { show: false },
+    //     },
+    //   ],
+    // },
     // {
     //   type: "Struct",
     //   field: "_control",

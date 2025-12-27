@@ -21,53 +21,50 @@ export default {
       $required: false,
       props: {
         type: "textarea",
+        clearable: "true",
       },
     };
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
+      {
+        type: "input",
+        field: "placeholder",
+      },
+      {
+        type: "DefaultValueConfig",
+        field: "value",
+      },
       // {
-      //     type: 'switch',
-      //     field: 'disabled'
+      //   type: "inputNumber",
+      //   field: "maxlength",
+      //   props: { min: 0 },
       // },
       {
         type: "CheckBoxInput",
-        field: "disabled",
+        field: "required",
         wrap: { show: false },
       },
-      // {
-      //     type: 'switch',
-      //     field: 'readonly'
-      // },
       {
         type: "CheckBoxInput",
         field: "readonly",
         wrap: { show: false },
       },
       // {
-      //     type: 'inputNumber',
-      //     field: 'maxlength',
-      //     props: {min: 0}
-      // },
-      // {
-      //     type: 'switch',
-      //     field: 'showWordLimit'
+      //   type: "CheckBoxInput",
+      //   field: "clearable",
+      //   wrap: { show: false },
       // },
       {
-        type: "input",
-        field: "placeholder",
+        type: "CheckBoxInput",
+        field: "disabled",
+        wrap: { show: false },
       },
       {
-        type: "inputNumber",
-        field: "rows",
-        props: {
-          min: 0,
-        },
+        type: "CheckBoxInput",
+        field: "hidden",
+        wrap: { show: false },
       },
-      // {
-      //     type: 'switch',
-      //     field: 'autosize'
-      // },
     ]);
   },
 };

@@ -42,7 +42,12 @@ export default {
       title: t("com.timestamp.name"),
       info: "",
       $required: false,
-      props: { valueFormat: "x", type: "date", format: "YYYY-MM-DD" },
+      props: {
+        valueFormat: "x",
+        type: "date",
+        format: "YYYY-MM-DD",
+        clearable: true,
+      },
     };
   },
   watch: {
@@ -52,26 +57,32 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      // { type: "switch", field: "readonly" },
       {
-        type: "CheckBoxInput",
-        field: "readonly",
-        wrap: { show: false },
+        type: "input",
+        field: "placeholder",
       },
+      // { type: "switch", field: "readonly" },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "readonly",
+      //   wrap: { show: false },
+      // },
       // {
       //   type: "switch",
       //   field: "disabled",
       // },
-      {
-        type: "CheckBoxInput",
-        field: "disabled",
-        wrap: { show: false },
-      },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "disabled",
+      //   wrap: { show: false },
+      // },
       {
         type: "select",
         field: "format",
         options: localeOptions(t, [
+          { label: "YYYY-MM", value: "YYYY-MM" },
           { label: "YYYY-MM-DD", value: "YYYY-MM-DD" },
+          { label: "YYYY-MM-DD HH:mm", value: "YYYY-MM-DD HH:mm" },
           { label: "YYYY-MM-DD HH:mm:ss", value: "YYYY-MM-DD HH:mm:ss" },
           // { label: "date", value: "date" },
           //{label: 'dates', value: 'dates'},
@@ -81,6 +92,10 @@ export default {
           // { label: "daterange", value: "daterange" },
           //, {label: 'monthrange', value: 'monthrange'}
         ]),
+      },
+      {
+        type: "DefaultValueConfig",
+        field: "value",
       },
       //  {
       //     type: 'switch',
@@ -98,10 +113,6 @@ export default {
         field: "editable",
         value: true,
         wrap: { show: false },
-      },
-      {
-        type: "input",
-        field: "placeholder",
       },
       // {
       //   type: "input",
@@ -125,6 +136,26 @@ export default {
       //     type: 'switch',
       //     field: 'unlinkPanels'
       // }
+      {
+        type: "CheckBoxInput",
+        field: "required",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "readonly",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "disabled",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "hidden",
+        wrap: { show: false },
+      },
     ]);
   },
 };
