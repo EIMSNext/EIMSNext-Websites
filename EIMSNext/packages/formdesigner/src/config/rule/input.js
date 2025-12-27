@@ -20,11 +20,15 @@ export default {
       title: t("com.input.name"),
       info: "",
       $required: false,
-      props: {},
+      props: { clearable: true },
     };
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
+      {
+        type: "input",
+        field: "placeholder",
+      },
       {
         type: "select",
         field: "type",
@@ -43,21 +47,11 @@ export default {
         type: "DefaultValueConfig",
         field: "value",
       },
-      {
-        type: "inputNumber",
-        field: "maxlength",
-        props: { min: 0 },
-      },
-      {
-        type: "input",
-        field: "placeholder",
-      },
-      {
-        type: "CheckBoxInput",
-        field: "hidden",
-        props: { title: t("props.is_hidden") },
-        wrap: { show: false },
-      },
+      // {
+      //   type: "inputNumber",
+      //   field: "maxlength",
+      //   props: { min: 0 },
+      // },
       {
         type: "CheckBoxInput",
         field: "readonly",
@@ -65,7 +59,7 @@ export default {
       },
       {
         type: "CheckBoxInput",
-        field: "clearable",
+        field: "disabled",
         wrap: { show: false },
       },
     ]);

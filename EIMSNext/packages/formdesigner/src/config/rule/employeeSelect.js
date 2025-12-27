@@ -26,12 +26,20 @@ export default {
     };
   },
   props(_, { t }) {
-    return localeProps(t, name + ".props", [
+    return localeProps(t, name + ".props", [     
+      {
+        type: "DefaultValueConfig",
+        field: "value",
+      },
+      {
+        type: "CheckBoxInput",
+        field: "readonly",
+        wrap: { show: false },
+      },
       {
         type: "CheckBoxInput",
         field: "disabled",
         wrap: { show: false },
-        title: t("props.disabled"),
       },
     ]);
   },

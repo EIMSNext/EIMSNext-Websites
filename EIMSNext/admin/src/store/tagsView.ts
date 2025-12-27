@@ -188,6 +188,7 @@ export const useTagsViewStore = defineStore("tagsView", () => {
       const affixTags = visitedViews.value.filter((tag) => tag?.affix);
       visitedViews.value = affixTags;
       cachedViews.value = [];
+      console.log("vis", visitedViews);
       resolve({
         visitedViews: [...visitedViews.value],
         cachedViews: [...cachedViews.value],
