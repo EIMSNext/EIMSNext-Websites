@@ -97,6 +97,11 @@ const ZhCn = {
     computedFormula: "通过公式和表单数据，动态计算组件的状态和数据值。",
   },
   computed: {
+    defaultValue: {
+      title: "公式联动",
+      btn: "公式联动",
+      name: "设置组件的值",
+    },
     value: {
       title: "数据联动",
       btn: "设置数据联动",
@@ -620,8 +625,8 @@ const ZhCn = {
     _top: "顶级窗口",
     showTitle: "显示标题",
     v_custom: "自定义",
-    v_data: "数据联动",
-    v_formula: "编辑公式",
+    v_datalink: "数据联动",
+    v_formula: "公式联动",
   },
   slots: {
     prefix: "头部内容",
@@ -805,7 +810,6 @@ const ZhCn = {
         unlinkPanels: "在范围选择器里取消两个日期面板之间的联动",
         readonly: "只读",
         disabled: "禁用",
-        value: "默认值",
       },
     },
     dateRange: {
@@ -1277,7 +1281,6 @@ const ZhCn = {
         clearable: "可清除",
         disabled: "禁用",
         readonly: "只读",
-        value: "默认值",
       },
     },
     number: {
@@ -1447,7 +1450,6 @@ const ZhCn = {
       props: {
         readonly: "只读",
         disabled: "禁用",
-        value: "默认值",
       },
     },
     departmentSelect2: {
@@ -1455,7 +1457,6 @@ const ZhCn = {
       props: {
         readonly: "只读",
         disabled: "禁用",
-        value: "默认值",
       },
     },
     employeeSelect: {
@@ -1463,7 +1464,6 @@ const ZhCn = {
       props: {
         readonly: "只读",
         disabled: "禁用",
-        value: "默认值",
       },
     },
     employeeSelect2: {
@@ -1471,7 +1471,6 @@ const ZhCn = {
       props: {
         readonly: "只读",
         disabled: "禁用",
-        value: "默认值",
       },
     },
     tableform: {
@@ -1640,7 +1639,6 @@ const ZhCn = {
         autosize: "高度是否自适应",
         readonly: "只读",
         disabled: "禁用",
-        value: "默认值",
       },
     },
     timePicker: {

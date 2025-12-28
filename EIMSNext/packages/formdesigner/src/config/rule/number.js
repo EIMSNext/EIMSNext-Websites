@@ -1,6 +1,5 @@
 import { uniqueId } from "@eimsnext/form-render-core";
 import { localeOptions, localeProps } from "../../utils";
-import { valueEquals } from "element-plus";
 
 const label = "计数器";
 const name = "number";
@@ -29,6 +28,9 @@ export default {
     return localeProps(t, name + ".props", [
       { type: "input", field: "placeholder" },
       {
+        type: "DefaultValueConfig",
+      },
+      {
         type: "CheckBoxInput",
         field: "controls",
         wrap: { show: false },
@@ -52,6 +54,7 @@ export default {
         title: "precision",
         field: "precision",
       },
+
       // {
       //     type: 'switch',
       //     field: 'stepStrictly'
