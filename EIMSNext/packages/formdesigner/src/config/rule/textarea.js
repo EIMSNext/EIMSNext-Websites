@@ -33,7 +33,6 @@ export default {
       },
       {
         type: "DefaultValueConfig",
-        field: "value",
       },
       // {
       //   type: "inputNumber",
