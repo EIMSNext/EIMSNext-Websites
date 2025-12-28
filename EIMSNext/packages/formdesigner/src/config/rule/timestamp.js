@@ -95,7 +95,6 @@ export default {
       },
       {
         type: "DefaultValueConfig",
-        field: "value",
       },
       //  {
       //     type: 'switch',

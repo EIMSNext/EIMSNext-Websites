@@ -103,6 +103,11 @@ const En = {
       "Dynamically calculates component states and data based on formulas and form data.",
   },
   computed: {
+    defaultValue: {
+      title: "Formula Link",
+      btn: "Formula Link",
+      name: "Set component value",
+    },
     value: {
       title: "Data linkage",
       btn: "Set data linkage",
@@ -835,7 +840,6 @@ const En = {
         unlinkPanels: "Unlink the two date panels in the range selector",
         readonly: "Readonly",
         disabled: "Disabled",
-        value: "Default Value",
       },
     },
     dateRange: {
@@ -1321,7 +1325,6 @@ const En = {
         placeholder: "Placeholder",
         disabled: "Disabled",
         readonly: "Readonly",
-        value: "Default value",
         clearable: "Clearable",
       },
     },
@@ -1338,7 +1341,6 @@ const En = {
         placeholder: "Placeholder",
         readonly: "Readonly",
         disabled: "Disabled",
-        value: "Default value",
       },
     },
     password: {
@@ -1504,7 +1506,6 @@ const En = {
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
-        value: "Default Value",
       },
     },
     departmentSelect2: {
@@ -1512,7 +1513,6 @@ const En = {
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
-        value: "Default Value",
       },
     },
     employeeSelect: {
@@ -1520,7 +1520,6 @@ const En = {
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
-        value: "Default Value",
       },
     },
     employeeSelect2: {
@@ -1528,7 +1527,6 @@ const En = {
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
-        value: "Default Value",
       },
     },
     tableform: {
@@ -1714,7 +1712,6 @@ const En = {
         rows: "Number of input box rows",
         autosize: "Whether the height is adaptive",
         clearable: "Clearable",
-        value: "Default Value",
       },
     },
     timePicker: {

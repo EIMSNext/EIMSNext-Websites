@@ -29,7 +29,6 @@ export default {
     return localeProps(t, name + ".props", [
       {
         type: "DefaultValueConfig",
-        field: "value",
       },
       {
         type: "CheckBoxInput",
