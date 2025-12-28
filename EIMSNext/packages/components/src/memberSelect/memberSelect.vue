@@ -104,7 +104,7 @@
           <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.CurUser)" label="当前用户" :name="MemberTabs.CurUser">
             <div class="dept-select">
               <et-list v-model="selectedEmps" :data="curEmpData" :selectable="true" :multiple="multiple"
-                style="border: none;" @item-check="empChecked" @all-check="curEmpCheckAll">
+                :showCount="false" style="border: none;" @item-check="empChecked" @all-check="curEmpCheckAll">
               </et-list>
             </div>
           </el-tab-pane>
@@ -216,11 +216,11 @@ onBeforeMount(() => {
 watch([() => tagsRef.value, activeTab], () => {
   // 确保树数据已加载
   if (!deptData.value || !roleData.value) return;
-  
+
   // 获取当前激活的树组件
   let currentTree: TreeInstance | undefined;
   let isRoleTree = false;
-  
+
   switch (activeTab.value) {
     case MemberTabs.Department:
       currentTree = deptTree.value;
@@ -237,30 +237,30 @@ watch([() => tagsRef.value, activeTab], () => {
     default:
       return;
   }
-  
+
   if (!currentTree) return;
-  
+
   // 获取当前类型的选中项ID列表
   const selectedIds = tagsRef.value
     .filter(tag => {
       return isRoleTree ? tag.type === TagType.Role : tag.type === TagType.Department;
     })
     .map(tag => tag.id);
-  
+
   // 遍历树节点，设置选中状态
   const setNodeChecked = (nodes: any[]) => {
     nodes.forEach(node => {
       // 设置当前节点的选中状态
       const isChecked = selectedIds.includes(node.id);
       currentTree!.setChecked(node, isChecked, false);
-      
+
       // 递归处理子节点
       if (node.children && node.children.length > 0) {
         setNodeChecked(node.children);
       }
     });
   };
-  
+
   // 根据树类型获取数据
   const treeData = isRoleTree ? roleData.value : activeTab.value === MemberTabs.CurDept ? curDeptData.value : deptData.value;
   if (treeData) {
@@ -507,7 +507,7 @@ const handleNodeClick = (node: any, data: ITreeNode, filterFn: (value: string, d
 
   // 根据当前选中状态切换
   const newCheckedState = !node.checked;
-  
+
   if (isRole) {
     // 角色选择
     if (roleTree.value) {
