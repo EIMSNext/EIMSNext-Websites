@@ -108,12 +108,12 @@ export default {
       //     props: {defaultValue: {}}
       // },
       // { type: "switch", field: "editable", value: true },
-      {
-        type: "CheckBoxInput",
-        field: "editable",
-        value: true,
-        wrap: { show: false },
-      },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "editable",
+      //   value: true,
+      //   wrap: { show: false },
+      // },
       // {
       //   type: "input",
       //   field: "startPlaceholder",

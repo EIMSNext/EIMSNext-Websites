@@ -52,6 +52,10 @@ export default {
         title: "precision",
         field: "precision",
       },
+      {
+        type: "DefaultValueConfig",
+        field: "value",
+      },
       // {
       //     type: 'switch',
       //     field: 'stepStrictly'

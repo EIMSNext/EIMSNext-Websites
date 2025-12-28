@@ -639,8 +639,8 @@ const En = {
     _top: "Top Window",
     showTitle: "Display Title",
     v_custom: "Custom",
-    v_data: "数据联动",
-    v_formula: "Edit Formula",
+    v_datalink: "Data Link",
+    v_formula: "Formula Link",
   },
   slots: {
     prefix: "Prefix",
@@ -1338,6 +1338,7 @@ const En = {
         placeholder: "Placeholder",
         readonly: "Readonly",
         disabled: "Disabled",
+        value: "Default value",
       },
     },
     password: {

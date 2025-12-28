@@ -620,8 +620,8 @@ const ZhCn = {
     _top: "顶级窗口",
     showTitle: "显示标题",
     v_custom: "自定义",
-    v_data: "数据联动",
-    v_formula: "编辑公式",
+    v_datalink: "数据联动",
+    v_formula: "公式联动",
   },
   slots: {
     prefix: "头部内容",
@@ -1294,6 +1294,7 @@ const ZhCn = {
         placeholder: "提示文字",
         readonly: "只读",
         disabled: "禁用",
+        value: "默认值",
       },
     },
     password: {

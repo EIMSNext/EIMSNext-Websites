@@ -2,16 +2,31 @@
   <div class="_fd-default-value">
     <el-select v-model="valueMode" @change="valueModeChanged">
       <el-option :label="t('props.v_custom')" value="custom"></el-option>
-      <el-option :label="t('props.v_data')" value="data"></el-option>
+      <el-option :label="t('props.v_datalink')" value="datalink"></el-option>
       <el-option :label="t('props.v_formula')" value="formula"></el-option>
     </el-select>
-    <el-input v-if="valueMode == 'custom'" v-model="customValue"></el-input>
-    <el-badge v-if="valueMode == 'data'" type="warning">
-      <Struct v-model="dataValue"></Struct>
+    <el-badge v-if="valueMode == 'custom'" type="warning">
+      <el-input v-if="activeRule.type == 'input'" v-model="customValue"></el-input>
+      <el-input v-if="activeRule.type == 'textarea'" type="textarea" v-model="customValue"></el-input>
+      <el-input-number v-if="activeRule.type == 'number'" v-model="customValue" controls-position="right"
+        :min="activeRule.props.min" :max="activeRule.props.max"></el-input-number>
+      <el-date-picker v-if="activeRule.type == 'timestamp'" v-model="customValue" value-format="x"
+        :type="activeRule.props.type" :format="activeRule.props.format"></el-date-picker>
+      <fc-department-select v-if="activeRule.type == 'departmentSelect'" v-model="customValue"
+        @change="onOrgChanged"></fc-department-select>
+      <fc-department-select v-if="activeRule.type == 'departmentSelect2'" v-model="customValue" @change="onOrgChanged"
+        :multiple="true"></fc-department-select>
+      <fc-employee-select v-if="activeRule.type == 'employeeSelect'" v-model="customValue"
+        @change="onOrgChanged"></fc-employee-select>
+      <fc-employee-select v-if="activeRule.type == 'employeeSelect2'" v-model="customValue" @change="onOrgChanged"
+        :multiple="true"></fc-employee-select>
+    </el-badge>
+    <el-badge v-if="valueMode == 'datalink'" type="warning">
+      <DataLinkConfig v-model="dataLinkValue" :title="t('props.v_datalink')"></DataLinkConfig>
     </el-badge>
     <el-badge v-if="valueMode == 'formula'" type="warning">
-      <ComputedConfig v-model="formulaValue" type="value" :btn="t('props.v_formula')" :title="t('computed.value.title')"
-        :name="t('computed.value.name')"></ComputedConfig>
+      <ComputedConfig v-model="formulaValue" type="linkage" :btn="t('props.v_formula')"
+        :title="t('computed.value.title')" :name="t('computed.value.name')"></ComputedConfig>
     </el-badge>
   </div>
 </template>
@@ -54,7 +69,7 @@ export default defineComponent({
       formulaEditorVisible: false,
 
       customValue: "",
-      dataValue: null,
+      dataLinkValue: null,
       formulaValue: null,
 
       visible: false,
@@ -130,6 +145,9 @@ export default defineComponent({
     },
   },
   methods: {
+    onOrgChanged(val) {
+      this.customValue = val
+    },
     valueModeChanged() {
       //   if (this.valueMode == "custom") this.customValue = this.modelValue;
       //   if (this.valueMode == "data") this.dataValue = this.modelValue;
