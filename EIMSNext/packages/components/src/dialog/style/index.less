@@ -65,19 +65,26 @@
         }
       }
     }
+
+    .foot-button {
+      font-weight: 500;
+      width: auto;
+      border-color: var(--color-border);
+      color: var(--color-text);
+    }
   }
 }
 
-.@{prefix}-confirm-dialog{
+.@{prefix}-confirm-dialog {
   &.el-dialog {
     width: 500px;
     padding: 0px;
     .el-dialog__header {
-     display: none;
+      display: none;
     }
     .el-dialog__body {
       padding: 0px !important;
-    }   
+    }
     .el-dialog__footer {
       border-top: 1px solid #d7d9dc;
       padding: 12px 20px !important;
@@ -93,7 +100,10 @@
       gap: 12px;
       .el-button {
         margin: 0;
-        color: var(--color-text); /* 确保按钮文字颜色 */
+        font-weight: 500;
+        width: auto;
+        border-color: var(--color--border);
+        color: var(--color-text);
       }
     }
     .footer-right {
@@ -101,37 +111,40 @@
       gap: 12px;
       .el-button {
         margin: 0;
-        color: var(--color-text); /* 确保按钮文字颜色 */
+        font-weight: 500;
+        width: auto;
+        border-color: var(--color--border);
+        color: var(--color-text);
         &.el-button--primary {
           color: #fff !important; /* 确保主要按钮文字为白色 */
         }
       }
     }
   }
-  .confirm-content{
+  .confirm-content {
     display: flex;
     padding: 24px;
 
     .msg-icon {
-      &.el-icon{
-      display: inline-block;
-      font-size: 24px;
-      line-height: 24px;
-      vertical-align: top;
+      &.el-icon {
+        display: inline-block;
+        font-size: 24px;
+        line-height: 24px;
+        vertical-align: top;
 
-      &.info {
-        color: var(--color-info);
-      }
-      &.warning {
-        color: var(--color-warning);
-      }
-      &.error {
-        color: var(--color-error);
+        &.info {
+          color: var(--color-info);
+        }
+        &.warning {
+          color: var(--color-warning);
+        }
+        &.error {
+          color: var(--color-error);
+        }
       }
     }
-    } 
-    .confirm-body{
-      display:inline-block;
+    .confirm-body {
+      display: inline-block;
       margin-left: 12px;
 
       .title {
@@ -143,7 +156,7 @@
         margin: 0 0 8px 0;
         word-break: break-word;
       }
-    
+
       .message {
         word-wrap: break-word;
         color: var(--color-text);
@@ -151,6 +164,6 @@
         line-height: 22px;
         word-break: break-word;
       }
-    }   
+    }
   }
 }

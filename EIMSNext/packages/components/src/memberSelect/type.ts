@@ -1,3 +1,5 @@
+import { ISelectedTag, TagType } from "dist";
+
 export enum MemberTabs {
   None = 0,
   Department = 1,
@@ -6,4 +8,8 @@ export enum MemberTabs {
   Dynamic = 8,
   CurDept = 16,
   CurUser = 32,
+}
+
+export interface IMemberLimit {
+  depts?: ISelectedTag[];
 }

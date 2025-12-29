@@ -1,11 +1,5 @@
 <template>
-  <el-dialog
-    class="et-dialog"
-    :model-value="modelValue"
-    v-bind="attrs"
-    ref="ori"
-    @close="cancel"
-  >
+  <el-dialog class="et-dialog" :model-value="modelValue" v-bind="attrs" ref="ori" @close="cancel">
     <slot></slot>
     <slot name="header"></slot>
     <slot name="footer" v-if="showFooter">

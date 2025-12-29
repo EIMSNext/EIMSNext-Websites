@@ -22,8 +22,8 @@ export default {
       props: {
         multiple: true,
         placeholder: "+ 选择部门",
-        selectScope: "all",
-        scopeDepartments: []
+        limitType: "all",
+        limitScope: [],
       },
     };
   },
@@ -32,31 +32,30 @@ export default {
       {
         type: "DefaultValueConfig",
       },
-      { type: "select",
-        field: "selectScope",
+      {
+        type: "select",
+        field: "limitType",
         title: "可选范围",
         options: [
           { label: "全部部门", value: "all" },
-          { label: "自定义", value: "custom" }
+          { label: "自定义", value: "custom" },
         ],
         control: [
           {
             value: "custom",
             rule: [
               {
-                type: "departmentSelect",
-                field: "scopeDepartments",
+                type: "FcDepartmentSelect",
+                field: "limitScope",
                 title: "",
                 wrap: { class: "_fd-default-value" },
                 props: {
-                  placeholder: "+选择部门",
-                  mode: "custom",
-                  showTags: true
-                }
-              }
-            ]
-          }
-        ]
+                  multiple: true,
+                },
+              },
+            ],
+          },
+        ],
       },
       {
         type: "CheckBoxInput",
@@ -67,7 +66,7 @@ export default {
         type: "CheckBoxInput",
         field: "disabled",
         wrap: { show: false },
-      }
+      },
     ]);
   },
 };

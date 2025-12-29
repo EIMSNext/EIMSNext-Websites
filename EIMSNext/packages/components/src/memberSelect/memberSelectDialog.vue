@@ -2,7 +2,8 @@
   <et-dialog :model-value="modelValue" class="member-select-dialog" title="部门成员列表" destroy-on-close width="750px"
     @cancel="cancel" @ok="save">
     <div style="padding: 12px 20px">
-      <member-select v-model="tagsRef" :showTabs="showTabs" :showCascade="showCascade" :multiple="multiple" :selectScope="selectScope" :scopeDepartments="scopeDepartments" />
+      <member-select v-model="tagsRef" :showTabs="showTabs" :showCascade="showCascade" :multiple="multiple"
+        :limit="limit" />
     </div>
     <template #footer-left>
       <el-button @click="openLink">通讯录</el-button>
@@ -13,7 +14,7 @@
 import "./style/index.less";
 import { ref, reactive, onBeforeMount } from "vue";
 import { ISelectedTag, TagType } from "../selectedTags/type";
-import { MemberTabs } from "./type";
+import { IMemberLimit, MemberTabs } from "./type";
 
 defineOptions({
   name: "MemberSelectDialog",
@@ -26,15 +27,12 @@ const props = withDefaults(
     showTabs?: MemberTabs | number,
     showCascade?: boolean;
     multiple?: boolean;
-    selectScope?: string;
-    scopeDepartments?: ISelectedTag[];
+    limit?: IMemberLimit;
   }>(),
   {
     showTabs: 7,
     showCascade: false,
-    multiple: true,
-    selectScope: "all",
-    scopeDepartments: () => []
+    multiple: true
   }
 );
 

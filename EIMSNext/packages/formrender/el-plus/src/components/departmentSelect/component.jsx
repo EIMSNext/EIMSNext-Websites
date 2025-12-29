@@ -26,11 +26,11 @@ export default defineComponent({
       type: Boolean,
       default: undefined,
     },
-    selectScope: {
+    limitType: {
       type: String,
       default: "all",
     },
-    scopeDepartments: {
+    limitScope: {
       type: Array,
       default: () => [],
     },
@@ -101,7 +101,10 @@ export default defineComponent({
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
       // 计算最终的禁用状态：禁用属性或查看模式
       const isDisabled = disabled || isPreviewMode.value;
-
+      const limit = { depts: undefined };
+      if (props.limitType == "custom" && props.limitScope?.length > 0) {
+        limit.depts = props.limitScope;
+      }
       return (
         <div style={{ width: "100%" }}>
           <div
@@ -167,8 +170,8 @@ export default defineComponent({
               }
               showTabs={MemberTabs.Department | MemberTabs.CurDept}
               multiple={multiple}
-              selectScope={props.selectScope}
-              scopeDepartments={props.scopeDepartments}
+              limit={limit}
+              limitScope={props.limitScope}
               onOk={handleDepartmentChange}
               onCancel={handleDeptCancel}
             />
