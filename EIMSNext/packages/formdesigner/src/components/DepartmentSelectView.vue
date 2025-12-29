@@ -1,6 +1,10 @@
 <template>
   <div class="fc-department-select-view">
-    <div class="fc-department-select-content" @click="handleClick">      
+    <div 
+      class="fc-department-select-content" 
+      :class="{ 'has-selection': selectedDepartments && selectedDepartments.length > 0 }"
+      @click="handleClick"
+    >      
       <template v-if="selectedDepartments && selectedDepartments.length > 0">
         <div 
           v-for="(dept, index) in selectedDepartments" 
@@ -8,6 +12,7 @@
           class="fc-department-tag"
           @click.stop="handleTagClick"
         >
+          <et-icon icon="el-icon-UserFilled" class="fc-department-tag-icon" ></et-icon>
           {{ dept.label }}
         </div>
       </template>
@@ -146,21 +151,42 @@ export default {
   color: #909399;
   font-size: 14px;
   line-height: 24px;
+  
+  &.has-selection {
+    justify-content: flex-start;
+  }
 }
 
 .fc-department-tag {
-  background-color: #ecf5ff;
-  color: #409eff;
-  padding: 4px 10px;
-  border-radius: 10px;
+  background: #F5F6F8;
+  color: #525559;
+  padding: 0 8px;
+  border-radius: 4px;
   margin-right: 8px;
   margin-bottom: 8px;
   font-size: 12px;
+  height: 24px;
+  line-height: 24px;
+  border: 1px solid #D7E3FD;
   cursor: pointer;
   align-items: center;
   justify-content: flex-start;
   flex-wrap: wrap;
   gap: 4px;
+  display: inline-flex;
+  align-items: center;
+  .dept-icon {
+    background-color: #e6f8f5;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+    font-size: 12px;
+    color: #4ac7b1;
+  }
 }
 
 .fc-department-placeholder {
@@ -168,5 +194,9 @@ export default {
   font-size: 14px;
   line-height: 24px;
   cursor: pointer;
+}
+.fc-department-tag-icon{
+  color: #52B59A;
+  margin-right: 4px;
 }
 </style>
