@@ -27,6 +27,7 @@ const props = withDefaults(
 );
 
 const actions = ref<FormActionSettings>({ draft: { text: "common.wfProcess.saveDraft" }, submit: { text: "common.wfProcess.submit" }, reset: { text: "common.reset" } })
+
 const appId = ref("");
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());

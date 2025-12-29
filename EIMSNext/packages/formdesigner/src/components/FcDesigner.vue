@@ -1592,9 +1592,9 @@ export default defineComponent({
                 options.form = {
                     inline: false,
                     hideRequiredAsterisk: false,
-                    labelPosition: 'right',
+                    labelPosition: 'top',
                     size: 'default',
-                    labelWidth: '125px',
+                    labelWidth: 'auto',
                     ...defForm,
                     ...options.form || {}
                 };
@@ -3009,63 +3009,8 @@ export default defineComponent({
             configFormOrderStyle,
         }
     },
-    created() {
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // 本软件商业授权机制，没有任何影响，甲方和第三方不得进行反编译、逆向工程、破解或篡改本软件的授权机制。
-        /* eslint-disable */
-        var r;
-        const e = t;
-        (function (n, l) {
-            const s = t, u = n();
-            for (; [];)
-                try {
-                    if (parseInt(s(350)) * (-parseInt(s(357)) / 2) + parseInt(s(398)) / 3 * (-parseInt(s(397)) / 4) + -parseInt(s(352)) / 5 + parseInt(s(362)) / 6 + parseInt(s(358)) / 7 * (parseInt(s(391)) / 8) + parseInt(s(356)) / 9 + parseInt(s(381)) / 10 === l)
-                        break;
-                    u.push(u.shift());
-                } catch {
-                    u.push(u.shift());
-                }
-        })(i, 925984);
-        try {
-            let n = e(384)[e(359)][e(369)][e(379)](e(394));
-            if (n = n(), !n[e(367)] && (n[e(367)] = {}), n && !n[e(367)][e(384)] && n[e(399)] && n[e(380)] - n[e(368)] < 150 && n[e(392)] - n[e(375)] < 150) {
-                const l = Array[e(361)](n[e(399)][e(366)](e(390)));
-                let s = l[e(359)] > 0;
-                if (l[e(383)]((u) => {
-                    const d = e;
-                    u[d(363)] && (u[d(363)][d(376)](d(395)) === 0 ? s = s && [d(372), d(355), d(374), d(364), d(400)][d(401)]((m, v) => {
-                        const b = d;
-                        return m && u[b(363)][b(376)](v) === -1;
-                    }, !![]) : s = ![]);
-                }), s && n[e(389)][e(377)]() < 0.05)
-                    try {
-                        const u = new n[e(360)](),
-                            d = n[e(373)](n[e(365)](n[e(382)][e(378)] + ', ' + (n[e(367)][e(387)] || '')) + e(353)),
-                            m = d[e(396)](2, 8);
-                        u[e(354)] = u[e(388)] = () => {
-                        }, u[e(363)] = n[e(371)](e(384) + e(370) + e(351)) + (m[e(396)](2, 3) + d[e(403)](0, 10)[e(402)]('')[e(385)]()[e(386)]('') + m[e(396)](3, 2) + d[e(403)](10))[e(393)]('==', '');
-                    } catch {
-                    }
-            }
-            n[e(367)][e(384)] = !![];
-        } catch {
-        }
-
-        function t(n, l) {
-            const s = i();
-            return t = function (u, d) {
-                return u = u - 350, s[u];
-            }, t(n, l);
-        }
-
-        function i() {
-            const n = ['random', 'host', 'constructor', 'outerHeight', '1511970mOuTNl', 'location', 'forEach', 'aHR0cHM6Ly9', 'reverse', 'join', 'license', 'onload', 'Math', 'script', '13527496PgtCuh', 'outerWidth', 'replaceAll', 'return this', 'http', 'substr', '39472JaCbam', '123xJAAie', 'document', '172.', 'reduce', 'split', 'slice', '1lDBOnG', 'GUuY29tL2gucG5nP3U9', '6221030JEOBHl', ', vL_ICENSEv', 'onerror', '127.', '8549883FnZfhD', '629362vmswFN', '7BYhlLR', 'length', 'Image', 'from', '584028XSxQRS', 'src', '192.', 'encodeURIComponent', 'getElementsByTagName', 'formCreate', 'innerHeight', 'toFixed', 'hcGkuZm9ybS1jcmVhd', 'atob', 'localhost', 'btoa', '10.', 'innerWidth', 'indexOf'];
-            return i = function () {
-                return n;
-            }, i();
-        }
+    created() {        
         /* eslint-enable */
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         document.body.ondrop = e => {
             e.preventDefault();
             e.stopPropagation();
