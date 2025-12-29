@@ -12,7 +12,7 @@
         </div>
       </template>
       <template v-else>
-        <el-button type="primary" link size="small">+ 选择部门</el-button>
+        <div class="fc-department-placeholder">+ 选择部门</div>
       </template>
     </div>
     
@@ -124,24 +124,28 @@ export default {
 
 <style scoped>
 .fc-department-select-view {
-
-  padding: 10px;
+  padding: 0;
+  width:100%;
   display: flex;
   align-items: center;
 }
 
 .fc-department-select-content {
   width: 100%;
-  padding: 3px;
+  padding: 8px 12px;
   border: 1px dashed #dcdfe6;
   border-radius: 4px;
   min-height: 32px;
   max-height: 110px; /* 大约3行高度 */
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   cursor: pointer;
   overflow-y: auto;
+  color: #909399;
+  font-size: 14px;
+  line-height: 24px;
 }
 
 .fc-department-tag {
@@ -157,5 +161,12 @@ export default {
   justify-content: flex-start;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.fc-department-placeholder {
+  color: #909399;
+  font-size: 14px;
+  line-height: 24px;
+  cursor: pointer;
 }
 </style>

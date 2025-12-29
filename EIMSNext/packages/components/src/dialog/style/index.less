@@ -47,8 +47,23 @@
     justify-content: space-between;
 
     .footer-left {
+      display: flex;
+      gap: 12px;
+      .el-button {
+        margin: 0;
+        color: var(--color-text); /* 确保按钮文字颜色 */
+      }
     }
     .footer-right {
+      display: flex;
+      gap: 12px;
+      .el-button {
+        margin: 0;
+        color: var(--color-text); /* 确保按钮文字颜色 */
+        &.el-button--primary {
+          color: #fff !important; /* 确保主要按钮文字为白色 */
+        }
+      }
     }
   }
 }
@@ -74,8 +89,23 @@
     justify-content: space-between;
 
     .footer-left {
+      display: flex;
+      gap: 12px;
+      .el-button {
+        margin: 0;
+        color: var(--color-text); /* 确保按钮文字颜色 */
+      }
     }
     .footer-right {
+      display: flex;
+      gap: 12px;
+      .el-button {
+        margin: 0;
+        color: var(--color-text); /* 确保按钮文字颜色 */
+        &.el-button--primary {
+          color: #fff !important; /* 确保主要按钮文字为白色 */
+        }
+      }
     }
   }
   .confirm-content{

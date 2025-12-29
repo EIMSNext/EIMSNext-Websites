@@ -32,18 +32,7 @@ export default {
       {
         type: "DefaultValueConfig",
       },
-      {
-        type: "CheckBoxInput",
-        field: "readonly",
-        wrap: { show: false },
-      },
-      {
-        type: "CheckBoxInput",
-        field: "disabled",
-        wrap: { show: false },
-      },
-      {
-        type: "select",
+      { type: "select",
         field: "selectScope",
         title: "可选范围",
         options: [
@@ -58,6 +47,7 @@ export default {
                 type: "departmentSelect",
                 field: "scopeDepartments",
                 title: "",
+                wrap: { class: "_fd-default-value" },
                 props: {
                   placeholder: "+选择部门",
                   mode: "custom",
@@ -67,6 +57,16 @@ export default {
             ]
           }
         ]
+      },
+      {
+        type: "CheckBoxInput",
+        field: "readonly",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "disabled",
+        wrap: { show: false },
       }
     ]);
   },

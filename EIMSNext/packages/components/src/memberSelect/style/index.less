@@ -3,6 +3,19 @@
 .member-select-dialog {
   width: 750px;
 
+  // 确保对话框底部按钮在一行上显示
+  :deep(.el-dialog__footer) {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    flex-direction: row !important;
+    
+    // 确保按钮在一行上显示
+    .el-button {
+      margin: 0 !important;
+    }
+  }
+
   .member-select {
     width: 100%;
     height: 480px;
