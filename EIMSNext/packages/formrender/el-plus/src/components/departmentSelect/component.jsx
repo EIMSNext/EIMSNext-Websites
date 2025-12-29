@@ -26,6 +26,14 @@ export default defineComponent({
       type: Boolean,
       default: undefined,
     },
+    selectScope: {
+      type: String,
+      default: "all",
+    },
+    scopeDepartments: {
+      type: Array,
+      default: () => [],
+    },
     // 从FormRender的prop.props中接收formCreateInject
     formCreateInject: {
       type: Object,
@@ -159,6 +167,8 @@ export default defineComponent({
               }
               showTabs={MemberTabs.Department | MemberTabs.CurDept}
               multiple={multiple}
+              selectScope={props.selectScope}
+              scopeDepartments={props.scopeDepartments}
               onOk={handleDepartmentChange}
               onCancel={handleDeptCancel}
             />

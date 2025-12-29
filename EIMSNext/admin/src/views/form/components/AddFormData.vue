@@ -24,7 +24,7 @@ const props = withDefaults(
   }
 );
 
-const actions = ref<FormActionSettings>({ draft: { text: "SaveDraft", visible: true }, submit: { text: "Submit", visible: true }, reset: { text: "Reset", visible: true } })
+const actions = ref<FormActionSettings>({ draft: { text: "保存草稿", visible: true }, submit: { text: "提交", visible: true }, reset: { text: "重置", visible: true } })
 const appId = ref("");
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());

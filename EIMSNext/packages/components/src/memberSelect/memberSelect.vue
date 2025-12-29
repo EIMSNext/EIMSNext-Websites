@@ -136,11 +136,15 @@ const props = withDefaults(
     showTabs?: MemberTabs | number,
     showCascade?: boolean;
     multiple?: boolean;
+    selectScope?: string;
+    scopeDepartments?: ISelectedTag[];
   }>(),
   {
     showTabs: 7,
     showCascade: false,
-    multiple: true
+    multiple: true,
+    selectScope: "all",
+    scopeDepartments: () => []
   }
 );
 const userStore = useUserStore()
@@ -173,15 +177,104 @@ watch([keyword], ([newKeyword], [oldKeyword]) => {
   }
 });
 
+// 根据可选范围过滤部门树
+const filterDeptTreeByScope = (treeData: ITreeNode[]): ITreeNode[] => {
+  if (props.selectScope === "all" || !props.scopeDepartments || props.scopeDepartments.length === 0) {
+    return treeData;
+  }
+
+  const scopeDeptIds = props.scopeDepartments.map(dept => dept.id);
+  
+  // 收集所有需要显示的部门ID，包括选中的部门及其所有父部门
+  const requiredDeptIds = new Set<string>();
+  
+  // 递归查找并添加节点及其所有父节点到requiredDeptIds中
+  const addNodeAndParents = (node: ITreeNode) => {
+    requiredDeptIds.add(node.id);
+    
+    // 查找父节点
+    const findParentNode = (parentNode: ITreeNode): boolean => {
+      if (parentNode.children) {
+        for (const child of parentNode.children) {
+          if (child.id === node.id) {
+            requiredDeptIds.add(parentNode.id);
+            // 递归查找父节点的父节点
+            addNodeAndParents(parentNode);
+            return true;
+          }
+          if (findParentNode(child)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    
+    // 遍历所有根节点查找父节点
+    for (const rootNode of treeData) {
+      if (rootNode.id === node.id) {
+        // 已经是根节点，不需要继续查找
+        return;
+      }
+      if (findParentNode(rootNode)) {
+        return;
+      }
+    }
+  };
+  
+  // 为每个选中的部门添加其所有父部门
+  const addAllRequiredNodes = (nodes: ITreeNode[]) => {
+    nodes.forEach(node => {
+      if (scopeDeptIds.includes(node.id)) {
+        addNodeAndParents(node);
+      }
+      if (node.children) {
+        addAllRequiredNodes(node.children);
+      }
+    });
+  };
+  
+  // 初始化requiredDeptIds
+  addAllRequiredNodes(treeData);
+  
+  // 过滤函数，递归检查节点是否应该保留
+  const filterNode = (node: ITreeNode): ITreeNode | null => {
+    // 如果节点是requiredDeptIds中的一员，或者是requiredDeptIds中某个节点的子节点
+    if (requiredDeptIds.has(node.id)) {
+      // 过滤子节点，只保留符合条件的子节点
+      const filteredChildren = node.children
+        ?.map(child => filterNode(child))
+        .filter((child): child is ITreeNode => child !== null);
+      
+      return {
+        ...node,
+        children: filteredChildren
+      };
+    }
+    
+    // 否则不保留
+    return null;
+  };
+  
+  // 遍历所有根节点，过滤出符合条件的节点
+  return treeData
+    .map(node => filterNode(node))
+    .filter((node): node is ITreeNode => node !== null);
+};
+
 onBeforeMount(() => {
   deptStore.load().then((data: Department[]) => {
     let detps = buildDeptTree(data);
-    deptData.value = JSON.parse(JSON.stringify(detps));
-    empDeptData.value = JSON.parse(JSON.stringify(detps));
+    const filteredDeptData = filterDeptTreeByScope(detps);
+    deptData.value = JSON.parse(JSON.stringify(filteredDeptData));
+    empDeptData.value = JSON.parse(JSON.stringify(filteredDeptData));
 
     if (userStore.currentUser.deptId) {
       deptStore.get(userStore.currentUser.deptId).then(x => {
-        if (x) curDeptData.value = [DeptToTreeNode(x)]
+        if (x) {
+          const curDeptNode = [DeptToTreeNode(x)];
+          curDeptData.value = filterDeptTreeByScope(curDeptNode);
+        }
       })
     }
     if (userStore.currentUser) {
@@ -196,6 +289,9 @@ onBeforeMount(() => {
       }
       curEmpData.value = [EmployeeToListItem(emp)]
     }
+    
+    // 部门树数据加载完成后，手动触发一次选中状态的设置
+    setSelectedNodes();
   });
 
   let roleGroups: RoleGroup[] = [];
@@ -204,7 +300,11 @@ onBeforeMount(() => {
     roleGroupService.query<RoleGroup>().then(data => { roleGroups = data }),
     roleService.query<Role>().then(data => { roles = data })
   ]
-  ).then(() => roleData.value = buildRoleTree(roleGroups, roles))
+  ).then(() => {
+    roleData.value = buildRoleTree(roleGroups, roles);
+    // 角色树数据加载完成后，手动触发一次选中状态的设置
+    setSelectedNodes();
+  })
 
   if (!props.multiple && props.modelValue?.length > 0) {
     if (props.modelValue[0].type == TagType.Department)
@@ -212,60 +312,59 @@ onBeforeMount(() => {
   }
 });
 
-// 监听选中标签变化，同步更新当前tab的树组件选中状态
-watch([() => tagsRef.value, activeTab], () => {
+// 手动设置选中节点
+const setSelectedNodes = () => {
   // 确保树数据已加载
   if (!deptData.value || !roleData.value) return;
   
-  // 获取当前激活的树组件
-  let currentTree: TreeInstance | undefined;
-  let isRoleTree = false;
-  
-  switch (activeTab.value) {
-    case MemberTabs.Department:
-      currentTree = deptTree.value;
-      isRoleTree = false;
-      break;
-    case MemberTabs.Role:
-      currentTree = roleTree.value;
-      isRoleTree = true;
-      break;
-    case MemberTabs.CurDept:
-      currentTree = curDeptTree.value;
-      isRoleTree = false;
-      break;
-    default:
-      return;
-  }
-  
-  if (!currentTree) return;
-  
-  // 获取当前类型的选中项ID列表
-  const selectedIds = tagsRef.value
-    .filter(tag => {
-      return isRoleTree ? tag.type === TagType.Role : tag.type === TagType.Department;
-    })
+  // 获取部门类型的选中项ID列表
+  const departmentSelectedIds = tagsRef.value
+    .filter(tag => tag.type === TagType.Department)
     .map(tag => tag.id);
   
+  // 获取角色类型的选中项ID列表
+  const roleSelectedIds = tagsRef.value
+    .filter(tag => tag.type === TagType.Role)
+    .map(tag => tag.id);
+  
+  // 如果是单选模式，设置singleDeptId
+  if (!props.multiple && departmentSelectedIds.length > 0) {
+    singleDeptId.value = departmentSelectedIds[0];
+  }
+  
   // 遍历树节点，设置选中状态
-  const setNodeChecked = (nodes: any[]) => {
+  const setNodeChecked = (tree: TreeInstance | undefined, nodes: any[], selectedIds: string[]) => {
+    if (!tree || !nodes) return;
+    
     nodes.forEach(node => {
       // 设置当前节点的选中状态
       const isChecked = selectedIds.includes(node.id);
-      currentTree!.setChecked(node, isChecked, false);
+      tree.setChecked(node, isChecked, false);
       
       // 递归处理子节点
       if (node.children && node.children.length > 0) {
-        setNodeChecked(node.children);
+        setNodeChecked(tree, node.children, selectedIds);
       }
     });
   };
   
-  // 根据树类型获取数据
-  const treeData = isRoleTree ? roleData.value : activeTab.value === MemberTabs.CurDept ? curDeptData.value : deptData.value;
-  if (treeData) {
-    setNodeChecked(treeData);
+  // 设置所有部门树的选中状态
+  setNodeChecked(deptTree.value, deptData.value, departmentSelectedIds);
+  if (curDeptData.value) {
+    setNodeChecked(curDeptTree.value, curDeptData.value, departmentSelectedIds);
   }
+  
+  // 设置角色树的选中状态
+  setNodeChecked(roleTree.value, roleData.value, roleSelectedIds);
+};
+
+// 监听选中标签变化，同步更新所有树组件的选中状态
+watch([() => tagsRef.value, activeTab], () => {
+  // 确保树数据已加载
+  if (!deptData.value || !roleData.value) return;
+  
+  // 直接调用setSelectedNodes函数，确保所有树组件的选中状态都正确设置
+  setSelectedNodes();
 });
 
 const emit = defineEmits(["update:modelValue"]);

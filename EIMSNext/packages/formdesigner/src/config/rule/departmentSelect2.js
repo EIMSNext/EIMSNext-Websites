@@ -22,6 +22,8 @@ export default {
       props: {
         multiple: true,
         placeholder: "+ 选择部门",
+        selectScope: "all",
+        scopeDepartments: []
       },
     };
   },
@@ -33,6 +35,32 @@ export default {
         wrap: { show: false },
         title: t("props.disabled"),
       },
+      {
+        type: "select",
+        field: "selectScope",
+        title: "可选范围",
+        options: [
+          { label: "全部部门", value: "all" },
+          { label: "自定义", value: "custom" }
+        ],
+        control: [
+          {
+            value: "custom",
+            rule: [
+              {
+                type: "departmentSelect",
+                field: "scopeDepartments",
+                title: "",
+                props: {
+                  placeholder: "+选择部门",
+                  mode: "custom",
+                  showTags: true
+                }
+              }
+            ]
+          }
+        ]
+      }
     ]);
   },
 };

@@ -2,7 +2,7 @@
   <et-dialog :model-value="modelValue" class="member-select-dialog" title="部门成员列表" destroy-on-close width="750px"
     @cancel="cancel" @ok="save">
     <div style="padding: 12px 20px">
-      <member-select v-model="tagsRef" :showTabs="showTabs" :showCascade="showCascade" :multiple="multiple" />
+      <member-select v-model="tagsRef" :showTabs="showTabs" :showCascade="showCascade" :multiple="multiple" :selectScope="selectScope" :scopeDepartments="scopeDepartments" />
     </div>
     <template #footer-left>
       <el-button @click="openLink">通讯录</el-button>
@@ -26,11 +26,15 @@ const props = withDefaults(
     showTabs?: MemberTabs | number,
     showCascade?: boolean;
     multiple?: boolean;
+    selectScope?: string;
+    scopeDepartments?: ISelectedTag[];
   }>(),
   {
     showTabs: 7,
     showCascade: false,
-    multiple: true
+    multiple: true,
+    selectScope: "all",
+    scopeDepartments: () => []
   }
 );
 
