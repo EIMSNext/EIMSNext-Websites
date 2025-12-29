@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'ConfigTitle',
@@ -13,15 +13,17 @@ export default defineComponent({
 </script>
 
 <style>
-._fd-config-title{
+._fd-config-title {
     display: flex;
     align-items: center;
-    margin: 26px 0 16px;
+    margin: 16px 0;
     font-size: 14px;
+    font-weight: 600;
     padding-left: 10px;
     position: relative;
 }
-._fd-config-title:before{
+
+._fd-config-title:before {
     content: ' ';
     width: 2px;
     height: 20px;

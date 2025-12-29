@@ -103,6 +103,11 @@ const En = {
       "Dynamically calculates component states and data based on formulas and form data.",
   },
   computed: {
+    defaultValue: {
+      title: "Formula Link",
+      btn: "Formula Link",
+      name: "Set component value",
+    },
     value: {
       title: "Data linkage",
       btn: "Set data linkage",
@@ -637,13 +642,10 @@ const En = {
     _blank: "New Window",
     _parent: "Parent Window",
     _top: "Top Window",
-    is_hidden: "Hidden",
-    is_readonly: "Readonly",
-    is_clearable: "Clearable",
-    is_showTitle: "Display Title",
+    showTitle: "Display Title",
     v_custom: "Custom",
-    v_data: "数据联动",
-    v_formula: "Edit Formula",
+    v_datalink: "Data Link",
+    v_formula: "Formula Link",
   },
   slots: {
     prefix: "Prefix",
@@ -789,11 +791,12 @@ const En = {
       props: {
         input: "Whether to fill in",
         type: "Type",
-        disabled: "Disabled",
         min: "Minimum number that can be checked",
         max: "The maximum number that can be checked",
         textColor: "Font color when the button is active",
         fill: "Border and background color when the button is active",
+        readonly: "Readonly",
+        disabled: "Disabled",
       },
     },
     col: {
@@ -823,20 +826,20 @@ const En = {
       name: "Date Picker",
       props: {
         pickerOptions: "Options specific to the current time and date picker",
-        readonly: "Readonly",
-        disabled: "Disabled",
         type: "Type",
         editable: "Text box can be input",
         clearable: "Whether to display the clear button",
-        placeholder: "Placeholder content for non-range selection",
+        placeholder: "Placeholder",
         startPlaceholder:
           "Placeholder content for the start date when selecting the range",
         endPlaceholder:
           "Placeholder content for the end date when selecting the range",
-        format: "Format displayed in the input box",
+        format: "Format",
         align: "Alignment",
         rangeSeparator: "Separator when selecting range",
         unlinkPanels: "Unlink the two date panels in the range selector",
+        readonly: "Readonly",
+        disabled: "Disabled",
       },
     },
     dateRange: {
@@ -937,7 +940,7 @@ const En = {
         label: "Title",
         disabled: "Disabled",
         name: "Identifier of the tab",
-        lazy: "Whether the label is delayed in rendering",
+        lazy: "Lazy rendering",
       },
     },
     elTabs: {
@@ -951,9 +954,9 @@ const En = {
       },
       props: {
         type: "Type",
-        closable: "Whether the label can be closed",
+        closable: "Tab Closable",
         tabPosition: "Tab position",
-        stretch: "Whether the width of the label is self-stretching",
+        stretch: "Self-stretching",
       },
     },
     elTag: {
@@ -1320,24 +1323,24 @@ const En = {
         maxlength: "Maximum input length",
         minlength: "Minimum input length",
         placeholder: "Placeholder",
-        clearable: "Whether to display the clear button",
         disabled: "Disabled",
         readonly: "Readonly",
-        value: "Default value",
+        clearable: "Clearable",
       },
     },
     number: {
       name: "Number",
       props: {
-        precision: "Precision of input value",
+        precision: "Precision",
         min: "Set the minimum value allowed for the counter",
         max: "Set the maximum allowed value of the counter",
         step: "Step",
         stepStrictly: "Whether only multiples of step can be entered",
-        disabled: "Disabled",
-        controls: "Whether to use control buttons",
+        controls: "Use control buttons",
         controlsPosition: "Control button position",
         placeholder: "Placeholder",
+        readonly: "Readonly",
+        disabled: "Disabled",
       },
     },
     password: {
@@ -1359,10 +1362,11 @@ const En = {
       name: "Radio",
       props: {
         input: "Whether to fill in",
-        disabled: "Disabled",
         type: "Type",
         textColor: "Text color when button form is activated",
         fill: "Fill color and border color when the button form is activated",
+        readonly: "Readonly",
+        disabled: "Disabled",
       },
     },
     rate: {
@@ -1386,14 +1390,13 @@ const En = {
       name: "Single Select",
       props: {
         // multiple: "Whether there are multiple selections",
-        disabled: "Disabled",
         clearable: "Whether the option can be cleared",
         collapseTags:
           "Whether to display the selected value as text during multi-selection",
         multipleLimit:
           "The maximum number of items that the user can select when multiple-selecting, if it is 0, there is no limit",
         placeholder: "Placeholder",
-        filterable: "Is it searchable",
+        filterable: "Searchable",
         allowCreate: "Whether users are allowed to create new entries",
         noMatchText: "Text displayed when no search conditions match",
         noDataText: "Text displayed when option is empty",
@@ -1403,6 +1406,8 @@ const En = {
           "Press Enter in the input box and select the first matching item",
         remote: "Whether the options are loaded remotely from the server",
         remoteMethod: "Custom remote search methods",
+        readonly: "Readonly",
+        disabled: "Disabled",
       },
     },
     select2: {
@@ -1412,14 +1417,13 @@ const En = {
       },
       props: {
         // multiple: "Whether there are multiple selections",
-        disabled: "Disabled",
         clearable: "Whether the option can be cleared",
         collapseTags:
           "Whether to display the selected value as text during multi-selection",
         multipleLimit:
           "The maximum number of items that the user can select when multiple-selecting, if it is 0, there is no limit",
         placeholder: "Placeholder",
-        filterable: "Is it searchable",
+        filterable: "Searchable",
         allowCreate: "Whether users are allowed to create new entries",
         noMatchText: "Text displayed when no search conditions match",
         noDataText: "Text displayed when option is empty",
@@ -1429,6 +1433,8 @@ const En = {
           "Press Enter in the input box and select the first matching item",
         remote: "Whether the options are loaded remotely from the server",
         remoteMethod: "Custom remote search methods",
+        readonly: "Readonly",
+        disabled: "Disabled",
       },
     },
     slider: {
@@ -1498,24 +1504,28 @@ const En = {
     departmentSelect: {
       name: "Department Single Select",
       props: {
+        readonly: "Readonly",
         disabled: "Disabled",
       },
     },
     departmentSelect2: {
       name: "Department Multiple Select",
       props: {
+        readonly: "Readonly",
         disabled: "Disabled",
       },
     },
     employeeSelect: {
       name: "Employee Single Select",
       props: {
+        readonly: "Readonly",
         disabled: "Disabled",
       },
     },
     employeeSelect2: {
       name: "Employee Multiple Select",
       props: {
+        readonly: "Readonly",
         disabled: "Disabled",
       },
     },
@@ -1701,6 +1711,7 @@ const En = {
         placeholder: "Placeholder",
         rows: "Number of input box rows",
         autosize: "Whether the height is adaptive",
+        clearable: "Clearable",
       },
     },
     timePicker: {
@@ -1777,6 +1788,23 @@ const En = {
       slots: {
         tip: "Description",
       },
+      props: {
+        listType: "Upload type",
+        multiple: "Whether multiple selection of files is supported",
+        action: "Upload address (required)",
+        beforeUpload: "Triggered before uploading a file",
+        onSuccess: "Triggered when the upload is successful",
+        beforeRemove: "Triggered before deleting a file",
+        headers: "Set upload request headers",
+        data: "Extra parameters attached when uploading",
+        name: "Uploaded file field name",
+        withCredentials: "Support sending cookie credential information",
+        accept: "Accept uploaded file types",
+        autoUpload: "Whether to upload the file immediately after selecting it",
+        limit: "Maximum number of uploads allowed",
+        readonly: "Readonly",
+        disabled: "Disabled",
+      },
     },
     fileupload: {
       name: "File",
@@ -1804,8 +1832,9 @@ const En = {
         withCredentials: "Support sending cookie credential information",
         accept: "Accept uploaded file types",
         autoUpload: "Whether to upload the file immediately after selecting it",
-        disabled: "Disabled",
         limit: "Maximum number of uploads allowed",
+        readonly: "Readonly",
+        disabled: "Disabled",
       },
     },
     audioBox: {

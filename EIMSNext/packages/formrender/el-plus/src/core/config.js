@@ -16,7 +16,7 @@ export default function getConfig() {
             loading: false,
             disabled: false,
             innerText: '',
-            show: true,
+            show: false,
             col: undefined,
             click: undefined,
         },

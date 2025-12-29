@@ -1,6 +1,6 @@
 <template>
   <Layout>
-    <div class="dashboard-container">
+    <div class="workspace-container">
       <el-row :gutter="10" class="mt-5">
         <el-col :span="24">
           <MyTasksCard></MyTasksCard>
@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 defineOptions({
-  name: "Dashboard",
+  name: "Workspace",
   inheritAttrs: false,
 });
 import { useRouter } from "vue-router";
@@ -43,7 +43,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.dashboard-container {
+.workspace-container {
   position: relative;
   padding: 24px;
 

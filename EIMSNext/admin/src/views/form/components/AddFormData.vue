@@ -12,6 +12,8 @@ import { FormDef, FormData, FormContent, FormDataRequest, DataAction } from "@ei
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -24,7 +26,8 @@ const props = withDefaults(
   }
 );
 
-const actions = ref<FormActionSettings>({ draft: { text: "保存草稿", visible: true }, submit: { text: "提交", visible: true }, reset: { text: "重置", visible: true } })
+const actions = ref<FormActionSettings>({ draft: { text: "common.wfProcess.saveDraft" }, submit: { text: "common.wfProcess.submit" }, reset: { text: "common.reset" } })
+
 const appId = ref("");
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());
@@ -72,6 +75,15 @@ const saveDraft = (data: any) => {
   });
 };;
 const submitData = (data: any) => {
+  if (actions.value.draft)
+    actions.value.draft.disabled = true
+
+  if (actions.value.submit)
+    actions.value.submit.disabled = true
+
+  if (actions.value.reset)
+    actions.value.reset.disabled = true
+
   let fdata: FormDataRequest = {
     action: DataAction.Submit,
     id: props.data?.id ?? "",

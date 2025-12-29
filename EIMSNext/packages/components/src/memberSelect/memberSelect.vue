@@ -104,7 +104,7 @@
           <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.CurUser)" label="当前用户" :name="MemberTabs.CurUser">
             <div class="dept-select">
               <et-list v-model="selectedEmps" :data="curEmpData" :selectable="true" :multiple="multiple"
-                style="border: none;" @item-check="empChecked" @all-check="curEmpCheckAll">
+                :showCount="false" style="border: none;" @item-check="empChecked" @all-check="curEmpCheckAll">
               </et-list>
             </div>
           </el-tab-pane>
@@ -606,7 +606,7 @@ const handleNodeClick = (node: any, data: ITreeNode, filterFn: (value: string, d
 
   // 根据当前选中状态切换
   const newCheckedState = !node.checked;
-  
+
   if (isRole) {
     // 角色选择
     if (roleTree.value) {

@@ -2,14 +2,16 @@
   <div v-click-outside="onClickOutside">
     <FieldSortList v-model="sortList" :form-id="formId" @change="onChange"></FieldSortList>
     <div class="actions">
-      <el-button type="primary" @click="onSort">排序</el-button>
-      <el-button>删除全部</el-button>
+      <el-button type="primary" @click="onSort">{{ t("common.sort") }}</el-button>
+      <el-button>{{ t("common.deleteAll") }}</el-button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { IFieldSortList } from "@eimsnext/components";
 import { ClickOutside as vClickOutside } from "element-plus";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineOptions({
   name: "DataFilter",

@@ -1,18 +1,16 @@
 <template>
     <div class="_fd-struct">
         <el-badge type="warning" is-dot :hidden="!configured">
-            <div @click="visible=true">
+            <div @click="visible = true">
                 <slot>
-                    <el-button class="_fd-plain-button" plain size="small">
+                    <el-button class="_fd-plain-button" plain>
                         {{ title || t('struct.title') }}
                     </el-button>
                 </slot>
             </div>
         </el-badge>
         <el-dialog class="_fd-struct-dialog _fd-config-dialog" :title="title || t('struct.title')" v-model="visible"
-                   destroy-on-close
-                   :close-on-click-modal="false"
-                   append-to-body width="800px">
+            destroy-on-close :close-on-click-modal="false" append-to-body width="800px">
             <div ref="editor" v-if="visible"></div>
             <template #footer>
                 <div>
@@ -28,9 +26,9 @@
 import 'codemirror/lib/codemirror.css';
 import CodeMirror from 'codemirror/lib/codemirror';
 import 'codemirror/mode/javascript/javascript';
-import {deepParseFn, toJSON} from '../utils/index';
+import { deepParseFn, toJSON } from '../utils/index';
 import { deepCopy, is } from '@eimsnext/form-render-core';
-import {defineComponent, markRaw} from 'vue';
+import { defineComponent, markRaw } from 'vue';
 import errorMessage from '../utils/message';
 import beautify from 'js-beautify';
 

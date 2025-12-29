@@ -124,15 +124,17 @@ export default {
 
 <style scoped>
 .fc-department-select-view {
+
   padding: 10px;
   display: flex;
   align-items: center;
 }
 
 .fc-department-select-content {
-  border: 1px solid #dcdfe6;
+  width: 100%;
+  padding: 3px;
+  border: 1px dashed #dcdfe6;
   border-radius: 4px;
-  padding: 8px 12px;
   min-height: 32px;
   max-height: 110px; /* 大约3行高度 */
   display: flex;
@@ -151,5 +153,9 @@ export default {
   margin-bottom: 8px;
   font-size: 12px;
   cursor: pointer;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 </style>

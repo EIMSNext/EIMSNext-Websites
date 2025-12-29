@@ -188,6 +188,7 @@ export const useTagsViewStore = defineStore("tagsView", () => {
       const affixTags = visitedViews.value.filter((tag) => tag?.affix);
       visitedViews.value = affixTags;
       cachedViews.value = [];
+      console.log("vis", visitedViews);
       resolve({
         visitedViews: [...visitedViews.value],
         cachedViews: [...cachedViews.value],
@@ -242,7 +243,7 @@ export const useTagsViewStore = defineStore("tagsView", () => {
     } else {
       // now the default is to redirect to the home page if there is no tags-view,
       // you can adjust it according to your needs.
-      if (view?.name === "Dashboard") {
+      if (view?.name === "workspace") {
         // to reload home page
         router.replace("/redirect" + view.fullPath);
       } else {
