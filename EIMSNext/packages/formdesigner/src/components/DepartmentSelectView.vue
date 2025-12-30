@@ -101,9 +101,16 @@ export default {
     
     // 部门选择确认
     const handleDepartmentChange = (departments) => {
-      selectedDepartments.value = departments;
-      emit('update:modelValue', departments);
-      emit('change', departments);
+      // 过滤部门数据，只保留需要的字段，移除不必要的data对象
+      const processedDepartments = departments.map(dept => {
+        // 只保留id, code, label, type字段，移除其他字段（包括data）
+        const { id, code, label, type } = dept;
+        return { id, code, label, type };
+      });
+      
+      selectedDepartments.value = processedDepartments;
+      emit('update:modelValue', processedDepartments);
+      emit('change', processedDepartments);
       showDialog.value = false;
     };
     
