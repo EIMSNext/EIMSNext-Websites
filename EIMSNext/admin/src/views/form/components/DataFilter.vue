@@ -8,14 +8,16 @@
       @change="onChange"
     ></ConditionList>
     <div class="actions">
-      <el-button type="primary" @click="onSearch">筛选</el-button>
-      <el-button>重置</el-button>
+      <el-button type="primary" @click="onSearch">{{ t("common.filter") }}</el-button>
+      <el-button>{{ t("common.reset") }}</el-button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { IConditionList } from "@eimsnext/components";
 import { ClickOutside as vClickOutside } from "element-plus";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineOptions({
   name: "DataFilter",

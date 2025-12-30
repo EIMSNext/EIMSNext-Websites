@@ -7,7 +7,7 @@
             <et-icon icon="iconfont-mytodo" size="64px" color="#1296db" />
           </div>
           <div class="todo-count">
-            <div class="todo-count-text">我的待办</div>
+            <div class="todo-count-text">{{ t("common.wfProcess.mytasks") }}</div>
             <div class="todo-count-number">33</div>
           </div>
         </div>
@@ -16,15 +16,15 @@
       <div class="flow-steps">
         <div class="step-wrapper">
           <et-icon icon="iconfont-mystarted" size="40px" class="step-image" />
-          <div class="step-text">我发起的</div>
+          <div class="step-text">{{ t("common.wfProcess.mystarted") }}</div>
         </div>
         <div class="step-wrapper">
           <et-icon icon="iconfont-myapproved" size="40px" class="step-image" />
-          <div class="step-text">我处理的</div>
+          <div class="step-text">{{ t("common.wfProcess.myapproved") }}</div>
         </div>
         <div class="step-wrapper">
           <et-icon icon="iconfont-mycced" size="40px" class="step-image" />
-          <div class="step-text">抄送我的</div>
+          <div class="step-text">{{ t("common.wfProcess.cctome") }}</div>
         </div>
         <div class="step-wrapper">
           <!-- <div class="step-text">待办委托</div> -->
@@ -34,6 +34,9 @@
   </et-card>
 </template>
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+const { t } = useI18n()
+
 defineOptions({
   name: "MyTasksCard",
 });

@@ -211,7 +211,7 @@ export default defineComponent({
 ._fd-drag-r {
     position: absolute;
     right: 0;
-    top: calc(100% - 20px);
+    top: 8px;
     padding: 0 2px 2px 0;
     z-index: 1904;
 }

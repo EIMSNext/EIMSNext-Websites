@@ -22,6 +22,8 @@ export default {
       props: {
         multiple: false,
         placeholder: "+ 选择部门",
+        limitType: "all",
+        limitScope: [],
       },
     };
   },
@@ -29,7 +31,31 @@ export default {
     return localeProps(t, name + ".props", [
       {
         type: "DefaultValueConfig",
-        field: "value",
+      },
+      {
+        type: "select",
+        field: "limitType",
+        title: "可选范围",
+        options: [
+          { label: "全部部门", value: "all" },
+          { label: "自定义", value: "custom" },
+        ],
+        control: [
+          {
+            value: "custom",
+            rule: [
+              {
+                type: "FcDepartmentSelect",
+                field: "limitScope",
+                title: "",
+                wrap: { class: "_fd-default-value" },
+                props: {
+                  multiple: true,
+                },
+              },
+            ],
+          },
+        ],
       },
       {
         type: "CheckBoxInput",

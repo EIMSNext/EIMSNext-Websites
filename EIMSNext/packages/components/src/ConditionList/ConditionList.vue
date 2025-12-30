@@ -17,11 +17,11 @@
       </div>
     </div>
     <div class="btn-add-item">
-      <el-link type="primary" underline="never" @click="addItem" style="margin-left: 15px">
+      <el-link type="primary" underline="never" class="add-item" @click="addItem">
         <et-icon icon="el-icon-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
         {{ t("computed.addCondition") }}
       </el-link>
-      <el-link v-if="groupLevel < maxLevel" type="primary" underline="never" @click="addGroup">
+      <el-link v-if="groupLevel < maxLevel" type="primary" underline="never" class="add-item" @click="addGroup">
         <et-icon icon="el-icon-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
         {{ t("computed.addGroup") }}
       </el-link>
@@ -166,6 +166,10 @@ watch(
     margin: 10px;
     display: flex;
     align-items: center;
+
+    .add-item {
+      margin-left: 15px;
+    }
   }
 }
 </style>

@@ -2,8 +2,8 @@ export default function getConfig() {
     return {
         form: {
             inline: false,
-            labelPosition: 'right',
-            labelWidth: '125px',
+            labelPosition: 'top',
+            labelWidth: 'auto',
             disabled: false,
             size: undefined,
         },
