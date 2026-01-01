@@ -233,12 +233,12 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     background-color: transparent;
-    color: var(--color-text-tertiary);
+    color: var(--et-color-text-tertiary);
 }
 
 ._fd-drag-btn:hover {
-    background-color: var(--color-info-bg);
-    color: var(--color-info);
+    background-color: var(--et-color-info-bg);
+    color: var(--et-color-info);
 }
 
 ._fd-drag-btn .el-dropdown {
@@ -251,12 +251,12 @@ export default defineComponent({
 
 ._fd-drag-danger {
     background-color: transparent;
-    color: var(--color-text-tertiary);
+    color: var(--et-color-text-tertiary);
 }
 
 ._fd-drag-danger:hover {
-    background-color: var(--color-error-bg);
-    color: var(--color-error);
+    background-color: var(--et-color-error-bg);
+    color: var(--et-color-error);
 }
 
 ._fd-drag-btn i {
