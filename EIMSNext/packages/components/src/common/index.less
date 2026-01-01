@@ -1,21 +1,21 @@
 @prefix: et;
 
 :root {
-  --color-primary: #409eff;
-  --color-primary-bg: #e6f8f5;
-  --color-text: #141e31;
-  --color-text-secondary: #525967;
-  --color-text-tertiary: #838892;
-  --color-warning: #f0a800;
-  --color-info: #2f7deb;
-  --color-info-bg: #eaf2fd;
-  --color-error: #eb5050;
-  --color-error-bg: #fdeeee;
-  --color--border: #dcdfe6;
+  --et-color-primary: #409eff;
+  --et-color-primary-bg: #e6f8f5;
+  --et-color-text: #141e31;
+  --et-color-text-secondary: #525967;
+  --et-color-text-tertiary: #838892;
+  --et-color-warning: #f0a800;
+  --et-color-info: #2f7deb;
+  --et-color-info-bg: #eaf2fd;
+  --et-color-error: #eb5050;
+  --et-color-error-bg: #fdeeee;
+  --et-color-border: #dcdfe6;
 }
 
 #colors() {
-  primary: var(--color-primary);
+  primary: var(--et-color-primary);
 }
 
 .no-padding {
@@ -38,18 +38,18 @@
 
 .btn-info {
   background-color: transparent;
-  color: var(--color-text-tertiary);
+  color: var(--et-color-text-tertiary);
   &:hover {
-    background-color: var(--color-info-bg) !important;
-    color: var(--color-info) !important;
+    background-color: var(--et-color-info-bg) !important;
+    color: var(--et-color-info) !important;
   }
 }
 
 .btn-delete {
   background-color: transparent;
-  color: var(--color-text-tertiary);
+  color: var(--et-color-text-tertiary);
   &:hover {
-    background-color: var(--color-error-bg) !important;
-    color: var(--color-error) !important;
+    background-color: var(--et-color-error-bg) !important;
+    color: var(--et-color-error) !important;
   }
 }

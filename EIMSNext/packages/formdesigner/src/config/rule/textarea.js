@@ -21,7 +21,7 @@ export default {
       $required: false,
       props: {
         type: "textarea",
-        clearable: "true",
+        clearable: true,
       },
     };
   },

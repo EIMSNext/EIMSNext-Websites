@@ -39,7 +39,7 @@ const settingStore = useSettingsStore();
     min-width: 40px;
     height: $navbar-height;
     line-height: $navbar-height;
-    color: var(--el-text-color);
+    color: var(--et-color-text);
     text-align: center;
     cursor: pointer;
 

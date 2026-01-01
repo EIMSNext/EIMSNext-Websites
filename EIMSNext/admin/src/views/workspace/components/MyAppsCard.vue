@@ -117,7 +117,6 @@ const handleDeleteClick = (app: App) => {
           width: 16%;
 
           .item-container {
-            background: #fff;
             border: 1px solid transparent;
             border-radius: 4px;
             height: 144px;
