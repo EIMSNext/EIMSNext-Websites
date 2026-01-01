@@ -149,7 +149,7 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
         }
 
         .tip-desc {
-          color: var(--color-text-secondary);
+          color: var(--et-color-text-secondary);
           font-size: 12px;
           margin-top: 12px;
           text-align: center;

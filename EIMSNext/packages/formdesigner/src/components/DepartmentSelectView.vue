@@ -1,18 +1,11 @@
 <template>
   <div class="fc-department-select-view">
-    <div 
-      class="fc-department-select-content" 
-      :class="{ 'has-selection': selectedDepartments && selectedDepartments.length > 0 }"
-      @click="handleClick"
-    >      
+    <div class="fc-department-select-content"
+      :class="{ 'has-selection': selectedDepartments && selectedDepartments.length > 0 }" @click="handleClick">
       <template v-if="selectedDepartments && selectedDepartments.length > 0">
-        <div 
-          v-for="(dept, index) in selectedDepartments" 
-          :key="index" 
-          class="fc-department-tag"
-          @click.stop="handleTagClick"
-        >
-          <et-icon icon="el-icon-UserFilled" class="fc-department-tag-icon" ></et-icon>
+        <div v-for="(dept, index) in selectedDepartments" :key="index" class="fc-department-tag"
+          @click.stop="handleTagClick">
+          <et-icon icon="el-icon-UserFilled" class="fc-department-tag-icon"></et-icon>
           {{ dept.label }}
         </div>
       </template>
@@ -20,18 +13,10 @@
         <div class="fc-department-placeholder">+ 选择部门</div>
       </template>
     </div>
-    
+
     <!-- 部门选择对话框 -->
-    <MemberSelectDialog
-      v-if="showDialog"
-      :key="dialogKey"
-      v-model:modelValue="showDialog"
-      :tags="formattedTags"
-      :showTabs="showTabs"
-      multiple
-      @ok="handleDepartmentChange"
-      @cancel="handleCancel"
-    />
+    <MemberSelectDialog v-if="showDialog" :key="dialogKey" v-model:modelValue="showDialog" :tags="formattedTags"
+      :showTabs="showTabs" multiple @ok="handleDepartmentChange" @cancel="handleCancel" />
   </div>
 </template>
 
@@ -61,7 +46,7 @@ export default {
     const selectedDepartments = ref([...props.modelValue]);
     // 只显示部门标签页
     const showTabs = MemberTabs.Department;
-    
+
     // 监听modelValue变化
     watch(
       () => props.modelValue,
@@ -70,7 +55,7 @@ export default {
       },
       { deep: true }
     );
-    
+
     // 格式化部门数据，添加type字段，确保MemberSelectDialog能正确处理
     const formattedTags = computed(() => {
       return selectedDepartments.value.map(dept => ({
@@ -80,7 +65,7 @@ export default {
         code: dept.code
       }));
     });
-    
+
     // 点击选择部门按钮
     const handleClick = () => {
       dialogKey.value++;
@@ -89,7 +74,7 @@ export default {
         showDialog.value = true;
       }, 200);
     };
-    
+
     // 点击标签
     const handleTagClick = () => {
       dialogKey.value++;
@@ -98,7 +83,7 @@ export default {
         showDialog.value = true;
       }, 200);
     };
-    
+
     // 部门选择确认
     const handleDepartmentChange = (departments) => {
       // 过滤部门数据，只保留需要的字段，移除不必要的data对象
@@ -113,12 +98,12 @@ export default {
       emit('change', processedDepartments);
       showDialog.value = false;
     };
-    
+
     // 取消选择
     const handleCancel = () => {
       showDialog.value = false;
     };
-    
+
     return {
       showDialog,
       dialogKey,
@@ -137,7 +122,7 @@ export default {
 <style scoped>
 .fc-department-select-view {
   padding: 0;
-  width:100%;
+  width: 100%;
   display: flex;
   align-items: center;
 }
@@ -148,7 +133,8 @@ export default {
   border: 1px dashed #dcdfe6;
   border-radius: 4px;
   min-height: 32px;
-  max-height: 110px; /* 大约3行高度 */
+  max-height: 110px;
+  /* 大约3行高度 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,7 +144,7 @@ export default {
   color: #909399;
   font-size: 14px;
   line-height: 24px;
-  
+
   &.has-selection {
     justify-content: flex-start;
   }
@@ -182,6 +168,7 @@ export default {
   gap: 4px;
   display: inline-flex;
   align-items: center;
+
   .dept-icon {
     background-color: #e6f8f5;
     border-radius: 50%;
@@ -202,7 +189,8 @@ export default {
   line-height: 24px;
   cursor: pointer;
 }
-.fc-department-tag-icon{
+
+.fc-department-tag-icon {
   color: #52B59A;
   margin-right: 4px;
 }

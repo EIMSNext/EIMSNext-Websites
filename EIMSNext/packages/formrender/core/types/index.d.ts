@@ -195,7 +195,7 @@ export interface util<
 
   (
     rule: FormRule<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>[],
-    option?: Options<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>,
+    option?: Options<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>
   ): Api<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>;
 
   fetch(option: FetchOption, effectArgs: Object): void;
@@ -436,7 +436,8 @@ export interface BaseRule<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>
     | ((
         formData: FormData,
         api: Api<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>
-      ) => any);
+      ) => any)
+    | { defaultValue?: string | number | object | any[] };
   emit?: Array<string | { name: string; inject: any }>;
   link?: string[];
   sync?: string[];
@@ -621,6 +622,7 @@ export class BaseCreator<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs> {
           formData: FormData,
           api: Api<OptionAttrs, CreatorAttrs, RuleAttrs, ApiAttrs>
         ) => any)
+      | { defaultValue?: string | number | object | any[] }
   ): this;
 
   emit(prop: Array<string | { name: string; inject: any }>): this;
