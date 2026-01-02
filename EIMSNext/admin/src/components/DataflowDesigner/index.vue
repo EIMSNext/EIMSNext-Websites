@@ -42,7 +42,7 @@ const props = defineProps<{
 const ready = ref(false)
 const currentWfDef = ref<WfDefinition>(props.flowDef);
 
-const flowData = ref<IFlowData>(createDataflowData(EventSourceType.Form));
+const flowData = ref<IFlowData>(createDataflowData(EventSourceType.Form, t));
 flowData.value.startNode.metadata.triggerMeta!.formId = props.formId;
 
 const flowContext: IFlowContext = {
@@ -51,7 +51,7 @@ const flowContext: IFlowContext = {
   sourceId: props.flowDef.sourceId,
   formId: props.formId,
   flowType: FlowType.Dataflow,
-  clonedData: createFlowNode(FlowNodeType.None),
+  clonedData: createFlowNode(FlowNodeType.None, t),
   activeData: flowData.value.startNode,
   flowData: flowData.value,
 };

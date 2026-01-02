@@ -1,11 +1,11 @@
 <template>
   <div class="flow-meta-editor">
     <el-tabs v-model="activeTab">
-      <el-tab-pane label="节点属性" name="node">
+      <el-tab-pane :label="t('workflow.nodeProps')" name="node">
         <div class="flow-node-meta">
           <div class="attr-content">
             <div class="attr-item has-padding">
-              <MetaItemHeader :label="t('节点名称')" :required="true"></MetaItemHeader>
+              <MetaItemHeader :label="t('workflow.nodeName')" :required="true"></MetaItemHeader>
               <el-input v-model="activeData.name" :readonly="nodeType == FlowNodeType.Start" size="default"
                 style="width: 100%" />
             </div>
@@ -21,8 +21,8 @@
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="流程属性" name="flow">
-        <div>提醒设置</div>
+      <el-tab-pane :label="t('workflow.flowProps')" name="flow">
+        <div>{{ t('workflow.reminderSetting') }}</div>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -44,7 +44,7 @@ defineOptions({
 const activeTab = ref("node");
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const nodeType = ref(FlowNodeType.None);
 
 watch(
@@ -89,6 +89,7 @@ watch(
           line-height: 22px;
           margin-bottom: 8px;
           position: relative;
+          color: var(--et-color-text);
 
           .title {
             // color: var(--fd-color-text);
@@ -116,7 +117,7 @@ watch(
     color: #b5b8be;
     font-size: 16px;
     line-height: 20px;
-    margin-left: 2px;
+    margin-left: 10px;
   }
 }
 </style>

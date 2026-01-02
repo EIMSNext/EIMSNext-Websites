@@ -98,8 +98,6 @@ const filterBtnRef = ref();
 const sortBtnRef = ref();
 const fieldBtnRef = ref();
 
-console.log(t('common.message.deleteConfirm_Title'))
-
 const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
