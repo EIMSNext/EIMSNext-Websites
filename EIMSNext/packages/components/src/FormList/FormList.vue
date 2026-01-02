@@ -1,5 +1,5 @@
 <template>
-  <el-select v-model="value" size="default" @change="onInput">
+  <el-select v-model="value" size="default" :placeholder="t('dataflow.selectForm')" @change="onInput">
     <el-option v-for="item in formList" :key="item.id" :label="item.label" :value="item.id" />
   </el-select>
 </template>
@@ -9,6 +9,8 @@ import { useFormStore, useAppStore } from "@eimsnext/store";
 import { IFormItem, buildFormListItems } from "./type";
 import { IListItem } from "@/list/type";
 import { ref, watch } from "vue";
+import { useLocale } from "element-plus";
+const { t } = useLocale();
 
 defineOptions({
   name: "FormList",

@@ -1,17 +1,10 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('目标表单')" :required="true"></MetaItemHeader>
+    <MetaItemHeader :label="t('dataflow.targetForm')" :required="true"></MetaItemHeader>
     <FormList v-model="formItem" :appId="appId" @change="formChanged"></FormList>
-    <MetaItemHeader class="mt-[8px]" :label="t('设置字段数据')" :required="true"></MetaItemHeader>
-    <FormFieldList
-      v-if="nodes.length > 0"
-      v-model="formFieldList"
-      :node-id="nodeId"
-      :formId="formId"
-      :nodes="nodes"
-      :show-all="true"
-      @change="fieldChanged"
-    ></FormFieldList>
+    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.setFieldValue')" :required="true"></MetaItemHeader>
+    <FormFieldList v-if="nodes.length > 0" v-model="formFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
+      :show-all="true" @change="fieldChanged"></FormFieldList>
   </template>
 </template>
 <script lang="ts" setup>

@@ -1,49 +1,20 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('删除对象')" :required="true"></MetaItemHeader>
+    <MetaItemHeader :label="t('dataflow.deleteFrom')" :required="true"></MetaItemHeader>
     <div class="mode-container">
-      <el-select
-        v-model="mode"
-        size="default"
-        style="width: 300px; margin-right: 5px"
-        @change="modeChanged"
-      >
-        <el-option label="选择表单修改数据" :value="UpdateMode.Form" />
-        <el-option label="选择节点修改数据" :value="UpdateMode.Node" />
+      <el-select v-model="mode" size="default" style="width: 300px; margin-right: 5px" @change="modeChanged">
+        <el-option :label="t('dataflow.recordInForm')" :value="UpdateMode.Form" />
+        <el-option :label="t('dataflow.recordInNode')" :value="UpdateMode.Node" />
       </el-select>
-      <FormList
-        v-if="mode == UpdateMode.Form"
-        v-model="formItem"
-        :appId="appId"
-        @change="formChanged"
-      ></FormList>
-      <el-select
-        v-if="mode == UpdateMode.Node"
-        v-model="activeData.metadata.deleteMeta!.nodeId"
-        size="default"
-        @change="nodeChanged"
-      >
-        <el-option
-          v-for="node in nodes"
-          :key="node.nodeId"
-          :label="node.nodeName"
-          :value="node.nodeId"
-        />
+      <FormList v-if="mode == UpdateMode.Form" v-model="formItem" :appId="appId" @change="formChanged"></FormList>
+      <el-select v-if="mode == UpdateMode.Node" v-model="activeData.metadata.deleteMeta!.nodeId" size="default"
+        :placeholder="t('dataflow.selectNode')" @change="nodeChanged">
+        <el-option v-for="node in nodes" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId" />
       </el-select>
     </div>
-    <MetaItemHeader
-      class="mt-[8px]"
-      :label="t('数据筛选条件')"
-      :required="true"
-    ></MetaItemHeader>
-    <ConditionList
-      v-model="condList"
-      :formId="formId"
-      :nodeId="nodeId"
-      :nodes="nodes"
-      :fieldBuildRule="FieldBuildRule.SingleResultOnly"
-      @change="onCondition"
-    ></ConditionList>
+    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.dataCondition')" :required="true"></MetaItemHeader>
+    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes"
+      :fieldBuildRule="FieldBuildRule.SingleResultOnly" @change="onCondition"></ConditionList>
   </template>
 </template>
 <script lang="ts" setup>
