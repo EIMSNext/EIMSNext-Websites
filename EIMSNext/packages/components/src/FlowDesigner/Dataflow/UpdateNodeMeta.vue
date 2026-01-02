@@ -1,10 +1,10 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('修改对象')" :required="true"></MetaItemHeader>
+    <MetaItemHeader :label="t('dataflow.editFrom')" :required="true"></MetaItemHeader>
     <div class="mode-container">
       <el-select v-model="mode" size="default" style="width: 300px; margin-right: 5px" @change="modeChanged">
-        <el-option label="选择表单修改数据" :value="UpdateMode.Form" />
-        <el-option label="选择节点修改数据" :value="UpdateMode.Node" />
+        <el-option :label="t('dataflow.recordInForm')" :value="UpdateMode.Form" />
+        <el-option :label="t('dataflow.recordInNode')" :value="UpdateMode.Node" />
       </el-select>
       <FormList v-if="mode == UpdateMode.Form" v-model="formItem" :appId="appId" @change="formChanged"></FormList>
       <el-select v-if="mode == UpdateMode.Node" v-model="activeData.metadata.updateMeta!.nodeId" size="default"
@@ -12,18 +12,18 @@
         <el-option v-for="node in nodes" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId" />
       </el-select>
     </div>
-    <MetaItemHeader class="mt-[8px]" :label="t('数据筛选条件')" :required="true"></MetaItemHeader>
+    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.dataCondition')" :required="true"></MetaItemHeader>
     <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition">
     </ConditionList>
     <div>
-      <el-checkbox v-model="activeData.metadata.updateMeta!.insertIfNoData" label="没有可修改的数据时，向对应表单新增数据"
-        @change="insertIfNoDataChanged" />
+      <el-checkbox v-model="activeData.metadata.updateMeta!.insertIfNoData"
+        :label="t('dataflow.createIfNoMatched_Tips')" @change="insertIfNoDataChanged" />
     </div>
-    <MetaItemHeader class="mt-[8px]" :label="t('设置字段数据')" :required="true"></MetaItemHeader>
+    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.setFieldValue')" :required="true"></MetaItemHeader>
     <div v-if="activeData.metadata.updateMeta!.insertIfNoData">
       <el-radio-group :model-value="showEditPanel" size="large" @change="showEditPanelChanged">
-        <el-radio-button label="修改数据" value="1" />
-        <el-radio-button label="新增数据" value="0" />
+        <el-radio-button :label="t('dataflow.editRecord')" value="1" />
+        <el-radio-button :label="t('dataflow.addRecord')" value="0" />
       </el-radio-group>
     </div>
     <div v-if="
@@ -35,7 +35,7 @@
       </FormFieldList>
       <div v-if="subCondNeeded" class="mt-[8px]" style="background-color: #f5f6f8; padding: 10px">
         <div class="mb-[8px]">
-          修改数据选择了子表单字段，请设置子表单的修改条件
+          {{ t("dataflow.subCondition_Tips") }}
         </div>
         <ConditionList v-model="subCondList" :formId="formId" :nodeId="nodeId" :nodes="nodes" :maxLevel="1"
           :field-build-setting="subCondBuildSetting" @change="onSubCondition"></ConditionList>
@@ -115,7 +115,7 @@ const subCondBuildSetting = ref<IFieldBuildSetting>({
 
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 
 const appId = ref(flowContext!.appId);
 const formItem = ref<IFormItem>({ id: "" });
@@ -189,8 +189,8 @@ const fieldSelecting = async (field: IFormFieldItem) => {
     if (field.field.isSubField) {
       let mainField = splitSubField(field.field.field)[0]
       if (mainField != fieldLimit.limitField) {
-        let confirm = await EtConfirm.showDialog("使用该字段后，主字段和子字段的配置冲突。此操作会清除部分已设置的字段赋值，无法还原", {
-          title: "确定要使用该字段吗？",
+        let confirm = await EtConfirm.showDialog(t("dataflow.fieldConflict_MsgContent"), {
+          title: t("dataflow.fieldConflict_MsgTitle"),
           icon: MessageIcon.Warning
         });
         if (confirm) {
@@ -233,8 +233,8 @@ const fieldValueChanging = async (
     if (!newVal.singleResultNode || newVal.isSubField) {
       if ((subCondBuildSetting.value.fieldLimit && subCondBuildSetting.value.fieldLimit.limitField != "master")
         || formFieldList.value.items.findIndex(x => x.field.isSubField) > -1) {
-        let confirm = await EtConfirm.showDialog("使用该字段后，主字段和子字段的配置冲突。此操作会清除部分已设置的字段赋值，无法还原", {
-          title: "确定要使用该字段吗？",
+        let confirm = await EtConfirm.showDialog(t("dataflow.fieldConflict_MsgContent"), {
+          title: t("dataflow.fieldConflict_MsgTitle"),
           icon: MessageIcon.Warning
         });
 

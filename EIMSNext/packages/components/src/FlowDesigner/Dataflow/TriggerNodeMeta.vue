@@ -1,53 +1,51 @@
 <template>
-  <MetaItemHeader :label="t('触发表单')" :required="true"></MetaItemHeader>
+  <MetaItemHeader :label="t('dataflow.triggeringForm')" :required="true"></MetaItemHeader>
   <el-input v-model="formName" readonly size="default" style="width: 100%" />
-  <MetaItemHeader class="mt-[8px]" :label="t('触发动作')" :required="true"></MetaItemHeader>
+  <MetaItemHeader class="mt-[8px]" :label="t('dataflow.trigger')" :required="true"></MetaItemHeader>
   <div class="trigger-header ml-[8px]">
-    <div style="color: #eb5050; font-size: 12px">
-      {{ t("选择触发动作") }}
-    </div>
     <el-popover popper-class="data-triggers" placement="bottom" :show-arrow="false" width="200" trigger="click">
       <div class="trigger-header">
         <!-- <div class="trigger-desc">{{ t("表单事件") }}</div> -->
         <div class="add-trigger" :class="{ notAllow: triggerBySubmit }" @click="addTrigger(EventType.Submitted)">
-          {{ t("提交数据时") }}
+          {{ t("dataflow.addedRecord") }}
         </div>
         <template v-if="!usingFlow">
           <div class="add-trigger" :class="{ notAllow: triggerByUpdate }" @click="addTrigger(EventType.Modified)">
-            {{ t("修改数据时") }}
+            {{ t("dataflow.updatedRecord") }}
           </div>
           <div class="add-trigger" :class="{ notAllow: triggerByDelete }" @click="addTrigger(EventType.Removed)">
-            {{ t("删除数据时") }}
+            {{ t("dataflow.deletedRecord") }}
           </div>
         </template>
         <template v-if="usingFlow">
           <!-- <div class="trigger-desc">{{ t("审批事件") }}</div> -->
           <div class="add-trigger" :class="{ notAllow: triggerByApproved }" @click="addTrigger(EventType.Approved)">
-            {{ t("审批通过时") }}
+            {{ t("dataflow.wfApproved") }}
           </div>
           <div class="add-trigger" :class="{ notAllow: triggerByRejected }" @click="addTrigger(EventType.Rejected)">
-            {{ t("审批驳回时") }}
+            {{ t("dataflow.wfRejected") }}
           </div>
           <div class="add-trigger" :class="{ notAllow: triggerByApproving }" @click="addTrigger(EventType.Approving)">
-            {{ t("节点流转时") }}
+            {{ t("dataflow.wfNextNode") }}
           </div>
         </template>
       </div>
       <template #reference>
         <el-button class="btn-add-trigger">
-          {{ "+ " + t("添加动作") }}
+          {{ "+ " + t("dataflow.addTrigger") }}
         </el-button>
       </template>
     </el-popover>
     <div class="item-triggers">
       <template v-for="(item, index) in triggerList">
         <div class="show-triggers">
-          <div class="color-838892">{{ index == 0 ? t("当") : t("或") }}</div>
+          <div class="color-838892">{{ index == 0 ? t("dataflow.when") : t("dataflow.or") }}</div>
           <template v-if="item.id == EventType.Approving">
             <div style="flex-grow: 1; margin-left: 8px; display: flex">
-              <div>{{ t("节点流转时") }}</div>
+              <div>{{ t("dataflow.wfNextNode") }}</div>
               <div style="flex: 1; margin: 0 5px; display: flex">
-                <el-select v-model="wfNodeId" placeholder="请选择节点" size="default" style="flex: 1" @change="onNodeInput">
+                <el-select v-model="wfNodeId" :placeholder="t('dataflow.selectNode')" size="default" style="flex: 1"
+                  @change="onNodeInput">
                   <el-option v-for="item in nodeList" :key="item.id" :label="item.label" :value="item.id" />
                 </el-select>
               </div>
@@ -70,7 +68,7 @@
       </template>
     </div>
   </div>
-  <MetaItemHeader class="mt-[12px]" :label="t('触发条件')" :required="true"></MetaItemHeader>
+  <MetaItemHeader class="mt-[12px]" :label="t('dataflow.triggerCondition')" :required="true"></MetaItemHeader>
   <ConditionList v-model="condList" :formId="flowContext!.formId" @change="onCondInput"></ConditionList>
 </template>
 <script lang="ts" setup>
@@ -109,7 +107,7 @@ defineOptions({
 
 const formStore = useFormStore();
 const formRef = ref<FormDef>();
-const formName = ref(t("未知表单"));
+const formName = ref(t(""));
 const usingFlow = ref(false);
 const selectedTriggers = ref(0);
 const flowContext = inject<IFlowContext>("flowContext");
@@ -121,8 +119,8 @@ const wfNodeId = ref("");
 const nodeAction = ref("submit");
 const nodeList = ref<IListItem[]>([]);
 const actionList = ref<IListItem[]>([
-  { id: "submit", label: "提交" },
-  // { id: "return", label: "退回" },
+  { id: "submit", label: t("dataflow.wfAction_Submit") },
+  // { id: "return", label: t("dataflow.wfAction_Return") },
 ]);
 
 const triggerBySubmit = computed(() => {
@@ -151,17 +149,17 @@ const triggerList = computed(() => {
   const tList: any[] = [];
 
   if (triggerBySubmit.value)
-    tList.push({ id: EventType.Submitted, title: t("提交数据时") });
+    tList.push({ id: EventType.Submitted, title: t("dataflow.addedRecord") });
   if (triggerByUpdate.value)
-    tList.push({ id: EventType.Modified, title: t("修改数据时") });
+    tList.push({ id: EventType.Modified, title: t("dataflow.updatedRecord") });
   if (triggerByDelete.value)
-    tList.push({ id: EventType.Removed, title: t("删除数据时") });
+    tList.push({ id: EventType.Removed, title: t("dataflow.deletedRecord") });
   if (triggerByApproving.value)
-    tList.push({ id: EventType.Approving, title: t("节点流转时") });
+    tList.push({ id: EventType.Approving, title: t("dataflow.wfNextNode") });
   if (triggerByApproved.value)
-    tList.push({ id: EventType.Approved, title: t("审批通过时") });
+    tList.push({ id: EventType.Approved, title: t("dataflow.wfApproved") });
   if (triggerByRejected.value)
-    tList.push({ id: EventType.Rejected, title: t("审批驳回时") });
+    tList.push({ id: EventType.Rejected, title: t("dataflow.wfRejected") });
 
   // console.log("trigger list", tList);
   return tList;
@@ -203,7 +201,7 @@ onBeforeMount(() => {
       formName.value = form.name;
       usingFlow.value = form.usingWorkflow;
     } else {
-      formName.value = t("未知表单");
+      formName.value = t("dataflow.unknownForm");
     }
 
     if (usingFlow.value) {

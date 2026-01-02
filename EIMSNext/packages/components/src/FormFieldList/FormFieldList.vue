@@ -3,7 +3,7 @@
     <el-dropdown v-if="!showAll" :hide-on-click="false" trigger="click" popper-class="data-triggers"
       @command="addingField">
       <el-button class="btn-add-trigger">
-        {{ "+ " + t("选择字段") }}
+        {{ "+ " + t("comp.selectField") }}
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">

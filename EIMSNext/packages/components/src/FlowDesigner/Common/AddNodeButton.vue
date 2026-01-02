@@ -1,92 +1,60 @@
 <template>
   <el-popover ref="popoverRef" :show-arrow="false" placement="right" width="200" trigger="click">
-    <el-button
-      :disabled="!canPaste"
-      icon="el-icon-plus"
-      style="width: 100%"
-      @click.stop="pasteNode"
-    >
-      {{ t("粘贴节点") }}
+    <el-button :disabled="!canPaste" icon="el-icon-plus" style="width: 100%" @click.stop="pasteNode">
+      {{ t("workflow.pasteNode") }}
     </el-button>
     <template v-if="flowContext.flowType == FlowType.Workflow">
-      <el-button
-        icon="el-icon-plus"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Approve)"
-      >
-        {{ t("普通审批") }}
+      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+        @click.stop="addNode(FlowNodeType.Approve)">
+        {{ t("workflow.taskNode") }}
       </el-button>
-      <el-button
-        icon="el-icon-plus"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.CopyTo)"
-      >
-        {{ t("审批抄送") }}
+      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+        @click.stop="addNode(FlowNodeType.CopyTo)">
+        {{ t("workflow.ccNode") }}
       </el-button>
-      <el-button
-        icon="el-icon-copy-document"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Branch)"
-      >
-        {{ t("并行分支") }}
+      <el-button icon="el-icon-copy-document" style="width: 100%; margin-left: 0; margin-top: 10px"
+        @click.stop="addNode(FlowNodeType.Branch)">
+        {{ t("workflow.branchNode") }}
       </el-button>
     </template>
     <template v-if="flowContext.flowType == FlowType.Dataflow">
-      <el-button
-        icon="el-icon-plus"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.QueryOne)"
-      >
-        {{ t("查询单条数据") }}
+      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+        @click.stop="addNode(FlowNodeType.QueryOne)">
+        {{ t("workflow.queryOneNode") }}
       </el-button>
-      <el-button
-        icon="el-icon-plus"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.QueryMany)"
-      >
-        {{ t("查询多条数据") }}
+      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+        @click.stop="addNode(FlowNodeType.QueryMany)">
+        {{ t("workflow.queryManyNode") }}
       </el-button>
-      <el-button
-        icon="el-icon-plus"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Insert)"
-      >
-        {{ t("新增数据") }}
+      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+        @click.stop="addNode(FlowNodeType.Insert)">
+        {{ t("workflow.insertDataNode") }}
       </el-button>
-      <el-button
-        icon="el-icon-plus"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Update)"
-      >
-        {{ t("修改数据") }}
+      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+        @click.stop="addNode(FlowNodeType.Update)">
+        {{ t("workflow.updateDataNode") }}
       </el-button>
-      <el-button
-        icon="el-icon-plus"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Delete)"
-      >
-        {{ t("删除数据") }}
+      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+        @click.stop="addNode(FlowNodeType.Delete)">
+        {{ t("workflow.deleteDataNode") }}
       </el-button>
       <!-- <el-button
         icon="el-icon-plus"
         style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Print)"
       >
-        {{ t("打印数据") }}
+        {{ t("workflow.printNode") }}
       </el-button>
       <el-button
         icon="el-icon-plus"
         style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Plugin)"
       >
-        {{ t("执行插件") }}
+        {{ t("workflow.pluginNode") }}
       </el-button> -->
-      <el-button
-        icon="el-icon-copy-document"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Branch2)"
-      >
-        {{ t("条件分支") }}
+      <el-button icon="el-icon-copy-document" style="width: 100%; margin-left: 0; margin-top: 10px"
+        @click.stop="addNode(FlowNodeType.Branch2)">
+        {{ t("workflow.branch2Node") }}
       </el-button>
     </template>
     <template #reference>
@@ -155,7 +123,7 @@ const pasteNode = () => {
 };
 
 const addNode = (nodeType: FlowNodeType) => {
-  const newNodeData = createFlowNode(nodeType);
+  const newNodeData = createFlowNode(nodeType, t);
   addNewNode(props.pNodeDatas, props.nodeData, newNodeData);
 };
 

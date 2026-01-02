@@ -3,7 +3,7 @@
     <div class="flow-node-meta">
       <div class="attr-content">
         <div class="attr-item has-padding" style="padding-bottom: 0">
-          <MetaItemHeader :label="t('节点名称')" :required="true"></MetaItemHeader>
+          <MetaItemHeader :label="t('workflow.nodeName')" :required="true"></MetaItemHeader>
           <el-input v-model="activeData.name" :readonly="activeData.nodeType == FlowNodeType.Start" size="default"
             style="width: 100%" />
         </div>
@@ -52,7 +52,7 @@ defineOptions({
 
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const nodeType = ref(FlowNodeType.None);
 
 watch(
@@ -67,13 +67,3 @@ watch(
   { immediate: true }
 );
 </script>
-<style scoped lang="scss">
-// .required {
-//   color: #eb5050;
-// }
-// .help-icon {
-//   color: #b5b8be;
-//   font-size: 16px;
-//   line-height: 20px;
-//   margin-left: 2px;
-// }</style>

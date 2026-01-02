@@ -31,7 +31,7 @@ const locale = computed(() => systemStore.locale);
 const activeName = ref("dataflow");
 
 const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
+  // console.log(tab, event);
 };
 
 const emit = defineEmits(["close"]);
