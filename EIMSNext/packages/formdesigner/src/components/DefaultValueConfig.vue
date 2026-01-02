@@ -45,7 +45,7 @@ export default defineComponent({
   },
   inject: ["designer"],
   mounted() {
-    console.log("modelvalue", this.modelValue)
+    // console.log("modelvalue", this.modelValue)
     if (this.activeRule) {
       if (this.activeRule._computed.value) {
         this.valueMode = 'formula';

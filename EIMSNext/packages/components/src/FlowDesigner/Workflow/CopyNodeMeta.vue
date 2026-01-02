@@ -1,7 +1,9 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('节点负责人')" :required="true" tips="最多选择100人"></MetaItemHeader>
-    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="'选择成员或部门'" @editTag="editTag" />
+    <MetaItemHeader :label="t('workflow.ccMember')" :required="true" :tips="t('workflow.maxApproverTips')">
+    </MetaItemHeader>
+    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('workflow.emptyMember')"
+      @editTag="editTag" />
     <member-select-dialog v-model="showMemberDialog" @ok="finishSelect" />
   </template>
 </template>
@@ -29,7 +31,7 @@ defineOptions({
 const ready = ref(false)
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const showMemberDialog = ref(false);
 const selectedCandidateTags = ref<ISelectedTag[]>([]);
 

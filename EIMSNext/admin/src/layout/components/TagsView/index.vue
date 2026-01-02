@@ -237,7 +237,7 @@ function closeOtherTags() {
 }
 
 function closeAllTags(view: TagView) {
-  console.log("close all")
+  // console.log("close all")
   tagsViewStore.delAllViews().then((res: any) => {
     tagsViewStore.toLastView(res.visitedViews, view);
   });

@@ -7,8 +7,8 @@
     </div>
     <div class="value-value">
       <template v-if="nodes && condValueType == ConditionValueType.Field">
-        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="props.fieldDef" :fieldBuildSetting="fieldBuildSetting"
-          @change="onValueChange">
+        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="props.fieldDef"
+          :fieldBuildSetting="fieldBuildSetting" @change="onValueChange">
         </NodeFieldList>
       </template>
       <template v-else>
@@ -47,12 +47,12 @@
 import { ConditionValueType, IConditonValue } from "./type";
 import { FieldType } from "@eimsnext/models";
 import { IFormFieldDef } from "../FieldList/type";
-import { IFieldBuildSetting, INodeForm, getConditionFieldType,ConditionFieldType } from "@/NodeFieldList/type";
+import { IFieldBuildSetting, INodeForm, getConditionFieldType, ConditionFieldType } from "@/NodeFieldList/type";
 import { IListItem } from "@/list/type";
 import { computed, ref, toRef } from "vue";
 
-// import { useLocale } from "element-plus";
-// const { t } = useLocale();
+import { useLocale } from "element-plus";
+const { t } = useLocale();
 
 defineOptions({
   name: "ConditionValue",
@@ -82,8 +82,8 @@ const condFieldValue = ref<IFormFieldDef>(
 );
 
 const condValueTypes: IListItem[] = [
-  { id: ConditionValueType.Custom, label: "自定义" },
-  { id: ConditionValueType.Field, label: "字段值" },
+  { id: ConditionValueType.Custom, label: t("comp.value_Custom") },
+  { id: ConditionValueType.Field, label: t("comp.value_Field") },
 ];
 
 const emit = defineEmits(["update:modelValue", "change"]);
