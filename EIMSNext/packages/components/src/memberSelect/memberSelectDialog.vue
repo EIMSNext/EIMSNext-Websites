@@ -3,7 +3,7 @@
     @cancel="cancel" @ok="save">
     <div style="padding: 12px 20px">
       <member-select v-model="tagsRef" :showTabs="showTabs" :showCascade="showCascade" :multiple="multiple"
-        :limit="limit" />
+        :limit="limit" :dynamicMembers="dynamicMembers" />
     </div>
     <template #footer-left>
       <el-button @click="openLink">通讯录</el-button>
@@ -28,6 +28,7 @@ const props = withDefaults(
     showCascade?: boolean;
     multiple?: boolean;
     limit?: IMemberLimit;
+    dynamicMembers?: ISelectedTag[];
   }>(),
   {
     showTabs: 7,

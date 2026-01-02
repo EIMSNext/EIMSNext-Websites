@@ -7,9 +7,10 @@
       <el-option label="会签" :value="2" />
     </el-select>
     <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="'选择成员或部门'" @editTag="editTag" />
-    <el-checkbox v-model="activeData.metadata.approveMeta!.enableCopyto" label="启用抄送" class="sub-item" />
-    <member-select-dialog v-model="showMemberDialog" :tags="selectedCandidateTags" destroy-on-close
-      @ok="finishSelect" />
+    <!-- <el-checkbox v-model="activeData.metadata.approveMeta!.enableCopyto" label="启用抄送" class="sub-item" /> -->
+    <member-select-dialog v-model="showMemberDialog" :tags="selectedCandidateTags"
+      :showTabs="MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic"
+      :dynamicMembers="dynamicMembers" destroy-on-close @ok="finishSelect" />
   </template>
 </template>
 <script lang="ts" setup>
@@ -27,7 +28,8 @@ import {
 import { useLocale } from "element-plus";
 import { convertCandidateToTag, convertTagToCandidate } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
-import { ISelectedTag } from "@/selectedTags/type";
+import { ISelectedTag, TagType } from "@/selectedTags/type";
+import { MemberTabs } from "@/component";
 const { t } = useLocale();
 
 defineOptions({
@@ -40,6 +42,7 @@ const flowContextRef = reactive<IFlowContext>(flowContext!);
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
 const showMemberDialog = ref(false);
 const selectedCandidateTags = ref<ISelectedTag[]>([]);
+const dynamicMembers = ref<ISelectedTag[]>([{ id: "starter", label: "流程发起人", type: TagType.Dynamic, data: { id: "starter", label: "流程发起人" } }])
 
 const editTag = () => {
   showMemberDialog.value = true;
@@ -58,6 +61,8 @@ const finishSelect = (tags: ISelectedTag[]) => {
 const init = () => {
   nextTick(async () => {
     activeData.value = flowContextRef.activeData;
+
+    //TODO:添加更多动态审批人，比如表单中员工字段
 
     selectedCandidateTags.value = [];
     if (activeData.value.metadata.approveMeta!.approvalCandidates) {
