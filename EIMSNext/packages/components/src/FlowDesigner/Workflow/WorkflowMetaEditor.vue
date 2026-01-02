@@ -89,6 +89,7 @@ watch(
           line-height: 22px;
           margin-bottom: 8px;
           position: relative;
+          color: var(--et-color-text);
 
           .title {
             // color: var(--fd-color-text);

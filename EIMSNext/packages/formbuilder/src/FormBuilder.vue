@@ -300,7 +300,7 @@ export default {
       const rule = this.$refs.designer.getJson();
       const options = this.$refs.designer.getOptionsJson();
 
-      console.log("form des data", rule, options);
+      // console.log("form des data", rule, options);
       let content = new FormContent();
       content.layout = rule;
       content.options = options;
@@ -340,7 +340,7 @@ export default {
       });
     },
     switchForm() {
-      console.log("switchForm", arguments);
+      // console.log("switchForm", arguments);
     },
     changeDark(n) {
       if (n) {
