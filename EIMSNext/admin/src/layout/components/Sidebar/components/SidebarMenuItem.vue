@@ -33,7 +33,7 @@
                     {{ t("admin.editNameAndIcon") }}
                   </el-dropdown-item>
                   <el-divider style="margin: 3px 0" />
-                  <el-dropdown-item @click="deleteForm(item.meta?.id)">{{ t("common.delete")
+                  <el-dropdown-item class="btn-delete" @click="deleteForm(item.meta?.id)">{{ t("common.delete")
                   }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
