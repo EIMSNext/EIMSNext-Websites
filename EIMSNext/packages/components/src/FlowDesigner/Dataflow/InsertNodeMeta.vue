@@ -42,7 +42,7 @@ const formStore = useFormStore();
 
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 
 const appId = ref(flowContext!.appId);
 const formItem = ref<IFormItem>({ id: "" });

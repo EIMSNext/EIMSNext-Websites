@@ -55,12 +55,12 @@ const currentWfDef = ref<WfDefinition>({
   eventSource: EventSourceType.None,
 });
 
-const flowData = ref<IFlowData>(createWorkflowData());
+const flowData = ref<IFlowData>(createWorkflowData(t));
 const flowContext: IFlowContext = {
   appId: props.appId,
   formId: props.formId,
   flowType: FlowType.Workflow,
-  clonedData: createFlowNode(FlowNodeType.None),
+  clonedData: createFlowNode(FlowNodeType.None, t),
   activeData: flowData.value.startNode,
   flowData: flowData.value,
 };

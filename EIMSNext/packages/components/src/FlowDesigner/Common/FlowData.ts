@@ -4,6 +4,7 @@ import { FlowType, EventSourceType } from "@eimsnext/models";
 import { IConditionList } from "@/ConditionList/type";
 import { IFormFieldList } from "@/FormFieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
+import { Translator } from "element-plus";
 
 export enum FlowNodeType {
   None = 0,
@@ -67,7 +68,10 @@ export interface IFlowContext {
   sourceId?: string;
   flowData: IFlowData;
 }
-export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
+export function createFlowNode(
+  nodeType: FlowNodeType,
+  t: Translator
+): IFlowNodeData {
   switch (nodeType) {
     case FlowNodeType.Branch:
     case FlowNodeType.Branch2:
@@ -77,17 +81,17 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: id,
         nodeType: nodeType,
-        name: nodeType == FlowNodeType.Branch ? "并行分支" : "条件分支",
+        name: nodeType == FlowNodeType.Branch ? t("workflow.branchNode") : t("workflow.branch2Node"),
         childNodes: [
           {
             id: bId1,
             nodeType: FlowNodeType.BranchItem,
-            name: "分支节点",
+            name: t("workflow.branchItemNode"),
             conditionData: {
               id: uniqueId(),
               nodeType: FlowNodeType.Condition,
-              name: "分支条件",
-              notes: "未设置",
+              name: t("workflow.conditionNode"),
+              notes:t("common.notset"),
               metadata: {
                 conditionMeta: {
                   condition: { id: uniqueId(), rel: "and", items: [] },
@@ -102,12 +106,12 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
           {
             id: bId2,
             nodeType: FlowNodeType.BranchItem,
-            name: "其他条件",
+            name: t("workflow.branchItemNode"),
             conditionData: {
               id: uniqueId(),
               nodeType: FlowNodeType.ConditionOther,
-              name: "其他条件",
-              notes: "所有分支条件均不满足",
+              name: t("workflow.conditionOtherNode"),
+              notes: t("workflow.othersNoMatched"),
               metadata: { conditionMeta: {} },
               prevId: bId2,
             },
@@ -123,13 +127,13 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: bId,
         nodeType: FlowNodeType.BranchItem,
-        name: "条件节点",
-        notes: "未设置",
+        name: t("workflow.branchItemNode"),
+        notes: t("common.notset"),
         conditionData: {
           id: uniqueId(),
           nodeType: FlowNodeType.Condition,
-          name: "分支条件",
-          notes: "未设置",
+          name: t("workflow.conditionNode"),
+          notes: t("common.notset"),
           metadata: {
             conditionMeta: {
               condition: { id: uniqueId(), rel: "and", items: [] },
@@ -144,7 +148,7 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: uniqueId(),
         nodeType: FlowNodeType.Approve,
-        name: "普通审批",
+        name: t("workflow.taskNode"),
         metadata: {
           approveMeta: {
             approveMode: ApproveMode.OrSign,
@@ -158,7 +162,7 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: uniqueId(),
         nodeType: FlowNodeType.CopyTo,
-        name: "审批抄送",
+        name: t("workflow.ccNode"),
         metadata: {
           copytoMeta: {
             approvalCandidates: [],
@@ -169,7 +173,7 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: uniqueId(),
         nodeType: FlowNodeType.QueryOne,
-        name: "查询单条数据",
+        name: t("workflow.queryOneNode"),
         metadata: {
           queryOneMeta: {
             formId: "",
@@ -183,7 +187,7 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: uniqueId(),
         nodeType: FlowNodeType.QueryMany,
-        name: "查询多条数据",
+        name: t("workflow.queryManyNode"),
         metadata: {
           queryManyMeta: {
             formId: "",
@@ -198,7 +202,7 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: uniqueId(),
         nodeType: FlowNodeType.Insert,
-        name: "新增数据",
+        name: t("workflow.insertDataNode"),
         metadata: {
           insertMeta: {
             formId: "",
@@ -211,7 +215,7 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: uniqueId(),
         nodeType: FlowNodeType.Update,
-        name: "修改数据",
+        name: t("workflow.updateDataNode"),
         metadata: {
           updateMeta: {
             updateMode: UpdateMode.Form,
@@ -228,7 +232,7 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: uniqueId(),
         nodeType: FlowNodeType.Delete,
-        name: "删除数据",
+        name: t("workflow.deleteDataNode"),
         metadata: {
           deleteMeta: {
             deleteMode: UpdateMode.Form,
@@ -242,14 +246,14 @@ export function createFlowNode(nodeType: FlowNodeType): IFlowNodeData {
       return {
         id: uniqueId(),
         nodeType: FlowNodeType.Print,
-        name: "打印数据",
+        name: t("workflow.printNode"),
         metadata: { printMeta: { singleResult: true } },
       };
     case FlowNodeType.Plugin:
       return {
         id: uniqueId(),
         nodeType: FlowNodeType.Plugin,
-        name: "执行插件",
+        name: t("workflow.pluginNode"),
         metadata: { pluginMeta: { singleResult: true } },
       };
     default:
@@ -364,19 +368,19 @@ export interface IApprovalCandidate {
   candidateName: string;
 }
 
-export function createWorkflowData(): IFlowData {
+export function createWorkflowData(t: Translator): IFlowData {
   return {
     startNode: {
       id: uniqueId(),
       nodeType: FlowNodeType.Start,
-      name: "发起流程",
+      name: t("workflow.startNode"),
       metadata: {},
     },
     nodes: [],
     endNode: {
       id: uniqueId(),
       nodeType: FlowNodeType.End,
-      name: "结束",
+      name: t("workflow.endNode"),
       metadata: {},
     },
     eventSource: EventSourceType.None,
@@ -446,14 +450,17 @@ export enum EventType {
   Approved = 16,
   Rejected = 32,
 }
-export function createDataflowData(eventSource: EventSourceType): IFlowData {
+export function createDataflowData(
+  eventSource: EventSourceType,
+  t: Translator
+): IFlowData {
   return {
     dfCascade: CascadeMode.Never,
     eventSource: eventSource,
     startNode: {
       id: uniqueId(),
       nodeType: FlowNodeType.Start,
-      name: "事件触发",
+      name: t("workflow.triggerNode"),
       metadata: {
         triggerMeta: {
           eventType: EventType.None,
@@ -469,7 +476,7 @@ export function createDataflowData(eventSource: EventSourceType): IFlowData {
     endNode: {
       id: uniqueId(),
       nodeType: FlowNodeType.End,
-      name: "结束",
+      name: t("workflow.endNode"),
       metadata: {},
     },
   };

@@ -1,4 +1,5 @@
 import { reject } from "lodash";
+import plugin from "unplugin-vue-define-options/index";
 
 export default {
   //通用
@@ -19,6 +20,7 @@ export default {
     fields: "字段",
     refresh: "刷新",
     other: "其他",
+    notset: "未设置",
     flowStatus: {
       draft: "草稿",
       approving: "审批中",
@@ -59,6 +61,34 @@ export default {
     deleteFormConfirm_Title: '你确定要删除"{0}"吗？',
     deleteFormConfirm_Content: "表单删除后将不可恢复，包括所有相关数据",
   },
+  workflow: {
+    startNode: "发起流程",
+    endNode: "结束",
+    branchNode: "并行分支",
+    branch2Node: "条件分支",
+    branchItemNode:"条件分支",
+    conditionNode: "条件节点",
+    conditionOtherNode: "其他条件",
+    othersNoMatched: "所有分支条件均不满足",
+    taskNode: "普通审批",
+    ccNode: "审批抄送",
+    triggerNode: "触发节点",
+    queryOneNode: "查询单条数据",
+    queryManyNode: "查询多条数据",
+    insertDataNode: "新增数据",
+    updateDataNode: "修改数据",
+    deleteDataNode: "删除数据",
+    printNode: "打印节点",
+    pluginNode: "插件节点",
+    cloneNode: "复制节点",
+    pasteNode: "粘贴节点",
+    deleteNode: "删除节点",
+    addBranch:"添加分支",
+    pasteBranch:"粘贴分支",
+    orSign: "或签",
+    counterSign: "会签",
+  },
+  dataflow: {},
   // 菜单国际化
   route: {
     workspace: "工作台",

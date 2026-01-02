@@ -39,7 +39,7 @@ defineOptions({
 const ready = ref(false)
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None,t));
 const showMemberDialog = ref(false);
 const selectedCandidateTags = ref<ISelectedTag[]>([]);
 const dynamicMembers = ref<ISelectedTag[]>([{ id: "starter", label: "流程发起人", type: TagType.Dynamic, data: { id: "starter", label: "流程发起人" } }])

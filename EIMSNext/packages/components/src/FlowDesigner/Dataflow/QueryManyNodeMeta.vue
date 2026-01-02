@@ -41,7 +41,7 @@ const condList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
 const sortList = ref<IFieldSortList>({ items: [] });
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 
 const appId = ref(flowContext!.appId);
 const nodeId = ref("");
