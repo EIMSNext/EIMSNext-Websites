@@ -1,12 +1,14 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('节点负责人')" :required="true" tips="最多选择100人"></MetaItemHeader>
+    <MetaItemHeader :label="t('workflow.approver')" :required="true" :tips="t('workflow.maxApproverTips')">
+    </MetaItemHeader>
     <el-select v-model="activeData.metadata.approveMeta!.approveMode" class="sub-item"
       style="width: 100%; margin-bottom: 8px">
-      <el-option label="或签" :value="1" />
-      <el-option label="会签" :value="2" />
+      <el-option :label="t('workflow.orSign')" :value="1" />
+      <el-option :label="t('workflow.counterSign')" :value="2" />
     </el-select>
-    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="'选择成员或部门'" @editTag="editTag" />
+    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('workflow.emptyMember')"
+      @editTag="editTag" />
     <!-- <el-checkbox v-model="activeData.metadata.approveMeta!.enableCopyto" label="启用抄送" class="sub-item" /> -->
     <member-select-dialog v-model="showMemberDialog" :tags="selectedCandidateTags"
       :showTabs="MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic"
@@ -39,10 +41,10 @@ defineOptions({
 const ready = ref(false)
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None,t));
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const showMemberDialog = ref(false);
 const selectedCandidateTags = ref<ISelectedTag[]>([]);
-const dynamicMembers = ref<ISelectedTag[]>([{ id: "starter", label: "流程发起人", type: TagType.Dynamic, data: { id: "starter", label: "流程发起人" } }])
+const dynamicMembers = ref<ISelectedTag[]>([{ id: "starter", label: t('workflow.starter'), type: TagType.Dynamic, data: { id: "starter", label: t('workflow.starter') } }])
 
 const editTag = () => {
   showMemberDialog.value = true;
