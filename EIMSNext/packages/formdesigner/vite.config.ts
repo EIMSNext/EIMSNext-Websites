@@ -33,6 +33,7 @@ export default defineConfig({
         "qr-code-styling",
         "signature_pad",
         "snowflake-id",
+        "vant",
       ],
       input: ["src/index.js"],
       output: {
@@ -57,6 +58,7 @@ export default defineConfig({
           "qr-code-styling": "qr-code-styling",
           signature_pad: "signature_pad",
           "snowflake-id": "snowflake-id",
+          vant: "vant",
         },
       },
     },

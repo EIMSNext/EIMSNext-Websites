@@ -114,6 +114,7 @@
     "postcss-scss": "^4.0.9",
     "prettier": "^3.6.2",
     "qr-code-styling": "^1.9.2",
+    "rollup-plugin-visualizer": "^6.0.5",
     "sass": "^1.93.2",
     "signature_pad": "^5.1.1",
     "snowflake-id": "^1.1.0",
