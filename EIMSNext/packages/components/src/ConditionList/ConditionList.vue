@@ -59,8 +59,8 @@ defineOptions({
 
 const props = withDefaults(
   defineProps<{
-    formId: string;
     modelValue: IConditionList;
+    formId: string;
     showTitle?: boolean;
     nodes?: INodeForm[];
     condType?: ConditionType;

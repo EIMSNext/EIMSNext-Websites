@@ -26,19 +26,18 @@
                       <et-icon icon="el-icon-star" size="large"></et-icon>
                     </div>
                     <div class="setting-icon">
-                      <el-popover trigger="click">
-                        <template #reference>
+                      <el-dropdown placement="bottom-start" size="large">
+                        <el-button>
                           <et-icon icon="el-icon-setting" size="large"></et-icon>
+                        </el-button>
+                        <template #dropdown>
+                          <el-dropdown-menu style="min-width: 150px">
+                            <el-dropdown-item>{{ t("admin.editNameAndIcon") }}</el-dropdown-item>
+                            <el-dropdown-item class="btn-delete" @click="handleDeleteClick(app)">{{ t("common.delete")
+                            }}</el-dropdown-item>
+                          </el-dropdown-menu>
                         </template>
-                        <el-menu class="app-menu">
-                          <el-menu-item class="app-menu-item"> {{ t("admin.editNameAndIcon") }}</el-menu-item>
-                          <!-- <el-menu-item class="app-menu-item">移动</el-menu-item>
-                          <el-menu-item class="app-menu-item">复制</el-menu-item> -->
-                          <el-menu-item class="app-menu-item app-remove" @click="handleDeleteClick(app)">
-                            {{ t("common.delete") }}
-                          </el-menu-item>
-                        </el-menu>
-                      </el-popover>
+                      </el-dropdown>
                     </div>
                   </div>
                 </li>
