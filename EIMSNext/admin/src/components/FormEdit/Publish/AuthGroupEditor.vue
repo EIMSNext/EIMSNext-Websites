@@ -140,7 +140,7 @@ const emit = defineEmits(["update:modelValue"]);
                     margin-top: 10px;
                     flex: 1;
 
-                    :deep .el-textarea__inner {
+                    :deep(.el-textarea__inner) {
                         height: 100%;
                     }
                 }
