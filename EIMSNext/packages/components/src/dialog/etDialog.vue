@@ -3,7 +3,7 @@
     <slot></slot>
     <slot name="header"></slot>
     <slot name="footer" v-if="showFooter">
-      <div class="footer-wrapper">
+      <div class="el-dialog__footer footer-wrapper">
         <div class="footer-left">
           <slot name="footer-left"></slot>
         </div>

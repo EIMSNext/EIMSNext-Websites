@@ -1,5 +1,3 @@
-import { reject } from "lodash";
-import plugin from "unplugin-vue-define-options/index";
 
 export default {
   //通用

@@ -5,7 +5,7 @@ import { type UserConfig, type ConfigEnv, loadEnv, defineConfig } from "vite";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
-
+import { visualizer } from "rollup-plugin-visualizer";
 import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 
 import UnoCSS from "unocss/vite";
@@ -35,6 +35,10 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     },
     plugins: [
       vue(),
+      visualizer({
+        filename: "./dist/stats.html",
+        open: mode === "production", // 构建后自动打开
+      }),
       DefineOptions(),
       UnoCSS({
         hmrTopLevelAwait: false,
@@ -163,6 +167,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     build: {
       chunkSizeWarningLimit: 2000, // 消除打包大小超过500kb警告
       minify: "terser", // Vite 2.6.x 以上需要配置 minify: "terser", terserOptions 才能生效
+      sourcemap: false,
       terserOptions: {
         compress: {
           keep_infinity: true, // 防止 Infinity 被压缩成 1/0，这可能会导致 Chrome 上的性能问题
@@ -175,7 +180,13 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       },
       rollupOptions: {
         output: {
+          experimentalMinChunkSize: 500 * 1024,
           manualChunks(id) {
+            if (id.includes("@eimsnext")) console.log("id", id);
+            if (id.includes("@eimsnext/form-designer")) {
+              return "form-designer"; // 单独拆成 vendor-formdesigner.js
+            }
+
             if (id.includes("node_modules")) {
               return id.toString().split("node_modules/")[1].split("/")[0];
             }

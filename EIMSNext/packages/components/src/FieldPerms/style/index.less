@@ -1,0 +1,58 @@
+@import "../../common/index.less";
+
+.@{prefix}-field-perms {
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: #f5f7fa;
+    border-radius: 4px 4px 0 0;
+
+    .item-header {
+      flex: 1;
+      text-align: center;
+
+      &:first-child {
+        text-align: left;
+        flex: 2;
+      }
+    }
+
+    .tips {
+      color: #f56c6c;
+      margin-left: 2px;
+    }
+  }
+
+  .list-content-wrapper {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    .list-item {
+      border-bottom: 1px solid #e5e6eb;
+
+      .content-wrapper {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+
+        .item-label {
+          flex: 2;
+          display: flex;
+          align-items: center;
+
+          .subform-tag {
+            margin-left: 8px;
+            color: #c0c4cc;
+          }
+        }
+
+        .el-checkbox {
+          flex: 1;
+          text-align: center;
+        }
+      }
+    }
+  }
+}
