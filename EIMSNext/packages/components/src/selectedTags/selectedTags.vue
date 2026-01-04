@@ -1,38 +1,19 @@
 <template>
-  <div
-    class="selected-tags"
-    :class="{ clickable: editable }"
-    style="overflow: auto; gap: 4px"
-    @click.stop="editTag"
-  >
+  <div class="selected-tags" :class="{ clickable: editable }" style="overflow: auto; gap: 4px" @click.stop="editTag">
     <template v-if="modelValue.length > 0">
-      <el-tag
-        v-for="tag in modelValue.filter((x) => x.type != TagType.None)"
-        :key="tag.id"
-        :closable="closable"
-        :class="{ 'error-tag': tag.error }"
-        @close="removeTag(tag)"
-        @click.stop="tagClick(tag)"
-      >
-        <et-icon
-          icon="el-icon-UserFilled"
-          icon-class="tag-icon"
-          :color="getIconColor(tag)"
-        ></et-icon>
-        <el-text
-          class="tag-label"
-          :class="{ 'has-error': tag.error, 'no-padding': closable }"
-          :style="{ color: '#909399' }"
-          >{{ tag.label }}</el-text
-        >
+      <el-tag v-for="tag in modelValue.filter((x) => x.type != TagType.None)" :key="tag.id" :closable="closable"
+        :class="{ 'error-tag': tag.error }" @close="removeTag(tag)" @click.stop="tagClick(tag)">
+        <et-icon icon="el-icon-UserFilled" icon-class="tag-icon" :color="getIconColor(tag)"></et-icon>
+        <el-text class="tag-label" :class="{ 'has-error': tag.error, 'no-padding': closable }"
+          :style="{ color: '#909399' }">{{ tag.label }}</el-text>
       </el-tag>
     </template>
     <template v-else>
       <div v-if="editable" class="empty-wrapper" @click.stop="editTag">
         <slot>
           <et-icon icon="el-icon-Plus"></et-icon>
-          <span class="empty-text">{{ emptyText }}</span></slot
-        >
+          <span class="empty-text">{{ emptyText || t("workflow.emptyMember") }}</span>
+        </slot>
       </div>
     </template>
   </div>
@@ -41,6 +22,8 @@
 import "./style/index.less";
 import { reactive, ref, toRef } from "vue";
 import { ISelectedTag, TagType } from "./type";
+import { useLocale } from "element-plus";
+const { t } = useLocale();
 
 defineOptions({
   name: "SelectedTags",

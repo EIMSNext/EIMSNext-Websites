@@ -8,7 +8,7 @@ export default defineComponent({
   props: {
     modelValue: {
       type: [Array, Object],
-      default: "",
+      default: [],
     },
     placeholder: {
       type: String,

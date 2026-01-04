@@ -22,6 +22,9 @@
     <div v-if="activeName == 'advance'" style="height: 100%; width: 100%">
       <Advanced :formDef="formDef!"></Advanced>
     </div>
+    <div v-if="activeName == 'publish'" style="height: 100%; width: 100%">
+      <Publish :formDef="formDef!"></Publish>
+    </div>
   </et-drawer>
 </template>
 
@@ -31,9 +34,10 @@ import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
 import WorkflowDesigner from "../WorkflowDesigner/index.vue";
 import Advanced from "./Advanced/index.vue";
+import Publish from "./Publish/index.vue"
 import { useSystemStore } from "@/store/system";
 import { useFormStore } from "@eimsnext/store";
-import { FormDef, EventSourceType } from "@eimsnext/models";
+import { FormDef } from "@eimsnext/models";
 
 defineOptions({
   name: "FormEdit",
@@ -75,7 +79,7 @@ const onSaved = () => {
   }
 };
 const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
+  // console.log(tab, event);
 };
 
 const emit = defineEmits(["close"]);

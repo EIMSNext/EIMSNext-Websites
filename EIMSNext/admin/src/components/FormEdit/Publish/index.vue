@@ -1,34 +1,29 @@
 <template>
   <el-tabs v-model="activeName" tabPosition="left" class="adv-container" @tab-click="handleClick">
-    <el-tab-pane label="数据推送" name="webpush" class="adv-panel">
-      <DataflowList :form-def="formDef" />
+    <el-tab-pane label="内部发布" name="internal" class="adv-panel">
+      <InternalPublish :form-def="formDef" />
     </el-tab-pane>
-    <el-tab-pane label="智能助手" name="dataflow" class="adv-panel">
-      <DataflowList :form-def="formDef" />
+    <el-tab-pane label="公开发布" name="public" class="adv-panel">
+      To do
     </el-tab-pane>
   </el-tabs>
 </template>
 <script setup lang="ts">
-import DataflowList from "./DataflowList.vue";
-import { useSystemStore } from "@/store/system";
-import { useFormStore } from "@eimsnext/store";
+import InternalPublish from "./InternalPublish.vue";
 import { FormDef, EventSourceType } from "@eimsnext/models";
 import { TabsPaneContext } from "element-plus";
-
+import { useLocale } from "element-plus";
+const { t } = useLocale()
 
 defineOptions({
-  name: "Advanced",
+  name: "Publish",
 });
 
 const props = defineProps<{
   formDef: FormDef;
 }>();
 
-const systemStore = useSystemStore();
-const formStore = useFormStore();
-const locale = computed(() => systemStore.locale);
-
-const activeName = ref("dataflow");
+const activeName = ref("internal");
 
 const handleClick = (tab: TabsPaneContext, event: Event) => {
   // console.log(tab, event);

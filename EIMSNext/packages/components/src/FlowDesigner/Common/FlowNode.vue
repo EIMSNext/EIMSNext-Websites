@@ -1,27 +1,20 @@
 <template>
   <div class="flow-node-wrapper">
-    <el-popover
-      ref="popoverRef"
-      width="60"
-      popper-class="node-action-popover"
-      trigger="hover"
-      placement="top-end"
-      :show-arrow="false"
-      :disabled="!allowCopy && !allowDelete"
-    >
+    <el-popover ref="popoverRef" width="60" popper-class="node-action-popover" trigger="hover" placement="top-end"
+      :show-arrow="false" :disabled="!allowCopy && !allowDelete">
       <div class="node-actions">
-        <div
-          v-if="allowCopy"
-          class="copy-btn"
-          @click.stop="
-            copyClick(nodeData.nodeType === FlowNodeType.Condition ? branchItemData! : nodeData)
-          "
-        >
-          <el-icon><CopyDocument /></el-icon>
+        <div v-if="allowCopy" class="copy-btn" @click.stop="
+          copyClick(nodeData.nodeType === FlowNodeType.Condition ? branchItemData! : nodeData)
+          ">
+          <el-icon>
+            <CopyDocument />
+          </el-icon>
         </div>
         <div v-if="allowCopy && allowDelete" class="action-split" />
         <div v-if="allowDelete" class="delete-btn" @click.stop="delClick(nodeData)">
-          <el-icon><Delete /></el-icon>
+          <el-icon>
+            <Delete />
+          </el-icon>
         </div>
       </div>
       <template #reference>
@@ -36,7 +29,7 @@
               </span>
             </div>
             <div class="flow-node-content">
-              <div class="node-desc" v-html="nodeData.notes || nodeData.name" />
+              <div class="node-desc" v-html="content" />
             </div>
           </div>
         </slot>
@@ -45,14 +38,16 @@
     <AddNodeButton v-if="showAddButton" :p-node-datas="pNodeDatas" :node-data="nodeData" />
 
     <div class="flow-connector" />
-    <el-icon v-if="!isStart" class="arrow-down"><CaretBottom /></el-icon>
+    <el-icon v-if="!isStart" class="arrow-down">
+      <CaretBottom />
+    </el-icon>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch } from "vue";
+import { computed, inject, nextTick, reactive, ref, watch } from "vue";
 import AddNodeButton from "./AddNodeButton.vue";
-import { IFlowNodeData, IFlowContext, FlowNodeType } from "./FlowData";
+import { IFlowNodeData, IFlowContext, FlowNodeType, IFlowNodeMetaData } from "./FlowData";
 
 defineOptions({
   name: "FlowNode",
@@ -70,6 +65,7 @@ const props = withDefaults(
     allowDelete?: boolean;
     branchItemData?: IFlowNodeData;
     branchItemDatas?: IFlowNodeData[];
+    contentFun?: (metadata: IFlowNodeMetaData) => string
   }>(),
   {
     iconName: "Stamp",
@@ -93,6 +89,12 @@ watch(
   },
   { immediate: true }
 );
+
+const content = computed(() => {
+  if (flowContext && props.contentFun) return props.contentFun(flowContextRef.activeData.metadata)
+
+  return props.nodeData.notes || props.nodeData.name;
+})
 
 const copyClick = (data: IFlowNodeData) => {
   popoverRef.value.hide();

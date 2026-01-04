@@ -75,8 +75,13 @@
               </div>
             </div>
           </el-tab-pane>
-          <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Dynamic)" label="动态负责人" :name="MemberTabs.Dynamic">
-            <div></div>
+          <el-tab-pane v-if="dynamicMembers && FlagEnum.has(showTabs, MemberTabs.Dynamic)" label="动态负责人"
+            :name="MemberTabs.Dynamic">
+            <div class="dept-select">
+              <et-list v-model="selectedDyMembers" :data="dynamicMembers" :selectable="true" :multiple="multiple"
+                :showCount="false" style="border: none;" @item-check="dymChecked" @all-check="dymCheckAll">
+              </et-list>
+            </div>
           </el-tab-pane>
           <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.CurDept)" label="当前用户所处部门" :name="MemberTabs.CurDept">
             <div class="dept-select">
@@ -137,6 +142,7 @@ const props = withDefaults(
     showCascade?: boolean;
     multiple?: boolean;
     limit?: IMemberLimit;
+    dynamicMembers?: ISelectedTag[];
   }>(),
   {
     showTabs: 7,
@@ -165,6 +171,7 @@ const curDeptTree = ref<TreeInstance>();
 const curDeptData = ref<ITreeNode[]>()
 const singleDeptId = ref<string>("")
 const curEmpData = ref<IListItem[]>([])
+const selectedDyMembers = ref<string[]>();
 
 watch([keyword], ([newKeyword], [oldKeyword]) => {
   if (newKeyword != oldKeyword) {
@@ -516,14 +523,14 @@ const empCheckAll = (checked: boolean) => {
       }
     });
   } else {
-    let indicesToRemove: number[] = [];
+    let toRemove: number[] = [];
     tagsRef.value.forEach((item, index) => {
       if (item.type == TagType.Employee) {
-        indicesToRemove.splice(0, 0, index);
+        toRemove.splice(0, 0, index);
       }
     });
 
-    indicesToRemove.forEach((index) => {
+    toRemove.forEach((index) => {
       tagsRef.value.splice(index, 1);
     });
   }
@@ -548,16 +555,97 @@ const curEmpCheckAll = (checked: boolean) => {
       }
     });
   } else {
-    let indicesToRemove: number[] = [];
+    let toRemove: number[] = [];
     tagsRef.value.forEach((item, index) => {
       if (item.type == TagType.Employee &&
         curEmpData.value.find(x => x.id == item.id)
       ) {
-        indicesToRemove.splice(0, 0, index);
+        toRemove.splice(0, 0, index);
       }
     });
 
-    indicesToRemove.forEach((index) => {
+    toRemove.forEach((index) => {
+      tagsRef.value.splice(index, 1);
+    });
+  }
+
+  emit("update:modelValue", tagsRef.value);
+};
+
+const dymChecked = (data: IListItem, checked: boolean) => {
+  //  console.log("empCheck", data, checked);
+  if (props.multiple) {
+    if (checked) {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Dynamic
+      );
+      if (index == undefined || index == -1) {
+        tagsRef.value.push({
+          id: data.id,
+          code: data.code,
+          label: data.label,
+          type: TagType.Dynamic,
+          data: data.data,
+        });
+      }
+    } else {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Dynamic
+      );
+      //  console.log("index", index, tagsRef);
+      if (index && index > -1) tagsRef.value.splice(index, 1);
+    }
+
+    emit("update:modelValue", tagsRef.value);
+  } else {
+    if (checked) {
+      // 直接创建新数组
+      const nonDynamics = tagsRef.value.filter(x => x.type != TagType.Dynamic);
+      tagsRef.value = [
+        ...nonDynamics,
+        {
+          id: data.id,
+          code: data.code,
+          label: data.label,
+          type: TagType.Dynamic,
+          data: data.data,
+        }
+      ];
+    } else {
+      // 只移除当前标签
+      const index = tagsRef.value.findIndex(x => x.id == data.id && x.type == TagType.Dynamic);
+      if (index > -1) {
+        tagsRef.value = [...tagsRef.value.slice(0, index), ...tagsRef.value.slice(index + 1)];
+      }
+    }
+    emit("update:modelValue", tagsRef.value);
+  }
+};
+const dymCheckAll = (checked: boolean) => {
+  if (checked) {
+    //全新增
+    props.dynamicMembers!.forEach((data) => {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Dynamic
+      );
+      if (index == undefined || index == -1) {
+        tagsRef.value.push({
+          id: data.id,
+          label: data.label,
+          type: TagType.Dynamic,
+          data: data.data,
+        });
+      }
+    });
+  } else {
+    let toRemove: number[] = [];
+    tagsRef.value.forEach((item, index) => {
+      if (item.type == TagType.Dynamic) {
+        toRemove.splice(0, 0, index);
+      }
+    });
+
+    toRemove.forEach((index) => {
       tagsRef.value.splice(index, 1);
     });
   }
@@ -606,6 +694,9 @@ const removeTag = (tag: ISelectedTag) => {
   }
   else if (tag.type == TagType.Employee) {
     selectedEmps.value = selectedEmps.value?.filter((x) => x != tag.id);
+  }
+  else if (tag.type == TagType.Dynamic) {
+    selectedDyMembers.value = selectedDyMembers.value?.filter((x) => x != tag.id)
   }
 };
 

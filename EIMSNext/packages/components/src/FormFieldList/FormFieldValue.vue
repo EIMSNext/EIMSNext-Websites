@@ -72,9 +72,9 @@ const fieldFieldValue = ref<IFormFieldDef>(
 );
 
 const fieldValueTypes: IListItem[] = [
-  { id: FieldValueType.Custom, label: "自定义" },
-  { id: FieldValueType.Field, label: "字段值" },
-  { id: FieldValueType.Empty, label: "空值" },
+  { id: FieldValueType.Custom, label: t("comp.value_Custom") },
+  { id: FieldValueType.Field, label: t("comp.value_Field") },
+  { id: FieldValueType.Empty, label: t("comp.value_Empty") },
 ];
 
 const fieldType = computed(() => props.fieldDef.type);

@@ -127,7 +127,7 @@ async function handleLoginSubmit() {
           await userStore.initialize(true);
 
           const { path, queryParams } = parseRedirect();
-          console.log("login ", path, queryParams)
+          // console.log("login ", path, queryParams)
           router.push({ path: path, query: queryParams });
         })
         .finally(() => {

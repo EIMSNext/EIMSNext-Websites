@@ -2,13 +2,13 @@
   <div class="field-list">
     <el-dropdown :hide-on-click="false" trigger="click" popper-class="data-triggers" @command="addField">
       <el-button class="btn-add-trigger">
-        {{ "+ " + t("添加排序规则") }}
+        {{ "+ " + t("comp.addSortRule") }}
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">
           <el-dropdown-item v-for="field in allFields" class="add-trigger"
-            :disabled="!!selectedFields.items.find((x) => x.field.field == field.id)"
-            :class="{ notAllow: selectedFields.items.find((x) => x.field.field == field.id) }" :command="field.data">
+            :disabled="disabledFieldIds.includes(field.id)" :class="{ notAllow: disabledFieldIds.includes(field.id) }"
+            :command="field.data">
             {{ field.label }}
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -20,7 +20,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, toRef, watch } from "vue";
+import { computed, ref, toRef, watch } from "vue";
 import { useFormStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
 import { IFieldSortItem, IFieldSortList } from "./type";
@@ -45,6 +45,9 @@ const formStore = useFormStore();
 
 const selectedFields = toRef<IFieldSortList>(props.modelValue);
 const allFields = ref<IListItem[]>([]);
+const disabledFieldIds = computed(() => {
+  return selectedFields.value.items.map(item => item.field.field);
+});
 
 const emit = defineEmits(["update:modelValue", "change"]);
 
@@ -79,20 +82,18 @@ const emitChange = () => {
 };
 
 watch(
-  [() => props.formId, () => props.modelValue],
-  async ([newFormId, newModel], [oldFormId, oldModel]) => {
+  [() => props.formId],
+  async ([newFormId], [oldFormId]) => {
     if (newFormId && newFormId != oldFormId) {
       let form = await formStore.get(newFormId);
       if (form && form.content && form.content.items) {
         allFields.value = buildFieldListItems(newFormId, form.content.items, form.usingWorkflow);
       }
     }
-    if (newModel != oldModel) {
-      selectedFields.value = newModel;
-    }
   },
   { immediate: true }
 );
+
 </script>
 <style lang="scss" scoped>
 .field-list {
