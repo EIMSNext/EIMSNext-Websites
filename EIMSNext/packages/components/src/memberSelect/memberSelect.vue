@@ -157,7 +157,7 @@ const empDeptTree = ref<TreeInstance>();
 const empDeptData = ref<ITreeNode[]>(); // 员工部门列表
 const empData = ref<IListItem[]>([]); //员工列表
 const selectedEmpDeptId = ref("");
-const selectedEmps = ref<string[]>();
+const selectedEmps = ref<string[]>([]);
 const deptChanging = ref(false);
 const roleTree = ref<TreeInstance>();
 const roleData = ref<ITreeNode[]>(); // 角色列表
@@ -270,7 +270,8 @@ onBeforeMount(() => {
       deptStore.get(userStore.currentUser.deptId).then(x => {
         if (x) {
           const curDeptNode = [DeptToTreeNode(x)];
-          curDeptData.value = filterDeptTreeByScope(curDeptNode);
+          // 不应用范围过滤，直接显示当前用户部门
+          curDeptData.value = curDeptNode;
         }
       })
     }
@@ -324,10 +325,18 @@ const setSelectedNodes = () => {
     .filter(tag => tag.type === TagType.Role)
     .map(tag => tag.id);
 
+  // 获取员工类型的选中项ID列表
+  const employeeSelectedIds = tagsRef.value
+    .filter(tag => tag.type === TagType.Employee)
+    .map(tag => tag.id);
+
   // 如果是单选模式，设置singleDeptId
   if (!props.multiple && departmentSelectedIds.length > 0) {
     singleDeptId.value = departmentSelectedIds[0];
   }
+
+  // 设置员工列表的选中状态
+  selectedEmps.value = employeeSelectedIds;
 
   // 遍历树节点，设置选中状态
   const setNodeChecked = (tree: TreeInstance | undefined, nodes: any[], selectedIds: string[]) => {
@@ -426,10 +435,16 @@ const selectEmpDept = (deptId: string) => {
     res.forEach((x) => {
       empData.value.push(EmployeeToListItem(x));
 
+      // 检查当前员工是否在已选标签中
       if (
         tagsRef.value.find((t) => t.id == x.id && t.type == TagType.Employee)
       ) {
-        selectedEmps.value?.push(x.id);
+        // 单选模式下直接赋值，多选模式下push到数组
+        if (props.multiple) {
+          selectedEmps.value?.push(x.id);
+        } else {
+          selectedEmps.value = [x.id];
+        }
       }
     });
     deptChanging.value = false;
