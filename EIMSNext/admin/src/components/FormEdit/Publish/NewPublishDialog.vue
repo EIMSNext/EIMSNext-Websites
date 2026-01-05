@@ -25,11 +25,12 @@
     </et-dialog>
 </template>
 <script setup lang="ts">
-import { FormDef, AuthGroup, DataPerms, AuthGroupType } from "@eimsnext/models";
+import { FormDef, AuthGroup, DataPerms, AuthGroupType, AuthGroupRequest, Member, MemberType } from "@eimsnext/models";
 import { ISelectedTag, SelectedTags, MemberSelectDialog, MemberTabs } from "@eimsnext/components";
 import AuthGroupEditor from "./AuthGroupEditor.vue";
 
 import { useI18n } from "vue-i18n";
+import { authGroupService } from "@eimsnext/services";
 const { t } = useI18n()
 
 defineOptions({
@@ -56,9 +57,27 @@ const cancel = () => {
     emit("update:modelValue", false);
     emit("close", false);
 };
-const save = () => {
+const save = async () => {
     console.log("newauth", newAuthGrp, members)
-    emit("close", true);
+
+    let req: AuthGroupRequest = {
+        id: "",
+        appId: props.formDef.appId,
+        formId: props.formDef.id,
+        name: newAuthGrp.value.name,
+        desc: newAuthGrp.value.desc,
+        type: newAuthGrp.value.type,
+        members: members.value.map(x => { return { id: x.id, code: x.code, label: x.label, type: x.type as any as MemberType } as Member }),
+        dataPerms: newAuthGrp.value.dataPerms,
+        dataFilter: newAuthGrp.value.dataFilter,
+        disabled: newAuthGrp.value.disabled
+    };
+
+
+    await authGroupService.post(req).then(() => {
+        ElMessage.success("保存成功");
+        emit("close", true);
+    });
 };
 
 </script>

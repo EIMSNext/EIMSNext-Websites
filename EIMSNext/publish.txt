@@ -1,12 +1,12 @@
-call npm run build:utils
-call npm run build:lang
-call npm run build:mod
-call npm run build:service
-call npm run build:store
-call npm run build:com
-call npm run build:core
-call npm run build:elplus
-call npm run build:vant
-call npm run build:des
-call npm run build:bld
-call npm run build
+npm run build:utils
+npm run build:lang
+npm run build:mod
+npm run build:service
+npm run build:store
+npm run build:com
+npm run build:core
+npm run build:elplus
+npm run build:vant
+npm run build:des
+npm run build:bld
+npm run build

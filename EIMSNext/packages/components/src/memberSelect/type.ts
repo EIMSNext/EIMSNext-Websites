@@ -1,4 +1,4 @@
-import { ISelectedTag, TagType } from "dist";
+import { ISelectedTag } from "@/selectedTags/type";
 
 export enum MemberTabs {
   None = 0,
