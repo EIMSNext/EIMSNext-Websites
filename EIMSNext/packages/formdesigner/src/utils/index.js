@@ -154,7 +154,7 @@ export function makeOptionsRule(t, to, label, value) {
               { label: "label", key: label || "label" },
               { value: true, label: "value", key: value || "value" },
             ],
-            keyValue: label || "label",
+            keyValue: label,
           },
         },
       ],
