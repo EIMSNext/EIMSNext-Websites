@@ -26,6 +26,14 @@ export default defineComponent({
       type: Boolean,
       default: undefined,
     },
+    limitType: {
+      type: String,
+      default: "all",
+    },
+    limitScope: {
+      type: Array,
+      default: () => [],
+    },
     // 从FormRender的prop.props中接收formCreateInject
     formCreateInject: {
       type: Object,
@@ -98,6 +106,10 @@ export default defineComponent({
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
       // 计算最终的禁用状态：禁用属性或查看模式
       const isDisabled = disabled || isPreviewMode.value;
+      const limit = { depts: undefined };
+      if (props.limitType == "custom" && props.limitScope?.length > 0) {
+        limit.depts = props.limitScope;
+      }
 
       return (
         <div style={{ width: "100%" }}>
@@ -172,6 +184,8 @@ export default defineComponent({
               }
               showTabs={MemberTabs.Employee | MemberTabs.CurUser}
               multiple={multiple}
+              limit={limit}
+              limitScope={props.limitScope}
               onOk={handleEmployeeChange}
               onCancel={handleEmpCancel}
             />

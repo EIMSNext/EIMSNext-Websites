@@ -51,9 +51,9 @@
                     </div>
                 </div>
             </el-tab-pane>
-            <!-- <el-tab-pane label="字段权限" name="fieldperm" class="ag-panel">
+            <el-tab-pane label="字段权限" name="fieldperm" class="ag-panel">
                 <EtFieldPerms v-model="fieldPerms" :fields="formDef.content?.items"></EtFieldPerms>
-            </el-tab-pane> -->
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>
@@ -140,7 +140,7 @@ const emit = defineEmits(["update:modelValue"]);
                     margin-top: 10px;
                     flex: 1;
 
-                    :deep .el-textarea__inner {
+                    :deep(.el-textarea__inner) {
                         height: 100%;
                     }
                 }
