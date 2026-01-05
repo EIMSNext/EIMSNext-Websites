@@ -4,6 +4,7 @@ import {
   FieldDef,
   FieldType,
   getFlowStatus,
+  getCreateBy,
   getCreateTime,
 } from "@eimsnext/models";
 
@@ -120,6 +121,18 @@ export function buildFieldListItems(
 
   if (!fieldLimit || fieldLimit.limitField == "master") {
     if (formId != "employee") {
+      let submitor: IFormFieldDef = toFormFieldDef(
+        formId,
+        getCreateBy("提交人"),
+        undefined,
+        nodeId
+      );
+      items.push({
+        id: submitor.field,
+        label: submitor.label,
+        data: submitor,
+      });
+
       let createTime: IFormFieldDef = toFormFieldDef(
         formId,
         getCreateTime("提交时间"),

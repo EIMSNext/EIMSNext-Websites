@@ -1,6 +1,6 @@
 import { defineComponent, ref, watch, computed } from "vue";
 import { MemberSelectDialog, MemberTabs } from "@eimsnext/components";
-import "../departmentSelect/style.css";
+import "../departmentselect/style.css";
 
 export default defineComponent({
   name: "FcEmployeeSelect",
