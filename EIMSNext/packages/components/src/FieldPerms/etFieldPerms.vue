@@ -1,30 +1,54 @@
 <template>
     <div class="et-field-perms">
         <!-- 表头 -->
-        <div class="list-header">
-            <div class="item-header">字段</div>
-            <div class="item-header">可见</div>
-            <div class="item-header">可编辑 <span class="tips">!</span></div>
+        <div class="field-list-header">
+            <span class="field-header">字段</span>
+            <div class="field-view-col">可见</div>
+            <div class="field-edit-col">可编辑 <span class="tips">!</span></div>
         </div>
 
         <!-- 列表项 -->
-        <ul class="list-content-wrapper">
-            <li v-for="item in data" :key="item.id" class="list-item">
-                <div class="content-wrapper">
-                    <!-- 字段名称 -->
-                    <div class="item-label" :style="{ paddingLeft: `${item.level || 0} * 16 + 'px'` }">
-                        {{ item.label }}
-                        <span v-if="item.type === FieldType.TableForm" class="subform-tag">::</span>
-                    </div>
-
-                    <el-checkbox v-model="item.visible"
-                        @change="(val: boolean) => handlePermChange(item, 'visible', val)" />
-
-                    <el-checkbox v-if="!item.system" v-model="item.editable"
-                        @change="(val: boolean) => handlePermChange(item, 'editable', val)" />
+        <div class="field-list-content-wrapper">
+            <div class="check-all">全选<div class="field-view-col">
+                    <el-checkbox></el-checkbox>
                 </div>
-            </li>
-        </ul>
+                <div class="field-edit-col">
+                    <el-checkbox></el-checkbox>
+                </div>
+            </div>
+            <div class="all-items">
+                <template v-for="item in data" :key="item.id">
+                    <div class="check-item">
+                        <div class="check-item-text" :style="{ paddingLeft: `${item.level || 0} * 8 + 'px'` }">
+                            <span> {{ item.label }}</span>
+                        </div>
+                        <div class="field-view-col">
+                            <el-checkbox v-model="item.visible" size="large"
+                                @change="(val: boolean) => handlePermChange(item, 'visible', val)" />
+                        </div>
+                        <div class="field-edit-col">
+                            <el-checkbox v-if="!item.system" v-model="item.editable" size="large"
+                                @change="(val: boolean) => handlePermChange(item, 'editable', val)" />
+
+                            <el-popover placement="left" :width="150" :hide-after="0" trigger="click">
+                                <template #reference>
+                                    <div v-if="item.type === FieldType.TableForm" class="subform-tag">
+                                        <el-button plain="true" style="width: 20px; height: 20px; padding: 0;"> <et-icon
+                                                icon="el-icon-memo" color="#B4B9C2" /></el-button>
+                                    </div>
+                                </template>
+                                <div>
+                                    <el-checkbox>可新增记录</el-checkbox>
+                                    <el-checkbox>可插入记录</el-checkbox>
+                                    <el-checkbox>可编辑已有记录</el-checkbox>
+                                    <el-checkbox>可删除已有记录</el-checkbox>
+                                </div>
+                            </el-popover>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
     </div>
 </template>
 

@@ -74,9 +74,9 @@ import QrCodeBox from "./components/aide/QrCodeBox.vue";
 import FcCity from "./components/City.vue";
 import FcTitle from "./components/aide/FcTitle.vue";
 import DepartmentSelectView from "./components/DepartmentSelectView.vue";
-import { FcDepartmentSelect } from "@eimsnext/form-render-elplus/src/components/departmentSelect";
+import { FcDepartmentSelect } from "@eimsnext/form-render-elplus/src/components/departmentselect";
 import EmployeeSelectView from "./components/EmployeeSelectView.vue";
-import { FcEmployeeSelect } from "@eimsnext/form-render-elplus/src/components/employeeSelect";
+import { FcEmployeeSelect } from "@eimsnext/form-render-elplus/src/components/employeeselect";
 import SignaturePad from "./components/SignaturePad.vue";
 import Echarts from "./components/echarts/Echarts.vue";
 import formCreate, { designerForm } from "./utils/form";
@@ -204,8 +204,8 @@ addComponent("SignaturePad", SignaturePad);
 addComponent("FcEcharts", Echarts);
 addComponent("FcTitle", FcTitle);
 addComponent("FcCity", FcCity);
-addComponent("departmentSelect", FcDepartmentSelect, DepartmentSelectView);
-addComponent("employeeSelect", FcEmployeeSelect, EmployeeSelectView);
+addComponent("departmentselect", FcDepartmentSelect, DepartmentSelectView);
+addComponent("employeeselect", FcEmployeeSelect, EmployeeSelectView);
 addComponent("FcId", Id);
 
 const setFormula = function (formula) {

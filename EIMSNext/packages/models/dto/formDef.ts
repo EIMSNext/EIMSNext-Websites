@@ -55,8 +55,8 @@ export enum FieldType {
   FileUpload = "fileupload",
   // Signature = "signature",
   TableForm = "tableform",
-  Employee = "employee",
-  Employee2 = "employee2",
-  Department = "department",
-  Department2 = "department2",
+  EmployeeSelect = "employeeselect",
+  EmployeeSelect2 = "employeeselect2",
+  DepartmentSelect = "departmentselect",
+  DepartmentSelect2 = "departmentselect2",
 }
