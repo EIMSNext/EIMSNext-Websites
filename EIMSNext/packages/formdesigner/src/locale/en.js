@@ -1501,28 +1501,28 @@ const En = {
         inactiveColor: "Background color when closed",
       },
     },
-    departmentSelect: {
+    departmentselect: {
       name: "Department Single Select",
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
       },
     },
-    departmentSelect2: {
+    departmentselect2: {
       name: "Department Multiple Select",
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
       },
     },
-    employeeSelect: {
+    employeeselect: {
       name: "Employee Single Select",
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
       },
     },
-    employeeSelect2: {
+    employeeselect2: {
       name: "Employee Multiple Select",
       props: {
         readonly: "Readonly",

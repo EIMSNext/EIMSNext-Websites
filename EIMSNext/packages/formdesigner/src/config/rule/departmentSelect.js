@@ -2,7 +2,7 @@ import { uniqueId } from "@eimsnext/form-render-core";
 import { makeTitleRule, localeProps } from "../../utils";
 
 const label = "部门单选";
-const name = "departmentSelect";
+const name = "departmentselect";
 
 export default {
   menu: "main",
@@ -16,7 +16,7 @@ export default {
     return {
       type: name,
       field: uniqueId(),
-      title: t("com.departmentSelect.name"),
+      title: t("com.departmentselect.name"),
       info: "",
       $required: false,
       props: {
