@@ -39,7 +39,6 @@
                                 </template>
                                 <div>
                                     <el-checkbox>可新增记录</el-checkbox>
-                                    <el-checkbox>可插入记录</el-checkbox>
                                     <el-checkbox>可编辑已有记录</el-checkbox>
                                     <el-checkbox>可删除已有记录</el-checkbox>
                                 </div>
