@@ -22,8 +22,8 @@ export default {
             return {
                 type: rule.props.type === 'button' ? 'elRadioButton' : 'elRadio',
                 props: {
-                    label: opt.value,
-                    value: opt.value,
+                    label: opt,
+                    value: opt,
                 },
                 _sfc:{
                     content: opt.label

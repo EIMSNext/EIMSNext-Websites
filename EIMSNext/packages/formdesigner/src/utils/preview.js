@@ -19,12 +19,12 @@ const findTreeLabel = function (find, data, key, props) {
 };
 
 const findCheckboxLabel = function (find, data) {
-  data.forEach((v) => {
-    if (find.indexOf(v.value) > -1) {
-      find[find.indexOf(v.value)] = v.label;
-    }
+  return find.map(item => {
+    // 如果item是对象，获取其value属性进行匹配
+    const valueToFind = typeof item === 'object' && item !== null ? item.value : item;
+    const match = data.find(v => v.value === valueToFind);
+    return match ? match.label : item;
   });
-  return find;
 };
 
 function toArray(val) {
