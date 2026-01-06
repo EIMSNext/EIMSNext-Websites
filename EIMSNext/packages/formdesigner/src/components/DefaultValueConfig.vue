@@ -15,13 +15,13 @@
         :min="activeRule.props.min" :max="activeRule.props.max"></el-input-number>
       <el-date-picker v-if="activeRule.type == 'timestamp'" v-model="customValue" value-format="x"
         :type="activeRule.props.type" :format="activeRule.props.format"></el-date-picker>
-      <fc-department-select v-if="activeRule.type == 'departmentSelect'" v-model="customValue"
+      <fc-department-select v-if="activeRule.type == 'departmentselect'" v-model="customValue"
         @change="onOrgChanged"></fc-department-select>
-      <fc-department-select v-if="activeRule.type == 'departmentSelect2'" v-model="customValue" @change="onOrgChanged"
+      <fc-department-select v-if="activeRule.type == 'departmentselect2'" v-model="customValue" @change="onOrgChanged"
         :multiple="true"></fc-department-select>
-      <fc-employee-select v-if="activeRule.type == 'employeeSelect'" v-model="customValue"
+      <fc-employee-select v-if="activeRule.type == 'employeeselect'" v-model="customValue"
         @change="onOrgChanged"></fc-employee-select>
-      <fc-employee-select v-if="activeRule.type == 'employeeSelect2'" v-model="customValue" @change="onOrgChanged"
+      <fc-employee-select v-if="activeRule.type == 'employeeselect2'" v-model="customValue" @change="onOrgChanged"
         :multiple="true"></fc-employee-select>
     </el-badge>
     <el-badge v-if="valueMode == 'datalink'" type="warning">

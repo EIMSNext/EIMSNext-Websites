@@ -52,7 +52,7 @@
                 </div>
             </el-tab-pane>
             <el-tab-pane label="字段权限" name="fieldperm" class="ag-panel">
-                <EtFieldPerms v-model="fieldPerms" :fields="formDef.content?.items"></EtFieldPerms>
+                <EtFieldPerms v-model="fieldPerms" :fields="formDef.content?.items" style="height:90%"></EtFieldPerms>
             </el-tab-pane>
         </el-tabs>
     </div>

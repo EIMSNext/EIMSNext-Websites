@@ -1445,28 +1445,28 @@ const ZhCn = {
         inactiveColor: "关闭时的背景色",
       },
     },
-    departmentSelect: {
+    departmentselect: {
       name: "部门单选",
       props: {
         readonly: "只读",
         disabled: "禁用",
       },
     },
-    departmentSelect2: {
+    departmentselect2: {
       name: "部门多选",
       props: {
         readonly: "只读",
         disabled: "禁用",
       },
     },
-    employeeSelect: {
+    employeeselect: {
       name: "成员单选",
       props: {
         readonly: "只读",
         disabled: "禁用",
       },
     },
-    employeeSelect2: {
+    employeeselect2: {
       name: "成员多选",
       props: {
         readonly: "只读",
