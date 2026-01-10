@@ -81,7 +81,10 @@ export function createFlowNode(
       return {
         id: id,
         nodeType: nodeType,
-        name: nodeType == FlowNodeType.Branch ? t("workflow.branchNode") : t("workflow.branch2Node"),
+        name:
+          nodeType == FlowNodeType.Branch
+            ? t("workflow.branchNode")
+            : t("workflow.branch2Node"),
         childNodes: [
           {
             id: bId1,
@@ -91,7 +94,7 @@ export function createFlowNode(
               id: uniqueId(),
               nodeType: FlowNodeType.Condition,
               name: t("workflow.conditionNode"),
-              notes:t("common.notset"),
+              notes: t("common.notset"),
               metadata: {
                 conditionMeta: {
                   condition: { id: uniqueId(), rel: "and", items: [] },
@@ -366,6 +369,7 @@ export interface IApprovalCandidate {
   candidateType: CandidateType;
   candidateId: string;
   candidateName: string;
+  cascadedDept?: boolean;
 }
 
 export function createWorkflowData(t: Translator): IFlowData {

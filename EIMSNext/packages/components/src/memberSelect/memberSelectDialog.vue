@@ -2,7 +2,7 @@
   <et-dialog :model-value="modelValue" class="member-select-dialog" title="部门成员列表" destroy-on-close width="750px"
     @cancel="cancel" @ok="save">
     <div style="padding: 12px 20px">
-      <member-select v-model="tagsRef" :showTabs="showTabs" :showCascade="showCascade" :multiple="multiple"
+      <member-select v-model="tagsRef" :showTabs="showTabs" :cascadedDept="cascadedDept" :showCascade="showCascade" :multiple="multiple"
         :limit="limit" :dynamicMembers="dynamicMembers" />
     </div>
     <template #footer-left>
@@ -25,6 +25,7 @@ const props = withDefaults(
     modelValue: boolean;
     tags: ISelectedTag[];
     showTabs?: MemberTabs | number,
+    cascadedDept?: boolean;
     showCascade?: boolean;
     multiple?: boolean;
     limit?: IMemberLimit;
@@ -32,6 +33,7 @@ const props = withDefaults(
   }>(),
   {
     showTabs: 7,
+    cascadedDept: false,
     showCascade: false,
     multiple: true
   }

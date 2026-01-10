@@ -44,6 +44,7 @@
     "@eimsnext/store": "workspace:*",
     "@eimsnext/utils": "workspace:*",
     "@element-plus/icons-vue": "^2.3.2",
+    "@rollup/plugin-terser": "^0.4.4",
     "@stomp/stompjs": "^7.2.1",
     "@univerjs/core": "^0.8.3",
     "@univerjs/design": "^0.8.3",
