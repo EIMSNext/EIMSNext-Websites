@@ -15,6 +15,7 @@
 </template>
 <script setup lang="ts">
 import { IConditionList } from "@eimsnext/components";
+import { IFieldPerm } from "@eimsnext/models";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -27,6 +28,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: IConditionList;
     formId: string;
+    fieldPerms?: IFieldPerm[];
   }>(),
   {}
 );

@@ -25,7 +25,6 @@ defineOptions({
 });
 
 const props = defineProps<{
-  // formId: string;
   modelValue: IFieldSortItem;
 }>();
 

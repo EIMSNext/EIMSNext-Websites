@@ -27,6 +27,7 @@ import { IFieldSortItem, IFieldSortList } from "./type";
 import { IFormFieldDef, buildFieldListItems } from "../FieldList/type";
 import { SortDirection } from "@eimsnext/services";
 import { IListItem } from "@/list/type";
+import { IFieldPerm } from "@eimsnext/models";
 const { t } = useLocale();
 
 defineOptions({
@@ -35,8 +36,9 @@ defineOptions({
 
 const props = withDefaults(
   defineProps<{
-    formId: string;
     modelValue: IFieldSortList;
+    formId: string;
+    fieldPerms?: IFieldPerm[];
   }>(),
   {}
 );

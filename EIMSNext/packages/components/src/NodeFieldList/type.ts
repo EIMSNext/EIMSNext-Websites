@@ -5,7 +5,7 @@ import {
   toFormFieldDef,
 } from "@/FieldList/type";
 import { ITreeNode, TreeNodeType } from "@/common";
-import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
+import { FieldDef, FieldType, FormDef, IFieldPerm } from "@eimsnext/models";
 
 export interface INodeForm {
   nodeId: string;
@@ -35,8 +35,9 @@ export interface IFormFieldMap {
   mapCount: number;
 }
 export interface IFieldLimit {
-  limitField: string;
-  limitType: FieldLimitType;
+  limitField?: string;
+  limitType?: FieldLimitType;
+  fieldPerms?: IFieldPerm[];
 }
 export enum FieldLimitType {
   None,

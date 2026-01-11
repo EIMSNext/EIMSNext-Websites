@@ -4,8 +4,8 @@
         <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
     </EtConfirmDialog>
     <et-toolbar :left-group="leftBars" @command="toolbarHandler" class="dataview-bar"></et-toolbar>
-    <FormView v-if="formData" :def="formDef" :data="formData" :isView="isView" :actions="actions" @draft="saveDraft"
-        @submit="submitData">
+    <FormView v-if="formData" :def="formDef" :data="formData" :isView="isView" :actions="actions"
+        :fieldPerms="fieldPerms" @draft="saveDraft" @submit="submitData">
     </FormView>
 </template>
 <script lang="ts" setup>
@@ -14,7 +14,7 @@ defineOptions({
 });
 
 import { ref, onBeforeMount } from "vue";
-import { FormData, FormContent, FormDataRequest, DataAction, FlowStatus } from "@eimsnext/models";
+import { FormData, FormContent, FormDataRequest, DataAction, FlowStatus, IFieldPerm } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
@@ -26,6 +26,7 @@ const props = withDefaults(
     defineProps<{
         formId: string;
         dataId: string;
+        fieldPerms?: IFieldPerm[];
     }>(),
     {
     }

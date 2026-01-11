@@ -3,7 +3,8 @@
     <et-dialog v-model="showAddDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
       :close-on-click-modal="false">
       <div class="form-container">
-        <AddFormData :formId="formId" :isView="false" @save="onDataSaved" @submit="onDataSaved"></AddFormData>
+        <AddFormData :formId="formId" :isView="false" :fieldPerms="fieldPerms" @save="onDataSaved"
+          @submit="onDataSaved"></AddFormData>
       </div>
     </et-dialog>
     <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')"
@@ -13,7 +14,8 @@
     <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
       :close-on-click-modal="false">
       <div class="form-container">
-        <FormDataView :formId="formId" :dataId="selectedData!.id" @ok="handleViewOk"></FormDataView>
+        <FormDataView :formId="formId" :dataId="selectedData!.id" :fieldPerms="fieldPerms" @ok="handleViewOk">
+        </FormDataView>
       </div>
     </et-dialog>
     <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
@@ -72,6 +74,7 @@ import {
   AuthGroup,
   CurrentUser,
   UserType,
+  IFieldPerm,
 } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
 import { IDynamicFindOptions, SortDirection, authGroupService, formDataService } from "@eimsnext/services";
@@ -88,7 +91,6 @@ import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
 import dayjs from "dayjs";
 import { useI18n } from "vue-i18n";
-import { FlagEnum } from "@eimsnext/utils";
 const { t } = useI18n();
 
 const tableRef = ref<TableInstance>();
@@ -105,6 +107,7 @@ const sortBtnRef = ref();
 const fieldBtnRef = ref();
 const authGrps = ref<AuthGroup[]>([])
 const curAuthGrp = ref<AuthGroup>()
+const fieldPerms = ref<IFieldPerm[]>()
 const userStore = useUserStore()
 
 const leftBars = ref<ToolbarItem[]>([
@@ -208,6 +211,8 @@ formStore.get(formId).then(async (form: FormDef | undefined) => {
         authGrps.value = res;
         if (res.length > 0) {
           curAuthGrp.value = res[0]
+          fieldPerms.value = curAuthGrp.value.fieldPerms;
+
           let menuItems: IToolbarItemDropdownItem[] = res.map(x => { return { text: x.name, command: x.id } })
           menuItems[0].checked = true
 
@@ -226,6 +231,8 @@ formStore.get(formId).then(async (form: FormDef | undefined) => {
                 menuItems: menuItems,
                 onCommand: (cmd) => {
                   curAuthGrp.value = authGrps.value.find(x => x.id == cmd);
+                  fieldPerms.value = curAuthGrp.value?.fieldPerms;
+
                   initChildrenField(formDef.value!.content?.items!, []);
                   columns.value = buildColumns(formDef.value!.content?.items!, formDef.value!.usingWorkflow, []);
                   updateQueryParams();
@@ -236,12 +243,12 @@ formStore.get(formId).then(async (form: FormDef | undefined) => {
             leftBars.value.unshift(grpItem)
           }
 
-          console.log("leftBars", leftBars.value)
+          // console.log("leftBars", leftBars.value)
         }
       });
     }
-    initChildrenField(form.content?.items!, []);
-    columns.value = buildColumns(form.content?.items!, form.usingWorkflow, []);
+    initChildrenField(form.content?.items!, [], fieldPerms.value);
+    columns.value = buildColumns(form.content?.items!, form.usingWorkflow, [], fieldPerms.value);
     updateQueryParams();
     handleQuery();
   }
@@ -488,7 +495,7 @@ const childrenFields = ref<string[]>([]);
 const flattedData = ref<any[]>([]);
 const spanMap = ref<number[]>([]);
 
-const initChildrenField = (fields: FieldDef[], displayFields: IFormFieldDef[]) => {
+const initChildrenField = (fields: FieldDef[], displayFields: IFormFieldDef[], fieldPerms?: IFieldPerm[]) => {
   childrenFields.value = [];
   fields.forEach((x) => {
     if (x.columns && x.columns.length > 0) childrenFields.value.push(x.field);

@@ -6,6 +6,7 @@ import {
   getFlowStatus,
   getCreateBy,
   getCreateTime,
+  IFieldPerm,
 } from "@eimsnext/models";
 
 export interface IFormFieldDef {
