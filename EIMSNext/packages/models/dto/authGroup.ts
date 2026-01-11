@@ -9,6 +9,7 @@ export interface AuthGroupRequest extends IdBase {
   members?: Member[];
   dataPerms?: DataPerms;
   dataFilter?: string;
+  fieldPerms?: IFieldPerm[];
   disabled?: boolean;
 }
 
@@ -21,15 +22,15 @@ export interface AuthGroup extends CorpModelBase {
   members?: Member[];
   dataPerms: DataPerms;
   dataFilter?: string;
+  fieldPerms?: IFieldPerm[];
   disabled: boolean;
 }
 
 export enum AuthGroupType {
-  Custom = 0,
-  ViewAllData = 1,
-  ManageAllData = 2,
-  ViewSelfData = 3,
-  ManageSelfData = 4,
+  ManageSelfData = "0",
+  ViewAllData = "1",
+  ManageAllData = "2",
+  Custom = "3",
 }
 
 export interface Member {
@@ -37,13 +38,14 @@ export interface Member {
   code?: string;
   label: string;
   type: MemberType;
+  cascadedDept: boolean;
 }
 
 export enum MemberType {
-  None = 0,
-  Department = 1,
-  Employee = 2,
-  Role = 3,
+  None = "0",
+  Department = "1",
+  Employee = "2",
+  Role = "3",
 }
 
 export enum DataPerms {
@@ -56,4 +58,13 @@ export enum DataPerms {
   Import = 1 << 5,
   Export = 1 << 6,
   All = (1 << 7) - 1,
+}
+
+export interface IFieldPerm {
+  id: string;
+  visible: boolean;
+  editable: boolean;
+  tableInsert?: boolean;
+  tableEdit?: boolean;
+  tableDelete?: boolean;
 }

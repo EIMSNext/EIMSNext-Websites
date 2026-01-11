@@ -1,7 +1,12 @@
 import { IFormFieldDef } from "@/FieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
 import { FieldType, SystemField, isSystemField } from "@eimsnext/models";
-import { IDynamicFindOptions, IDynamicFilter, SortDirection } from "@eimsnext/services";
+import {
+  IDynamicFindOptions,
+  IDynamicFilter,
+  SortDirection,
+  IDataScope,
+} from "@eimsnext/services";
 // import { ODataQuery } from "@/utils/query";
 
 export enum ConditionType {
@@ -59,7 +64,8 @@ export function toDynamicFindOptions(
   sort: IFieldSortList,
   skip: number,
   take: number,
-  fixedFilter?: IDynamicFilter
+  fixedFilter?: IDynamicFilter,
+  scope?: IDataScope
 ) {
   let toDynamicFilter = (filter: IConditionList) => {
     let dfilter: IDynamicFilter = {};
@@ -70,7 +76,9 @@ export function toDynamicFindOptions(
         dfilter.items?.push(toDynamicFilter(x));
       });
     } else if (filter.field?.field) {
-      dfilter.field = filter.field.field; // 直接使用字段名，不要添加"data."前缀
+      dfilter.field = isSystemField(filter.field.field)
+        ? filter.field.field
+        : `data.${filter.field.field}`;
       dfilter.type = filter.field.type;
       dfilter.op = filter.op;
       dfilter.value = filter.value?.value;
@@ -82,11 +90,12 @@ export function toDynamicFindOptions(
   const findOpt = {} as IDynamicFindOptions;
   findOpt.skip = skip;
   findOpt.take = take;
+  findOpt.scope = scope;
 
   if (fields.length > 0) {
     findOpt.select = [];
     fields.forEach((x) => {
-      let field = x.field; // 直接使用字段名，不要添加"data."前缀
+      let field = isSystemField(x.field) ? x.field : `data.${x.field}`;
       findOpt.select?.push({ field: field, visible: true });
     });
   }
@@ -94,7 +103,9 @@ export function toDynamicFindOptions(
   if (sort.items.length > 0) {
     findOpt.sort = [];
     sort.items.forEach((x) => {
-      let sField = x.field.field; // 直接使用字段名，不要添加"data."前缀
+      let sField = isSystemField(x.field.field)
+        ? x.field.field
+        : `data.${x.field.field}`;
       findOpt.sort?.push({ field: sField, dir: x.sort });
     });
   }
@@ -136,7 +147,9 @@ export function toODataQuery<T>(
 
   if (sort.items.length > 0) {
     query.orderBy = sort.items
-      .map((x) => (x.sort == SortDirection.Desc ? `${x.field.field} desc` : x.field.field))
+      .map((x) =>
+        x.sort == SortDirection.Desc ? `${x.field.field} desc` : x.field.field
+      )
       .join(",");
   }
 

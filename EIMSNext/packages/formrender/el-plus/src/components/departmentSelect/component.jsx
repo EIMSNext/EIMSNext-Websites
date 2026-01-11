@@ -34,6 +34,10 @@ export default defineComponent({
       type: Array,
       default: () => [],
     },
+    cascadedDept: {
+      type: Boolean,
+      default: false,
+    },
     // 从FormRender的prop.props中接收formCreateInject
     formCreateInject: {
       type: Object,
@@ -103,6 +107,7 @@ export default defineComponent({
       const isDisabled = disabled || isPreviewMode.value;
       const limit = { depts: undefined };
       if (props.limitType == "custom" && props.limitScope?.length > 0) {
+        //TODO:应该动态计算所有子节点
         limit.depts = props.limitScope;
       }
       return (
@@ -169,6 +174,7 @@ export default defineComponent({
                     : []
               }
               showTabs={MemberTabs.Department | MemberTabs.CurDept}
+              cascadedDept={cascadedDept}
               multiple={multiple}
               limit={limit}
               limitScope={props.limitScope}

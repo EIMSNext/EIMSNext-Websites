@@ -45,20 +45,22 @@
         </template>
       </el-input>
 
-      <el-dropdown placement="bottom-start" size="large">
-        <el-button>
-          <et-icon icon="el-icon-plus"> </et-icon>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu style="min-width: 150px">
-            <el-dropdown-item @click="createForm(false, false)">{{ t("admin.newForm") }}</el-dropdown-item>
-            <el-dropdown-item @click="createForm(true, false)">{{ t("admin.newFlowForm") }}</el-dropdown-item>
-            <el-dropdown-item @click="createForm(false, true)">{{ t("admin.newLedgerForm") }}</el-dropdown-item>
-            <el-divider style="margin: 3px 0" />
-            <el-dropdown-item @click="createFolder">{{ t("admin.newGroup") }}</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+      <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
+        <el-dropdown placement="bottom-start" size="large">
+          <el-button>
+            <et-icon icon="el-icon-plus"> </et-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu style="min-width: 150px">
+              <el-dropdown-item @click="createForm(false, false)">{{ t("admin.newForm") }}</el-dropdown-item>
+              <el-dropdown-item @click="createForm(true, false)">{{ t("admin.newFlowForm") }}</el-dropdown-item>
+              <el-dropdown-item @click="createForm(false, true)">{{ t("admin.newLedgerForm") }}</el-dropdown-item>
+              <el-divider style="margin: 3px 0" />
+              <el-dropdown-item @click="createFolder">{{ t("admin.newGroup") }}</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </template>
     </div>
     <el-scrollbar>
       <SidebarMenu :menu-list="permissionStore.routes" base-path="" />
@@ -70,8 +72,8 @@
 
 <script setup lang="ts">
 import { useSettingsStore, usePermissionStore } from "@/store";
-import { App } from "@eimsnext/models";
-import { useAppStore, useContextStore } from "@eimsnext/store";
+import { App, UserType } from "@eimsnext/models";
+import { useAppStore, useContextStore, useUserStore } from "@eimsnext/store";
 import NavbarRight from "../NavBar/components/NavbarRight.vue";
 import FormEdit from "@/components/FormEdit/index.vue";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
@@ -91,6 +93,8 @@ const sidebarLogo = computed(() => settingsStore.sidebarLogo);
 
 const appStore = useAppStore();
 const contextStore = useContextStore();
+const userStore = useUserStore()
+const curUser = toRef(userStore.currentUser)
 
 const app = ref<App>();
 

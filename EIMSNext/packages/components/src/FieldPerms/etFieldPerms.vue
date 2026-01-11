@@ -33,8 +33,8 @@
                             <el-popover placement="left" :width="150" :hide-after="0" trigger="click">
                                 <template #reference>
                                     <div v-if="item.type === FieldType.TableForm" class="subform-tag">
-                                        <el-button plain="true" style="width: 20px; height: 20px; padding: 0;"> <et-icon
-                                                icon="el-icon-memo" color="#B4B9C2" /></el-button>
+                                        <el-button :plain="true" style="width: 20px; height: 20px; padding: 0;">
+                                            <et-icon icon="el-icon-memo" color="#B4B9C2" /></el-button>
                                     </div>
                                 </template>
                                 <div>
@@ -125,7 +125,7 @@ const buildListItems = (items: IFieldPermItem[]) => {
 
 
 const data = ref<IFieldPermListItem[]>(buildListItems(props.modelValue));
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "change"]);
 
 
 const handlePermChange = (item: IFieldPermListItem, key: "visible" | "editable", val: boolean) => {
@@ -141,6 +141,7 @@ const handlePermChange = (item: IFieldPermListItem, key: "visible" | "editable",
     }
 
     emit("update:modelValue", fixedModelValue.value);
+    emit("change", fixedModelValue.value);
 };
 </script>
 

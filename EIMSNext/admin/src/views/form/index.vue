@@ -60,7 +60,7 @@
 </template>
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
-import { useFormStore } from "@eimsnext/store";
+import { useFormStore, useUserStore } from "@eimsnext/store";
 import {
   FormDef,
   FormData,
@@ -69,9 +69,12 @@ import {
   FlowStatus,
   FieldType,
   getCreateTime,
+  AuthGroup,
+  CurrentUser,
+  UserType,
 } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
-import { IDynamicFindOptions, SortDirection, formDataService } from "@eimsnext/services";
+import { IDynamicFindOptions, SortDirection, authGroupService, formDataService } from "@eimsnext/services";
 import {
   MessageIcon,
   ToolbarItem,
@@ -84,6 +87,7 @@ import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
 import dayjs from "dayjs";
 import { useI18n } from "vue-i18n";
+import { FlagEnum } from "@eimsnext/utils";
 const { t } = useI18n();
 
 const tableRef = ref<TableInstance>();
@@ -98,6 +102,9 @@ const formDef = ref<FormDef>();
 const filterBtnRef = ref();
 const sortBtnRef = ref();
 const fieldBtnRef = ref();
+const authGrps = ref<AuthGroup[]>([])
+const curAuthGrp = ref<AuthGroup>()
+const userStore = useUserStore()
 
 const leftBars = ref<ToolbarItem[]>([
   {
@@ -192,9 +199,43 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
   }
 };
 
-formStore.get(formId).then((form: FormDef | undefined) => {
+formStore.get(formId).then(async (form: FormDef | undefined) => {
   if (form) {
     formDef.value = form;
+    if (userStore.currentUser.userType == UserType.Employee) {
+      await authGroupService.query<AuthGroup>(`$filter=appid eq '${form.appId}' AND formid eq '${form.id}'`).then(res => {
+        authGrps.value = res;
+        if (res.length > 0) {
+          curAuthGrp.value = res[0]
+
+          let grpItem = leftBars.value.find((x) => x.type == "dropdown" && x.config.command == "authgrp")
+          console.log("grpItem", grpItem)
+          if (grpItem) {
+            grpItem.config.menuItems = res.map(x => { return { text: x.name, command: x.id } })
+          }
+          else {
+            grpItem = {
+              type: "dropdown",
+              config: {
+                text: "请选择权限组",
+                command: "authgrp",
+                menuItems: res.map(x => { return { text: x.name, command: x.id } }),
+                onCommand: (cmd) => {
+                  curAuthGrp.value = cmd;
+                  initChildrenField(formDef.value!.content?.items!, []);
+                  columns.value = buildColumns(formDef.value!.content?.items!, formDef.value!.usingWorkflow, []);
+                  updateQueryParams();
+                  handleQuery();
+                }
+              }
+            };
+            leftBars.value.unshift(grpItem)
+          }
+
+          console.log("leftBars", leftBars.value)
+        }
+      });
+    }
     initChildrenField(form.content?.items!, []);
     columns.value = buildColumns(form.content?.items!, form.usingWorkflow, []);
     updateQueryParams();
@@ -288,7 +329,8 @@ const updateQueryParams = () => {
     sortList.value,
     (pageNum.value - 1) * pageSize.value,
     pageSize.value,
-    { field: "formId", type: "none", op: "eq", value: formDef.value!.id }
+    { field: "formId", type: "none", op: "eq", value: formDef.value!.id },
+    { authGroupId: curAuthGrp.value?.id }
   );
 };
 
