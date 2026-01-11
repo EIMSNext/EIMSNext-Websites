@@ -1,10 +1,11 @@
 import type { RouteRecordRaw } from "vue-router";
 import { SysLayout, constantRoutes } from "@/router";
-import { store, useAppStoreHook, useContextStoreHook } from "@eimsnext/store";
+import { store, useAppStoreHook, useContextStoreHook, useFormStore } from "@eimsnext/store";
 import router from "@/router";
 import { getAppIcon, getFormIcon, getAppIconColor } from "@/utils/common";
 
-import { AppMenu, FormType } from "@eimsnext/models";
+import { AppMenu, FormDef, FormType } from "@eimsnext/models";
+import { formDefService } from "@eimsnext/services";
 const modules = import.meta.glob("../../views/**/**.vue");
 const AppLayout = () => import("@/layout/applayout/index.vue");
 
@@ -19,44 +20,72 @@ export const usePermissionStore = defineStore("permission", () => {
   const appStore = useAppStoreHook();
   const contextStore = useContextStoreHook();
   const { appId, appChanged } = storeToRefs(contextStore);
-  watch([appChanged], ([newVal]) => {
+  watch([appChanged], async ([newVal]) => {
     // console.log("appChanged", newVal);
-    generateAppMenus();
+    await generateAppMenus();
   });
 
-  const generateAppMenus = () => {
+  const generateAppMenus = async () => {
     appMenus.value = [];
+    let menus: RouteRecordRaw[] = [];
     // console.log("perm app id", appId.value);
     if (appId.value) {
-      appStore.get(appId.value, false).then((app) => {
-        // console.log("perm app", app);
-        if (app) {
-          app.appMenus.forEach((x: AppMenu) => {
-            appMenus.value.push(generateAppMenu(appId.value, x));
-          });
-        }
-      });
+      let app = await appStore.get(appId.value);
+      if (app) {
+        let forms = await formDefService.query<FormDef>(
+          `$filter=appid eq '${appId.value}'&appid=${appId.value}`
+        );
+        app.appMenus.forEach((x: AppMenu) => {
+          if (x.menuType == FormType.Group || forms.findIndex((y) => y.id == x.menuId) > -1) {
+            generateAppMenu(appId.value, x, forms, menus);
+          }
+        });
+        appMenus.value = menus;
+      }
     }
   };
-  const generateAppMenu = (appId: string, x: AppMenu) => {
-    let formRoute: RouteRecordRaw = {
-      path: `/app/${appId}/form/${x.menuId}`,
-      redirect: `/app/${appId}/form/${x.menuId}`,
-      meta: {
-        id: x.menuId,
-        title: x.title,
-        icon: getFormIcon(x),
-        iconColor: getAppIconColor(x),
-        isGroup: x.menuType == FormType.Group,
-      },
-    };
-    // console.log("form menu", formRoute);
-    if (x.subMenus) {
-      formRoute.children = [];
-      x.subMenus.forEach((s: AppMenu) => formRoute.children?.push(generateAppMenu(appId, s)));
-    }
+  const generateAppMenu = (
+    appId: string,
+    x: AppMenu,
+    forms: FormDef[],
+    menus: RouteRecordRaw[]
+  ) => {
+    let formRoute: RouteRecordRaw;
 
-    return formRoute;
+    if (x.menuType != FormType.Group) {
+      formRoute = {
+        path: `/app/${appId}/form/${x.menuId}`,
+        redirect: `/app/${appId}/form/${x.menuId}`,
+        meta: {
+          id: x.menuId,
+          title: x.title,
+          icon: getFormIcon(x),
+          iconColor: getAppIconColor(x),
+          isGroup: false,
+        },
+      };
+      menus.push(formRoute);
+    } else {
+      if (x.menuType == FormType.Group && x.subMenus && x.subMenus.length > 0) {
+        var subMenus = x.subMenus.filter((x) => forms.findIndex((y) => y.id == x.menuId) > -1);
+        if (subMenus.length > 0) {
+          formRoute = {
+            path: `#`,
+            redirect: `#`,
+            meta: {
+              id: x.menuId,
+              title: x.title,
+              icon: getFormIcon(x),
+              iconColor: getAppIconColor(x),
+              isGroup: true,
+              children: [],
+            },
+          };
+          menus.push(formRoute);
+          subMenus.forEach((s: AppMenu) => generateAppMenu(appId, s, forms, formRoute.children!));
+        }
+      }
+    }
   };
   /**
    * 生成动态路由
