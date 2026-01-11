@@ -1,12 +1,5 @@
 <template>
     <el-input class="_fd-value-input" v-model="value" @blur="onBlur" v-bind="$attrs">
-        <template #prepend>
-            <el-select v-model="type" style="width: 60px">
-                <el-option :label="t('validate.types.string')" value="1"/>
-                <el-option :label="t('validate.types.number')" value="2"/>
-                <el-option :label="t('validate.types.boolean')" value="3"/>
-            </el-select>
-        </template>
         <template #append v-if="$slots.append">
             <slot name="append"></slot>
         </template>
@@ -18,14 +11,13 @@ import {defineComponent} from 'vue';
 
 export default defineComponent({
     name: 'ValueInput',
-    emits: ['update:modelValue', 'change', 'change-type', 'blur'],
+    emits: ['update:modelValue', 'change', 'blur'],
     inject: ['designer'],
     props: {
-        modelValue: [String, Number, Boolean],
+        modelValue: [String],
     },
     data() {
         return {
-            type: '1',
             value: '',
         }
     },
@@ -37,20 +29,9 @@ export default defineComponent({
     watch: {
         modelValue: {
             handler: function (val) {
-                if (typeof val === 'number') {
-                    this.type = '2';
-                } else if (typeof val === 'boolean') {
-                    this.type = '3';
-                } else {
-                    this.type = '1';
-                }
                 this.value = null == val ? '' : ('' + val);
             },
             immediate: true,
-        },
-        type() {
-            this.updateValue(this.value);
-            this.$emit('change-type', this.type);
         }
     },
     methods: {
@@ -66,12 +47,7 @@ export default defineComponent({
             this.$emit('change', value);
         },
         toValue(val) {
-            if (this.type === '1') {
-                return '' + val;
-            } else if (this.type === '2') {
-                return parseFloat(val) || 0;
-            }
-            return val === 'true';
+            return '' + val;
         }
     }
 });

@@ -24,21 +24,21 @@
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select">
           <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
-            <el-option v-for="opt in options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+            <el-option v-for="opt in props.options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select2">
           <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
             @change="onInput">
-            <el-option v-for="opt in options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+            <el-option v-for="opt in props.options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
           </el-select>
         </template>
         <!-- <template v-else-if="dataType == ConditionFieldType.Switch">
           <el-switch size="default" v-bind="props || {}" v-model="value" @change="onInput"></el-switch>
         </template> -->
-        <!-- <template v-else>
+        <template v-else>
           <el-input size="default" v-model="value" @blur="onInput"></el-input>
-        </template> -->
+        </template>
       </template>
     </div>
   </div>
