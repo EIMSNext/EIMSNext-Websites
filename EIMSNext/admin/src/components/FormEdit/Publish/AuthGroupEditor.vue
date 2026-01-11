@@ -51,15 +51,16 @@
                     </div>
                 </div>
             </el-tab-pane>
-            <!-- <el-tab-pane label="字段权限" name="fieldperm" class="ag-panel">
-                <EtFieldPerms v-model="fieldPerms" :fields="formDef.content?.items"></EtFieldPerms>
-            </el-tab-pane> -->
+            <el-tab-pane label="字段权限" name="fieldperm" class="ag-panel">
+                <EtFieldPerms v-model="fieldPerms" :fields="formDef.content?.items" style="height:90%"
+                    @change="fieldPermsChanged"></EtFieldPerms>
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>
 <script setup lang="ts">
 import { IConditionList, IFieldPermItem } from "@eimsnext/components";
-import { FormDef, AuthGroup, DataPerms, AuthGroupType } from "@eimsnext/models";
+import { FormDef, AuthGroup, DataPerms, AuthGroupType, IFieldPerm } from "@eimsnext/models";
 import { FlagEnum } from "@eimsnext/utils";
 
 import { useI18n } from "vue-i18n";
@@ -109,6 +110,11 @@ const dataFilterChanged = (condList: IConditionList) => {
 }
 
 const fieldPerms = ref<IFieldPermItem[]>([])
+if (props.modelValue.fieldPerms) {
+    fieldPerms.value = props.modelValue.fieldPerms as IFieldPermItem[]
+}
+
+const fieldPermsChanged = (value: IFieldPermItem[]) => { props.modelValue.fieldPerms = value as IFieldPerm[] }
 
 const emit = defineEmits(["update:modelValue"]);
 
@@ -140,7 +146,7 @@ const emit = defineEmits(["update:modelValue"]);
                     margin-top: 10px;
                     flex: 1;
 
-                    :deep .el-textarea__inner {
+                    :deep(.el-textarea__inner) {
                         height: 100%;
                     }
                 }

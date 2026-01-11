@@ -20,6 +20,7 @@
     "exm:service": "pnpm run --filter ./examples/service dev",
     "exm:com": "pnpm run --filter ./examples/comp dev",
     "build:utils": "cd packages/utils & vite build",
+    "build:lang": "cd packages/locale & vite build",
     "build:mod": "cd packages/models & vite build",
     "build:service": "cd packages/services & vite build",
     "build:store": "cd packages/store & vite build",
@@ -28,8 +29,7 @@
     "build:elplus": "cd packages/formrender/el-plus & vite build",
     "build:vant": "cd packages/formrender/vant & vite build",
     "build:des": "cd packages/formdesigner & vite build",
-    "build:bld": "cd packages/formbuilder & vite build",
-    "build:lang": "cd packages/locale & vite build"
+    "build:bld": "cd packages/formbuilder & vite build"
   },
   "dependencies": {
     "@eimsnext/components": "workspace:*",
@@ -44,6 +44,7 @@
     "@eimsnext/store": "workspace:*",
     "@eimsnext/utils": "workspace:*",
     "@element-plus/icons-vue": "^2.3.2",
+    "@rollup/plugin-terser": "^0.4.4",
     "@stomp/stompjs": "^7.2.1",
     "@univerjs/core": "^0.8.3",
     "@univerjs/design": "^0.8.3",

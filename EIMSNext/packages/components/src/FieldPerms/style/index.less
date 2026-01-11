@@ -1,22 +1,13 @@
 @import "../../common/index.less";
 
 .@{prefix}-field-perms {
-  .list-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 16px;
-    background: #f5f7fa;
-    border-radius: 4px 4px 0 0;
-
-    .item-header {
-      flex: 1;
-      text-align: center;
-
-      &:first-child {
-        text-align: left;
-        flex: 2;
-      }
-    }
+  .field-list-header {
+    background-color: var(--et-color-bg-secondary);
+    height: 30px;
+    line-height: 30px;
+    padding: 0 8px;
+    position: relative;
+    width: 100%;
 
     .tips {
       color: #f56c6c;
@@ -24,33 +15,66 @@
     }
   }
 
-  .list-content-wrapper {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  .field-view-col {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    width: 60px;
+    right: 175px;
+  }
 
-    .list-item {
-      border-bottom: 1px solid #e5e6eb;
+  .field-edit-col {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    width: 60px;
+    right: 55px;
+  }
 
-      .content-wrapper {
-        display: flex;
-        align-items: center;
-        padding: 12px 16px;
+  .field-list-content-wrapper {
+    height: 100%;
+    overflow: auto;
+    position: relative;
+    width: 100%;
 
-        .item-label {
-          flex: 2;
-          display: flex;
-          align-items: center;
+    .check-all {
+      color: var(--et-color-primary);
+      height: 40px;
+      padding: 8px;
+      position: relative;
+      width: 100%;
+    }
+    .all-items {
+      width: 100%;
 
-          .subform-tag {
-            margin-left: 8px;
-            color: #c0c4cc;
-          }
+      .check-item {
+        min-height: 40px;
+        padding: 8px;
+        position: relative;
+
+        .check-item-text {
+          word-wrap: break-word;
+          word-break: break-word;
+          max-width: 200px;
         }
 
-        .el-checkbox {
-          flex: 1;
-          text-align: center;
+        .subform-tag {
+          align-items: center;
+          bottom: 0;
+          display: flex;
+          flex-wrap: nowrap;
+          justify-content: center;
+          position: absolute;
+          top: 0;
+          right: -8px;
         }
       }
     }

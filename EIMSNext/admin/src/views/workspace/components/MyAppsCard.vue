@@ -2,7 +2,8 @@
   <AddEditApp v-if="showAddEditDialog" :edit="false" @cancel="showAddEditDialog = false" @ok="handleSaved"></AddEditApp>
   <et-card :title="t('admin.myApp')">
     <template #action>
-      <el-button icon="plus" @click="createApp">{{ t("admin.newApp") }}</el-button>
+      <el-button v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin" icon="plus"
+        @click="createApp">{{ t("admin.newApp") }}</el-button>
     </template>
 
     <div class="content">
@@ -25,7 +26,8 @@
                     <div class="favorite-icon">
                       <et-icon icon="el-icon-star" size="large"></et-icon>
                     </div>
-                    <div class="setting-icon">
+                    <div v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
+                      class="setting-icon">
                       <el-dropdown placement="bottom-start" size="large">
                         <el-button>
                           <et-icon icon="el-icon-setting" size="large"></et-icon>
@@ -54,8 +56,8 @@ defineOptions({
   name: "MyAppsCard",
 });
 import AddEditApp from "@/views/app/components/AddEditApp.vue";
-import { App } from "@eimsnext/models";
-import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
+import { App, UserType } from "@eimsnext/models";
+import { useAppStore, useContextStore, useUserStore } from "@eimsnext/store";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n()
@@ -64,6 +66,8 @@ const router = useRouter();
 const appStore = useAppStore();
 const contextStore = useContextStore();
 const { items: appsRef } = storeToRefs(appStore);
+const userStore = useUserStore()
+const curUser = toRef(userStore.currentUser)
 const showAddEditDialog = ref(false);
 
 const createApp = () => {

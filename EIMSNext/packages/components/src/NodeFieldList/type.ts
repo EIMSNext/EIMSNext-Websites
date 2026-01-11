@@ -52,7 +52,7 @@ export enum ConditionFieldType {
   TimeStamp = "timestamp",
   Other = "other",
 }
-export function getConditionFieldType(fieldtype?: string): ConditionFieldType {
+export function getConditionFieldType(fieldtype?: FieldType | string): ConditionFieldType {
   if (!fieldtype) return ConditionFieldType.None;
 
   let dataType = ConditionFieldType.Other;

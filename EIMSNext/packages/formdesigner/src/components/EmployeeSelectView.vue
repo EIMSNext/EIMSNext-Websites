@@ -1,7 +1,7 @@
 <template>
   <div class="fc-employee-select-view">
     <div class="fc-employee-select-content">
-      <el-button type="primary" link size="small">+ 选择成员</el-button>
+      <div class="fc-employee-placeholder">+ 选择成员</div>
     </div>
   </div>
 </template>
@@ -14,16 +14,20 @@ export default {
 
 <style scoped>
 .fc-employee-select-view {
-  width: 100%;
-  padding: 3px;
+  padding: 8px 12px;
+  width:100%;
+  display: flex;
+  align-items: center;
   border: 1px dashed #dcdfe6;
   border-radius: 4px;
   min-height: 32px;
+  max-height: 110px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   flex-wrap: wrap;
-  gap: 4px;
+  cursor: pointer;
+  overflow-y: auto;
 }
 
 .fc-employee-select-content {
@@ -33,7 +37,13 @@ export default {
   justify-content: center;
   color: #909399;
   font-size: 14px;
-  height: 24px;
   line-height: 24px;
+}
+
+.fc-employee-placeholder {
+  color: #909399;
+  font-size: 14px;
+  line-height: 24px;
+  cursor: pointer;
 }
 </style>

@@ -1,3 +1,4 @@
+import { UserType } from "@eimsnext/models";
 import type { App } from "vue";
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
 
@@ -40,6 +41,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "collection",
           keepAlive: true,
           requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
         },
       },
     ],
@@ -56,6 +58,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "collection",
           keepAlive: true,
           requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
         },
       },
     ],
@@ -72,6 +75,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "collection",
           keepAlive: true,
           requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
         },
       },
     ],

@@ -2,7 +2,7 @@ import { uniqueId } from "@eimsnext/form-render-core";
 import { makeTitleRule, localeProps } from "../../utils";
 
 const label = "成员多选";
-const name = "employeeSelect2";
+const name = "employeeselect2";
 
 export default {
   menu: "main",
@@ -16,12 +16,14 @@ export default {
     return {
       type: name,
       field: uniqueId(),
-      title: t("com.employeeSelect2.name"),
+      title: t("com.employeeselect2.name"),
       info: "",
       $required: false,
       props: {
         multiple: true,
         placeholder: "+ 选择成员",
+        limitType: "all",
+        limitScope: [],
       },
     };
   },
@@ -29,6 +31,31 @@ export default {
     return localeProps(t, name + ".props", [
       {
         type: "DefaultValueConfig",
+      },
+      {
+        type: "select",
+        field: "limitType",
+        title: "可选范围",
+        options: [
+          { label: "全部员工", value: "all" },
+          { label: "自定义", value: "custom" },
+        ],
+        control: [
+          {
+            value: "custom",
+            rule: [
+              {
+                type: "FcDepartmentSelect",
+                field: "limitScope",
+                title: "",
+                wrap: { class: "_fd-default-value" },
+                props: {
+                  multiple: true,
+                },
+              },
+            ],
+          },
+        ],
       },
       {
         type: "CheckBoxInput",

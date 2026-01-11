@@ -25,7 +25,7 @@
                 <div class="flow-header">
                   <el-button @click="edit(flow)">编辑</el-button>
                   <el-button @click="remove(flow)">删除</el-button>
-                  <el-switch :model-value="flow.disabled" @change="toggleDisable(flow)"></el-switch>
+                  <el-switch :model-value="!flow.disabled" @change="toggleDisable(flow)"></el-switch>
                 </div>
               </template>
               <div class="flow-content">触发: {{ flow.eventSource }}</div>

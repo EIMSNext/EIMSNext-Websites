@@ -36,7 +36,7 @@ const onSort = () => {
 };
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
-  let excludedClasses = ["data-sort", "el-dropdown-menu__item"];
+  let excludedClasses = ["data-sort", "el-dropdown-menu__item", "el-select__popper", "el-dropdown__popper"];
   if (excludedClasses.some((cls) => target.closest(`.${cls}`))) {
     return;
   }

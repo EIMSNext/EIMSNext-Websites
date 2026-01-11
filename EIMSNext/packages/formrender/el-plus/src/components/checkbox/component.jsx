@@ -34,7 +34,13 @@ export default defineComponent({
     const input = toRef(props, "input", false);
     const updateCustomValue = (n) => {
       const _value = [...toArray(value.value)];
-      const idx = _value.indexOf(customValue.value);
+      // 查找自定义值的索引，处理对象类型
+      const idx = _value.findIndex(item => {
+        if (typeof item === 'object' && item !== null && typeof customValue.value === 'object' && customValue.value !== null) {
+          return item.value === customValue.value.value;
+        }
+        return item === customValue.value;
+      });
       customValue.value = n;
       if (idx > -1) {
         _value.splice(idx, 1);
@@ -58,10 +64,19 @@ export default defineComponent({
       return Array.isArray(arr) ? arr : [];
     });
 
+    // 将接收到的对象类型的值数组转换为value值数组，以便Element Plus组件能够正确识别选中的选项
+    const computedValue = computed(() => {
+      // 处理空值情况，确保value.value是数组
+      const values = Array.isArray(value.value) ? value.value : [];
+      return values.map(item => {
+        return typeof item === 'object' && item !== null ? item.value : item;
+      });
+    });
+
     watch(
       value,
       (n) => {
-        let value = null;
+        let customVal = null;
         if (
           !inputValue.value &&
           n != null &&
@@ -69,28 +84,36 @@ export default defineComponent({
           n.length > 0 &&
           input.value
         ) {
-          const values = _options.value.map((item) => {
+          const optionValues = _options.value.map((item) => {
             return item.value;
           });
           n.forEach((val) => {
-            if (values.indexOf(val) === -1) {
-              value = val;
+            // 获取当前值的实际值，如果是对象则取value属性
+            const currentValue = typeof val === 'object' && val !== null ? val.value : val;
+            if (optionValues.indexOf(currentValue) === -1) {
+              customVal = val;
             }
           });
         }
-        if (value != null) {
-          customValue.value = value;
+        if (customVal != null) {
+          customValue.value = customVal;
         }
       },
       { immediate: true }
     );
     const onInput = (n) => {
-      _.emit("update:modelValue", n);
+      // 根据value数组找到对应的选项对象数组
+      const selectedOptions = n.map(val => {
+        const option = _options.value.find(opt => opt.value === val);
+        return option || val;
+      });
+      _.emit("update:modelValue", selectedOptions);
     };
 
     return {
       options: _options,
       value,
+      computedValue,
       onInput,
       updateCustomValue,
       makeInput(Type) {
@@ -118,25 +141,25 @@ export default defineComponent({
     return (
       <ElCheckboxGroup
         {...this.$attrs}
-        modelValue={this.value}
+        modelValue={this.computedValue}
         v-slots={getSlot(this.$slots, ["default"])}
         onUpdate:modelValue={this.onInput}
         ref="el"
       >
         {this.options.map((opt, index) => {
           const props = { ...opt };
-          const value = props.value;
           const label = props.label;
           delete props.value;
           delete props.label;
+          // 直接使用value属性作为label和value，确保能够正确比较
           return (
             <Type
               {...props}
-              label={value}
-              value={value}
-              key={name + index + "-" + value}
+              label={opt.value}
+              value={opt.value}
+              key={name + index + "-" + (opt.value || index)}
             >
-              {label || value || ""}
+              {label || opt.value || ""}
             </Type>
           );
         })}

@@ -1,0 +1,12 @@
+npm run build:utils
+npm run build:lang
+npm run build:mod
+npm run build:service
+npm run build:store
+npm run build:com
+npm run build:core
+npm run build:elplus
+npm run build:vant
+npm run build:des
+npm run build:bld
+npm run build

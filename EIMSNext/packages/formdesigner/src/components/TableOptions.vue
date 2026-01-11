@@ -6,8 +6,7 @@
                     <template #default="scope">
                         <template v-if="col.value">
                             <ValueInput :size="size || 'small'" :modelValue="scope.row[col.key]"
-                                @update:modelValue="(n) => (scope.row[col.key] = n)" @blur="onInput(scope.row)"
-                                @change-type="onInput(scope.row)"></ValueInput>
+                                @update:modelValue="(n) => (scope.row[col.key] = n)" @blur="onInput(scope.row)"></ValueInput>
                         </template>
                         <template v-else>
                             <el-input :size="size || 'small'" :modelValue="scope.row[col.key]"
@@ -134,7 +133,8 @@ export default defineComponent({
                     if (this.valueType === 'string') {
                         return v.value;
                     }
-                    if (this.checked) {
+                    // 只有当keyValue存在时，才执行keyValue相关逻辑
+                    if (this.checked && this.keyValue) {
                         const value = v[this.keyValue];
                         return this.column.reduce((item, col) => {
                             item[col.key] = value;

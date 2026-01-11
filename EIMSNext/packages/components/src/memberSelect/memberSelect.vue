@@ -9,7 +9,7 @@
             <div class="dept-select">
               <el-tree ref="deptTree" class="dept-tree" style="margin-top: 12px" :data="deptData" :props="defaultProps"
                 :expand-on-click-node="true" node-key="id" :show-checkbox="multiple" :check-strictly="!orgCascade"
-                :filter-node-method="deptFilter" @check-change="deptNodeChecked">
+                :filter-node-method="deptFilter" @check-change="orgNodeChecked">
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, deptFilter, false)">
                     <div class="node-wrapper">
@@ -26,6 +26,7 @@
                   </div>
                 </template>
               </el-tree>
+              <div v-if="showCascade"><el-checkbox v-model="orgCascade">动态包含下级部门</el-checkbox></div>
             </div>
           </el-tab-pane>
           <el-tab-pane v-if="FlagEnum.has(showTabs, MemberTabs.Role)" label="角色" :name="MemberTabs.Role">
@@ -139,6 +140,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: ISelectedTag[];
     showTabs?: MemberTabs | number,
+    cascadedDept?: boolean;
     showCascade?: boolean;
     multiple?: boolean;
     limit?: IMemberLimit;
@@ -146,12 +148,13 @@ const props = withDefaults(
   }>(),
   {
     showTabs: 7,
+    cascadedDept: false,
     showCascade: false,
     multiple: true
   }
 );
 const userStore = useUserStore()
-const orgCascade = ref(false);
+const orgCascade = ref(props.cascadedDept ?? false);
 const defaultProps = { children: "children", label: "label" };
 const tagsRef = toRef(props.modelValue);
 const keyword = ref("");
@@ -163,7 +166,7 @@ const empDeptTree = ref<TreeInstance>();
 const empDeptData = ref<ITreeNode[]>(); // 员工部门列表
 const empData = ref<IListItem[]>([]); //员工列表
 const selectedEmpDeptId = ref("");
-const selectedEmps = ref<string[]>();
+const selectedEmps = ref<string[]>([]);
 const deptChanging = ref(false);
 const roleTree = ref<TreeInstance>();
 const roleData = ref<ITreeNode[]>(); // 角色列表
@@ -267,6 +270,12 @@ const filterDeptTreeByScope = (treeData: ITreeNode[]): ITreeNode[] => {
 };
 
 onBeforeMount(() => {
+  //复选模式下，如果支持级联选择并且显示级联框，则是否级联由数据决定
+  if (props.multiple && props.cascadedDept && props.showCascade) {
+    let firstDept = props.modelValue.find(x => x.type == TagType.Department)
+    if (firstDept && firstDept.cascadedDept) orgCascade.value = firstDept.cascadedDept
+  }
+
   deptStore.load().then((data: Department[]) => {
     let detps = buildDeptTree(data);
     const filteredDeptData = filterDeptTreeByScope(detps);
@@ -277,7 +286,8 @@ onBeforeMount(() => {
       deptStore.get(userStore.currentUser.deptId).then(x => {
         if (x) {
           const curDeptNode = [DeptToTreeNode(x)];
-          curDeptData.value = filterDeptTreeByScope(curDeptNode);
+          // 不应用范围过滤，直接显示当前用户部门
+          curDeptData.value = curDeptNode;
         }
       })
     }
@@ -331,10 +341,18 @@ const setSelectedNodes = () => {
     .filter(tag => tag.type === TagType.Role)
     .map(tag => tag.id);
 
+  // 获取员工类型的选中项ID列表
+  const employeeSelectedIds = tagsRef.value
+    .filter(tag => tag.type === TagType.Employee)
+    .map(tag => tag.id);
+
   // 如果是单选模式，设置singleDeptId
   if (!props.multiple && departmentSelectedIds.length > 0) {
     singleDeptId.value = departmentSelectedIds[0];
   }
+
+  // 设置员工列表的选中状态
+  selectedEmps.value = employeeSelectedIds;
 
   // 遍历树节点，设置选中状态
   const setNodeChecked = (tree: TreeInstance | undefined, nodes: any[], selectedIds: string[]) => {
@@ -352,8 +370,8 @@ const setSelectedNodes = () => {
     });
   };
 
-  // 设置所有部门树的选中状态
-  setNodeChecked(deptTree.value, deptData.value, departmentSelectedIds);
+  // 部门的下级自动选中，不能手动，依赖于orgCascade实现动态
+  // setNodeChecked(deptTree.value, deptData.value, departmentSelectedIds);
   if (curDeptData.value) {
     setNodeChecked(curDeptTree.value, curDeptData.value, departmentSelectedIds);
   }
@@ -381,6 +399,32 @@ const deptFilter = (value: string, data: any) => {
   if (data.id == "all") return true;
 
   return data.label.indexOf(value) !== -1;
+};
+const orgNodeChecked = (data: ITreeNode, checked: boolean) => {
+  if (props.multiple) {
+    if (checked) {
+      // 添加重复判断，防止重复添加
+      const existingIndex = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Department
+      );
+      if (existingIndex === -1) {
+        tagsRef.value.push({
+          id: data.id,
+          code: data.code,
+          label: data.label,
+          type: TagType.Department,
+          data: data.data,
+          cascadedDept: orgCascade.value
+        });
+      }
+    } else {
+      let index = tagsRef.value.findIndex(
+        (x) => x.id == data.id && x.type == TagType.Department
+      );
+      if (index > -1) tagsRef.value.splice(index, 1);
+    }
+    emit("update:modelValue", tagsRef.value);
+  }
 };
 const deptNodeChecked = (data: ITreeNode, checked: boolean) => {
   if (props.multiple) {
@@ -433,10 +477,16 @@ const selectEmpDept = (deptId: string) => {
     res.forEach((x) => {
       empData.value.push(EmployeeToListItem(x));
 
+      // 检查当前员工是否在已选标签中
       if (
         tagsRef.value.find((t) => t.id == x.id && t.type == TagType.Employee)
       ) {
-        selectedEmps.value?.push(x.id);
+        // 单选模式下直接赋值，多选模式下push到数组
+        if (props.multiple) {
+          selectedEmps.value?.push(x.id);
+        } else {
+          selectedEmps.value = [x.id];
+        }
       }
     });
     deptChanging.value = false;

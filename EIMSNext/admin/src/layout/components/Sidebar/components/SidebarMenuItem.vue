@@ -23,7 +23,7 @@
         <el-menu-item :index="resolvePath(onlyOneChild.path)">
           <SidebarMenuItemTitle :icon="onlyOneChild.meta.icon || item.meta?.icon" :title="onlyOneChild.meta.title"
             :iconColor="item.meta?.iconColor" />
-          <span class="more-wrapper">
+          <span v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin" class="more-wrapper">
             <el-dropdown placement="bottom-start" size="large">
               <et-icon icon="el-icon-More" @click.prevent=""></et-icon>
               <template #dropdown>
@@ -65,8 +65,8 @@ defineOptions({
 import path from "path-browserify";
 import { RouteMeta, RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
-import { useContextStore, useFormStore } from "@eimsnext/store";
-import { FormDef } from "@eimsnext/models";
+import { useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
+import { FormDef, UserType } from "@eimsnext/models";
 import { MessageIcon } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n()
@@ -107,6 +107,8 @@ const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
 const showDeleteConfirmDialog = ref(false);
+const userStore = useUserStore();
+const curUser = toRef(userStore.currentUser)
 /**
  * 检查是否仅有一个可见子节点
  *
