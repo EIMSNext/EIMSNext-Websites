@@ -1,11 +1,11 @@
 <template>
     <template v-if="item.type == 'dropdown'">
-        <el-dropdown trigger="click" :disabled="item.config.disabled" :class="item.config.class"
-            :style="item.config.style"
-            @command="(cmd: string, e: MouseEvent) => handleCommand(cmd, e, item.config.onCommand)">
+        <el-dropdown trigger="click" :disabled="item.config.disabled" class="toolbar-dropdown"
+            :class="item.config.class" :style="item.config.style"
+            @command="(cmd: string, e: MouseEvent) => handleSubItemCommand(item, cmd, e, item.config.onCommand)">
             <span class="el-dropdown-link">
                 <et-icon v-if="item.config.icon" :icon="item.config.icon" style="margin-right: 5px;" />
-                <span>{{ t(item.config.text) }}</span><et-icon icon="el-icon-arrow-down" class="el-icon--right" />
+                <span>{{ getDropdwnText(item) }}</span><et-icon icon="el-icon-arrow-down" class="el-icon--right" />
             </span>
             <template #dropdown>
                 <el-dropdown-menu v-if="item.config.menuItems">
@@ -57,13 +57,32 @@ const props = withDefaults(
     }
 );
 const item = toRef(props.data)
+
 const getIconStyle = (item: ToolbarItem) => {
     if (item.config.text)
         return { 'margin-right': '3px' }
     return {}
 }
 const emit = defineEmits(['command'])
+const getDropdwnText = (item: ToolbarItem) => {
+    if (item.config.menuItems && item.config.menuItems.length > 0) {
+        let checkedItem = item.config.menuItems.find(x => x.checked)
+        if (checkedItem) return t(checkedItem.text)
+    }
 
+    return t(item.config.text)
+};
+
+const handleSubItemCommand = (item: ToolbarItem, cmd: string, e: MouseEvent, callback: any) => {
+    item.config.menuItems!.forEach(x => {
+        x.checked = x.command == cmd
+    });
+
+    if (callback)
+        callback(cmd, e)
+    else
+        emit('command', cmd, e)
+}
 const handleCommand = (cmd: string, e: MouseEvent, callback: any) => {
     if (callback)
         callback(cmd, e)
@@ -73,6 +92,11 @@ const handleCommand = (cmd: string, e: MouseEvent, callback: any) => {
 </script>
 
 <style scoped>
+.toolbar-dropdown {
+    background-color: var(--el-bg-color-overlay);
+    box-sizing: border-box;
+}
+
 .el-dropdown-link {
     cursor: pointer;
     display: flex;

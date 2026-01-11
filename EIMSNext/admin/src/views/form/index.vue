@@ -82,6 +82,7 @@ import {
   toDynamicFindOptions,
   IFieldSortList,
   IFormFieldDef,
+  IToolbarItemDropdownItem,
 } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
@@ -207,21 +208,24 @@ formStore.get(formId).then(async (form: FormDef | undefined) => {
         authGrps.value = res;
         if (res.length > 0) {
           curAuthGrp.value = res[0]
+          let menuItems: IToolbarItemDropdownItem[] = res.map(x => { return { text: x.name, command: x.id } })
+          menuItems[0].checked = true
 
           let grpItem = leftBars.value.find((x) => x.type == "dropdown" && x.config.command == "authgrp")
-          console.log("grpItem", grpItem)
+          // console.log("grpItem", grpItem)
           if (grpItem) {
-            grpItem.config.menuItems = res.map(x => { return { text: x.name, command: x.id } })
+            grpItem.config.menuItems = menuItems
           }
           else {
             grpItem = {
               type: "dropdown",
               config: {
                 text: "请选择权限组",
+                class: "auth-gropu-filter",
                 command: "authgrp",
-                menuItems: res.map(x => { return { text: x.name, command: x.id } }),
+                menuItems: menuItems,
                 onCommand: (cmd) => {
-                  curAuthGrp.value = cmd;
+                  curAuthGrp.value = authGrps.value.find(x => x.id == cmd);
                   initChildrenField(formDef.value!.content?.items!, []);
                   columns.value = buildColumns(formDef.value!.content?.items!, formDef.value!.usingWorkflow, []);
                   updateQueryParams();
@@ -577,5 +581,10 @@ const idBasedSpanMethod = (data: {
 
 :deep(.data-filter) {
   margin-left: 0px;
+}
+
+:deep(.auth-gropu-filter) {
+  padding: 0 8px;
+  margin-right: 10px;
 }
 </style>
