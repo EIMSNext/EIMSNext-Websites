@@ -14,6 +14,7 @@ export interface IFormFieldDef {
   label: string;
   type: FieldType;
   format?: string;
+  options?: any;
   isSubField?: boolean;
   nodeId?: string;
   singleResultNode?: boolean;
@@ -35,6 +36,7 @@ export function toFormFieldDef(
       label: `${parent.title}.${field.title}`,
       type: field.type,
       format: field.options?.format,
+      options: field.options,
       isSubField: true,
       nodeId: nodeId,
       singleResultNode: singleResultNode,
@@ -47,6 +49,7 @@ export function toFormFieldDef(
       label: field.title,
       type: field.type,
       format: field.options?.format,
+      options: field.options,
       isSubField: false,
       nodeId: nodeId,
       singleResultNode: singleResultNode,

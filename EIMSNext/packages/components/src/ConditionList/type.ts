@@ -70,9 +70,7 @@ export function toDynamicFindOptions(
         dfilter.items?.push(toDynamicFilter(x));
       });
     } else if (filter.field?.field) {
-      dfilter.field = isSystemField(filter.field.field)
-        ? filter.field.field
-        : `data.${filter.field.field}`;
+      dfilter.field = filter.field.field; // 直接使用字段名，不要添加"data."前缀
       dfilter.type = filter.field.type;
       dfilter.op = filter.op;
       dfilter.value = filter.value?.value;
@@ -88,7 +86,7 @@ export function toDynamicFindOptions(
   if (fields.length > 0) {
     findOpt.select = [];
     fields.forEach((x) => {
-      let field = isSystemField(x.field) ? x.field : `data.${x.field}`;
+      let field = x.field; // 直接使用字段名，不要添加"data."前缀
       findOpt.select?.push({ field: field, visible: true });
     });
   }
@@ -96,7 +94,7 @@ export function toDynamicFindOptions(
   if (sort.items.length > 0) {
     findOpt.sort = [];
     sort.items.forEach((x) => {
-      let sField = isSystemField(x.field.field) ? x.field.field : `data.${x.field.field}`;
+      let sField = x.field.field; // 直接使用字段名，不要添加"data."前缀
       findOpt.sort?.push({ field: sField, dir: x.sort });
     });
   }
