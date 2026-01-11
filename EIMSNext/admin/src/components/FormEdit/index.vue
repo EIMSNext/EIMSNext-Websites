@@ -1,5 +1,5 @@
 <template>
-  <CustomDrawer v-model="showDrawer" @close="close">
+  <et-drawer v-model="showDrawer" @close="close">
     <template #title>
       <el-input v-model="formName" class="title-editor" />
     </template>
@@ -22,19 +22,22 @@
     <div v-if="activeName == 'advance'" style="height: 100%; width: 100%">
       <Advanced :formDef="formDef!"></Advanced>
     </div>
-  </CustomDrawer>
+    <div v-if="activeName == 'publish'" style="height: 100%; width: 100%">
+      <Publish :formDef="formDef!"></Publish>
+    </div>
+  </et-drawer>
 </template>
 
 <script setup lang="ts">
 import { TabsPaneContext } from "element-plus";
 import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
-import WorkflowDesigner from "../FlowDesigner/Workflow/index.vue";
+import WorkflowDesigner from "../WorkflowDesigner/index.vue";
 import Advanced from "./Advanced/index.vue";
+import Publish from "./Publish/index.vue"
 import { useSystemStore } from "@/store/system";
 import { useFormStore } from "@eimsnext/store";
-import { FormDef, EventSourceType } from "@eimsnext/models";
-import CustomDrawer from "@/components/CustomDrawer/index.vue";
+import { FormDef } from "@eimsnext/models";
 
 defineOptions({
   name: "FormEdit",
@@ -76,7 +79,7 @@ const onSaved = () => {
   }
 };
 const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
+  // console.log(tab, event);
 };
 
 const emit = defineEmits(["close"]);

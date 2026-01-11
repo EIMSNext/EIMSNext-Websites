@@ -62,13 +62,13 @@ export function getIdDef(title: string): FieldDef {
   return field;
 }
 
-// export function  getCreateBy(title: string): FieldDef {
-//   let field = new FieldDef();
-//   field.field = SystemField.CreateBy;
-//   field.title = title;
-//   field.type = FieldType.Input;
-//   return field;
-// }
+export function  getCreateBy(title: string): FieldDef {
+  let field = new FieldDef();
+  field.field = SystemField.CreateBy;
+  field.title = title;
+  field.type = FieldType.EmployeeSelect;
+  return field;
+}
 
 export function getCreateTime(title: string): FieldDef {
   let field = new FieldDef();

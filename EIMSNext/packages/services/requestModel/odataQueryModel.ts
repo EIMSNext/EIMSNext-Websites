@@ -3,7 +3,7 @@ export class ODataQueryModel {
   $expand?: string;
   $select?: string;
   $skip: number = 0;
-  $take: number = 20;
+  $top: number = 20;
 }
 
 export interface IDynamicFindOptions {
@@ -12,6 +12,7 @@ export interface IDynamicFindOptions {
   sort?: IDynamicSort[];
   skip: number;
   take: number;
+  scope?: IDataScope;
 }
 
 export interface IDynamicField {
@@ -34,4 +35,7 @@ export interface IDynamicSort {
 export enum SortDirection {
   Asc = 1,
   Desc = -1,
+}
+export interface IDataScope {
+  authGroupId?: string;
 }

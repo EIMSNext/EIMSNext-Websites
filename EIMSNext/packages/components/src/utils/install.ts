@@ -21,7 +21,7 @@ export const withInstall = <T, E extends Record<string, any>>(
 
 export const makeInstaller = (components: Plugin[] = []) => {
   const install = (app: App) => {
-    console.log(components);
+    // console.log(components);
     components.forEach((c) => app.use(c));
   };
   return {

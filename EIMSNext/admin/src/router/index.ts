@@ -1,3 +1,4 @@
+import { UserType } from "@eimsnext/models";
 import type { App } from "vue";
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
 
@@ -23,9 +24,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   {
-    name: "dashboard",
-    path: "/dashboard",
-    component: () => import("@/views/dashboard/index.vue"),
+    name: "workspace",
+    path: "/workspace",
+    component: () => import("@/views/workspace/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
   {
@@ -40,6 +41,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "collection",
           keepAlive: true,
           requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
         },
       },
     ],
@@ -56,6 +58,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "collection",
           keepAlive: true,
           requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
         },
       },
     ],
@@ -72,6 +75,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "collection",
           keepAlive: true,
           requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
         },
       },
     ],
@@ -210,7 +214,7 @@ export const constantRoutes: RouteRecordRaw[] = [
   // },
   {
     path: "/",
-    redirect: "/dashboard",
+    redirect: "/workspace",
   },
 ];
 

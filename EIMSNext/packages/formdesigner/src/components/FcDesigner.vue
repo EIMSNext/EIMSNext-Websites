@@ -40,13 +40,13 @@
                                 <i class="fc-icon icon-language"></i>
                             </div>
                         </el-tooltip>
-                        <el-tooltip v-if="getConfig('showJsonPreview', true)" effect="dark" content="JSON"
+                        <!-- <el-tooltip v-if="getConfig('showJsonPreview', true)" effect="dark" content="JSON"
                             placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'json' }"
                                 @click="activeModule = 'json'">
                                 <i class="fc-icon icon-script"></i>
                             </div>
-                        </el-tooltip>
+                        </el-tooltip> -->
                         <el-tooltip v-if="getConfig('showAi', true)" effect="dark" :content="t('ai.name')"
                             placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'ai' }"
@@ -55,10 +55,10 @@
                             </div>
                         </el-tooltip>
                     </el-aside>
-                    <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '266px'">
+                    <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '250px'">
                         <AiChat v-if="activeModule === 'ai'"></AiChat>
                         <LanguageConfig v-if="activeModule === 'language'"></LanguageConfig>
-                        <JsonPreview v-if="activeModule === 'json'"></JsonPreview>
+                        <!-- <JsonPreview v-if="activeModule === 'json'"></JsonPreview> -->
                         <el-container v-show="activeModule === 'global'">
                             <el-main>
                                 <div class="_fc-l-label">
@@ -213,7 +213,7 @@
                         <el-header class="_fc-m-tools" height="40">
                             <div class="_fc-m-tools-l">
                                 <template v-if="!inputForm.state">
-                                    <template v-if="getConfig('showDevice') !== false">
+                                    <!-- <template v-if="getConfig('showDevice') !== false">
                                         <div class="devices">
                                             <i class="fc-icon icon-pc" :class="{ active: device === 'pc' }"
                                                 @click="setDevice('pc')"></i>
@@ -223,7 +223,7 @@
                                                 @click="setDevice('mobile')"></i>
                                         </div>
                                         <div class="line"></div>
-                                    </template>
+                                    </template> -->
                                     <template v-if="getConfig('showQuickLayout') !== false">
                                         <QuickLayout></QuickLayout>
                                         <div class="line"></div>
@@ -241,7 +241,7 @@
                             <div class="_fc-m-tools-r">
                                 <template v-if="!inputForm.state">
                                     <slot name="handle"></slot>
-                                    <el-button v-if="getConfig('showSaveBtn', false)" type="success" plain size="small"
+                                    <!-- <el-button v-if="getConfig('showSaveBtn', false)" type="success" plain size="small"
                                         @click="handleSave"><i class="fc-icon icon-save"></i> {{
                                             t('props.save')
                                         }}
@@ -250,18 +250,19 @@
                                         size="small" @click="openPreview"><i class="fc-icon icon-preview"></i> {{
                                             t('props.preview')
                                         }}
-                                    </el-button>
+                                    </el-button> -->
                                     <el-popconfirm :title="t('designer.clearWarn')" width="200px"
                                         :confirm-button-text="t('props.clear')" :cancel-button-text="t('props.cancel')"
                                         @confirm="clearDragRule">
                                         <template #reference>
-                                            <el-button type="danger" plain size="small"><i
-                                                    class="fc-icon icon-delete"></i>{{ t('props.clear') }}
+                                            <el-button class="btn-delete" style="border:none"><i
+                                                    class="fc-icon icon-delete"></i>{{
+                                                        t('props.clear') }}
                                             </el-button>
                                         </template>
                                     </el-popconfirm>
                                     <el-dropdown trigger="click" size="default" v-if="handle && handle.length">
-                                        <el-button class="_fd-m-extend" plain size="small">
+                                        <el-button class="_fd-m-extend" plain>
                                             <i class="fc-icon icon-more"></i>
                                         </el-button>
                                         <template #dropdown>
@@ -281,7 +282,7 @@
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
                                             }}：</span>
-                                        <el-switch size="small" :model-value="inputForm.state" inline-prompt
+                                        <el-switch :model-value="inputForm.state" inline-prompt
                                             @update:model-value="openInputData" />
                                     </div>
                                 </template>
@@ -330,7 +331,7 @@
                                     :class="{ active: activeTab === 'form' }" @click="activeTab = 'form'">{{
                                         t('designer.form') }}
                                 </div>
-                                <ToolsBar v-if="activeTab === 'props'"></ToolsBar>
+                                <!-- <ToolsBar v-if="activeTab === 'props'"></ToolsBar> -->
                             </el-header>
                             <el-main class="_fc-r-tab-form" v-show="activeTab === 'form'"
                                 v-if="!config || config.showFormConfig !== false">
@@ -350,11 +351,11 @@
                             </el-main>
                             <el-main class="_fc-r-tab-props" v-show="activeTab === 'props'"
                                 :key="activeRule ? activeRule._fc_id : (customForm.config ? customForm.key : '')">
-                                <template
-                                    v-if="activeRule || (customForm.config && (customForm.config.name || customForm.config.label))">
-                                    <p class="_fc-r-title">{{ t('designer.type') }}</p>
-                                    <TypeSelect></TypeSelect>
-                                    <!-- <template
+                                <!-- <template
+                                    v-if="activeRule || (customForm.config && (customForm.config.name || customForm.config.label))"> -->
+                                <!-- <p class="_fc-r-title">{{ t('designer.type') }}</p>
+                                    <TypeSelect></TypeSelect> -->
+                                <!-- <template
                                         v-if="(activeRule && activeRule.name && config.showComponentName !== false)">
                                         <p class="_fc-r-title">
                                             <Warning :tooltip="t('warning.name')">
@@ -366,21 +367,30 @@
                                             <template #suffix>
                                                 <i class="fc-icon icon-group" @click="copyName"></i>
                                             </template>
-                                            <template #append>
+            <template #append>
                                                 <i class="fc-icon icon-auto" @click="updateName"></i>
                                             </template>
-                                        </el-input>
-                                    </template> -->
-                                </template>
+            </el-input>
+            </template> -->
+                                <!-- </template>
                                 <template v-if="activeRuleChildren">
                                     <SubList></SubList>
-                                </template>
+                                </template> -->
                                 <div class="_fc-r-config" :style="{ 'grid-template-areas': configFormOrderStyle }">
                                     <div style="grid-area: base;">
-                                        <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
+                                        <!-- <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
                                             t('designer.rule')
-                                        }}
-                                        </ConfigTitle>
+                                            }}
+                                        </ConfigTitle> -->
+                                        <div style="display:flex;justify-content: space-between; margin-bottom: 10px;">
+                                            <div><span style="color:#eb5050">*</span><span class="_fc-field-title">{{
+                                                t('form.title')
+                                                    }}</span></div>
+                                            <el-tag v-if="activeRule" type="success" effect="plain" disable-transitions>
+                                                {{ t('com.' + (activeRule._menu.name) + '.name') ||
+                                                    activeRule._menu.label }}
+                                            </el-tag> <!-- <TypeSelect></TypeSelect> -->
+                                        </div>
                                         <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api"
                                             :rule="baseForm.rule" :option="baseForm.options"
                                             :modelValue="baseForm.value" @change="baseChange">
@@ -399,9 +409,9 @@
                                     <div style="grid-area: props;">
                                         <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
                                             t('designer.props') }}
-                                            <VariableConfig v-if="propsForm.variable"></VariableConfig>
+                                            <!-- <VariableConfig v-if="propsForm.variable"></VariableConfig>
                                             <PropsInput v-if="activeRule && getConfig('showCustomProps', true)">
-                                            </PropsInput>
+                                            </PropsInput> -->
                                         </ConfigTitle>
                                         <DragForm v-show="propsForm.isShow" v-model:api="propsForm.api"
                                             :rule="propsForm.rule" :option="propsForm.options"
@@ -426,6 +436,25 @@
                                             v-model:api="customForm.api" :rule="customForm.rule"
                                             :option="customForm.options" :key="customForm.key"
                                             @change="customFormChange"></DragForm>
+
+                                        <!--隐藏-->
+                                        <div v-if="activeRule" class="_fd-checkbox-input">
+                                            <el-checkbox :modelValue="activeRule._hidden"
+                                                @update:modelValue="toolHidden(activeRule)">{{
+                                                    t('props.hide') }}</el-checkbox>
+                                        </div>
+                                    </div>
+                                    <div style="grid-area: validate;">
+                                        <template v-if="activeRule">
+                                            <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
+                                                t('designer.validate')
+                                            }}
+                                            </ConfigTitle>
+                                            <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api"
+                                                :rule="validateForm.rule" :option="validateForm.options"
+                                                :modelValue="validateForm.value" @change="validateChange"
+                                                :key="activeRule._fc_id"></DragForm>
+                                        </template>
                                     </div>
                                     <div style="grid-area: advanced;">
                                         <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
@@ -465,18 +494,6 @@
                                             @update:modelValue="changeEvent">
                                         </EventConfig>
                                     </div>
-                                    <div style="grid-area: validate;">
-                                        <template v-if="activeRule">
-                                            <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
-                                                t('designer.validate')
-                                            }}
-                                            </ConfigTitle>
-                                            <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api"
-                                                :rule="validateForm.rule" :option="validateForm.options"
-                                                :modelValue="validateForm.value" @change="validateChange"
-                                                :key="activeRule._fc_id"></DragForm>
-                                        </template>
-                                    </div>
                                 </div>
                             </el-main>
                         </el-container>
@@ -485,9 +502,9 @@
                         <el-tabs class="_fd-preview-tabs" v-model="previewStatus">
                             <el-tab-pane :label="t('form.formMode')" name="form"></el-tab-pane>
                             <el-tab-pane :label="t('form.previewMode')" name="preview"></el-tab-pane>
-                            <el-tab-pane :label="t('form.componentMode')" name="component"></el-tab-pane>
+                            <!-- <el-tab-pane :label="t('form.componentMode')" name="component"></el-tab-pane>
                             <el-tab-pane :label="t('form.sfcMode')" name="sfc"
-                                v-if="previewDevice !== 'mobile'"></el-tab-pane>
+                                v-if="previewDevice !== 'mobile'"></el-tab-pane> -->
                         </el-tabs>
                         <div class="_fd-preview-device" v-if="previewStatus !== 'sfc' && !onlyPC">
                             <div :class="{ active: previewDevice === 'pc' }" @click="previewDevice = 'pc'"><i
@@ -730,7 +747,7 @@ export default defineComponent({
             return null;
         });
         const configFormOrderStyle = computed(() => {
-            const def = ['base', 'props', 'advanced', 'slots', 'style', 'event', 'validate'];
+            const def = ['base', 'props', 'validate', 'advanced', 'slots', 'style', 'event'];
             let sort = configRef.value.configFormOrder ? [...configRef.value.configFormOrder] : [];
             let value = [];
             if (!sort.length) {
@@ -840,7 +857,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false
                 },
@@ -867,7 +883,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -894,7 +909,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -911,7 +925,6 @@ export default defineComponent({
                 options: {
                     form: {
                         labelPosition: 'left',
-                        size: 'small',
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -928,7 +941,6 @@ export default defineComponent({
                 options: {
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -961,7 +973,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -989,7 +1000,6 @@ export default defineComponent({
                     },
                     form: {
                         labelPosition: 'top',
-                        size: 'small'
                     },
                     submitBtn: false,
                 }
@@ -1582,9 +1592,9 @@ export default defineComponent({
                 options.form = {
                     inline: false,
                     hideRequiredAsterisk: false,
-                    labelPosition: 'right',
+                    labelPosition: 'top',
                     size: 'default',
-                    labelWidth: '125px',
+                    labelWidth: 'auto',
                     ...defForm,
                     ...options.form || {}
                 };
@@ -2999,63 +3009,8 @@ export default defineComponent({
             configFormOrderStyle,
         }
     },
-    created() {
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // 本软件商业授权机制，没有任何影响，甲方和第三方不得进行反编译、逆向工程、破解或篡改本软件的授权机制。
-        /* eslint-disable */
-        var r;
-        const e = t;
-        (function (n, l) {
-            const s = t, u = n();
-            for (; [];)
-                try {
-                    if (parseInt(s(350)) * (-parseInt(s(357)) / 2) + parseInt(s(398)) / 3 * (-parseInt(s(397)) / 4) + -parseInt(s(352)) / 5 + parseInt(s(362)) / 6 + parseInt(s(358)) / 7 * (parseInt(s(391)) / 8) + parseInt(s(356)) / 9 + parseInt(s(381)) / 10 === l)
-                        break;
-                    u.push(u.shift());
-                } catch {
-                    u.push(u.shift());
-                }
-        })(i, 925984);
-        try {
-            let n = e(384)[e(359)][e(369)][e(379)](e(394));
-            if (n = n(), !n[e(367)] && (n[e(367)] = {}), n && !n[e(367)][e(384)] && n[e(399)] && n[e(380)] - n[e(368)] < 150 && n[e(392)] - n[e(375)] < 150) {
-                const l = Array[e(361)](n[e(399)][e(366)](e(390)));
-                let s = l[e(359)] > 0;
-                if (l[e(383)]((u) => {
-                    const d = e;
-                    u[d(363)] && (u[d(363)][d(376)](d(395)) === 0 ? s = s && [d(372), d(355), d(374), d(364), d(400)][d(401)]((m, v) => {
-                        const b = d;
-                        return m && u[b(363)][b(376)](v) === -1;
-                    }, !![]) : s = ![]);
-                }), s && n[e(389)][e(377)]() < 0.05)
-                    try {
-                        const u = new n[e(360)](),
-                            d = n[e(373)](n[e(365)](n[e(382)][e(378)] + ', ' + (n[e(367)][e(387)] || '')) + e(353)),
-                            m = d[e(396)](2, 8);
-                        u[e(354)] = u[e(388)] = () => {
-                        }, u[e(363)] = n[e(371)](e(384) + e(370) + e(351)) + (m[e(396)](2, 3) + d[e(403)](0, 10)[e(402)]('')[e(385)]()[e(386)]('') + m[e(396)](3, 2) + d[e(403)](10))[e(393)]('==', '');
-                    } catch {
-                    }
-            }
-            n[e(367)][e(384)] = !![];
-        } catch {
-        }
-
-        function t(n, l) {
-            const s = i();
-            return t = function (u, d) {
-                return u = u - 350, s[u];
-            }, t(n, l);
-        }
-
-        function i() {
-            const n = ['random', 'host', 'constructor', 'outerHeight', '1511970mOuTNl', 'location', 'forEach', 'aHR0cHM6Ly9', 'reverse', 'join', 'license', 'onload', 'Math', 'script', '13527496PgtCuh', 'outerWidth', 'replaceAll', 'return this', 'http', 'substr', '39472JaCbam', '123xJAAie', 'document', '172.', 'reduce', 'split', 'slice', '1lDBOnG', 'GUuY29tL2gucG5nP3U9', '6221030JEOBHl', ', vL_ICENSEv', 'onerror', '127.', '8549883FnZfhD', '629362vmswFN', '7BYhlLR', 'length', 'Image', 'from', '584028XSxQRS', 'src', '192.', 'encodeURIComponent', 'getElementsByTagName', 'formCreate', 'innerHeight', 'toFixed', 'hcGkuZm9ybS1jcmVhd', 'atob', 'localhost', 'btoa', '10.', 'innerWidth', 'indexOf'];
-            return i = function () {
-                return n;
-            }, i();
-        }
+    created() {        
         /* eslint-enable */
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         document.body.ondrop = e => {
             e.preventDefault();
             e.stopPropagation();

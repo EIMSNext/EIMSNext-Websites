@@ -1,5 +1,12 @@
+import { IFieldLimit } from "@/NodeFieldList/type";
 import { IListItem } from "@/list/type";
-import { FieldDef, FieldType, getFlowStatus, getCreateTime } from "@eimsnext/models";
+import {
+  FieldDef,
+  FieldType,
+  getFlowStatus,
+  getCreateBy,
+  getCreateTime,
+} from "@eimsnext/models";
 
 export interface IFormFieldDef {
   formId: string;
@@ -7,6 +14,7 @@ export interface IFormFieldDef {
   label: string;
   type: FieldType;
   format?: string;
+  options?: any;
   isSubField?: boolean;
   nodeId?: string;
   singleResultNode?: boolean;
@@ -28,6 +36,7 @@ export function toFormFieldDef(
       label: `${parent.title}.${field.title}`,
       type: field.type,
       format: field.options?.format,
+      options: field.options,
       isSubField: true,
       nodeId: nodeId,
       singleResultNode: singleResultNode,
@@ -40,6 +49,7 @@ export function toFormFieldDef(
       label: field.title,
       type: field.type,
       format: field.options?.format,
+      options: field.options,
       isSubField: false,
       nodeId: nodeId,
       singleResultNode: singleResultNode,
@@ -56,11 +66,11 @@ export function buildFieldListItems(
   fields: FieldDef[],
   usingWf: boolean,
   nodeId?: string,
-  fieldLimit?: string
+  fieldLimit?: IFieldLimit
 ): IListItem[] {
   const items: IListItem[] = [];
 
-  if (!fieldLimit || fieldLimit == "master") {
+  if (!fieldLimit || fieldLimit.limitField == "master") {
     if (usingWf) {
       let status: IFormFieldDef = toFormFieldDef(
         formId,
@@ -77,7 +87,11 @@ export function buildFieldListItems(
   }
   fields.forEach((x: FieldDef) => {
     if (x.type == FieldType.TableForm) {
-      if ((!fieldLimit || fieldLimit == x.field) && x.columns && x.columns.length > 0) {
+      if (
+        (!fieldLimit || fieldLimit.limitField == x.field) &&
+        x.columns &&
+        x.columns.length > 0
+      ) {
         x.columns.forEach((sub: FieldDef) => {
           var fieldDef: IFormFieldDef = toFormFieldDef(formId, sub, x, nodeId);
           let item: IListItem = {
@@ -90,8 +104,13 @@ export function buildFieldListItems(
         });
       }
     } else {
-      if (!fieldLimit || fieldLimit == "master") {
-        var fieldDef: IFormFieldDef = toFormFieldDef(formId, x, undefined, nodeId);
+      if (!fieldLimit || fieldLimit.limitField == "master") {
+        var fieldDef: IFormFieldDef = toFormFieldDef(
+          formId,
+          x,
+          undefined,
+          nodeId
+        );
         let item: IListItem = {
           id: fieldDef.field,
           label: fieldDef.label,
@@ -103,8 +122,20 @@ export function buildFieldListItems(
     }
   });
 
-  if (!fieldLimit || fieldLimit == "master") {
+  if (!fieldLimit || fieldLimit.limitField == "master") {
     if (formId != "employee") {
+      let submitor: IFormFieldDef = toFormFieldDef(
+        formId,
+        getCreateBy("提交人"),
+        undefined,
+        nodeId
+      );
+      items.push({
+        id: submitor.field,
+        label: submitor.label,
+        data: submitor,
+      });
+
       let createTime: IFormFieldDef = toFormFieldDef(
         formId,
         getCreateTime("提交时间"),

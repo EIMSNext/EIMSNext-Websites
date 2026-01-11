@@ -15,7 +15,7 @@
       <div class="content">
         <div class="login-container">
           <div class="account-login">
-            <div class="login-title">账号登录</div>
+            <div class="login-title">{{ t("login.loginTitle") }}</div>
             <!-- <div class="login-register"><span>没有账号？</span>
               <el-link type="primary" :underline="false" href="/register" target="_self">
                 免费注册
@@ -127,6 +127,7 @@ async function handleLoginSubmit() {
           await userStore.initialize(true);
 
           const { path, queryParams } = parseRedirect();
+          // console.log("login ", path, queryParams)
           router.push({ path: path, query: queryParams });
         })
         .finally(() => {
@@ -214,7 +215,7 @@ function checkCapslock(event: KeyboardEvent) {
     height: 100%;
 
     .bg-banner {
-      background-image: url("@/assets/images/login-image.jpg");
+      background-image: url("@/assets/images/login/login-image.jpg");
       background-position: 50%;
       background-repeat: no-repeat;
       background-size: cover;
@@ -274,7 +275,7 @@ function checkCapslock(event: KeyboardEvent) {
 
 html.dark {
   .login {
-    background: url("@/assets/images/login-background-dark.jpg") no-repeat center right;
+    background: url("@/assets/images/login/login-background-dark.jpg") no-repeat center right;
 
     .login-content {
       background: transparent;

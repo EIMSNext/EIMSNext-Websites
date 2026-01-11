@@ -7,6 +7,7 @@ export interface ConfirmOptions {
   icon?: MessageIcon;
   iconColor?: string;
   width?: string;
+  showCancel?: boolean;
 }
 
 /**
@@ -62,6 +63,7 @@ const confirm = (
     const props = {
       modelValue: visible.value,
       title: options.title || "确认操作吗？",
+      showCancel: options.showCancel ?? true,
       showNoSave: false,
       okText: "确定",
       icon: options.icon || MessageIcon.Warning,

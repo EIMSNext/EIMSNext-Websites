@@ -24,41 +24,33 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      {
-        type: "input",
-        field: "header",
-        warning: t("com.tableFormColumn.header"),
-      },
-      {
-        type: "input",
-        field: "label",
-      },
-      {
-        type: "select",
-        field: "fixed",
-        options: [false, "left", "right"].map((v) => {
-          return {
-            label: t("com.dataTable.fixed." + (v || "default")),
-            value: v,
-          };
-        }),
-      },
-      {
-        type: "switch",
-        field: "required",
-      },
-      {
-        type: "switch",
-        field: "hidden",
-      },
-      {
-        type: "input",
-        field: "width",
-      },
-      {
-        type: "ColorInput",
-        field: "color",
-      },
+      // {
+      //   type: "input",
+      //   field: "header",
+      //   warning: t("com.tableFormColumn.header"),
+      // },
+      // {
+      //   type: "input",
+      //   field: "label",
+      // },
+      // {
+      //   type: "select",
+      //   field: "fixed",
+      //   options: [false, "left", "right"].map((v) => {
+      //     return {
+      //       label: t("com.dataTable.fixed." + (v || "default")),
+      //       value: v,
+      //     };
+      //   }),
+      // },
+      // {
+      //   type: "input",
+      //   field: "width",
+      // },
+      // {
+      //   type: "ColorInput",
+      //   field: "color",
+      // },
     ]);
   },
 };

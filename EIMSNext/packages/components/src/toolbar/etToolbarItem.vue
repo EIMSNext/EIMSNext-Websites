@@ -5,14 +5,14 @@
             @command="(cmd: string, e: MouseEvent) => handleCommand(cmd, e, item.config.onCommand)">
             <span class="el-dropdown-link">
                 <et-icon v-if="item.config.icon" :icon="item.config.icon" style="margin-right: 5px;" />
-                <span>{{ item.config.text }}</span><et-icon icon="el-icon-arrow-down" class="el-icon--right" />
+                <span>{{ t(item.config.text) }}</span><et-icon icon="el-icon-arrow-down" class="el-icon--right" />
             </span>
             <template #dropdown>
                 <el-dropdown-menu v-if="item.config.menuItems">
                     <el-dropdown-item v-for="menuItem in item.config.menuItems" :key="'m-' + menuItem.command"
                         :command="menuItem.command" :divided="menuItem.divided" :disabled="menuItem.disabled"
                         :class="menuItem.class" :style="menuItem.style">
-                        {{ menuItem.text }}
+                        {{ t(menuItem.text) }}
                     </el-dropdown-item>
                 </el-dropdown-menu>
             </template>
@@ -27,7 +27,7 @@
                     :style="item.config.style"
                     @click="handleCommand(item.config.command, $event, item.config.onCommand)">
                     <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
-                    <span>{{ item.config.text }}</span>
+                    <span>{{ t(item.config.text) }}</span>
                 </el-button>
             </el-tooltip>
         </template>
@@ -35,13 +35,15 @@
             <el-button :type="item.config.type" :disabled="item.config.disabled" :class="item.config.class"
                 :style="item.config.style" @click="handleCommand(item.config.command, $event, item.config.onCommand)">
                 <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
-                <span>{{ item.config.text }}</span>
+                <span>{{ t(item.config.text) }}</span>
             </el-button></template>
     </template>
 </template>
 <script setup lang="ts">
 import { toRef } from 'vue';
 import { ToolbarItem } from './type';
+import { useLocale } from 'element-plus';
+const { t } = useLocale()
 
 defineOptions({
     name: "EtToolbarItem",

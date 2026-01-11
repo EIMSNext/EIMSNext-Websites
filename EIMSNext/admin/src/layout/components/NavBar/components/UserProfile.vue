@@ -14,12 +14,12 @@
         <el-dropdown-item @click="handleOpenUserProfile">
           {{ t("navbar.profile") }}
         </el-dropdown-item>
-        <a target="_blank" href="https://gitee.com/youlaiorg/vue3-element-admin">
+        <a target="_blank" href="https://gitee.com/eimsnext/EIMSNext-Websites">
           <el-dropdown-item>{{ t("navbar.gitee") }}</el-dropdown-item>
         </a>
-        <a target="_blank" href="https://juejin.cn/post/7228990409909108793">
+        <!-- <a target="_blank" href="https://juejin.cn/post/7228990409909108793">
           <el-dropdown-item>{{ t("navbar.document") }}</el-dropdown-item>
-        </a>
+        </a> -->
         <el-dropdown-item divided @click="logout">
           {{ t("navbar.logout") }}
         </el-dropdown-item>
@@ -74,7 +74,7 @@ function logout() {
         tagsViewStore.delAllViews();
       })
       .then(() => {
-        router.push(`/login?redirect=${route.fullPath}`);
+        router.push(`/login`);
       });
   });
 }

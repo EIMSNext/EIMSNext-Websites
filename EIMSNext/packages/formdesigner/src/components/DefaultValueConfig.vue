@@ -1,72 +1,74 @@
 <template>
-  <div class="_fd-default-value">
-    <el-select v-model="valueMode" @change="valueModeChanged">
+  <div v-if="activeRule" class="_fd-default-value">
+    <div class="el-form-item__label"><span class="_fc-field-title">{{
+      t('props.inputData')
+    }}</span></div>
+    <el-select v-model="valueMode">
       <el-option :label="t('props.v_custom')" value="custom"></el-option>
-      <el-option :label="t('props.v_data')" value="data"></el-option>
+      <el-option :label="t('props.v_datalink')" value="datalink"></el-option>
       <el-option :label="t('props.v_formula')" value="formula"></el-option>
     </el-select>
-    <el-input v-if="valueMode == 'custom'" v-model="customValue"></el-input>
-    <el-badge v-if="valueMode == 'data'" type="warning">
-      <Struct v-model="dataValue"></Struct>
+    <el-badge v-if="valueMode == 'custom'" type="warning">
+      <el-input v-if="activeRule.type == 'input'" v-model="customValue"></el-input>
+      <el-input v-if="activeRule.type == 'textarea'" type="textarea" v-model="customValue"></el-input>
+      <el-input-number v-if="activeRule.type == 'number'" v-model="customValue" controls-position="right"
+        :min="activeRule.props.min" :max="activeRule.props.max"></el-input-number>
+      <el-date-picker v-if="activeRule.type == 'timestamp'" v-model="customValue" value-format="x"
+        :type="activeRule.props.type" :format="activeRule.props.format"></el-date-picker>
+      <fc-department-select v-if="activeRule.type == 'departmentselect'" v-model="customValue"
+        @change="onOrgChanged"></fc-department-select>
+      <fc-department-select v-if="activeRule.type == 'departmentselect2'" v-model="customValue" @change="onOrgChanged"
+        :multiple="true"></fc-department-select>
+      <fc-employee-select v-if="activeRule.type == 'employeeselect'" v-model="customValue"
+        @change="onOrgChanged"></fc-employee-select>
+      <fc-employee-select v-if="activeRule.type == 'employeeselect2'" v-model="customValue" @change="onOrgChanged"
+        :multiple="true"></fc-employee-select>
+    </el-badge>
+    <el-badge v-if="valueMode == 'datalink'" type="warning">
+      <DataLinkConfig v-model="dataLinkValue" :title="t('props.v_datalink')"></DataLinkConfig>
     </el-badge>
     <el-badge v-if="valueMode == 'formula'" type="warning">
-      <ComputedConfig v-model="formulaValue" type="value" :btn="t('props.v_formula')" :title="t('computed.value.title')"
-        :name="t('computed.value.name')"></ComputedConfig>
+      <ComputedConfig v-model="formulaValue" type="linkage" :btn="t('computed.defaultValue.btn')"
+        :title="t('computed.defaultValue.title')" :name="t('computed.defaultValue.name')"></ComputedConfig>
     </el-badge>
   </div>
 </template>
 
 <script>
-import { uniqueId, deepExtend, is } from "@eimsnext/form-render-core";
 import { defineComponent } from "vue";
-import FnEditor from "./FnEditor.vue";
-import { getInjectArg } from "../utils";
-
-const $T = "$FNX:";
-
-const isFNX = (v) => {
-  return is.String(v) && v.indexOf($T) === 0;
-};
 
 export default defineComponent({
   name: "DefaultValueConfig",
   emits: ["update:modelValue"],
   props: {
-    modelValue: [Object, undefined, null],
-    componentName: "",
-    eventName: {
-      type: Array,
-      default: () => [],
-    },
+    modelValue: [Object, String, Number, undefined, null],
   },
-  inject: ["designer", "http"],
-  components: {
-    FnEditor,
-  },
+  inject: ["designer"],
   mounted() {
-    // console.log("DefaultValueConfig", this.httpClient);
-    // this.http.auth.login("12345678901", "123456");
+    // console.log("modelvalue", this.modelValue)
+    if (this.activeRule) {
+      if (this.activeRule._computed.value) {
+        this.valueMode = 'formula';
+        this.formulaValue = this.activeRule._computed.value
+        this.oldFormulaValue = this.formulaValue
+      }
+      else {
+        this.valueMode = 'custom'
+        this.customValue = this.activeRule._computed.defaultValue
+        this.oldCustomValue = this.customValue
+      }
+    }
   },
   data() {
     return {
       valueMode: "custom",
-      dataEditorVisible: false,
-      formulaEditorVisible: false,
+      oldCustomValue: null,
+      oldFormulaValue: null,
+      oldDataLinkValue: null,
 
-      customValue: "",
-      dataValue: null,
+      customValue: null,
+      dataLinkValue: null,
       formulaValue: null,
-
-      visible: false,
-      activeData: null,
-      val: null,
-      defActive: "no",
-      event: {},
-      cus: false,
-      cusValue: "",
-      eventType: "fn",
-      eventKey: "",
-      eventStr: "",
     };
   },
   computed: {
@@ -76,224 +78,227 @@ export default defineComponent({
     activeRule() {
       return this.designer.setupState.activeRule;
     },
-    eventNum() {
-      let num = 0;
-      Object.keys(this.modelValue || {}).forEach((k) => {
-        num += Array.isArray(this.modelValue[k])
-          ? this.modelValue[k].length
-          : 1;
-      });
-      return num;
-    },
-    eventInfo() {
-      const info = {};
-      this.eventName.forEach((v) => {
-        info[v] =
-          this.t("com." + this.componentName + ".event." + v) ||
-          this.t("eventInfo." + v) ||
-          "";
-      });
-      return info;
-    },
-    globalEvent() {
-      return this.designer.setupState.formOptions.globalEvent || {};
-    },
-    options() {
-      return Object.keys(this.globalEvent).map((k) => {
-        return {
-          label: this.globalEvent[k].label,
-          value: "$GLOBAL:" + k,
-        };
-      });
-    },
-    fnArgs() {
-      return [getInjectArg(this.t)];
-    },
+    // eventNum() {
+    //   let num = 0;
+    //   Object.keys(this.modelValue || {}).forEach((k) => {
+    //     num += Array.isArray(this.modelValue[k])
+    //       ? this.modelValue[k].length
+    //       : 1;
+    //   });
+    //   return num;
+    // },
+    // eventInfo() {
+    //   const info = {};
+    //   this.eventName.forEach((v) => {
+    //     info[v] =
+    //       this.t("com." + this.componentName + ".event." + v) ||
+    //       this.t("eventInfo." + v) ||
+    //       "";
+    //   });
+    //   return info;
+    // },
+    // globalEvent() {
+    //   return this.designer.setupState.formOptions.globalEvent || {};
+    // },
+    // options() {
+    //   return Object.keys(this.globalEvent).map((k) => {
+    //     return {
+    //       label: this.globalEvent[k].label,
+    //       value: "$GLOBAL:" + k,
+    //     };
+    //   });
+    // },
+    // fnArgs() {
+    //   return [getInjectArg(this.t)];
+    // },
   },
   watch: {
-    visible(v) {
-      this.event = v ? this.loadFN(deepExtend({}, this.modelValue || {})) : {};
-      if (!v) {
-        this.destroy();
-        this.closeCus();
-      }
+    customValue(v) {
+      if (this.valueMode == "custom" && this.customValue != this.oldCustomValue)
+        this.update(v);
     },
-    // customValue(v) {
-    //   if (this.valueMode == "custom" && this.customValue != this.modelValue)
-    //     this.update(v);
-    // },
-    // dataValue() {},
+    dataLinkValue() { },
     formulaValue(v) {
-      console.log("ffffvvvv", v, this.activeRule);
-      if (this.valueMode == "formula" && this.formulaValue != this.modelValue)
+      // console.log("ffffvvvv", v, this.activeRule);
+      if (this.valueMode == "formula" && this.formulaValue != this.oldFormulaValue)
         this.update(v);
     },
   },
   methods: {
-    valueModeChanged() {
-      //   if (this.valueMode == "custom") this.customValue = this.modelValue;
-      //   if (this.valueMode == "data") this.dataValue = this.modelValue;
-      //   if (this.valueMode == "formula") this.formulaValue = this.modelValue;
+    onOrgChanged(val) {
+      this.update(val)
     },
     update(v) {
-      if (this.valueMode == "custom") this.$emit("update:modelValue", v);
-      if (this.valueMode == "formula") {
-        if (this.activeRule._computed) this.activeRule._computed.value = v;
-        else this.activeRule["_computed"] = { value: v };
-        console.log("activeRule", this.activeRule);
-      }
-    },
-    openConfig() {
-      this.designer.setupState.openGlobalEventDialog();
-    },
-    addCus() {
-      const val = this.cusValue && this.cusValue.trim();
-      if (val) {
-        this.closeCus();
-        this.add(val);
-      }
-    },
-    closeCus() {
-      this.cus = false;
-      this.cusValue = "";
-    },
-    cusEvent() {
-      this.cus = true;
-    },
-    loadFN(e) {
-      const val = {};
-      Object.keys(e).forEach((k) => {
-        if (Array.isArray(e[k])) {
-          const data = [];
-          e[k].forEach((v) => {
-            if (isFNX(v)) {
-              data.push(v.replace($T, ""));
-            } else if (is.Function(v) && isFNX(v.__json)) {
-              data.push(v.__json.replace($T, ""));
-            } else if (v && v.indexOf("$GLOBAL:") === 0) {
-              data.push(v);
-            }
-          });
-          val[k] = data;
-        } else if (isFNX(e[k])) {
-          val[k] = [e[k].replace($T, "")];
-        } else if (is.Function(e[k]) && isFNX(e[k].__json)) {
-          val[k] = [e[k].__json.replace($T, "")];
-        } else if (e[k] && e[k].indexOf("$GLOBAL:") === 0) {
-          val[k] = [e[k]];
-        }
-      });
-      return val;
-    },
-    parseFN(e) {
-      const on = {};
-      Object.keys(e).forEach((k) => {
-        const lst = [];
-        e[k].forEach((v, i) => {
-          lst[i] = v.indexOf("$GLOBAL:") !== 0 ? $T + v : v;
-        });
-        if (lst.length > 0) {
-          on[k] = lst.length === 1 ? lst[0] : lst;
-        }
-      });
-      return on;
-    },
-    add(name) {
-      let data = {};
-      if (Array.isArray(this.event[name])) {
-        this.event[name].push("");
-        data = {
-          name,
-          item: this.event[name],
-          index: this.event[name].length - 1,
-        };
-      } else if (this.event[name]) {
-        const arr = [this.event[name], ""];
-        this.event[name] = arr;
-        data = {
-          name,
-          item: arr,
-          index: 1,
-        };
-      } else {
-        const arr = [""];
-        this.event[name] = arr;
-        data = {
-          name,
-          item: arr,
-          index: 0,
-        };
-      }
-      if (!this.activeData) {
-        this.edit(data);
-      }
-    },
-    edit(data) {
-      const key = data.name + (data.index || 0);
-      if (this.defActive === key) {
-        return;
-      }
-      data.key = uniqueId();
-      if (data.item) {
-        this.val = data.item[data.index];
-      } else {
-        this.val = this.event[data.name];
-      }
-      this.activeData = data;
-      this.eventType = this.val.indexOf("$GLOBAL:") === 0 ? "event" : "fn";
-      if (this.eventType === "event") {
-        this.eventKey = this.val;
-        this.eventStr = "";
-      } else {
-        this.eventStr = this.val;
-        this.eventKey = "";
-      }
-      this.defActive = key;
-    },
-    save() {
-      let str = this.eventKey;
-      if (this.eventType !== "event") {
-        if (!this.$refs.fn.save()) {
-          return false;
-        }
-        str = this.eventStr;
-      }
+      if (this.valueMode == "custom") {
+        this.activeRule._computed["defaultValue"] = v
 
-      if (this.activeData.item) {
-        this.activeData.item[this.activeData.index] = str;
-      } else {
-        this.event[this.activeData.name] = str;
+        if (this.activeRule._computed.value) delete this.activeRule._computed.value
+
+        this.$emit("update:modelValue", v);
       }
-      this.destroy();
-      return true;
-    },
-    rm(data) {
-      if (data.index !== undefined) {
-        data.item.splice(data.index, 1);
-      } else {
-        this.$delete(this.event, data.name);
-      }
-      if (this.defActive === data.name + (data.index || 0)) {
-        this.destroy();
+      else {
+        if (this.valueMode == "formula") {
+          if (this.activeRule._computed) this.activeRule._computed.value = v;
+          else this.activeRule["_computed"] = { value: v };
+          // console.log("activeRule", this.activeRule);
+        }
+
+        if (this.activeRule._computed.defaultValue) delete this.activeRule._computed.defaultValue
+
+        this.$emit("update:modelValue", undefined);
       }
     },
-    destroy() {
-      this.activeData = null;
-      this.val = null;
-      this.defActive = "no";
-    },
-    close() {
-      this.destroy();
-    },
-    submit() {
-      if (this.activeData && !this.save()) {
-        return;
-      }
-      this.$emit("update:modelValue", this.parseFN(this.event));
-      this.visible = false;
-      this.destroy();
-      this.closeCus();
-    },
+    // openConfig() {
+    //   this.designer.setupState.openGlobalEventDialog();
+    // },
+    // addCus() {
+    //   const val = this.cusValue && this.cusValue.trim();
+    //   if (val) {
+    //     this.closeCus();
+    //     this.add(val);
+    //   }
+    // },
+    // closeCus() {
+    //   this.cus = false;
+    //   this.cusValue = "";
+    // },
+    // cusEvent() {
+    //   this.cus = true;
+    // },
+    // loadFN(e) {
+    //   const val = {};
+    //   Object.keys(e).forEach((k) => {
+    //     if (Array.isArray(e[k])) {
+    //       const data = [];
+    //       e[k].forEach((v) => {
+    //         if (isFNX(v)) {
+    //           data.push(v.replace($T, ""));
+    //         } else if (is.Function(v) && isFNX(v.__json)) {
+    //           data.push(v.__json.replace($T, ""));
+    //         } else if (v && v.indexOf("$GLOBAL:") === 0) {
+    //           data.push(v);
+    //         }
+    //       });
+    //       val[k] = data;
+    //     } else if (isFNX(e[k])) {
+    //       val[k] = [e[k].replace($T, "")];
+    //     } else if (is.Function(e[k]) && isFNX(e[k].__json)) {
+    //       val[k] = [e[k].__json.replace($T, "")];
+    //     } else if (e[k] && e[k].indexOf("$GLOBAL:") === 0) {
+    //       val[k] = [e[k]];
+    //     }
+    //   });
+    //   return val;
+    // },
+    // parseFN(e) {
+    //   const on = {};
+    //   Object.keys(e).forEach((k) => {
+    //     const lst = [];
+    //     e[k].forEach((v, i) => {
+    //       lst[i] = v.indexOf("$GLOBAL:") !== 0 ? $T + v : v;
+    //     });
+    //     if (lst.length > 0) {
+    //       on[k] = lst.length === 1 ? lst[0] : lst;
+    //     }
+    //   });
+    //   return on;
+    // },
+    // add(name) {
+    //   let data = {};
+    //   if (Array.isArray(this.event[name])) {
+    //     this.event[name].push("");
+    //     data = {
+    //       name,
+    //       item: this.event[name],
+    //       index: this.event[name].length - 1,
+    //     };
+    //   } else if (this.event[name]) {
+    //     const arr = [this.event[name], ""];
+    //     this.event[name] = arr;
+    //     data = {
+    //       name,
+    //       item: arr,
+    //       index: 1,
+    //     };
+    //   } else {
+    //     const arr = [""];
+    //     this.event[name] = arr;
+    //     data = {
+    //       name,
+    //       item: arr,
+    //       index: 0,
+    //     };
+    //   }
+    //   if (!this.activeData) {
+    //     this.edit(data);
+    //   }
+    // },
+    // edit(data) {
+    //   const key = data.name + (data.index || 0);
+    //   if (this.defActive === key) {
+    //     return;
+    //   }
+    //   data.key = uniqueId();
+    //   if (data.item) {
+    //     this.val = data.item[data.index];
+    //   } else {
+    //     this.val = this.event[data.name];
+    //   }
+    //   this.activeData = data;
+    //   this.eventType = this.val.indexOf("$GLOBAL:") === 0 ? "event" : "fn";
+    //   if (this.eventType === "event") {
+    //     this.eventKey = this.val;
+    //     this.eventStr = "";
+    //   } else {
+    //     this.eventStr = this.val;
+    //     this.eventKey = "";
+    //   }
+    //   this.defActive = key;
+    // },
+    // save() {
+    //   let str = this.eventKey;
+    //   if (this.eventType !== "event") {
+    //     if (!this.$refs.fn.save()) {
+    //       return false;
+    //     }
+    //     str = this.eventStr;
+    //   }
+
+    //   if (this.activeData.item) {
+    //     this.activeData.item[this.activeData.index] = str;
+    //   } else {
+    //     this.event[this.activeData.name] = str;
+    //   }
+    //   this.destroy();
+    //   return true;
+    // },
+    // rm(data) {
+    //   if (data.index !== undefined) {
+    //     data.item.splice(data.index, 1);
+    //   } else {
+    //     this.$delete(this.event, data.name);
+    //   }
+    //   if (this.defActive === data.name + (data.index || 0)) {
+    //     this.destroy();
+    //   }
+    // },
+    // destroy() {
+    //   this.activeData = null;
+    //   this.val = null;
+    //   this.defActive = "no";
+    // },
+    // close() {
+    //   this.destroy();
+    // },
+    // submit() {
+    //   if (this.activeData && !this.save()) {
+    //     return;
+    //   }
+    //   this.$emit("update:modelValue", this.parseFN(this.event));
+    //   this.visible = false;
+    //   this.destroy();
+    //   this.closeCus();
+    // },
   },
   beforeCreate() {
     window.$inject = {

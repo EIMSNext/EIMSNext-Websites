@@ -144,7 +144,7 @@ onMounted(() => {
             }
 
             .current-node {
-                color: var(--color-text-secondary);
+                color: var(--et-color-text-secondary);
                 font-size: 12px;
                 margin-left: 12px;
                 width: fit-content;
@@ -194,7 +194,7 @@ onMounted(() => {
                     padding: 0 12px;
 
                     .brief-label {
-                        color: var(--color-text-secondary);
+                        color: var(--et-color-text-secondary);
                         display: inline-block;
                         flex: none;
                         max-width: 100px;
@@ -205,7 +205,7 @@ onMounted(() => {
                     }
 
                     .sep {
-                        color: var(--color-text-secondary);
+                        color: var(--et-color-text-secondary);
                     }
 
                     .brief-val {

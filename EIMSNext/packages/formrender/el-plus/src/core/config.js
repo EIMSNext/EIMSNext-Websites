@@ -2,8 +2,8 @@ export default function getConfig() {
     return {
         form: {
             inline: false,
-            labelPosition: 'right',
-            labelWidth: '125px',
+            labelPosition: 'top',
+            labelWidth: 'auto',
             disabled: false,
             size: undefined,
         },
@@ -16,7 +16,7 @@ export default function getConfig() {
             loading: false,
             disabled: false,
             innerText: '',
-            show: true,
+            show: false,
             col: undefined,
             click: undefined,
         },

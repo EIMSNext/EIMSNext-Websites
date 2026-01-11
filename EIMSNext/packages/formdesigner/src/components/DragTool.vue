@@ -1,6 +1,6 @@
 <template>
     <div class="_fd-drag-tool" @click.stop="active"
-         :class="{active: fcx.active === id, 'is-inside': inside, 'is-inline': inline}">
+        :class="{ active: fcx.active === id, 'is-inside': inside, 'is-inline': inline }">
         <div class="_fd-drag-mask" v-if="mask"></div>
         <div class="_fd-drag-hidden" v-if="hidden">
             <i class="fc-icon icon-eye-close"></i> {{ t('props.hide') }}
@@ -27,19 +27,19 @@
                     </el-dropdown>
                 </div>
                 <div class="_fd-drag-btn" @click.stop v-if="isCreate && (btns === true || btns.indexOf('create') > -1)"
-                     @click="$emit('create')">
+                    @click="$emit('create')">
                     <i class="fc-icon icon-add"></i>
                 </div>
                 <div class="_fd-drag-btn" @click.stop v-if="!only && (btns === true || btns.indexOf('copy') > -1)"
-                     @click="$emit('copy')">
+                    @click="$emit('copy')">
                     <i class="fc-icon icon-copy"></i>
                 </div>
-                <div class="_fd-drag-btn" @click.stop v-if="children && (btns === true || btns.indexOf('addChild') > -1)"
-                     @click="$emit('addChild')">
+                <div class="_fd-drag-btn" @click.stop
+                    v-if="children && (btns === true || btns.indexOf('addChild') > -1)" @click="$emit('addChild')">
                     <i class="fc-icon icon-add-child"></i>
                 </div>
-                <div class="_fd-drag-btn _fd-drag-danger" @click.stop v-if="btns === true || btns.indexOf('delete') > -1"
-                     @click="$emit('delete')">
+                <div class="_fd-drag-btn _fd-drag-danger" @click.stop
+                    v-if="btns === true || btns.indexOf('delete') > -1" @click="$emit('delete')">
                     <i class="fc-icon icon-delete"></i>
                 </div>
             </slot>
@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'DragTool',
@@ -162,12 +162,12 @@ export default defineComponent({
     outline-style: dashed;
 }
 
-._fd-drag-tool:not(.active):hover > div > ._fd-drag-btn {
+._fd-drag-tool:not(.active):hover>div>._fd-drag-btn {
     display: flex !important;
     opacity: 0.7;
 }
 
-._fd-drag-tool:has(._fd-drag-tool:not(.active):hover, ._fd-drag-tool.active:hover) > div > ._fd-drag-btn {
+._fd-drag-tool:has(._fd-drag-tool:not(.active):hover, ._fd-drag-tool.active:hover)>div>._fd-drag-btn {
     display: none !important;
 }
 
@@ -175,7 +175,7 @@ export default defineComponent({
     padding: 2px;
 }
 
-._fd-drag-tool + ._fd-drag-tool {
+._fd-drag-tool+._fd-drag-tool {
     margin-top: 5px;
 }
 
@@ -186,7 +186,7 @@ export default defineComponent({
     min-height: 36px;
 }
 
-._fd-drag-tool.active > div > ._fd-drag-btn {
+._fd-drag-tool.active>div>._fd-drag-btn {
     display: flex;
 }
 
@@ -211,7 +211,7 @@ export default defineComponent({
 ._fd-drag-r {
     position: absolute;
     right: 0;
-    top: calc(100% - 20px);
+    top: 8px;
     padding: 0 2px 2px 0;
     z-index: 1904;
 }
@@ -226,39 +226,52 @@ export default defineComponent({
 ._fd-drag-btn {
     height: 18px;
     width: 18px;
-    color: #fff;
-    background-color: var(--fc-style-color-1);
     line-height: 20px;
     padding-bottom: 1px;
     float: left;
     cursor: pointer;
     align-items: center;
     justify-content: center;
+    background-color: transparent;
+    color: var(--et-color-text-tertiary);
+}
+
+._fd-drag-btn:hover {
+    background-color: var(--et-color-info-bg);
+    color: var(--et-color-info);
 }
 
 ._fd-drag-btn .el-dropdown {
     color: #fff;
 }
 
-._fd-drag-btn + ._fd-drag-btn {
+._fd-drag-btn+._fd-drag-btn {
     margin-left: 2px;
 }
 
 ._fd-drag-danger {
-    background-color: var(--fc-style-color-3);
+    background-color: transparent;
+    color: var(--et-color-text-tertiary);
+}
+
+._fd-drag-danger:hover {
+    background-color: var(--et-color-error-bg);
+    color: var(--et-color-error);
 }
 
 ._fd-drag-btn i {
     font-size: 14px;
 }
 
-._fd-drag-mask, ._fd-drag-hidden {
+._fd-drag-mask,
+._fd-drag-hidden {
     z-index: 1900;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;;
+    bottom: 0;
+    ;
 }
 
 ._fd-drag-hidden {
@@ -270,7 +283,9 @@ export default defineComponent({
     font-size: 14px;
 }
 
-._fd-drag-tool:hover ._fd-drag-hidden, ._fd-drag-tool.active ._fd-drag-hidden, ._fd-drag-tool:has(._fd-drag-tool.active) ._fd-drag-hidden {
+._fd-drag-tool:hover ._fd-drag-hidden,
+._fd-drag-tool.active ._fd-drag-hidden,
+._fd-drag-tool:has(._fd-drag-tool.active) ._fd-drag-hidden {
     display: none;
 }
 

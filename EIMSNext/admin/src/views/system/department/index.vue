@@ -17,21 +17,10 @@
       <!-- 用户列表 -->
       <el-col :lg="18" :xs="24">
         <el-card shadow="never">
-          <et-toolbar
-            :left-group="leftBars"
-            :right-group="rightBars"
-            @command="toolbarHandler"
-          ></et-toolbar>
-          <el-table
-            ref="tableRef"
-            v-loading="loading"
-            :data="dataRef"
-            show-overflow-tooltip
-            :tooltip-formatter="tableToolFormatter"
-            :row-class-name="rowClassName"
-            @selection-change="selectionChanged"
-            @row-click="edit"
-          >
+          <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+          <el-table ref="tableRef" v-loading="loading" :data="dataRef" show-overflow-tooltip
+            :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" @selection-change="selectionChanged"
+            @row-click="edit">
             <el-table-column type="selection" width="40" />
             <el-table-column label="姓名" width="150" prop="empName" />
             <el-table-column label="编码" width="150" prop="code" />
@@ -56,57 +45,15 @@
         </el-card>
       </el-col>
     </el-row>
-    <AddEditEmp
-      v-if="showAddEditDialog"
-      :edit="editMode"
-      :emp="selectedEmp"
-      @cancel="showAddEditDialog = false"
-      @ok="handleSaved"
-    />
-    <et-confirm-dialog
-      v-model="showDeleteConfirmDialog"
-      title="你确定要删除所选数据吗？"
-      :showNoSave="false"
-      okText="确认"
-      @ok="execDelete"
-    >
-      你当前选中了{{ checkedDatas.length }}条数据，数据删除后将不可恢复
-    </et-confirm-dialog>
-    <el-popover
-      :visible="showFilter"
-      :virtual-ref="filterBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataFilter
-        :model-value="condList"
-        formId="employee"
-        @ok="setFilter"
-        @cancel="showFilter = false"
-      ></DataFilter>
+    <AddEditEmp v-if="showAddEditDialog" :edit="editMode" :emp="selectedEmp" @cancel="showAddEditDialog = false"
+      @ok="handleSaved" />
+    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
     </el-popover>
-    <el-popover
-      :visible="showSort"
-      :virtual-ref="sortBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataSort
-        :model-value="sortList"
-        formId="employee"
-        @ok="setSort"
-        @cancel="showSort = false"
-      ></DataSort>
+    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
   </div>
 </template>
@@ -116,7 +63,7 @@ import { ODataQuery } from "@/utils/query";
 import { Department, Employee, FieldType } from "@eimsnext/models";
 import { SortDirection, employeeService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList } from "@eimsnext/components";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, EtConfirm } from "@eimsnext/components";
 import { TableInstance, TableTooltipData } from "element-plus";
 
 defineOptions({
@@ -169,6 +116,16 @@ const leftBars = ref<ToolbarItem[]>([
       command: "delete",
       icon: "el-icon-delete",
       disabled: true,
+      onCommand: async () => {
+        if (checkedDatas.value.length > 0) {
+          var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
+          if (confirm) {
+            await employeeService.delete("batch", { keys: checkedDatas.value.map((x) => x.id) }).then(() => {
+              handleQuery();
+            });
+          }
+        }
+      }
     },
   },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
@@ -323,7 +280,7 @@ const loadData = () => {
     .query<Employee>(query)
     .then((res: Employee[]) => {
       dataRef.value = res;
-      console.log("data.....", dataRef.value);
+      // console.log("data.....", dataRef.value);
     })
     .finally(() => (loading.value = false));
 };
@@ -372,12 +329,6 @@ const edit = (row: Employee, column: any) => {
 const handleSaved = (data: Employee) => {
   showAddEditDialog.value = false;
   handleQuery();
-};
-
-const execDelete = async () => {
-  await employeeService.delete("batch", { keys: checkedDatas.value.map((x) => x.id) }).then(() => {
-    handleQuery();
-  });
 };
 
 onMounted(() => {

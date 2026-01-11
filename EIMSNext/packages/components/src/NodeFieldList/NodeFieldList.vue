@@ -1,7 +1,7 @@
 <template>
   <el-tree-select v-model="selectedNode" :data="nodeList" :props="selectProps" :render-after-expand="true" node-key="id"
-    :default-expanded-keys="defaultExpand" :filterable="true" :clearable="true" :filter-node-method="filterNode"
-    @change="onInput" />
+    :placeholder="t('comp.selectField')" :default-expanded-keys="defaultExpand" :filterable="true" :clearable="true"
+    :filter-node-method="filterNode" @change="onInput" />
 </template>
 
 <script setup lang="ts">
@@ -12,6 +12,8 @@ import { IFormFieldDef } from "@/FieldList/type";
 import { ref, toRef, watch } from "vue";
 import { ITreeNode, TreeNodeType, findNode } from "@/common";
 import { FieldType } from "@eimsnext/models";
+import { useLocale } from "element-plus"
+const { t } = useLocale()
 
 defineOptions({
   name: "NodeFieldList",

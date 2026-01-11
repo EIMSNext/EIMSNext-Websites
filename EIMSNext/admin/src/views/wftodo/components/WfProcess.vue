@@ -21,7 +21,7 @@ const props = withDefaults(
   }
 );
 
-const actions = ref<FormActionSettings>({ approve: { text: "Approve", visible: true }, reject: { text: "Reject", visible: true } })
+const actions = ref<FormActionSettings>({ approve: { text: "common.wfProcess.approve", visible: true }, reject: { text: "common.wfProcess.reject", visible: true } })
 const appId = ref("");
 const dataId = ref(props.todo.dataId);
 const formStore = useFormStore();

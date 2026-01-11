@@ -104,7 +104,26 @@ const emit = defineEmits(["cancel", "ok"]);
 const cancel = () => {
   emit("cancel");
 };
-const saveAndInvite = async () => { };
+const saveAndInvite = async () => {
+  const newEmp: EmployeeRequest = {
+    id: formData.value.id,
+    code: formData.value.code,
+    empName: formData.value.empName,
+    workPhone: formData.value.workPhone,
+    workEmail: formData.value.workEmail,
+    departmentId: formData.value.departmentId,
+    isManager: false,
+    invite: formData.value.workPhone || formData.value.workEmail
+  };
+
+  if (props.edit) {
+    formData.value = await employeeService.patch<Employee>(newEmp.id, newEmp);
+  } else {
+    formData.value = await employeeService.post<Employee>(newEmp);
+  }
+
+  emit("ok", formData.value);
+};
 
 const save = async () => {
   const newEmp: EmployeeRequest = {

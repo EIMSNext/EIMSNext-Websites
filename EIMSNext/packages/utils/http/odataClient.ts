@@ -28,7 +28,7 @@ export class ODataClient {
     url = this.formatUrl(url, $count);
     if (data) {
       let qStr = typeof data === "string" ? data : qs.stringify(data);
-      console.log("qStr", qStr);
+      // console.log("qStr", qStr);
       data = qStr.startsWith("?") ? qStr.substring(1) : qStr;
     } else {
       //请求体不能undefined，否则contenttype不起作用
@@ -44,12 +44,12 @@ export class ODataClient {
   }
 
   query<T>(url: string, data?: any) {
-    console.log("query data", data);
+    // console.log("query data", data);
 
     url = this.formatUrl(url, "$query");
     if (data) {
       let qStr = typeof data === "string" ? data : qs.stringify(data);
-      console.log("qStr", qStr);
+      // console.log("qStr", qStr);
       data = qStr.startsWith("?") ? qStr.substring(1) : qStr;
     } else {
       //请求体不能undefined，否则contenttype不起作用
@@ -92,6 +92,12 @@ export class ODataClient {
     return this.httpRequest.delete<T>({ url, data, headers, withToken: true });
   }
 
+  exec<T = any>(url: string, data: any) {
+    url = this.formatUrl(url);
+    let headers = this.getAxiosHeaders(ContentType.JSON);
+    return this.httpRequest.post<T>({ url, data, headers, withToken: true });
+  }
+
   private formatUrl<T>(url: string, id?: string) {
     let idPath = id ? "/" + id : "";
     url = url.startsWith("/") ? url : "/" + url;
@@ -104,7 +110,7 @@ export class ODataClient {
     let headers = new AxiosHeaders();
     headers.setAccept(ODataMetadata.None);
     if (contentType) headers.setContentType(contentType, true);
-    console.log("headers", headers, contentType);
+    // console.log("headers", headers, contentType);
     return headers;
   }
 }

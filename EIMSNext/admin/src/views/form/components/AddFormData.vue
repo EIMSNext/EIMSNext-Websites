@@ -7,10 +7,13 @@ defineOptions({
   name: "AddFormData",
 });
 
+import { ref, watch } from "vue";
 import { FormDef, FormData, FormContent, FormDataRequest, DataAction } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -23,12 +26,21 @@ const props = withDefaults(
   }
 );
 
-const actions = ref<FormActionSettings>({ draft: { text: "SaveDraft", visible: true }, submit: { text: "Submit", visible: true }, reset: { text: "Reset", visible: true } })
+const actions = ref<FormActionSettings>({ draft: { text: "common.wfProcess.saveDraft" }, submit: { text: "common.wfProcess.submit" }, reset: { text: "common.reset" } })
+
 const appId = ref("");
-const dataId = ref(props.data?.id);
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());
 const formData = ref(props.data);
+
+// 添加watch监听props.data的变化，确保formData始终与props.data保持同步
+watch(
+  () => props.data,
+  (newData) => {
+    formData.value = newData;
+  },
+  { deep: true }
+);
 
 if (props.formId) {
   let form = formStore.items.find((x: FormDef) => x.id == props.formId);
@@ -46,27 +58,45 @@ const cancel = () => {
 const saveDraft = (data: any) => {
   let fdata: FormDataRequest = {
     action: DataAction.Save,
-    id: dataId.value ?? "",
+    id: props.data?.id ?? "",
     appId: appId.value,
     formId: props.formId,
     data: data,
   };
 
-  formDataService.post<FormData>(fdata).then((res) => {
+  // 根据是否有props.data?.id判断是新增还是编辑
+  const request = props.data?.id ?
+    formDataService.put<FormData>(props.data.id, fdata) :
+    formDataService.post<FormData>(fdata);
+
+  request.then((res) => {
     formData.value = res.data;
     emit("save", res);
   });
 };;
 const submitData = (data: any) => {
+  if (actions.value.draft)
+    actions.value.draft.disabled = true
+
+  if (actions.value.submit)
+    actions.value.submit.disabled = true
+
+  if (actions.value.reset)
+    actions.value.reset.disabled = true
+
   let fdata: FormDataRequest = {
     action: DataAction.Submit,
-    id: dataId.value ?? "",
+    id: props.data?.id ?? "",
     appId: appId.value,
     formId: props.formId,
     data: data,
   };
+  // 根据是否有props.data?.id判断是新增还是编辑
+  const request = props.data?.id ?
+    formDataService.put<FormData>(props.data.id, fdata) :
+    formDataService.post<FormData>(fdata);
 
-  formDataService.post<FormData>(fdata).then((res) => {
+  request.then((res) => {
     formData.value = res.data;
     emit("submit", res);
   });

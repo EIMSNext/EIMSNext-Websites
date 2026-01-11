@@ -6,6 +6,7 @@ export * from "./icon";
 export * from "./list";
 export * from "./list/type";
 export * from "./memberSelect";
+export * from "./memberSelect/type";
 export * from "./selectedTags";
 export * from "./selectedTags/type";
 export * from "./toolbar";
@@ -17,3 +18,5 @@ export * from "./FormFieldList/type";
 export * from "./FormList/type";
 export * from "./NodeFieldList/type";
 export * from "./dialog/EtConfirm";
+export * from "./FlowDesigner/type";
+export * from "./FieldPerms/type"

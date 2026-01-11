@@ -2,16 +2,18 @@
     <div v-click-outside="onClickOutside">
         <et-list v-model="value" :data="fieldList" :selectable="true"></et-list>
         <div class="actions">
-            <el-button type="primary" @click="onOk">确定</el-button>
-            <el-button @click="onCancel">取消</el-button>
+            <el-button type="primary" @click="onOk">{{ t("common.ok") }}</el-button>
+            <el-button @click="onCancel">{{ t("common.cancel") }}</el-button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { IListItem,IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
+import { IListItem, IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import { ClickOutside as vClickOutside } from "element-plus";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineOptions({
     name: "DataField",
@@ -37,7 +39,7 @@ const onCancel = () => {
 };
 const onClickOutside = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
-    let excludedClasses = ["data-field", "el-select__popper"];
+    let excludedClasses = ["data-field", "el-select__popper", "el-dropdown__popper"];
     if (excludedClasses.some((cls) => target.closest(`.${cls}`))) {
         return;
     }

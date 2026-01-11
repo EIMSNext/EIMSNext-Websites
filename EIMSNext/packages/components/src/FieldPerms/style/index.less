@@ -1,0 +1,82 @@
+@import "../../common/index.less";
+
+.@{prefix}-field-perms {
+  .field-list-header {
+    background-color: var(--et-color-bg-secondary);
+    height: 30px;
+    line-height: 30px;
+    padding: 0 8px;
+    position: relative;
+    width: 100%;
+
+    .tips {
+      color: #f56c6c;
+      margin-left: 2px;
+    }
+  }
+
+  .field-view-col {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    width: 60px;
+    right: 175px;
+  }
+
+  .field-edit-col {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    width: 60px;
+    right: 55px;
+  }
+
+  .field-list-content-wrapper {
+    height: 100%;
+    overflow: auto;
+    position: relative;
+    width: 100%;
+
+    .check-all {
+      color: var(--et-color-primary);
+      height: 40px;
+      padding: 8px;
+      position: relative;
+      width: 100%;
+    }
+    .all-items {
+      width: 100%;
+
+      .check-item {
+        min-height: 40px;
+        padding: 8px;
+        position: relative;
+
+        .check-item-text {
+          word-wrap: break-word;
+          word-break: break-word;
+          max-width: 200px;
+        }
+
+        .subform-tag {
+          align-items: center;
+          bottom: 0;
+          display: flex;
+          flex-wrap: nowrap;
+          justify-content: center;
+          position: absolute;
+          top: 0;
+          right: -8px;
+        }
+      }
+    }
+  }
+}

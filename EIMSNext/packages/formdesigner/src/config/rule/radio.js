@@ -22,8 +22,8 @@ export default {
             return {
                 type: rule.props.type === 'button' ? 'elRadioButton' : 'elRadio',
                 props: {
-                    label: opt.value,
-                    value: opt.value,
+                    label: opt,
+                    value: opt,
                 },
                 _sfc:{
                     content: opt.label
@@ -50,11 +50,11 @@ export default {
         return localeProps(t, name + '.props', [
             makeOptionsRule(t, 'options'),
             // {type: 'switch', field: 'disabled'}
-            {
-                type: "CheckBoxInput",
-                field: "disabled",
-                wrap: { show: false },
-              },
+            // {
+            //     type: "CheckBoxInput",
+            //     field: "disabled",
+            //     wrap: { show: false },
+            //   },
             // ,
             // {type: 'switch', field: 'input'}
             // , 
@@ -66,6 +66,17 @@ export default {
             //     type: 'ColorInput',
             //     field: 'fill'
             // }
+
+              {
+                type: "CheckBoxInput",
+                field: "readonly",
+                wrap: { show: false },
+              },
+              {
+                type: "CheckBoxInput",
+                field: "disabled",
+                wrap: { show: false },
+              },
         ]);
     }
 };

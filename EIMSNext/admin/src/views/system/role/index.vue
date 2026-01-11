@@ -10,11 +10,7 @@
       <!-- 用户列表 -->
       <el-col :lg="18" :xs="24">
         <el-card shadow="never">
-          <et-toolbar
-            :left-group="leftBars"
-            :right-group="rightBars"
-            @command="toolbarHandler"
-          ></et-toolbar>
+          <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
           <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="40" />
             <el-table-column label="姓名" width="150" prop="empName" />
@@ -40,59 +36,32 @@
         </el-card>
       </el-col>
     </el-row>
-    <el-popover
-      :visible="showFilter"
-      :virtual-ref="filterBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataFilter
-        :model-value="condList"
-        formId="employee"
-        @ok="setFilter"
-        @cancel="showFilter = false"
-      ></DataFilter>
+    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
     </el-popover>
-    <el-popover
-      :visible="showSort"
-      :virtual-ref="sortBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataSort
-        :model-value="sortList"
-        formId="employee"
-        @ok="setSort"
-        @cancel="showSort = false"
-      ></DataSort>
+    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
+    <member-select-dialog v-model="showMemberDialog" :show-tabs="MemberTabs.Employee" destroy-on-close
+      @ok="finishSelect" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
 import { Department, Employee, FieldType, Role } from "@eimsnext/models";
-import { SortDirection, employeeService } from "@eimsnext/services";
+import { SortDirection, employeeService, roleService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList } from "@eimsnext/components";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm, MemberTabs } from "@eimsnext/components";
 
 defineOptions({
   name: "RoleManager",
   inheritAttrs: false,
 });
 
-const selectedEmp = ref<Employee>();
-const showAddEditDialog = ref(false);
+const showMemberDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and" });
@@ -121,7 +90,7 @@ const leftBars = ref<ToolbarItem[]>([
       command: "add",
       icon: "el-icon-plus",
       onCommand: () => {
-        showAddEditDialog.value = true;
+        showMemberDialog.value = true;
       },
     },
   },
@@ -133,6 +102,17 @@ const leftBars = ref<ToolbarItem[]>([
       command: "delete",
       icon: "el-icon-delete",
       disabled: true,
+      onCommand: async () => {
+        if (checkedDatas.value.length > 0) {
+          var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
+          if (confirm) {
+            await roleService.removeEmps(roleId.value, checkedDatas.value.map(x => x.id))
+              .then(() => {
+                handleQuery()
+              })
+          }
+        }
+      }
     },
   },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
@@ -192,6 +172,15 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
   }
 };
 
+const finishSelect = (tags: ISelectedTag[]) => {
+  //   console.log("sel tags", tags);
+  if (tags.length > 0) {
+    roleService.addEmps(roleId.value, tags.map(x => x.id)).then(() => handleQuery())
+  }
+
+  showMemberDialog.value = false;
+};
+
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
   showFilter.value = false;
@@ -211,20 +200,24 @@ const setSort = (sort: IFieldSortList) => {
 };
 
 const updateQueryParams = () => {
-  let roleFilter = undefined;
-  // if (deptId.value) {
-  //   deptFilter = { departmentId: { eq: deptId.value } }
-  // }
+  let statusFilter = { status: { eq: 0 } };
+  let preFilter: any = statusFilter;
+  if (roleId.value) {
+    preFilter = {
+      and: [statusFilter, `roles/any(r: r/roleId eq '${roleId.value}')`],
+    };
+  }
+
   queryParams.value = toODataQuery(
     condList.value,
     sortList.value,
     (pageNum.value - 1) * pageSize.value,
     pageSize.value,
-    roleFilter
+    preFilter
   );
   queryParams.value.expand = "department";
 
-  // console.log("queryParams list", queryParams.value);
+  console.log("queryParams filter", queryParams.value.filter);
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -252,6 +245,11 @@ const handleRoleQuery = (role?: Role) => {
 };
 // 查询
 const handleQuery = () => {
+  if (!roleId.value) {
+    totalRef.value = 0;
+    dataRef.value = []
+    return
+  }
   loading.value = true;
 
   loadCount();
@@ -280,6 +278,8 @@ const loadData = () => {
 // 选中项发生变化
 const handleSelectionChange = (selection: any[]) => {
   checkedDatas.value = selection;
+  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
+    checkedDatas.value.length == 0;
 };
 
 const showDetails = (row: FormData, column: any) => {
@@ -291,39 +291,6 @@ const showDetails = (row: FormData, column: any) => {
   //   selectedData.value = row
   //   showDetailsDialog.value = true
   // }
-};
-
-// 重置密码
-// function hancleResetPassword(row: any) {
-//   ElMessageBox.prompt("请输入用户【" + row.username + "】的新密码", "重置密码", {
-//     confirmButtonText: "确定",
-//     cancelButtonText: "取消",
-//   }).then(
-//     ({ value }) => {
-//       if (!value || value.length < 6) {
-//         ElMessage.warning("密码至少需要6位字符，请重新输入");
-//         return false;
-//       }
-//       UserAPI.resetPassword(row.id, value).then(() => {
-//         ElMessage.success("密码重置成功，新密码是：" + value);
-//       });
-//     },
-//     () => {
-//       ElMessage.info("已取消重置密码");
-//     }
-//   );
-// }
-
-const handleSaved = (data: Employee) => {
-  // showAddEditDialog.value = false;
-  // handleQuery()
-};
-
-const execDelete = async () => {
-  // await employeeService.delete("batch", { keys: checkedDatas.value.map(x => x.id) })
-  //   .then(() => {
-  //     handleQuery()
-  //   })
 };
 
 onMounted(() => {

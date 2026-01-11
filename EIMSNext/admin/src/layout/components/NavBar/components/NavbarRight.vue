@@ -1,14 +1,12 @@
 <template>
   <div class="navbar__right">
     <!-- 非手机设备（窄屏）才显示 -->
-    <template>
-
-      <!-- 全屏 -->
-      <Fullscreen />
-      <!-- 消息通知 -->
-      <Notification />
-    </template>
-
+    <!-- <template> -->
+    <!-- 全屏 -->
+    <Fullscreen />
+    <!-- 消息通知 -->
+    <Notification />
+    <!-- </template> -->
     <!-- 语言选择 -->
     <LangSelect :show-label="false" />
 
@@ -41,7 +39,7 @@ const settingStore = useSettingsStore();
     min-width: 40px;
     height: $navbar-height;
     line-height: $navbar-height;
-    color: var(--el-text-color);
+    color: var(--et-color-text);
     text-align: center;
     cursor: pointer;
 

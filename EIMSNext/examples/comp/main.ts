@@ -10,14 +10,12 @@ import EtPlus from "@eimsnext/components";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import "@eimsnext/components/dist/index.css";
-import { createPinia } from "pinia";
 import { AxiosHeaders } from "axios";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import { setupStore, useUserStore } from "@eimsnext/store";
 
 // console.log(JlPlus);
 const app = createApp(App);
-app.use(createPinia());
 
 //@ts-ignore
 if (window.appSetting) appSetting.merge(window.appSetting);

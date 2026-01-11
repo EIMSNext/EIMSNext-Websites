@@ -48,5 +48,4 @@ export function getUploadUrl(url: string, ver: string = "v1") {
     : `${appSetting.uploadUrl}/api/${ver}${url}`;
 }
 
-const appSetting = new AppSetting();
-export default appSetting;
+export const appSetting = new AppSetting();

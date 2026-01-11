@@ -24,17 +24,17 @@ export default function form({ t }) {
     //     value: '',
     //     title: t('form.formName'),
     // },
-    {
-      type: "radio",
-      field: "labelPosition",
-      value: "left",
-      title: t("form.labelPosition"),
-      options: localeOptions(t, [
-        { value: "left", label: "left" },
-        { value: "right", label: "right" },
-        { value: "top", label: "top" },
-      ]),
-    },
+    // {
+    //   type: "radio",
+    //   field: "labelPosition",
+    //   value: "left",
+    //   title: t("form.labelPosition"),
+    //   options: localeOptions(t, [
+    //     { value: "left", label: "left" },
+    //     { value: "right", label: "right" },
+    //     { value: "top", label: "top" },
+    //   ]),
+    // },
     // {
     //   type: "radio",
     //   field: "size",

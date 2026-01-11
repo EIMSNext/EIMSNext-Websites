@@ -22,7 +22,7 @@ export interface IFieldBuildSetting {
   version: number;
   rule: FieldBuildRule;
   matchType: boolean;
-  fieldLimit?: string;
+  fieldLimit?: IFieldLimit;
   fieldMapping?: Record<string, IFormFieldMap>;
 }
 export interface IFormFieldMap {
@@ -34,6 +34,15 @@ export interface IFormFieldMap {
   mapSingleResult: boolean;
   mapCount: number;
 }
+export interface IFieldLimit {
+  limitField: string;
+  limitType: FieldLimitType;
+}
+export enum FieldLimitType {
+  None,
+  SubField,
+  MultiResult,
+}
 export enum ConditionFieldType {
   None = "none",
   Input = "input",
@@ -43,7 +52,7 @@ export enum ConditionFieldType {
   TimeStamp = "timestamp",
   Other = "other",
 }
-export function getConditionFieldType(fieldtype?: string): ConditionFieldType {
+export function getConditionFieldType(fieldtype?: FieldType | string): ConditionFieldType {
   if (!fieldtype) return ConditionFieldType.None;
 
   let dataType = ConditionFieldType.Other;

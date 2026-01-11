@@ -46,8 +46,10 @@ const sfcContent = (col) => {
                             _sfc: {
                                 attr: {
                                     ':initialIndex': 'i',
-                                    ':src': 'src',
-                                    ':previewSrcList': `Array.isArray(scope.row.${col.prop}) ? scope.row.${col.prop} : [scope.row.${col.prop}]`,
+                                    // 处理对象数组，提取url属性
+                                    ':src': `typeof src === 'object' && src !== null ? src.url || src.src : src`,
+                                    // 处理预览图片列表，提取所有图片的url属性
+                                    ':previewSrcList': `(Array.isArray(scope.row.${col.prop}) ? scope.row.${col.prop} : [scope.row.${col.prop}]).map(item => typeof item === 'object' && item !== null ? item.url || item.src : item)`,
                                 }
                             }
                         }

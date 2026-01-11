@@ -2,16 +2,21 @@
   <div class="form-wrapper">
     <formCreate ref="fcInst" :modelValue="dataRef" :rule="rules" :option="options" :preview="isView" />
     <div v-if="actions" class="form-actions">
-      <el-button v-if="actions.submit && actions.submit.visible" type="primary" @click="handleSubmit">
-        {{ t(actions.submit.text || "提交") }}</el-button>
-      <el-button v-if="actions.draft && actions.draft.visible" @click="handleDraft">
-        {{ t(actions.draft.text || "存为草稿") }}</el-button>
-      <el-button v-if="actions.reset && actions.reset.visible" @click="handleReset">
-        {{ t(actions.reset.text || "重置") }}</el-button>
-      <el-button v-if="actions.approve && actions.approve.visible" type="primary" @click="handleApprove">
-        {{ t(actions.approve.text || "同意") }}</el-button>
-      <el-button v-if="actions.reject && actions.reject.visible" @click="handleReject">
-        {{ t(actions.reject.text || "驳回") }}</el-button>
+      <el-button v-if="actions.submit && (!actions.submit.visible || actions.submit.visible)" type="primary"
+        :disabled="actions.submit.disabled" @click="handleSubmit">
+        {{ t(actions.submit.text) }}</el-button>
+      <el-button v-if="actions.draft && (!actions.draft.visible || actions.draft.visible)"
+        :disabled="actions.draft.disabled" @click="handleDraft">
+        {{ t(actions.draft.text) }}</el-button>
+      <el-button v-if="actions.reset && (!actions.reset.visible || actions.reset.visible)"
+        :disabled="actions.reset.disabled" @click="handleReset">
+        {{ t(actions.reset.text) }}</el-button>
+      <el-button v-if="actions.approve && (!actions.approve.visible || actions.approve.visible)" type="primary"
+        :disabled="actions.approve.disabled" @click="handleApprove">
+        {{ t(actions.approve.text) }}</el-button>
+      <el-button v-if="actions.reject && (!actions.reject.visible || actions.reject.visible)"
+        :disabled="actions.reject.disabled" @click="handleReject">
+        {{ t(actions.reject.text) }}</el-button>
     </div>
   </div>
 </template>

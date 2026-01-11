@@ -19,12 +19,12 @@ const findTreeLabel = function (find, data, key, props) {
 };
 
 const findCheckboxLabel = function (find, data) {
-  data.forEach((v) => {
-    if (find.indexOf(v.value) > -1) {
-      find[find.indexOf(v.value)] = v.label;
-    }
+  return find.map(item => {
+    // 如果item是对象，获取其value属性进行匹配
+    const valueToFind = typeof item === 'object' && item !== null ? item.value : item;
+    const match = data.find(v => v.value === valueToFind);
+    return match ? match.label : item;
   });
-  return find;
 };
 
 function toArray(val) {
@@ -53,16 +53,12 @@ export default function renderPreview(_, ctx) {
     ctx.rule.subForm ||
     (Array.isArray(subForm) ? subForm.length : subForm) ||
     [
-      "fcGroup",
-      "fcSubForm",
-      "tableform",
-      "stepForm",
-      "nestedTableForm",
-      "infiniteTableForm",
-      "fcUpload",
-    ].indexOf(ctx.trueType) > -1
+            "fcgroup", "fcsubform", "tableform", "stepform", 
+            "nestedtableform", "infinitetableform", "fcupload", "fc-upload",
+            "departmentselect","employeeselect", "fileupload", "imageupload"
+          ].indexOf(ctx.trueType.toLowerCase()) > -1
   ) {
-    if (ctx.trueType === "fcUpload") {
+    if (ctx.trueType.toLowerCase() === "fcupload") {
       ctx.prop.props.disabled = true;
     }
     return ctx.parser.render(_, ctx);

@@ -21,17 +21,26 @@ export default {
       title: t("com.number.name"),
       info: "",
       $required: false,
-      props: {},
+      props: { controls: true, controlsPosition: "right" },
     };
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      // { type: "switch", field: "disabled" },
+      { type: "input", field: "placeholder" },
+      {
+        type: "DefaultValueConfig",
+      },
       {
         type: "CheckBoxInput",
-        field: "disabled",
+        field: "controls",
         wrap: { show: false },
       },
+      { type: "inputNumber", field: "step", value: 1, props: { min: 0 } },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "disabled",
+      //   wrap: { show: false },
+      // },
       {
         type: "inputNumber",
         field: "min",
@@ -45,7 +54,7 @@ export default {
         title: "precision",
         field: "precision",
       },
-      { type: "inputNumber", field: "step", props: { min: 0 } },
+
       // {
       //     type: 'switch',
       //     field: 'stepStrictly'
@@ -55,20 +64,24 @@ export default {
       //   field: "controls",
       //   value: true,
       // },
+      // {
+      //   type: "select",
+      //   field: "controlsPosition",
+      //   options: localeOptions(t, [
+      //     { label: "default", value: "" },
+      //     { label: "right", value: "right" },
+      //   ]),
+      // },
       {
         type: "CheckBoxInput",
-        field: "controls",
+        field: "readonly",
         wrap: { show: false },
       },
       {
-        type: "select",
-        field: "controlsPosition",
-        options: localeOptions(t, [
-          { label: "default", value: "" },
-          { label: "right", value: "right" },
-        ]),
+        type: "CheckBoxInput",
+        field: "disabled",
+        wrap: { show: false },
       },
-      { type: "input", field: "placeholder" },
     ]);
   },
 };

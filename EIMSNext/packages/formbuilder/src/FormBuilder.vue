@@ -1,39 +1,26 @@
 <template>
   <div id="formbuilder" class="form-builder">
-    <fc-designer ref="designer" @save="onSave" :locale="locale" :handle="handle" :config="config">
+    <div class="flow-actions">
+      <div class="left"></div>
+      <div class="right">
+        <el-button @click="onSave">保存</el-button>
+        <el-button @click="onPreview">预览</el-button>
+      </div>
+    </div>
+    <fc-designer ref="designer" :locale="locale" :handle="handle" :config="config">
       <template #block_fff="scope">
         &lt;template #block_fff="scope"&gt; 自定义内容 &lt;/template&gt;
       </template>
       <template #handle>
-        <div class="handle">
-          <el-dropdown>
-            <div class="el-dropdown-link">
-              <span>导入</span>
-              <el-icon class="el-icon--right">
-                <ArrowDown />
-              </el-icon>
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="setJson">导入JSON</el-dropdown-item>
-                <el-dropdown-item @click="setOption">导入Options</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <el-dropdown>
-            <div class="el-dropdown-link">
-              <span>导出</span>
-              <el-icon class="el-icon--right">
-                <ArrowDown />
-              </el-icon>
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="showJson">生成JSON</el-dropdown-item>
-                <el-dropdown-item @click="showOption">生成Options</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+        <div v-if="isgod" class="handle">
+          <el-button size="small" class="btn-info" style="border:none" @click="setJson">导入JSON
+          </el-button>
+          <el-button size="small" class="btn-info" style="border:none" @click="setOption">导入Options
+          </el-button>
+          <el-button size="small" class="btn-info" style="border:none" @click="showJson">生成JSON
+          </el-button>
+          <el-button size="small" class="btn-info" style="border:none" @click="showOption">生成Options
+          </el-button>
         </div>
       </template>
     </fc-designer>
@@ -73,6 +60,7 @@ import { is } from "@eimsnext/form-render-core";
 import formCreate from "@eimsnext/form-render-elplus";
 import { copyTextToClipboard } from "@eimsnext/form-designer";
 import { ArrowDown } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 import { FormContent, FormType, FormDefRequest, FormDef } from "@eimsnext/models";
 import { formDefService } from "@eimsnext/services";
 import "@eimsnext/form-designer/dist/index.css";
@@ -223,7 +211,7 @@ export default {
         switchType: false, //禁止切换组件类型
         showStyleForm: false,
         showEventForm: false,
-        showValidateForm: false,
+        showValidateForm: true,
         formOptions: { info: { align: "left" } },
         varList: [
           {
@@ -247,6 +235,7 @@ export default {
           },
         ],
       },
+      isgod: true
     };
   },
   watch: {
@@ -311,7 +300,7 @@ export default {
       const rule = this.$refs.designer.getJson();
       const options = this.$refs.designer.getOptionsJson();
 
-      console.log("form des data", rule, options);
+      // console.log("form des data", rule, options);
       let content = new FormContent();
       content.layout = rule;
       content.options = options;
@@ -331,15 +320,18 @@ export default {
         let resp = await formDefService.patch(req.id, req);
 
         formStore.update(resp);
-
+        ElMessage.success("保存成功");
         this.$emit("save", false);
       } else {
         let resp = await formDefService.post(req);
         contextStore.setAppChanged(); //reload 菜单
         formStore.update(resp);
-
+        ElMessage.success("保存成功");
         this.$emit("save", true);
       }
+    },
+    onPreview() {
+      this.$refs.designer.openPreview()
     },
     handleChat() {
       this.$refs.designer.activeModule = "ai";
@@ -348,7 +340,7 @@ export default {
       });
     },
     switchForm() {
-      console.log("switchForm", arguments);
+      // console.log("switchForm", arguments);
     },
     changeDark(n) {
       if (n) {
@@ -427,6 +419,8 @@ export default {
     window.jsonlint = jsonlint;
   },
   mounted() {
+    this.isgod = (process.env.NODE_ENV === 'development' || this.$route.query.god === 'cn')
+
     if (this.formDef && this.formDef.content) {
       if (this.formDef.content.layout)
         this.$refs.designer.setRule(this.formDef.content.layout);
@@ -525,12 +519,11 @@ body {
 .handle {
   display: flex;
   align-items: center;
-  margin-right: 20px;
 }
 
 ._fc-t-menu .el-dropdown,
-.handle .el-dropdown {
-  cursor: pointer;
+.handle .el-button+.el-button {
+  margin-left: 0;
 }
 
 .handle .el-icon {

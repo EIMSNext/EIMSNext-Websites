@@ -108,18 +108,37 @@ const handleDeleteConfirm = async () => {
 };
 </script>
 <style scoped lang="scss">
+.node-data {
+  // 确保整个节点区域都能触发hover效果
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .node-wrapper {
+  // 设置相对定位，作为.node-action的定位基准
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+
   .node-label {
-    margin-right: 55px;
+    // 移除固定的margin-right，改为flex布局自动分配空间
+    flex: 1;
   }
 
   .node-action {
+    // 调整绝对定位，确保和部门名称在同一行
     position: absolute;
     right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
     display: none;
+    white-space: nowrap;
 
     .action-item {
       margin-right: 5px;
+      cursor: pointer;
 
       &:last-child {
         margin-right: 0;
@@ -131,9 +150,11 @@ const handleDeleteConfirm = async () => {
     }
   }
 
+  // 确保整个.node-wrapper都能触发hover效果
   &:hover {
     .node-action {
-      display: block;
+      display: flex;
+      align-items: center;
     }
   }
 }

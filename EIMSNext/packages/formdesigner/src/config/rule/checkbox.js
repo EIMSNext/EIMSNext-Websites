@@ -62,11 +62,11 @@ export default {
         //     type: 'switch',
         //     field: 'disabled'
         // },
-        {
-          type: "CheckBoxInput",
-          field: "disabled",
-          wrap: { show: false },
-        },
+        // {
+        //   type: "CheckBoxInput",
+        //   field: "disabled",
+        //   wrap: { show: false },
+        // },
         // ,
         // {type: 'switch', field: 'input'},
         // {
@@ -97,6 +97,16 @@ export default {
         //     field: 'fill'
         // }
       ],
+      {
+        type: "CheckBoxInput",
+        field: "readonly",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "disabled",
+        wrap: { show: false },
+      },      
     ]);
   },
 };

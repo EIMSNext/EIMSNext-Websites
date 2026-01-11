@@ -6,24 +6,26 @@
       </el-header>
       <el-container style="border-top: 1px solid var(--el-menu-border-color)">
         <el-aside width="45px" class="main-left-menu">
-          <el-tooltip content="工作台" placement="right" :hide-after="0">
+          <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
             <AppLink :to="{
-              path: '/dashboard',
+              path: '/workspace',
             }">
               <div class="main-left-menu-item">
                 <et-icon icon="homepage" size="20px" :color="getAppIconColor()"></et-icon>
               </div>
             </AppLink>
           </el-tooltip>
-          <el-tooltip content="通讯录" placement="right" :hide-after="0">
-            <AppLink :to="{
-              path: '/system/department',
-            }">
-              <div class="main-left-menu-item">
-                <et-icon icon="el-icon-Notebook" size="20px" :color="getAppIconColor()"></et-icon>
-              </div>
-            </AppLink>
-          </el-tooltip>
+          <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
+            <el-tooltip :content="t('route.system')" placement="right" :hide-after="0">
+              <AppLink :to="{
+                path: '/system/department',
+              }">
+                <div class="main-left-menu-item">
+                  <et-icon icon="el-icon-Notebook" size="20px" :color="getAppIconColor()"></et-icon>
+                </div>
+              </AppLink>
+            </el-tooltip>
+          </template>
           <el-divider style="margin: 3px 0" />
           <template v-for="app in appsRef">
             <template v-if="app.id != 'system'">
@@ -49,10 +51,13 @@
 
 <script setup lang="ts">
 import { useSystemStore } from "@/store";
-import { useAppStore } from "@eimsnext/store";
+import { useAppStore, useUserStore } from "@eimsnext/store";
 import NavBar from "./components/NavBar/index.vue";
 import defaultSettings from "@/settings";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
+import { useI18n } from "vue-i18n";
+import { UserType } from "@eimsnext/models";
+const { t } = useI18n()
 
 defineOptions({
   name: "Layout",
@@ -60,8 +65,10 @@ defineOptions({
 
 const systemStore = useSystemStore();
 
+const userStore = useUserStore()
 const appStore = useAppStore();
 const { items: appsRef } = storeToRefs(appStore);
+const curUser = toRef(userStore.currentUser)
 
 const classObj = computed(() => ({
   hideSidebar: !systemStore.sidebar.opened,
