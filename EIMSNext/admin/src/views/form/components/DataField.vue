@@ -39,7 +39,7 @@ const onCancel = () => {
 };
 const onClickOutside = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
-    let excludedClasses = ["data-field", "el-select__popper"];
+    let excludedClasses = ["data-field", "el-select__popper", "el-dropdown__popper"];
     if (excludedClasses.some((cls) => target.closest(`.${cls}`))) {
         return;
     }
