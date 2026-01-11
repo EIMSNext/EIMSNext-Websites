@@ -64,19 +64,30 @@ This project adopts a modular design and primarily includes the following core m
 ### Install Dependencies
 
 ```bash
-pnpm install
+pnpm install -W
 ```
 
 ### Start Development Server
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 ### Build Production Bundle
 
 ```bash
-pnpm build
+npm run build:utils
+npm run build:lang
+npm run build:mod
+npm run build:service
+npm run build:store
+npm run build:com
+npm run build:core
+npm run build:elplus
+npm run build:vant
+npm run build:des
+npm run build:bld
+npm run build
 ```
 
 ### Code Linting

@@ -65,19 +65,30 @@ EIMSNext-Websites 是企业低代码应用系统前端项目，基于 Vue 3 和 
 ### 安装依赖
 
 ```bash
-pnpm install
+npm install -W
 ```
 
 ### 启动开发服务器
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 ### 构建生产环境包
 
 ```bash
-pnpm build
+npm run build:utils
+npm run build:lang
+npm run build:mod
+npm run build:service
+npm run build:store
+npm run build:com
+npm run build:core
+npm run build:elplus
+npm run build:vant
+npm run build:des
+npm run build:bld
+npm run build
 ```
 
 ### 代码规范检查
