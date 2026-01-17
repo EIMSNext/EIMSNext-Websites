@@ -7,7 +7,7 @@
       <el-option :label="t('workflow.orSign')" :value="1" />
       <el-option :label="t('workflow.counterSign')" :value="2" />
     </el-select>
-    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('workflow.emptyMember')"
+    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
       @editTag="editTag" />
     <!-- <el-checkbox v-model="activeData.metadata.approveMeta!.enableCopyto" label="启用抄送" class="sub-item" /> -->
     <member-select-dialog v-model="showMemberDialog" :tags="selectedCandidateTags"

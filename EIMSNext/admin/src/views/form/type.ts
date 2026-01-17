@@ -1,5 +1,5 @@
 import { IFormFieldDef } from "@eimsnext/components";
-import { FieldDef, SystemField, getCreateTime, getFlowStatus } from "@eimsnext/models";
+import { FieldDef, IFieldPerm, SystemField, getCreateTime, getFlowStatus } from "@eimsnext/models";
 import { Dictionary } from "@eimsnext/utils";
 
 export interface ITableColumn {
@@ -15,7 +15,8 @@ export interface ITableColumn {
 export function buildColumns(
   fields: FieldDef[],
   usingWf: boolean,
-  displayFields: IFormFieldDef[]
+  displayFields: IFormFieldDef[],
+  fieldPerms?: IFieldPerm[]
 ): ITableColumn[] {
   const dispalyAll = displayFields.length == 0;
   const subDisplayFields = new Dictionary();

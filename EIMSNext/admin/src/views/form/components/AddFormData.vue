@@ -1,5 +1,6 @@
 <template>
-  <FormView :def="formDef" :data="formData" :isView="isView" :actions="actions" @draft="saveDraft" @submit="submitData">
+  <FormView :def="formDef" :data="formData" :isView="isView" :actions="actions" :fieldPerms="fieldPerms"
+    @draft="saveDraft" @submit="submitData">
   </FormView>
 </template>
 <script lang="ts" setup>
@@ -8,7 +9,7 @@ defineOptions({
 });
 
 import { ref, watch } from "vue";
-import { FormDef, FormData, FormContent, FormDataRequest, DataAction } from "@eimsnext/models";
+import { FormDef, FormData, FormContent, FormDataRequest, DataAction, IFieldPerm } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
@@ -20,6 +21,7 @@ const props = withDefaults(
     formId: string;
     isView: boolean;
     data?: FormData;
+    fieldPerms?: IFieldPerm[]
   }>(),
   {
     isView: false,

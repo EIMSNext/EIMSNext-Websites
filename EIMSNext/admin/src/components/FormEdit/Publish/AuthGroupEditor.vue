@@ -114,7 +114,10 @@ if (props.modelValue.fieldPerms) {
     fieldPerms.value = props.modelValue.fieldPerms as IFieldPermItem[]
 }
 
-const fieldPermsChanged = (value: IFieldPermItem[]) => { props.modelValue.fieldPerms = value as IFieldPerm[] }
+const fieldPermsChanged = (value: IFieldPermItem[]) => {
+    props.modelValue.fieldPerms = value as IFieldPerm[]
+    emit("update:modelValue", authGrp.value)
+}
 
 const emit = defineEmits(["update:modelValue"]);
 

@@ -202,7 +202,7 @@ const En = {
     autoRequired: "Please enter {title}",
     autoMode: "Please enter the correct {title}",
     requiredPlaceholder: "Please enter",
-    required: "Is it required",
+    required: "Required",
     rule: "Validation",
   },
   tableOptions: {

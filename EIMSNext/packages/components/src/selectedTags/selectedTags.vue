@@ -12,7 +12,7 @@
       <div v-if="editable" class="empty-wrapper" @click.stop="editTag">
         <slot>
           <et-icon icon="el-icon-Plus"></et-icon>
-          <span class="empty-text">{{ emptyText || t("workflow.emptyMember") }}</span>
+          <span class="empty-text">{{ emptyText || t("comp.emptyMember") }}</span>
         </slot>
       </div>
     </template>

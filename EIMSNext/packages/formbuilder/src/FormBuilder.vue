@@ -64,7 +64,7 @@ import { ElMessage } from "element-plus";
 import { FormContent, FormType, FormDefRequest, FormDef } from "@eimsnext/models";
 import { formDefService } from "@eimsnext/services";
 import "@eimsnext/form-designer/dist/index.css";
-import { useContextStore, useFormStore } from "@eimsnext/store";
+import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
 
 const TITLE = [
   "生成规则",
@@ -320,6 +320,15 @@ export default {
         let resp = await formDefService.patch(req.id, req);
 
         formStore.update(resp);
+        const appStore = useAppStore();
+        const app = await appStore.get(this.formDef.appId)
+        if (app) {
+          const menu = app.appMenus.find(x => x.menuId == this.formDef.id)
+          if (menu) {
+            menu.title = this.formName;
+            contextStore.setAppChanged(); //reload 菜单
+          }
+        }
         ElMessage.success("保存成功");
         this.$emit("save", false);
       } else {
