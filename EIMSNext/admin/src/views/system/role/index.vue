@@ -18,14 +18,14 @@
             <el-table-column label="工作电话" width="150" prop="workPhone" />
             <el-table-column label="工作邮箱" width="150" prop="workEmail" />
             <el-table-column label="部门" prop="departmentName" />
-            <el-table-column label="操作" fixed="right" width="150">
+            <!-- <el-table-column label="操作" fixed="right" width="150">
               <template #default="scope">
                 <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
                 </el-button>
                 <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
                 </el-button>
               </template>
-            </el-table-column>
+            </el-table-column> -->
           </el-table>
 
           <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
