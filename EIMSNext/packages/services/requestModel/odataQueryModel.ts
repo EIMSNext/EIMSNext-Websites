@@ -30,6 +30,7 @@ export interface IDynamicFilter {
 
 export interface IDynamicSort {
   field: string;
+  type?: string;
   dir: SortDirection;
 }
 export enum SortDirection {

@@ -49,7 +49,7 @@ const rules = ref(formCreate.parseJson(props.def.layout!));
 const options = ref(formCreate.parseJson(props.def.options!));
 const dataRef = ref<any>(props.data?.data)
 
-console.log("layout", rules.value)
+// console.log("layout", rules.value)
 if (props.fieldPerms && props.fieldPerms.length > 0) {
   let layout = formCreate.parseJson(props.def.layout!);
   layout.forEach(x => {

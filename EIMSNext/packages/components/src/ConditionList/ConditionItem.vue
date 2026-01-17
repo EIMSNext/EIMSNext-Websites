@@ -2,32 +2,15 @@
   <div class="cond-item">
     <div class="cond-detail">
       <template v-if="condType == ConditionType.Node">
-        <NodeFieldList
-          class="cond-field"
-          v-model="field"
-          :nodes="nodes!"
-          :fieldBuildSetting="fieldBuildSetting"
-          :field-def="modelValue.field"
-          @change="changeField"
-        ></NodeFieldList>
+        <NodeFieldList class="cond-field" v-model="field" :nodes="nodes!" :fieldBuildSetting="fieldBuildSetting"
+          :field-def="modelValue.field" @change="changeField"></NodeFieldList>
       </template>
       <template v-else>
-        <FieldList
-          class="cond-field"
-          v-model="field"
-          :formId="formId"
-          :fieldLimit="fieldBuildSetting.fieldLimit"
-          @change="changeField"
-        ></FieldList>
+        <FieldList class="cond-field" v-model="field" :formId="formId" :fieldLimit="fieldBuildSetting.fieldLimit"
+          @change="changeField"></FieldList>
       </template>
 
-      <el-dropdown
-        v-model="op"
-        class="cond-op"
-        size="default"
-        trigger="click"
-        @command="onOpChanged"
-      >
+      <el-dropdown v-model="op" class="cond-op" size="default" trigger="click" @command="onOpChanged">
         <span style="display: flex; align-items: center">
           {{ opLabel }}
           <et-icon icon="el-icon-arrow-down"></et-icon>
@@ -44,14 +27,8 @@
       <div><et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon></div>
     </div>
     <div v-if="op != 'empty' && op != 'notempty'" class="cond-detail mt-[10px]">
-      <ConditionValue
-        v-model="value"
-        :field-def="field"
-        :nodes="nodes"
-        :fieldBuildSetting="valueBuildSetting"
-        :options="buildOptions(field.options)"
-        @change="onInput"
-      ></ConditionValue>
+      <ConditionValue v-model="value" :field-def="field" :nodes="nodes" :fieldBuildSetting="valueBuildSetting"
+        :options="buildOptions(field.options)" @change="onInput"></ConditionValue>
     </div>
   </div>
 </template>
@@ -138,9 +115,9 @@ const emitChange = () => {
 };
 const buildOptions = (options: any): IListItem[] => {
   if (!options) return [];
-  
+
   let result: IListItem[] = [];
-  
+
   try {
     // 1. 直接处理options为数组的情况
     if (Array.isArray(options)) {
@@ -182,7 +159,7 @@ const buildOptions = (options: any): IListItem[] => {
       let layout = typeof options.layout === 'string' ? JSON.parse(options.layout) : options.layout;
       if (Array.isArray(layout)) {
         // 查找radio或checkbox类型的配置
-        const fieldConfig = layout.find((item: any) => 
+        const fieldConfig = layout.find((item: any) =>
           item.type === 'radio' || item.type === 'checkbox'
         );
         if (fieldConfig && fieldConfig.options) {
@@ -206,7 +183,7 @@ const buildOptions = (options: any): IListItem[] => {
   } catch (error) {
     console.error('Failed to build options:', error);
   }
-  
+
   return result;
 };
 

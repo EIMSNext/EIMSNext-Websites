@@ -57,6 +57,9 @@ export default {
     rel_And: "All of",
     rel_Or: "Any of",
     conditions: "the condictions",
+    emptyMember: "Select member or department",
+    emptyDept: "Select department",
+    emptyEmp: "Select member",
   },
   admin: {
     myApp: "My Apps",
@@ -100,7 +103,6 @@ export default {
     starter: "Flow Initiator",
     approver: "Node Approver",
     maxApproverTips: "Up to 100 members",
-    emptyMember: "Select a member or department",
     ccMember: "CC To",
     nodeName: "Node Name",
     nodeProps: "Node Properties",

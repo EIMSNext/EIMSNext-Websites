@@ -57,6 +57,9 @@ export default {
     rel_And: "所有",
     rel_Or: "任意",
     conditions: "条件",
+    emptyMember: "选择成员或部门",
+    emptyDept: "选择部门",
+    emptyEmp: "选择成员",
   },
   //主项目
   admin: {
@@ -100,7 +103,6 @@ export default {
     starter: "流程发起人",
     approver: "节点负责人",
     maxApproverTips: "最多选择100人",
-    emptyMember: "选择成员或部门",
     ccMember: "抄送人",
     nodeName: "节点名称",
     nodeProps: "节点属性",

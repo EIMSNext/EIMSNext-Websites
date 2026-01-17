@@ -2,8 +2,8 @@
   <et-dialog :model-value="modelValue" class="member-select-dialog" title="部门成员列表" destroy-on-close width="750px"
     @cancel="cancel" @ok="save">
     <div style="padding: 12px 20px">
-      <member-select v-model="tagsRef" :showTabs="showTabs" :cascadedDept="cascadedDept" :showCascade="showCascade" :multiple="multiple"
-        :limit="limit" :dynamicMembers="dynamicMembers" />
+      <member-select v-model="tagsRef" :showTabs="showTabs" :cascadedDept="cascadedDept" :showCascade="showCascade"
+        :multiple="multiple" :limit="limit" :dynamicMembers="dynamicMembers" />
     </div>
     <template #footer-left>
       <el-button @click="openLink">通讯录</el-button>
@@ -39,9 +39,7 @@ const props = withDefaults(
   }
 );
 
-const tagsRef = ref<ISelectedTag[]>([
-  { id: "none", label: "", type: TagType.None },
-]);
+const tagsRef = ref<ISelectedTag[]>([]);
 
 onBeforeMount(() => {
   if (props.tags && props.tags.length > 0) {
@@ -50,6 +48,7 @@ onBeforeMount(() => {
     });
   }
 });
+
 
 const openLink = () => {
   window.open(`${location.origin}/#/system/department`, "_blank");
