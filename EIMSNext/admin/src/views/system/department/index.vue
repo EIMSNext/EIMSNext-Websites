@@ -27,18 +27,14 @@
             <el-table-column label="工作电话" width="150" prop="workPhone" />
             <el-table-column label="工作邮箱" width="150" prop="workEmail" />
             <el-table-column label="部门" prop="department.name" />
-            <!-- <el-table-column label="操作" fixed="right" width="150">
+            <el-table-column label="操作" fixed="right" width="150">
               <template #default="scope">
-                <el-button v-hasPerm="'sys:user:edit'" type="primary" icon="edit" link size="small"
-                  @click="handleEditClick(scope.row)">
-                  编辑
+                <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
                 </el-button>
-                <el-button v-hasPerm="'sys:user:delete'" type="danger" icon="delete" link size="small"
-                  @click="handleDeleteClick(scope.row)">
-                  删除
+                <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
                 </el-button>
               </template>
-</el-table-column> -->
+            </el-table-column>
           </el-table>
 
           <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
@@ -60,7 +56,7 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { Department, Employee, FieldType } from "@eimsnext/models";
+import { DataPerms, Department, Employee, FieldType } from "@eimsnext/models";
 import { SortDirection, employeeService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, EtConfirm } from "@eimsnext/components";
@@ -101,6 +97,7 @@ const leftBars = ref<ToolbarItem[]>([
       text: "新增",
       type: "success",
       command: "add",
+      visible: true,
       icon: "el-icon-plus",
       onCommand: () => {
         editMode.value = false;
@@ -114,6 +111,7 @@ const leftBars = ref<ToolbarItem[]>([
       text: "删除",
       type: "danger",
       command: "delete",
+      visible: true,
       icon: "el-icon-delete",
       disabled: true,
       onCommand: async () => {
@@ -139,6 +137,7 @@ const rightBars = ref<ToolbarItem[]>([
       text: "筛选",
       class: "data-filter",
       command: "filter",
+      visible: true,
       icon: "el-icon-filter",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((filterBtnRef.value = e.currentTarget), (showSort.value = false));
@@ -152,6 +151,7 @@ const rightBars = ref<ToolbarItem[]>([
       text: "排序",
       class: "data-filter",
       command: "sort",
+      visible: true,
       icon: "el-icon-sort",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((sortBtnRef.value = e.currentTarget), (showFilter.value = false));
@@ -165,6 +165,7 @@ const rightBars = ref<ToolbarItem[]>([
       text: "刷新",
       class: "data-filter",
       command: "refresh",
+      visible: true,
       icon: "el-icon-refresh",
       onCommand: () => {
         handleQuery();

@@ -14,7 +14,8 @@
     <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
       :close-on-click-modal="false">
       <div class="form-container">
-        <FormDataView :formId="formId" :dataId="selectedData!.id" :fieldPerms="fieldPerms" @ok="handleViewOk">
+        <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms"
+          @ok="handleViewOk">
         </FormDataView>
       </div>
     </et-dialog>
@@ -62,7 +63,7 @@
 </template>
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
-import { useFormStore, useUserStore } from "@eimsnext/store";
+import { useFormStore, useUserStore, useContextStore } from "@eimsnext/store";
 import {
   FormDef,
   FormData,
@@ -75,6 +76,7 @@ import {
   CurrentUser,
   UserType,
   IFieldPerm,
+  DataPerms,
 } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
 import { IDynamicFindOptions, SortDirection, authGroupService, formDataService } from "@eimsnext/services";
@@ -91,6 +93,7 @@ import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
 import dayjs from "dayjs";
 import { useI18n } from "vue-i18n";
+import { getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
 const { t } = useI18n();
 
 const tableRef = ref<TableInstance>();
@@ -109,14 +112,38 @@ const authGrps = ref<AuthGroup[]>([])
 const curAuthGrp = ref<AuthGroup>()
 const fieldPerms = ref<IFieldPerm[]>()
 const userStore = useUserStore()
+const { currentUser } = userStore
+
+const dataPerms = computed(() => getAuthGroupDataPerms(curAuthGrp.value))
+const canAdd = computed(() => hasDataPerm(currentUser.userType, DataPerms.AddNew, dataPerms.value))
+const canRemove = computed(() => hasDataPerm(currentUser.userType, DataPerms.Remove, dataPerms.value))
 
 const leftBars = ref<ToolbarItem[]>([
+  {
+    type: "dropdown",
+    config: {
+      text: "请选择权限组",
+      class: "auth-gropu-filter",
+      command: "authgrp",
+      visible: false,
+      onCommand: (cmd) => {
+        curAuthGrp.value = authGrps.value.find(x => x.id == cmd);
+        fieldPerms.value = curAuthGrp.value?.fieldPerms;
+
+        initChildrenField(formDef.value!.content?.items!, []);
+        columns.value = buildColumns(formDef.value!.content?.items!, formDef.value!.usingWorkflow, []);
+        updateQueryParams();
+        handleQuery();
+      }
+    }
+  },
   {
     type: "button",
     config: {
       text: "common.addNew",
       type: "success",
       command: "add",
+      visible: canAdd,
       icon: "el-icon-plus",
       onCommand: () => {
         showAddDialog.value = true;
@@ -129,6 +156,7 @@ const leftBars = ref<ToolbarItem[]>([
       text: "common.delete",
       type: "danger",
       command: "delete",
+      visible: canRemove,
       icon: "el-icon-delete",
       disabled: true,
     },
@@ -144,6 +172,7 @@ const rightBars = ref<ToolbarItem[]>([
       text: "common.filter",
       class: "data-filter",
       command: "filter",
+      visible: true,
       icon: "el-icon-filter",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((filterBtnRef.value = e.currentTarget), (showSort.value = showField.value = false));
@@ -157,6 +186,7 @@ const rightBars = ref<ToolbarItem[]>([
       text: "common.sort",
       class: "data-filter",
       command: "sort",
+      visible: true,
       icon: "el-icon-sort",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((sortBtnRef.value = e.currentTarget), (showFilter.value = showField.value = false));
@@ -170,6 +200,7 @@ const rightBars = ref<ToolbarItem[]>([
       text: "common.fields",
       class: "data-filter",
       command: "list",
+      visible: true,
       icon: "el-icon-list",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((fieldBtnRef.value = e.currentTarget), (showFilter.value = showSort.value = false));
@@ -183,6 +214,7 @@ const rightBars = ref<ToolbarItem[]>([
       text: "common.refresh",
       class: "data-filter",
       command: "refresh",
+      visible: true,
       icon: "el-icon-refresh",
       onCommand: () => {
         handleQuery();
@@ -213,37 +245,15 @@ formStore.get(formId).then(async (form: FormDef | undefined) => {
           curAuthGrp.value = res[0]
           fieldPerms.value = curAuthGrp.value.fieldPerms;
 
-          let menuItems: IToolbarItemDropdownItem[] = res.map(x => { return { text: x.name, command: x.id } })
+          let menuItems: IToolbarItemDropdownItem[] = res.map(x => { return { text: x.name, command: x.id, visible: true, } })
           menuItems[0].checked = true
 
-          let grpItem = leftBars.value.find((x) => x.type == "dropdown" && x.config.command == "authgrp")
+          let grpItem = leftBars.value.find((x) => x.config.command == "authgrp")
           // console.log("grpItem", grpItem)
           if (grpItem) {
             grpItem.config.menuItems = menuItems
+            grpItem.config.visible = true
           }
-          else {
-            grpItem = {
-              type: "dropdown",
-              config: {
-                text: "请选择权限组",
-                class: "auth-gropu-filter",
-                command: "authgrp",
-                menuItems: menuItems,
-                onCommand: (cmd) => {
-                  curAuthGrp.value = authGrps.value.find(x => x.id == cmd);
-                  fieldPerms.value = curAuthGrp.value?.fieldPerms;
-
-                  initChildrenField(formDef.value!.content?.items!, []);
-                  columns.value = buildColumns(formDef.value!.content?.items!, formDef.value!.usingWorkflow, []);
-                  updateQueryParams();
-                  handleQuery();
-                }
-              }
-            };
-            leftBars.value.unshift(grpItem)
-          }
-
-          // console.log("leftBars", leftBars.value)
         }
       });
     }
@@ -591,6 +601,7 @@ const idBasedSpanMethod = (data: {
 }
 
 :deep(.auth-gropu-filter) {
+  line-height: 32px;
   padding: 0 8px;
   margin-right: 10px;
 }

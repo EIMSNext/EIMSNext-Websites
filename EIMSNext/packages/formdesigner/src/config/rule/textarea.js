@@ -34,16 +34,17 @@ export default {
       {
         type: "DefaultValueConfig",
       },
-      // {
-      //   type: "inputNumber",
-      //   field: "maxlength",
-      //   props: { min: 0 },
-      // },
       {
-        type: "CheckBoxInput",
-        field: "readonly",
-        wrap: { show: false },
+        type: "inputNumber",
+        field: "maxlength",
+        value: 500,
+        props: { min: 0 },
       },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "readonly",
+      //   wrap: { show: false },
+      // },
       // {
       //   type: "CheckBoxInput",
       //   field: "clearable",

@@ -1,42 +1,47 @@
 <template>
-    <template v-if="item.type == 'dropdown'">
-        <el-dropdown trigger="click" :disabled="item.config.disabled" class="toolbar-dropdown"
-            :class="item.config.class" :style="item.config.style"
-            @command="(cmd: string, e: MouseEvent) => handleSubItemCommand(item, cmd, e, item.config.onCommand)">
-            <span class="el-dropdown-link">
-                <et-icon v-if="item.config.icon" :icon="item.config.icon" style="margin-right: 5px;" />
-                <span>{{ getDropdwnText(item) }}</span><et-icon icon="el-icon-arrow-down" class="el-icon--right" />
-            </span>
-            <template #dropdown>
-                <el-dropdown-menu v-if="item.config.menuItems">
-                    <el-dropdown-item v-for="menuItem in item.config.menuItems" :key="'m-' + menuItem.command"
-                        :command="menuItem.command" :divided="menuItem.divided" :disabled="menuItem.disabled"
-                        :class="menuItem.class" :style="menuItem.style">
-                        {{ t(menuItem.text) }}
-                    </el-dropdown-item>
-                </el-dropdown-menu>
+    <template v-if="item.config.visible">
+        <template v-if="item.type == 'dropdown'">
+            <el-dropdown trigger="click" :disabled="item.config.disabled" class="toolbar-dropdown"
+                :class="item.config.class" :style="item.config.style"
+                @command="(cmd: string, e: MouseEvent) => handleSubItemCommand(item, cmd, e, item.config.onCommand)">
+                <span class="el-dropdown-link">
+                    <et-icon v-if="item.config.icon" :icon="item.config.icon" style="margin-right: 5px;" />
+                    <span>{{ getDropdwnText(item) }}</span><et-icon icon="el-icon-arrow-down" class="el-icon--right" />
+                </span>
+                <template #dropdown>
+                    <el-dropdown-menu v-if="item.config.menuItems">
+                        <template v-for="menuItem in item.config.menuItems" :key="'m-' + menuItem.command">
+                            <el-dropdown-item v-if="menuItem.visible" :command="menuItem.command"
+                                :divided="menuItem.divided" :disabled="menuItem.disabled" :class="menuItem.class"
+                                :style="menuItem.style">
+                                {{ t(menuItem.text) }}
+                            </el-dropdown-item>
+                        </template>
+                    </el-dropdown-menu>
+                </template>
+            </el-dropdown>
+        </template>
+        <template v-else-if="item.type == 'devider'">
+            <el-divider direction="vertical" :class="item.config.class" :style="item.config.style" />
+        </template>
+        <template v-else>
+            <template v-if="item.config.tooltip"><el-tooltip placement="top" :content="item.config.tooltip">
+                    <el-button :type="item.config.type" :disabled="item.config.disabled" :class="item.config.class"
+                        :style="item.config.style"
+                        @click="handleCommand(item.config.command, $event, item.config.onCommand)">
+                        <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
+                        <span>{{ t(item.config.text) }}</span>
+                    </el-button>
+                </el-tooltip>
             </template>
-        </el-dropdown>
-    </template>
-    <template v-else-if="item.type == 'devider'">
-        <el-divider direction="vertical" :class="item.config.class" :style="item.config.style" />
-    </template>
-    <template v-else>
-        <template v-if="item.config.tooltip"><el-tooltip placement="top" :content="item.config.tooltip">
+            <template v-else>
                 <el-button :type="item.config.type" :disabled="item.config.disabled" :class="item.config.class"
                     :style="item.config.style"
                     @click="handleCommand(item.config.command, $event, item.config.onCommand)">
                     <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
                     <span>{{ t(item.config.text) }}</span>
-                </el-button>
-            </el-tooltip>
+                </el-button></template>
         </template>
-        <template v-else>
-            <el-button :type="item.config.type" :disabled="item.config.disabled" :class="item.config.class"
-                :style="item.config.style" @click="handleCommand(item.config.command, $event, item.config.onCommand)">
-                <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
-                <span>{{ t(item.config.text) }}</span>
-            </el-button></template>
     </template>
 </template>
 <script setup lang="ts">

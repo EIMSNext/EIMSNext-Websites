@@ -74,7 +74,8 @@ const save = async () => {
         members: members.value.map<Member>(x => { return { id: x.id, code: x.code, label: x.label, type: convertTagTypeToMemberType(x.type), cascadedDept: x.cascadedDept ?? false } }),
         dataPerms: newAuthGrp.value.dataPerms,
         dataFilter: newAuthGrp.value.dataFilter,
-        disabled: newAuthGrp.value.disabled
+        disabled: newAuthGrp.value.disabled,
+        fieldPerms: newAuthGrp.value.fieldPerms
     };
 
     const request = req.id ?

@@ -58,11 +58,11 @@ export default {
           },
         ],
       },
-      {
-        type: "CheckBoxInput",
-        field: "readonly",
-        wrap: { show: false },
-      },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "readonly",
+      //   wrap: { show: false },
+      // },
       {
         type: "CheckBoxInput",
         field: "disabled",

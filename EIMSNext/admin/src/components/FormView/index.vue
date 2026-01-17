@@ -25,7 +25,6 @@ import formCreate from "@eimsnext/form-render-elplus";
 import { FieldType, FormContent, FormData, IFieldPerm } from "@eimsnext/models";
 import { FormActionSettings } from "./type";
 import { useLocale } from "element-plus";
-import { provideSSRWidth } from "@vueuse/core";
 const { t } = useLocale();
 
 defineOptions({
@@ -59,9 +58,9 @@ if (props.fieldPerms && props.fieldPerms.length > 0) {
       if (perm) {
         x.hidden = !perm.visible
         if (x.props)
-          x.props = { ...x.props, readonly: !perm.editable }
+          x.props = { ...x.props, disabled: !perm.editable }
         else
-          x.props = { readonly: !perm.editable }
+          x.props = { disabled: !perm.editable }
       }
       else {
         x.hidden = true
@@ -76,9 +75,9 @@ if (props.fieldPerms && props.fieldPerms.length > 0) {
             if (fPerm) {
               x.hidden = !fPerm.visible
               if (f.props)
-                f.props = { ...f.props, readonly: !fPerm.editable }
+                f.props = { ...f.props, disabled: !fPerm.editable }
               else
-                f.props = { readonly: !fPerm.editable }
+                f.props = { disabled: !fPerm.editable }
             }
             else {
               x.hidden = true
@@ -92,9 +91,9 @@ if (props.fieldPerms && props.fieldPerms.length > 0) {
       if (perm) {
         x.hidden = !perm.visible
         if (x.props)
-          x.props = { ...x.props, readonly: !perm.editable }
+          x.props = { ...x.props, disabled: !perm.editable }
         else
-          x.props = { readonly: !perm.editable }
+          x.props = { disabled: !perm.editable }
       }
       else {
         x.hidden = true

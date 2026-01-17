@@ -66,12 +66,11 @@ export default {
             //     type: 'ColorInput',
             //     field: 'fill'
             // }
-
-              {
-                type: "CheckBoxInput",
-                field: "readonly",
-                wrap: { show: false },
-              },
+            //   {
+            //     type: "CheckBoxInput",
+            //     field: "readonly",
+            //     wrap: { show: false },
+            //   },
               {
                 type: "CheckBoxInput",
                 field: "disabled",
