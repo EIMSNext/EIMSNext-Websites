@@ -60,6 +60,9 @@ export default {
     emptyMember: "Select member or department",
     emptyDept: "Select department",
     emptyEmp: "Select member",
+    availableScope: "Available Scopes",
+    allDepts: "All departments",
+    allEmps: "All members",
   },
   admin: {
     myApp: "My Apps",

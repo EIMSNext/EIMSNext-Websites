@@ -45,17 +45,19 @@
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.DepartmentSelect">
-          <selected-tags :modelValue="value" :editable="true" :empty-text="'选择部门'" @editTag="selectDept(false)" />
+          <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyDept')"
+            @editTag="selectDept(false)" />
         </template>
         <template v-else-if="dataType == ConditionFieldType.DepartmentSelect2">
-          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="'选择部门'"
+          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyDept')"
             @editTag="selectDept(true)" />
         </template>
         <template v-else-if="dataType == ConditionFieldType.EmployeeSelect">
-          <selected-tags :modelValue="value" :editable="true" :empty-text="'选择成员'" @editTag="selectEmp(false)" />
+          <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyEmp')"
+            @editTag="selectEmp(false)" />
         </template>
         <template v-else-if="dataType == ConditionFieldType.EmployeeSelect2">
-          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="'选择成员'"
+          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyEmp')"
             @editTag="selectEmp(true)" />
         </template>
         <template v-else>

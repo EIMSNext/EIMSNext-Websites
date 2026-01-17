@@ -46,12 +46,12 @@ export default {
       {
         type: "DefaultValueConfig",
       },
-      {
-        type: "inputNumber",
-        field: "maxlength",
-        value: 100,
-        props: { min: 0 },
-      },
+      // {
+      //   type: "inputNumber",
+      //   field: "maxlength",
+      //   value: 100,
+      //   props: { min: 0 },
+      // },
       // {
       //   type: "CheckBoxInput",
       //   field: "readonly",

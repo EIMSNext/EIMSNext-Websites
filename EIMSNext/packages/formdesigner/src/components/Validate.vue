@@ -101,9 +101,9 @@ export default defineComponent({
                 }
             } else {
                 return {
-                    min: this.t('validate.modes.min'),
-                    max: this.t('validate.modes.max'),
-                    len: this.t('validate.modes.len'),
+                    // min: this.t('validate.modes.min'),
+                    // max: this.t('validate.modes.max'),
+                    // len: this.t('validate.modes.len'),
                     pattern: this.t('validate.modes.pattern'),
                     validator: this.t('validate.modes.validator'),
                 }

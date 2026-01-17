@@ -21,7 +21,7 @@ export default {
       $required: false,
       props: {
         multiple: false,
-        placeholder: "+ 选择成员",
+        placeholder: t("comp.emptyEmp"),
         limitType: "all",
         limitScope: [],
       },
@@ -35,10 +35,10 @@ export default {
       {
         type: "select",
         field: "limitType",
-        title: "可选范围",
+        title: t("comp.availableScope"),
         options: [
-          { label: "全部员工", value: "all" },
-          { label: "自定义", value: "custom" },
+          { label:t("comp.allEmps"), value: "all" },
+          { label: t("props.custom"), value: "custom" },
         ],
         control: [
           {

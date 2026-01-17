@@ -60,6 +60,9 @@ export default {
     emptyMember: "选择成员或部门",
     emptyDept: "选择部门",
     emptyEmp: "选择成员",
+    availableScope:"可选范围",
+    allDepts:"全部部门",
+    allEmps:"所有成员"
   },
   //主项目
   admin: {
