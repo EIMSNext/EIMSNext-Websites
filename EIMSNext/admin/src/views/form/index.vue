@@ -92,8 +92,9 @@ import {
 import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
 import dayjs from "dayjs";
-import { useI18n } from "vue-i18n";
 import { getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
+import Pagination from "../../components/Pagination/index.vue";
+import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const tableRef = ref<TableInstance>();

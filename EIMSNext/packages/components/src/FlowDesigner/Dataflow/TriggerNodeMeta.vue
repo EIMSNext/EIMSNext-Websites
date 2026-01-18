@@ -188,7 +188,6 @@ const onActionInput = (val: string) => {
 };
 
 onBeforeMount(() => {
-  console.log("onBeforeMount");
   selectedTriggers.value =
     activeData.value.metadata.triggerMeta!.eventType ?? 0;
   condList.value = activeData.value.metadata.triggerMeta!.condition;

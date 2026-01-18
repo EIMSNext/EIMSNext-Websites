@@ -24,24 +24,28 @@
         </template>
         <template v-else-if="dataType == ConditionFieldType.Radio">
           <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
-            <el-option v-for="opt in props.options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.CheckBox">
           <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
             @change="onInput">
-            <el-option v-for="opt in props.options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select">
           <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
-            <el-option v-for="opt in props.options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select2">
           <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
             @change="onInput">
-            <el-option v-for="opt in props.options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.DepartmentSelect">
@@ -65,13 +69,13 @@
         </template>
       </template>
     </div>
-    <memberSelectDialog v-model="showMemberDialog" :tags="value" :multiple="memberMultiple" :showTabs="memberShowTabs"
-      @ok="memberSelected">
+    <memberSelectDialog v-model="showMemberDialog" :tags="value ?? []" :multiple="memberMultiple"
+      :showTabs="memberShowTabs" @ok="memberSelected">
     </memberSelectDialog>
   </div>
 </template>
 <script setup lang="ts">
-import { ConditionValueType, IConditonValue } from "./type";
+import { ConditionValueType, IConditonValue, toListItem } from "./type";
 import { FieldType } from "@eimsnext/models";
 import { IFormFieldDef } from "../FieldList/type";
 import { IFieldBuildSetting, INodeForm, getConditionFieldType, ConditionFieldType } from "@/NodeFieldList/type";
@@ -91,7 +95,6 @@ const props = defineProps<{
   fieldBuildSetting: IFieldBuildSetting;
   nodes?: INodeForm[];
   fieldDef?: IFormFieldDef;
-  options?: IListItem[];
 }>();
 
 const dataType = computed(() => {

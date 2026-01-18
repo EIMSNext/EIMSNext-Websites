@@ -61,7 +61,7 @@ export function buildColumns(
         field: x.field,
         title: x.title,
         type: x.type,
-        format: x.options?.format,
+        format: x.props?.format,
         mergeField: "_id",
         oriField: `data.${x.field}`,
       };
@@ -87,7 +87,7 @@ export function buildColumns(
       field: createTimeField.field,
       title: createTimeField.title,
       type: createTimeField.type,
-      format: createTimeField.options?.format,
+      format: createTimeField.props?.format,
       mergeField: "_id",
       oriField: SystemField.CreateTime,
     });
@@ -110,7 +110,7 @@ function buildSubColumns(
           field: x.field,
           title: x.title,
           type: x.type,
-          format: x.options?.format,
+          format: x.props?.format,
           oriField: `${pField}>${x.field}`,
         };
         if (x.columns && x.columns.length > 0) {

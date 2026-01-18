@@ -1,6 +1,6 @@
 import { is, hasProperty, parseFn, toCase } from "@eimsnext/form-render-core";
 import { computed, isRef, unref, ref } from "vue";
-import ZhCn from "../locale/zh-cn";
+import { ZhCn } from "@eimsnext/locale";
 import { message } from "./message";
 import renderPreview from "./preview";
 
@@ -15,7 +15,7 @@ export function makeRequiredRule() {
   return {
     type: "Required",
     field: "formCreate$required",
-    title: "是否必填",
+    title: "必填",
   };
 }
 
@@ -153,7 +153,7 @@ export function makeOptionsRule(t, to, label, value) {
             column: [
               { label: "label", key: label || "label" },
               { value: true, label: "value", key: value || "value" },
-            ]           
+            ],
           },
         },
       ],

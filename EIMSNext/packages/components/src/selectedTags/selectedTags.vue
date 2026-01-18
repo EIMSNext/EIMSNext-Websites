@@ -42,7 +42,7 @@ const props = withDefaults(
   }
 );
 
-const tagsRef = toRef(props.modelValue);
+const tagsRef = toRef(props.modelValue ?? []);
 const getIconColor = (tag: ISelectedTag) => {
   switch (tag.type) {
     case TagType.Employee:
