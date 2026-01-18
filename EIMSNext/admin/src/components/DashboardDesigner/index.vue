@@ -7,6 +7,7 @@
   </EtDrawer>
 </template>
 <script setup lang="ts">
+import { EtDrawer } from "@eimsnext/components/src/drawer";
 import EChartDesigner from "./EChartDesigner/index.vue";
 
 defineOptions({

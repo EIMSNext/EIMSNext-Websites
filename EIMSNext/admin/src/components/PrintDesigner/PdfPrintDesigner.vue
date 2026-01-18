@@ -11,27 +11,17 @@
     <div class="print-design-container">
       <el-tabs v-model="activeTab" class="field-container">
         <el-tab-pane label="表单字段" name="form" class="field-panel">
-          <el-tree
-            ref="formFieldsTreeRef"
-            class="mt-2"
-            :data="formFieldNodes"
-            item-key="id"
-            :props="{ children: 'children', label: 'label', disabled: '' }"
-            :expand-on-click-node="false"
-          >
+          <el-tree ref="formFieldsTreeRef" class="mt-2" :data="formFieldNodes" item-key="id"
+            :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false">
             <template #default="{ node, data }">
-              <Draggable
-                :list="[data]"
-                :sort="false"
-                ghost-class="ghost"
-                @start="onStart"
-                :group="{ name: 'fields', pull: 'clone', put: false }"
-                item-key="id"
-              >
+              <Draggable :list="[data]" :sort="false" ghost-class="ghost" @start="onStart"
+                :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
                 <template #item="{ element }">
                   <div class="node-data" :title="data.label">
                     <div class="node-wrapper">
-                      <el-icon class="node-icon"><UserFilled /></el-icon>
+                      <el-icon class="node-icon">
+                        <UserFilled />
+                      </el-icon>
                       <span class="node-label">{{ data.label }}</span>
                     </div>
                   </div>
@@ -51,7 +41,6 @@
 <script setup lang="ts">
 import { LocaleType, merge, Univer, UniverInstanceType } from "@univerjs/core";
 import { defaultTheme } from "@univerjs/design";
-
 import { UniverFormulaEnginePlugin } from "@univerjs/engine-formula";
 import { UniverRenderEnginePlugin } from "@univerjs/engine-render";
 import { UniverUIPlugin } from "@univerjs/ui";
@@ -278,11 +267,13 @@ onBeforeUnmount(() => {
       height: 100%;
     }
   }
+
   .univer-container {
     width: 100%;
     height: 100%;
   }
 }
+
 .drop-active {
   background-color: #f0f7ff;
   border: 2px dashed #409eff !important;

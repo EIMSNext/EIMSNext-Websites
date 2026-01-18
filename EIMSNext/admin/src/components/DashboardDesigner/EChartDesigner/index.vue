@@ -9,7 +9,7 @@
           </div>
           <div class="data-source-name">
             <et-icon icon="el-icon-document"></et-icon>
-            <span>{{ dataSource?.title }}</span>
+            <span>{{ dataSource?.label }}</span>
           </div>
         </div>
         <div class="data-source" v-if="dataSourceType == DataSourceType.Form">
@@ -36,14 +36,8 @@
             </div> -->
           </div>
           <div style="overflow-y: auto">
-            <Draggable
-              :list="fields"
-              :sort="false"
-              ghost-class="ghost"
-              @start="dragStart"
-              :group="{ name: 'fields', pull: 'clone', put: false }"
-              item-key="id"
-            >
+            <Draggable :list="fields" :sort="false" ghost-class="ghost" @start="dragStart"
+              :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
               <template #item="{ element, index }">
                 <div class="field-wrapper" :title="element.title">
                   <div class="field-name">
@@ -75,8 +69,9 @@
 <script setup lang="ts">
 import Draggable from "vuedraggable";
 import { DataSourceType, IDataSource, IDataSourceField } from "../type";
-
 import { useLocale } from "element-plus";
+import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
+import { useFormStore } from "@eimsnext/store";
 const { t } = useLocale();
 
 defineOptions({
@@ -87,20 +82,54 @@ const props = defineProps<{}>();
 const selectedRole = ref("1");
 const dataSource = ref<IDataSource>({ id: "sssss", type: DataSourceType.Form, title: "mock up" });
 const dataSourceType = ref<DataSourceType>(dataSource.value?.type);
-const fields = ref<IDataSourceField[]>([
-  { id: "wwww", title: "ziduanaaa", isComputed: true },
-  { id: "qqqqq", title: "ziduan", isComputed: true },
-]);
+const formStore = useFormStore();
+const formDef = ref<FormDef>()
+const fields = ref<IDataSourceField[]>([]);
+const draggingNode = ref<IDataSourceField>();
+
+const populateFormFields = () => {
+  fields.value = [];
+
+  if (formDef.value?.content && formDef.value?.content.items) {
+    formDef.value?.content.items.forEach((x: FieldDef) => {
+      if (x.type != FieldType.TableForm) {
+        let node: IDataSourceField = {
+          id: x.field,
+          label: x.title,
+          isComputed: false
+        };
+
+        fields.value.push(node);
+      }
+      else {
+        if (x.columns && x.columns.length > 0) {
+          x.columns.forEach((y) => {
+            let subNode: IDataSourceField = {
+              id: `${x.field}>${y.field}`,
+              label: `${x.title}.${y.title}`,
+              isComputed: false
+            };
+            fields.value.push(subNode)
+          });
+        }
+      }
+    });
+  }
+};
+
 const chartType = ref(0);
 
-const changeDataSource = () => {};
-const roleChanged = () => {};
+const changeDataSource = () => { };
+const roleChanged = () => { };
 
-const dragStart = () => {};
-const addComputedField = () => {};
-const copyField = (field: IDataSourceField) => {};
-const editField = (field: IDataSourceField, index: number) => {};
-const removeField = (field: IDataSourceField, index: number) => {};
+const dragStart = (e: any) => {
+  e.preventDefault();
+  draggingNode.value = e.originalEvent.srcElement._underlying_vm_;
+};
+const addComputedField = () => { };
+const copyField = (field: IDataSourceField) => { };
+const editField = (field: IDataSourceField, index: number) => { };
+const removeField = (field: IDataSourceField, index: number) => { };
 </script>
 <style lang="scss" scoped>
 .design-container {
@@ -144,6 +173,7 @@ const removeField = (field: IDataSourceField, index: number) => {};
           .icon {
             vertical-align: text-bottom;
           }
+
           .el-select {
             width: 100%;
           }
@@ -242,10 +272,12 @@ const removeField = (field: IDataSourceField, index: number) => {};
 
   .center-echarts {
     padding: 0 8px;
+
     .green-line {
       background-color: #e6f8f9 !important;
       border-color: #00b899 !important;
     }
+
     .center-box {
       border: 1px dashed #d9d9d9;
       background-color: #fff;
@@ -256,16 +288,20 @@ const removeField = (field: IDataSourceField, index: number) => {};
         cursor: pointer;
         margin-right: 8px;
         margin-top: 9px;
+
         .builder-filter-icon {
           display: flex;
           align-items: center;
+
           img {
             width: 16px;
             height: 16px;
           }
         }
       }
+
       .chart-container {
+
         // display: flex;
         .chart-title {
           font-size: 14px;
@@ -397,9 +433,11 @@ const removeField = (field: IDataSourceField, index: number) => {};
         .display-item {
           color: #fff;
           background-color: var(--el-color-primary);
+
           .vs-icon {
             color: var(--el-color-primary);
           }
+
           .el-icon-arrow-down {
             color: #fff;
           }
@@ -529,24 +567,31 @@ const removeField = (field: IDataSourceField, index: number) => {};
             .gauge {
               background-image: url("../../../assets/images/charts/gauge.svg");
             }
+
             .map {
               background-image: url("../../../assets/images/charts/map.svg");
             }
+
             .scatter {
               background-image: url("../../../assets/images/charts/scatter.svg");
             }
+
             .bubble {
               background-image: url("../../../assets/images/charts/bubble.svg");
             }
+
             .detailtable {
               background-image: url("../../../assets/images/charts/detailtable.svg");
             }
+
             .treemap {
               background-image: url("../../../assets/images/charts/treemap.svg");
             }
+
             .wordcloud {
               background-image: url("../../../assets/images/charts/wordcloud.svg");
             }
+
             .heatmap {
               background-image: url("../../../assets/images/charts/heatmap.svg");
             }
@@ -556,6 +601,7 @@ const removeField = (field: IDataSourceField, index: number) => {};
         .layer-chevron-right {
           padding: 9px 4px 0px 0px;
           margin-left: -5px;
+
           .vs-icon {
             font-size: 16px;
             color: #ccc;
@@ -565,6 +611,7 @@ const removeField = (field: IDataSourceField, index: number) => {};
         .active {
           background: var(--el-color-primary);
           color: #fff;
+
           .icon {
             filter: brightness(100);
           }
@@ -663,6 +710,7 @@ const removeField = (field: IDataSourceField, index: number) => {};
         .active {
           //background-color: var(--el-bg-color);
           background-color: var(--el-color-primary);
+
           .icon {
             opacity: 1;
             filter: brightness(100);
@@ -739,24 +787,31 @@ const removeField = (field: IDataSourceField, index: number) => {};
         .gauge {
           background-image: url("../../../assets/images/charts/gauge.svg");
         }
+
         .map {
           background-image: url("../../../assets/images/charts/map.svg");
         }
+
         .scatter {
           background-image: url("../../../assets/images/charts/scatter.svg");
         }
+
         .bubble {
           background-image: url("../../../assets/images/charts/bubble.svg");
         }
+
         .detailtable {
           background-image: url("../../../assets/images/charts/detailtable.svg");
         }
+
         .treemap {
           background-image: url("../../../assets/images/charts/treemap.svg");
         }
+
         .wordcloud {
           background-image: url("../../../assets/images/charts/wordcloud.svg");
         }
+
         .heatmap {
           background-image: url("../../../assets/images/charts/heatmap.svg");
         }
