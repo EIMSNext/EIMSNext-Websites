@@ -1,4 +1,4 @@
-import { IFormFieldDef } from "../FieldList/type";
+import { IFormFieldDef } from "../FieldSelect/type";
 import { SortDirection } from "@eimsnext/services";
 
 export interface IFieldSortItem {

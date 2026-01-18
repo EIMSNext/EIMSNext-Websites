@@ -36,7 +36,7 @@ import {
   INodeForm,
 } from "../NodeFieldList/type";
 import { nextTick, onMounted, ref, toRef, watch } from "vue";
-import { IFormFieldDef, splitSubField } from "@/FieldList/type";
+import { IFormFieldDef, splitSubField } from "@/FieldSelect/type";
 const { t } = useLocale();
 
 defineOptions({

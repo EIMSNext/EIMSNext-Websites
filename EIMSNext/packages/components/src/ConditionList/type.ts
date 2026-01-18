@@ -1,4 +1,4 @@
-import { IFormFieldDef } from "@/FieldList/type";
+import { IFormFieldDef } from "@/FieldSelect/type";
 import { IFieldSortList } from "@/FieldSortList/type";
 import { IListItem } from "@/list/type";
 import { ISelectedTag } from "@/selectedTags/type";
