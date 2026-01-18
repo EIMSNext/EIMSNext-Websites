@@ -7,7 +7,7 @@
   </CustomDrawer>
 </template>
 <script setup lang="ts">
-import CustomDrawer from "@/components/CustomDrawer/index.vue";
+import CustomDrawer from "@eimsnext/components";
 import EChartDesigner from "./EChartDesigner/index.vue";
 
 defineOptions({
