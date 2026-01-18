@@ -77,7 +77,7 @@
 <script setup lang="ts">
 import { ConditionValueType, IConditonValue, toListItem } from "./type";
 import { FieldType } from "@eimsnext/models";
-import { IFormFieldDef } from "../FieldList/type";
+import { IFormFieldDef } from "../FieldSelect/type";
 import { IFieldBuildSetting, INodeForm, getConditionFieldType, ConditionFieldType } from "@/NodeFieldList/type";
 import { IListItem } from "@/list/type";
 import { computed, ref, toRef } from "vue";
