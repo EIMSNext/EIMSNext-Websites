@@ -47,7 +47,8 @@ export default defineComponent({
   emits: ["update:modelValue", "change"],
   setup(props, { emit }) {
     const showDialog = ref(false);
-    const selectedValue = ref(props.modelValue);
+    const selectedValue = ref(props.modelValue ?? []);
+
     // 结合props和上下文的preview属性，确定是否处于查看模式
     // 优先使用props.preview，因为FormDataView组件会将isView=true传递给FormView组件，
     // 然后FormView组件会将preview=isView传递给formCreate组件
@@ -168,13 +169,14 @@ export default defineComponent({
               tags={
                 props.multiple
                   ? selectedValue.value || []
-                  : selectedValue.value &&
-                      typeof selectedValue.value === "object"
-                    ? [selectedValue.value]
-                    : []
+                  : selectedValue.value && Array.isArray(selectedValue.value)
+                    ? selectedValue.value
+                    : selectedValue.value
+                      ? [selectedValue.value]
+                      : []
               }
               showTabs={MemberTabs.Department | MemberTabs.CurDept}
-              cascadedDept={cascadedDept}
+              cascadedDept={props.cascadedDept}
               multiple={multiple}
               limit={limit}
               limitScope={props.limitScope}

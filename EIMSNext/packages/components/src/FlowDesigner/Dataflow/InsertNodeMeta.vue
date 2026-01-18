@@ -16,7 +16,7 @@ import { useLocale } from "element-plus";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { IFormFieldList, mergeFieldList } from "@/FormFieldList/type";
-import { IFormItem } from "@/FormList/type";
+import { IFormItem } from "@/FormSelect/type";
 import { INodeForm } from "@/NodeFieldList/type";
 
 const { t } = useLocale();

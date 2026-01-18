@@ -4,8 +4,8 @@
         <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
     </EtConfirmDialog>
     <et-toolbar :left-group="leftBars" @command="toolbarHandler" class="dataview-bar"></et-toolbar>
-    <FormView v-if="formData" :def="formDef" :data="formData" :isView="isView" :actions="actions" @draft="saveDraft"
-        @submit="submitData">
+    <FormView v-if="formData" :def="formDef" :data="formData" :isView="isView" :actions="actions"
+        :fieldPerms="fieldPerms" @draft="saveDraft" @submit="submitData">
     </FormView>
 </template>
 <script lang="ts" setup>
@@ -14,18 +14,21 @@ defineOptions({
 });
 
 import { ref, onBeforeMount } from "vue";
-import { FormData, FormContent, FormDataRequest, DataAction, FlowStatus } from "@eimsnext/models";
-import { useFormStore } from "@eimsnext/store";
+import { FormData, FormContent, FormDataRequest, DataAction, FlowStatus, IFieldPerm, DataPerms } from "@eimsnext/models";
+import { useFormStore, useUserStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
 import { MessageIcon, ToolbarItem } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
+import { hasDataPerm } from "@/utils/common";
 const { t } = useI18n();
 
 const props = withDefaults(
     defineProps<{
         formId: string;
         dataId: string;
+        dataPerms?: DataPerms;
+        fieldPerms?: IFieldPerm[];
     }>(),
     {
     }
@@ -39,8 +42,14 @@ const formDef = ref<FormContent>(new FormContent());
 const usingWorkflow = ref(false)
 const formData = ref<FormData>();
 const showDeleteConfirmDialog = ref(false)
+const userStore = useUserStore()
+const { currentUser } = userStore
 
-const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "common.edit", command: "edit", icon: "el-icon-edit" } }, { type: "button", config: { text: "common.delete", command: "delete", icon: "el-icon-delete", disabled: false } }])
+const canEdit = computed(() => hasDataPerm(currentUser.userType, DataPerms.Edit, props.dataPerms))
+const canRemove = computed(() => hasDataPerm(currentUser.userType, DataPerms.Remove, props.dataPerms))
+
+
+const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "common.edit", command: "edit", visible: canEdit, icon: "el-icon-edit" } }, { type: "button", config: { text: "common.delete", command: "delete", visible: canRemove, icon: "el-icon-delete", disabled: false } }])
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
     switch (cmd) {
         case 'edit':

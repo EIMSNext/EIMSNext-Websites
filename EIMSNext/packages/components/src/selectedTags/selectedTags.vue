@@ -12,7 +12,7 @@
       <div v-if="editable" class="empty-wrapper" @click.stop="editTag">
         <slot>
           <et-icon icon="el-icon-Plus"></et-icon>
-          <span class="empty-text">{{ emptyText || t("workflow.emptyMember") }}</span>
+          <span class="empty-text">{{ emptyText || t("comp.emptyMember") }}</span>
         </slot>
       </div>
     </template>
@@ -42,7 +42,7 @@ const props = withDefaults(
   }
 );
 
-const tagsRef = toRef(props.modelValue);
+const tagsRef = toRef(props.modelValue ?? []);
 const getIconColor = (tag: ISelectedTag) => {
   switch (tag.type) {
     case TagType.Employee:

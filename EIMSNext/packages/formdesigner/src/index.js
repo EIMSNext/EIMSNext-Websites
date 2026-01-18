@@ -109,8 +109,6 @@ import CheckBoxInput from "./components/CheckBoxInput.vue";
 import DefaultValueConfig from "./components/DefaultValueConfig.vue";
 import { behavior, behaviorRules, behaviorTree } from "./utils/behavior";
 import loadjs from "loadjs";
-import ZhCn from "./locale/zh-cn";
-import En from "./locale/en";
 
 CodeMirror.defineSimpleMode("fcComputedMode", {
   start: [
@@ -299,7 +297,5 @@ export {
   makeTreeOptionsRule,
   makeTitleRule,
   makeDataRule,
-  toJSON,
-  ZhCn,
-  En,
+  toJSON
 };

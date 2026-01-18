@@ -21,7 +21,7 @@ export default {
       $required: false,
       props: {
         multiple: true,
-        placeholder: "+ 选择部门",
+        placeholder: t("comp.emptyDept"),
         limitType: "all",
         limitScope: [],
       },
@@ -35,10 +35,10 @@ export default {
       {
         type: "select",
         field: "limitType",
-        title: "可选范围",
+        title: t("comp.availableScope"),
         options: [
-          { label: "全部部门", value: "all" },
-          { label: "自定义", value: "custom" },
+          { label: t("comp.allDepts"), value: "all" },
+          { label: t("props.custom"), value: "custom" },
         ],
         control: [
           {
@@ -58,11 +58,11 @@ export default {
           },
         ],
       },
-      {
-        type: "CheckBoxInput",
-        field: "readonly",
-        wrap: { show: false },
-      },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "readonly",
+      //   wrap: { show: false },
+      // },
       {
         type: "CheckBoxInput",
         field: "disabled",

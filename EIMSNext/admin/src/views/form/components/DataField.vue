@@ -10,6 +10,7 @@
 
 <script setup lang="ts">
 import { IListItem, IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
+import { IFieldPerm } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { useI18n } from "vue-i18n";
@@ -19,8 +20,9 @@ defineOptions({
     name: "DataField",
 });
 const props = defineProps<{
-    formId: string;
     modelValue: IFormFieldDef[];
+    formId: string;
+    fieldPerms?: IFieldPerm[];
 }>();
 
 const formStore = useFormStore();
@@ -48,7 +50,7 @@ const onClickOutside = (e: MouseEvent) => {
 onBeforeMount(() => {
     formStore.get(props.formId).then((form) => {
         if (form?.content?.items)
-            fieldList.value = buildFieldListItems(form.id, form.content.items, form.usingWorkflow);
+            fieldList.value = buildFieldListItems(form.id, form.content.items, form.usingWorkflow, undefined, { fieldPerms: props.fieldPerms });
     });
 })
 </script>

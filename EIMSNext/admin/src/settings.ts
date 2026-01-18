@@ -1,6 +1,5 @@
-import { SizeEnum } from "./enums/SizeEnum";
-import { ThemeEnum } from "./enums/ThemeEnum";
-import { LanguageEnum } from "./enums/LanguageEnum";
+import { Themes } from "./enums/Themes";
+import { Language } from "./enums/Language";
 
 // 检查用户的操作系统是否使用深色模式
 const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
@@ -19,11 +18,9 @@ const defaultSettings: AppSettings = {
   // 是否显示侧边栏Logo
   sidebarLogo: true,
   // 主题，根据操作系统的色彩方案自动选择
-  theme: mediaQueryList.matches ? ThemeEnum.DARK : ThemeEnum.LIGHT,
-  // 组件大小 default | medium | small | large
-  size: SizeEnum.DEFAULT,
+  theme: mediaQueryList.matches ? Themes.DARK : Themes.LIGHT,
   // 语言
-  language: LanguageEnum.ZH_CN,
+  language: Language.ZH_CN,
   // 主题颜色
   themeColor: "#4080FF",
   // 是否开启水印
