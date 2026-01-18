@@ -618,6 +618,8 @@ const ZhCn = {
     append: "插入",
     options: "选项数据",
     option: "选项",
+    labelField: "标签字段",
+    valueField: "值字段",
     callback: "回调",
     _self: "当前窗口",
     _blank: "新的窗口",

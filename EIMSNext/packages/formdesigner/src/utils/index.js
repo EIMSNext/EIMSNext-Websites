@@ -121,7 +121,7 @@ export function makeOptionsRule(t, to, label, value) {
     //   rule: [
     //     {
     //       type: "GlobalFetchSelect",
-    //       field: "formCreateEffect>fetch",
+    //       field: "formCreateEffect>source",
     //       props: {
     //         to,
     //       },
@@ -132,8 +132,8 @@ export function makeOptionsRule(t, to, label, value) {
       value: 3,
       rule: [
         {
-          type: "FormFieldSelect",
-          field: "formCreateEffect>fetch",
+          type: "SourceConfig",
+          field: "formCreateEffect>source",
           props: {
             to,
           },
@@ -152,10 +152,9 @@ export function makeOptionsRule(t, to, label, value) {
           props: {
             column: [
               { label: "label", key: label || "label" },
-              { value: true, label: "value", key: value || "value" },
+              { label: "value", key: value || "value" },
             ],
-            keyValue: label || "label",
-            showHeader: false,
+            showHeader: true,
           },
         },
       ],
