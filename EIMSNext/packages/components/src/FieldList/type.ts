@@ -6,6 +6,8 @@ import {
   getFlowStatus,
   getCreateBy,
   getCreateTime,
+  IFieldPerm,
+  ValueOption,
 } from "@eimsnext/models";
 
 export interface IFormFieldDef {
@@ -14,7 +16,7 @@ export interface IFormFieldDef {
   label: string;
   type: FieldType;
   format?: string;
-  options?: any;
+  options?: ValueOption[];
   isSubField?: boolean;
   nodeId?: string;
   singleResultNode?: boolean;
@@ -35,8 +37,8 @@ export function toFormFieldDef(
       field: `${parent.field}>${field.field}`,
       label: `${parent.title}.${field.title}`,
       type: field.type,
-      format: field.options?.format,
-      options: field.options,
+      format: field.props?.format,
+      options: field.props?.options,
       isSubField: true,
       nodeId: nodeId,
       singleResultNode: singleResultNode,
@@ -48,8 +50,8 @@ export function toFormFieldDef(
       field: field.field,
       label: field.title,
       type: field.type,
-      format: field.options?.format,
-      options: field.options,
+      format: field.props?.format,
+      options: field.props?.options,
       isSubField: false,
       nodeId: nodeId,
       singleResultNode: singleResultNode,

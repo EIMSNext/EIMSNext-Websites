@@ -32,10 +32,15 @@ export class FieldDef {
   title: string = "";
   type: FieldType = FieldType.None;
   columns?: FieldDef[];
-  options?: FieldOpt;
+  props?: FieldProp;
 }
-export class FieldOpt {
+export interface FieldProp {
   format?: string;
+  options?: ValueOption[];
+}
+export interface ValueOption {
+  value: string;
+  label: string;
 }
 export enum FieldType {
   None = "none",

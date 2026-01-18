@@ -2,7 +2,7 @@
   <template v-if="ready">
     <MetaItemHeader :label="t('workflow.ccMember')" :required="true" :tips="t('workflow.maxApproverTips')">
     </MetaItemHeader>
-    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('workflow.emptyMember')"
+    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
       @editTag="editTag" />
     <member-select-dialog v-model="showMemberDialog" @ok="finishSelect" />
   </template>

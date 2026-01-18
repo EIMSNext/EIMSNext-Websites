@@ -1,5 +1,15 @@
-import { App, AppMenu, FormDef, FormType } from "@eimsnext/models";
+import {
+  App,
+  AppMenu,
+  AuthGroup,
+  AuthGroupType,
+  DataPerms,
+  FormDef,
+  FormType,
+  UserType,
+} from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
+import { FlagEnum } from "@eimsnext/utils";
 
 export function getAppIcon(app?: App) {
   let icon = "iconfont-appdefault";
@@ -46,4 +56,27 @@ export function getFormIcon(form?: AppMenu) {
   }
 
   return icon;
+}
+
+export function getAuthGroupDataPerms(authGrp?: AuthGroup) {
+  if (authGrp) {
+    switch (authGrp.type) {
+      case AuthGroupType.ManageSelfData:
+      case AuthGroupType.ManageAllData:
+        return DataPerms.All;
+      case AuthGroupType.ViewAllData:
+        return DataPerms.View;
+      default:
+        return authGrp.dataPerms;
+    }
+  }
+
+  return undefined;
+}
+export function hasDataPerm(userType: UserType, needPerm: DataPerms, dataPerms?: DataPerms) {
+  return (
+    userType == UserType.CorpOwmer ||
+    userType == UserType.CorpAdmin ||
+    (dataPerms && FlagEnum.has(dataPerms, needPerm)) == true
+  );
 }

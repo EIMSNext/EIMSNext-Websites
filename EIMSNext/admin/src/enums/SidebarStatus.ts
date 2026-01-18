@@ -1,7 +1,7 @@
 /**
  * 侧边栏状态枚举
  */
-export const enum SidebarStatusEnum {
+export const enum SidebarStatus {
   /**
    * 展开
    */
