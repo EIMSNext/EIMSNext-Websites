@@ -32,10 +32,15 @@ export class FieldDef {
   title: string = "";
   type: FieldType = FieldType.None;
   columns?: FieldDef[];
-  options?: FieldOpt;
+  props?: FieldProp;
 }
-export class FieldOpt {
+export interface FieldProp {
   format?: string;
+  options?: ValueOption[];
+}
+export interface ValueOption {
+  value: string;
+  label: string;
 }
 export enum FieldType {
   None = "none",
@@ -55,8 +60,8 @@ export enum FieldType {
   FileUpload = "fileupload",
   // Signature = "signature",
   TableForm = "tableform",
-  Employee = "employee",
-  Employee2 = "employee2",
-  Department = "department",
-  Department2 = "department2",
+  EmployeeSelect = "employeeselect",
+  EmployeeSelect2 = "employeeselect2",
+  DepartmentSelect = "departmentselect",
+  DepartmentSelect2 = "departmentselect2",
 }

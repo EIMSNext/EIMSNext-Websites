@@ -4,24 +4,24 @@
       <div v class="cond-list-label">
         <div>
           <!-- <span v-if="groupLevel == 1">条件组，</span> -->
-          满足以下
+          {{ t("comp.meetCondition") }}
         </div>
         <el-select v-model="list.rel" size="small" style="width: 65px; margin-left: 5px; margin-right: 5px">
-          <el-option label="所有" value="and" />
-          <el-option label="任意" value="or" />
+          <el-option :label="t('comp.rel_And')" value="and" />
+          <el-option :label="t('comp.rel_Or')" value="or" />
         </el-select>
-        <div>条件</div>
+        <div>{{ t("comp.conditions") }}</div>
       </div>
       <div v-if="groupLevel > 1">
         <et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon>
       </div>
     </div>
     <div class="btn-add-item">
-      <el-link type="primary" underline="never" @click="addItem" style="margin-left: 15px">
+      <el-link type="primary" underline="never" class="add-item" @click="addItem">
         <et-icon icon="el-icon-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
         {{ t("computed.addCondition") }}
       </el-link>
-      <el-link v-if="groupLevel < maxLevel" type="primary" underline="never" @click="addGroup">
+      <el-link v-if="groupLevel < maxLevel" type="primary" underline="never" class="add-item" @click="addGroup">
         <et-icon icon="el-icon-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
         {{ t("computed.addGroup") }}
       </el-link>
@@ -59,8 +59,8 @@ defineOptions({
 
 const props = withDefaults(
   defineProps<{
-    formId: string;
     modelValue: IConditionList;
+    formId: string;
     showTitle?: boolean;
     nodes?: INodeForm[];
     condType?: ConditionType;
@@ -166,6 +166,10 @@ watch(
     margin: 10px;
     display: flex;
     align-items: center;
+
+    .add-item {
+      margin-left: 15px;
+    }
   }
 }
 </style>

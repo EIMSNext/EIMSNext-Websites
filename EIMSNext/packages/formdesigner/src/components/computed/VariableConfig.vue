@@ -8,7 +8,7 @@
                 </template>
                 <el-container style="height: 100%;">
                     <el-header height="55px" class="_fd-variable-pop-header">
-                        <el-input size="small" v-model="variable">
+                        <el-input v-model="variable">
                             <template #prefix>
                                 <span>{&lcub;</span>
                             </template>

@@ -1,15 +1,18 @@
 <template>
   <div v-click-outside="onClickOutside">
-    <FieldSortList v-model="sortList" :form-id="formId" @change="onChange"></FieldSortList>
+    <FieldSortList v-model="sortList" :form-id="formId" :fieldPerms="fieldPerms" @change="onChange"></FieldSortList>
     <div class="actions">
-      <el-button type="primary" @click="onSort">排序</el-button>
-      <el-button>删除全部</el-button>
+      <el-button type="primary" @click="onSort">{{ t("common.sort") }}</el-button>
+      <el-button>{{ t("common.deleteAll") }}</el-button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { IFieldSortList } from "@eimsnext/components";
+import { IFieldPerm } from "@eimsnext/models";
 import { ClickOutside as vClickOutside } from "element-plus";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineOptions({
   name: "DataFilter",
@@ -19,6 +22,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: IFieldSortList;
     formId: string;
+    fieldPerms?: IFieldPerm[];
   }>(),
   {}
 );
@@ -34,7 +38,7 @@ const onSort = () => {
 };
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
-  let excludedClasses = ["data-sort", "el-dropdown-menu__item"];
+  let excludedClasses = ["data-sort", "el-dropdown-menu__item", "el-select__popper", "el-dropdown__popper"];
   if (excludedClasses.some((cls) => target.closest(`.${cls}`))) {
     return;
   }

@@ -8,14 +8,17 @@
       @change="onChange"
     ></ConditionList>
     <div class="actions">
-      <el-button type="primary" @click="onSearch">筛选</el-button>
-      <el-button>重置</el-button>
+      <el-button type="primary" @click="onSearch">{{ t("common.filter") }}</el-button>
+      <el-button>{{ t("common.reset") }}</el-button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { IConditionList } from "@eimsnext/components";
+import { IFieldPerm } from "@eimsnext/models";
 import { ClickOutside as vClickOutside } from "element-plus";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineOptions({
   name: "DataFilter",
@@ -25,6 +28,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: IConditionList;
     formId: string;
+    fieldPerms?: IFieldPerm[];
   }>(),
   {}
 );
@@ -40,7 +44,7 @@ const onSearch = () => {
 };
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
-  let excludedClasses = ["data-filter", "el-select__popper"];
+  let excludedClasses = ["data-filter", "el-select__popper", "el-dropdown__popper"];
   if (excludedClasses.some((cls) => target.closest(`.${cls}`))) {
     return;
   }

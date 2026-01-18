@@ -296,14 +296,18 @@ export default function useContext(Handler) {
           const computedValue = computed(() => {
             const item = computedRule[k];
             if (!item) return undefined;
-            const value = this.compute(ctx, item);
+            const value =
+              k === "defaultValue"
+                ? this.computeDefaultValue(item, ctx)
+                : this.compute(ctx, item);
             if (item.linkage && value === oldValueTag) {
               return oldValue;
             }
+
             return value;
           });
           const callback = (n) => {
-            if (k === "value") {
+            if (k === "value" || k === "defaultValue") {
               this.onInput(ctx, n);
             } else if (k[0] === "$") {
               this.api.setEffect(ctx.id, k, n);
@@ -312,7 +316,7 @@ export default function useContext(Handler) {
             }
           };
           if (
-            k === "value"
+            k === "defaultValue" || k === "value"
               ? [undefined, null, ""].indexOf(ctx.rule.value) > -1
               : computedValue.value !== deepGet(ctx.rule, k)
           ) {
@@ -527,6 +531,25 @@ export default function useContext(Handler) {
             break;
         }
       }
+    },
+    computeDefaultValue(dVal, ctx) {
+      const that = this;
+      if (ctx.type == "timestamp") {
+        if (typeof dVal === "string") {
+          let defValue = undefined;
+          switch (dVal) {
+            case "today":
+              defValue = new Date().getTime();
+              break;
+          }
+
+          return defValue;
+        }
+
+        return dVal;
+      }
+
+      return dVal;
     },
     compute(ctx, item) {
       let fn;

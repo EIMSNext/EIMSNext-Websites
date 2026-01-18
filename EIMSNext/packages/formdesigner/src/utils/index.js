@@ -1,6 +1,6 @@
 import { is, hasProperty, parseFn, toCase } from "@eimsnext/form-render-core";
 import { computed, isRef, unref, ref } from "vue";
-import ZhCn from "../locale/zh-cn";
+import { ZhCn } from "@eimsnext/locale";
 import { message } from "./message";
 import renderPreview from "./preview";
 
@@ -15,7 +15,7 @@ export function makeRequiredRule() {
   return {
     type: "Required",
     field: "formCreate$required",
-    title: "是否必填",
+    title: "必填",
   };
 }
 
@@ -112,22 +112,22 @@ export function makeOptionsRule(t, to, label, value) {
   const options = [
     { label: t("fetch.optionsType.struct"), value: 2 },
     { label: t("fetch.optionsType.fetch"), value: 3 },
-    { label: t("fetch.optionsType.global"), value: 1 },
+    // { label: t("fetch.optionsType.global"), value: 1 },
   ];
 
   const control = [
-    {
-      value: 1,
-      rule: [
-        {
-          type: "GlobalFetchSelect",
-          field: "formCreateEffect>fetch",
-          props: {
-            to,
-          },
-        },
-      ],
-    },
+    // {
+    //   value: 1,
+    //   rule: [
+    //     {
+    //       type: "GlobalFetchSelect",
+    //       field: "formCreateEffect>fetch",
+    //       props: {
+    //         to,
+    //       },
+    //     },
+    //   ],
+    // },
     {
       value: 3,
       rule: [
@@ -154,7 +154,6 @@ export function makeOptionsRule(t, to, label, value) {
               { label: "label", key: label || "label" },
               { value: true, label: "value", key: value || "value" },
             ],
-            keyValue: label || "label",
           },
         },
       ],
@@ -178,22 +177,22 @@ export function makeDataRule(t, to, title) {
   const options = [
     { label: t("fetch.optionsType.struct"), value: 2 },
     { label: t("fetch.optionsType.fetch"), value: 3 },
-    { label: t("fetch.optionsType.global"), value: 1 },
+    // { label: t("fetch.optionsType.global"), value: 1 },
   ];
 
   const control = [
-    {
-      value: 1,
-      rule: [
-        {
-          type: "GlobalFetchSelect",
-          field: "formCreateEffect>fetch",
-          props: {
-            to,
-          },
-        },
-      ],
-    },
+    // {
+    //   value: 1,
+    //   rule: [
+    //     {
+    //       type: "GlobalFetchSelect",
+    //       field: "formCreateEffect>fetch",
+    //       props: {
+    //         to,
+    //       },
+    //     },
+    //   ],
+    // },
     {
       value: 3,
       rule: [
@@ -237,22 +236,22 @@ export function makeTreeOptionsRule(t, to, label, value) {
   const options = [
     { label: t("fetch.optionsType.struct"), value: 2 },
     { label: t("fetch.optionsType.fetch"), value: 3 },
-    { label: t("fetch.optionsType.global"), value: 1 },
+    // { label: t("fetch.optionsType.global"), value: 1 },
   ];
 
   const control = [
-    {
-      value: 1,
-      rule: [
-        {
-          type: "GlobalFetchSelect",
-          field: "formCreateEffect>fetch",
-          props: {
-            to,
-          },
-        },
-      ],
-    },
+    // {
+    //   value: 1,
+    //   rule: [
+    //     {
+    //       type: "GlobalFetchSelect",
+    //       field: "formCreateEffect>fetch",
+    //       props: {
+    //         to,
+    //       },
+    //     },
+    //   ],
+    // },
     {
       value: 3,
       rule: [

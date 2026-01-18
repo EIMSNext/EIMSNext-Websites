@@ -37,8 +37,9 @@ watch(
   (newFormId, oldFormId) => {
     if (newFormId && newFormId != oldFormId) {
       formStore.get(newFormId).then((form) => {
-        if (form?.content?.items)
-          fieldList.value = buildFieldListItems(newFormId, form.content.items, form.usingWorkflow, undefined, props.fieldLimit);
+        if (form?.content?.items) {
+          fieldList.value = buildFieldListItems(newFormId, form?.content?.items, form.usingWorkflow, undefined, props.fieldLimit);
+        }
       });
     }
   },

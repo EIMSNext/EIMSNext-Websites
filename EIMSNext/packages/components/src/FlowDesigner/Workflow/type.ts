@@ -6,13 +6,17 @@ export function convertTagToCandidate(tag: ISelectedTag): IApprovalCandidate {
     candidateId: tag.id,
     candidateType: convertTagTypeToCandidateType(tag.type),
     candidateName: tag.label,
+    cascadedDept: tag.cascadedDept ?? false,
   };
 }
-export function convertCandidateToTag(candidate: IApprovalCandidate): ISelectedTag {
+export function convertCandidateToTag(
+  candidate: IApprovalCandidate
+): ISelectedTag {
   return {
     id: candidate.candidateId,
     label: candidate.candidateName,
     type: convertCandidateTypeToTagType(candidate.candidateType),
+    cascadedDept: candidate.cascadedDept,
   };
 }
 export function convertTagTypeToCandidateType(tagType: TagType): CandidateType {
@@ -33,7 +37,9 @@ export function convertTagTypeToCandidateType(tagType: TagType): CandidateType {
   }
   return candidateType;
 }
-export function convertCandidateTypeToTagType(candidateType: CandidateType): TagType {
+export function convertCandidateTypeToTagType(
+  candidateType: CandidateType
+): TagType {
   let tagType = TagType.None;
   switch (candidateType) {
     case CandidateType.Department:

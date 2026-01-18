@@ -44,11 +44,13 @@ const props = withDefaults(
     selectable?: boolean;
     itemClass?: string;
     multiple?: boolean;
+    showCount?: boolean;
   }>(),
   {
     selectable: false,
     itemClass: "",
-    multiple: true
+    multiple: true,
+    showCount: true
   }
 );
 

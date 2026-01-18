@@ -90,8 +90,10 @@ import gaugeChart from "./rule/charts/gaugeChart";
 import radarChart from "./rule/charts/radarChart";
 import scatterChart from "./rule/charts/scatterChart";
 import customChart from "./rule/charts/customChart";
-import departmentSelect from "./rule/departmentSelect";
-import departmentSelect2 from "./rule/departmentSelect2";
+import departmentselect from "./rule/departmentselect";
+import departmentselect2 from "./rule/departmentselect2";
+import employeeselect from "./rule/employeeselect";
+import employeeselect2 from "./rule/employeeselect2";
 
 const ruleList = [
   input,
@@ -119,8 +121,10 @@ const ruleList = [
   tree,
   treeSelect,
   city,
-  departmentSelect,
-  departmentSelect2,
+  departmentselect,
+  departmentselect2,
+  employeeselect,
+  employeeselect2,
   editor,
   dataTable,
   id,

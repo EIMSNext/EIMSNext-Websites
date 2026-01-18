@@ -19,6 +19,7 @@ import {
   DataflowDiagram,
   DataflowMetaEditor,
 } from "./FlowDesigner";
+import { EtFieldPerms } from "./FieldPerms";
 
 export default [
   SvgIcon,
@@ -49,4 +50,5 @@ export default [
   WorkflowMetaEditor,
   DataflowDiagram,
   DataflowMetaEditor,
+  EtFieldPerms,
 ];

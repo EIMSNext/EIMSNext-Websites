@@ -13,9 +13,19 @@ import formCreate from "@eimsnext/form-render-elplus";
 import FcDesigner from "@eimsnext/form-designer";
 import EtPlus from "@eimsnext/components";
 import setupHttp from "../utils/http";
+import { createI18n } from "vue-i18n";
+import { useSystemStoreHook } from "@/store";
 
 export default {
   install(app: App<Element>) {
+    const systemStore = useSystemStoreHook();
+    const i18n = createI18n({
+      locale: systemStore.language,
+      messages: systemStore.locales,
+      legacy: false, // Vue3 推荐开启
+    });
+    app.use(i18n);
+
     //http初始化
     app.use(setupHttp);
     // 自定义指令(directive)

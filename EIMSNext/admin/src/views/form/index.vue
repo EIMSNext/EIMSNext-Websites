@@ -1,137 +1,59 @@
 <template>
   <div class="formdata-container">
-    <et-dialog
-      v-model="showAddDialog"
-      :title="formDef?.name"
-      :show-footer="false"
-      :destroy-on-close="true"
-      :close-on-click-modal="false"
-    >
+    <et-dialog v-model="showAddDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
+      :close-on-click-modal="false">
       <div class="form-container">
-        <AddFormData
-          :formId="formId"
-          :isView="false"
-          @save="onDataSaved"
-          @submit="onDataSaved"
-        ></AddFormData>
+        <AddFormData :formId="formId" :isView="false" :fieldPerms="fieldPerms" @save="onDataSaved"
+          @submit="onDataSaved"></AddFormData>
       </div>
     </et-dialog>
-    <EtConfirmDialog
-      v-model="showDeleteConfirmDialog"
-      title="你确定要删除所选数据吗？"
-      :icon="MessageIcon.Warning"
-      :showNoSave="false"
-      okText="确定"
-      @ok="execDelete"
-    >
-      <div>你当前选中了{{ checkedDatas.length }}条数据，数据删除后将不可恢复</div>
+    <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')"
+      :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
+      <div>{{ t("common.message.deleteConfirm_Content", [checkedDatas.length]) }}</div>
     </EtConfirmDialog>
-    <et-dialog
-      v-model="showDetailsDialog"
-      :title="formDef?.name"
-      :show-footer="false"
-      :destroy-on-close="true"
-    >
+    <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
+      :close-on-click-modal="false">
       <div class="form-container">
-        <FormDataView :formId="formId" :dataId="selectedData!.id" @ok="handleViewOk"></FormDataView>
+        <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms"
+          @ok="handleViewOk">
+        </FormDataView>
       </div>
     </et-dialog>
-    <el-popover
-      :visible="showFilter"
-      :virtual-ref="filterBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataFilter
-        :model-value="condList"
-        :formId="formId"
-        @ok="setFilter"
-        @cancel="showFilter = false"
-      ></DataFilter>
+    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataFilter :model-value="condList" :formId="formId" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
     </el-popover>
-    <el-popover
-      :visible="showSort"
-      :virtual-ref="sortBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataSort
-        :model-value="sortList"
-        :formId="formId"
-        @ok="setSort"
-        @cancel="showSort = false"
-      ></DataSort>
+    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataSort :model-value="sortList" :formId="formId" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
-    <el-popover
-      :visible="showField"
-      :virtual-ref="fieldBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataField
-        :model-value="fieldList"
-        :formId="formId"
-        @ok="setField"
-        @cancel="showField = false"
-      ></DataField>
+    <el-popover :visible="showField" :virtual-ref="fieldBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
-    <et-toolbar
-      :left-group="leftBars"
-      :right-group="rightBars"
-      @command="toolbarHandler"
-    ></et-toolbar>
+    <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
     <div class="data-list" style="height: 100%">
-      <el-table
-        ref="tableRef"
-        :data="flattedData"
-        :span-method="idBasedSpanMethod"
-        style="width: 100%; height: 100%"
-        show-overflow-tooltip
-        :tooltip-formatter="tableToolFormatter"
-        :row-class-name="rowClassName"
-        :fit="true"
-        @selection-change="selectionChanged"
-        @row-click="showDetails"
-      >
+      <el-table ref="tableRef" :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%; height: 100%"
+        show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" :fit="true"
+        @selection-change="selectionChanged" @row-click="showDetails">
         <el-table-column type="selection" width="40" :selectable="selectable" />
         <template v-for="col in columns">
           <template v-if="col.children">
             <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip :resizable="true">
               <template v-if="col.children" v-for="sub in col.children">
-                <el-table-column
-                  :prop="sub.field"
-                  :formatter="formatter"
-                  :label="sub.title"
-                  :width="sub.width"
-                  :resizable="true"
-                ></el-table-column>
+                <el-table-column :prop="sub.field" :formatter="formatter" :label="sub.title" :width="sub.width"
+                  :resizable="true" :dangerouslyUseHTMLString="true"></el-table-column>
               </template>
             </el-table-column>
           </template>
           <template v-else>
-            <el-table-column
-              :prop="col.field"
-              :formatter="formatter"
-              :label="col.title"
-              :width="col.width"
-              show-overflow-tooltip
-              :resizable="true"
-            ></el-table-column>
+            <el-table-column :prop="col.field" :label="col.title" :width="col.width" show-overflow-tooltip
+              :resizable="true">
+              <!-- 使用slot-scope方式渲染，支持HTML -->
+              <template #default="scope">
+                <div v-html="formatter(scope.row, { property: col.field }, scope.row[col.field])"></div>
+              </template>
+            </el-table-column>
           </template>
         </template>
       </el-table>
@@ -141,7 +63,7 @@
 </template>
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
-import { useFormStore } from "@eimsnext/store";
+import { useFormStore, useUserStore, useContextStore } from "@eimsnext/store";
 import {
   FormDef,
   FormData,
@@ -150,9 +72,14 @@ import {
   FlowStatus,
   FieldType,
   getCreateTime,
+  AuthGroup,
+  CurrentUser,
+  UserType,
+  IFieldPerm,
+  DataPerms,
 } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
-import { IDynamicFindOptions, SortDirection, formDataService } from "@eimsnext/services";
+import { IDynamicFindOptions, SortDirection, authGroupService, formDataService } from "@eimsnext/services";
 import {
   MessageIcon,
   ToolbarItem,
@@ -160,10 +87,15 @@ import {
   toDynamicFindOptions,
   IFieldSortList,
   IFormFieldDef,
+  IToolbarItemDropdownItem,
 } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
 import dayjs from "dayjs";
+import { getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
+import Pagination from "../../components/Pagination/index.vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const tableRef = ref<TableInstance>();
 const displayItemCount = 3; //最多显示3条明细
@@ -177,14 +109,42 @@ const formDef = ref<FormDef>();
 const filterBtnRef = ref();
 const sortBtnRef = ref();
 const fieldBtnRef = ref();
+const authGrps = ref<AuthGroup[]>([])
+const curAuthGrp = ref<AuthGroup>()
+const fieldPerms = ref<IFieldPerm[]>()
+const userStore = useUserStore()
+const { currentUser } = userStore
+
+const dataPerms = computed(() => getAuthGroupDataPerms(curAuthGrp.value))
+const canAdd = computed(() => hasDataPerm(currentUser.userType, DataPerms.AddNew, dataPerms.value))
+const canRemove = computed(() => hasDataPerm(currentUser.userType, DataPerms.Remove, dataPerms.value))
 
 const leftBars = ref<ToolbarItem[]>([
   {
+    type: "dropdown",
+    config: {
+      text: "请选择权限组",
+      class: "auth-gropu-filter",
+      command: "authgrp",
+      visible: false,
+      onCommand: (cmd) => {
+        curAuthGrp.value = authGrps.value.find(x => x.id == cmd);
+        fieldPerms.value = curAuthGrp.value?.fieldPerms;
+
+        initChildrenField(formDef.value!.content?.items!, []);
+        columns.value = buildColumns(formDef.value!.content?.items!, formDef.value!.usingWorkflow, []);
+        updateQueryParams();
+        handleQuery();
+      }
+    }
+  },
+  {
     type: "button",
     config: {
-      text: "新增",
+      text: "common.addNew",
       type: "success",
       command: "add",
+      visible: canAdd,
       icon: "el-icon-plus",
       onCommand: () => {
         showAddDialog.value = true;
@@ -194,9 +154,10 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "删除",
+      text: "common.delete",
       type: "danger",
       command: "delete",
+      visible: canRemove,
       icon: "el-icon-delete",
       disabled: true,
     },
@@ -209,9 +170,10 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "筛选",
+      text: "common.filter",
       class: "data-filter",
       command: "filter",
+      visible: true,
       icon: "el-icon-filter",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((filterBtnRef.value = e.currentTarget), (showSort.value = showField.value = false));
@@ -222,9 +184,10 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "排序",
+      text: "common.sort",
       class: "data-filter",
       command: "sort",
+      visible: true,
       icon: "el-icon-sort",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((sortBtnRef.value = e.currentTarget), (showFilter.value = showField.value = false));
@@ -235,9 +198,10 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "字段",
+      text: "common.fields",
       class: "data-filter",
       command: "list",
+      visible: true,
       icon: "el-icon-list",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((fieldBtnRef.value = e.currentTarget), (showFilter.value = showSort.value = false));
@@ -248,9 +212,10 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "刷新",
+      text: "common.refresh",
       class: "data-filter",
       command: "refresh",
+      visible: true,
       icon: "el-icon-refresh",
       onCommand: () => {
         handleQuery();
@@ -271,11 +236,30 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
   }
 };
 
-formStore.get(formId).then((form: FormDef | undefined) => {
+formStore.get(formId).then(async (form: FormDef | undefined) => {
   if (form) {
     formDef.value = form;
-    initChildrenField(form.content?.items!, []);
-    columns.value = buildColumns(form.content?.items!, form.usingWorkflow, []);
+    if (userStore.currentUser.userType == UserType.Employee) {
+      await authGroupService.query<AuthGroup>(`$filter=appid eq '${form.appId}' AND formid eq '${form.id}'`).then(res => {
+        authGrps.value = res;
+        if (res.length > 0) {
+          curAuthGrp.value = res[0]
+          fieldPerms.value = curAuthGrp.value.fieldPerms;
+
+          let menuItems: IToolbarItemDropdownItem[] = res.map(x => { return { text: x.name, command: x.id, visible: true, } })
+          menuItems[0].checked = true
+
+          let grpItem = leftBars.value.find((x) => x.config.command == "authgrp")
+          // console.log("grpItem", grpItem)
+          if (grpItem) {
+            grpItem.config.menuItems = menuItems
+            grpItem.config.visible = true
+          }
+        }
+      });
+    }
+    initChildrenField(form.content?.items!, [], fieldPerms.value);
+    columns.value = buildColumns(form.content?.items!, form.usingWorkflow, [], fieldPerms.value);
     updateQueryParams();
     handleQuery();
   }
@@ -367,7 +351,8 @@ const updateQueryParams = () => {
     sortList.value,
     (pageNum.value - 1) * pageSize.value,
     pageSize.value,
-    { field: "formId", type: "none", op: "eq", value: formDef.value!.id }
+    { field: "formId", type: "none", op: "eq", value: formDef.value!.id },
+    { authGroupId: curAuthGrp.value?.id }
   );
 };
 
@@ -416,8 +401,36 @@ const formatter = (row: any, column: any, cellValue: any) => {
       const format = colSetting.format || "YYYY-MM-DD";
       return cellValue ? dayjs(cellValue).format(format) : "";
     }
+    // 添加对图片字段的处理
+    if (colSetting.type == FieldType.ImageUpload) {
+      if (!cellValue) return '';
+
+      // 处理图片对象数组，提取url属性
+      if (Array.isArray(cellValue)) {
+        // 过滤出有效的图片对象
+        const validImages = cellValue.filter(item => typeof item === 'object' && item !== null && item.url);
+        if (validImages.length === 0) return '';
+
+        // 生成图片标签
+        return validImages.map(img => {
+          // 将反斜杠转换为正斜杠
+          const imgUrl = img.url.replace(/\\/g, '/');
+          return `<img src="${imgUrl}" style="width: 40px; height: 40px; border-radius: 4px; margin-right: 4px; object-fit: cover; cursor: pointer;" />`;
+        }).join('');
+      }
+      // 处理单个图片对象
+      else if (typeof cellValue === 'object' && cellValue !== null && cellValue.url) {
+        const imgUrl = cellValue.url.replace(/\\/g, '/');
+        return `<img src="${imgUrl}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" />`;
+      }
+      // 处理图片URL字符串
+      else if (typeof cellValue === 'string') {
+        const imgUrl = cellValue.replace(/\\/g, '/');
+        return `<img src="${imgUrl}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" />`;
+      }
+    }
   }
-  
+
   // 添加对部门选择器返回对象和数组的处理
   if (cellValue && typeof cellValue === 'object') {
     // 处理单选情况：完整的部门对象 { label: '部门名称', code: '部门编码', value: '部门ID', type: 'department' }
@@ -493,7 +506,7 @@ const childrenFields = ref<string[]>([]);
 const flattedData = ref<any[]>([]);
 const spanMap = ref<number[]>([]);
 
-const initChildrenField = (fields: FieldDef[], displayFields: IFormFieldDef[]) => {
+const initChildrenField = (fields: FieldDef[], displayFields: IFormFieldDef[], fieldPerms?: IFieldPerm[]) => {
   childrenFields.value = [];
   fields.forEach((x) => {
     if (x.columns && x.columns.length > 0) childrenFields.value.push(x.field);
@@ -586,5 +599,11 @@ const idBasedSpanMethod = (data: {
 
 :deep(.data-filter) {
   margin-left: 0px;
+}
+
+:deep(.auth-gropu-filter) {
+  line-height: 32px;
+  padding: 0 8px;
+  margin-right: 10px;
 }
 </style>

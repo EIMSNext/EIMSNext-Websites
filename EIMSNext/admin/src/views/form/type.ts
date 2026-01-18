@@ -1,5 +1,5 @@
 import { IFormFieldDef } from "@eimsnext/components";
-import { FieldDef, SystemField, getCreateTime, getFlowStatus } from "@eimsnext/models";
+import { FieldDef, IFieldPerm, SystemField, getCreateTime, getFlowStatus } from "@eimsnext/models";
 import { Dictionary } from "@eimsnext/utils";
 
 export interface ITableColumn {
@@ -15,7 +15,8 @@ export interface ITableColumn {
 export function buildColumns(
   fields: FieldDef[],
   usingWf: boolean,
-  displayFields: IFormFieldDef[]
+  displayFields: IFormFieldDef[],
+  fieldPerms?: IFieldPerm[]
 ): ITableColumn[] {
   const dispalyAll = displayFields.length == 0;
   const subDisplayFields = new Dictionary();
@@ -60,7 +61,7 @@ export function buildColumns(
         field: x.field,
         title: x.title,
         type: x.type,
-        format: x.options?.format,
+        format: x.props?.format,
         mergeField: "_id",
         oriField: `data.${x.field}`,
       };
@@ -86,7 +87,7 @@ export function buildColumns(
       field: createTimeField.field,
       title: createTimeField.title,
       type: createTimeField.type,
-      format: createTimeField.options?.format,
+      format: createTimeField.props?.format,
       mergeField: "_id",
       oriField: SystemField.CreateTime,
     });
@@ -109,7 +110,7 @@ function buildSubColumns(
           field: x.field,
           title: x.title,
           type: x.type,
-          format: x.options?.format,
+          format: x.props?.format,
           oriField: `${pField}>${x.field}`,
         };
         if (x.columns && x.columns.length > 0) {

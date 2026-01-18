@@ -322,7 +322,7 @@ html.dark {
 ._fc-r-config {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
-    grid-template-areas: "base" "props" "advanced" "slots" "style" "event" "validate";
+    grid-template-areas: "base" "props" "validate" "advanced" "slots" "style" "event";
 }
 
 ._fc-r-name-input .el-input-group__append {
@@ -432,7 +432,7 @@ html.dark {
 ._fc-l-tabs, ._fc-r-tabs {
     position: relative;
     border-bottom: 1px solid var(--fc-line-color-3);
-    padding: 0 10px;
+    padding: 0 10px !important;
     width: 100%;
 }
 
@@ -449,6 +449,7 @@ html.dark {
     text-align: center;
     margin: 0 10px;
     cursor: pointer;
+    width: 40%;
 }
 
 ._fc-l ._fc-l-tab.active {
@@ -498,14 +499,15 @@ html.dark {
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 14px;
-    padding: 12px;
+    padding: 10px;
     margin: 0;
 }
 
 ._fc-l-title i {
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: 400;
 }
 
 ._fc-l-title i.down {
@@ -516,16 +518,16 @@ html.dark {
     display: inline-flex;
     background: var(--fc-bg-color-1);
     color: var(--fc-text-color-1);
-    line-height: 1;
     text-align: center;
     transition: all .2s ease;
     cursor: move;
-    margin-bottom: 10px;
-    align-items: center;
+    margin-bottom: 5px;
+    align-items: center;    
+    border: 1px dashed var(--fc-bg-color-1);
 }
 
 ._fc-l-item i {
-    font-size: 21px;
+    font-size: 16px;
     display: inline-block;
 }
 
@@ -534,12 +536,12 @@ html.dark {
 }
 
 ._fc-l-item ._fc-l-icon {
-    padding: 0px 10px;
+    padding: 0px 8px 0 6px;
 }
 
 ._fc-l-item:hover {
-    background: var(--fc-style-color-1);
-    color: #fff;
+    border: 1px dashed var(--el-color-primary);
+    color: var(--el-color-primary);    
 }
 
 ._fc-m-tools {
@@ -1234,4 +1236,8 @@ html.dark {
 
 .fc-icon.icon-chart-custom{
     background-position: -48px -25px
+}
+._fc-field-title {
+    font-weight: 500;
+    font-size: 14px;
 }

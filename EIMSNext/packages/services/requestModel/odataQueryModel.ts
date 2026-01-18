@@ -12,6 +12,7 @@ export interface IDynamicFindOptions {
   sort?: IDynamicSort[];
   skip: number;
   take: number;
+  scope?: IDataScope;
 }
 
 export interface IDynamicField {
@@ -29,9 +30,13 @@ export interface IDynamicFilter {
 
 export interface IDynamicSort {
   field: string;
+  type?: string;
   dir: SortDirection;
 }
 export enum SortDirection {
   Asc = 1,
   Desc = -1,
+}
+export interface IDataScope {
+  authGroupId?: string;
 }

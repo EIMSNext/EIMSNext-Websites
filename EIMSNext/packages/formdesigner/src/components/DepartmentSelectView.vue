@@ -1,28 +1,42 @@
 <template>
-  <div class="fc-department-select-view">
-    <div class="fc-department-select-content">
-      <el-button type="primary" link size="small">+ 选择部门</el-button>
-    </div>
+  <div class="org-select-view">
+    <SelectedTags :modelValue="modelValue" :style="{ height: multiple ? '60px' : '42px' }" :editable="true"
+      :emptyText="t('comp.emptyDept')"></SelectedTags>
   </div>
 </template>
 
 <script>
-export default {
+import { SelectedTags } from '@eimsnext/components';
+import { defineComponent } from 'vue';
+
+export default defineComponent({
   name: 'DepartmentSelectView',
-};
+  props: {
+    modelValue: {
+      type: Array,
+      default: () => []
+    },
+    multiple: {
+      type: Boolean,
+      default: false,
+    },
+    formCreateInject: Object,
+  },
+  inject: ['designer'],
+  components: {
+    SelectedTags,
+  },
+  computed: {
+    t() {
+      return this.designer.setupState.t;
+    }
+  }
+})
+
 </script>
 
-<style scoped>
-.fc-department-select-view {
-  padding: 10px;
-}
-
-.fc-department-select-content {
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 8px 12px;
-  min-height: 32px;
-  display: flex;
-  align-items: center;
+<style scoped lang="scss">
+.org-select-view {
+  width: 100%;
 }
 </style>

@@ -13,12 +13,8 @@
                     <el-col :span="getSpan(item)">
                         <el-form-item :label="t('validate.mode')">
                             <el-select v-model="item.trigger" @change="onInput">
-                                <el-option
-                                    v-for="item in triggers"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value"
-                                />
+                                <el-option v-for="item in triggers" :key="item.value" :label="item.label"
+                                    :value="item.value" />
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -29,8 +25,8 @@
                             </template>
                             <template v-else-if="item.mode === 'validator'">
                                 <FnInput v-model="item[item.mode]" name="validator"
-                                         :args="['rule', 'value', 'callback']"
-                                         @change="onInput">{{ t('validate.modes.validator') }}
+                                    :args="['rule', 'value', 'callback']" @change="onInput">{{
+                                    t('validate.modes.validator') }}
                                 </FnInput>
                             </template>
                             <template v-else>
@@ -41,7 +37,7 @@
                     <el-col :span="24">
                         <el-form-item :label="t('validate.message')">
                             <LanguageInput v-model="item.message" :placeholder="t('validate.requiredPlaceholder')"
-                                            @change="onInput">
+                                @change="onInput">
                             </LanguageInput>
                         </el-form-item>
                     </el-col>
@@ -50,7 +46,7 @@
         </template>
 
         <el-dropdown trigger="click" size="default" popper-class="_fd-validate-pop" @command="handleCommand">
-            <el-button class="_fd-validate-btn _fd-plain-button" plain size="small">{{ t('validate.rule') }} +
+            <el-button class="_fd-validate-btn _fd-plain-button" plain>{{ t('validate.rule') }} +
             </el-button>
             <template #dropdown>
                 <el-dropdown-menu>
@@ -64,11 +60,11 @@
 </template>
 
 <script>
-import {defineComponent} from 'vue';
-import {localeOptions} from '../utils';
+import { defineComponent } from 'vue';
+import { localeOptions } from '../utils';
 import PatternInput from './computed/PatternInput.vue';
 import FnInput from './FnInput.vue';
-import {deepCopy} from '@eimsnext/form-render-core';
+import { deepCopy } from '@eimsnext/form-render-core';
 import LanguageInput from './language/LanguageInput.vue';
 
 export default defineComponent({
@@ -105,9 +101,9 @@ export default defineComponent({
                 }
             } else {
                 return {
-                    min: this.t('validate.modes.min'),
-                    max: this.t('validate.modes.max'),
-                    len: this.t('validate.modes.len'),
+                    // min: this.t('validate.modes.min'),
+                    // max: this.t('validate.modes.max'),
+                    // len: this.t('validate.modes.len'),
                     pattern: this.t('validate.modes.pattern'),
                     validator: this.t('validate.modes.validator'),
                 }
@@ -115,9 +111,9 @@ export default defineComponent({
         },
         triggers() {
             return localeOptions(this.t, [
-                {label: 'blur', value: 'blur'},
-                {label: 'change', value: 'change'},
-                {label: 'submit', value: 'submit'},
+                { label: 'blur', value: 'blur' },
+                { label: 'change', value: 'change' },
+                { label: 'submit', value: 'submit' },
             ]);
         }
     },
@@ -132,7 +128,7 @@ export default defineComponent({
         autoMessage(item) {
             const title = this.designer.setupState.activeRule.title;
             if (this.designer.setupState.activeRule) {
-                item.message = this.t('validate.autoRequired', {title})
+                item.message = this.t('validate.autoRequired', { title })
                 this.onInput();
             }
         },
@@ -141,7 +137,7 @@ export default defineComponent({
         },
         onInput: function () {
             this.$emit('update:modelValue', this.validate.map(item => {
-                item = {...item};
+                item = { ...item };
                 if (!item.message) {
                     delete item.message;
                 }
@@ -172,7 +168,6 @@ export default defineComponent({
 </script>
 
 <style>
-
 ._fd-validate {
     display: flex;
     flex-direction: column;
@@ -197,7 +192,7 @@ export default defineComponent({
     padding-right: 5px;
 }
 
-._fd-validate-item .el-col-12 + .el-col-12 {
+._fd-validate-item .el-col-12+.el-col-12 {
     padding-left: 5px;
 }
 
@@ -212,12 +207,12 @@ export default defineComponent({
     margin-bottom: 10px;
 }
 
-._fd-validate-title > div {
+._fd-validate-title>div {
     display: flex;
     align-items: center;
 }
 
-._fd-validate-title > div > span {
+._fd-validate-title>div>span {
     width: 16px;
     height: 16px;
     background: var(--fc-bg-color-3);

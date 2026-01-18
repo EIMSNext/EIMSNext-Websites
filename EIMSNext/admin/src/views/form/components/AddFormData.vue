@@ -1,5 +1,6 @@
 <template>
-  <FormView :def="formDef" :data="formData" :isView="isView" :actions="actions" @draft="saveDraft" @submit="submitData">
+  <FormView :def="formDef" :data="formData" :isView="isView" :actions="actions" :fieldPerms="fieldPerms"
+    @draft="saveDraft" @submit="submitData">
   </FormView>
 </template>
 <script lang="ts" setup>
@@ -8,23 +9,27 @@ defineOptions({
 });
 
 import { ref, watch } from "vue";
-import { FormDef, FormData, FormContent, FormDataRequest, DataAction } from "@eimsnext/models";
+import { FormDef, FormData, FormContent, FormDataRequest, DataAction, IFieldPerm } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
     formId: string;
     isView: boolean;
     data?: FormData;
+    fieldPerms?: IFieldPerm[]
   }>(),
   {
     isView: false,
   }
 );
 
-const actions = ref<FormActionSettings>({ draft: { text: "SaveDraft", visible: true }, submit: { text: "Submit", visible: true }, reset: { text: "Reset", visible: true } })
+const actions = ref<FormActionSettings>({ draft: { text: "common.wfProcess.saveDraft" }, submit: { text: "common.wfProcess.submit" }, reset: { text: "common.reset" } })
+
 const appId = ref("");
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());
@@ -72,6 +77,15 @@ const saveDraft = (data: any) => {
   });
 };;
 const submitData = (data: any) => {
+  if (actions.value.draft)
+    actions.value.draft.disabled = true
+
+  if (actions.value.submit)
+    actions.value.submit.disabled = true
+
+  if (actions.value.reset)
+    actions.value.reset.disabled = true
+
   let fdata: FormDataRequest = {
     action: DataAction.Submit,
     id: props.data?.id ?? "",

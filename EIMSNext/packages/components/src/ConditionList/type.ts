@@ -1,7 +1,19 @@
 import { IFormFieldDef } from "@/FieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
-import { FieldType, SystemField, isSystemField } from "@eimsnext/models";
-import { IDynamicFindOptions, IDynamicFilter, SortDirection } from "@eimsnext/services";
+import { IListItem } from "@/list/type";
+import { ISelectedTag } from "@/selectedTags/type";
+import {
+  FieldType,
+  SystemField,
+  ValueOption,
+  isSystemField,
+} from "@eimsnext/models";
+import {
+  IDynamicFindOptions,
+  IDynamicFilter,
+  SortDirection,
+  IDataScope,
+} from "@eimsnext/services";
 // import { ODataQuery } from "@/utils/query";
 
 export enum ConditionType {
@@ -29,8 +41,14 @@ export const dataOperators: Record<string, string[]> = {
   input: ["eq", "ne", "in", "nin", "empty", "notempty"],
   number: ["eq", "ne", "gt", "gte", "lt", "lte", "empty", "notempty"],
   timestamp: ["eq", "ne", "gt", "gte", "lt", "lte", "empty", "notempty"],
+  radio: ["eq", "ne", "in", "nin", "empty", "notempty"],
+  checkbox: ["in", "nin", "empty", "notempty"],
   select: ["eq", "ne", "in", "nin", "empty", "notempty"],
   select2: ["in", "nin", "empty", "notempty"],
+  departmentselect: ["eq", "ne", "in", "nin", "empty", "notempty"],
+  departmentselect2: ["in", "nin", "empty", "notempty"],
+  employeeselect: ["eq", "ne", "in", "nin", "empty", "notempty"],
+  employeeselect2: ["in", "nin", "empty", "notempty"],
   other: ["empty", "notempty"],
 };
 
@@ -59,7 +77,8 @@ export function toDynamicFindOptions(
   sort: IFieldSortList,
   skip: number,
   take: number,
-  fixedFilter?: IDynamicFilter
+  fixedFilter?: IDynamicFilter,
+  scope?: IDataScope
 ) {
   let toDynamicFilter = (filter: IConditionList) => {
     let dfilter: IDynamicFilter = {};
@@ -75,7 +94,17 @@ export function toDynamicFindOptions(
         : `data.${filter.field.field}`;
       dfilter.type = filter.field.type;
       dfilter.op = filter.op;
-      dfilter.value = filter.value?.value;
+      if (
+        filter.value?.value &&
+        (dfilter.type == FieldType.EmployeeSelect ||
+          dfilter.type == FieldType.EmployeeSelect2 ||
+          dfilter.type == FieldType.DepartmentSelect ||
+          dfilter.type == FieldType.DepartmentSelect2)
+      ) {
+        dfilter.value = filter.value.value.map((x: ISelectedTag) => x.id);
+      } else {
+        dfilter.value = filter.value?.value;
+      }
     }
 
     return dfilter;
@@ -84,6 +113,7 @@ export function toDynamicFindOptions(
   const findOpt = {} as IDynamicFindOptions;
   findOpt.skip = skip;
   findOpt.take = take;
+  findOpt.scope = scope;
 
   if (fields.length > 0) {
     findOpt.select = [];
@@ -96,8 +126,10 @@ export function toDynamicFindOptions(
   if (sort.items.length > 0) {
     findOpt.sort = [];
     sort.items.forEach((x) => {
-      let sField = isSystemField(x.field.field) ? x.field.field : `data.${x.field.field}`;
-      findOpt.sort?.push({ field: sField, dir: x.sort });
+      let sField = isSystemField(x.field.field)
+        ? x.field.field
+        : `data.${x.field.field}`;
+      findOpt.sort?.push({ field: sField, type: x.field.type, dir: x.sort });
     });
   }
 
@@ -138,7 +170,9 @@ export function toODataQuery<T>(
 
   if (sort.items.length > 0) {
     query.orderBy = sort.items
-      .map((x) => (x.sort == SortDirection.Desc ? `${x.field.field} desc` : x.field.field))
+      .map((x) =>
+        x.sort == SortDirection.Desc ? `${x.field.field} desc` : x.field.field
+      )
       .join(",");
   }
 
@@ -179,4 +213,9 @@ export function toODataQuery<T>(
   query.filter = oFilter;
 
   return query;
+}
+
+export function toListItem(options?: ValueOption[]) {
+  if (!options) return [];
+  return options.map<IListItem>((opt) => ({ id: opt.value, label: opt.label }));
 }

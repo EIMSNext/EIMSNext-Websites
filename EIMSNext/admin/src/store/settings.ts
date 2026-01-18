@@ -1,5 +1,5 @@
 import defaultSettings from "@/settings";
-import { ThemeEnum } from "@/enums/ThemeEnum";
+import { Themes } from "@/enums/Themes";
 import { generateThemeColors, applyTheme, toggleDarkMode } from "@/utils/theme";
 
 type SettingsValue = boolean | string;
@@ -29,7 +29,7 @@ export const useSettingsStore = defineStore("setting", () => {
   watch(
     [theme, themeColor],
     ([newTheme, newThemeColor]) => {
-      toggleDarkMode(newTheme === ThemeEnum.DARK);
+      toggleDarkMode(newTheme === Themes.DARK);
       const colors = generateThemeColors(newThemeColor);
       applyTheme(colors);
     },

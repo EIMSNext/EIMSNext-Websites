@@ -7,5 +7,6 @@ export class FormActionSettings {
 }
 export class ActionSetting {
   text: string = "";
-  visible: boolean = false;
+  visible?: boolean = true;
+  disabled?: boolean = false;
 }

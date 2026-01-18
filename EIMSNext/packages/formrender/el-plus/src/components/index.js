@@ -2,7 +2,8 @@ import { FcSubForm as subForm } from '@eimsnext/form-render-core';
 import IconWarning from './icon/IconWarning.vue';
 
 import { FcCheckbox as checkbox } from "./checkbox";
-import { FcDepartmentSelect as departmentSelect } from "./departmentSelect";
+import { FcDepartmentSelect as departmentselect } from "./departmentselect";
+import { FcEmployeeSelect as employeeselect } from "./employeeselect";
 import { FcFrame as frame } from "./frame";
 import { FcGroup as group } from "./group";
 import { FcRadio as radio } from "./radio";
@@ -16,7 +17,8 @@ export { FcEditor }
 
 export default [
     checkbox,
-    departmentSelect,
+    departmentselect,
+    employeeselect,
     frame,
     radio,
     select,

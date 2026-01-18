@@ -4,8 +4,8 @@
       <div class="flex-1">{{ modelValue.field.label }}</div>
       <div>
         <el-radio-group v-model="sort" size="default" class="mr-[5px]" @change="onSortChanged">
-          <el-radio-button label="升序" :value="SortDirection.Asc" />
-          <el-radio-button label="降序" :value="SortDirection.Desc" />
+          <el-radio-button :label="t('comp.orderby_Asc')" :value="SortDirection.Asc" />
+          <el-radio-button :label="t('comp.orderby_Desc')" :value="SortDirection.Desc" />
         </el-radio-group>
       </div>
       <div><et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon></div>
@@ -25,7 +25,6 @@ defineOptions({
 });
 
 const props = defineProps<{
-  // formId: string;
   modelValue: IFieldSortItem;
 }>();
 

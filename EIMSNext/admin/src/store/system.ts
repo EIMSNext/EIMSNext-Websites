@@ -1,42 +1,32 @@
 import defaultSettings from "@/settings";
 
 import { store } from "@eimsnext/store";
-import { SidebarStatusEnum } from "@/enums/SidebarStatusEnum";
+import { SidebarStatus } from "@/enums/SidebarStatus";
 
 // 导入 Element Plus 中英文语言包
 import zhCn_EL from "element-plus/es/locale/lang/zh-cn";
 import en_EL from "element-plus/es/locale/lang/en";
-// 导入设计器 语言包
-//@ts-expect-error (the desinger is js lib)
-import { ZhCn as zhCn_Des, En as en_Des } from "@eimsnext/form-designer";
 // 本地语言包
-import en_App from "@/lang/en";
-import zhCn_App from "@/lang/zh-cn";
+import { ZhCn as zhCn_App, En as en_App } from "@eimsnext/locale";
 
 const locales = {
   "zh-CN": {
-    caption: "简体中文",
     ...zhCn_EL,
-    ...zhCn_Des,
     ...zhCn_App,
   },
   en: {
-    caption: "English",
     ...en_EL,
-    ...en_Des,
     ...en_App,
   },
 };
 
 export const useSystemStore = defineStore("system", () => {
-  // 布局大小
-  const size = useStorage("size", defaultSettings.size);
   // 语言
   const language = useStorage("language", defaultSettings.language);
   // 侧边栏状态
-  const sidebarStatus = useStorage("sidebarStatus", SidebarStatusEnum.CLOSED);
+  const sidebarStatus = useStorage("sidebarStatus", SidebarStatus.CLOSED);
   const sidebar = reactive({
-    opened: sidebarStatus.value === SidebarStatusEnum.OPENED,
+    opened: sidebarStatus.value === SidebarStatus.OPENED,
     withoutAnimation: false,
   });
 
@@ -54,30 +44,22 @@ export const useSystemStore = defineStore("system", () => {
   // 切换侧边栏
   function toggleSidebar() {
     sidebar.opened = !sidebar.opened;
-    sidebarStatus.value = sidebar.opened ? SidebarStatusEnum.OPENED : SidebarStatusEnum.CLOSED;
+    sidebarStatus.value = sidebar.opened ? SidebarStatus.OPENED : SidebarStatus.CLOSED;
   }
 
   // 关闭侧边栏
   function closeSideBar() {
     sidebar.opened = false;
-    sidebarStatus.value = SidebarStatusEnum.CLOSED;
+    sidebarStatus.value = SidebarStatus.CLOSED;
   }
 
   // 打开侧边栏
   function openSideBar() {
     sidebar.opened = true;
-    sidebarStatus.value = SidebarStatusEnum.OPENED;
+    sidebarStatus.value = SidebarStatus.OPENED;
   }
 
    /**
-   * 改变布局大小
-   *
-   * @param val 布局大小 default | small | large
-   */
-  function changeSize(val: string) {
-    size.value = val;
-  }
-  /**
    * 切换语言
    *
    * @param val
@@ -90,8 +72,7 @@ export const useSystemStore = defineStore("system", () => {
     sidebar,
     language,
     locale,
-    size,
-    changeSize,
+    locales,
     changeLanguage,
     toggleSidebar,
     closeSideBar,

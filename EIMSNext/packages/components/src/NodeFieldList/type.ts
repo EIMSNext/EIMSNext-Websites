@@ -5,7 +5,7 @@ import {
   toFormFieldDef,
 } from "@/FieldList/type";
 import { ITreeNode, TreeNodeType } from "@/common";
-import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
+import { FieldDef, FieldType, FormDef, IFieldPerm } from "@eimsnext/models";
 
 export interface INodeForm {
   nodeId: string;
@@ -35,8 +35,9 @@ export interface IFormFieldMap {
   mapCount: number;
 }
 export interface IFieldLimit {
-  limitField: string;
-  limitType: FieldLimitType;
+  limitField?: string;
+  limitType?: FieldLimitType;
+  fieldPerms?: IFieldPerm[];
 }
 export enum FieldLimitType {
   None,
@@ -47,12 +48,20 @@ export enum ConditionFieldType {
   None = "none",
   Input = "input",
   Number = "number",
+  Radio = "radio",
+  CheckBox = "checkbox",
   Select = "select",
   Select2 = "select2",
   TimeStamp = "timestamp",
+  EmployeeSelect = "employeeselect",
+  EmployeeSelect2 = "employeeselect2",
+  DepartmentSelect = "departmentselect",
+  DepartmentSelect2 = "departmentselect2",
   Other = "other",
 }
-export function getConditionFieldType(fieldtype?: string): ConditionFieldType {
+export function getConditionFieldType(
+  fieldtype?: FieldType | string
+): ConditionFieldType {
   if (!fieldtype) return ConditionFieldType.None;
 
   let dataType = ConditionFieldType.Other;
@@ -68,12 +77,28 @@ export function getConditionFieldType(fieldtype?: string): ConditionFieldType {
       dataType = ConditionFieldType.TimeStamp;
       break;
     case FieldType.Radio:
+      dataType = ConditionFieldType.Radio;
+      break;
     case FieldType.Select:
       dataType = ConditionFieldType.Select;
       break;
     case FieldType.CheckBox:
+      dataType = ConditionFieldType.CheckBox;
+      break;
     case FieldType.Select2:
       dataType = ConditionFieldType.Select2;
+      break;
+    case FieldType.DepartmentSelect:
+      dataType = ConditionFieldType.DepartmentSelect;
+      break;
+    case FieldType.DepartmentSelect2:
+      dataType = ConditionFieldType.DepartmentSelect2;
+      break;
+    case FieldType.EmployeeSelect:
+      dataType = ConditionFieldType.EmployeeSelect;
+      break;
+    case FieldType.EmployeeSelect2:
+      dataType = ConditionFieldType.EmployeeSelect2;
       break;
   }
 

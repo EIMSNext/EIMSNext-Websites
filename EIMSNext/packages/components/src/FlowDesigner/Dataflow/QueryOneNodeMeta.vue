@@ -1,11 +1,11 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('目标表单')" :required="true"></MetaItemHeader>
+    <MetaItemHeader :label="t('dataflow.targetForm')" :required="true"></MetaItemHeader>
     <FormList v-model="formItem" :appId="appId" @change="formChanged"></FormList>
-    <MetaItemHeader class="mt-[8px]" :label="t('查询条件')" :required="true"></MetaItemHeader>
+    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.queryCondition')" :required="true"></MetaItemHeader>
     <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition">
     </ConditionList>
-    <MetaItemHeader class="mt-[8px]" :label="t('排序规则')"></MetaItemHeader>
+    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.sortRule')"></MetaItemHeader>
     <FieldSortList v-model="sortList" :form-id="formId" @change="onSort"></FieldSortList>
   </template>
 </template>
@@ -38,7 +38,7 @@ const condList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
 const sortList = ref<IFieldSortList>({ items: [] });
 const flowContext = inject<IFlowContext>("flowContext");
 const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None));
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 
 const appId = ref(flowContext!.appId);
 const nodeId = ref("");

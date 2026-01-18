@@ -1,17 +1,18 @@
 import { defineComponent, ref, watch, computed } from "vue";
 import { MemberSelectDialog, MemberTabs } from "@eimsnext/components";
+import "./style.css";
 
 export default defineComponent({
   name: "FcDepartmentSelect",
   inheritAttrs: false,
   props: {
     modelValue: {
-      type: [String, Array, Object],
-      default: "",
+      type: [Array, Object],
+      default: [],
     },
     placeholder: {
       type: String,
-      default: "请选择部门",
+      default: "+ 选择部门",
     },
     multiple: {
       type: Boolean,
@@ -25,6 +26,18 @@ export default defineComponent({
       type: Boolean,
       default: undefined,
     },
+    limitType: {
+      type: String,
+      default: "all",
+    },
+    limitScope: {
+      type: Array,
+      default: () => [],
+    },
+    cascadedDept: {
+      type: Boolean,
+      default: false,
+    },
     // 从FormRender的prop.props中接收formCreateInject
     formCreateInject: {
       type: Object,
@@ -34,7 +47,8 @@ export default defineComponent({
   emits: ["update:modelValue", "change"],
   setup(props, { emit }) {
     const showDialog = ref(false);
-    const selectedValue = ref(props.modelValue);
+    const selectedValue = ref(props.modelValue ?? []);
+
     // 结合props和上下文的preview属性，确定是否处于查看模式
     // 优先使用props.preview，因为FormDataView组件会将isView=true传递给FormView组件，
     // 然后FormView组件会将preview=isView传递给formCreate组件
@@ -57,7 +71,7 @@ export default defineComponent({
     // 移除部门对象中的data和value字段，只保留必要的字段
     const removeUnnecessaryFields = (dept) => {
       if (!dept || typeof dept !== "object") return dept;
-      const { data, value, ...rest } = dept;
+      const { data, value, error, ...rest } = dept;
       return rest;
     };
 
@@ -83,27 +97,26 @@ export default defineComponent({
     const handleTagClick = () => {
       showDialog.value = true;
     };
+    const css_icon_dept_selected = {
+      color: "#52B59A",
+      marginRight: "4px",
+    };
 
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
       // 计算最终的禁用状态：禁用属性或查看模式
       const isDisabled = disabled || isPreviewMode.value;
-
+      const limit = { depts: undefined };
+      if (props.limitType == "custom" && props.limitScope?.length > 0) {
+        //TODO:应该动态计算所有子节点
+        limit.depts = props.limitScope;
+      }
       return (
-        <div>
+        <div style={{ width: "100%" }}>
           <div
-            class={`_fc-department-select ${isDisabled ? "is-disabled" : ""}`}
+            class={`_fc-org-select ${isDisabled ? "is-disabled" : ""}`}
             style={{
               cursor: isDisabled ? "not-allowed" : "pointer",
-              padding: "10px",
-              border: "1px solid #dcdfe6",
-              borderRadius: "4px",
-              minHeight: "32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              flexWrap: "wrap",
-              gap: "4px",
               backgroundColor: isDisabled ? "#f5f7fa" : "#ffffff",
             }}
             onClick={() => !isDisabled && (showDialog.value = true)}
@@ -113,19 +126,16 @@ export default defineComponent({
             !Array.isArray(selectedValue.value) &&
             selectedValue.value.label ? (
               <div
-                class="_fc-department-tag"
+                class="_fc-org-tag"
                 style={{
-                  background: "#ecf5ff",
-                  color: "#409eff",
-                  padding: "0 8px",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  height: "24px",
-                  lineHeight: "24px",
                   cursor: isDisabled ? "not-allowed" : "pointer",
                 }}
                 onClick={() => !isDisabled && handleTagClick()}
               >
+                <et-icon
+                  icon="el-icon-UserFilled"
+                  style={css_icon_dept_selected}
+                ></et-icon>
                 {selectedValue.value.label}
               </div>
             ) : Array.isArray(selectedValue.value) &&
@@ -133,15 +143,8 @@ export default defineComponent({
               selectedValue.value.map((dept, index) => (
                 <div
                   key={index}
-                  class="_fc-department-tag"
+                  class="_fc-org-tag"
                   style={{
-                    background: "#ecf5ff",
-                    color: "#409eff",
-                    padding: "0 8px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    height: "24px",
-                    lineHeight: "24px",
                     cursor: isDisabled ? "not-allowed" : "pointer",
                   }}
                   onClick={(e) => {
@@ -149,21 +152,15 @@ export default defineComponent({
                     !isDisabled && handleTagClick();
                   }}
                 >
+                  <et-icon
+                    icon="el-icon-UserFilled"
+                    style={css_icon_dept_selected}
+                  ></et-icon>
                   {dept.label}
                 </div>
               ))
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#909399",
-                  fontSize: "14px",
-                }}
-              >
-                {placeholder}
-              </div>
+              <div class={"_fc-org-empty"}>{placeholder}</div>
             )}
           </div>
           {!isDisabled && showDialog.value && (
@@ -172,13 +169,17 @@ export default defineComponent({
               tags={
                 props.multiple
                   ? selectedValue.value || []
-                  : selectedValue.value &&
-                      typeof selectedValue.value === "object"
-                    ? [selectedValue.value]
-                    : []
+                  : selectedValue.value && Array.isArray(selectedValue.value)
+                    ? selectedValue.value
+                    : selectedValue.value
+                      ? [selectedValue.value]
+                      : []
               }
               showTabs={MemberTabs.Department | MemberTabs.CurDept}
+              cascadedDept={props.cascadedDept}
               multiple={multiple}
+              limit={limit}
+              limitScope={props.limitScope}
               onOk={handleDepartmentChange}
               onCancel={handleDeptCancel}
             />

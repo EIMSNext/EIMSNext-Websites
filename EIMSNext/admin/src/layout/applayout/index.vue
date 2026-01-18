@@ -36,10 +36,17 @@ function handleOutsideClick() {
   systemStore.closeSideBar();
 }
 
-onBeforeMount(async () => {
-  let appId = route.params.appId.toString();
-  await contextStore.setAppId(appId);
-});
+watch(
+  () => route.params.appId,
+  async (newAppId, oldAppId) => {
+    if (newAppId !== oldAppId) {
+      let appId = newAppId.toString();
+      await contextStore.setAppId(appId);
+    }
+  },
+  { immediate: true }
+);
+
 </script>
 
 <style lang="scss" scoped>

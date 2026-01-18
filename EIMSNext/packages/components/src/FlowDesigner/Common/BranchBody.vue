@@ -2,15 +2,11 @@
   <div class="branch-body">
     <el-popover :show-arrow="false" placement="right" width="200" trigger="click">
       <el-button icon="el-icon-plus" style="width: 100%" @click.stop="addBranchItem">
-        {{ t("添加分支") }}
+        {{ t("workflow.addBranch") }}
       </el-button>
-      <el-button
-        :disabled="!canPaste"
-        icon="el-icon-copy-document"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="pasteBranchItem"
-      >
-        {{ t("粘贴分支") }}
+      <el-button :disabled="!canPaste" icon="el-icon-copy-document"
+        style="width: 100%; margin-left: 0; margin-top: 10px" @click.stop="pasteBranchItem">
+        {{ t("workflow.pasteBranch") }}
       </el-button>
       <template #reference>
         <div class="branch-head" :style="'opacity:1'">
@@ -20,12 +16,8 @@
     </el-popover>
 
     <div class="branch-list">
-      <BranchItem
-        v-for="(item, index) in nodeData.childNodes"
-        :p-node-datas="nodeData.childNodes!"
-        :node-data="item"
-        :data-index="index"
-      />
+      <BranchItem v-for="(item, index) in nodeData.childNodes" :p-node-datas="nodeData.childNodes!" :node-data="item"
+        :data-index="index" />
     </div>
     <div class="branch-foot">
       <AddNodeButton :p-node-datas="pNodeDatas" :node-data="nodeData" />
@@ -73,7 +65,7 @@ watch(
 );
 
 const addBranchItem = () => {
-  const newBranchItem = createFlowNode(FlowNodeType.BranchItem);
+  const newBranchItem = createFlowNode(FlowNodeType.BranchItem, t);
   addNewNode(props.nodeData.childNodes!, newBranchItem);
 };
 const pasteBranchItem = () => {

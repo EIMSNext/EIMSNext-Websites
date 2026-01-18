@@ -43,7 +43,7 @@ export default {
         fetch: "",
       },
       $required: false,
-      props: { multiple: true },
+      props: { multiple: true, clearable: true },
       options: makeTreeOptions(
         t("props.option"),
         { label: "label", value: "value" },
@@ -58,23 +58,24 @@ export default {
   // },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
+      { type: "input", field: "placeholder" },
       makeOptionsRule(t, "options"),
-    //   { type: "switch", field: "multiple" },
+      //   { type: "switch", field: "multiple" },
       // {
       //   type: "switch",
       //   field: "disabled",
       // },
-      {
-        type: "CheckBoxInput",
-        field: "disabled",
-        wrap: { show: false },
-      },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "disabled",
+      //   wrap: { show: false },
+      // },
       // { type: "switch", field: "clearable" },
-      {
-        type: "CheckBoxInput",
-        field: "clearable",
-        wrap: { show: false },
-      },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "clearable",
+      //   wrap: { show: false },
+      // },
       // {
       //     type: 'switch',
       //     field: 'collapseTags'
@@ -84,7 +85,6 @@ export default {
       //     field: 'multipleLimit',
       //     props: {min: 0}
       // },
-      { type: "input", field: "placeholder" },
       // {
       //   type: "switch",
       //   field: "filterable",
@@ -109,15 +109,25 @@ export default {
       //     },
       // },
       //  {type: 'switch', field: 'allowCreate'},
-      {
-        type: "input",
-        field: "noMatchText",
-      },
+      // {
+      //   type: "input",
+      //   field: "noMatchText",
+      // },
       // {type: 'input', field: 'noDataText'}, {
       //     type: 'switch',
       //     field: 'reserveKeyword'
       // },
       // { type: "switch", field: "defaultFirstOption" },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "readonly",
+      //   wrap: { show: false },
+      // },
+      {
+        type: "CheckBoxInput",
+        field: "disabled",
+        wrap: { show: false },
+      },
     ]);
   },
 };
