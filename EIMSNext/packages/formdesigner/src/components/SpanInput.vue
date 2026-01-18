@@ -1,14 +1,14 @@
 <template>
     <el-radio-group :modelValue="modelValue" class="_fd-span-input">
         <el-radio-button :value="item.value" :label="item.value" v-for="item in layout" :key="item.value"
-                         @click="onInput(item.value)">
+            @click="onInput(item.value)">
             {{ item.value === 24 ? t('form.row') : item.label }}
         </el-radio-button>
     </el-radio-group>
 </template>
 
 <script>
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'SpanInput',
@@ -24,12 +24,12 @@ export default defineComponent({
     data() {
         return {
             layout: [
-                {label: '1/4', value: 6},
-                {label: '1/3', value: 8},
-                {label: '1/2', value: 12},
-                {label: '2/3', value: 16},
-                {label: '3/4', value: 18},
-                {label: '整行', value: 24},
+                { label: '1/4', value: 6 },
+                { label: '1/3', value: 8 },
+                { label: '1/2', value: 12 },
+                { label: '2/3', value: 16 },
+                { label: '3/4', value: 18 },
+                { label: '整行', value: 24 },
             ]
         }
     },
@@ -50,7 +50,7 @@ export default defineComponent({
 ._fd-span-input .el-radio-button__inner {
     width: 100%;
     padding: 4px;
-    line-height: 16px;
+    line-height: 24px;
 }
 
 ._fd-span-input .el-radio-button {

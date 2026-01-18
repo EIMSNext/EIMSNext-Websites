@@ -1,4 +1,4 @@
-import { FieldDef, FieldType } from "./formDef";
+import { FieldDef, FieldProp, FieldType } from "./formDef";
 
 export interface IIdentity {
   id: string;
@@ -6,9 +6,9 @@ export interface IIdentity {
 
 export interface IDataModel {
   createBy?: Operator;
-  createTime?: Date;
+  createTime?: number;
   updateBy?: Operator;
-  updateTime?: Date;
+  updateTime?: number;
 }
 
 export interface ICorpModel {
@@ -20,9 +20,9 @@ export interface IdBase extends IIdentity {
 }
 export interface ModelBase extends IdBase, IDataModel {
   createBy?: Operator;
-  createTime?: Date;
+  createTime?: number;
   updateBy?: Operator;
-  updateTime?: Date;
+  updateTime?: number;
 }
 
 export interface CorpModelBase extends ModelBase, ICorpModel {
@@ -43,6 +43,17 @@ export enum SystemField {
   FlowStatus = "flowStatus",
 }
 
+export function isSystemField(field: string) {
+  return (
+    field === SystemField.Id ||
+    field === SystemField.CreateBy ||
+    field === SystemField.CreateTime ||
+    field === SystemField.UpdateBy ||
+    field === SystemField.UpdateTime ||
+    field === SystemField.FlowStatus
+  );
+}
+
 export function getIdDef(title: string): FieldDef {
   let field = new FieldDef();
   field.field = SystemField.Id;
@@ -51,19 +62,20 @@ export function getIdDef(title: string): FieldDef {
   return field;
 }
 
-// export function  getCreateBy(title: string): FieldDef {
-//   let field = new FieldDef();
-//   field.field = SystemField.CreateBy;
-//   field.title = title;
-//   field.type = FieldType.Input;
-//   return field;
-// }
+export function  getCreateBy(title: string): FieldDef {
+  let field = new FieldDef();
+  field.field = SystemField.CreateBy;
+  field.title = title;
+  field.type = FieldType.EmployeeSelect;
+  return field;
+}
 
 export function getCreateTime(title: string): FieldDef {
   let field = new FieldDef();
   field.field = SystemField.CreateTime;
   field.title = title;
-  field.type = FieldType.DatePicker;
+  field.type = FieldType.TimeStamp;
+  field.props = { format: "YYYY-MM-DD HH:mm:ss" };
   return field;
 }
 
@@ -79,7 +91,8 @@ export function getUpdateTime(title: string): FieldDef {
   let field = new FieldDef();
   field.field = SystemField.UpdateTime;
   field.title = title;
-  field.type = FieldType.DatePicker;
+  field.type = FieldType.TimeStamp;
+  field.props = { format: "YYYY-MM-DD HH:mm:ss" };
   return field;
 }
 

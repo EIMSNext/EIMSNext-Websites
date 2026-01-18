@@ -4,9 +4,12 @@ export interface ISelectedTag {
   type: TagType;
   error?: boolean;
   data?: any;
+  code?: string;
+  value?: string;
+  cascadedDept?: boolean;
 }
 export enum TagType {
-  None,
+  None = 0,
   Department,
   Employee,
   Role,

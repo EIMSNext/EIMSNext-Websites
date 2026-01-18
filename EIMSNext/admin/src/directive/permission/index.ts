@@ -1,40 +1,27 @@
 import type { Directive, DirectiveBinding } from "vue";
 
 import { useUserStore } from "@eimsnext/store";
+import { AuthGroup, DataPerms, UserType } from "@eimsnext/models";
+import { FlagEnum } from "@eimsnext/utils";
+
+export interface PermContext {
+  dataPerms?: DataPerms;
+  needPerm: DataPerms;
+}
 
 /**
  * 按钮权限
  */
 export const hasPerm: Directive = {
-  mounted(el: HTMLElement, binding: DirectiveBinding) {
-    const requiredPerms = binding.value;
+  mounted(el: HTMLElement, binding: DirectiveBinding<PermContext>) {
+    const context = binding.value;
     const { currentUser } = storeToRefs(useUserStore());
-    // if(user.userType == usertype)
-    return;
 
-    // 校验传入的权限值是否合法
-    // if (!requiredPerms || (typeof requiredPerms !== "string" && !Array.isArray(requiredPerms))) {
-    //   throw new Error(
-    //     "需要提供权限标识！例如：v-has-perm=\"'sys:user:add'\" 或 v-has-perm=\"['sys:user:add', 'sys:user:edit']\""
-    //   );
-    // }
-
-    //   const { roles, perms } = useUserStore().currentUser;
-
-    //   // 超级管理员拥有所有权限
-    //   if (roles.includes("ROOT")) {
-    //     return;
-    //   }
-
-    //   // 检查权限
-    //   const hasAuth = Array.isArray(requiredPerms)
-    //     ? requiredPerms.some((perm) => perms.includes(perm))
-    //     : perms.includes(requiredPerms);
-
-    //   // 如果没有权限，移除该元素
-    //   if (!hasAuth && el.parentNode) {
-    //     el.parentNode.removeChild(el);
-    //   }
+    return (
+      (currentUser.value.userType == UserType.CorpOwmer ||
+        currentUser.value.userType == UserType.CorpAdmin ||
+        (context.dataPerms && FlagEnum.has(context.dataPerms, context.needPerm))) == true
+    );
   },
 };
 

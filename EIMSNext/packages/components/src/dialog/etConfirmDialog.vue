@@ -1,51 +1,39 @@
 <template>
-  <el-dialog
-    class="et-confirm-dialog"
-    ref="ori"
-    :model-value="modelValue"
-    v-bind="attrs"
-    :show-close="false"
-    :append-to-body="true"
-    :destroy-on-close="true"
-    @close="cancel"
-  >
+  <el-dialog class="et-confirm-dialog" ref="ori" :model-value="modelValue" v-bind="attrs" :show-close="false"
+    :append-to-body="true" :destroy-on-close="true" @close="cancel">
     <div class="confirm-content">
-      <el-icon
-        class="msg-icon"
-        :class="{
-          error: icon == MessageIcon.Error,
-          warning: icon == MessageIcon.Warning,
-          info: icon == MessageIcon.Info || icon == MessageIcon.Question,
-        }"
-        :color="iconColor"
-      >
+      <el-icon class="msg-icon" :class="{
+        error: icon == MessageIcon.Error,
+        warning: icon == MessageIcon.Warning,
+        info: icon == MessageIcon.Info || icon == MessageIcon.Question,
+      }" :color="iconColor">
         <InfoFilled v-if="icon == MessageIcon.Info" />
         <QuestionFilled v-if="icon == MessageIcon.Question" />
         <WarningFilled v-if="icon == MessageIcon.Warning" />
         <CircleCloseFilled v-if="icon == MessageIcon.Error" />
       </el-icon>
       <div class="confirm-body">
-        <div class="title">{{ title }}</div>
+        <div class="title">{{ titleRef }}</div>
         <div class="message">
           <slot></slot>
         </div>
       </div>
     </div>
     <slot name="footer">
-      <div class="footer-wrapper">
+      <div class="el-dialog__footer footer-wrapper">
         <div class="footer-left">
           <slot name="footer-left"></slot>
         </div>
         <div class="footer-right">
           <slot name="footer-right">
             <el-button v-if="showCancel" @click="cancel">{{
-              cancelText
+              cancelTextRef
             }}</el-button>
             <el-button v-if="showNoSave" @click="save(false)">{{
-              noSaveText
+              noSaveTextRef
             }}</el-button>
             <el-button type="primary" @click="save(true)">{{
-              okText
+              okTextRef
             }}</el-button>
           </slot>
         </div>
@@ -55,8 +43,24 @@
 </template>
 <script lang="ts" setup>
 import "./style/index.less";
-import { ref, useAttrs } from "vue";
+import { computed, onMounted, ref, useAttrs } from "vue";
 import { MessageIcon } from "./type";
+//下面的导入对于函数式调用是必须的
+import { ElDialog, ElIcon, ElButton } from "element-plus";
+import {
+  InfoFilled,
+  QuestionFilled,
+  WarningFilled,
+  CircleCloseFilled,
+} from "@element-plus/icons-vue";
+import { useLocale } from "element-plus";
+const { t } = useLocale()
+
+
+const defaultTitle = computed(() => t("common.message.editConfirm_Title"))
+const defaultCancelText = computed(() => t("common.cancel"))
+const defaultOKText = computed(() => t("common.ok"))
+const defaultNoSaveText = computed(() => t("common.noSave"))
 
 const attrs = useAttrs();
 // const ori = ref(null);
@@ -80,14 +84,26 @@ const props = withDefaults(
   }>(),
   {
     icon: MessageIcon.Question,
-    title: "数据有修改，是否保存？",
     showCancel: true,
     showNoSave: true,
-    cancelText: "取消",
-    noSaveText: "不保存",
-    okText: "保存并继续",
   }
 );
+
+const titleRef = computed(() => props.title || t("common.message.editConfirm_Title"));
+const cancelTextRef = computed(() => props.cancelText || t("common.cancel"));
+const okTextRef = computed(() => props.okText || t("common.ok"));
+const noSaveTextRef = computed(() => props.noSaveText || t("common.noSave"));
+
+const getIconClass = computed(() => {
+  let iconCls =
+    props.icon == MessageIcon.Error
+      ? "error"
+      : props.icon == MessageIcon.Warning
+        ? "warning"
+        : "info";
+
+  return `msg-icon ${iconCls}`;
+});
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
 const cancel = () => {

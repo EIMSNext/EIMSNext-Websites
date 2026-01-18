@@ -3,11 +3,25 @@
 .member-select-dialog {
   width: 750px;
 
+  // 确保对话框底部按钮在一行上显示
+  :deep(.el-dialog__footer) {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    flex-direction: row !important;
+    
+    // 确保按钮在一行上显示
+    .el-button {
+      margin: 0 !important;
+    }
+  }
+
   .member-select {
     width: 100%;
     height: 480px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 
     .search-input {
       width: 100%;
@@ -17,13 +31,16 @@
     .search-result {
       border: 1px solid #eee;
       display: flex;
-      flex: auto;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
     }
     .result-container {
       padding: 0 12px;
       border-bottom: 1px solid #eeeeee;
       display: flex;
       flex: 1;
+      flex-direction: column;
 
       .el-tabs__nav-wrap:after {
         height: 0;
@@ -40,25 +57,31 @@
         }
       }
 
+      .el-tabs {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .el-tabs__content {
+        flex: 1;
+        margin-top: 0 !important;
+        overflow: hidden;
+      }
+
+      .el-tab-pane {
+        height: 100%;
+        display: flex;
+        overflow: hidden;
+      }
+
       .el-collapse {
         border-top: none;
         border-bottom: none;
       }
     }
 
-    .left-panel {
-      bottom: 0;
-      position: absolute;
-      top: 0;
-      transition: left 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-    }
-    .right-panel {
-      background: #fff;
-      bottom: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
     .filter-items {
       display: flex;
       flex: none;
@@ -66,7 +89,7 @@
 
       .filter-item {
         border-radius: 4px;
-        color: var(--color-text);
+        color: var(--et-color-text);
         cursor: pointer;
         font-size: 14px;
         height: 36px;
@@ -74,40 +97,90 @@
         padding: 0 12px;
 
         &:hover {
-          background: var(--color-primary-bg);
-          color: var(--color-primary);
+          background: var(--et-color-bg-primary);
+          color: var(--et-color-primary);
         }
         &.active {
-          background: var(--color-primary-bg);
-          color: var(--color-primary);
+          background: var(--et-color-bg-primary);
+          color: var(--et-color-primary);
         }
       }
     }
   }
 }
-.dept-tree {
-  .node-data {
+.dept-select {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  
+  .dept-tree {
     width: 100%;
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 12px;
+    max-height: calc(100% - 12px);
+    
+    .node-data {
+      width: 100%;
 
-    .node-wrapper {
-      display: flex;
-      align-items: center;
+      .node-wrapper {
+        display: flex;
+        align-items: center;
 
-      .node-icon {
-        width: 20px;
-        height: 20px;
-      }
-      .node-label {
-        margin-left: 5px;
-        flex: 1 1 auto;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .node-action {
-        margin: 0 5px;
-        flex: none;
+        .node-icon {
+          width: 20px;
+          height: 20px;
+        }
+        .node-label {
+          margin-left: 5px;
+          flex: 1 1 auto;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .node-action {
+          margin: 0 5px;
+          flex: none;
+        }
       }
     }
+  }
+}
+
+.emp-select {
+  height: 100%;
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  
+  .left-panel {
+    width: 50%;
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid #eee;
+    box-sizing: border-box;
+    
+    .filter-items {
+      padding: 0 12px;
+    }
+    
+    .dept-tree {
+      height: calc(100% - 36px);
+      overflow-y: auto;
+      width: 100%;
+      margin-top: 0;
+      padding: 0 12px;
+      box-sizing: border-box;
+    }
+  }
+  
+  .right-panel {
+    width: 50%;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
   }
 }

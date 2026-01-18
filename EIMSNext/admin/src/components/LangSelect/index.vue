@@ -1,7 +1,10 @@
 <template>
   <el-dropdown trigger="click" @command="handleLanguageChange">
     <div>
-      <et-icon icon="language" :size="size" /> <span v-if="showLabel">{{ curLang.label }}</span>
+      <div style="display: inline-flex;">
+        <et-icon icon="language" :size="size" />
+        <span v-if="showLabel" class="ml-[5px]">{{ curLang.label }}</span>
+      </div>
     </div>
     <template #dropdown>
       <el-dropdown-menu>
@@ -16,7 +19,9 @@
 
 <script setup lang="ts">
 import { useSystemStore } from "@/store/system";
-import { LanguageEnum } from "@/enums/LanguageEnum";
+import { Language } from "@/enums/Language";
+import { useI18n } from "vue-i18n";
+const { locale } = useI18n();
 
 defineProps({
   size: {
@@ -27,23 +32,30 @@ defineProps({
     type: Boolean,
     required: false,
     default: () => true,
-  }
+  },
 });
 
 const langOptions = [
-  { label: "简体中文", value: LanguageEnum.ZH_CN },
-  { label: "English", value: LanguageEnum.EN },
+  { label: "简体中文", value: Language.ZH_CN },
+  { label: "English", value: Language.EN },
 ];
 
-const curLang = ref({ label: "简体中文", value: LanguageEnum.ZH_CN })
+const curLang = ref({ label: "简体中文", value: Language.ZH_CN });
 
 const systemStore = useSystemStore();
 if (systemStore.language) {
-  curLang.value = langOptions.find(x => x.value === systemStore.language) || { label: "简体中文", value: LanguageEnum.ZH_CN };
+  curLang.value = langOptions.find((x) => x.value === systemStore.language) || {
+    label: "简体中文",
+    value: Language.ZH_CN,
+  };
+  locale.value = curLang.value.value
 }
 
 function handleLanguageChange(lang: string) {
   systemStore.changeLanguage(lang);
-  curLang.value = langOptions.find(x => x.value === lang) || { label: "简体中文", value: LanguageEnum.ZH_CN };
+  curLang.value = langOptions.find((x) => x.value === lang) || {
+    label: "简体中文",
+    value: Language.ZH_CN,
+  };
 }
 </script>

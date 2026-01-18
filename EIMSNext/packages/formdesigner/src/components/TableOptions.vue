@@ -1,23 +1,17 @@
 <template>
     <div class="_td-table-opt">
-        <el-table
-            :data="value"
-            :key="checked ? '2': '1'"
-            border
-            :size="size || 'small'"
-            style="width: 100%">
-            <template v-for="(col,idx) in overColumn" :key="col.label + idx">
+        <el-table :data="value" :key="checked ? '2' : '1'" border :size="size || 'small'" style="width: 100%">
+            <template v-for="(col, idx) in overColumn" :key="col.label + idx">
                 <el-table-column :label="col.label">
                     <template #default="scope">
                         <template v-if="col.value">
                             <ValueInput :size="size || 'small'" :modelValue="scope.row[col.key]"
-                                        @update:modelValue="(n)=>(scope.row[col.key] = n)"
-                                        @blur="onInput(scope.row)" @change-type="onInput(scope.row)"></ValueInput>
+                                @update:modelValue="(n) => (scope.row[col.key] = n)" @blur="onInput(scope.row)"></ValueInput>
                         </template>
                         <template v-else>
                             <el-input :size="size || 'small'" :modelValue="scope.row[col.key]"
-                                      @update:modelValue="(n)=>(scope.row[col.key] = n)"
-                                      @blur="onInput(scope.row)"></el-input>
+                                @update:modelValue="(n) => (scope.row[col.key] = n)"
+                                @blur="onInput(scope.row)"></el-input>
                         </template>
                     </template>
                 </el-table-column>
@@ -32,26 +26,27 @@
             <el-button link type="primary" @click="add" v-if="!max || max > value.length">
                 <i class="fc-icon icon-add"></i> {{ t('tableOptions.add') }}
             </el-button>
-            <el-checkbox v-model="checked" :label="t('tableOptions.keyValue')" v-if="keyValue"/>
+            <!-- 隐藏keyvalue选项，设置默认值为true -->
+            <!-- <el-checkbox v-model="checked" :label="t('tableOptions.keyValue')" v-if="keyValue" /> -->
         </div>
 
     </div>
 </template>
 
 <script>
-import {defineComponent} from 'vue';
-import {copy} from '@eimsnext/form-render-core';
+import { defineComponent } from 'vue';
+import { copy } from '@eimsnext/form-render-core';
 import ValueInput from './computed/ValueInput.vue';
 
 export default defineComponent({
     name: 'TableOptions',
-    components: {ValueInput},
+    components: { ValueInput },
     emits: ['update:modelValue', 'change'],
     props: {
         modelValue: [Array, Object],
         column: {
             type: Array,
-            default: () => [{label: 'label', key: 'label'}, {label: 'value', key: 'value'}]
+            default: () => [{ label: 'label', key: 'label' }, { label: 'value', key: 'value' }]
         },
         valueType: String,
         keyValue: String,
@@ -83,7 +78,7 @@ export default defineComponent({
     data() {
         return {
             value: this.tidyModelValue(),
-            checked: false,
+            checked: true //false
         };
     },
     created() {
@@ -112,11 +107,11 @@ export default defineComponent({
             const modelValue = this.modelValue;
             if (this.valueType === 'string') {
                 return (modelValue || []).map(value => {
-                    return {value: '' + value}
+                    return { value: '' + value }
                 })
             } else if (this.valueType === 'object') {
                 return Object.keys((modelValue || {})).map(label => {
-                    return {label, value: modelValue[label]}
+                    return { label, value: modelValue[label] }
                 })
             } else {
                 return [...modelValue || []].map(v => {
@@ -138,14 +133,15 @@ export default defineComponent({
                     if (this.valueType === 'string') {
                         return v.value;
                     }
-                    if (this.checked) {
+                    // 只有当keyValue存在时，才执行keyValue相关逻辑
+                    if (this.checked && this.keyValue) {
                         const value = v[this.keyValue];
                         return this.column.reduce((item, col) => {
                             item[col.key] = value;
                             return item;
                         }, {});
                     } else {
-                        return {...v}
+                        return { ...v }
                     }
                 });
             }
@@ -174,9 +170,11 @@ export default defineComponent({
         },
         add() {
             this.value.push(this.column.reduce((initial, v) => {
-                initial[v.key] = '';
+                const i = this.value.length + 1
+                initial[v.key] = this.t("props.option") + (i < 10 ? `0${i}` : `${i}`);
                 return initial;
             }, {}));
+            this.input()
         },
         del(idx) {
             this.value.splice(idx, 1);

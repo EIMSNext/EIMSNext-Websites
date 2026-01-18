@@ -1,5 +1,8 @@
 <template>
   <el-tabs v-model="activeName" tabPosition="left" class="adv-container" @tab-click="handleClick">
+    <el-tab-pane label="数据推送" name="webpush" class="adv-panel">
+      <DataflowList :form-def="formDef" />
+    </el-tab-pane>
     <el-tab-pane label="智能助手" name="dataflow" class="adv-panel">
       <DataflowList :form-def="formDef" />
     </el-tab-pane>
@@ -28,7 +31,7 @@ const locale = computed(() => systemStore.locale);
 const activeName = ref("dataflow");
 
 const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
+  // console.log(tab, event);
 };
 
 const emit = defineEmits(["close"]);

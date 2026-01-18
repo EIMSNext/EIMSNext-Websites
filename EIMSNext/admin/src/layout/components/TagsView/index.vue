@@ -12,10 +12,10 @@
 
     <!-- tag标签操作菜单 -->
     <ul v-show="contentMenuVisible" class="contextmenu" :style="{ left: left + 'px', top: top + 'px' }">
-      <li @click="refreshSelectedTag(selectedTag)">
+      <!-- <li @click="refreshSelectedTag(selectedTag)">
         <et-icon icon="refresh" />
         刷新
-      </li>
+      </li> -->
       <li v-if="!isAffix(selectedTag) || isClosable(selectedTag)" @click="closeSelectedTag(selectedTag)">
         <et-icon icon="close" />
         关闭
@@ -179,7 +179,7 @@ function isClosable(tag: TagView) {
 function isFirstView() {
   try {
     return (
-      selectedTag.value.path === "/dashboard" ||
+      selectedTag.value.path === "/workspace" ||
       selectedTag.value.fullPath === tagsViewStore.visitedViews[1].fullPath
     );
   } catch (err) {
@@ -202,7 +202,7 @@ function refreshSelectedTag(view: TagView) {
   tagsViewStore.delCachedView(view);
   const { fullPath } = view;
   nextTick(() => {
-    router.replace("/redirect" + fullPath);
+    router.replace(fullPath);
   });
 }
 
@@ -237,6 +237,7 @@ function closeOtherTags() {
 }
 
 function closeAllTags(view: TagView) {
+  // console.log("close all")
   tagsViewStore.delAllViews().then((res: any) => {
     tagsViewStore.toLastView(res.visitedViews, view);
   });
@@ -263,8 +264,9 @@ function openContentMenu(tag: TagView, e: MouseEvent) {
   // if (layout.value === "mix") {
   //   top.value = e.clientY - 50;
   // } else {
-  top.value = e.clientY;
+  // top.value = e.clientY;
   // }
+  top.value = 37;
 
   contentMenuVisible.value = true;
   selectedTag.value = tag;
@@ -311,26 +313,6 @@ function findOutermostParent(tree: any[], findName: string) {
 
   return null;
 }
-
-// const againActiveTop = (newVal: string) => {
-//   if (layout.value !== "mix") return;
-//   const parent = findOutermostParent(permissionStore.routes, newVal);
-//   if (appStore.activeTopMenu !== parent.path) {
-//     appStore.activeTopMenu(parent.path);
-//   }
-// };
-// 如果是混合模式，更改selectedTag，需要对应高亮的activeTop
-// watch(
-// () => route.name,
-// (newVal) => {
-//   if (newVal) {
-//     againActiveTop(newVal as string);
-//   }
-// },
-// {
-//   deep: true,
-// }
-// );
 onMounted(() => {
   initTags();
 });
@@ -341,24 +323,53 @@ onMounted(() => {
   width: 100%;
   height: 36px;
   background-color: var(--el-bg-color);
-  border: 1px solid var(--el-border-color-light);
-  box-shadow: 0 1px 1px var(--el-box-shadow-light);
+  border: none;
+  border-bottom: 1px solid var(--el-border-color-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
 
   .tags-item {
-    display: inline-block;
-    padding: 3px 8px;
-    margin: 3px 0 0 0px;
-    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    margin: 4px 0 0 8px;
+    font-size: 13px;
     cursor: pointer;
-    border: 1px solid var(--el-border-color-light);
-    border-bottom: none;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+    background-color: var(--el-bg-color);
+    color: var(--el-text-color-regular);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    max-width: 160px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-left-color: var(--el-border-color-light);
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: transparent;
+      transition: background-color 0.25s ease;
+    }
 
     &:hover {
       color: var(--el-color-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     &:first-of-type {
-      margin-left: 8px;
+      margin-left: 12px;
     }
 
     &:last-of-type {
@@ -366,33 +377,67 @@ onMounted(() => {
     }
 
     .tag-close-icon {
-      vertical-align: -0.15em;
+      vertical-align: middle;
       cursor: pointer;
       border-radius: 50%;
+      margin-left: 6px;
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      opacity: 0.7;
+      transition: all 0.2s ease;
 
       &:hover {
         color: #fff;
-        background-color: var(--el-color-primary);
+        // background-color: var(--el-color-primary);
+        opacity: 1;
+        transform: scale(1.1);
       }
     }
 
     &.active {
-      color: #fff;
-      background-color: var(--el-color-primary);
+      color: var(--el-color-primary);
+      // background-color: #fff;
+      // border-color: var(--el-border-color-light) var(--el-border-color-light) transparent;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      font-weight: 500;
 
-      // &::before {
-      //   display: inline-block;
-      //   width: 8px;
-      //   height: 8px;
-      //   margin-right: 5px;
-      //   content: "";
-      //   background: #fff;
-      //   border-radius: 50%;
-      // }
+      &::before {
+        background-color: var(--el-color-primary);
+      }
 
-      .tag-close-icon:hover {
+      &:hover {
         color: var(--el-color-primary);
+        // border-color: var(--el-border-color-light) var(--el-border-color-light) transparent;
+        // background-color: #fff;
+        transform: none;
+      }
+
+      .tag-close-icon {
+        opacity: 0.8;
+
+        &:hover {
+          color: #fff;
+          background-color: var(--el-color-primary);
+        }
+      }
+    }
+
+    // 固定标签样式
+    &.tags-item[data-affix="true"] {
+      font-weight: 500;
+      color: var(--el-text-color-primary);
+
+      &:hover {
+        color: var(--el-text-color-primary);
         background-color: var(--el-fill-color-light);
+      }
+
+      &.active {
+        color: var(--el-color-primary);
       }
     }
   }
@@ -400,18 +445,35 @@ onMounted(() => {
 
 .contextmenu {
   position: absolute;
-  z-index: 99;
+  z-index: 9999;
   font-size: 12px;
   background: var(--el-bg-color-overlay);
-  border-radius: 4px;
-  box-shadow: var(--el-box-shadow-light);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--el-border-color-light);
+  padding: 4px 0;
+  min-width: 120px;
+  backdrop-filter: blur(8px);
 
   li {
     padding: 8px 16px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease;
+
+    et-icon {
+      margin-right: 6px;
+      font-size: 14px;
+    }
 
     &:hover {
-      background: var(--el-fill-color-light);
+      background-color: var(--el-fill-color-light);
+      color: var(--el-color-primary);
+    }
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--el-border-color-transparent);
     }
   }
 }
@@ -424,10 +486,47 @@ onMounted(() => {
 
   .el-scrollbar__bar {
     bottom: 0;
+    height: 4px;
+
+    &.is-vertical {
+      display: none;
+    }
+
+    .el-scrollbar__thumb {
+      background-color: rgba(144, 147, 153, 0.3);
+      border-radius: 2px;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: rgba(144, 147, 153, 0.5);
+      }
+    }
   }
 
   .el-scrollbar__wrap {
     height: 49px;
+    padding-bottom: 12px;
   }
+}
+
+// 动画效果增强
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contextmenu {
+  animation: fadeIn 0.15s ease forwards;
+}
+
+.tags-item {
+  animation: fadeIn 0.2s ease forwards;
 }
 </style>

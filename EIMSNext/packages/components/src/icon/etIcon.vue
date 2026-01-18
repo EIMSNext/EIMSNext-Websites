@@ -9,6 +9,10 @@
         <i :class="'iconfont icon-' + icon.replace('iconfont-', '') + ' ' + iconClass"
           :style="'font-size:' + size + ';color:' + color">
         </i></template>
+      <template v-else-if="icon.startsWith('fc-icon-')">
+        <i :class="'fc-icon ' + icon.replace('fc-icon-', '') + ' ' + iconClass"
+          :style="'font-size:' + size + ';color:' + color">
+        </i></template>
       <template v-else>
         <SvgIcon :icon="icon" :color="color" :size="size" :iconClass="iconClass" />
       </template>
@@ -31,7 +35,7 @@ const props = withDefaults(
     iconClass?: string;
   }>(),
   {
-    color: "",
+    color: "currentcolor",
     size: "1em",
     iconClass: "",
   }

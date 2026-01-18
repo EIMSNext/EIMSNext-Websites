@@ -1,4 +1,9 @@
 <template>
+  <!-- 删除确认对话框 -->
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('admin.deleteFormConfirm_Title', [selectedForm?.name])"
+    :icon="MessageIcon.Warning" :showNoSave="false" @ok="handleDeleteConfirm">
+    <div>{{ t("admin.deleteFormConfirm_Content") }}</div>
+  </EtConfirmDialog>
   <form-edit v-if="showFormEditor" :formId="selectedFormId" :usingFlow="usingWorkflow" :isLedger="isLedger"
     @close="closeEditor" />
   <div v-if="!item.meta || !item.meta.hidden">
@@ -15,20 +20,21 @@
         path: resolvePath(onlyOneChild.path),
         query: onlyOneChild.meta.params,
       }">
-        <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'submenu-title-noDropdown': !isNest }">
+        <el-menu-item :index="resolvePath(onlyOneChild.path)">
           <SidebarMenuItemTitle :icon="onlyOneChild.meta.icon || item.meta?.icon" :title="onlyOneChild.meta.title"
             :iconColor="item.meta?.iconColor" />
-          <span class="more-wrapper">
+          <span v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin" class="more-wrapper">
             <el-dropdown placement="bottom-start" size="large">
-              <et-icon icon="el-icon-More"></et-icon>
+              <et-icon icon="el-icon-More" @click.prevent=""></et-icon>
               <template #dropdown>
                 <el-dropdown-menu style="min-width: 150px">
-                  <el-dropdown-item @click="editForm(item.meta?.id)">编辑</el-dropdown-item>
+                  <el-dropdown-item @click="editForm(item.meta?.id)">{{ t("common.edit") }}</el-dropdown-item>
                   <el-dropdown-item @click="editForm(item.meta?.id)">
-                    修改名称和图标
+                    {{ t("admin.editNameAndIcon") }}
                   </el-dropdown-item>
                   <el-divider style="margin: 3px 0" />
-                  <el-dropdown-item @click="deleteForm(item.meta?.id)">删除</el-dropdown-item>
+                  <el-dropdown-item class="btn-delete" @click="deleteForm(item.meta?.id)">{{ t("common.delete")
+                  }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -59,8 +65,11 @@ defineOptions({
 import path from "path-browserify";
 import { RouteMeta, RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
-import { useFormStore } from "@eimsnext/store";
-import { FormDef } from "@eimsnext/models";
+import { useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
+import { FormDef, UserType } from "@eimsnext/models";
+import { MessageIcon } from "@eimsnext/components";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n()
 
 const props = defineProps({
   /**
@@ -88,13 +97,18 @@ const props = defineProps({
   },
 });
 
+const contextStore = useContextStore();
 const formStore = useFormStore();
 // 可见的唯一子节点
 const onlyOneChild = ref();
 const selectedFormId = ref("");
+const selectedForm = ref<FormDef>()
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
+const showDeleteConfirmDialog = ref(false);
+const userStore = useUserStore();
+const curUser = toRef(userStore.currentUser)
 /**
  * 检查是否仅有一个可见子节点
  *
@@ -146,19 +160,33 @@ async function editForm(formId?: string) {
     let form = await formStore.get(formId);
     if (form) {
       selectedFormId.value = formId;
+      selectedForm.value = form
       usingWorkflow.value = form.usingWorkflow;
       isLedger.value = form.isLedger;
       showFormEditor.value = true;
     }
   }
 }
-function deleteForm(formId?: string) {
+async function deleteForm(formId?: string) {
   if (formId) {
-    selectedFormId.value = formId;
-    showFormEditor.value = true;
+    let form = await formStore.get(formId);
+    if (form) {
+      selectedFormId.value = formId;
+      selectedForm.value = form
+      showDeleteConfirmDialog.value = true;
+    }
   }
 }
 
+async function handleDeleteConfirm() {
+  if (selectedFormId.value) {
+    await formStore.remove(selectedFormId.value);
+    selectedFormId.value = "";
+    contextStore.setAppChanged();
+  }
+
+  showDeleteConfirmDialog.value = false;
+};
 function closeEditor() {
   showFormEditor.value = false;
 }
@@ -166,42 +194,6 @@ function closeEditor() {
 
 <style lang="scss" scoped>
 .hideSidebar {
-  .submenu-title-noDropdown {
-    position: relative;
-    padding: 0 !important;
-
-    .el-tooltip {
-      padding: 0 !important;
-
-      .sub-el-icon {
-        margin-left: 19px;
-      }
-    }
-
-    &>span {
-      width: 0;
-      height: 0;
-      overflow: hidden;
-      display: none;
-    }
-  }
-
-  .el-sub-menu {
-    overflow: hidden;
-
-    &>.el-sub-menu__title {
-      padding: 0 !important;
-
-      .sub-el-icon {
-        margin-left: 19px;
-      }
-
-      .el-sub-menu__icon-arrow {
-        display: none;
-      }
-    }
-  }
-
   .el-menu--collapse {
     width: $sidebar-width-collapsed;
 
@@ -218,11 +210,16 @@ function closeEditor() {
 
 .el-menu-item:hover {
   background-color: $menu-hover;
+
+  .more-wrapper {
+    visibility: visible;
+  }
 }
 
 .more-wrapper {
   position: absolute;
   right: 10px;
   display: flex;
+  visibility: hidden;
 }
 </style>

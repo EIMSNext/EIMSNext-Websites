@@ -1,7 +1,7 @@
 import { AxiosHeaders } from "axios";
 import { HttpRequest } from "./httpRequest";
 import { ContentType, PageResult } from "./interface";
-import appSetting from "../appSetting";
+import { getApiUrl } from "../appSetting";
 
 export class ApiClient {
   private httpRequest: HttpRequest;
@@ -73,22 +73,37 @@ export class ApiClient {
     return this.httpRequest.delete<T>({ url, data, headers, withToken });
   }
 
-  upload(url: string, file: any, withToken?: true) {
-    url = this.formatUrl(url);
-    let headers = new AxiosHeaders();
-    headers.setContentType(ContentType.FORM_DATA);
-    return this.httpRequest.request({ url, headers, withToken });
-  }
+  // upload(url: string, file: any, withToken?: true) {
+  //   url = this.formatUrl(url);
+  //   let headers = new AxiosHeaders();
+  //   headers.setContentType(ContentType.FORM_DATA);
+  //   return this.httpRequest.request({ url, data: file, headers, withToken });
+  // }
 
-  download(url: string, withToken?: true) {
+  // download(url: string, withToken?: true) {
+  //   url = this.formatUrl(url);
+  //   let headers = new AxiosHeaders();
+  //   return this.httpRequest.request({ url, headers, withToken });
+  // }
+
+  exec<T = any>(
+    url: string,
+    data: any,
+    method: string = "post",
+    contentType: ContentType = ContentType.JSON,
+    withToken?: true
+  ) {
     url = this.formatUrl(url);
     let headers = new AxiosHeaders();
-    return this.httpRequest.request({ url, headers, withToken });
+    if (method == "post") {
+      headers.setContentType(contentType);
+      return this.httpRequest.post<T>({ url, data, headers, withToken });
+    } else {
+      return this.httpRequest.get<T>({ url, data, headers, withToken });
+    }
   }
 
   private formatUrl(url: string) {
-    return url.startsWith("http")
-      ? url
-      : `${appSetting.apiUrl}/api/${this.apiVersion}${url}`;
+    return getApiUrl(url, this.apiVersion);
   }
 }

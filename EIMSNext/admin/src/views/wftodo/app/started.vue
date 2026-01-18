@@ -1,8 +1,7 @@
-
 <template>
-  <MyApproved></MyApproved>
+  <MyStarted></MyStarted>
 </template>
 
 <script setup lang="ts">
-import MyApproved from "../components/MyApproved.vue";
+import MyStarted from "../components/MyStarted.vue";
 </script>

@@ -1,8 +1,12 @@
+/* stylelint-disable selector-pseudo-element-colon-notation */
+/* stylelint-disable font-family-no-missing-generic-family-keyword */
+/* stylelint-disable font-family-name-quotes */
 @font-face {
   font-family: "iconfont"; /* Project id 5026874 */
-  src: url('//at.alicdn.com/t/c/font_5026874_0ro3s19a630l.woff2?t=1758449130364') format('woff2'),
-       url('//at.alicdn.com/t/c/font_5026874_0ro3s19a630l.woff?t=1758449130364') format('woff'),
-       url('//at.alicdn.com/t/c/font_5026874_0ro3s19a630l.ttf?t=1758449130364') format('truetype');
+  src:
+    url("//at.alicdn.com/t/c/font_5026874_ny6y5bns7f.woff2?t=1759477290297") format("woff2"),
+    url("//at.alicdn.com/t/c/font_5026874_ny6y5bns7f.woff?t=1759477290297") format("woff"),
+    url("//at.alicdn.com/t/c/font_5026874_ny6y5bns7f.ttf?t=1759477290297") format("truetype");
 }
 
 .iconfont {
@@ -11,6 +15,18 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-adminFilled:before {
+  content: "\e604";
+}
+
+.icon-admin:before {
+  content: "\e600";
+}
+
+.icon-organization:before {
+  content: "\e9c8";
 }
 
 .icon-ledgerdefault:before {

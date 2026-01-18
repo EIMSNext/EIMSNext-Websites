@@ -1,46 +1,43 @@
 <template>
-  <CustomDrawer v-model="showDrawer" @close="close">
+  <et-drawer v-model="showDrawer" @close="close">
     <template #title>
       <el-input v-model="formName" class="title-editor" />
     </template>
     <template #top-center>
       <el-tabs v-model="activeName" class="nav-tabs" @tab-click="handleClick">
-        <el-tab-pane label="表单设计" name="edit" />
-        <el-tab-pane v-if="usingFlow" label="流程设定" name="flow" />
-        <el-tab-pane label="扩展功能" name="extension" />
+        <el-tab-pane label="表单设计" name="formedit" />
+        <el-tab-pane v-if="usingFlow" label="流程设定" name="workflow" />
+        <el-tab-pane label="高级功能" name="advance" />
         <el-tab-pane label="表单发布" name="publish" />
-        <el-tab-pane label="数据管理" name="data" />
+        <el-tab-pane label="数据管理" name="datamanage" />
       </el-tabs>
     </template>
-    <div v-if="activeName == 'edit'">
-      <form-builder
-        :locale="locale"
-        :formName="formName"
-        :formDef="formDef"
-        :usingFlow="usingFlow"
-        :isLedger="isLedger"
-        @save="onSaved"
-      />
+    <div v-if="activeName == 'formedit'">
+      <form-builder :locale="locale" :formName="formName" :formDef="formDef" :usingFlow="usingFlow" :isLedger="isLedger"
+        @save="onSaved" />
     </div>
-    <div v-if="usingFlow && activeName == 'flow'" style="height: 100%; width: 100%">
+    <div v-if="usingFlow && activeName == 'workflow'" style="height: 100%; width: 100%">
       <WorkflowDesigner :appId="appId" :formId="formId" />
     </div>
-    <div v-if="activeName == 'extension'" style="height: 100%; width: 100%">
+    <div v-if="activeName == 'advance'" style="height: 100%; width: 100%">
       <Advanced :formDef="formDef!"></Advanced>
     </div>
-  </CustomDrawer>
+    <div v-if="activeName == 'publish'" style="height: 100%; width: 100%">
+      <Publish :formDef="formDef!"></Publish>
+    </div>
+  </et-drawer>
 </template>
 
 <script setup lang="ts">
 import { TabsPaneContext } from "element-plus";
 import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
-import WorkflowDesigner from "../FlowDesigner/Workflow/index.vue";
+import WorkflowDesigner from "../WorkflowDesigner/index.vue";
 import Advanced from "./Advanced/index.vue";
+import Publish from "./Publish/index.vue"
 import { useSystemStore } from "@/store/system";
 import { useFormStore } from "@eimsnext/store";
-import { FormDef, EventSourceType } from "@eimsnext/models";
-import CustomDrawer from "@/components/CustomDrawer/index.vue";
+import { FormDef } from "@eimsnext/models";
 
 defineOptions({
   name: "FormEdit",
@@ -60,7 +57,7 @@ const locale = computed(() => systemStore.locale);
 
 const appId = ref("");
 const formName = ref("测试表单");
-const activeName = ref("edit");
+const activeName = ref("formedit");
 const formDef = ref<FormDef>();
 
 // console.log("formid", props.formId);
@@ -82,7 +79,7 @@ const onSaved = () => {
   }
 };
 const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
+  // console.log(tab, event);
 };
 
 const emit = defineEmits(["close"]);
@@ -113,24 +110,30 @@ onBeforeMount(() => {
     box-shadow: none;
   }
 }
+
 .top-nav-bar .nav-tabs {
   height: 60px;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__header {
   margin: 0;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__nav {
   height: 60px;
   align-items: center;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__content {
   display: none;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__item:last-child {
   margin-left: 46px;
   overflow: visible;
   position: relative;
 }
+
 .top-nav-bar .nav-tabs .el-tabs__item:last-child:after {
   background: #e1e3e5;
   content: "";

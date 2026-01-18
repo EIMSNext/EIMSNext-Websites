@@ -1,8 +1,14 @@
 <template>
   <div class="mytasks-container">
+    <et-dialog v-model="showProcessDialog" :title="selectedTask?.formName" :show-footer="false"
+      :destroy-on-close="true">
+      <div class="form-container">
+        <WfProcess :todo="selectedTask!"></WfProcess>
+      </div>
+    </et-dialog>
     <el-space direction="vertical" class="task-space">
       <template v-for="task in dataRef">
-        <et-card class="task-card">
+        <et-card class="task-card" @click="processTodo(task)">
           <template #header>
             <div class="flex-y-center">
               <div class="flow-header">
@@ -12,9 +18,6 @@
                 <div class="current-node" :title="task.approveNodeName">
                   <et-icon icon="tree" />
                   <span class="node-name">{{ task.approveNodeName }}</span>
-                </div>
-                <div style="margin-left: 50px">
-                  <el-button @click="approve(task)">Approve</el-button>
                 </div>
               </div>
             </div>
@@ -61,33 +64,29 @@ defineOptions({
 });
 
 import { useRoute } from "vue-router";
-import { useFormStore } from "@eimsnext/store";
-import { WfTodo, ApproveAction, BriefField } from "@eimsnext/models";
-
-import { wfTodoService, workflowService } from "@eimsnext/services";
+import { WfTodo, } from "@eimsnext/models";
+import { wfTodoService, } from "@eimsnext/services";
 import { ODataQuery } from "@/utils/query";
 import { EtDialog } from "@eimsnext/components";
 import buildQuery from "odata-query";
+import WfProcess from "./WfProcess.vue";
 
-const showApproveDialog = ref(false);
+const showProcessDialog = ref(false);
 const route = useRoute();
-const formStore = useFormStore();
 const appId = route.params.appId.toString();
-
-const queryParams = reactive<ODataQuery<any>>({
-  pageNum: 1,
-  pageSize: 10,
-  deptId: "",
-  keywords: "",
-});
 const totalRef = ref(0);
 const dataRef = ref<WfTodo[]>();
+const selectedTask = ref<WfTodo>()
+
+const queryParams = reactive<ODataQuery<any>>({
+  skip: 0,
+  top: 10,
+});
 
 const loadCount = () => {
   let query = buildQuery({ filter: { appId: appId } });
 
   wfTodoService.count(query).then((cnt: number) => {
-    // console.log("cnt", cnt);
     totalRef.value = cnt;
   });
 };
@@ -98,12 +97,9 @@ const loadData = () => {
   });
 };
 
-const approve = (task: WfTodo) => {
-  workflowService.approve({
-    dataId: task.dataId,
-    action: ApproveAction.Approve,
-    comment: "同意",
-  });
+const processTodo = async (task: WfTodo) => {
+  selectedTask.value = task
+  showProcessDialog.value = true;
 };
 
 onMounted(() => {
@@ -113,14 +109,16 @@ onMounted(() => {
 </script>
 <style lang="scss" scoped>
 .mytasks-container {
-  padding: 20px;
+  // padding: 20px;
   display: flex;
+
   .task-space {
     width: 100%;
     align-items: normal !important;
   }
 
   .task-card {
+    cursor: pointer;
     width: 100%;
 
     .flow-header {
@@ -136,7 +134,7 @@ onMounted(() => {
       }
 
       .current-node {
-        color: var(--color-text-secondary);
+        color: var(--et-color-text-secondary);
         font-size: 12px;
         margin-left: 12px;
         width: fit-content;
@@ -186,7 +184,7 @@ onMounted(() => {
           padding: 0 12px;
 
           .brief-label {
-            color: var(--color-text-secondary);
+            color: var(--et-color-text-secondary);
             display: inline-block;
             flex: none;
             max-width: 100px;
@@ -195,8 +193,9 @@ onMounted(() => {
             vertical-align: top;
             white-space: nowrap;
           }
+
           .sep {
-            color: var(--color-text-secondary);
+            color: var(--et-color-text-secondary);
           }
 
           .brief-val {

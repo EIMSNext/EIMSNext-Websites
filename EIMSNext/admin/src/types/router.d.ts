@@ -1,3 +1,4 @@
+import { UserType } from "@eimsnext/models";
 import "vue-router";
 
 declare module "vue-router" {
@@ -68,5 +69,8 @@ declare module "vue-router" {
 
     //是否分组
     isGroup?: boolean;
+
+    //允许的用户类型
+    allowedUserTypes?: UserType[];
   }
 }

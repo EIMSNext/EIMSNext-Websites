@@ -1,21 +1,12 @@
+import { UserType } from "@eimsnext/models";
 import type { App } from "vue";
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
 
-export const AppLayout = () => import("@/applayout/index.vue");
+export const AppLayout = () => import("@/layout/applayout/index.vue");
+export const SysLayout = () => import("@/layout/syslayout/index.vue");
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
-  // {
-  //   path: "/redirect",
-  //   component: AppLayout,
-  //   meta: { hidden: true },
-  //   children: [
-  //     {
-  //       path: "/redirect/:path(.*)",
-  //       component: () => import("@/views/redirect/index.vue"),
-  //     },
-  //   ],
-  // },
   {
     path: "/401",
     component: () => import("@/views/error/401.vue"),
@@ -33,15 +24,78 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   {
-    name: "dashboard",
-    path: "/dashboard",
-    component: () => import("@/views/dashboard/index.vue"),
+    name: "workspace",
+    path: "/workspace",
+    component: () => import("@/views/workspace/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
   {
-    path: "/system",
-    component: () => import("@/views/system/index.vue"),
-    meta: { hidden: true, requiresAuth: true },
+    path: "/system/department",
+    component: SysLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/system/department/index.vue"),
+        meta: {
+          title: "",
+          icon: "collection",
+          keepAlive: true,
+          requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
+        },
+      },
+    ],
+  },
+  {
+    path: "/system/role",
+    component: SysLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/system/role/index.vue"),
+        meta: {
+          title: "role",
+          icon: "collection",
+          keepAlive: true,
+          requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
+        },
+      },
+    ],
+  },
+  {
+    path: "/system/admin",
+    component: SysLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/system/admin/index.vue"),
+        meta: {
+          title: "admin",
+          icon: "collection",
+          keepAlive: true,
+          requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
+        },
+      },
+    ],
+  },
+  {
+    path: "/system/:formId",
+    component: SysLayout,
+    redirect: "/system/$route.params.formId",
+    children: [
+      {
+        path: "401",
+        component: () => import("@/views/error/401.vue"),
+        meta: { hidden: true },
+      },
+      {
+        path: "404",
+        component: () => import("@/views/error/404.vue"),
+        meta: { hidden: true },
+      },
+    ],
   },
   {
     path: "/app/:appId/form/:formId",
@@ -76,12 +130,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/profile/index.vue"),
         meta: { title: "个人中心", icon: "user", hidden: true, requiresAuth: true },
       },
-      // {
-      //   path: "myNotice",
-      //   name: "MyNotice",
-      //   component: () => import("@/views/system/notice/components/MyNotice.vue"),
-      //   meta: { title: "我的通知", icon: "user", hidden: true, requiresAuth: true },
-      // },
     ],
   },
   {
@@ -159,14 +207,14 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  {
-    path: "/app/:appId",
-    component: () => import("@/views/app/index.vue"),
-    meta: { hidden: true, requiresAuth: true },
-  },
+  // {
+  //   path: "/app/:appId",
+  //   component: () => import("@/views/app/index.vue"),
+  //   meta: { hidden: true, requiresAuth: true },
+  // },
   {
     path: "/",
-    redirect: "/dashboard",
+    redirect: "/workspace",
   },
 ];
 

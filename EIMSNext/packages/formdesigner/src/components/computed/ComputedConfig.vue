@@ -5,7 +5,6 @@
         class="_fd-plain-button"
         plain
         @click="visible = true"
-        size="small"
         >{{ btn || title }}</el-button
       >
     </el-badge>
@@ -55,7 +54,6 @@
               {{ t("computed.linkage.info.0") }}
               <RuleSelect
                 v-model="linkage"
-                size="small"
                 onlyField
                 valueType="field"
                 clearable

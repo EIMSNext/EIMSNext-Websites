@@ -7,7 +7,7 @@
       <div class="bg-banner"></div>
     </div>
     <div class="main">
-      <div class="lang-switch">        
+      <div class="lang-switch">
         <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny" @change="toggleTheme" />
         <lang-select class="ml-5 cursor-pointer" />
       </div>
@@ -15,12 +15,12 @@
       <div class="content">
         <div class="login-container">
           <div class="account-login">
-            <div class="login-title">账号登录</div>
-            <div class="login-register"><span>没有账号？</span>
+            <div class="login-title">{{ t("login.loginTitle") }}</div>
+            <!-- <div class="login-register"><span>没有账号？</span>
               <el-link type="primary" :underline="false" href="/register" target="_self">
                 免费注册
               </el-link>
-            </div>
+            </div> -->
             <el-form ref="loginFormRef" :model="loginData" :rules="loginRules">
               <div class="login-content">
                 <div class="login-form">
@@ -65,7 +65,7 @@
 import { LocationQuery, useRoute } from "vue-router";
 import router from "@/router";
 import type { FormInstance } from "element-plus";
-import { ThemeEnum } from "@/enums/ThemeEnum";
+import { Themes } from "@/enums/Themes";
 
 import { useSettingsStore } from "@/store";
 import {
@@ -82,7 +82,7 @@ const settingsStore = useSettingsStore();
 const route = useRoute();
 const loginFormRef = ref<FormInstance>();
 
-const isDark = ref(settingsStore.theme === ThemeEnum.DARK); // 是否暗黑模式
+const isDark = ref(settingsStore.theme === Themes.DARK); // 是否暗黑模式
 const loading = ref(false); // 按钮 loading 状态
 const isCapslock = ref(false); // 是否大写锁定
 
@@ -124,9 +124,10 @@ async function handleLoginSubmit() {
       userStore
         .login(loginData.value)
         .then(async () => {
-          await userStore.initialize();
+          await userStore.initialize(true);
 
           const { path, queryParams } = parseRedirect();
+          // console.log("login ", path, queryParams)
           router.push({ path: path, query: queryParams });
         })
         .finally(() => {
@@ -161,7 +162,7 @@ function parseRedirect(): {
 
 // 主题切换
 const toggleTheme = () => {
-  const newTheme = settingsStore.theme === ThemeEnum.DARK ? ThemeEnum.LIGHT : ThemeEnum.DARK;
+  const newTheme = settingsStore.theme === Themes.DARK ? Themes.LIGHT : Themes.DARK;
   settingsStore.changeTheme(newTheme);
 };
 
@@ -197,7 +198,7 @@ function checkCapslock(event: KeyboardEvent) {
 
   .lang-switch {
     align-items: center;
-    color: var(--fd-color-text-tertiary);
+    color: var(--et-color-text-tertiary);
     cursor: pointer;
     display: inline-flex;
     font-size: 14px;
@@ -214,7 +215,7 @@ function checkCapslock(event: KeyboardEvent) {
     height: 100%;
 
     .bg-banner {
-      background-image: url("@/assets/images/login-image.jpg");
+      background-image: url("@/assets/images/login/login-image.jpg");
       background-position: 50%;
       background-repeat: no-repeat;
       background-size: cover;
@@ -274,7 +275,7 @@ function checkCapslock(event: KeyboardEvent) {
 
 html.dark {
   .login {
-    background: url("@/assets/images/login-background-dark.jpg") no-repeat center right;
+    background: url("@/assets/images/login/login-background-dark.jpg") no-repeat center right;
 
     .login-content {
       background: transparent;

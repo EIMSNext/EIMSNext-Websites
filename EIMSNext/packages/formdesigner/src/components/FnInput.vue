@@ -1,16 +1,14 @@
 <template>
     <div class="_fd-fn-input">
         <el-badge type="warning" is-dot :hidden="!configured">
-            <el-button class="_fd-plain-button" plain @click="visible=true" size="small">
+            <el-button class="_fd-plain-button" plain @click="visible = true">
                 <slot>
-                    {{t('event.action')}}
+                    {{ t('event.action') }}
                 </slot>
             </el-button>
         </el-badge>
         <el-dialog class="_fd-fn-input-dialog _fd-config-dialog" :title="title || t('struct.title')" v-model="visible"
-                   destroy-on-close
-                   :close-on-click-modal="false"
-                   append-to-body width="800px">
+            destroy-on-close :close-on-click-modal="false" append-to-body width="800px">
             <FnEditor ref="editor" v-model="value" :name="name" :args="args" :body="body" :fnx="fnx"></FnEditor>
             <template #footer>
                 <div>
@@ -25,12 +23,12 @@
 <script>
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/javascript/javascript';
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 import FnEditor from './FnEditor.vue';
 
 export default defineComponent({
     name: 'FnInput',
-    components: {FnEditor},
+    components: { FnEditor },
     emits: ['update:modelValue', 'change'],
     props: {
         modelValue: [String, Function],
@@ -60,13 +58,13 @@ export default defineComponent({
         };
     },
     watch: {
-        modelValue(n){
+        modelValue(n) {
             this.value = n;
         }
     },
     methods: {
         onOk() {
-            if(this.$refs.editor.save()) {
+            if (this.$refs.editor.save()) {
                 this.$emit('update:modelValue', this.value);
                 this.$emit('change', this.value);
                 this.visible = false;

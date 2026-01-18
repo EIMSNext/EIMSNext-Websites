@@ -1,8 +1,8 @@
 import { AxiosHeaders } from "axios";
 import { HttpRequest } from "./httpRequest";
 import { ContentType, ODataMetadata, PageResult } from "./interface";
-import appSetting from "../appSetting";
 import qs from "qs";
+import { getODataUrl } from "../appSetting";
 
 export class ODataClient {
   private httpRequest: HttpRequest;
@@ -13,7 +13,7 @@ export class ODataClient {
   }
 
   get<T = any>(url: string, id: string, data?: any) {
-    url = this.getOdataUrl<T>(url, id);
+    url = this.formatUrl<T>(url, id);
     if (data) {
       let qStr = typeof data === "string" ? data : qs.stringify(data);
       let qMark = qStr.startsWith("?") ? "" : "?";
@@ -25,10 +25,10 @@ export class ODataClient {
 
   count(url: string, data?: any) {
     let $count = url.endsWith("$count") ? "" : "$count";
-    url = this.getOdataUrl(url, $count);
+    url = this.formatUrl(url, $count);
     if (data) {
       let qStr = typeof data === "string" ? data : qs.stringify(data);
-      console.log("qStr", qStr);
+      // console.log("qStr", qStr);
       data = qStr.startsWith("?") ? qStr.substring(1) : qStr;
     } else {
       //请求体不能undefined，否则contenttype不起作用
@@ -44,12 +44,12 @@ export class ODataClient {
   }
 
   query<T>(url: string, data?: any) {
-    console.log("query data", data);
+    // console.log("query data", data);
 
-    url = this.getOdataUrl(url, "$query");
+    url = this.formatUrl(url, "$query");
     if (data) {
       let qStr = typeof data === "string" ? data : qs.stringify(data);
-      console.log("qStr", qStr);
+      // console.log("qStr", qStr);
       data = qStr.startsWith("?") ? qStr.substring(1) : qStr;
     } else {
       //请求体不能undefined，否则contenttype不起作用
@@ -69,42 +69,48 @@ export class ODataClient {
   }
 
   post<T = any>(url: string, data: any) {
-    url = this.getOdataUrl(url);
+    url = this.formatUrl(url);
     let headers = this.getAxiosHeaders(ContentType.JSON);
     return this.httpRequest.post<T>({ url, data, headers, withToken: true });
   }
 
   put<T = any>(url: string, id: string, data: any) {
-    url = this.getOdataUrl(url, id);
+    url = this.formatUrl(url, id);
     let headers = this.getAxiosHeaders(ContentType.JSON);
     return this.httpRequest.put<T>({ url, data, headers, withToken: true });
   }
 
   patch<T = any>(url: string, id: string, data: any) {
-    url = this.getOdataUrl(url, id);
+    url = this.formatUrl(url, id);
     let headers = this.getAxiosHeaders(ContentType.JSON);
     return this.httpRequest.patch<T>({ url, data, headers, withToken: true });
   }
 
   delete<T = any>(url: string, id: string, data: any) {
-    url = this.getOdataUrl(url, id);
+    url = this.formatUrl(url, id);
     let headers = this.getAxiosHeaders();
     return this.httpRequest.delete<T>({ url, data, headers, withToken: true });
   }
 
-  private getOdataUrl<T>(url: string, id?: string) {
+  exec<T = any>(url: string, data: any) {
+    url = this.formatUrl(url);
+    let headers = this.getAxiosHeaders(ContentType.JSON);
+    return this.httpRequest.post<T>({ url, data, headers, withToken: true });
+  }
+
+  private formatUrl<T>(url: string, id?: string) {
     let idPath = id ? "/" + id : "";
     url = url.startsWith("/") ? url : "/" + url;
     return url.startsWith("http")
       ? url
-      : `${appSetting.apiUrl}/odata/${this.apiVersion}${url}${idPath}`;
+      : getODataUrl(url, this.apiVersion) + idPath;
   }
 
   private getAxiosHeaders(contentType?: ContentType) {
     let headers = new AxiosHeaders();
     headers.setAccept(ODataMetadata.None);
     if (contentType) headers.setContentType(contentType, true);
-    console.log("headers", headers, contentType);
+    // console.log("headers", headers, contentType);
     return headers;
   }
 }

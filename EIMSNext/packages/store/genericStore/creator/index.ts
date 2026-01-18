@@ -25,7 +25,7 @@ export default function createStore<T extends IIdentity>(
           http.odata
             .query<T>(url, query)
             .then((res) => {
-              items.value = res;
+              items.value = [...initData, ...res];
               resolve(res);
             })
             .catch((error) => {
@@ -71,7 +71,7 @@ export default function createStore<T extends IIdentity>(
     };
 
     const update = (item: T) => {
-      console.log(`${url} Store update: ${item}`);
+      // console.log(`${url} Store update: ${item}`);
       if (item && item.id) {
         const i = items.value.findIndex((x) => x.id == item.id);
         if (i > -1) items.value.splice(i, 1, item);
@@ -80,7 +80,7 @@ export default function createStore<T extends IIdentity>(
     };
 
     const remove = (id: string, removeFromDb: boolean = true) => {
-      console.log(`${url} Store remove: ${id}`);
+      // console.log(`${url} Store remove: ${id}`);
       if (id) {
         const i = items.value.findIndex((x) => x.id == id);
         if (i > -1) {
@@ -96,7 +96,7 @@ export default function createStore<T extends IIdentity>(
     };
 
     const clear = () => {
-      items.value = [];
+      items.value = initData;
     };
 
     return { loading, items, load, get, update, remove, clear };

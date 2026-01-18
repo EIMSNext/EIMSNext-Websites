@@ -1,40 +1,43 @@
 <template>
   <div class="wh-full" :class="classObj">
     <el-container>
-      <el-header style="height: 50px; padding:0 12px">
+      <el-header style="height: 50px; padding: 0 12px">
         <NavBar />
       </el-header>
-      <el-container style="border-top: 1px solid var(--el-menu-border-color);">
+      <el-container style="border-top: 1px solid var(--el-menu-border-color)">
         <el-aside width="45px" class="main-left-menu">
-          <el-tooltip content="工作台" placement="right" :hide-after="0">
+          <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
             <AppLink :to="{
-              path: '/dashboard',
+              path: '/workspace',
             }">
               <div class="main-left-menu-item">
-                <et-icon icon="homepage" size="20px"></et-icon>
+                <et-icon icon="homepage" size="20px" :color="getAppIconColor()"></et-icon>
               </div>
             </AppLink>
           </el-tooltip>
-          <el-tooltip content="通讯录" placement="right" :hide-after="0">
-            <AppLink :to="{
-              path: '/system',
-            }">
-              <div class="main-left-menu-item">
-                <et-icon icon="el-icon-Notebook" size="20px" :color="getAppIconColor()"></et-icon>
-              </div>
-            </AppLink>
-          </el-tooltip>
-          <el-divider style="margin: 3px 0" />
-          <template v-for="app in appsRef">
-            <el-tooltip :content="app.name" placement="right" :hide-after="0">
+          <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
+            <el-tooltip :content="t('route.system')" placement="right" :hide-after="0">
               <AppLink :to="{
-                path: `/app/${app.id}`,
+                path: '/system/department',
               }">
                 <div class="main-left-menu-item">
-                  <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor()"></et-icon>
+                  <et-icon icon="el-icon-Notebook" size="20px" :color="getAppIconColor()"></et-icon>
                 </div>
               </AppLink>
             </el-tooltip>
+          </template>
+          <el-divider style="margin: 3px 0" />
+          <template v-for="app in appsRef">
+            <template v-if="app.id != 'system'">
+              <el-tooltip :content="app.name" placement="right" :hide-after="0">
+                <AppLink :to="{
+                  path: `/app/${app.id}/mytasks`,
+                }">
+                  <div class="main-left-menu-item">
+                    <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor()"></et-icon>
+                  </div>
+                </AppLink>
+              </el-tooltip></template>
           </template>
         </el-aside>
         <el-main style="padding: 0">
@@ -47,50 +50,31 @@
 </template>
 
 <script setup lang="ts">
-import { useSystemStore, useSettingsStore, usePermissionStore } from "@/store";
-import { useAppStore } from "@eimsnext/store";
-import { DeviceEnum } from "@/enums/DeviceEnum";
+import { useSystemStore } from "@/store";
+import { useAppStore, useUserStore } from "@eimsnext/store";
 import NavBar from "./components/NavBar/index.vue";
-import defaultSettings from "@/settings"
+import defaultSettings from "@/settings";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
+import { useI18n } from "vue-i18n";
+import { UserType } from "@eimsnext/models";
+const { t } = useI18n()
 
 defineOptions({
   name: "Layout",
 });
 
 const systemStore = useSystemStore();
-const settingsStore = useSettingsStore();
+
+const userStore = useUserStore()
 const appStore = useAppStore();
 const { items: appsRef } = storeToRefs(appStore);
-const width = useWindowSize().width;
-
-const WIDTH_DESKTOP = 992; // 响应式布局容器固定宽度  大屏（>=1200px） 中屏（>=992px） 小屏（>=768px）
-const isMobile = computed(() => systemStore.device === DeviceEnum.MOBILE);
-const isOpenSidebar = computed(() => systemStore.sidebar.opened);
-// const layout = computed(() => settingsStore.layout); // 布局模式 left top mix
+const curUser = toRef(userStore.currentUser)
 
 const classObj = computed(() => ({
   hideSidebar: !systemStore.sidebar.opened,
   openSidebar: systemStore.sidebar.opened,
-  mobile: systemStore.device === DeviceEnum.MOBILE,
-  // [`layout-${settingsStore.layout}`]: true,
 }));
 
-watchEffect(() => {
-  systemStore.toggleDevice(width.value < WIDTH_DESKTOP ? DeviceEnum.MOBILE : DeviceEnum.DESKTOP);
-  if (width.value >= WIDTH_DESKTOP) {
-    systemStore.openSideBar();
-  } else {
-    systemStore.closeSideBar();
-  }
-});
-
-const route = useRoute();
-watch(route, () => {
-  if (isMobile.value && isOpenSidebar.value) {
-    systemStore.closeSideBar();
-  }
-});
 </script>
 
 <style lang="scss" scoped>

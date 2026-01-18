@@ -15,4 +15,6 @@ export enum ApproveAction {
   Return = "3",
   AddSignPre = "4",
   AddSignAfter = "5",
+  AutoApprove = "6",
+  CopyTo = "7",
 }

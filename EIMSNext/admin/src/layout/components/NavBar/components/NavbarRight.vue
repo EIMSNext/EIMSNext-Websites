@@ -1,14 +1,12 @@
 <template>
   <div class="navbar__right">
     <!-- 非手机设备（窄屏）才显示 -->
-    <template v-if="!isMobile">
-
-      <!-- 全屏 -->
-      <Fullscreen />
-      <!-- 消息通知 -->
-      <Notification />
-    </template>
-
+    <!-- <template> -->
+    <!-- 全屏 -->
+    <Fullscreen />
+    <!-- 消息通知 -->
+    <Notification />
+    <!-- </template> -->
     <!-- 语言选择 -->
     <LangSelect :show-label="false" />
 
@@ -23,14 +21,11 @@
 </template>
 <script setup lang="ts">
 import defaultSettings from "@/settings";
-import { DeviceEnum } from "@/enums/DeviceEnum";
 import { useSystemStore, useSettingsStore } from "@/store";
 import UserProfile from "./UserProfile.vue";
 
 const appStore = useSystemStore();
 const settingStore = useSettingsStore();
-
-const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE);
 </script>
 
 <style lang="scss" scoped>
@@ -44,7 +39,7 @@ const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE);
     min-width: 40px;
     height: $navbar-height;
     line-height: $navbar-height;
-    color: var(--el-text-color);
+    color: var(--et-color-text);
     text-align: center;
     cursor: pointer;
 
