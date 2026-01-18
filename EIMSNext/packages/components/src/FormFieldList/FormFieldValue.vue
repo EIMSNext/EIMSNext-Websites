@@ -8,7 +8,7 @@
     <div class="value-value">
       <template v-if="fieldValueType == FieldValueType.Custom">
         <template
-          v-if="fieldType == FieldType.Input || fieldType == FieldType.Radio || fieldType == FieldType.CheckBox || fieldType == FieldType.Select || fieldType == FieldType.Select2">
+          v-if="fieldType == FieldType.Input || fieldType == FieldType.Select || fieldType == FieldType.Select2">
           <el-input v-model="value" size="default" @change="onInput"></el-input>
         </template>
         <template v-if="fieldType == FieldType.Number">
@@ -18,23 +18,45 @@
           <el-date-picker size="default" v-model="value" value-format="x" :format="fieldDef?.format" :type="dateType"
             @change="onInput"></el-date-picker>
         </template>
-        <!-- <template v-else-if="fieldType == FieldType.Select || fieldType == FieldType.Radio">
+
+        <template v-else-if="fieldType == FieldType.Radio">
           <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
-            <el-option v-for="opt in fieldDef." :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
-        <template v-else-if="dataType == ConditionFieldType.Select2">
+        <template v-else-if="fieldType == FieldType.CheckBox">
           <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
             @change="onInput">
-            <el-option v-for="opt in options" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
-        </template> -->
+        </template>
+        <template v-else-if="fieldType == FieldType.DepartmentSelect">
+          <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyDept')"
+            @editTag="selectDept(false)" />
+        </template>
+        <template v-else-if="fieldType == FieldType.DepartmentSelect2">
+          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyDept')"
+            @editTag="selectDept(true)" />
+        </template>
+        <template v-else-if="fieldType == FieldType.EmployeeSelect">
+          <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyEmp')"
+            @editTag="selectEmp(false)" />
+        </template>
+        <template v-else-if="fieldType == FieldType.EmployeeSelect2">
+          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyEmp')"
+            @editTag="selectEmp(true)" />
+        </template>
       </template>
       <template v-if="fieldValueType == FieldValueType.Field">
         <NodeFieldList ref="nodefieldlist" v-model="fieldFieldValue" :nodes="nodes" :field-def="fieldDef"
           :fieldBuildSetting="fieldSetting" @change="onValueChange"></NodeFieldList>
       </template>
     </div>
+    <memberSelectDialog v-model="showMemberDialog" :tags="value ?? []" :multiple="memberMultiple"
+      :showTabs="memberShowTabs" @ok="memberSelected">
+    </memberSelectDialog>
   </div>
 </template>
 <script setup lang="ts">
@@ -45,6 +67,9 @@ import { useLocale } from "element-plus";
 import { IFormFieldDef } from "@/FieldList/type";
 import { computed, ref } from "vue";
 import { IListItem } from "@/list/type";
+import { toListItem } from "@/ConditionList/type";
+import { MemberTabs } from "@/memberSelect/type";
+import { ISelectedTag } from "@/selectedTags/type";
 
 const { t } = useLocale();
 
@@ -59,8 +84,34 @@ const props = defineProps<{
   fieldValueChanging?: (field: IFormFieldDef, oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => Promise<boolean>;
 }>();
 
+const showMemberDialog = ref(false)
+const memberMultiple = ref(false)
+const memberShowTabs = ref(MemberTabs.None)
+
+const fieldType = computed(() => props.fieldDef.type);
+const dateType = computed(() => ((props.fieldDef.type == FieldType.TimeStamp ? props.fieldDef.format : undefined) ?? "yyyy-MM-dd").includes("HH") ? "datetime" : "date");
+
 const fieldValueType = ref(props.modelValue.type);
 const value = ref<any>(props.modelValue.value);
+if (!value.value && fieldValueType.value == FieldValueType.Custom
+  && (fieldType.value == FieldType.EmployeeSelect ||
+    fieldType.value == FieldType.EmployeeSelect2 ||
+    fieldType.value == FieldType.DepartmentSelect ||
+    fieldType.value == FieldType.DepartmentSelect2 ||
+    fieldType.value == FieldType.CheckBox ||
+    fieldType.value == FieldType.Select2
+  )
+) {
+  value.value = []
+}
+
+if (fieldValueType.value == FieldValueType.Custom
+  && (fieldType.value == FieldType.EmployeeSelect ||
+    fieldType.value == FieldType.DepartmentSelect
+  ) && !Array.isArray(value.value)) {
+  value.value = [value.value]
+}
+
 const fieldFieldValue = ref<IFormFieldDef>(
   props.modelValue.fieldValue ?? {
     nodeId: "",
@@ -77,14 +128,22 @@ const fieldValueTypes: IListItem[] = [
   { id: FieldValueType.Empty, label: t("comp.value_Empty") },
 ];
 
-const fieldType = computed(() => props.fieldDef.type);
-const dateType = computed(() => ((props.fieldDef.type == FieldType.TimeStamp ? props.fieldDef.format : undefined) ?? "yyyy-MM-dd").includes("HH") ? "datetime" : "date");
 
 const emit = defineEmits(["update:modelValue", "change"]);
 const onValueTypeChange = () => {
   props.modelValue.type = fieldValueType.value;
-  // if (props.modelValue.type == FieldValueType.Field && nodefieldlist.value)
-  //   nodefieldlist.value.rebuildValueNodes();
+
+  if (fieldValueType.value == FieldValueType.Custom
+    && (fieldType.value == FieldType.EmployeeSelect ||
+      fieldType.value == FieldType.EmployeeSelect2 ||
+      fieldType.value == FieldType.DepartmentSelect ||
+      fieldType.value == FieldType.DepartmentSelect2 ||
+      fieldType.value == FieldType.CheckBox ||
+      fieldType.value == FieldType.Select2
+    )
+  ) {
+    value.value = []
+  }
 
   emitChange();
 };
@@ -118,6 +177,27 @@ const onValueChange = async (newVal?: IFormFieldDef) => {
     }
   }
 };
+
+
+const selectDept = (multiple: boolean) => {
+  memberShowTabs.value = MemberTabs.Department | MemberTabs.CurDept
+  memberMultiple.value = multiple;
+  showMemberDialog.value = true
+}
+const selectEmp = (multiple: boolean) => {
+  memberShowTabs.value = MemberTabs.Employee | MemberTabs.CurUser
+  memberMultiple.value = multiple;
+  showMemberDialog.value = true
+}
+const memberSelected = (members: ISelectedTag[]) => {
+  value.value = members
+  props.modelValue.type = FieldValueType.Custom
+  props.modelValue.value = members;
+  showMemberDialog.value = false
+
+  emitChange();
+}
+
 const emitChange = () => {
   emit("update:modelValue", props.modelValue);
   emit("change", props.modelValue);

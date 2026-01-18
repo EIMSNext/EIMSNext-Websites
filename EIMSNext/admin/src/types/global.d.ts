@@ -69,8 +69,6 @@ declare global {
     themeColor: string;
     /** 主题模式(dark|light) */
     theme: string;
-    /** 布局大小(default |large |small) */
-    size: string;
     /** 语言( zh-cn| en) */
     language: string;
     /** 是否开启水印 */

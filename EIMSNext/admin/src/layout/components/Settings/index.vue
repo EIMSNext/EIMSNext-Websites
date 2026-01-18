@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ThemeEnum } from "@/enums/ThemeEnum";
+import { Themes } from "@/enums/Themes";
 
 import { useSettingsStore, usePermissionStore, useSystemStore } from "@/store";
 import { useLocale } from "element-plus";
@@ -41,7 +41,7 @@ const route = useRoute();
 const appStore = useSystemStore();
 const settingsStore = useSettingsStore();
 const permissionStore = usePermissionStore();
-const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
+const isDark = ref<boolean>(settingsStore.theme === Themes.DARK);
 
 const settingsVisible = computed({
   get() {
@@ -68,7 +68,7 @@ function changeThemeColor(color: string) {
  */
 const changeTheme = (val: any) => {
   isDark.value = val;
-  settingsStore.changeTheme(isDark.value ? ThemeEnum.DARK : ThemeEnum.LIGHT);
+  settingsStore.changeTheme(isDark.value ? Themes.DARK : Themes.LIGHT);
 };
 
 </script>

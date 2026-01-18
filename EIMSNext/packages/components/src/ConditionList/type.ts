@@ -1,7 +1,13 @@
 import { IFormFieldDef } from "@/FieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
+import { IListItem } from "@/list/type";
 import { ISelectedTag } from "@/selectedTags/type";
-import { FieldType, SystemField, isSystemField } from "@eimsnext/models";
+import {
+  FieldType,
+  SystemField,
+  ValueOption,
+  isSystemField,
+} from "@eimsnext/models";
 import {
   IDynamicFindOptions,
   IDynamicFilter,
@@ -207,4 +213,9 @@ export function toODataQuery<T>(
   query.filter = oFilter;
 
   return query;
+}
+
+export function toListItem(options?: ValueOption[]) {
+  if (!options) return [];
+  return options.map<IListItem>((opt) => ({ id: opt.value, label: opt.label }));
 }
