@@ -6,6 +6,11 @@ export interface IDataSource {
 export enum DataSourceType {
   Form,
 }
+export interface IDraggableItem {
+  id: string;
+  icon: string;
+  label: string;
+}
 export interface IDataSourceField {
   formId?: string;
   id: string;

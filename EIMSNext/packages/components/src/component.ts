@@ -1,5 +1,6 @@
 export * from "./upload";
 export * from "./dialog";
+export * from "./dialog/EtConfirm";
 export * from "./dialog/type";
 export * from "./card";
 export * from "./icon";
