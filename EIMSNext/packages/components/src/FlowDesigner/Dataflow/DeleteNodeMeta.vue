@@ -31,7 +31,7 @@ import { getPrevNodes } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { uniqueId } from "@eimsnext/utils";
 import { IConditionList } from "@/ConditionList/type";
-import { IFormItem } from "@/FormList/type";
+import { IFormItem } from "@/FormSelect/type";
 import { INodeForm, FieldBuildRule } from "@/NodeFieldList/type";
 const { t } = useLocale();
 

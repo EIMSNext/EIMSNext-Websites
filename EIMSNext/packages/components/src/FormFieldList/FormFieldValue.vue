@@ -64,7 +64,7 @@ import { IFormFieldValue, FieldValueType } from "./type";
 import { FieldDef, FieldType } from "@eimsnext/models";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
 import { useLocale } from "element-plus";
-import { IFormFieldDef } from "@/FieldList/type";
+import { IFormFieldDef } from "@/FieldSelect/type";
 import { computed, ref } from "vue";
 import { IListItem } from "@/list/type";
 import { toListItem } from "@/ConditionList/type";

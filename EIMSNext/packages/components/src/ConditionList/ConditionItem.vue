@@ -6,8 +6,8 @@
           :field-def="modelValue.field" @change="changeField"></NodeFieldList>
       </template>
       <template v-else>
-        <FieldList class="cond-field" v-model="field" :formId="formId" :fieldLimit="fieldBuildSetting.fieldLimit"
-          @change="changeField"></FieldList>
+        <FieldSelect class="cond-field" v-model="field" :formId="formId" :fieldLimit="fieldBuildSetting.fieldLimit"
+          @change="changeField"></FieldSelect>
       </template>
 
       <el-dropdown v-model="op" class="cond-op" size="default" trigger="click" @command="onOpChanged">
@@ -37,8 +37,7 @@ import { FieldType } from "@eimsnext/models";
 import { ConditionType, ConditionValueType, IConditionList, dataOperators } from "./type";
 import { useLocale } from "element-plus";
 import { ConditionFieldType, IFieldBuildSetting, INodeForm, getConditionFieldType } from "@/NodeFieldList/type";
-import { IFormFieldDef } from "@/FieldList/type";
-import { IListItem } from "@/list/type";
+import { IFormFieldDef } from "@/FieldSelect/type";
 import { computed, ref, toRef } from "vue";
 
 const { t } = useLocale();

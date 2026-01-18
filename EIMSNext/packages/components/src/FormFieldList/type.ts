@@ -1,4 +1,4 @@
-import { IFormFieldDef, toFormFieldDef } from "@/FieldList/type";
+import { IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
 import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
 
 export interface IFormFieldList {

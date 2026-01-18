@@ -3,7 +3,7 @@ import {
   getFieldIcon,
   splitSubField,
   toFormFieldDef,
-} from "@/FieldList/type";
+} from "@/FieldSelect/type";
 import { ITreeNode, TreeNodeType } from "@/common";
 import { FieldDef, FieldType, FormDef, IFieldPerm } from "@eimsnext/models";
 

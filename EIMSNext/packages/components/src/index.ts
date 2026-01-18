@@ -7,10 +7,10 @@ import { MemberSelect, MemberSelectDialog } from "./memberSelect";
 import { EtCard } from "./card";
 import { EtToolbar, EtToolbarItem } from "./toolbar";
 import { ConditionList, ConditionItem, ConditionValue } from "./ConditionList";
-import { FieldList } from "./FieldList";
+import { FieldSelect } from "./FieldSelect";
 import { FieldSortList, FieldSortItem } from "./FieldSortList";
 import { FormFieldList, FormFieldItem, FormFieldValue } from "./FormFieldList";
-import { FormList } from "./FormList";
+import { FormSelect } from "./FormSelect";
 import { NodeFieldList } from "./NodeFieldList";
 import { EtDrawer } from "./drawer";
 import {
@@ -37,13 +37,13 @@ export default [
   ConditionList,
   ConditionItem,
   ConditionValue,
-  FieldList,
+  FieldSelect,
   FieldSortList,
   FieldSortItem,
   FormFieldList,
   FormFieldItem,
   FormFieldValue,
-  FormList,
+  FormSelect,
   NodeFieldList,
   EtDrawer,
   WorkflowDiagram,
