@@ -2,7 +2,7 @@
   <div :class="{ 'has-logo': sidebarLogo }">
     <form-edit v-if="showFormEditor" :formId="''" :usingFlow="usingWorkflow" :isLedger="isLedger"
       @close="showFormEditor = false" />
-    <DashboardDesigner v-model="showDshEditor"></DashboardDesigner>
+    <DashboardDesigner v-model="showDshEditor" :appId="appId"></DashboardDesigner>
 
     <!-- 顶部布局顶部 || 左侧布局左侧 -->
     <!-- <SidebarLogo v-if="sidebarLogo" :collapse="isSidebarCollapsed" /> -->
@@ -98,7 +98,7 @@ const appStore = useAppStore();
 const contextStore = useContextStore();
 const userStore = useUserStore()
 const curUser = toRef(userStore.currentUser)
-
+const appId = toRef(contextStore.appId)
 const app = ref<App>();
 
 

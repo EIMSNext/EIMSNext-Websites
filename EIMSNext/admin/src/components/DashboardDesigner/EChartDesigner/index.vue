@@ -12,7 +12,7 @@
             <span>{{ dataSource?.label }}</span>
           </div>
         </div>
-        <div class="data-source" v-if="dataSourceType == DataSourceType.Form">
+        <div class="data-source" v-if="dataSource.type == DataSourceType.Form">
           <div class="data-source-setting">
             <span>数据获取权限</span>
             <!-- <div class="choose-data" v-if="selectedRole === 2">
@@ -64,28 +64,37 @@
     </el-aside>
     <el-main style="min-width: 460px"></el-main>
     <el-aside width="300px"></el-aside>
+    <DataSourceDialog v-model="showDataSourceDialog" :appId="appId" :dataSource="dataSource"></DataSourceDialog>
   </el-container>
 </template>
 <script setup lang="ts">
 import Draggable from "vuedraggable";
 import { DataSourceType, IDataSource, IDataSourceField } from "../type";
-import { useLocale } from "element-plus";
 import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
+import { IFormItem } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
+import DataSourceDialog from "../components/DataSourceDialog.vue";
+import { useLocale } from "element-plus";
 const { t } = useLocale();
 
 defineOptions({
   name: "EChartDesigner",
 });
 
-const props = defineProps<{}>();
+const props = defineProps<{
+  appId: string;
+  dataSource: IDataSource,
+  layout?: string
+}>();
+
 const selectedRole = ref("1");
-const dataSource = ref<IDataSource>({ id: "sssss", type: DataSourceType.Form, title: "mock up" });
-const dataSourceType = ref<DataSourceType>(dataSource.value?.type);
+const dataSource = toRef(props.dataSource);
+const formItem = ref<IFormItem>()
 const formStore = useFormStore();
 const formDef = ref<FormDef>()
 const fields = ref<IDataSourceField[]>([]);
 const draggingNode = ref<IDataSourceField>();
+const showDataSourceDialog = ref(false)
 
 const populateFormFields = () => {
   fields.value = [];
@@ -119,7 +128,11 @@ const populateFormFields = () => {
 
 const chartType = ref(0);
 
-const changeDataSource = () => { };
+const changeDataSource = () => {
+  // if (dataSourceType == DataSourceType.Form) {
+
+  // }
+};
 const roleChanged = () => { };
 
 const dragStart = (e: any) => {

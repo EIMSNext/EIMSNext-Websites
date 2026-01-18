@@ -20,19 +20,15 @@ const props = defineProps<{
   appId: string;
 }>();
 const appStore = useAppStore()
-const formStore = useFormStore();
-const formList = ref<IListItem[]>([]);
-// console.log("form stores", formStore.items, props.appId);
-// formList.value = buildFormListItems(formStore.items.filter((x) => x.appId == props.appId));
-// console.log("form list", formList.value);
+const formList = ref<IFormItem[]>([]);
 
 const value = ref(props.modelValue?.id);
 
 const emit = defineEmits(["update:modelValue", "change"]);
 const onInput = (val: string) => {
-  let listItem = formList.value.find((x) => x.id == val)!;
-  emit("update:modelValue", listItem.data);
-  emit("change", listItem.data);
+  let formtem = formList.value.find((x) => x.id == val)!;
+  emit("update:modelValue", formtem);
+  emit("change", formtem);
 };
 
 watch(

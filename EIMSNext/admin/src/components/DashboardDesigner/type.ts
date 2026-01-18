@@ -7,7 +7,8 @@ export enum DataSourceType {
   Form,
 }
 export interface IDataSourceField {
+  formId?: string;
   id: string;
-  label: string;
+  label?: string;
   isComputed?: boolean;
 }
