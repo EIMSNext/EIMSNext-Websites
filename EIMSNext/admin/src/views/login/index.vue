@@ -65,7 +65,7 @@
 import { LocationQuery, useRoute } from "vue-router";
 import router from "@/router";
 import type { FormInstance } from "element-plus";
-import { ThemeEnum } from "@/enums/ThemeEnum";
+import { Themes } from "@/enums/Themes";
 
 import { useSettingsStore } from "@/store";
 import {
@@ -82,7 +82,7 @@ const settingsStore = useSettingsStore();
 const route = useRoute();
 const loginFormRef = ref<FormInstance>();
 
-const isDark = ref(settingsStore.theme === ThemeEnum.DARK); // 是否暗黑模式
+const isDark = ref(settingsStore.theme === Themes.DARK); // 是否暗黑模式
 const loading = ref(false); // 按钮 loading 状态
 const isCapslock = ref(false); // 是否大写锁定
 
@@ -162,7 +162,7 @@ function parseRedirect(): {
 
 // 主题切换
 const toggleTheme = () => {
-  const newTheme = settingsStore.theme === ThemeEnum.DARK ? ThemeEnum.LIGHT : ThemeEnum.DARK;
+  const newTheme = settingsStore.theme === Themes.DARK ? Themes.LIGHT : Themes.DARK;
   settingsStore.changeTheme(newTheme);
 };
 

@@ -303,7 +303,7 @@ export default function useContext(Handler) {
             if (item.linkage && value === oldValueTag) {
               return oldValue;
             }
-            
+
             return value;
           });
           const callback = (n) => {
@@ -316,10 +316,9 @@ export default function useContext(Handler) {
             }
           };
           if (
-            k === "defaultValue" ||
-            (k === "value"
+            k === "defaultValue" || k === "value"
               ? [undefined, null, ""].indexOf(ctx.rule.value) > -1
-              : computedValue.value !== deepGet(ctx.rule, k))
+              : computedValue.value !== deepGet(ctx.rule, k)
           ) {
             callback(computedValue.value);
           }

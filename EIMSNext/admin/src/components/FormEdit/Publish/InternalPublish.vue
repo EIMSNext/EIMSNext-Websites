@@ -26,7 +26,7 @@
                 </template>
                 <div class="auth-grp-content">
                   <selected-tags :modelValue="convertMembersToTags(authGrp.members)" :editable="true"
-                    :empty-text="t('workflow.emptyMember')" @editTag="editTag(authGrp)" />
+                    :empty-text="t('comp.emptyMember')" @editTag="editTag(authGrp)" />
                 </div>
               </et-card>
             </template>

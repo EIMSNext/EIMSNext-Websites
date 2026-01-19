@@ -17,7 +17,8 @@ import { ref } from "vue";
 import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
 import { IFormFieldItem, FieldValueType, IFormFieldList } from "./type";
 import { useLocale } from "element-plus";
-import { IFormFieldDef } from "@/FieldList/type";
+import { IFormFieldDef } from "@/FieldSelect/type";
+import { FieldType } from "@eimsnext/models";
 const { t } = useLocale();
 
 defineOptions({
@@ -29,7 +30,7 @@ const props = defineProps<{
   nodes: INodeForm[];
   fieldSetting: IFieldBuildSetting;
   removable?: boolean;
-  fieldValueChanging?: (field:IFormFieldDef,oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => Promise<boolean>;
+  fieldValueChanging?: (field: IFormFieldDef, oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => Promise<boolean>;
 }>();
 
 const field = ref(props.modelValue.field);
@@ -64,6 +65,11 @@ const onInput = () => {
 
 const emitChange = () => {
   let newModel = { field: field.value, value: value.value };
+  if (value.value.type == FieldValueType.Custom && (field.value.type == FieldType.DepartmentSelect ||
+    field.value.type == FieldType.EmployeeSelect) && Array.isArray(value.value.value)
+  ) {
+    newModel.value = value.value.value[0]
+  }
   emit("update:modelValue", newModel);
   emit("change", newModel);
 };

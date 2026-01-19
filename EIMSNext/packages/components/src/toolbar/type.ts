@@ -1,3 +1,5 @@
+import { ComputedRef } from "vue";
+
 export interface ToolbarItem {
   type: "button" | "dropdown" | "devider";
   config: IToolbarItemConfig;
@@ -5,6 +7,7 @@ export interface ToolbarItem {
 export interface IToolbarItemConfig {
   text: string;
   command: string;
+  visible: boolean | ComputedRef<boolean>;
   type?: "primary" | "success" | "warning" | "danger" | "info";
   icon?: string;
   tooltip?: string;
@@ -17,6 +20,7 @@ export interface IToolbarItemConfig {
 export interface IToolbarItemDropdownItem {
   text: string;
   command: string | number;
+  visible: boolean;
   divided?: boolean;
   disabled?: boolean;
   class?: string;

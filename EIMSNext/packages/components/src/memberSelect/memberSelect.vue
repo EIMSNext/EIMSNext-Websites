@@ -411,7 +411,7 @@ const orgNodeChecked = (data: ITreeNode, checked: boolean) => {
         tagsRef.value.push({
           id: data.id,
           code: data.code,
-          label: data.label,
+          label: data.data?.name || data.label,
           type: TagType.Department,
           data: data.data,
           cascadedDept: orgCascade.value
@@ -437,7 +437,7 @@ const deptNodeChecked = (data: ITreeNode, checked: boolean) => {
         tagsRef.value.push({
           id: data.id,
           code: data.code,
-          label: data.label,
+          label: data.data?.name || data.label,
           type: TagType.Department,
           data: data.data,
         });
@@ -457,7 +457,7 @@ const singleDeptChecked = (data: ITreeNode, val: string) => {
     tagsRef.value = [{
       id: data.id,
       code: data.code,
-      label: data.label,
+      label: data.data?.name || data.label,
       type: TagType.Department,
       data: data.data,
     }];

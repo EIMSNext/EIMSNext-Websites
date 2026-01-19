@@ -13,7 +13,7 @@ import { useLocale } from "element-plus";
 const { t } = useLocale();
 
 defineOptions({
-  name: "FormList",
+  name: "FormSelect",
 });
 const props = defineProps<{
   modelValue: IFormItem;
