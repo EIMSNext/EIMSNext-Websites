@@ -1,7 +1,7 @@
 <template>
   <div class="tags-container">
     <el-scrollbar class="scroll-container" :vertical="false" @wheel.prevent="handleScroll">
-      <router-link v-for="tag in visitedViews" ref="tagRef" :key="tag.fullPath"
+      <router-link v-for="tag in visitedViews" ref="tagRef" :key="tag.path"
         :class="'tags-item ' + (tagsViewStore.isActive(tag) ? 'active' : '')" :to="{ path: tag.path, query: tag.query }"
         @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''" @contextmenu.prevent="openContentMenu(tag, $event)">
         {{ translateRouteTitle(tag.title) }}
@@ -133,7 +133,7 @@ function initTags() {
 
 function addTags() {
   if (route.meta.title) {
-    tagsViewStore.addView({
+    const view = {
       name: route.name as string,
       title: route.meta.title,
       path: route.path,
@@ -142,31 +142,24 @@ function addTags() {
       keepAlive: route.meta?.keepAlive,
       closable: route.meta.closable,
       query: route.query,
-    });
+    };
+    // 检查视图是否已存在
+    const isViewExist = visitedViews.value.some(v => v.path === view.path);
+    if (isViewExist) {
+      // 如果视图已存在，只更新属性，不重新添加
+      tagsViewStore.updateVisitedView(view);
+    } else {
+      // 如果视图不存在，添加新视图，tagsViewStore内部会处理路由类型变化的情况
+      tagsViewStore.addView(view);
+    }
   }
 }
 
 function moveToCurrentTag() {
   // 使用 nextTick() 的目的是确保在更新 tagsView 组件之前，scrollPaneRef 对象已经滚动到了正确的位置。
   nextTick(() => {
-    for (const tag of visitedViews.value) {
-      if (tag.path === route.path) {
-        // when query is different then update
-        // route.query = { ...route.query, ...tag.query };
-        if (tag.fullPath !== route.fullPath) {
-          tagsViewStore.updateVisitedView({
-            name: route.name as string,
-            title: route.meta.title || "",
-            path: route.path,
-            fullPath: route.fullPath,
-            affix: route.meta?.affix,
-            keepAlive: route.meta?.keepAlive,
-            closable: route.meta?.closable,
-            query: route.query,
-          });
-        }
-      }
-    }
+    // 当查询参数变化时，不更新标签，避免Tab内容明显刷新
+    // 只需要确保当前标签是激活状态即可
   });
 }
 

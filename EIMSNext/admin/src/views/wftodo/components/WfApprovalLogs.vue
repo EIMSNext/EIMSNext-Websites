@@ -64,12 +64,14 @@ defineOptions({
 });
 
 import { useRoute } from "vue-router";
+import { ref, reactive, onMounted, watch } from "vue";
 import { useFormStore } from "@eimsnext/store";
 import { ApproveAction, BriefField, WfApprovalLog } from "@eimsnext/models";
 import { wfApprovalLogService } from "@eimsnext/services";
 import { ODataQuery } from "@/utils/query";
 import { EtDialog } from "@eimsnext/components";
 import buildQuery from "odata-query";
+import WfApprovalLogView from "./WfApprovalLogView.vue";
 
 const props = withDefaults(
     defineProps<{
@@ -82,18 +84,51 @@ const props = withDefaults(
 const showDetailsDialog = ref(false);
 const route = useRoute();
 const formStore = useFormStore();
-const appId = route.params.appId.toString();
 const totalRef = ref(0);
-const dataRef = ref<WfApprovalLog[]>();
+const dataRef = ref<WfApprovalLog[]>([]);
 const selectedTask = ref<WfApprovalLog>()
 const filterRef = ref(props.filter)
-filterRef.value.appId = appId;
 
+// 监听props.filter变化
+watch(
+  () => props.filter,
+  (newFilter) => {
+    console.log('props.filter changed:', newFilter);
+    filterRef.value = { ...newFilter };
+    updateFilterWithAppId();
+    loadCount();
+    loadData();
+  },
+  { deep: true }
+);
+
+// 支持从params和query获取appId
+const getAppId = () => {
+  const appIdFromParams = route.params.appId;
+  const appIdFromQuery = route.query.appId;
+  return appIdFromParams?.toString() || appIdFromQuery?.toString();
+};
+
+// 只有在appId存在时才添加到filter中
+const updateFilterWithAppId = () => {
+  const appId = getAppId();
+  if (appId) {
+    filterRef.value.appId = appId;
+  } else {
+    delete filterRef.value.appId;
+  }
+};
+
+// 初始化时更新filter
+updateFilterWithAppId();
+
+// 定义查询参数
 const queryParams = reactive<ODataQuery<any>>({
     skip: 0,
     top: 10,
 });
 
+// 定义loadCount函数
 const loadCount = () => {
     let query = buildQuery({ filter: filterRef.value });
 
@@ -102,16 +137,39 @@ const loadCount = () => {
         totalRef.value = cnt;
     });
 };
+
+// 定义loadData函数
 const loadData = () => {
+    console.log('loadData filterRef:', filterRef.value);
     let query = buildQuery({ filter: filterRef.value });
+    console.log('loadData query:', query);
     wfApprovalLogService.query<WfApprovalLog>(query).then((res: WfApprovalLog[]) => {
+        console.log('loadData result:', res);
         dataRef.value = res;
+    }).catch((error: any) => {
+        console.log('loadData error:', error);
     });
 };
+
+// 定义viewLog函数
 const viewLog = async (task: WfApprovalLog) => {
     selectedTask.value = task
     showDetailsDialog.value = true;
 };
+
+// 监听路由变化，更新appId和filter
+watch(
+  () => [route.params.appId, route.query.appId],
+  () => {
+    updateFilterWithAppId();
+    // 重新加载数据
+    loadCount();
+    loadData();
+  },
+  { immediate: true }
+);
+
+// 组件挂载时加载数据
 onMounted(() => {
     loadCount();
     loadData();
