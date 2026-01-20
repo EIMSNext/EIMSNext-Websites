@@ -50,16 +50,49 @@ const selectedFormId = ref<string>(props.modelValue);
 const loading = ref(false);
 const appId = computed(() => contextStore.appId);
 
+
+
 // 加载表单数据
 const loadForms = async () => {
   try {
     loading.value = true;
+    
+    // 从URL中取当前表单id
+    let currentFormId = '';
+    
+    // 处理哈希路由，从哈希路径中提取表单ID（如 #/app/xxx/form/xxx）
+    const hash = window.location.hash;
+    const formIdRegex = /\/form\/(\w+)/;
+    const match = hash.match(formIdRegex);
+    
+    if (match && match[1]) {
+      // 从哈希路径中提取表单ID
+      currentFormId = match[1];
+    } else {
+      // 尝试从查询参数中获取，兼容传统URL
+      const urlObj = new URL(window.location.href);
+      currentFormId = urlObj.searchParams.get('id') || '';
+    }
+    
+    // 加载所有表单数据
     const forms = await formStore.load(`$filter=appId eq '${appId.value}'`, false);
-    formOptions.value = forms.map(form => ({
-      value: form.id,
-      label: form.name,
-      data: form
-    }));
+    
+    // 循环过滤表单，排除当前表单
+    const options = [];
+    for (let i = 0; i < forms.length; i++) {
+      const form = forms[i];
+      // 如果循环中的项的表单id不等于当前表单id，就添加到下拉框里
+      if (form.id !== currentFormId) {
+        options.push({
+          value: form.id,
+          label: form.name,
+          data: form
+        });
+      }
+    }
+    
+    // 更新表单选项
+    formOptions.value = options;
   } catch (error) {
     console.error("加载表单失败:", error);
     formOptions.value = [];
@@ -85,6 +118,8 @@ watch(
   },
   { immediate: true }
 );
+
+
 
 // 组件挂载时加载数据
 onMounted(() => {

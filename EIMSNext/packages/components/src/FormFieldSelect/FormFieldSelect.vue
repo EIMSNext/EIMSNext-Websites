@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { useFormStore } from "@eimsnext/store";
-import { IFormFieldDef, toFormFieldDef } from "@/FieldList/type";
+import { IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
 import { ref, watch, computed, onMounted } from "vue";
 import { FieldType } from "@eimsnext/models";
 

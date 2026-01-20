@@ -794,6 +794,8 @@ export default {
     form: "Form",
     subform: "Subform",
     other: "Other",
+    labelField: "Label Field",
+    valueField: "Value Field",
     model: "Model",
     field: "Field",
     variable: "Variable",

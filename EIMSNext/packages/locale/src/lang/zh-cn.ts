@@ -773,6 +773,8 @@ export default {
     form: "表单",
     subform: "子表单",
     other: "其他",
+    labelField: "标签字段",
+    valueField: "值字段",
     model: "弹窗",
     field: "字段",
     variable: "变量",
