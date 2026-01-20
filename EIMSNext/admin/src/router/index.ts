@@ -4,6 +4,7 @@ import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-rou
 
 export const AppLayout = () => import("@/layout/applayout/index.vue");
 export const SysLayout = () => import("@/layout/syslayout/index.vue");
+export const TodoLayout = () => import("@/layout/todolayout/index.vue");
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
@@ -28,6 +29,54 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/workspace",
     component: () => import("@/views/workspace/index.vue"),
     meta: { hidden: true, requiresAuth: true },
+  },
+  {
+    path: "/mytasks",
+    component: TodoLayout,
+    children: [
+      {
+        path: "",
+        name: "mytasks-global",
+        component: () => import("@/views/wftodo/global/mytasks.vue"),
+        meta: { title: "我的待办", affix: false, keepAlive: true, requiresAuth: true, closable: true },
+      },
+    ],
+  },
+  {
+    path: "/mystarted",
+    component: TodoLayout,
+    children: [
+      {
+        path: "",
+        name: "mystarted-global",
+        component: () => import("@/views/wftodo/global/mystarted.vue"),
+        meta: { title: "我发起的", affix: false, keepAlive: true, requiresAuth: true, closable: true },
+      },
+    ],
+  },
+  {
+    path: "/myapproved",
+    component: TodoLayout,
+    children: [
+      {
+        path: "",
+        name: "myapproved-global",
+        component: () => import("@/views/wftodo/global/myapproved.vue"),
+        meta: { title: "我审批的", affix: false, keepAlive: true, requiresAuth: true, closable: true },
+      },
+    ],
+  },
+  {
+    path: "/cctome",
+    component: TodoLayout,
+    children: [
+      {
+        path: "",
+        name: "cctome-global",
+        component: () => import("@/views/wftodo/global/cctome.vue"),
+        meta: { title: "抄送我的", affix: false, keepAlive: true, requiresAuth: true, closable: true },
+      },
+    ],
   },
   {
     path: "/system/department",
@@ -143,7 +192,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "mytasks",
         meta: {
           title: "我的待办",
-          affix: true,
+          affix: false,
           keepAlive: true,
           requiresAuth: true,
         },
@@ -161,7 +210,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "mystarted",
         meta: {
           title: "我发起的",
-          affix: true,
+          affix: false,
           keepAlive: true,
           requiresAuth: true,
           closable: true,
@@ -180,7 +229,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "myapproved",
         meta: {
           title: "我审批的",
-          affix: true,
+          affix: false,
           keepAlive: true,
           requiresAuth: true,
           closable: true,
@@ -199,7 +248,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "cctome",
         meta: {
           title: "抄送我的",
-          affix: true,
+          affix: false,
           keepAlive: true,
           requiresAuth: true,
           closable: true,

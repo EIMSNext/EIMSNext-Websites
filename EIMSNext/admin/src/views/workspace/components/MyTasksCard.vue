@@ -14,15 +14,15 @@
       </div>
       <el-divider direction="vertical" style="height: 100px;" />
       <div class="flow-steps">
-        <div class="step-wrapper">
+        <div class="step-wrapper" @click="goToMyStarted">
           <et-icon icon="iconfont-mystarted" size="40px" class="step-image" />
           <div class="step-text">{{ t("common.wfProcess.mystarted") }}</div>
         </div>
-        <div class="step-wrapper">
+        <div class="step-wrapper" @click="goToMyApproved">
           <et-icon icon="iconfont-myapproved" size="40px" class="step-image" />
           <div class="step-text">{{ t("common.wfProcess.myapproved") }}</div>
         </div>
-        <div class="step-wrapper">
+        <div class="step-wrapper" @click="goToMyCced">
           <et-icon icon="iconfont-mycced" size="40px" class="step-image" />
           <div class="step-text">{{ t("common.wfProcess.cctome") }}</div>
         </div>
@@ -33,13 +33,29 @@
     </div>
   </et-card>
 </template>
+
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 const { t } = useI18n()
+const router = useRouter();
 
 defineOptions({
   name: "MyTasksCard",
 });
+
+// 跳转到我发起的页面
+const goToMyStarted = () => {
+  router.push("/mystarted");
+};
+
+const goToMyApproved = () => {
+  router.push("/myapproved");
+};
+
+const goToMyCced = () => {
+  router.push("/mycced");
+};
 </script>
 <style lang="scss" scoped>
 .flow-center-wrapper {
