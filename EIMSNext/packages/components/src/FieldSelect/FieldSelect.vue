@@ -12,7 +12,7 @@ import { IListItem } from "@/list/type";
 import { IFieldLimit } from "@/NodeFieldList/type";
 
 defineOptions({
-  name: "FieldList",
+  name: "FieldSelect",
 });
 const props = defineProps<{
   modelValue: IFormFieldDef;

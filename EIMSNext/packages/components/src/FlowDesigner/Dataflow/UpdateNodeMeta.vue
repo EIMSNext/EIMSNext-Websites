@@ -79,8 +79,8 @@ import {
   IFieldLimit,
   INodeForm,
 } from "@/NodeFieldList/type";
-import { IFormItem } from "@/FormList/type";
-import { IFormFieldDef, splitSubField } from "@/FieldList/type";
+import { IFormItem } from "@/FormSelect/type";
+import { IFormFieldDef, splitSubField } from "@/FieldSelect/type";
 import { EtConfirm } from "@/dialog/EtConfirm";
 import { MessageIcon } from "@/dialog/type";
 

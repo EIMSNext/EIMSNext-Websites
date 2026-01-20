@@ -28,7 +28,7 @@ import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { useLocale } from "element-plus";
 import { IConditionList } from "@/ConditionList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
-import { IFormItem } from "@/FormList/type";
+import { IFormItem } from "@/FormSelect/type";
 import { INodeForm } from "@/NodeFieldList/type";
 const { t } = useLocale();
 
