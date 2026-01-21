@@ -1707,6 +1707,31 @@ export default defineComponent({
                     rule._loadData = rule.effect.loadData;
                     delete rule.effect.loadData;
                 }
+                // 去掉空的fetch字段
+                if (rule.effect?.fetch === "" || rule.effect?.fetch === undefined) {
+                    delete rule.effect.fetch;
+                }
+                // 简化source中的label和value数据
+                if (rule.effect?.source) {
+                    // 简化label数据
+                    if (rule.effect.source.label) {
+                        rule.effect.source.label = {
+                            formId: rule.effect.source.label.formId,
+                            field: rule.effect.source.label.field,
+                            label: rule.effect.source.label.label,
+                            type: rule.effect.source.label.type
+                        };
+                    }
+                    // 简化value数据
+                    if (rule.effect.source.value) {
+                        rule.effect.source.value = {
+                            formId: rule.effect.source.value.formId,
+                            field: rule.effect.source.value.field,
+                            label: rule.effect.source.value.label,
+                            type: rule.effect.source.value.type
+                        };
+                    }
+                }
                 if (rule.$loadData) {
                     rule._loadData = rule.$loadData;
                     delete rule.$loadData;
@@ -1812,6 +1837,36 @@ export default defineComponent({
                     if (rule.props && rule.props.key) {
                         rule.key = rule.props.key;
                     }
+                    // 清理effect.source中的label和value对象，去掉无用字段
+                    if (rule.effect && rule.effect.source) {
+                        const source = rule.effect.source;
+                        
+                        // 清理label对象，保留formId字段
+                        if (source.label) {
+                            source.label = {
+                                formId: source.label.formId || source.formId,
+                                field: source.label.field,
+                                label: source.label.label,
+                                type: source.label.type
+                            };
+                        }
+                        
+                        // 清理value对象，保留formId字段
+                        if (source.value) {
+                            source.value = {
+                                formId: source.value.formId || source.formId,
+                                field: source.value.field,
+                                label: source.value.label,
+                                type: source.value.type
+                            };
+                        }
+                        
+                        // 去掉空的fetch字段
+                        if (rule.effect.fetch === "" || rule.effect.fetch === undefined) {
+                            delete rule.effect.fetch;
+                        }
+                    }
+                    
                     [rule.wrap, rule.title, rule.info, rule].forEach(item => {
                         if (item) {
                             Object.keys(item).filter(k => k.indexOf('__') === 0 || item[k] === '' || (Array.isArray(item[k]) && item[k].length === 0) || (is.Object(item[k]) && Object.keys(item[k]).length === 0)).forEach(k => {

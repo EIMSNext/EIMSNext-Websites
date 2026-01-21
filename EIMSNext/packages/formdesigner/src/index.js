@@ -79,6 +79,7 @@ import EmployeeSelectView from "./components/EmployeeSelectView.vue";
 import { FcEmployeeSelect } from "@eimsnext/form-render-elplus/src/components/employeeselect";
 import SignaturePad from "./components/SignaturePad.vue";
 import Echarts from "./components/echarts/Echarts.vue";
+import SourceConfig from "./components/SourceConfig.vue";
 import formCreate, { designerForm } from "./utils/form";
 import draggable from "vuedraggable/src/vuedraggable";
 import {
@@ -179,6 +180,7 @@ designerForm.component("CheckBoxInput", CheckBoxInput);
 designerForm.component("DefaultValueConfig", DefaultValueConfig);
 designerForm.component("SpanInput", SpanInput);
 designerForm.component("LanguageInput", LanguageInput);
+designerForm.component("SourceConfig", SourceConfig);
 addComponent("FcSlot", Slot, SlotView);
 addComponent("FcJson", Json, JsonView);
 addComponent("DataTable", DataTable);

@@ -370,8 +370,8 @@ const setSelectedNodes = () => {
     });
   };
 
-  // 部门的下级自动选中，不能手动，依赖于orgCascade实现动态
-  // setNodeChecked(deptTree.value, deptData.value, departmentSelectedIds);
+  // 设置部门树的选中状态
+  setNodeChecked(deptTree.value, deptData.value, departmentSelectedIds);
   if (curDeptData.value) {
     setNodeChecked(curDeptTree.value, curDeptData.value, departmentSelectedIds);
   }

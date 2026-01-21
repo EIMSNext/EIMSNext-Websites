@@ -12,6 +12,7 @@ import { FieldSortList, FieldSortItem } from "./FieldSortList";
 import { FormFieldList, FormFieldItem, FormFieldValue } from "./FormFieldList";
 import { FormSelect } from "./FormSelect";
 import { NodeFieldList } from "./NodeFieldList";
+import { FormFieldSelect } from "./FormFieldSelect";
 import { EtDrawer } from "./drawer";
 import {
   WorkflowDiagram,
@@ -45,6 +46,7 @@ export default [
   FormFieldValue,
   FormSelect,
   NodeFieldList,
+  FormFieldSelect,
   EtDrawer,
   WorkflowDiagram,
   WorkflowMetaEditor,
