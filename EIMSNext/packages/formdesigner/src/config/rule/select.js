@@ -59,6 +59,9 @@ export default {
   props(_, { t }) {
     return localeProps(t, name + ".props", [
       { type: "input", field: "placeholder" },
+      {
+        type: "DefaultValueConfig",
+      },
       makeOptionsRule(t, "options"),
       //   { type: "switch", field: "multiple" },
       // {
