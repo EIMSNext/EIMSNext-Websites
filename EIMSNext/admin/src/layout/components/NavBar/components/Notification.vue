@@ -178,8 +178,4 @@ function markAllAsRead() {
 </script>
 
 <style lang="scss" scoped>
-.layout-top .notification-icon,
-.layout-mix .notification-icon {
-  color: #fff;
-}
 </style>

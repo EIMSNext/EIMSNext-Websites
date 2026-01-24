@@ -1,5 +1,5 @@
 <template>
-  <div class="wh-full" :class="classObj">
+  <div class="wh-full layout-left" :class="classObj">
     <el-container>
       <el-header style="height: 50px; padding: 0 12px">
         <NavBar />
@@ -11,7 +11,7 @@
               path: '/workspace',
             }">
               <div class="main-left-menu-item">
-                <et-icon icon="homepage" size="20px" :color="getAppIconColor()"></et-icon>
+                <et-icon icon="homepage" size="18px" :color="getAppIconColor()"></et-icon>
               </div>
             </AppLink>
           </el-tooltip>
@@ -21,7 +21,7 @@
                 path: '/system/department',
               }">
                 <div class="main-left-menu-item">
-                  <et-icon icon="el-icon-Notebook" size="20px" :color="getAppIconColor()"></et-icon>
+                  <et-icon icon="el-icon-Notebook" size="18px" :color="getAppIconColor()"></et-icon>
                 </div>
               </AppLink>
             </el-tooltip>
@@ -34,7 +34,7 @@
                   path: `/app/${app.id}/mytasks`,
                 }">
                   <div class="main-left-menu-item">
-                    <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor()"></et-icon>
+                    <et-icon :icon="getAppIcon(app)" size="18px" :color="getAppIconColor()"></et-icon>
                   </div>
                 </AppLink>
               </el-tooltip></template>

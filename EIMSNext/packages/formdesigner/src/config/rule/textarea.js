@@ -50,6 +50,7 @@ export default {
       //   field: "clearable",
       //   wrap: { show: false },
       // },
+      { type: "GroupLabel", props: { title: t("props.othersetting") } },
       {
         type: "CheckBoxInput",
         field: "disabled",

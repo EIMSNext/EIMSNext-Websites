@@ -40,6 +40,7 @@ export const usePermissionStore = defineStore("permission", () => {
             generateAppMenu(appId.value, x, forms, menus);
           }
         });
+
         appMenus.value = menus;
       }
     }

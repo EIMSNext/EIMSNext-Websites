@@ -1,6 +1,6 @@
 <!-- 菜单组件 -->
 <template>
-  <el-menu ref="menuRef" :default-active="currentRoute.path" :collapse="!systemStore.sidebar.opened"
+  <el-menu :default-active="currentRoute.path" :collapse="!systemStore.sidebar.opened"
     :background-color="variables['menu-background']" :text-color="variables['menu-text']"
     :active-text-color="variables['menu-active-text']" :unique-opened="false" :collapse-transition="false"
     mode="vertical" style="width: 100%;" @open="onMenuOpen" @close="onMenuClose">
@@ -12,10 +12,7 @@
 
 <script lang="ts" setup>
 import path from "path-browserify";
-import { storeToRefs } from "pinia";
-import type { MenuInstance } from "element-plus";
-
-import { useSystemStore, usePermissionStore } from "@/store";
+import { useSystemStore, } from "@/store";
 import { isExternal } from "@/utils/index";
 
 import variables from "@/styles/variables.module.scss";
@@ -32,14 +29,18 @@ const props = defineProps({
   },
 });
 
-const menuRef = ref<MenuInstance>();
 const systemStore = useSystemStore();
 const currentRoute = useRoute();
-const { appMenus } = storeToRefs(usePermissionStore());
+const appMenus = toRef(props.menuList)
 
 // 存储已展开的菜单项索引
 const expandedMenuIndexes = ref<string[]>([]);
-
+watch(() => props.menuList,
+  () => {
+    appMenus.value = props.menuList
+  },
+  { immediate: true }
+)
 /**
  * 获取完整路径
  *

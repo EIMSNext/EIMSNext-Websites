@@ -1,11 +1,9 @@
 <template>
   <Layout>
     <!-- 工作流侧边栏 -->
-    <div class="sidebar-container">
+    <div class="todobar-container">
       <TodoSidebar />
     </div>
-    <!-- 遮罩层 -->
-    <div v-if="isOpenSidebar" class="wh-full fixed-lt z-999 bg-black bg-opacity-30" @click="handleOutsideClick" />
     <!-- 左侧和顶部布局 -->
     <div :class="{ hasTagsView: showTagsView }" class="main-container">
       <div :class="{ 'fixed-header': fixedHeader }" class="tag-header">
@@ -62,35 +60,52 @@ function handleOutsideClick() {
 </script>
 
 <style lang="scss" scoped>
-.sidebar-container {
+.todobar-container {
   position: fixed;
   z-index: 999;
-  width: 200px;
-  height: calc(100vh - 50px);
-  background-color: var(--el-menu-background-color);
+  width: $sidebar-width;
+  background-color: $menu-background;
   transition: width 0.28s;
-  margin-top: 50px;
-  border-right: 1px solid var(--el-menu-border-color);
+
+  :deep(.el-menu) {
+    border: none;
+  }
 }
 
 .main-container {
   position: relative;
   height: 100%;
-  margin-left: 200px;
+  margin-left: $sidebar-width;
   overflow-y: auto;
   transition: margin-left 0.28s;
+
+  .fixed-header {
+    position: sticky;
+    top: 0;
+    z-index: 9;
+    transition: width 0.28s;
+  }
+
+  .tag-header {
+    padding: 0 12px;
+    background-color: var(--el-bg-color-page);
+  }
 }
 
-.fixed-header {
-  position: sticky;
-  top: 0;
-  z-index: 9;
-  transition: width 0.28s;
+.hideSidebar {
+  .main-container {
+    margin-left: $sidebar-width-collapsed;
+  }
 }
 
-.tag-header {
-  padding: 0 12px;
-  background-color: var(--el-bg-color-page);
+.layout-left.hideSidebar {
+  .todobar-container {
+    width: $sidebar-width-collapsed !important;
+  }
+
+  .main-container {
+    margin-left: $sidebar-width-collapsed;
+  }
 }
 
 .app-main {
