@@ -1,6 +1,6 @@
 <template>
   <div>
-    <form-edit v-if="showFormEditor" :formId="''" :usingFlow="usingWorkflow" :isLedger="isLedger"
+    <form-edit v-if="showFormEditor" :formId="newFormId" :usingFlow="usingWorkflow" :isLedger="isLedger"
       @close="showFormEditor = false" />
 
     <div class="app-title">
@@ -49,8 +49,8 @@
 
       <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
         <el-dropdown placement="bottom-start" size="large">
-          <el-button>
-            <et-icon icon="el-icon-plus" style="width: 30px;"> </et-icon>
+          <el-button style="width: 30px;">
+            <et-icon icon="el-icon-plus"> </et-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu style="min-width: 150px">
@@ -64,23 +64,23 @@
         </el-dropdown>
       </template>
     </div>
-    <div v-else></div>
     <el-scrollbar>
-      <SidebarMenu :menu-list="permissionStore.routes" base-path="" />
+      <SidebarMenu :menu-list="appMenus" base-path="" />
     </el-scrollbar>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useSettingsStore, usePermissionStore, useSystemStore } from "@/store";
-import { App, UserType } from "@eimsnext/models";
-import { useAppStore, useContextStore, useUserStore } from "@eimsnext/store";
-import NavbarRight from "../NavBar/components/NavbarRight.vue";
+import { App, FormDef, FormDefRequest, FormType, UserType } from "@eimsnext/models";
+import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
+import { formDefService } from "@eimsnext/services";
 const { t } = useI18n()
 
+const newFormId = ref("")
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
@@ -88,9 +88,11 @@ const isLedger = ref(false);
 const showDshEditor = ref(false);
 // const systemStore = useSystemStore();
 const settingsStore = useSettingsStore();
-const permissionStore = usePermissionStore();
+var permissionStore = usePermissionStore()
+const { appMenus } = storeToRefs(permissionStore);
 
 const appStore = useAppStore();
+const formStore = useFormStore();
 const contextStore = useContextStore();
 const userStore = useUserStore()
 const curUser = toRef(userStore.currentUser)
@@ -113,7 +115,27 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
   usingWorkflow.value = usingFlow;
   isLedger.value = ledger;
 
-  showFormEditor.value = true;
+  //直接创建，防止工作流/数据流等设置报错
+  let req: FormDefRequest = {
+    id: "",
+    appId: contextStore.appId,
+    name: t("admin.untitledForm"),
+    type: FormType.Form,
+    content: {
+      "layout": "[]",
+      "options": "{\"info\":{\"align\":\"left\"},\"form\":{\"inline\":false,\"hideRequiredAsterisk\":false,\"labelPosition\":\"top\",\"size\":\"default\",\"labelWidth\":\"auto\"},\"resetBtn\":{\"show\":false,\"innerText\":\"重置\"},\"submitBtn\":{\"show\":false,\"innerText\":\"提交\"}}"
+    },
+    usingWorkflow: usingFlow,
+    isLedger: ledger,
+  };
+
+  formDefService.post<FormDef>(req).then(resp => {
+    newFormId.value = resp.id
+    formStore.update(resp);
+    contextStore.setAppChanged(); //reload 菜单
+
+    showFormEditor.value = true;
+  });
 };
 
 const createDashboard = () => {

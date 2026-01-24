@@ -56,7 +56,7 @@ const formStore = useFormStore();
 const locale = computed(() => systemStore.locale);
 
 const appId = ref("");
-const formName = ref("测试表单");
+const formName = ref("未命名表单");
 const activeName = ref("formedit");
 const formDef = ref<FormDef>();
 

@@ -77,6 +77,7 @@ export default {
     deleteFormConfirm_Title: '你确定要删除"{0}"吗？',
     deleteFormConfirm_Content: "表单删除后将不可恢复，包括所有相关数据",
     flowcenter: "流程中心",
+    untitledForm: "未命名表单",
   },
   workflow: {
     startNode: "发起流程",
