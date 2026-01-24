@@ -43,7 +43,7 @@ export default {
         fetch: "",
       },
       $required: false,
-      props: { multiple: true, clearable: true },
+      props: { multiple: true, clearable: true,filterable:true },
       options: makeTreeOptions(
         t("props.option"),
         { label: "label", value: "value" },
@@ -59,9 +59,6 @@ export default {
   props(_, { t }) {
     return localeProps(t, name + ".props", [
       { type: "input", field: "placeholder" },
-      {
-        type: "DefaultValueConfig",
-      },
       makeOptionsRule(t, "options"),
       //   { type: "switch", field: "multiple" },
       // {
@@ -93,10 +90,13 @@ export default {
       //   field: "filterable",
       // },
       {
-        type: "CheckBoxInput",
-        field: "filterable",
-        wrap: { show: false },
+        type: "DefaultValueConfig",
       },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "filterable",
+      //   wrap: { show: false },
+      // },
       // {
       //     type: 'switch',
       //     field: 'remote',
@@ -126,6 +126,7 @@ export default {
       //   field: "readonly",
       //   wrap: { show: false },
       // },
+      { type: "GroupLabel", props: { title: t("props.othersetting") } },
       {
         type: "CheckBoxInput",
         field: "disabled",

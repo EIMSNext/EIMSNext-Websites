@@ -432,7 +432,7 @@ export default {
     autoMode: "Please enter the correct {title}",
     requiredPlaceholder: "Please enter",
     required: "Required",
-    rule: "Validation",
+    rule: "Custom Validation",
   },
   tableOptions: {
     handle: "Operation",
@@ -876,7 +876,8 @@ export default {
     showTitle: "Display Title",
     v_custom: "Custom",
     v_datalink: "Data Link",
-    v_formula: "Formula Link",
+    v_formula: "Formula Link",    
+    othersetting: "Other Settings",
   },
   slots: {
     prefix: "Prefix",

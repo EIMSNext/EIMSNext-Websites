@@ -423,7 +423,7 @@ export default {
     autoMode: "请输入正确的{title}",
     requiredPlaceholder: "请输入提示语",
     required: "必填",
-    rule: "验证规则",
+    rule: "自定义验证规则",
   },
   tableOptions: {
     handle: "操作",
@@ -856,6 +856,7 @@ export default {
     v_custom: "自定义",
     v_datalink: "数据联动",
     v_formula: "公式联动",
+    othersetting: "其他设置",
   },
   slots: {
     prefix: "头部内容",

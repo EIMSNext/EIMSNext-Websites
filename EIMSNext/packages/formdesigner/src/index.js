@@ -108,6 +108,7 @@ import formulas, { formulaInfo, formulaTree } from "./utils/formulas";
 import CheckBoxInput from "./components/CheckBoxInput.vue";
 import DefaultValueConfig from "./components/DefaultValueConfig.vue";
 import { behavior, behaviorRules, behaviorTree } from "./utils/behavior";
+import GroupLabel from "./components/GroupLabel.vue";
 import loadjs from "loadjs";
 
 CodeMirror.defineSimpleMode("fcComputedMode", {
@@ -181,6 +182,7 @@ designerForm.component("DefaultValueConfig", DefaultValueConfig);
 designerForm.component("SpanInput", SpanInput);
 designerForm.component("LanguageInput", LanguageInput);
 designerForm.component("SourceConfig", SourceConfig);
+designerForm.component("GroupLabel", GroupLabel);
 addComponent("FcSlot", Slot, SlotView);
 addComponent("FcJson", Json, JsonView);
 addComponent("DataTable", DataTable);
@@ -297,5 +299,5 @@ export {
   makeTreeOptionsRule,
   makeTitleRule,
   makeDataRule,
-  toJSON
+  toJSON,
 };
