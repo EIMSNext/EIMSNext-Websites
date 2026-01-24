@@ -65,33 +65,52 @@ function handleOutsideClick() {
 .sidebar-container {
   position: fixed;
   z-index: 999;
-  width: 200px;
-  height: calc(100vh - 50px);
-  background-color: var(--el-menu-background-color);
+  width: $sidebar-width;
+  background-color: $menu-background;
   transition: width 0.28s;
-  margin-top: 50px;
-  border-right: 1px solid var(--el-menu-border-color);
+
+  :deep(.el-menu) {
+    border: none;
+  }
 }
 
 .main-container {
   position: relative;
   height: 100%;
-  margin-left: 200px;
+  margin-left: $sidebar-width;
   overflow-y: auto;
   transition: margin-left 0.28s;
+
+  .fixed-header {
+    position: sticky;
+    top: 0;
+    z-index: 9;
+    transition: width 0.28s;
+  }
+
+  .tag-header {
+    padding: 0 12px;
+    background-color: var(--el-bg-color-page);
+  }
 }
 
-.fixed-header {
-  position: sticky;
-  top: 0;
-  z-index: 9;
-  transition: width 0.28s;
-}
+// .hideSidebar {
+//   .main-container {
+//     margin-left: $sidebar-width-collapsed;
+//   }
+// }
 
-.tag-header {
-  padding: 0 12px;
-  background-color: var(--el-bg-color-page);
-}
+// .layout-left.hideSidebar {
+//   .sidebar-container {
+//     width: $sidebar-width-collapsed !important;
+//   }
+
+//   .main-container {
+//     margin-left: $sidebar-width-collapsed;
+//   }
+// }
+
+// }
 
 .app-main {
   position: relative;

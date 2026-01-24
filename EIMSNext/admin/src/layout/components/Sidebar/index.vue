@@ -147,6 +147,11 @@ const createFolder = () => { };
   margin-left: 5px
 }
 
+:deep(.el-sub-menu__title) {
+  line-height: 40px;
+  height: 40px;
+}
+
 :deep(.el-menu-item) {
   line-height: 40px;
   height: 40px;
