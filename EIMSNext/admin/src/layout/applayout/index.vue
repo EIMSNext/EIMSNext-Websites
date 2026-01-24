@@ -2,8 +2,6 @@
   <Layout>
     <!-- 公用侧边栏 -->
     <Sidebar class="sidebar-container" />
-    <!-- 遮罩层 -->
-    <div v-if="isOpenSidebar" class="wh-full fixed-lt z-999 bg-black bg-opacity-30" @click="handleOutsideClick" />
     <!-- 左侧和顶部布局 -->
     <div :class="{ hasTagsView: showTagsView }" class="main-container">
       <div :class="{ 'fixed-header': fixedHeader }" class="tag-header">
@@ -82,21 +80,19 @@ watch(
   }
 }
 
-// .hideSidebar {
-//   .main-container {
-//     margin-left: $sidebar-width-collapsed;
-//   }
-// }
+.hideSidebar {
+  .main-container {
+    margin-left: $sidebar-width-collapsed;
+  }
+}
 
-// .layout-left.hideSidebar {
-//   .sidebar-container {
-//     width: $sidebar-width-collapsed !important;
-//   }
+.layout-left.hideSidebar {
+  .sidebar-container {
+    width: $sidebar-width-collapsed !important;
+  }
 
-//   .main-container {
-//     margin-left: $sidebar-width-collapsed;
-//   }
-// }
-
-// }
+  .main-container {
+    margin-left: $sidebar-width-collapsed;
+  }
+}
 </style>

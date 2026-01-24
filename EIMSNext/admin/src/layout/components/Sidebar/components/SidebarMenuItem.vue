@@ -20,10 +20,12 @@
         path: resolvePath(onlyOneChild.path),
         query: onlyOneChild.meta.params,
       }">
-        <el-menu-item :index="resolvePath(onlyOneChild.path)">
+        <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'pl-15px': !isSidebarOpened }">
           <SidebarMenuItemTitle :icon="onlyOneChild.meta.icon || item.meta?.icon" :title="onlyOneChild.meta.title"
             :iconColor="item.meta?.iconColor" />
-          <span v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin" class="more-wrapper">
+          <span
+            v-if="isSidebarOpened && (curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin)"
+            class="more-wrapper">
             <el-dropdown placement="bottom-start" size="large">
               <et-icon icon="el-icon-More" @click.prevent=""></et-icon>
               <template #dropdown>
@@ -69,6 +71,7 @@ import { useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
 import { FormDef, UserType } from "@eimsnext/models";
 import { MessageIcon } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
+import { useSystemStore } from "@/store";
 const { t } = useI18n()
 
 const props = defineProps({
@@ -109,6 +112,9 @@ const isLedger = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const userStore = useUserStore();
 const curUser = toRef(userStore.currentUser)
+
+const systemStore = useSystemStore();
+const isSidebarOpened = computed(() => systemStore.sidebar.opened);
 /**
  * 检查是否仅有一个可见子节点
  *

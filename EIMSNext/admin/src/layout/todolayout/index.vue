@@ -1,11 +1,9 @@
 <template>
   <Layout>
     <!-- 工作流侧边栏 -->
-    <div class="sidebar-container">
+    <div class="todobar-container">
       <TodoSidebar />
     </div>
-    <!-- 遮罩层 -->
-    <div v-if="isOpenSidebar" class="wh-full fixed-lt z-999 bg-black bg-opacity-30" @click="handleOutsideClick" />
     <!-- 左侧和顶部布局 -->
     <div :class="{ hasTagsView: showTagsView }" class="main-container">
       <div :class="{ 'fixed-header': fixedHeader }" class="tag-header">
@@ -62,7 +60,7 @@ function handleOutsideClick() {
 </script>
 
 <style lang="scss" scoped>
-.sidebar-container {
+.todobar-container {
   position: fixed;
   z-index: 999;
   width: $sidebar-width;
@@ -94,23 +92,21 @@ function handleOutsideClick() {
   }
 }
 
-// .hideSidebar {
-//   .main-container {
-//     margin-left: $sidebar-width-collapsed;
-//   }
-// }
+.hideSidebar {
+  .main-container {
+    margin-left: $sidebar-width-collapsed;
+  }
+}
 
-// .layout-left.hideSidebar {
-//   .sidebar-container {
-//     width: $sidebar-width-collapsed !important;
-//   }
+.layout-left.hideSidebar {
+  .todobar-container {
+    width: $sidebar-width-collapsed !important;
+  }
 
-//   .main-container {
-//     margin-left: $sidebar-width-collapsed;
-//   }
-// }
-
-// }
+  .main-container {
+    margin-left: $sidebar-width-collapsed;
+  }
+}
 
 .app-main {
   position: relative;
