@@ -29,7 +29,7 @@ interface IFormOption {
 }
 
 defineOptions({
-  name: "FormSelect",
+  name: "FormSelectInDesigner",
 });
 
 const props = withDefaults(
@@ -49,8 +49,6 @@ const formOptions = ref<IFormOption[]>([]);
 const selectedFormId = ref<string>(props.modelValue);
 const loading = ref(false);
 const appId = computed(() => contextStore.appId);
-
-
 
 // 加载表单数据
 const loadForms = async () => {
@@ -108,6 +106,7 @@ const handleChange = (formId: string) => {
   emit("change", selectedForm);
 };
 
+
 // 监听外部modelValue变化
 watch(
   () => props.modelValue,
@@ -118,8 +117,6 @@ watch(
   },
   { immediate: true }
 );
-
-
 
 // 组件挂载时加载数据
 onMounted(() => {
