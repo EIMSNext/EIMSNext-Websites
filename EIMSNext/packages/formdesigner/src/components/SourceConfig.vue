@@ -2,33 +2,28 @@
   <div class="source-config">
     <!-- 表单选择 -->
     <div class="form-select-item">
-      <div class="el-form-item__label"><span class="_fc-field-title">{{ t('props.form') }}</span></div>
+      <div class="el-form-item__label"><span>{{ t('props.form') }}</span></div>
       <form-select v-model="source.formId" @change="onFormChange" />
     </div>
-    
+
     <!-- Label字段选择 -->
     <div class="field-select-item">
-      <div class="el-form-item__label"><span class="_fc-field-title">{{ t('props.labelField') }}</span></div>
-      <form-field-select 
-        v-model="source.label" 
-        :form-id="source.formId"
-      />
+      <div class="el-form-item__label"><span>{{ t('props.labelField') }}</span></div>
+      <form-field-select v-model="source.label" :form-id="source.formId" />
     </div>
-    
+
     <!-- Value字段选择 -->
     <div class="field-select-item">
-      <div class="el-form-item__label"><span class="_fc-field-title">{{ t('props.valueField') }}</span></div>
-      <form-field-select 
-        v-model="source.value" 
-        :form-id="source.formId"
-      />
+      <div class="el-form-item__label"><span>{{ t('props.valueField') }}</span></div>
+      <form-field-select v-model="source.value" :form-id="source.formId" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, defineProps, defineEmits, inject } from "vue";
-import { IFormFieldDef } from "@eimsnext/models";
+import { ref, watch, computed, inject } from "vue";
+import { IFormFieldDef } from "@eimsnext/components";
+import { FieldType } from "@eimsnext/models";
 
 interface ISourceConfig {
   formId: string;
@@ -47,7 +42,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:modelValue", "change"]);
 
-const designer = inject('designer');
+const designer: any = inject('designer');
 const t = computed(() => designer.setupState.t);
 
 const source = ref<ISourceConfig>({
@@ -74,13 +69,13 @@ const onFormChange = (form: any) => {
       formId: form.value,
       field: '',
       label: '',
-      type: ''
+      type: FieldType.None
     };
     source.value.value = {
       formId: form.value,
       field: '',
       label: '',
-      type: ''
+      type: FieldType.None
     };
     emitChange();
   }
@@ -142,9 +137,5 @@ watch(() => props.modelValue, (newVal) => {
   width: 80px;
   text-align: right;
   margin-right: 8px;
-}
-
-._fc-field-title {
-  font-weight: 500;
 }
 </style>

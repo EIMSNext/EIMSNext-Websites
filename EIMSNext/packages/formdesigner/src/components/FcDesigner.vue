@@ -407,12 +407,12 @@
                                         </DragForm>
                                     </div>
                                     <div style="grid-area: props;">
-                                        <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
-                                            t('designer.props') }}
+                                        <!-- <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
+                                            t('designer.props') }} -->
                                             <!-- <VariableConfig v-if="propsForm.variable"></VariableConfig>
                                             <PropsInput v-if="activeRule && getConfig('showCustomProps', true)">
                                             </PropsInput> -->
-                                        </ConfigTitle>
+                                        <!-- </ConfigTitle> -->
                                         <DragForm v-show="propsForm.isShow" v-model:api="propsForm.api"
                                             :rule="propsForm.rule" :option="propsForm.options"
                                             :modelValue="propsForm.value" @change="propChange"
@@ -428,10 +428,10 @@
                                                 </template>
                                             </template>
                                         </DragForm>
-                                        <ConfigTitle v-if="customForm.isShow && customForm.propsShow"
+                                        <!-- <ConfigTitle v-if="customForm.isShow && customForm.propsShow"
                                             id="_fd-config-props">
                                             {{ t('designer.props') }}
-                                        </ConfigTitle>
+                                        </ConfigTitle> -->
                                         <DragForm v-if="customForm.isShow && customForm.propsShow"
                                             v-model:api="customForm.api" :rule="customForm.rule"
                                             :option="customForm.options" :key="customForm.key"
@@ -446,10 +446,10 @@
                                     </div>
                                     <div style="grid-area: validate;">
                                         <template v-if="activeRule">
-                                            <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
+                                            <!-- <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
                                                 t('designer.validate')
                                             }}
-                                            </ConfigTitle>
+                                            </ConfigTitle> -->
                                             <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api"
                                                 :rule="validateForm.rule" :option="validateForm.options"
                                                 :modelValue="validateForm.value" @change="validateChange"
@@ -457,10 +457,10 @@
                                         </template>
                                     </div>
                                     <div style="grid-area: advanced;">
-                                        <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
+                                        <!-- <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
                                             t('designer.advanced')
                                         }}
-                                        </ConfigTitle>
+                                        </ConfigTitle> -->
                                         <DragForm v-show="advancedForm.isShow" v-model:api="advancedForm.api"
                                             :rule="advancedForm.rule" :option="advancedForm.options"
                                             :modelValue="advancedForm.value" @change="computedChange">

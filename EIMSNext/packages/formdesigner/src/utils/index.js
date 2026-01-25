@@ -151,8 +151,8 @@ export function makeOptionsRule(t, to, label, value) {
           wrap: { show: false },
           props: {
             column: [
-              { label: "label", key: label || "label" },
-              { label: "value", key: value || "value" },
+              { label: t("props.label"), key: label || "label" },
+              { label: t("props.value"), key: value || "value" },
             ],
             showHeader: true,
           },
@@ -168,7 +168,7 @@ export function makeOptionsRule(t, to, label, value) {
     value: 2,
     options,
     props: {
-     clearable: false
+      clearable: false,
     },
     control,
   };
