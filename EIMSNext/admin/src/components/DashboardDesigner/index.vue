@@ -1,5 +1,5 @@
 <template>
-  <EtDrawer v-model="showDrawer" @close="close">
+  <EtDrawer :model-value="modelValue" @close="close">
     <template #title>
       <el-input v-model="formName" class="title-editor" />
     </template>
@@ -176,10 +176,10 @@ defineOptions({
 });
 
 const props = defineProps<{
+  modelValue: boolean;
   appId: string;
 }>();
 
-var showDrawer = ref(true);
 const formName = ref("未命名仪表盘");
 
 const charts = ref<IDraggableItem[]>([{ id: "", icon: "el-icon-PieChart", label: "统计表" }])
@@ -211,8 +211,9 @@ const onSave = () => {
 const onPreview = () => {
 }
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits(["update:modelValue", "close"]);
 const close = () => {
+  emit("update:modelValue", false)
   emit("close");
 }
 </script>
