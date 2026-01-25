@@ -1,17 +1,17 @@
 <template>
-  <div class="wh-full" :class="classObj">
-    <el-container>
+  <div class="wh-full layout-left" :class="classObj">
+    <el-container style="height: 100%;">
       <el-header style="height: 50px; padding: 0 12px">
         <NavBar />
       </el-header>
-      <el-container style="border-top: 1px solid var(--el-menu-border-color)">
+      <el-container style="height: 99%; border-top: 1px solid var(--el-menu-border-color)">
         <el-aside width="45px" class="main-left-menu">
           <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
             <AppLink :to="{
               path: '/workspace',
             }">
               <div class="main-left-menu-item">
-                <et-icon icon="homepage" size="20px" :color="getAppIconColor()"></et-icon>
+                <et-icon icon="homepage" size="18px" :color="getAppIconColor()"></et-icon>
               </div>
             </AppLink>
           </el-tooltip>
@@ -21,7 +21,7 @@
                 path: '/system/department',
               }">
                 <div class="main-left-menu-item">
-                  <et-icon icon="el-icon-Notebook" size="20px" :color="getAppIconColor()"></et-icon>
+                  <et-icon icon="el-icon-Notebook" size="18px" :color="getAppIconColor()"></et-icon>
                 </div>
               </AppLink>
             </el-tooltip>
@@ -34,7 +34,7 @@
                   path: `/app/${app.id}/mytasks`,
                 }">
                   <div class="main-left-menu-item">
-                    <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor()"></et-icon>
+                    <et-icon :icon="getAppIcon(app)" size="18px" :color="getAppIconColor()"></et-icon>
                   </div>
                 </AppLink>
               </el-tooltip></template>

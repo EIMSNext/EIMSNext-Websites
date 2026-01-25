@@ -27,12 +27,12 @@
                                 </el-badge>
                             </div>
                         </el-tooltip>
-                        <el-tooltip effect="dark" :content="t('form.globalConfig')" placement="right" :hide-after="0">
+                        <!-- <el-tooltip effect="dark" :content="t('form.globalConfig')" placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'global' }"
                                 @click="activeModule = 'global'">
                                 <i class="fc-icon icon-data"></i>
                             </div>
-                        </el-tooltip>
+                        </el-tooltip> -->
                         <el-tooltip v-if="getConfig('showLanguage', true)" effect="dark" :content="t('language.name')"
                             placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'language' }"
@@ -47,13 +47,13 @@
                                 <i class="fc-icon icon-script"></i>
                             </div>
                         </el-tooltip> -->
-                        <el-tooltip v-if="getConfig('showAi', true)" effect="dark" :content="t('ai.name')"
+                        <!-- <el-tooltip v-if="getConfig('showAi', true)" effect="dark" :content="t('ai.name')"
                             placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'ai' }"
                                 @click="activeModule = 'ai'">
                                 <i class="fc-icon icon-ai bright"></i>
                             </div>
-                        </el-tooltip>
+                        </el-tooltip> -->
                     </el-aside>
                     <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '250px'">
                         <AiChat v-if="activeModule === 'ai'"></AiChat>
@@ -281,7 +281,7 @@
                                     <div class="_fd-input-btn">
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
-                                            }}：</span>
+                                            }}: </span>
                                         <el-switch :model-value="inputForm.state" inline-prompt
                                             @update:model-value="openInputData" />
                                     </div>
@@ -407,12 +407,12 @@
                                         </DragForm>
                                     </div>
                                     <div style="grid-area: props;">
-                                        <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
-                                            t('designer.props') }}
+                                        <!-- <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
+                                            t('designer.props') }} -->
                                             <!-- <VariableConfig v-if="propsForm.variable"></VariableConfig>
                                             <PropsInput v-if="activeRule && getConfig('showCustomProps', true)">
                                             </PropsInput> -->
-                                        </ConfigTitle>
+                                        <!-- </ConfigTitle> -->
                                         <DragForm v-show="propsForm.isShow" v-model:api="propsForm.api"
                                             :rule="propsForm.rule" :option="propsForm.options"
                                             :modelValue="propsForm.value" @change="propChange"
@@ -428,10 +428,10 @@
                                                 </template>
                                             </template>
                                         </DragForm>
-                                        <ConfigTitle v-if="customForm.isShow && customForm.propsShow"
+                                        <!-- <ConfigTitle v-if="customForm.isShow && customForm.propsShow"
                                             id="_fd-config-props">
                                             {{ t('designer.props') }}
-                                        </ConfigTitle>
+                                        </ConfigTitle> -->
                                         <DragForm v-if="customForm.isShow && customForm.propsShow"
                                             v-model:api="customForm.api" :rule="customForm.rule"
                                             :option="customForm.options" :key="customForm.key"
@@ -446,10 +446,10 @@
                                     </div>
                                     <div style="grid-area: validate;">
                                         <template v-if="activeRule">
-                                            <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
+                                            <!-- <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
                                                 t('designer.validate')
                                             }}
-                                            </ConfigTitle>
+                                            </ConfigTitle> -->
                                             <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api"
                                                 :rule="validateForm.rule" :option="validateForm.options"
                                                 :modelValue="validateForm.value" @change="validateChange"
@@ -457,10 +457,10 @@
                                         </template>
                                     </div>
                                     <div style="grid-area: advanced;">
-                                        <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
+                                        <!-- <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
                                             t('designer.advanced')
                                         }}
-                                        </ConfigTitle>
+                                        </ConfigTitle> -->
                                         <DragForm v-show="advancedForm.isShow" v-model:api="advancedForm.api"
                                             :rule="advancedForm.rule" :option="advancedForm.options"
                                             :modelValue="advancedForm.value" @change="computedChange">
@@ -1707,6 +1707,31 @@ export default defineComponent({
                     rule._loadData = rule.effect.loadData;
                     delete rule.effect.loadData;
                 }
+                // 去掉空的fetch字段
+                if (rule.effect?.fetch === "" || rule.effect?.fetch === undefined) {
+                    delete rule.effect.fetch;
+                }
+                // 简化source中的label和value数据
+                if (rule.effect?.source) {
+                    // 简化label数据
+                    if (rule.effect.source.label) {
+                        rule.effect.source.label = {
+                            formId: rule.effect.source.label.formId,
+                            field: rule.effect.source.label.field,
+                            label: rule.effect.source.label.label,
+                            type: rule.effect.source.label.type
+                        };
+                    }
+                    // 简化value数据
+                    if (rule.effect.source.value) {
+                        rule.effect.source.value = {
+                            formId: rule.effect.source.value.formId,
+                            field: rule.effect.source.value.field,
+                            label: rule.effect.source.value.label,
+                            type: rule.effect.source.value.type
+                        };
+                    }
+                }
                 if (rule.$loadData) {
                     rule._loadData = rule.$loadData;
                     delete rule.$loadData;
@@ -1812,6 +1837,36 @@ export default defineComponent({
                     if (rule.props && rule.props.key) {
                         rule.key = rule.props.key;
                     }
+                    // 清理effect.source中的label和value对象，去掉无用字段
+                    if (rule.effect && rule.effect.source) {
+                        const source = rule.effect.source;
+                        
+                        // 清理label对象，保留formId字段
+                        if (source.label) {
+                            source.label = {
+                                formId: source.label.formId || source.formId,
+                                field: source.label.field,
+                                label: source.label.label,
+                                type: source.label.type
+                            };
+                        }
+                        
+                        // 清理value对象，保留formId字段
+                        if (source.value) {
+                            source.value = {
+                                formId: source.value.formId || source.formId,
+                                field: source.value.field,
+                                label: source.value.label,
+                                type: source.value.type
+                            };
+                        }
+                        
+                        // 去掉空的fetch字段
+                        if (rule.effect.fetch === "" || rule.effect.fetch === undefined) {
+                            delete rule.effect.fetch;
+                        }
+                    }
+                    
                     [rule.wrap, rule.title, rule.info, rule].forEach(item => {
                         if (item) {
                             Object.keys(item).filter(k => k.indexOf('__') === 0 || item[k] === '' || (Array.isArray(item[k]) && item[k].length === 0) || (is.Object(item[k]) && Object.keys(item[k]).length === 0)).forEach(k => {

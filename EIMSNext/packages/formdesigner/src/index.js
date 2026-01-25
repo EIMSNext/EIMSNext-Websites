@@ -79,6 +79,7 @@ import EmployeeSelectView from "./components/EmployeeSelectView.vue";
 import { FcEmployeeSelect } from "@eimsnext/form-render-elplus/src/components/employeeselect";
 import SignaturePad from "./components/SignaturePad.vue";
 import Echarts from "./components/echarts/Echarts.vue";
+import SourceConfig from "./components/SourceConfig.vue";
 import formCreate, { designerForm } from "./utils/form";
 import draggable from "vuedraggable/src/vuedraggable";
 import {
@@ -107,6 +108,7 @@ import formulas, { formulaInfo, formulaTree } from "./utils/formulas";
 import CheckBoxInput from "./components/CheckBoxInput.vue";
 import DefaultValueConfig from "./components/DefaultValueConfig.vue";
 import { behavior, behaviorRules, behaviorTree } from "./utils/behavior";
+import GroupLabel from "./components/GroupLabel.vue";
 import loadjs from "loadjs";
 
 CodeMirror.defineSimpleMode("fcComputedMode", {
@@ -179,6 +181,8 @@ designerForm.component("CheckBoxInput", CheckBoxInput);
 designerForm.component("DefaultValueConfig", DefaultValueConfig);
 designerForm.component("SpanInput", SpanInput);
 designerForm.component("LanguageInput", LanguageInput);
+designerForm.component("SourceConfig", SourceConfig);
+designerForm.component("GroupLabel", GroupLabel);
 addComponent("FcSlot", Slot, SlotView);
 addComponent("FcJson", Json, JsonView);
 addComponent("DataTable", DataTable);
@@ -295,5 +299,5 @@ export {
   makeTreeOptionsRule,
   makeTitleRule,
   makeDataRule,
-  toJSON
+  toJSON,
 };

@@ -55,7 +55,7 @@ export default {
     };
   },
   props(_, { t }) {
-    return localeProps(t, name + ".props", [
+    return localeProps(t, name + ".props", [     
       makeOptionsRule(t, "options"),
       ...[
         // {
@@ -97,11 +97,15 @@ export default {
         //     field: 'fill'
         // }
       ],
+      {
+        type: "DefaultValueConfig",
+      },
       // {
       //   type: "CheckBoxInput",
       //   field: "readonly",
       //   wrap: { show: false },
       // },
+      { type: "GroupLabel", props: { title: t("props.othersetting") } },
       {
         type: "CheckBoxInput",
         field: "disabled",

@@ -1,4 +1,7 @@
-import formSelect from "./FormSelect.vue";
-import { withInstall } from "../utils/install";
-const FormSelect = withInstall(formSelect);
-export { FormSelect};
+import FormSelect from './FormSelect.vue';
+import { withInstall } from '../utils/install';
+
+const FcFormSelect = withInstall(FormSelect);
+
+export default FcFormSelect;
+export { FcFormSelect as FormSelect };

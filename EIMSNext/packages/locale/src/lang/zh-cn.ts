@@ -76,6 +76,8 @@ export default {
     newGroup: "创建分组",
     deleteFormConfirm_Title: '你确定要删除"{0}"吗？',
     deleteFormConfirm_Content: "表单删除后将不可恢复，包括所有相关数据",
+    flowcenter: "流程中心",
+    untitledForm: "未命名表单",
   },
   workflow: {
     startNode: "发起流程",
@@ -423,7 +425,7 @@ export default {
     autoMode: "请输入正确的{title}",
     requiredPlaceholder: "请输入提示语",
     required: "必填",
-    rule: "验证规则",
+    rule: "自定义验证规则",
   },
   tableOptions: {
     handle: "操作",
@@ -773,6 +775,8 @@ export default {
     form: "表单",
     subform: "子表单",
     other: "其他",
+    labelField: "标签字段",
+    valueField: "值字段",
     model: "弹窗",
     field: "字段",
     variable: "变量",
@@ -841,6 +845,7 @@ export default {
     key: "键名",
     name: "名称",
     value: "值",
+    label:"标签",
     inputData: "默认值",
     append: "插入",
     options: "选项数据",
@@ -854,6 +859,7 @@ export default {
     v_custom: "自定义",
     v_datalink: "数据联动",
     v_formula: "公式联动",
+    othersetting: "其他设置",
   },
   slots: {
     prefix: "头部内容",

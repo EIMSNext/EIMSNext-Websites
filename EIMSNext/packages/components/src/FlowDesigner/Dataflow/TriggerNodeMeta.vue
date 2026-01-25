@@ -1,6 +1,8 @@
 <template>
   <MetaItemHeader :label="t('dataflow.triggeringForm')" :required="true"></MetaItemHeader>
-  <el-input v-model="formName" readonly size="default" style="width: 100%" />
+  <div class="ml-[8px]">
+    <el-input v-model="formName" readonly size="default" style="width: 100%" />
+  </div>
   <MetaItemHeader class="mt-[8px]" :label="t('dataflow.trigger')" :required="true"></MetaItemHeader>
   <div class="trigger-header ml-[8px]">
     <el-popover popper-class="data-triggers" placement="bottom" :show-arrow="false" width="200" trigger="click">

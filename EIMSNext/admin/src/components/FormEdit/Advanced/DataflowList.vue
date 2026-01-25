@@ -69,6 +69,7 @@ const loadDataflows = (formId: string) => {
 const addNew = (eventSource: EventSourceType) => {
   selectedFlow.value = {
     id: "",
+    appId: props.formDef.appId,
     name: "未命名助手",
     flowType: FlowType.Dataflow,
     externalId: "",

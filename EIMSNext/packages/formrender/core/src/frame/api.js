@@ -122,9 +122,10 @@ export default function Api(h) {
     formData(fields) {
       if (fields == null || typeof fields === "boolean") {
         const data = {};
-        Object.keys(h.form).forEach((k) => {
+        // 遍历所有字段，调用getValue方法获取每个字段的值
+        h.fields().forEach((k) => {
           if (fields === true || h.ignoreFields.indexOf(k) === -1) {
-            data[k] = copy(h.form[k]);
+            data[k] = api.getValue(k);
           }
         });
         return data;
@@ -146,7 +147,8 @@ export default function Api(h) {
         }
         return undefined;
       }
-      return copy(ctx.rule.value);
+      // 调用toFormValue方法转换值
+      return copy(ctx.parser.toFormValue(ctx.rule.value, ctx));
     },
     coverValue(formData) {
       const data = { ...(formData || {}) };
