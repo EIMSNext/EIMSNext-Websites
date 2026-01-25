@@ -845,6 +845,7 @@ export default {
     key: "键名",
     name: "名称",
     value: "值",
+    label:"标签",
     inputData: "默认值",
     append: "插入",
     options: "选项数据",

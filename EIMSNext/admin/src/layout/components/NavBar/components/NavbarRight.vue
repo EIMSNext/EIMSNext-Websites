@@ -35,12 +35,14 @@ const settingStore = useSettingsStore();
   justify-content: center;
 
   &>* {
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     min-width: 40px;
-    height: $navbar-height;
-    line-height: $navbar-height;
+    height: 50px;
+    line-height: 50px;
     color: var(--et-color-text);
-    text-align: center;
+    align-items: center;
     cursor: pointer;
 
     &:hover {

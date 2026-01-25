@@ -74,6 +74,7 @@ onBeforeMount(() => {
 const save = () => {
   let req: WfDefinitionRequest = {
     id: currentWfDef.value.id,
+    appId: currentWfDef.value.appId,
     name: currentWfDef.value.name,
     flowType: currentWfDef.value.flowType,
     externalId: currentWfDef.value.externalId,

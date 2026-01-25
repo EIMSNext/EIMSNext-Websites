@@ -37,3 +37,30 @@
 .pl-15px {
   padding-left: 15px !important;
 }
+
+.adv-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  background-color: var(--et-bg-color-primary);
+
+  .adv-tabs {
+    height: 100%;
+    width: 1000px;
+    background-color: #fff;
+
+    .adv-panel {
+      height: 100%;
+    }
+  }
+}
+
+.middle-center {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

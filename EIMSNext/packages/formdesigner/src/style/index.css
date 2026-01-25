@@ -661,7 +661,7 @@ html.dark {
 ._fc-m-con {
     position: relative;
     background: var(--fc-bg-color-2);
-    padding: 20px;
+    padding: 10px !important;
 }
 
 ._fc-m-drag.mobile, ._fc-m-drag.pad {
@@ -1238,6 +1238,6 @@ html.dark {
     background-position: -48px -25px
 }
 ._fc-field-title {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
 }

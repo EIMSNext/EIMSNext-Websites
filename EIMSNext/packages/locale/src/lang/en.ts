@@ -866,6 +866,7 @@ export default {
     key: "key",
     name: "Name",
     value: "Value",
+    label: "Label",
     inputData: "Default value",
     append: "Append",
     options: "Options",

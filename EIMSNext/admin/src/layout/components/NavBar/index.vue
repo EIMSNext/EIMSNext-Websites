@@ -21,7 +21,13 @@
 
   &__left {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 40px;
+    height: 50px;
+    line-height: 50px;
+    color: var(--et-color-text);
+    cursor: pointer;
   }
 }
 </style>
