@@ -314,7 +314,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .tags-container {
   width: 100%;
-  height: 36px;
+  height: 42px;
   background-color: var(--el-bg-color);
   border: none;
   border-bottom: 1px solid var(--el-border-color-light);
@@ -328,21 +328,19 @@ onMounted(() => {
   .tags-item {
     display: inline-flex;
     align-items: center;
-    padding: 4px 12px;
-    margin: 4px 0 0 8px;
-    font-size: 13px;
+    padding: 6px 16px;
+    margin: 5px 0 0 0;
+    font-size: 14px;
     cursor: pointer;
-    border: 1px solid transparent;
-    border-radius: 4px 4px 0 0;
+    border: none;
     background-color: var(--el-bg-color);
     color: var(--el-text-color-regular);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    max-width: 160px;
+    max-width: 180px;
     text-overflow: ellipsis;
     white-space: nowrap;
-    border-left-color: var(--el-border-color-light);
 
     &::before {
       content: '';
@@ -350,52 +348,68 @@ onMounted(() => {
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 2px;
+      height: 1px;
       background-color: transparent;
       transition: background-color 0.25s ease;
     }
 
+    &::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 12px;
+      height: 18px;
+      width: 1px;
+      background-color: var(--el-border-color-light);
+      opacity: 0.5;
+    }
+
     &:hover {
       color: var(--el-color-primary);
+      background-color: var(--el-fill-color-light);
       transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
     }
 
     &:first-of-type {
-      margin-left: 12px;
+      margin-left: 16px;
     }
 
     &:last-of-type {
-      margin-right: 12px;
+      margin-right: 16px;
+
+      &::after {
+        display: none;
+      }
     }
 
     .tag-close-icon {
       vertical-align: middle;
       cursor: pointer;
       border-radius: 50%;
-      margin-left: 6px;
-      width: 16px;
-      height: 16px;
+      margin-left: 8px;
+      width: 18px;
+      height: 18px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 12px;
-      opacity: 0.7;
+      opacity: 0.6;
       transition: all 0.2s ease;
 
       &:hover {
         color: #fff;
-        // background-color: var(--el-color-primary);
+        background-color: var(--el-color-primary);
         opacity: 1;
-        transform: scale(1.1);
+        transform: scale(1.15);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
     }
 
     &.active {
       color: var(--el-color-primary);
-      // background-color: #fff;
-      // border-color: var(--el-border-color-light) var(--el-border-color-light) transparent;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      background-color: rgba(64, 158, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       font-weight: 500;
 
       &::before {
@@ -404,13 +418,12 @@ onMounted(() => {
 
       &:hover {
         color: var(--el-color-primary);
-        // border-color: var(--el-border-color-light) var(--el-border-color-light) transparent;
-        // background-color: #fff;
+        background-color: rgba(64, 158, 255, 0.15);
         transform: none;
       }
 
       .tag-close-icon {
-        opacity: 0.8;
+        opacity: 0.7;
 
         &:hover {
           color: #fff;
@@ -431,6 +444,7 @@ onMounted(() => {
 
       &.active {
         color: var(--el-color-primary);
+        background-color: rgba(64, 158, 255, 0.1);
       }
     }
   }
@@ -439,25 +453,24 @@ onMounted(() => {
 .contextmenu {
   position: absolute;
   z-index: 9999;
-  font-size: 12px;
+  font-size: 13px;
   background: var(--el-bg-color-overlay);
-  border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   border: 1px solid var(--el-border-color-light);
-  padding: 4px 0;
-  min-width: 120px;
+  padding: 6px 0;
+  min-width: 130px;
   backdrop-filter: blur(8px);
 
   li {
-    padding: 8px 16px;
+    padding: 9px 18px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
 
     et-icon {
-      margin-right: 6px;
-      font-size: 14px;
+      margin-right: 8px;
+      font-size: 15px;
     }
 
     &:hover {
@@ -497,7 +510,7 @@ onMounted(() => {
   }
 
   .el-scrollbar__wrap {
-    height: 49px;
+    height: 52px;
     padding-bottom: 12px;
   }
 }
@@ -515,11 +528,35 @@ onMounted(() => {
   }
 }
 
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .contextmenu {
   animation: fadeIn 0.15s ease forwards;
 }
 
 .tags-item {
-  animation: fadeIn 0.2s ease forwards;
+  animation: slideIn 0.2s ease forwards;
 }
+
+// 为每个标签添加不同的动画延迟，创造更流畅的效果
+.tags-item:nth-child(1) { animation-delay: 0.05s; }
+.tags-item:nth-child(2) { animation-delay: 0.1s; }
+.tags-item:nth-child(3) { animation-delay: 0.15s; }
+.tags-item:nth-child(4) { animation-delay: 0.2s; }
+.tags-item:nth-child(5) { animation-delay: 0.25s; }
+.tags-item:nth-child(6) { animation-delay: 0.3s; }
+.tags-item:nth-child(7) { animation-delay: 0.35s; }
+.tags-item:nth-child(8) { animation-delay: 0.4s; }
+.tags-item:nth-child(9) { animation-delay: 0.45s; }
+.tags-item:nth-child(10) { animation-delay: 0.5s; }
 </style>

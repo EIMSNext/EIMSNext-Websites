@@ -63,6 +63,7 @@ export default {
     availableScope: "可选范围",
     allDepts: "全部部门",
     allEmps: "所有成员",
+    selectDataSource:"选择数据源"
   },
   //主项目
   admin: {

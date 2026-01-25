@@ -7,7 +7,6 @@
 <script setup lang="ts">
 import { useFormStore, useAppStore } from "@eimsnext/store";
 import { IFormItem, buildFormListItems } from "./type";
-import { IListItem } from "@/list/type";
 import { ref, watch } from "vue";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
