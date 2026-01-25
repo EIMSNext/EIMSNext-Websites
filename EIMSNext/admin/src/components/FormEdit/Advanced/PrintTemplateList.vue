@@ -97,6 +97,7 @@ onBeforeMount(() => {
 .flow-container {
   padding: 20px;
   display: flex;
+
   .flow-space {
     width: 100%;
     align-items: normal !important;

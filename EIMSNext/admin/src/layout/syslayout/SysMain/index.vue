@@ -13,15 +13,10 @@
 </template>
 
 <script setup lang="ts">
-import { useSettingsStore } from "@/store";
 import variables from "@/styles/variables.module.scss";
 
 const appMainHeight = computed(() => {
-    if (useSettingsStore().tagsView) {
-        return `calc(100vh - ${variables["navbar-height"]} - ${variables["tags-view-height"]})`;
-    } else {
-        return `calc(100vh - ${variables["navbar-height"]})`;
-    }
+    return `calc(100vh - ${variables["navbar-height"]}-1px)`;
 });
 </script>
 
