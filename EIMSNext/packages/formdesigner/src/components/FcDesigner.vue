@@ -27,12 +27,12 @@
                                 </el-badge>
                             </div>
                         </el-tooltip>
-                        <el-tooltip effect="dark" :content="t('form.globalConfig')" placement="right" :hide-after="0">
+                        <!-- <el-tooltip effect="dark" :content="t('form.globalConfig')" placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'global' }"
                                 @click="activeModule = 'global'">
                                 <i class="fc-icon icon-data"></i>
                             </div>
-                        </el-tooltip>
+                        </el-tooltip> -->
                         <el-tooltip v-if="getConfig('showLanguage', true)" effect="dark" :content="t('language.name')"
                             placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'language' }"
@@ -47,13 +47,13 @@
                                 <i class="fc-icon icon-script"></i>
                             </div>
                         </el-tooltip> -->
-                        <el-tooltip v-if="getConfig('showAi', true)" effect="dark" :content="t('ai.name')"
+                        <!-- <el-tooltip v-if="getConfig('showAi', true)" effect="dark" :content="t('ai.name')"
                             placement="right" :hide-after="0">
                             <div class="_fc-l-menu-item" :class="{ active: activeModule === 'ai' }"
                                 @click="activeModule = 'ai'">
                                 <i class="fc-icon icon-ai bright"></i>
                             </div>
-                        </el-tooltip>
+                        </el-tooltip> -->
                     </el-aside>
                     <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '250px'">
                         <AiChat v-if="activeModule === 'ai'"></AiChat>
@@ -281,7 +281,7 @@
                                     <div class="_fd-input-btn">
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
-                                            }}：</span>
+                                            }}: </span>
                                         <el-switch :model-value="inputForm.state" inline-prompt
                                             @update:model-value="openInputData" />
                                     </div>

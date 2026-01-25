@@ -11,7 +11,7 @@
     </div>
     <div class="flow-editor-wrapper">
       <div class="flow-editor">
-        <div class="flow-toolbar">aaaaaaa</div>
+        <!-- <div class="flow-toolbar">帮助</div> -->
         <WorkflowDiagram :flow-data="flowData" />
       </div>
       <div class="flow-meta-container">
@@ -46,6 +46,7 @@ const props = defineProps<{
 const ready = ref(false)
 const currentWfDef = ref<WfDefinition>({
   id: "",
+  appId: props.appId,
   name: "",
   flowType: FlowType.Workflow,
   externalId: props.formId,
@@ -53,6 +54,7 @@ const currentWfDef = ref<WfDefinition>({
   isCurrent: true,
   content: "",
   eventSource: EventSourceType.None,
+  sourceId: props.formId
 });
 
 const flowData = ref<IFlowData>(createWorkflowData(t));
@@ -82,6 +84,7 @@ onBeforeMount(() => {
 const save = () => {
   let req: WfDefinitionRequest = {
     id: currentWfDef.value.id,
+    appId: currentWfDef.value.appId,
     name: "",
     flowType: FlowType.Workflow,
     externalId: currentWfDef.value.externalId,
@@ -89,6 +92,7 @@ const save = () => {
     isCurrent: currentWfDef.value.isCurrent,
     content: JSON.stringify(flowData.value),
     eventSource: EventSourceType.None,
+    sourceId: currentWfDef.value.sourceId
   };
 
   // console.log("wf req", req);
