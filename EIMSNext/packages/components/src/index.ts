@@ -10,7 +10,7 @@ import { ConditionList, ConditionItem, ConditionValue } from "./ConditionList";
 import { FieldSelect } from "./FieldSelect";
 import { FieldSortList, FieldSortItem } from "./FieldSortList";
 import { FormFieldList, FormFieldItem, FormFieldValue } from "./FormFieldList";
-import { FormSelect } from "./FormSelect";
+import { FormSelect, FormSelectInDesigner } from "./FormSelect";
 import { NodeFieldList } from "./NodeFieldList";
 import { FormFieldSelect } from "./FormFieldSelect";
 import { EtDrawer } from "./drawer";
@@ -45,6 +45,7 @@ export default [
   FormFieldItem,
   FormFieldValue,
   FormSelect,
+  FormSelectInDesigner,
   NodeFieldList,
   FormFieldSelect,
   EtDrawer,

@@ -3,7 +3,7 @@
     <!-- 表单选择 -->
     <div class="form-select-item">
       <div class="el-form-item__label"><span>{{ t('props.form') }}</span></div>
-      <form-select v-model="source.formId" @change="onFormChange" />
+      <form-select-in-designer v-model="source.formId" @change="onFormChange" />
     </div>
 
     <!-- Label字段选择 -->
