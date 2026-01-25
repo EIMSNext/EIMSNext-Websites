@@ -39,8 +39,22 @@ export default defineComponent({
             </ElOptionGroup>;
         }
         const options = this.options();
+        
+        // 处理多选时的重复值问题
+        const handleUpdateModelValue = (v) => {
+            // 如果是数组（多选），确保值的唯一性
+            if (Array.isArray(v)) {
+                // 使用Set去重，保持原有顺序
+                const uniqueValues = [...new Set(v)];
+                this.$emit('update:modelValue', uniqueValues);
+            } else {
+                // 单选情况直接传递
+                this.$emit('update:modelValue', v);
+            }
+        };
+        
         return <ElSelect {...this.$attrs} modelValue={this.value}
-            onUpdate:modelValue={(v) => this.$emit('update:modelValue', v)}
+            onUpdate:modelValue={handleUpdateModelValue}
             v-slots={getSlot(this.$slots, ['default'])} ref="el">{options.map((props, index) => {
                 return hasProperty(props || '', 'options') ? makeOptionGroup(props, index) : makeOption(props, index);
             })}{this.$slots.default?.()}</ElSelect>;

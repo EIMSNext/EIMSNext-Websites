@@ -23,6 +23,18 @@
         @change="onOrgChanged"></fc-employee-select>
       <fc-employee-select v-if="activeRule.type == 'employeeselect2'" v-model="customValue" @change="onOrgChanged"
         :multiple="true"></fc-employee-select>
+      <el-select v-if="activeRule.type == 'radio'" v-model="customValue">
+        <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
+      </el-select>
+      <el-select v-if="activeRule.type == 'checkbox'" v-model="customValue" multiple>
+        <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
+      </el-select>
+      <el-select v-if="activeRule.type == 'select'" v-model="customValue">
+        <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
+      </el-select>
+      <el-select v-if="activeRule.type == 'select2'" v-model="customValue" multiple>
+        <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
+      </el-select>
     </el-badge>
     <el-badge v-if="valueMode == 'datalink'" type="warning">
       <DataLinkConfig v-model="dataLinkValue" :title="t('props.v_datalink')"></DataLinkConfig>

@@ -80,6 +80,12 @@ export default function useEffect(Handler) {
                 }
                 return i;
             }, { ...rule.effect || {} }));
+            
+            // 如果存在source配置，将其转换为fetch配置，这样fetch provider就能处理它
+            if (effect.source) {
+                effect.fetch = effect.source;
+            }
+            
             Object.keys(effect).forEach(attr => {
                 const p = this.providers[attr];
                 if (!p || (p.input && !input)) return;

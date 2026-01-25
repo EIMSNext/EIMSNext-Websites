@@ -78,6 +78,8 @@ export default {
     deleteFormConfirm_Title: "Are you sure you want to delete {0}?",
     deleteFormConfirm_Content:
       "If you delete it, the records will be cleared and cannot be restored.",
+    flowcenter: "Flow Center",
+    untitledForm: "Untitled Form",
   },
   workflow: {
     startNode: "Start",
@@ -433,7 +435,7 @@ export default {
     autoMode: "Please enter the correct {title}",
     requiredPlaceholder: "Please enter",
     required: "Required",
-    rule: "Validation",
+    rule: "Custom Validation",
   },
   tableOptions: {
     handle: "Operation",
@@ -795,6 +797,8 @@ export default {
     form: "Form",
     subform: "Subform",
     other: "Other",
+    labelField: "Label Field",
+    valueField: "Value Field",
     model: "Model",
     field: "Field",
     variable: "Variable",
@@ -863,6 +867,7 @@ export default {
     key: "key",
     name: "Name",
     value: "Value",
+    label: "Label",
     inputData: "Default value",
     append: "Append",
     options: "Options",
@@ -876,6 +881,7 @@ export default {
     v_custom: "Custom",
     v_datalink: "Data Link",
     v_formula: "Formula Link",
+    othersetting: "Other Settings",
   },
   slots: {
     prefix: "Prefix",

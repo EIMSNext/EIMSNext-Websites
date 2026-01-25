@@ -1,7 +1,7 @@
 <template>
   <div class="formdata-container">
     <et-dialog v-model="showAddDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
-      :close-on-click-modal="false">
+      width="800px" :close-on-click-modal="false">
       <div class="form-container">
         <AddFormData :formId="formId" :isView="false" :fieldPerms="fieldPerms" @save="onDataSaved"
           @submit="onDataSaved"></AddFormData>
@@ -12,7 +12,7 @@
       <div>{{ t("common.message.deleteConfirm_Content", [checkedDatas.length]) }}</div>
     </EtConfirmDialog>
     <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
-      :close-on-click-modal="false">
+      width="800px" :close-on-click-modal="false">
       <div class="form-container">
         <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms"
           @ok="handleViewOk">
@@ -431,19 +431,32 @@ const formatter = (row: any, column: any, cellValue: any) => {
     }
   }
 
-  // 添加对部门选择器返回对象和数组的处理
+  // 添加对对象和数组的处理
   if (cellValue && typeof cellValue === 'object') {
-    // 处理单选情况：完整的部门对象 { label: '部门名称', code: '部门编码', value: '部门ID', type: 'department' }
+    // 处理单选情况：对象 { label: '选项名称', value: '选项值' }
     if (cellValue.label) {
       return cellValue.label;
     }
-    // 处理多选情况：完整的部门对象数组 [{ label: '部门1', code: 'code1', value: 'id1', type: 'department' }, ...]
+    // 处理多选情况：数组
     if (Array.isArray(cellValue)) {
-      return cellValue.map(item => item.label || '').filter(Boolean).join(', ');
+      // 处理对象数组 [{ label: '选项1', value: '1' }, ...]
+      if (cellValue.length > 0 && typeof cellValue[0] === 'object' && cellValue[0] !== null) {
+        return cellValue.map(item => item.label || item.name || '').filter(Boolean).join(', ');
+      }
+      // 处理基本类型数组 [1, 2, 3] 或 ['a', 'b', 'c']
+      else {
+        return cellValue.map(item => String(item)).filter(Boolean).join(', ');
+      }
     }
   }
 
-  return cellValue;
+  // 处理基本类型，直接返回字符串表示
+  if (cellValue !== undefined && cellValue !== null) {
+    return String(cellValue);
+  }
+
+  // 处理undefined或null，显示空字符串
+  return '';
 };
 const getColumnSetting = (field: string) => {
   const findSub = (children: ITableColumn[], field: string) => {

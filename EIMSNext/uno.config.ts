@@ -11,6 +11,9 @@ import {
 } from "unocss";
 
 export default defineConfig({
+  content: {
+    filesystem: ["./src/**/*", "../packages/components/**/*"],
+  },
   shortcuts: {
     "flex-center": "flex justify-center items-center",
     "flex-x-center": "flex justify-center",

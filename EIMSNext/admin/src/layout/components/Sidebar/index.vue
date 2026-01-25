@@ -1,54 +1,56 @@
 <template>
-  <div :class="{ 'has-logo': sidebarLogo }">
-    <form-edit v-if="showFormEditor" :formId="''" :usingFlow="usingWorkflow" :isLedger="isLedger"
+  <div>
+    <form-edit v-if="showFormEditor" :formId="newFormId" :usingFlow="usingWorkflow" :isLedger="isLedger"
       @close="showFormEditor = false" />
     <DashboardDesigner v-model="showDshEditor" :appId="appId"></DashboardDesigner>
 
-    <!-- 顶部布局顶部 || 左侧布局左侧 -->
-    <!-- <SidebarLogo v-if="sidebarLogo" :collapse="isSidebarCollapsed" /> -->
     <div class="app-title">
-      <et-icon :icon="getAppIcon(app)" size="20px" :color="getAppIconColor(app)"></et-icon>
-      <span class="ml-[10px]">{{ app?.name
+      <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
+      <span v-if="isSidebarOpened" class="ml-[10px]">{{ app?.name
       }}</span>
+      <el-button class="side-bar-control" @click.stop="toggleSideBar"> <et-icon v-if="isSidebarOpened"
+          icon="el-icon-DArrowLeft" size="14px"></et-icon>
+        <et-icon v-else icon="el-icon-DArrowRight" size="14px"></et-icon>
+      </el-button>
     </div>
     <div>
       <el-menu mode="vertical">
         <AppLink :to="{ name: 'mytasks', params: { appId: app?.id } }">
-          <el-menu-item index="mytodo">
-            <et-icon icon="iconfont-mytodo" class="step-image" size="16px" />
-            <span class="app-menu-text">{{ t("common.wfProcess.mytasks") }}</span>
+          <el-menu-item index="mytodo" :class="{ 'pl-15px': !isSidebarOpened }">
+            <et-icon icon="iconfont-mytodo" class="step-image" size="14px" />
+            <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.mytasks") }}</span>
           </el-menu-item>
         </AppLink>
         <AppLink :to="{ name: 'mystarted', params: { appId: app?.id } }">
-          <el-menu-item index="mystarted">
-            <et-icon icon="iconfont-mystarted" class="step-image" size="16px" />
-            <span class="app-menu-text">{{ t("common.wfProcess.mystarted") }}</span>
+          <el-menu-item index="mystarted" :class="{ 'pl-15px': !isSidebarOpened }">
+            <et-icon icon="iconfont-mystarted" class="step-image" size="14px" />
+            <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.mystarted") }}</span>
           </el-menu-item>
         </AppLink>
         <AppLink :to="{ name: 'myapproved', params: { appId: app?.id } }">
-          <el-menu-item index="myapproved">
-            <et-icon icon="iconfont-myapproved" class="step-image" size="16px" />
-            <span class="app-menu-text">{{ t("common.wfProcess.myapproved") }}</span>
+          <el-menu-item index="myapproved" :class="{ 'pl-15px': !isSidebarOpened }">
+            <et-icon icon="iconfont-myapproved" class="step-image" size="14px" />
+            <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.myapproved") }}</span>
           </el-menu-item>
         </AppLink>
         <AppLink :to="{ name: 'cctome', params: { appId: app?.id } }">
-          <el-menu-item index="mycced">
-            <et-icon icon="iconfont-mycced" class="step-image" size="16px" />
-            <span class="app-menu-text">{{ t("common.wfProcess.cctome") }}</span>
+          <el-menu-item index="mycced" :class="{ 'pl-15px': !isSidebarOpened }">
+            <et-icon icon="iconfont-mycced" class="step-image" size="14px" />
+            <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.cctome") }}</span>
           </el-menu-item>
         </AppLink>
       </el-menu>
     </div>
-    <div class="form-action">
+    <div v-if="isSidebarOpened" class="form-action">
       <el-input>
         <template #prefix>
-          <et-icon icon="el-icon-search"> </et-icon>
+          <et-icon icon="el-icon-search" size="14px"> </et-icon>
         </template>
       </el-input>
 
       <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
         <el-dropdown placement="bottom-start" size="large">
-          <el-button>
+          <el-button style="width: 30px;">
             <et-icon icon="el-icon-plus"> </et-icon>
           </el-button>
           <template #dropdown>
@@ -66,23 +68,22 @@
       </template>
     </div>
     <el-scrollbar>
-      <SidebarMenu :menu-list="permissionStore.routes" base-path="" />
+      <SidebarMenu :menu-list="appMenus" base-path="" />
     </el-scrollbar>
-    <!-- 顶部布局导航 -->
-    <NavbarRight />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useSettingsStore, usePermissionStore } from "@/store";
-import { App, UserType } from "@eimsnext/models";
-import { useAppStore, useContextStore, useUserStore } from "@eimsnext/store";
-import NavbarRight from "../NavBar/components/NavbarRight.vue";
+import { useSettingsStore, usePermissionStore, useSystemStore } from "@/store";
+import { App, FormDef, FormDefRequest, FormType, UserType } from "@eimsnext/models";
+import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
+import { formDefService } from "@eimsnext/services";
 const { t } = useI18n()
 
+const newFormId = ref("")
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
@@ -90,17 +91,23 @@ const isLedger = ref(false);
 const showDshEditor = ref(false);
 // const systemStore = useSystemStore();
 const settingsStore = useSettingsStore();
-const permissionStore = usePermissionStore();
-
-const sidebarLogo = computed(() => settingsStore.sidebarLogo);
+var permissionStore = usePermissionStore()
+const { appMenus } = storeToRefs(permissionStore);
 
 const appStore = useAppStore();
+const formStore = useFormStore();
 const contextStore = useContextStore();
 const userStore = useUserStore()
 const curUser = toRef(userStore.currentUser)
 const appId = toRef(contextStore.appId)
 const app = ref<App>();
 
+const systemStore = useSystemStore();
+const isSidebarOpened = computed(() => systemStore.sidebar.opened);
+// 展开/收缩菜单
+function toggleSideBar() {
+  systemStore.toggleSidebar();
+}
 
 watch(() => contextStore.appId,
   () => { appStore.get(contextStore.appId).then((res) => (app.value = res)); },
@@ -111,7 +118,27 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
   usingWorkflow.value = usingFlow;
   isLedger.value = ledger;
 
-  showFormEditor.value = true;
+  //直接创建，防止工作流/数据流等设置报错
+  let req: FormDefRequest = {
+    id: "",
+    appId: contextStore.appId,
+    name: t("admin.untitledForm"),
+    type: FormType.Form,
+    content: {
+      "layout": "[]",
+      "options": "{\"info\":{\"align\":\"left\"},\"form\":{\"inline\":false,\"hideRequiredAsterisk\":false,\"labelPosition\":\"top\",\"size\":\"default\",\"labelWidth\":\"auto\"},\"resetBtn\":{\"show\":false,\"innerText\":\"重置\"},\"submitBtn\":{\"show\":false,\"innerText\":\"提交\"}}"
+    },
+    usingWorkflow: usingFlow,
+    isLedger: ledger,
+  };
+
+  formDefService.post<FormDef>(req).then(resp => {
+    newFormId.value = resp.id
+    formStore.update(resp);
+    contextStore.setAppChanged(); //reload 菜单
+
+    showFormEditor.value = true;
+  });
 };
 
 const createDashboard = () => {
@@ -122,17 +149,18 @@ const createFolder = () => { };
 </script>
 
 <style lang="scss" scoped>
-.has-logo {
-  .el-scrollbar {
-    height: calc(100vh - $navbar-height);
-  }
+.side-bar-control {
+  border: none;
+  position: absolute;
+  top: 10px;
+  right: 1px;
 }
 
 .app-title {
   display: flex;
   overflow: hidden;
-  padding: 16px;
-  font-size: 20px;
+  padding: 15px;
+  font-size: 16px;
   align-items: center;
 }
 
@@ -148,6 +176,11 @@ const createFolder = () => { };
 
 .app-menu-text {
   margin-left: 5px
+}
+
+:deep(.el-sub-menu__title) {
+  line-height: 40px;
+  height: 40px;
 }
 
 :deep(.el-menu-item) {

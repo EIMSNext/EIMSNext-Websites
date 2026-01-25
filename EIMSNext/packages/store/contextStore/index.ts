@@ -3,6 +3,7 @@ import { store } from "../setup";
 import { ref } from "vue";
 import { useAppStoreHook } from "../genericStore/appStore";
 import { useFormStoreHook } from "../genericStore/formStore";
+import { appService } from "@eimsnext/services";
 
 export const useContextStore = defineStore("context", () => {
   //state
@@ -27,7 +28,7 @@ export const useContextStore = defineStore("context", () => {
         appStore
           .load("", false)
           .then(() => {
-            setAppChanged();
+            updateAppChanged();
             resolve();
           })
           .catch((error) => {
@@ -40,6 +41,7 @@ export const useContextStore = defineStore("context", () => {
   };
   const clearCorpId = () => {
     corpId.value = "";
+    updateAppChanged();
   };
 
   const setAppId = (
@@ -50,7 +52,7 @@ export const useContextStore = defineStore("context", () => {
       let needReload = false;
       if (appId.value !== id) {
         appId.value = id;
-        setAppChanged();
+        updateAppChanged();
         // needReload = true;
       }
       if (needReload || foreceReload) {
@@ -68,15 +70,24 @@ export const useContextStore = defineStore("context", () => {
 
   const clearAppId = () => {
     appId.value = "";
+    updateAppChanged();
   };
 
   const setAppChanged = () => {
+    if (appId.value) {
+      appStore.get(appId.value, false).then(() => {
+        updateAppChanged();
+      });
+    }
+  };
+  const updateAppChanged = () => {
     appChanged.value = new Date().getTime();
   };
 
   const clearAll = () => {
     corpId.value = "";
     appId.value = "";
+    updateAppChanged();
   };
 
   return {

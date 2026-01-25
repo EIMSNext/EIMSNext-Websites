@@ -125,12 +125,13 @@ const handleDeleteConfirm = async () => {
   .node-label {
     // 移除固定的margin-right，改为flex布局自动分配空间
     flex: 1;
+    padding-left: 5px;
   }
 
   .node-action {
     // 调整绝对定位，确保和部门名称在同一行
     position: absolute;
-    right: 0px;
+    right: 5px;
     top: 50%;
     transform: translateY(-50%);
     display: none;

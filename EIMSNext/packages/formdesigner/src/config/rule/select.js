@@ -43,7 +43,7 @@ export default {
         fetch: "",
       },
       $required: false,
-      props: { clearable: true },
+      props: { clearable: true, filterable: true },
       options: makeTreeOptions(
         t("props.option"),
         { label: "label", value: "value" },
@@ -90,10 +90,13 @@ export default {
       //   field: "filterable",
       // },
       {
-        type: "CheckBoxInput",
-        field: "filterable",
-        wrap: { show: false },
+        type: "DefaultValueConfig",
       },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "filterable",
+      //   wrap: { show: false },
+      // },
       // {
       //     type: 'switch',
       //     field: 'remote',
@@ -123,6 +126,7 @@ export default {
       //   field: "readonly",
       //   wrap: { show: false },
       // },
+      { type: "GroupLabel", props: { title: t("props.othersetting") } },
       {
         type: "CheckBoxInput",
         field: "disabled",

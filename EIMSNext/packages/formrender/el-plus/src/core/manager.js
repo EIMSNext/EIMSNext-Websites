@@ -269,6 +269,10 @@ export default {
   },
   makeRow(children) {
     const row = this.options.row || {};
+    // 添加默认的gutter属性，设置列之间的间距为20px
+    if (!row.gutter) {
+      row.gutter = 20;
+    }
     return this.$r(
       {
         type: "row",
