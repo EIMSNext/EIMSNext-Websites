@@ -1,18 +1,7 @@
 <template>
-  <el-select
-    v-model="selectedFormId"
-    filterable
-    clearable
-    placeholder="请选择表单"
-    :loading="loading"
-    @change="handleChange"
-  >
-    <el-option
-      v-for="option in formOptions"
-      :key="option.value"
-      :label="option.label"
-      :value="option.value"
-    >
+  <el-select v-model="selectedFormId" filterable clearable placeholder="请选择表单" :loading="loading"
+    @change="handleChange">
+    <el-option v-for="option in formOptions" :key="option.value" :label="option.label" :value="option.value">
       <span>{{ option.label }}</span>
     </el-option>
   </el-select>
@@ -54,15 +43,15 @@ const appId = computed(() => contextStore.appId);
 const loadForms = async () => {
   try {
     loading.value = true;
-    
+
     // 从URL中取当前表单id
     let currentFormId = '';
-    
+
     // 处理哈希路由，从哈希路径中提取表单ID（如 #/app/xxx/form/xxx）
     const hash = window.location.hash;
     const formIdRegex = /\/form\/(\w+)/;
     const match = hash.match(formIdRegex);
-    
+
     if (match && match[1]) {
       // 从哈希路径中提取表单ID
       currentFormId = match[1];
@@ -71,12 +60,12 @@ const loadForms = async () => {
       const urlObj = new URL(window.location.href);
       currentFormId = urlObj.searchParams.get('id') || '';
     }
-    
+
     // 加载所有表单数据
     const forms = await formStore.load(`$filter=appId eq '${appId.value}'`, false);
-    
+
     // 循环过滤表单，排除当前表单
-    const options = [];
+    const options: IFormOption[] = [];
     for (let i = 0; i < forms.length; i++) {
       const form = forms[i];
       // 如果循环中的项的表单id不等于当前表单id，就添加到下拉框里
@@ -88,7 +77,7 @@ const loadForms = async () => {
         });
       }
     }
-    
+
     // 更新表单选项
     formOptions.value = options;
   } catch (error) {
