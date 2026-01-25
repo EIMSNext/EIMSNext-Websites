@@ -1,12 +1,14 @@
 <template>
-  <el-tabs v-model="activeName" tabPosition="left" class="adv-container" @tab-click="handleClick">
-    <el-tab-pane label="数据推送" name="webpush" class="adv-panel">
-      <DataflowList :form-def="formDef" />
-    </el-tab-pane>
-    <el-tab-pane label="智能助手" name="dataflow" class="adv-panel">
-      <DataflowList :form-def="formDef" />
-    </el-tab-pane>
-  </el-tabs>
+  <div class="adv-container">
+    <el-tabs v-model="activeName" tabPosition="left" class="adv-tabs" @tab-click="handleClick">
+      <el-tab-pane label="数据推送" name="webpush" class="adv-panel">
+        <DataflowList :form-def="formDef" />
+      </el-tab-pane>
+      <el-tab-pane label="智能助手" name="dataflow" class="adv-panel">
+        <DataflowList :form-def="formDef" />
+      </el-tab-pane>
+    </el-tabs>
+  </div>
 </template>
 <script setup lang="ts">
 import DataflowList from "./DataflowList.vue";
@@ -41,11 +43,11 @@ function close() {
 }
 </script>
 <style lang="scss" scoped>
-.adv-container {
-  height: 100%;
+:deep(.adv-tabs.el-tabs--left .el-tabs__nav.is-left) {
+  width: 165px !important;
+}
 
-  .adv-panel {
-    height: 100%;
-  }
+:deep(.adv-tabs.el-tabs--left .el-tabs__item.is-left) {
+  justify-content: flex-start;
 }
 </style>

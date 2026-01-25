@@ -1,10 +1,10 @@
 <template>
   <div class="wh-full layout-left" :class="classObj">
-    <el-container>
+    <el-container style="height: 99%;">
       <el-header style="height: 50px; padding: 0 12px">
         <NavBar />
       </el-header>
-      <el-container style="border-top: 1px solid var(--el-menu-border-color)">
+      <el-container style="height: 99%;">
         <el-aside width="45px" class="main-left-menu">
           <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
             <AppLink :to="{
