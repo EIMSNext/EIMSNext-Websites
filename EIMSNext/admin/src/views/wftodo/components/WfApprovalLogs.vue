@@ -91,32 +91,32 @@ const filterRef = ref(props.filter)
 
 // 监听props.filter变化
 watch(
-  () => props.filter,
-  (newFilter) => {
-    console.log('props.filter changed:', newFilter);
-    filterRef.value = { ...newFilter };
-    updateFilterWithAppId();
-    loadCount();
-    loadData();
-  },
-  { deep: true }
+    () => props.filter,
+    (newFilter) => {
+        // console.log('props.filter changed:', newFilter);
+        filterRef.value = { ...newFilter };
+        updateFilterWithAppId();
+        loadCount();
+        loadData();
+    },
+    { deep: true }
 );
 
 // 支持从params和query获取appId
 const getAppId = () => {
-  const appIdFromParams = route.params.appId;
-  const appIdFromQuery = route.query.appId;
-  return appIdFromParams?.toString() || appIdFromQuery?.toString();
+    const appIdFromParams = route.params.appId;
+    const appIdFromQuery = route.query.appId;
+    return appIdFromParams?.toString() || appIdFromQuery?.toString();
 };
 
 // 只有在appId存在时才添加到filter中
 const updateFilterWithAppId = () => {
-  const appId = getAppId();
-  if (appId) {
-    filterRef.value.appId = appId;
-  } else {
-    delete filterRef.value.appId;
-  }
+    const appId = getAppId();
+    if (appId) {
+        filterRef.value.appId = appId;
+    } else {
+        delete filterRef.value.appId;
+    }
 };
 
 // 初始化时更新filter
@@ -140,11 +140,11 @@ const loadCount = () => {
 
 // 定义loadData函数
 const loadData = () => {
-    console.log('loadData filterRef:', filterRef.value);
+    // console.log('loadData filterRef:', filterRef.value);
     let query = buildQuery({ filter: filterRef.value });
-    console.log('loadData query:', query);
+    // console.log('loadData query:', query);
     wfApprovalLogService.query<WfApprovalLog>(query).then((res: WfApprovalLog[]) => {
-        console.log('loadData result:', res);
+        // console.log('loadData result:', res);
         dataRef.value = res;
     }).catch((error: any) => {
         console.log('loadData error:', error);
@@ -159,14 +159,14 @@ const viewLog = async (task: WfApprovalLog) => {
 
 // 监听路由变化，更新appId和filter
 watch(
-  () => [route.params.appId, route.query.appId],
-  () => {
-    updateFilterWithAppId();
-    // 重新加载数据
-    loadCount();
-    loadData();
-  },
-  { immediate: true }
+    () => [route.params.appId, route.query.appId],
+    () => {
+        updateFilterWithAppId();
+        // 重新加载数据
+        loadCount();
+        loadData();
+    },
+    { immediate: true }
 );
 
 // 组件挂载时加载数据

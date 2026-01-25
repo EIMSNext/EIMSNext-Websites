@@ -4,7 +4,7 @@ import input from './input';
 import slider from './slider';
 import timePicker from './timePicker';
 import row from './row';
-import select from './select';
+import select, { select2, fcSelect } from './select';
 
 export default [
     datePicker,
@@ -13,5 +13,7 @@ export default [
     slider,
     timePicker,
     row,
-    select
+    select,
+    select2,
+    fcSelect
 ]

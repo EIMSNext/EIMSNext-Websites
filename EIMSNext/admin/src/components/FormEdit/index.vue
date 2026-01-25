@@ -4,32 +4,32 @@
       <el-input v-model="formName" class="title-editor" />
     </template>
     <template #top-center>
-      <el-tabs v-model="activeName" class="nav-tabs" @tab-click="handleClick">
+      <el-tabs v-model="activeName" class="nav-tabs" :before-leave="tabChanging">
         <el-tab-pane label="表单设计" name="formedit" />
         <el-tab-pane v-if="usingFlow" label="流程设定" name="workflow" />
         <el-tab-pane label="高级功能" name="advance" />
         <el-tab-pane label="表单发布" name="publish" />
-        <el-tab-pane label="数据管理" name="datamanage" />
+        <!-- <el-tab-pane label="数据管理" name="datamanage" /> -->
       </el-tabs>
     </template>
     <div v-if="activeName == 'formedit'">
       <form-builder :locale="locale" :formName="formName" :formDef="formDef" :usingFlow="usingFlow" :isLedger="isLedger"
         @save="onSaved" />
     </div>
-    <div v-if="usingFlow && activeName == 'workflow'" style="height: 100%; width: 100%">
+    <div v-if="usingFlow && activeName == 'workflow'" class="main-content-container">
       <WorkflowDesigner :appId="appId" :formId="formId" />
     </div>
-    <div v-if="activeName == 'advance'" style="height: 100%; width: 100%">
+    <div v-if="activeName == 'advance'" class="main-content-container">
       <Advanced :formDef="formDef!"></Advanced>
     </div>
-    <div v-if="activeName == 'publish'" style="height: 100%; width: 100%">
+    <div v-if="activeName == 'publish'" class="main-content-container">
       <Publish :formDef="formDef!"></Publish>
     </div>
   </et-drawer>
 </template>
 
 <script setup lang="ts">
-import { TabsPaneContext } from "element-plus";
+import { TabPaneName, TabsPaneContext } from "element-plus";
 import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
 import WorkflowDesigner from "../WorkflowDesigner/index.vue";
@@ -56,7 +56,7 @@ const formStore = useFormStore();
 const locale = computed(() => systemStore.locale);
 
 const appId = ref("");
-const formName = ref("测试表单");
+const formName = ref("未命名表单");
 const activeName = ref("formedit");
 const formDef = ref<FormDef>();
 
@@ -78,8 +78,9 @@ const onSaved = () => {
     loadForm(props.formId);
   }
 };
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-  // console.log(tab, event);
+const tabChanging = (activeName: TabPaneName, oldActiveName: TabPaneName) => {
+  console.log("tabChanging", oldActiveName, activeName);
+  return true
 };
 
 const emit = defineEmits(["close"]);
@@ -128,11 +129,11 @@ onBeforeMount(() => {
   display: none;
 }
 
-.top-nav-bar .nav-tabs .el-tabs__item:last-child {
-  margin-left: 46px;
-  overflow: visible;
-  position: relative;
-}
+// .top-nav-bar .nav-tabs .el-tabs__item:last-child {
+//   margin-left: 46px;
+//   overflow: visible;
+//   position: relative;
+// }
 
 .top-nav-bar .nav-tabs .el-tabs__item:last-child:after {
   background: #e1e3e5;
@@ -144,5 +145,10 @@ onBeforeMount(() => {
   pointer-events: none;
   position: absolute;
   width: 2px;
+}
+
+.main-content-container {
+  width: 100%;
+  height: 100%;
 }
 </style>

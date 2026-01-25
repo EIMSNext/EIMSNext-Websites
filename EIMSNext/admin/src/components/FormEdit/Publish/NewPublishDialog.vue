@@ -1,5 +1,5 @@
 <template>
-    <et-dialog :modelValue="modelValue" :title="'创建权限组'" width="610px" destroy-on-close @ok="save" @cancel="cancel">
+    <et-dialog :modelValue="modelValue" :title="'创建权限组'" width="750px" destroy-on-close @ok="save" @cancel="cancel">
         <div class="new-publish-container">
             <div class="member-select">
                 <div class="item-title">对成员发布</div>

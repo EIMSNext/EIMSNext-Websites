@@ -1,62 +1,102 @@
 <template>
-  <div :class="{ 'has-logo': sidebarLogo }" class="todo-sidebar-container">
-    <el-menu mode="vertical" :default-active="defaultActiveMenu" :default-openeds="defaultOpenedMenus" @select="handleMenuSelect" class="todo-sidebar-menu">
-      <!-- 我的待办 -->
-      <el-sub-menu index="mytasks">
-        <template #title>
-          <et-icon icon="iconfont-mytodo" class="step-image" />
-          <span @click.stop="goToTaskType('mytasks')">{{ t("common.wfProcess.mytasks") }}</span>
-        </template>
-        <template v-for="app in appsRef" :key="app.id">
-          <el-menu-item v-if="app.id !== 'system'" :index="`mytasks-${app.id}`" @click="selectApp(app, 'mytasks')">
-            <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
-            <span class="ml-1">{{ app.name }}</span>
-          </el-menu-item>
-        </template>
-      </el-sub-menu>
+  <div>
+    <div class="app-title">
+      <et-icon icon="iconfont-mytodo" size="16px" class="step-image"></et-icon>
+      <span v-if="isSidebarOpened" class="ml-[10px]">{{ t('admin.flowcenter') }}</span>
+      <el-button class="side-bar-control" @click.stop="toggleSideBar"> <et-icon v-if="isSidebarOpened"
+          icon="el-icon-DArrowLeft" size="14px"></et-icon>
+        <et-icon v-else icon="el-icon-DArrowRight" size="14px"></et-icon>
+      </el-button>
+    </div>
+    <div v-if="isSidebarOpened">
+      <el-menu mode="vertical" :default-active="defaultActiveMenu" :default-openeds="defaultOpenedMenus"
+        @select="handleMenuSelect" class="todo-sidebar-menu">
+        <!-- 我的待办 -->
+        <el-sub-menu index="mytasks">
+          <template #title>
+            <et-icon icon="iconfont-mytodo" size="14px" class="step-image" />
+            <span class="app-menu-text" @click.stop="goToTaskType('mytasks')">{{ t("common.wfProcess.mytasks")
+            }}</span>
+          </template>
+          <template v-for="app in appsRef" :key="app.id">
+            <el-menu-item v-if="app.id !== 'system'" :index="`mytasks-${app.id}`" @click="selectApp(app, 'mytasks')">
+              <et-icon :icon="getAppIcon(app)" size="14px" :color="getAppIconColor(app)"></et-icon>
+              <span class="app-menu-text">{{ app.name }}</span>
+            </el-menu-item>
+          </template>
+        </el-sub-menu>
 
-      <!-- 我发起的 -->
-      <el-sub-menu index="mystarted">
-        <template #title>
-          <et-icon icon="iconfont-mystarted" class="step-image" />
-          <span @click.stop="goToTaskType('mystarted')">{{ t("common.wfProcess.mystarted") }}</span>
-        </template>
-        <template v-for="app in appsRef" :key="app.id">
-          <el-menu-item v-if="app.id !== 'system'" :index="`mystarted-${app.id}`" @click="selectApp(app, 'mystarted')">
-            <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
-            <span class="ml-1">{{ app.name }}</span>
-          </el-menu-item>
-        </template>
-      </el-sub-menu>
+        <!-- 我发起的 -->
+        <el-sub-menu index="mystarted">
+          <template #title>
+            <et-icon icon="iconfont-mystarted" size="14px" class="step-image" />
+            <span class="app-menu-text" @click.stop="goToTaskType('mystarted')">{{ t("common.wfProcess.mystarted")
+            }}</span>
+          </template>
+          <template v-for="app in appsRef" :key="app.id">
+            <el-menu-item v-if="app.id !== 'system'" :index="`mystarted-${app.id}`"
+              @click="selectApp(app, 'mystarted')">
+              <et-icon :icon="getAppIcon(app)" size="14px" :color="getAppIconColor(app)"></et-icon>
+              <span class="app-menu-text">{{ app.name }}</span>
+            </el-menu-item>
+          </template>
+        </el-sub-menu>
 
-      <!-- 我审核的 -->
-      <el-sub-menu index="myapproved">
-        <template #title>
-          <et-icon icon="iconfont-myapproved" class="step-image" />
-          <span @click.stop="goToTaskType('myapproved')">{{ t("common.wfProcess.myapproved") }}</span>
-        </template>
-        <template v-for="app in appsRef" :key="app.id">
-          <el-menu-item v-if="app.id !== 'system'" :index="`myapproved-${app.id}`" @click="selectApp(app, 'myapproved')">
-            <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
-            <span class="ml-1">{{ app.name }}</span>
-          </el-menu-item>
-        </template>
-      </el-sub-menu>
+        <!-- 我审核的 -->
+        <el-sub-menu index="myapproved">
+          <template #title>
+            <et-icon icon="iconfont-myapproved" size="14px" class="step-image" />
+            <span class="app-menu-text" @click.stop="goToTaskType('myapproved')">{{ t("common.wfProcess.myapproved")
+            }}</span>
+          </template>
+          <template v-for="app in appsRef" :key="app.id">
+            <el-menu-item v-if="app.id !== 'system'" :index="`myapproved-${app.id}`"
+              @click="selectApp(app, 'myapproved')">
+              <et-icon :icon="getAppIcon(app)" size="14px" :color="getAppIconColor(app)"></et-icon>
+              <span class="app-menu-text">{{ app.name }}</span>
+            </el-menu-item>
+          </template>
+        </el-sub-menu>
 
-      <!-- 抄送我的 -->
-      <el-sub-menu index="cctome">
-        <template #title>
-          <et-icon icon="iconfont-mycced" class="step-image" />
-          <span @click.stop="goToTaskType('cctome')">{{ t("common.wfProcess.cctome") }}</span>
-        </template>
-        <template v-for="app in appsRef" :key="app.id">
-          <el-menu-item v-if="app.id !== 'system'" :index="`cctome-${app.id}`" @click="selectApp(app, 'cctome')">
-            <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
-            <span class="ml-1">{{ app.name }}</span>
-          </el-menu-item>
-        </template>
-      </el-sub-menu>
-    </el-menu>
+        <!-- 抄送我的 -->
+        <el-sub-menu index="cctome">
+          <template #title>
+            <et-icon icon="iconfont-mycced" size="14px" class="step-image" />
+            <span class="app-menu-text" @click.stop="goToTaskType('cctome')">{{ t("common.wfProcess.cctome") }}</span>
+          </template>
+          <template v-for="app in appsRef" :key="app.id">
+            <el-menu-item v-if="app.id !== 'system'" :index="`cctome-${app.id}`" @click="selectApp(app, 'cctome')">
+              <et-icon :icon="getAppIcon(app)" size="14px" :color="getAppIconColor(app)"></et-icon>
+              <span class="app-menu-text">{{ app.name }}</span>
+            </el-menu-item>
+          </template>
+        </el-sub-menu>
+      </el-menu>
+    </div>
+    <div v-else>
+      <el-menu mode="vertical" :default-active="defaultActiveMenu" :default-openeds="defaultOpenedMenus"
+        @select="handleMenuSelect" class="todo-sidebar-menu">
+        <!-- 我的待办 -->
+        <el-menu-item index="mytasks" class="pl-15px" @click.stop="goToTaskType('mytasks')">
+          <et-icon icon="iconfont-mytodo" size="14px" class="step-image" />
+        </el-menu-item>
+
+        <!-- 我发起的 -->
+        <el-menu-item index="mystarted" class="pl-15px" @click.stop="goToTaskType('mystarted')">
+          <et-icon icon="iconfont-mystarted" size="14px" class="step-image" />
+        </el-menu-item>
+
+        <!-- 我审核的 -->
+        <el-menu-item index="myapproved" class="pl-15px" @click.stop="goToTaskType('myapproved')">
+          <et-icon icon="iconfont-myapproved" size="14px" class="step-image" />
+        </el-menu-item>
+
+        <!-- 抄送我的 -->
+        <el-menu-item index="cctome" class="pl-15px" @click.stop="goToTaskType('cctome')">
+          <et-icon icon="iconfont-mycced" size="14px" class="step-image" />
+        </el-menu-item>
+      </el-menu>
+    </div>
   </div>
 </template>
 
@@ -67,7 +107,7 @@ defineOptions({
 
 import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useSettingsStore } from "@/store";
+import { useSettingsStore, useSystemStore } from "@/store";
 import { useAppStore } from "@eimsnext/store";
 import { App } from "@eimsnext/models";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
@@ -108,7 +148,13 @@ const defaultOpenedMenus = computed(() => {
   return [currentPath.value.substring(1)];
 });
 
-const sidebarLogo = computed(() => settingsStore.sidebarLogo);
+const systemStore = useSystemStore();
+const isSidebarOpened = computed(() => systemStore.sidebar.opened);
+// 展开/收缩菜单
+function toggleSideBar() {
+  systemStore.toggleSidebar();
+}
+
 const appsRef = ref<App[]>([]);
 
 // 选择应用和任务类型
@@ -176,47 +222,42 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-.workflow-title {
+.side-bar-control {
+  border: none;
+  position: absolute;
+  top: 10px;
+  right: 1px;
+}
+
+.app-title {
   display: flex;
+  overflow: hidden;
+  padding: 15px;
+  font-size: 16px;
   align-items: center;
-  padding: 16px;
-  font-size: 20px;
-  border-bottom: 1px solid var(--el-menu-border-color);
+}
+
+.form-action {
+  display: flex;
+  padding: 0 8px;
+  margin-bottom: 5px;
 }
 
 .step-image {
   color: #1296db;
 }
 
-.ml-2 {
-  margin-left: 8px;
+.app-menu-text {
+  margin-left: 5px
 }
 
-.text-xl {
-  font-size: 20px;
-}
-
-.font-semibold {
-  font-weight: 600;
+:deep(.el-sub-menu__title) {
+  line-height: 40px;
+  height: 40px;
 }
 
 :deep(.el-menu-item) {
   line-height: 40px;
   height: 40px;
-}
-
-.ml-1 {
-  margin-left: 4px;
-}
-
-.todo-sidebar-container {
-  height: calc(100vh - 100px); /* 减去顶部导航栏和标签栏的高度 */
-  overflow: hidden;
-}
-
-.todo-sidebar-menu {
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 </style>

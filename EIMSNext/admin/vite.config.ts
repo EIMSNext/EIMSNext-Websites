@@ -41,6 +41,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       }),
       DefineOptions(),
       UnoCSS({
+        configFile: resolve(__dirname, "../uno.config.ts"),
         hmrTopLevelAwait: false,
       }),
       // 自动导入配置 https://github.com/sxzz/element-plus-best-practices/blob/main/vite.config.ts

@@ -335,9 +335,7 @@ export default defineComponent({
                             return this.makeColumn(child);
                         });
                     }
-                    if (!col.format || col.format === 'default') {
-                        return undefined;
-                    }
+                    // 无论col.format是什么，都调用makeTd方法处理单元格数据
                     return this.makeTd(col, scope);
                 }
             })
@@ -418,23 +416,38 @@ export default defineComponent({
                     return imgs;
                 })());
             } else {
-                const value = this.deepGet(scope.row, col.prop, '');
+                // 首先尝试从scope.row.data中获取数据（表单字段值嵌套在data字段中）
+                let value = this.deepGet(scope.row, `data.${col.prop}`, undefined);
+                
+                // 如果从scope.row.data中获取失败，尝试直接从scope.row中获取数据（兼容其他数据结构）
+                if (value === undefined) {
+                    value = this.deepGet(scope.row, col.prop, '');
+                }
+                
                 // 处理对象类型，避免显示[object Object]
                 if (typeof value === 'object' && value !== null) {
                     if (Array.isArray(value)) {
-                        // 处理对象数组，提取name或其他有意义的属性
+                        // 处理数组类型，支持基本类型数组和对象数组
                         return value.map(item => {
                             if (typeof item === 'object' && item !== null) {
+                                // 处理对象类型元素，提取name或label属性
                                 return item.name || item.label || '';
+                            } else if (item !== undefined && item !== null) {
+                                // 处理基本类型元素，直接返回
+                                return String(item);
                             }
-                            return item;
-                        }).filter(item => !!item).join(', ');
+                            return '';
+                        }).filter(item => item !== '').join(', ');
                     } else {
                         // 处理单个对象，提取name或label属性
                         return value.name || value.label || '';
                     }
+                } else if (value !== undefined && value !== null) {
+                    // 处理基本类型，直接返回字符串表示
+                    return String(value);
                 }
-                return '' + value;
+                // 处理undefined或null，显示空字符串
+                return '';
             }
         },
     },

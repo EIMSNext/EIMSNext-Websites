@@ -109,14 +109,20 @@ export default function useInput(Handler) {
         }, data);
       }
       fields.reduce((initial, field) => {
-        const ctx =
+        const ctx = 
           (this.fieldCtx[field] || []).filter(
             (ctx) => !this.isIgnore(ctx.rule)
           )[0] || this.fieldCtx[field][0];
         if (this.isIgnore(ctx.rule)) {
           ignoreFields.push(field);
         }
-        initial[field] = toRef(ctx.rule, "value");
+        // 使用computed确保响应式，同时应用toFormValue转换
+        Object.defineProperty(initial, field, {
+          get: () => {
+            return ctx.parser.toFormValue(ctx.rule.value, ctx);
+          },
+          enumerable: true
+        });
         return initial;
       }, data);
       this.form = data;

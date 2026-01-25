@@ -1,15 +1,15 @@
 <template>
     <Layout>
         <!-- 公用侧边栏 -->
-        <div class="sidebar-container" :class="{ 'has-logo': false }">
+        <div class="sidebar-container">
             <!-- 顶部布局顶部 || 左侧布局左侧 -->
-            <div>
+            <div style="margin-top:10px">
                 <el-menu mode="vertical">
                     <AppLink :to="{
                         path: resolveFullPath('department'),
                     }">
                         <el-menu-item index="department">
-                            <et-icon icon="iconfont-organization" class="step-image" size="16px" />
+                            <et-icon icon="iconfont-organization" class="step-image" size="14px" />
                             <span class="app-menu-text">内部组织</span>
                         </el-menu-item>
                     </AppLink>
@@ -17,7 +17,7 @@
                         path: resolveFullPath('role'),
                     }">
                         <el-menu-item index="role">
-                            <et-icon icon="iconfont-organization" class="step-image" size="16px" />
+                            <et-icon icon="iconfont-organization" class="step-image" size="14px" />
                             <span class="app-menu-text">角色</span>
                         </el-menu-item>
                     </AppLink>
@@ -25,16 +25,13 @@
                         path: resolveFullPath('admin'),
                     }">
                         <el-menu-item index="admin">
-                            <et-icon icon="iconfont-admin" class="step-image" size="16px" />
+                            <et-icon icon="iconfont-admin" class="step-image" size="14px" />
                             <span class="app-menu-text">管理员</span>
                         </el-menu-item>
                     </AppLink>
                 </el-menu>
             </div>
         </div>
-        <!-- 遮罩层 -->
-        <div v-if="isOpenSidebar" class="wh-full fixed-lt z-999 bg-black bg-opacity-30"
-            @click="handleOutsideClick" />
         <!-- 左侧和顶部布局 -->
         <div class="main-container">
             <SysMain />

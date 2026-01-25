@@ -1,7 +1,7 @@
 <template>
   <template v-if="ready">
     <MetaItemHeader :label="t('dataflow.targetForm')" :required="true"></MetaItemHeader>
-    <FormList v-model="formItem" :appId="appId" @change="formChanged"></FormList>
+    <FormSelect v-model="formItem" :appId="appId" @change="formChanged"></FormSelect>
     <MetaItemHeader class="mt-[8px]" :label="t('dataflow.setFieldValue')" :required="true"></MetaItemHeader>
     <FormFieldList v-if="nodes.length > 0" v-model="formFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
       :show-all="true" @change="fieldChanged"></FormFieldList>

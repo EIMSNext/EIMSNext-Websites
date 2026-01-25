@@ -14,19 +14,6 @@ export default function advanced({ t }) {
     // },
     {
       type: "ComputedConfig",
-      field: "hidden",
-      value: "",
-      props: {
-        btn: t("computed.hidden.btn"),
-        title: t("computed.hidden.title"),
-        name: t("computed.hidden.name"),
-        invertLabel: t("props.show"),
-        validLabel: t("props.hide"),
-      },
-      title: t("computed.hidden.title"),
-    },
-    {
-      type: "ComputedConfig",
       field: "$required",
       value: "",
       props: {
@@ -50,6 +37,19 @@ export default function advanced({ t }) {
         validLabel: t("props.disabled"),
       },
       title: t("computed.disabled.title"),
+    },
+    {
+      type: "ComputedConfig",
+      field: "hidden",
+      value: "",
+      props: {
+        btn: t("computed.hidden.btn"),
+        title: t("computed.hidden.title"),
+        name: t("computed.hidden.name"),
+        invertLabel: t("props.show"),
+        validLabel: t("props.hide"),
+      },
+      title: t("computed.hidden.title"),
     },
   ];
 }

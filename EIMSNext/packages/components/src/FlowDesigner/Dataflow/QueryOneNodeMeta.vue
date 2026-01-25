@@ -1,7 +1,7 @@
 <template>
   <template v-if="ready">
     <MetaItemHeader :label="t('dataflow.targetForm')" :required="true"></MetaItemHeader>
-    <FormList v-model="formItem" :appId="appId" @change="formChanged"></FormList>
+    <FormSelect v-model="formItem" :appId="appId" @change="formChanged"></FormSelect>
     <MetaItemHeader class="mt-[8px]" :label="t('dataflow.queryCondition')" :required="true"></MetaItemHeader>
     <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition">
     </ConditionList>
