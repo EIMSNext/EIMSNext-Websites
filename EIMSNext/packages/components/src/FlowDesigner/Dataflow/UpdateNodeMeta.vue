@@ -6,7 +6,7 @@
         <el-option :label="t('dataflow.recordInForm')" :value="UpdateMode.Form" />
         <el-option :label="t('dataflow.recordInNode')" :value="UpdateMode.Node" />
       </el-select>
-      <FormList v-if="mode == UpdateMode.Form" v-model="formItem" :appId="appId" @change="formChanged"></FormList>
+      <FormSelect v-if="mode == UpdateMode.Form" v-model="formItem" :appId="appId" @change="formChanged"></FormSelect>
       <el-select v-if="mode == UpdateMode.Node" v-model="activeData.metadata.updateMeta!.nodeId" size="default"
         @change="nodeChanged">
         <el-option v-for="node in nodes" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId" />

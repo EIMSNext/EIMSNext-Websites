@@ -1,12 +1,14 @@
 <template>
     <div class="_td-table-opt">
-        <el-table :data="value" :key="checked ? '2' : '1'" border :size="size || 'small'" style="width: 100%" :show-header="showHeader">
+        <el-table :data="value" :key="checked ? '2' : '1'" border :size="size || 'small'" style="width: 100%"
+            :show-header="showHeader">
             <template v-for="(col, idx) in overColumn" :key="col.label + idx">
                 <el-table-column :label="col.label">
                     <template #default="scope">
                         <template v-if="col.value">
                             <ValueInput :size="size || 'small'" :modelValue="scope.row[col.key]"
-                                @update:modelValue="(n) => (scope.row[col.key] = n)" @blur="onInput(scope.row)"></ValueInput>
+                                @update:modelValue="(n) => (scope.row[col.key] = n)" @blur="onInput(scope.row)">
+                            </ValueInput>
                         </template>
                         <template v-else>
                             <el-input :size="size || 'small'" :modelValue="scope.row[col.key]"
@@ -22,7 +24,7 @@
                 </template>
             </el-table-column>
         </el-table>
-        <div class="_td-table-opt-handle">
+        <div class="_td-table-opt-handle" style="margin-bottom: 8px;">
             <el-button link type="primary" @click="add" v-if="!max || max > value.length">
                 <i class="fc-icon icon-add"></i> {{ t('tableOptions.add') }}
             </el-button>

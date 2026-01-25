@@ -9,12 +9,8 @@ export const useSettingsStore = defineStore("setting", () => {
   const settingsVisible = ref(false);
   // 标签
   const tagsView = useStorage<boolean>("tagsView", defaultSettings.tagsView);
-  // 侧边栏 Logo
-  const sidebarLogo = useStorage<boolean>("sidebarLogo", defaultSettings.sidebarLogo);
   // 固定头部
   const fixedHeader = useStorage<boolean>("fixedHeader", defaultSettings.fixedHeader);
-  // 布局
-  // const layout = useStorage<string>("layout", defaultSettings.layout);
   // 水印
   const watermarkEnabled = useStorage<boolean>(
     "watermarkEnabled",
@@ -39,8 +35,6 @@ export const useSettingsStore = defineStore("setting", () => {
   const settingsMap: Record<string, Ref<SettingsValue>> = {
     fixedHeader,
     tagsView,
-    sidebarLogo,
-    // layout,
     watermarkEnabled,
   };
 
@@ -57,22 +51,15 @@ export const useSettingsStore = defineStore("setting", () => {
     themeColor.value = color;
   }
 
-  // function changeLayout(val: string) {
-  //   layout.value = val;
-  // }
-
   return {
     settingsVisible,
     tagsView,
     fixedHeader,
-    sidebarLogo,
-    // layout,
     themeColor,
     theme,
     watermarkEnabled,
     changeSetting,
     changeTheme,
-    changeThemeColor,
-    // changeLayout,
+    changeThemeColor
   };
 });

@@ -57,13 +57,6 @@ declare module "vue-router" {
      */
     keepAlive?: boolean;
 
-    /**
-     * 是否在面包屑导航中隐藏
-     * true 隐藏, false 显示
-     * @default false
-     */
-    breadcrumb?: boolean;
-
     //菜单ID
     id?: string;
 

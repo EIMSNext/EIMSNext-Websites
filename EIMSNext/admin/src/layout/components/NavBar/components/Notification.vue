@@ -1,10 +1,10 @@
 <template>
   <el-dropdown trigger="click">
-    <div>
-      <el-badge v-if="notices.length > 0" :offset="[-10, 15]" :value="notices.length" :max="99">
+    <div class="middle-center">
+      <el-badge v-if="notices.length > 0" class="middle-center" :offset="[-10, 15]" :value="notices.length" :max="99">
         <et-icon icon="el-icon-Bell" />
       </el-badge>
-      <el-badge v-else>
+      <el-badge v-else class="middle-center">
         <et-icon icon="el-icon-Bell" />
       </el-badge>
     </div>
@@ -177,9 +177,4 @@ function markAllAsRead() {
 }
 </script>
 
-<style lang="scss" scoped>
-.layout-top .notification-icon,
-.layout-mix .notification-icon {
-  color: #fff;
-}
-</style>
+<style lang="scss" scoped></style>

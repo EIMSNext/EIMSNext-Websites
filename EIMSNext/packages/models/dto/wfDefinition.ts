@@ -1,6 +1,7 @@
 ﻿import { CorpModelBase, IdBase } from "./modelBase";
 
 export interface WfDefinitionRequest extends IdBase {
+  appId?: string;
   name?: string;
   flowType?: FlowType;
   externalId?: string;
@@ -14,6 +15,7 @@ export interface WfDefinitionRequest extends IdBase {
 }
 
 export interface WfDefinition extends CorpModelBase {
+  appId: string;
   name: string;
   flowType: FlowType;
   externalId: string;

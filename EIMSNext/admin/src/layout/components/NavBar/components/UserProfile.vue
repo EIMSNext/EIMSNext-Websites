@@ -1,6 +1,6 @@
 <template>
   <el-dropdown trigger="click">
-    <div>
+    <div class="middle-center">
       <template v-if="userStore.currentUser.avatar">
         <img :src="userStore.currentUser.avatar" class="rounded-full" />
       </template>

@@ -212,6 +212,7 @@ export default {
       //   type: "input",
       //   field: "emptyText",
       // },
+      { type: "GroupLabel", props: { title: t("props.othersetting") } },
       {
         type: "CheckBoxInput",
         field: "stripe",

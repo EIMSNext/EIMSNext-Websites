@@ -2,7 +2,7 @@
   <et-card :showHeader="false">
     <div class="flow-center-wrapper">
       <div class="my-todo">
-        <div class="todo-wrapper">
+        <div class="todo-wrapper" @click="goToMyTasks">
           <div class="image-wrapper">
             <et-icon icon="iconfont-mytodo" size="64px" color="#1296db" />
           </div>
@@ -44,6 +44,10 @@ defineOptions({
   name: "MyTasksCard",
 });
 
+const goToMyTasks = () => {
+  router.push("/mytasks");
+};
+
 // 跳转到我发起的页面
 const goToMyStarted = () => {
   router.push("/mystarted");
@@ -54,7 +58,7 @@ const goToMyApproved = () => {
 };
 
 const goToMyCced = () => {
-  router.push("/mycced");
+  router.push("/cctome");
 };
 </script>
 <style lang="scss" scoped>
