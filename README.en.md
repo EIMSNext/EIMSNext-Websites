@@ -1,6 +1,8 @@
-# EIMSNext-Websites
+# EIMSNext（Dongfeng Low-Code）- Enterprise Information Management System
 
-EIMSNext-Websites is an enterprise low-code application system frontend project built with Vue 3 and TypeScript, featuring a modular design and scalable architecture suitable for applications such as internal enterprise management systems, workflow approval systems, and form systems.
+## Project Introduction
+
+EIMSNext (also known as Dongfeng Low-Code) is an open-source enterprise-level information management solution. Centered on low-code technology, it provides full-stack support for both frontend and backend. The frontend is built with Vue 3 and TypeScript using a modular design, while the backend encompasses core modules such as identity authentication, data management, and workflow engine, supporting flexible API interactions and data persistence. Adaptable to diverse scenarios including enterprise internal management, process approval, and dynamic forms, the solution helps enterprises reduce informatization costs and improve management efficiency.
 
 WebSite： [www.eimsnext.com](https://www.eimsnext.com)
 
