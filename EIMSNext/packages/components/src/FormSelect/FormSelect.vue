@@ -20,7 +20,7 @@ const props = defineProps<{
   appId: string;
 }>();
 const appStore = useAppStore()
-const formList = ref<IFormItem[]>([]);
+const formList = ref<IListItem[]>([]);
 
 const value = ref(props.modelValue?.id);
 

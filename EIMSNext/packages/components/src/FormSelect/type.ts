@@ -3,6 +3,7 @@ import { App, FormDef, FormType } from "@eimsnext/models";
 
 export interface IFormItem {
   id: string;
+  label?: string;
 }
 
 // export function buildFormListItems(forms: FormDef[]): IListItem[] {
