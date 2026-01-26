@@ -59,11 +59,25 @@ const rules = reactive({
 });
 
 const emit = defineEmits(["cancel", "ok"]);
+const appRef = ref();
 const cancel = () => {
   emit("cancel");
 };
 const save = async () => {
-  const newApp: AppRequest = { id: formData.value.id, name: formData.value.name, sortIndex: 0 };
+  if (!appRef.value) return;
+  
+  try {
+    await appRef.value.validate();
+  } catch (error) {
+    return;
+  }
+  
+  const newApp: AppRequest = {
+    id: formData.value.id,
+    name: formData.value.name,
+    description: formData.value.description,
+    sortIndex: formData.value.sortIndex,
+  };
 
   if (props.edit) {
     formData.value = await appService.patch<App>(newApp.id, newApp);
