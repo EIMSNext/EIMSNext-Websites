@@ -26,6 +26,9 @@
           :rows="5"
         />
       </el-form-item>
+      <el-form-item label="应用图标" prop="icon">
+        <IconSelect v-model="formData.icon" width="80%" />
+      </el-form-item>
     </el-form>
   </et-dialog>
 </template>
@@ -33,6 +36,7 @@
 import { App, AppRequest } from "@eimsnext/models";
 import { appService } from "@eimsnext/services";
 import { useAppStore } from "@eimsnext/store";
+import IconSelect from "@/components/IconSelect/index.vue";
 
 defineOptions({
   name: "AddEditApp",
@@ -51,7 +55,7 @@ const props = withDefaults(
 const appStore = useAppStore();
 const showDialog = ref(true);
 const title = props.edit ? "修改应用信息" : "添加新应用";
-const formData = ref<App>({ id: "", name: "", sortIndex: 0, appMenus: [] });
+const formData = ref<App>({ id: "", name: "", sortIndex: 0, appMenus: [], icon: "" });
 if (props.edit) formData.value = props.app!;
 
 const rules = reactive({
@@ -77,6 +81,7 @@ const save = async () => {
     name: formData.value.name,
     description: formData.value.description,
     sortIndex: formData.value.sortIndex,
+    icon: formData.value.icon,
   };
 
   if (props.edit) {
