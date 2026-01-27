@@ -15,8 +15,9 @@
         <button @click="changeTags">change Tags</button>
       </div>
     </et-dialog>
-    <member-select-dialog v-model="showMemberDialog" :multiple="false"
-      :showTabs="MemberTabs.Employee | MemberTabs.CurUser" @ok="finishSelect" />
+    <member-select-dialog v-model="showMemberDialog"
+      :member-options="{ multiple: true, showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee, cascadedDept: true, showCascade: true }"
+      @ok="finishSelect" />
     <et-confirm-dialog v-model="showConfirmDialog" :icon="MessageIcon.Error" @ok="onConfirmed">
       <div>效果如何</div>
     </et-confirm-dialog>

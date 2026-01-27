@@ -2,8 +2,7 @@
   <et-dialog :model-value="modelValue" class="member-select-dialog" title="部门成员列表" destroy-on-close width="750px"
     @cancel="cancel" @ok="save">
     <div style="padding: 12px 20px">
-      <member-select v-model="tagsRef" :showTabs="showTabs" :cascadedDept="cascadedDept" :showCascade="showCascade"
-        :multiple="multiple" :limit="limit" :dynamicMembers="dynamicMembers" />
+      <member-select v-model="tagsRef" :options="memberOptions" />
     </div>
     <template #footer-left>
       <el-button @click="openLink">通讯录</el-button>
@@ -14,7 +13,7 @@
 import "./style/index.less";
 import { ref, reactive, onBeforeMount } from "vue";
 import { ISelectedTag, TagType } from "../selectedTags/type";
-import { IMemberLimit, MemberTabs } from "./type";
+import { IMemberLimit, IMemberSelectOptions, MemberTabs } from "./type";
 
 defineOptions({
   name: "MemberSelectDialog",
@@ -24,23 +23,13 @@ const props = withDefaults(
   defineProps<{
     modelValue: boolean;
     tags: ISelectedTag[];
-    showTabs?: MemberTabs | number,
-    cascadedDept?: boolean;
-    showCascade?: boolean;
-    multiple?: boolean;
-    limit?: IMemberLimit;
-    dynamicMembers?: ISelectedTag[];
+    memberOptions?: IMemberSelectOptions
   }>(),
   {
-    showTabs: 7,
-    cascadedDept: false,
-    showCascade: false,
-    multiple: true
   }
 );
 
 const tagsRef = ref<ISelectedTag[]>([]);
-
 onBeforeMount(() => {
   if (props.tags && props.tags.length > 0) {
     props.tags.forEach((x) => {

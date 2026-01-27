@@ -15,6 +15,8 @@ export interface ITreeNode {
   nodeType: TreeNodeType;
   icon?: string;
   children?: ITreeNode[];
+  checked?: boolean;
+  disabled?: boolean;
   data?: any;
 }
 export enum TreeNodeType {
@@ -28,7 +30,7 @@ export enum TreeNodeType {
 
 export function findNode(
   nodes: ITreeNode[],
-  id: string
+  id: string,
 ): ITreeNode | undefined {
   let node: ITreeNode | undefined = undefined;
   if (id) {
@@ -64,7 +66,7 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
 
   const treeNoes: ITreeNode[] = [];
   const rootDept = depts.find(
-    (x) => x.parentId == undefined || x.parentId == ""
+    (x) => x.parentId == undefined || x.parentId == "",
   );
   if (rootDept) {
     const rootNode: ITreeNode = DeptToTreeNode(rootDept);
