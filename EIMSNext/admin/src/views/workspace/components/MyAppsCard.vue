@@ -24,13 +24,13 @@
                       </div>
                     </div>
                     <div class="favorite-icon">
-                      <et-icon icon="el-icon-star" size="large"></et-icon>
+                      <et-icon icon="el-star" size="large"></et-icon>
                     </div>
                     <div v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
                       class="setting-icon">
                       <el-dropdown placement="bottom-start" size="large">
                         <el-button class="setting-btn">
-                          <et-icon icon="el-icon-setting" size="large"></et-icon>
+                          <et-icon icon="el-setting" size="large"></et-icon>
                         </el-button>
                         <template #dropdown>
                           <el-dropdown-menu style="min-width: 150px">

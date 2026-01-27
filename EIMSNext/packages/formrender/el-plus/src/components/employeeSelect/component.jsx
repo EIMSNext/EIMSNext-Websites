@@ -132,7 +132,7 @@ export default defineComponent({
                 onClick={() => !isDisabled && handleTagClick()}
               >
                 <et-icon
-                  icon="el-icon-UserFilled"
+                  icon="el-UserFilled"
                   style={css_icon_user_selected}
                 ></et-icon>
                 {selectedValue.value.label}
@@ -158,7 +158,7 @@ export default defineComponent({
                       }}
                     >
                       <et-icon
-                        icon="el-icon-UserFilled"
+                        icon="el-UserFilled"
                         style={css_icon_user_selected}
                       ></et-icon>
                       {emp.label}

@@ -8,7 +8,7 @@
           <el-radio-button :label="t('comp.orderby_Desc')" :value="SortDirection.Desc" />
         </el-radio-group>
       </div>
-      <div><et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon></div>
+      <div><et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon></div>
     </div>
   </div>
 </template>

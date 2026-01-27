@@ -2,7 +2,7 @@
   <div class="navbar">
     <div class="navbar__left">
       <!--  -->
-      <et-icon icon="el-icon-Grid" size="24"></et-icon>
+      <et-icon icon="el-Grid" size="24"></et-icon>
     </div>
     <!-- 导航栏右侧 -->
     <NavbarRight />
