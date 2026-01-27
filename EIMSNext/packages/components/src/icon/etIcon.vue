@@ -1,16 +1,16 @@
 <template>
   <div class="et-icon">
     <div class="icon-container">
-      <template v-if="icon.startsWith('el-icon-')">
+      <template v-if="icon.startsWith('el-')">
         <el-icon :class="iconClass" :color="color" :size="size">
-          <component :is="icon.replace('el-icon-', '')" />
+          <component :is="icon.replace('el-', '')" />
         </el-icon></template>
       <template v-else-if="icon.startsWith('iconfont-')">
         <i :class="'iconfont icon-' + icon.replace('iconfont-', '') + ' ' + iconClass"
           :style="'font-size:' + size + ';color:' + color">
         </i></template>
-      <template v-else-if="icon.startsWith('fc-icon-')">
-        <i :class="'fc-icon ' + icon.replace('fc-icon-', '') + ' ' + iconClass"
+      <template v-else-if="icon.startsWith('fc-')">
+        <i :class="'fc-icon ' + icon.replace('fc-', '') + ' ' + iconClass"
           :style="'font-size:' + size + ';color:' + color">
         </i></template>
       <template v-else>

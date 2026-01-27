@@ -15,7 +15,7 @@
 
     <!-- 设置面板 -->
     <div v-if="defaultSettings.showSettings" @click="settingStore.settingsVisible = true">
-      <et-icon icon="el-icon-setting" />
+      <et-icon icon="el-setting" />
     </div>
   </div>
 </template>

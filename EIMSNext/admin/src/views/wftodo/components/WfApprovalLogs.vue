@@ -29,7 +29,7 @@
                     </template>
                     <div class="flow-content">
                         <div class="creator-info">
-                            <et-icon icon="el-icon-user" size="14px"></et-icon>
+                            <et-icon icon="el-user" size="14px"></et-icon>
                             <span class="creator-name" :title="task.approver?.empName">
                                 {{ task.approver?.empName }}
                             </span>

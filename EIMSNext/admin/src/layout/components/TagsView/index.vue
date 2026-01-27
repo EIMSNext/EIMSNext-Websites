@@ -5,7 +5,7 @@
         :class="'tags-item ' + (tagsViewStore.isActive(tag) ? 'active' : '')" :to="{ path: tag.path, query: tag.query }"
         @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''" @contextmenu.prevent="openContentMenu(tag, $event)">
         {{ translateRouteTitle(tag.title) }}
-        <et-icon v-if="!isAffix(tag) || isClosable(tag)" icon="el-icon-Close" class="tag-close-icon"
+        <et-icon v-if="!isAffix(tag) || isClosable(tag)" icon="el-Close" class="tag-close-icon"
           @click.prevent.stop="closeSelectedTag(tag)"></et-icon>
       </router-link>
     </el-scrollbar>

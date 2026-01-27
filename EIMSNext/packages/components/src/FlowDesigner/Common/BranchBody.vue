@@ -1,10 +1,10 @@
 <template>
   <div class="branch-body">
     <el-popover :show-arrow="false" placement="right" width="200" trigger="click">
-      <el-button icon="el-icon-plus" style="width: 100%" @click.stop="addBranchItem">
+      <el-button icon="el-plus" style="width: 100%" @click.stop="addBranchItem">
         {{ t("workflow.addBranch") }}
       </el-button>
-      <el-button :disabled="!canPaste" icon="el-icon-copy-document"
+      <el-button :disabled="!canPaste" icon="el-copy-document"
         style="width: 100%; margin-left: 0; margin-top: 10px" @click.stop="pasteBranchItem">
         {{ t("workflow.pasteBranch") }}
       </el-button>

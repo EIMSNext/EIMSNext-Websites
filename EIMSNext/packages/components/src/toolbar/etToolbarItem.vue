@@ -6,7 +6,7 @@
                 @command="(cmd: string, e: MouseEvent) => handleSubItemCommand(item, cmd, e, item.config.onCommand)">
                 <span class="el-dropdown-link">
                     <et-icon v-if="item.config.icon" :icon="item.config.icon" style="margin-right: 5px;" />
-                    <span>{{ getDropdwnText(item) }}</span><et-icon icon="el-icon-arrow-down" class="el-icon--right" />
+                    <span>{{ getDropdwnText(item) }}</span><et-icon icon="el-arrow-down" class="el-icon--right" />
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu v-if="item.config.menuItems">

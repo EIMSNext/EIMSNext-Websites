@@ -8,7 +8,7 @@
       :fieldValueChanging="fieldValueChanging" @change="onInput">
     </FormFieldValue>
     <div v-if="removable" class="ml-[5px]" style="align-content: center">
-      <et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon>
+      <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
     </div>
   </div>
 </template>

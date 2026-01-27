@@ -13,7 +13,7 @@
       <el-dropdown v-model="op" class="cond-op" size="default" trigger="click" @command="onOpChanged">
         <span style="display: flex; align-items: center">
           {{ opLabel }}
-          <et-icon icon="el-icon-arrow-down"></et-icon>
+          <et-icon icon="el-arrow-down"></et-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
@@ -24,7 +24,7 @@
         </template>
       </el-dropdown>
       <div class="flex-1"></div>
-      <div><et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon></div>
+      <div><et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon></div>
     </div>
     <div v-if="op != 'empty' && op != 'notempty'" class="cond-detail mt-[10px]">
       <ConditionValue v-model="value" :field-def="field" :nodes="nodes" :fieldBuildSetting="valueBuildSetting"
