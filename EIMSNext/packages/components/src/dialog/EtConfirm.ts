@@ -87,7 +87,8 @@ export const EtConfirm = {
   showDialog: (
     message: string,
     options: ConfirmOptions = {},
+    t?: any,
   ): Promise<boolean> => {
-    return confirm(message, options);
+    return confirm(message, options, t);
   },
 };

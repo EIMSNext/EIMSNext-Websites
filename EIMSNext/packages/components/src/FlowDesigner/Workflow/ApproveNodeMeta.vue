@@ -10,9 +10,10 @@
     <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
       @editTag="editTag" />
     <!-- <el-checkbox v-model="activeData.metadata.approveMeta!.enableCopyto" label="启用抄送" class="sub-item" /> -->
-    <member-select-dialog v-model="showMemberDialog" :tags="selectedCandidateTags"
-      :showTabs="MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic"
-      :dynamicMembers="dynamicMembers" destroy-on-close @ok="finishSelect" />
+    <member-select-dialog v-model="showMemberDialog" :tags="selectedCandidateTags" :member-options="{
+      showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic,
+      dynamicMembers: dynamicMembers, cascadedDept: true, showCascade: true
+    }" destroy-on-close @ok="finishSelect" />
   </template>
 </template>
 <script lang="ts" setup>

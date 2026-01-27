@@ -17,9 +17,10 @@
             <AuthGroupEditor v-if="newAuthGrp.type == AuthGroupType.Custom" v-model="newAuthGrp" :form-def="formDef"
                 style="height: 280px;">
             </AuthGroupEditor>
-            <MemberSelectDialog v-model="showMemberDialog" :tags="members"
-                :showTabs="MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee" :multiple="true"
-                :cascadeDept="true" destroy-on-close @ok="finishSelect">
+            <MemberSelectDialog v-model="showMemberDialog" :tags="members" :memberOptions="{
+                showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee, multiple: true, cascadedDept: true,
+                showCascade: true
+            }" destroy-on-close @ok="finishSelect">
             </MemberSelectDialog>
         </div>
     </et-dialog>

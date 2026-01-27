@@ -4,7 +4,6 @@ import {
   makeOptionsRule,
   makeTreeOptions,
 } from "../../utils/index";
-import { type } from "os";
 
 const label = "单选框";
 const name = "radio";
@@ -51,7 +50,7 @@ export default {
       options: makeTreeOptions(
         t("props.option"),
         { label: "label", value: "value" },
-        1
+        1,
       ),
     };
   },

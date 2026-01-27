@@ -69,8 +69,9 @@
         </template>
       </template>
     </div>
-    <memberSelectDialog v-model="showMemberDialog" :tags="value ?? []" :multiple="memberMultiple"
-      :showTabs="memberShowTabs" @ok="memberSelected">
+    <memberSelectDialog v-model="showMemberDialog" :tags="value ?? []" :memberOptions="{
+      showTabs: memberShowTabs, multiple: memberMultiple
+    }" @ok="memberSelected">
     </memberSelectDialog>
   </div>
 </template>

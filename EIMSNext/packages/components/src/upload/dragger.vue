@@ -8,7 +8,7 @@
     <div class="et-upload-content">
       <et-icon
         icon-class="et-upload-icon"
-        :icon="isEnter ? 'el-icon-FolderOpened' : 'el-icon-Folder'"
+        :icon="isEnter ? 'el-FolderOpened' : 'el-Folder'"
       />
       <div class="et-upload-dragger-text">
         将文件拖到此处或<em>点击上传</em>

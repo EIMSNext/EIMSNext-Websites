@@ -34,9 +34,10 @@
         </div>
       </div>
     </AdvanceLayout>
-    <MemberSelectDialog v-if="showMemberDialog" v-model="showMemberDialog" :tags="selectedMemberTags"
-      :showTabs="MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee" :multiple="true" destroy-on-close
-      @ok="finishSelect">
+    <MemberSelectDialog v-if="showMemberDialog" v-model="showMemberDialog" :tags="selectedMemberTags" :memberOptions="{
+      showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee, multiple: true, cascadedDept: true,
+      showCascade: true
+    }" destroy-on-close @ok="finishSelect">
     </MemberSelectDialog>
   </div>
 </template>

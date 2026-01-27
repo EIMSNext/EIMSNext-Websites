@@ -15,6 +15,8 @@ export interface ITreeNode {
   nodeType: TreeNodeType;
   icon?: string;
   children?: ITreeNode[];
+  checked?: boolean;
+  disabled?: boolean;
   data?: any;
 }
 export enum TreeNodeType {
@@ -28,7 +30,7 @@ export enum TreeNodeType {
 
 export function findNode(
   nodes: ITreeNode[],
-  id: string
+  id: string,
 ): ITreeNode | undefined {
   let node: ITreeNode | undefined = undefined;
   if (id) {
@@ -64,7 +66,7 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
 
   const treeNoes: ITreeNode[] = [];
   const rootDept = depts.find(
-    (x) => x.parentId == undefined || x.parentId == ""
+    (x) => x.parentId == undefined || x.parentId == "",
   );
   if (rootDept) {
     const rootNode: ITreeNode = DeptToTreeNode(rootDept);
@@ -83,7 +85,7 @@ export function DeptToTreeNode(dept: Department): ITreeNode {
     nodeType: TreeNodeType.Dept,
     children: [],
     data: dept,
-    icon: "el-icon-UserFilled",
+    icon: "el-UserFilled",
   };
 }
 
@@ -106,7 +108,7 @@ export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
       nodeType: TreeNodeType.Group,
       children: [],
       data: x,
-      icon: "el-icon-Folder",
+      icon: "el-Folder",
     };
 
     attachChildren(rootNode);
@@ -122,7 +124,7 @@ export function RoleToTreeNode(role: Role): ITreeNode {
     nodeType: TreeNodeType.Role,
     children: [],
     data: role,
-    icon: "el-icon-UserFilled",
+    icon: "el-UserFilled",
   };
 }
 
@@ -131,7 +133,7 @@ export function EmployeeToListItem(emp: Employee): IListItem {
     id: emp.id,
     code: emp.code,
     label: emp.empName,
-    icon: "el-icon-UserFilled",
+    icon: "el-UserFilled",
     data: emp,
   };
 }
