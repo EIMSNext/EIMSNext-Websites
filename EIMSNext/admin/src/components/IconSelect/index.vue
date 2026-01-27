@@ -7,31 +7,17 @@
             <el-input v-model="selectedIcon" readonly placeholder="点击选择图标" class="reference">
               <template #prepend>
                 <!-- 根据图标类型展示 -->
-                <el-icon v-if="isElementIcon">
-                  <component :is="selectedIcon.replace('el-icon-', '')" />
-                </el-icon>
-                <template v-else>
-                  <et-icon :icon="selectedIcon" />
-                </template>
+                <et-icon :icon="selectedIcon" />
               </template>
               <template #suffix>
                 <!-- 清空按钮 -->
-                <el-icon
-                  v-if="selectedIcon"
-                  style="margin-right: 8px"
-                  @click.stop="clearSelectedIcon"
-                >
-                  <CircleClose />
-                </el-icon>
+                <et-icon v-if="selectedIcon" style="margin-right: 8px" @click.stop="clearSelectedIcon"
+                  icon="el-CircleClose" />
 
-                <el-icon
-                  :style="{
-                    transform: popoverVisible ? 'rotate(180deg)' : 'rotate(0)',
-                    transition: 'transform .5s',
-                  }"
-                >
-                  <ArrowDown @click.stop="togglePopover" />
-                </el-icon>
+                <et-icon icon="el-ArrowDown" :style="{
+                  transform: popoverVisible ? 'rotate(180deg)' : 'rotate(0)',
+                  transition: 'transform .5s',
+                }" @click.stop="togglePopover" />
               </template>
             </el-input>
           </slot>
@@ -45,12 +31,8 @@
           <el-tab-pane label="SVG 图标" name="svg">
             <el-scrollbar height="300px">
               <ul class="icon-grid">
-                <li
-                  v-for="icon in filteredSvgIcons"
-                  :key="'svg-' + icon"
-                  class="icon-grid-item"
-                  @click="selectIcon(icon)"
-                >
+                <li v-for="icon in filteredSvgIcons" :key="'svg-' + icon" class="icon-grid-item"
+                  @click="selectIcon(icon)">
                   <el-tooltip :content="icon" placement="bottom" effect="light">
                     <et-icon :icon="icon" />
                   </el-tooltip>
@@ -61,15 +43,8 @@
           <el-tab-pane label="Element 图标" name="element">
             <el-scrollbar height="300px">
               <ul class="icon-grid">
-                <li
-                  v-for="icon in filteredElementIcons"
-                  :key="icon"
-                  class="icon-grid-item"
-                  @click="selectIcon(icon)"
-                >
-                  <el-icon>
-                    <component :is="icon" />
-                  </el-icon>
+                <li v-for="icon in filteredElementIcons" :key="icon" class="icon-grid-item" @click="selectIcon(icon)">
+                  <et-icon :icon="'el-' + icon" />
                 </li>
               </ul>
             </el-scrollbar>
@@ -112,9 +87,6 @@ const selectedIcon = defineModel("modelValue", {
 const filterText = ref("");
 const filteredSvgIcons = ref<string[]>([]);
 const filteredElementIcons = ref<string[]>(elementIcons.value);
-const isElementIcon = computed(() => {
-  return selectedIcon.value && selectedIcon.value.startsWith("el-icon");
-});
 
 function loadIcons() {
   const icons = import.meta.glob("../../assets/icons/*.svg");
@@ -138,14 +110,14 @@ function filterIcons() {
   } else {
     filteredElementIcons.value = filterText.value
       ? elementIcons.value.filter((icon) =>
-          icon.toLowerCase().includes(filterText.value.toLowerCase())
-        )
+        icon.toLowerCase().includes(filterText.value.toLowerCase())
+      )
       : elementIcons.value;
   }
 }
 
 function selectIcon(icon: string) {
-  const iconName = activeTab.value === "element" ? "el-icon-" + icon : icon;
+  const iconName = activeTab.value === "element" ? "el-" + icon : icon;
   emit("update:modelValue", iconName);
   popoverVisible.value = false;
 }
@@ -168,7 +140,7 @@ function clearSelectedIcon() {
 onMounted(() => {
   loadIcons();
   if (selectedIcon.value) {
-    if (elementIcons.value.includes(selectedIcon.value.replace("el-icon-", ""))) {
+    if (elementIcons.value.includes(selectedIcon.value.replace("el-", ""))) {
       activeTab.value = "element";
     } else {
       activeTab.value = "svg";
