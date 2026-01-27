@@ -1,5 +1,11 @@
 <template>
-  <AddEditApp v-if="showAddEditDialog" :edit="false" @cancel="showAddEditDialog = false" @ok="handleSaved"></AddEditApp>
+  <AddEditApp 
+    v-if="showAddEditDialog" 
+    :edit="isEditMode" 
+    :app="currentApp" 
+    @cancel="showAddEditDialog = false" 
+    @ok="handleSaved">
+  </AddEditApp>
   <et-card :title="t('admin.myApp')">
     <template #action>
       <el-button v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin" icon="plus"
@@ -34,7 +40,7 @@
                         </el-button>
                         <template #dropdown>
                           <el-dropdown-menu style="min-width: 150px">
-                            <el-dropdown-item>{{ t("admin.editNameAndIcon") }}</el-dropdown-item>
+                            <el-dropdown-item @click="handleEditClick(app)">{{ t("admin.editNameAndIcon") }}</el-dropdown-item>
                             <el-dropdown-item class="btn-delete" @click="handleDeleteClick(app)">{{ t("common.delete")
                             }}</el-dropdown-item>
                           </el-dropdown-menu>
@@ -70,12 +76,25 @@ const { items: appsRef } = storeToRefs(appStore);
 const userStore = useUserStore()
 const curUser = toRef(userStore.currentUser)
 const showAddEditDialog = ref(false);
+const isEditMode = ref(false);
+const currentApp = ref<App | undefined>(undefined);
 
 const createApp = () => {
+  isEditMode.value = false;
+  currentApp.value = undefined;
   showAddEditDialog.value = true;
 };
+
+const handleEditClick = (app: App) => {
+  isEditMode.value = true;
+  currentApp.value = app;
+  showAddEditDialog.value = true;
+};
+
 const handleSaved = () => {
   showAddEditDialog.value = false;
+  isEditMode.value = false;
+  currentApp.value = undefined;
 };
 
 const gotoApp = async (app: App) => {

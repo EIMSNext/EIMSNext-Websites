@@ -26,6 +26,9 @@
           :rows="5"
         />
       </el-form-item>
+      <el-form-item label="应用图标" prop="icon">
+        <IconSelect v-model="formData.icon" width="80%" />
+      </el-form-item>
     </el-form>
   </et-dialog>
 </template>
@@ -33,6 +36,7 @@
 import { App, AppRequest } from "@eimsnext/models";
 import { appService } from "@eimsnext/services";
 import { useAppStore } from "@eimsnext/store";
+import IconSelect from "@/components/IconSelect/index.vue";
 
 defineOptions({
   name: "AddEditApp",
@@ -51,7 +55,7 @@ const props = withDefaults(
 const appStore = useAppStore();
 const showDialog = ref(true);
 const title = props.edit ? "修改应用信息" : "添加新应用";
-const formData = ref<App>({ id: "", name: "", sortIndex: 0, appMenus: [] });
+const formData = ref<App>({ id: "", name: "", sortIndex: 0, appMenus: [], icon: "" });
 if (props.edit) formData.value = props.app!;
 
 const rules = reactive({
@@ -59,11 +63,26 @@ const rules = reactive({
 });
 
 const emit = defineEmits(["cancel", "ok"]);
+const appRef = ref();
 const cancel = () => {
   emit("cancel");
 };
 const save = async () => {
-  const newApp: AppRequest = { id: formData.value.id, name: formData.value.name, sortIndex: 0 };
+  if (!appRef.value) return;
+  
+  try {
+    await appRef.value.validate();
+  } catch (error) {
+    return;
+  }
+  
+  const newApp: AppRequest = {
+    id: formData.value.id,
+    name: formData.value.name,
+    description: formData.value.description,
+    sortIndex: formData.value.sortIndex,
+    icon: formData.value.icon,
+  };
 
   if (props.edit) {
     formData.value = await appService.patch<App>(newApp.id, newApp);

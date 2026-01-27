@@ -1,6 +1,12 @@
 <template>
   <div ref="iconSelectRef" :style="{ width: props.width }">
-    <el-popover :visible="popoverVisible" :width="props.width" placement="bottom-end">
+    <el-popover 
+      :visible="popoverVisible" 
+      :width="props.width" 
+      placement="bottom" 
+      :teleported="true"
+      popper-class="icon-select-popper"
+      popper-style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);">
       <template #reference>
         <div @click="popoverVisible = !popoverVisible">
           <slot>
@@ -175,5 +181,12 @@ onMounted(() => {
 .icon-grid-item:hover {
   border-color: #4080ff;
   transform: scale(1.2);
+}
+
+:deep(.icon-select-popper) {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 </style>
