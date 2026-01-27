@@ -6,7 +6,7 @@
     @cancel="showDeleteDialog = false" @ok="handleDeleteConfirm">
     确认删除已选中的数据项?
   </et-confirm-dialog>
-  <el-card shadow="never">
+  <el-card shadow="never" style="border: none;">
     <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
     <el-tree ref="deptTreeRef" class="dept-tree mt-2" :data="deptList"
       :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false"
@@ -108,6 +108,40 @@ const handleDeleteConfirm = async () => {
 };
 </script>
 <style scoped lang="scss">
+// 去掉el-card的边框
+:deep(.el-card) {
+  border: none;
+  box-shadow: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// 搜索框样式
+.search-input {
+  margin-bottom: 8px;
+}
+
+// 部门树样式
+.dept-tree {
+  flex: 1;
+  overflow-x: auto; // 启用横向滚动
+  overflow-y: auto; // 启用纵向滚动
+  min-height: 0; // 解决flex子元素高度问题
+
+  // 确保节点内容不会被截断
+  :deep(.el-tree-node) {
+    min-width: 100%;
+    white-space: nowrap;
+  }
+
+  // 调整节点内容样式
+  :deep(.el-tree-node__content) {
+    min-width: 100%;
+  }
+}
+
 .node-data {
   // 确保整个节点区域都能触发hover效果
   width: 100%;

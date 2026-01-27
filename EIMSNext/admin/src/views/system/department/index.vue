@@ -1,9 +1,9 @@
 <!-- 用户管理 -->
 <template>
-  <div>
-    <el-row :gutter="20">
+  <div class="dept-manager-container">
+    <el-row :gutter="20" class="main-row">
       <!-- 部门树 -->
-      <el-col :lg="6" :xs="24" class="mb-[12px]">
+      <el-col :lg="6" :xs="24" class="dept-tree-col">
         <div class="org-menu">员工</div>
         <div class="menu-items">
           <el-radio-group v-model="empStatus" @change="handleStatusChanged">
@@ -12,32 +12,37 @@
           </el-radio-group>
         </div>
         <div class="org-menu">部门</div>
-        <dept-tree :editable="true" @node-click="handleDeptChanged" />
+        <div class="dept-tree-wrapper">
+          <dept-tree :editable="true" @node-click="handleDeptChanged" />
+        </div>
       </el-col>
       <!-- 用户列表 -->
-      <el-col :lg="18" :xs="24">
-        <el-card shadow="never">
+      <el-col :lg="18" :xs="24" class="emp-list-col">
+        <el-card shadow="never" class="emp-list-card">
           <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
-          <el-table ref="tableRef" v-loading="loading" :data="dataRef" show-overflow-tooltip
-            :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" @selection-change="selectionChanged"
-            @row-click="edit">
-            <el-table-column type="selection" width="40" />
-            <el-table-column label="姓名" width="150" prop="empName" />
-            <el-table-column label="编码" width="150" prop="code" />
-            <el-table-column label="工作电话" width="150" prop="workPhone" />
-            <el-table-column label="工作邮箱" width="150" prop="workEmail" />
-            <el-table-column label="部门" prop="department.name" />
-            <!-- <el-table-column label="操作" fixed="right" width="150">
-              <template #default="scope">
-                <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
-                </el-button>
-                <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
-                </el-button>
-              </template>
-            </el-table-column> -->
-          </el-table>
-
-          <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
+          <div class="table-container">
+            <el-table ref="tableRef" v-loading="loading" :data="dataRef" show-overflow-tooltip
+              :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" @selection-change="selectionChanged"
+              @row-click="edit">
+              <el-table-column type="selection" width="40" />
+              <el-table-column label="姓名" width="150" prop="empName" />
+              <el-table-column label="编码" width="150" prop="code" />
+              <el-table-column label="工作电话" width="150" prop="workPhone" />
+              <el-table-column label="工作邮箱" width="150" prop="workEmail" />
+              <el-table-column label="部门" prop="department.name" />
+              <!-- <el-table-column label="操作" fixed="right" width="150">
+                <template #default="scope">
+                  <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
+                  </el-button>
+                  <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
+                  </el-button>
+                </template>
+              </el-table-column> -->
+            </el-table>
+          </div>
+          <div class="pagination-container">
+            <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -338,6 +343,81 @@ onMounted(() => {
 });
 </script>
 <style lang="scss" scoped>
+// 主容器样式
+.dept-manager-container {
+  height: 100vh;
+  overflow: hidden;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+// 主行样式
+.main-row {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+// 部门树列样式
+.dept-tree-col {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// 部门树包装器样式
+.dept-tree-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin-top: 10px;
+  background-color: #fff;
+  min-height: 0;
+}
+
+// 员工列表列样式
+.emp-list-col {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// 员工列表卡片样式
+.emp-list-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+// 表格容器样式
+.table-container {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+
+// 分页容器样式
+.pagination-container {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 10px 10px;
+  box-sizing: border-box;
+  //横向外层容器内居中显示
+  position: absolute;
+  left: 30%;
+  transform: translateX(-10%);
+  bottom: 0px;
+}
+
+// 原始样式保留
 .org-menu {
   color: #838892;
   font-size: 14px;

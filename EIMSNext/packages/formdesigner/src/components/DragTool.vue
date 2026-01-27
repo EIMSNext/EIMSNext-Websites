@@ -129,8 +129,7 @@ export default defineComponent({
     min-height: 20px;
     min-width: 0;
     box-sizing: border-box;
-    padding: 2px;
-    outline: 1px dashed var(--fc-tool-border-color);
+    padding: 2px;    
     overflow: hidden;
     word-wrap: break-word;
     word-break: break-all;
@@ -153,9 +152,8 @@ export default defineComponent({
 }
 
 ._fd-drag-tool:hover {
-    outline-color: var(--fc-style-color-1);
-    outline-style: solid;
     z-index: 1;
+    background-color: #f7f8fa;
 }
 
 ._fd-drag-tool:has(._fd-drag-tool:hover) {
@@ -179,11 +177,11 @@ export default defineComponent({
     margin-top: 5px;
 }
 
-._fd-drag-tool.active {
-    outline: 2px solid var(--fc-style-color-1) !important;
+._fd-drag-tool.active {    
     z-index: 2;
     min-width: 80px;
     min-height: 36px;
+    background-color:#fff5e8;
 }
 
 ._fd-drag-tool.active>div>._fd-drag-btn {
