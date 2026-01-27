@@ -49,7 +49,7 @@ const canEdit = computed(() => hasDataPerm(currentUser.userType, DataPerms.Edit,
 const canRemove = computed(() => hasDataPerm(currentUser.userType, DataPerms.Remove, props.dataPerms))
 
 
-const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "common.edit", command: "edit", visible: canEdit, icon: "el-icon-edit" } }, { type: "button", config: { text: "common.delete", command: "delete", visible: canRemove, icon: "el-icon-delete", disabled: false } }])
+const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "common.edit", command: "edit", visible: canEdit, icon: "el-edit" } }, { type: "button", config: { text: "common.delete", command: "delete", visible: canRemove, icon: "el-delete", disabled: false } }])
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
     switch (cmd) {
         case 'edit':

@@ -85,7 +85,7 @@ export function DeptToTreeNode(dept: Department): ITreeNode {
     nodeType: TreeNodeType.Dept,
     children: [],
     data: dept,
-    icon: "el-icon-UserFilled",
+    icon: "el-UserFilled",
   };
 }
 
@@ -108,7 +108,7 @@ export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
       nodeType: TreeNodeType.Group,
       children: [],
       data: x,
-      icon: "el-icon-Folder",
+      icon: "el-Folder",
     };
 
     attachChildren(rootNode);
@@ -124,7 +124,7 @@ export function RoleToTreeNode(role: Role): ITreeNode {
     nodeType: TreeNodeType.Role,
     children: [],
     data: role,
-    icon: "el-icon-UserFilled",
+    icon: "el-UserFilled",
   };
 }
 
@@ -133,7 +133,7 @@ export function EmployeeToListItem(emp: Employee): IListItem {
     id: emp.id,
     code: emp.code,
     label: emp.empName,
-    icon: "el-icon-UserFilled",
+    icon: "el-UserFilled",
     data: emp,
   };
 }

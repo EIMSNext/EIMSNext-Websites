@@ -9,7 +9,7 @@
             :name="MemberTabs.Department">
             <div class="dept-select">
               <el-tree ref="deptTree" class="dept-tree" style="margin-top: 12px" :data="deptData" :props="defaultProps"
-                :expand-on-click-node="true" node-key="id" :check-strictly="true" :filter-node-method="deptFilter">
+                :expand-on-click-node="false" node-key="id" :check-strictly="true" :filter-node-method="deptFilter">
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, deptFilter, false)">
                     <div class="node-wrapper">
@@ -74,7 +74,8 @@
               </div>
               <div class="right-panel">
                 <et-list v-model="selectedEmps" :data="empData" :selectable="true" :multiple="options.multiple"
-                  style="padding-top: 0px; height: 100%" @item-check="empChecked" @all-check="empCheckAll">
+                  item-class="custom-list-item" style="padding-top: 0px; height: 100%" @item-check="empChecked"
+                  @all-check="empCheckAll" @item-click="empClicked">
                 </et-list>
               </div>
             </div>
@@ -92,7 +93,7 @@
             :name="MemberTabs.CurDept">
             <div class="dept-select">
               <el-tree ref="curDeptTree" class="dept-tree" style="margin-top: 12px" :data="curDeptData"
-                :props="defaultProps" :expand-on-click-node="true" :check-strictly="true" node-key="id"
+                :props="defaultProps" :expand-on-click-node="false" :check-strictly="true" node-key="id"
                 :filter-node-method="deptFilter">
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, deptFilter, false)">
@@ -188,11 +189,6 @@ watch([keyword], ([newKeyword], [oldKeyword]) => {
     empDeptTree.value!.filter(newKeyword);
   }
 });
-// watch([orgCascade], ([newVal], [oldVal]) => {
-//   if (newVal != oldVal && deptData.value) {
-//     updateCascadeStatus(deptData.value[0])
-//   }
-// });
 
 // 根据可选范围过滤部门树
 const filterDeptTreeByScope = (treeData: ITreeNode[]): ITreeNode[] => {
@@ -374,7 +370,7 @@ const setNodeChecked = (type: TagType, nodes: ITreeNode[]) => {
     const checked = tagsRef.value.findIndex(x => x.type === type && x.id === node.id) > -1;
     node.checked = checked
     node.disabled = false;
-    
+
     // 递归处理子节点
     if (node.children && node.children.length > 0) {
       setNodeChecked(type, node.children);
@@ -444,6 +440,10 @@ const selectEmpDept = (deptId: string) => {
     deptChanging.value = false;
   });
 };
+
+const empClicked = (data: IListItem) => {
+  empChecked(data, !data.checked)
+}
 const empChecked = (data: IListItem, checked: boolean) => {
   //  console.log("empCheck", data, checked);
   if (options.multiple) {
@@ -461,20 +461,16 @@ const empChecked = (data: IListItem, checked: boolean) => {
         });
       }
     } else {
-      let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == TagType.Employee
-      );
-      //  console.log("index", index, tagsRef);
-      if (index && index > -1) tagsRef.value.splice(index, 1);
+      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Employee || x.id !== data.id)
     }
 
     emit("update:modelValue", tagsRef.value);
   } else {
     if (checked) {
       // 直接创建新数组，保留非员工标签，替换为新的员工标签
-      const nonEmployeeTags = tagsRef.value.filter(x => x.type != TagType.Employee);
+      const noEmployeeTags = tagsRef.value.filter(x => x.type != TagType.Employee);
       tagsRef.value = [
-        ...nonEmployeeTags,
+        ...noEmployeeTags,
         {
           id: data.id,
           code: data.code,
@@ -485,10 +481,7 @@ const empChecked = (data: IListItem, checked: boolean) => {
       ];
     } else {
       // 只移除当前员工标签
-      const index = tagsRef.value.findIndex(x => x.id == data.id && x.type == TagType.Employee);
-      if (index > -1) {
-        tagsRef.value = [...tagsRef.value.slice(0, index), ...tagsRef.value.slice(index + 1)];
-      }
+      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Employee || x.id !== data.id)
     }
     emit("update:modelValue", tagsRef.value);
   }
@@ -510,16 +503,7 @@ const empCheckAll = (checked: boolean) => {
       }
     });
   } else {
-    let toRemove: number[] = [];
-    tagsRef.value.forEach((item, index) => {
-      if (item.type == TagType.Employee) {
-        toRemove.splice(0, 0, index);
-      }
-    });
-
-    toRemove.forEach((index) => {
-      tagsRef.value.splice(index, 1);
-    });
+    tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Employee)
   }
 
   emit("update:modelValue", tagsRef.value);
@@ -673,52 +657,34 @@ const removeTag = (tag: ISelectedTag) => {
 
 // 处理节点点击事件，实现点击整行选中/取消选中
 const handleNodeClick = (node: any, data: ITreeNode, filterFn: (value: string, data: any) => boolean, isRole: boolean) => {
-  // 检查是否禁用
-  if (!filterFn(keyword.value, data)) {
-    return;
-  }
-
-  // 根据当前选中状态切换
-  const newCheckedState = !data.checked;
-
-  if (isRole) {
-    // 角色选择
-    if (roleTree.value) {
-      updateRoleTags(data, newCheckedState)
-    }
-  } else {
-    // 部门选择
-    if (deptTree.value) {
-      deptTree.value.setChecked(node, newCheckedState, false);
-    } else if (curDeptTree.value) {
-      curDeptTree.value.setChecked(node, newCheckedState, false);
-    }
-  }
+  updateTags(data, !data.checked, filterFn, isRole);;
 };
 
 const handleCheckedChanged = (node: any, data: ITreeNode, filterFn: (value: string, data: any) => boolean, isRole: boolean) => {
+  updateTags(data, !!data.checked, filterFn, isRole);;
+};
+
+const updateTags = (data: ITreeNode, checked: boolean, filterFn: (value: string, data: any) => boolean, isRole: boolean) => {
   // 检查是否禁用
   if (!filterFn(keyword.value, data)) {
     return;
   }
 
-  // 根据当前选中状态切换
-  const newCheckedState = !!data.checked;
-
   if (isRole) {
     // 角色选择
     if (roleTree.value) {
-      updateRoleTags(data, newCheckedState)
+      updateRoleTags(data, checked)
     }
   } else {
     // 部门选择
     if (deptTree.value) {
-      updateDeptTags(data, newCheckedState, false)
+      updateDeptTags(data, checked, false)
     } else if (curDeptTree.value) {
-      updateDeptTags(data, newCheckedState, true)
+      updateDeptTags(data, checked, true)
     }
   }
-};
+}
+
 const updateRoleTags = (data: ITreeNode, checked: boolean) => {
   data.checked = checked
   if (checked) {
@@ -852,5 +818,9 @@ const cascadeChanged = (val: boolean) => {
 :deep(.hide-tabs-header .el-tabs__content) {
   margin-top: 0 !important;
   border: none !important;
+}
+
+.custom-list-item {
+  cursor: pointer;
 }
 </style>

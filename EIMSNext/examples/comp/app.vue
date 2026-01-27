@@ -62,8 +62,8 @@ const showConfirmDialog = ref(false);
 // const http = inject<HttpClient>("http")!;
 
 const listData: IListItem[] = [
-  { id: "111", label: "111", icon: "el-icon-UserFilled", color: "red" },
-  { id: "222", label: "222", icon: "el-icon-UserFilled", color: "red" },
+  { id: "111", label: "111", icon: "el-UserFilled", color: "red" },
+  { id: "222", label: "222", icon: "el-UserFilled", color: "red" },
 ];
 const listTile = ref("list test");
 const selectedList = ref(["111"]);
