@@ -92,9 +92,10 @@
         color: var(--et-color-text);
         cursor: pointer;
         font-size: 14px;
-        height: 36px;
-        line-height: 36px;
-        padding: 0 12px;
+        height: 30px;
+        line-height: 30px;
+        padding-left: 12px;
+        margin: 5px 8px 0 0;
 
         &:hover {
           background: var(--et-color-bg-primary);
@@ -103,6 +104,36 @@
         &.active {
           background: var(--et-color-bg-primary);
           color: var(--et-color-primary);
+        }
+      }
+    }
+
+    .dept-tree {
+      flex: 1;
+      overflow-y: auto;
+
+      .node-data {
+        width: 100%;
+
+        .node-wrapper {
+          display: flex;
+          align-items: center;
+
+          .node-icon {
+            width: 20px;
+            height: 20px;
+          }
+          .node-label {
+            padding-left: 5px;
+            flex: 1 1 auto;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .node-action {
+            margin: 0 5px;
+            flex: none;
+          }
         }
       }
     }
@@ -117,36 +148,8 @@
   position: relative;
 
   .dept-tree {
-    width: 100%;
-    flex: 1;
-    overflow-y: auto;
     margin-top: 12px;
-    max-height: calc(100% - 12px);
-
-    .node-data {
-      width: 100%;
-
-      .node-wrapper {
-        display: flex;
-        align-items: center;
-
-        .node-icon {
-          width: 20px;
-          height: 20px;
-        }
-        .node-label {
-          padding-left: 5px;
-          flex: 1 1 auto;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        .node-action {
-          margin: 0 5px;
-          flex: none;
-        }
-      }
-    }
+    height: calc(100% - 12px);
   }
 }
 
@@ -163,17 +166,11 @@
     border-right: 1px solid #eee;
     box-sizing: border-box;
 
-    .filter-items {
-      padding: 0 12px;
-    }
-
     .dept-tree {
       height: calc(100% - 36px);
-      overflow-y: auto;
-      width: 100%;
       margin-top: 0;
-      padding: 0 12px;
       box-sizing: border-box;
+      margin-right: 8px;
     }
   }
 

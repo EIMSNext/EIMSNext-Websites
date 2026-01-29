@@ -15,9 +15,10 @@ export interface ITreeNode {
   nodeType: TreeNodeType;
   icon?: string;
   children?: ITreeNode[];
+  data?: any;
   checked?: boolean;
   disabled?: boolean;
-  data?: any;
+  readonly?: boolean;
 }
 export enum TreeNodeType {
   None = 0,
