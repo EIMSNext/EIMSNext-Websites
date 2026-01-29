@@ -15,7 +15,7 @@
                     <div class="node-wrapper">
                       <et-icon :icon="data.icon" class="node-icon" />
                       <span class="node-label">{{ data.label }}</span>
-                      <div class="node-action">
+                      <div v-if="!data.readonly" class="node-action">
                         <el-checkbox v-if="options.multiple" v-model="data.checked" @click.stop=""
                           :disabled="data.disabled || !deptFilter(keyword, data)"
                           @change="(val: any) => handleCheckedChanged(node, data, deptFilter, false)" />
@@ -254,15 +254,22 @@ const filterDeptTreeByScope = (treeData: ITreeNode[]): ITreeNode[] => {
   const filterNode = (node: ITreeNode): ITreeNode | null => {
     // 如果节点是requiredDeptIds中的一员，或者是requiredDeptIds中某个节点的子节点
     if (requiredDeptIds.has(node.id)) {
-      // 过滤子节点，只保留符合条件的子节点
-      const filteredChildren = node.children
-        ?.map(child => filterNode(child))
-        .filter((child): child is ITreeNode => child !== null);
+      const isScoped = scopeDeptIds.indexOf(node.id) > -1
+      if (isScoped) {
+        return node
+      }
+      else {
+        node.readonly = true
+        // 过滤子节点，只保留符合条件的子节点
+        const filteredChildren = node.children
+          ?.map(child => filterNode(child))
+          .filter((child): child is ITreeNode => child !== null);
 
-      return {
-        ...node,
-        children: filteredChildren
-      };
+        return {
+          ...node,
+          children: filteredChildren
+        };
+      }
     }
 
     // 否则不保留
@@ -367,6 +374,9 @@ const setNodeChecked = (type: TagType, nodes: ITreeNode[]) => {
   if (!nodes) return;
 
   nodes.forEach(node => {
+    if (node.disabled || node.readonly)
+      return;
+
     const checked = tagsRef.value.findIndex(x => x.type === type && x.id === node.id) > -1;
     node.checked = checked
     node.disabled = false;
@@ -666,7 +676,7 @@ const handleCheckedChanged = (node: any, data: ITreeNode, filterFn: (value: stri
 
 const updateTags = (data: ITreeNode, checked: boolean, filterFn: (value: string, data: any) => boolean, isRole: boolean) => {
   // 检查是否禁用
-  if (!filterFn(keyword.value, data)) {
+  if (data.disabled || data.readonly || !filterFn(keyword.value, data)) {
     return;
   }
 
@@ -786,6 +796,9 @@ const updateDeptTags = (data: ITreeNode, checked: boolean, isCurDept: boolean) =
 };
 
 const updateCascadeStatus = (data: ITreeNode) => {
+  if (data.disabled || data.readonly)
+    return;
+
   if (data.children && data.children.length > 0) {
     data.children.forEach(child => {
       child.disabled = data.checked
