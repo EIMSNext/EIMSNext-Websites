@@ -5,6 +5,8 @@
 <script lang="ts" setup>
 import { IFlowNodeData, IFlowNodeMetaData } from "./FlowData";
 import FlowNode from "./FlowNode.vue";
+import { useLocale } from "element-plus";
+const { t } = useLocale()
 
 defineOptions({
   name: "CopyToNode",
@@ -16,10 +18,12 @@ const props = defineProps<{
 }>();
 
 const getContent = (metadata: IFlowNodeMetaData): string => {
-  if (props.nodeData.metadata.copytoMeta?.approvalCandidates) {
-    return props.nodeData.metadata.copytoMeta.approvalCandidates.map(x => x.candidateName).join(',')
+  if (metadata.copytoMeta?.approvalCandidates
+    && metadata.copytoMeta?.approvalCandidates.length > 0
+  ) {
+    return metadata.copytoMeta.approvalCandidates.map(x => x.candidateName).join(',')
   }
 
-  return ""
+  return t("workflow.noCCMember")
 }
 </script>
