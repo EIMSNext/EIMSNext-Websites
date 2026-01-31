@@ -84,6 +84,10 @@ const goToMyCced = () => {
       height: 100%;
       justify-content: center;
 
+      &:hover {
+        background-color: var(--et-bg-color-primary);
+      }
+
       .image-wrapper {
         margin-right: 40px;
         width: 64px;
@@ -111,9 +115,8 @@ const goToMyCced = () => {
   .flow-steps {
     border-radius: 6px;
     display: flex;
-    height: 100%;
+    height: 96px;
     justify-content: space-between;
-    padding: 20px 20px 20px 16px;
     width: 68%;
 
     .step-wrapper {
@@ -126,10 +129,13 @@ const goToMyCced = () => {
       line-height: 0;
       width: 23%;
 
+      &:hover {
+        background-color: var(--et-bg-color-primary);
+      }
+
       .step-image {
         height: 40px;
         color: #1296db;
-        margin-bottom: 16px;
       }
     }
   }

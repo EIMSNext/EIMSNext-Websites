@@ -4,8 +4,8 @@
       <et-icon icon="iconfont-mytodo" size="16px" class="step-image"></et-icon>
       <span v-if="isSidebarOpened" class="ml-[10px]">{{ t('admin.flowcenter') }}</span>
       <el-button class="side-bar-control" @click.stop="toggleSideBar"> <et-icon v-if="isSidebarOpened"
-          icon="el-icon-DArrowLeft" size="14px"></et-icon>
-        <et-icon v-else icon="el-icon-DArrowRight" size="14px"></et-icon>
+          icon="el-DArrowLeft" size="14px"></et-icon>
+        <et-icon v-else icon="el-DArrowRight" size="14px"></et-icon>
       </el-button>
     </div>
     <div v-if="isSidebarOpened">

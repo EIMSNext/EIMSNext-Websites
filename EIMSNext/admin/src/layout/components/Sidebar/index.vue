@@ -9,8 +9,8 @@
       <span v-if="isSidebarOpened" class="ml-[10px]">{{ app?.name
       }}</span>
       <el-button class="side-bar-control" @click.stop="toggleSideBar"> <et-icon v-if="isSidebarOpened"
-          icon="el-icon-DArrowLeft" size="14px"></et-icon>
-        <et-icon v-else icon="el-icon-DArrowRight" size="14px"></et-icon>
+          icon="el-DArrowLeft" size="14px"></et-icon>
+        <et-icon v-else icon="el-DArrowRight" size="14px"></et-icon>
       </el-button>
     </div>
     <div>
@@ -44,14 +44,14 @@
     <div v-if="isSidebarOpened" class="form-action">
       <el-input>
         <template #prefix>
-          <et-icon icon="el-icon-search" size="14px"> </et-icon>
+          <et-icon icon="el-search" size="14px"> </et-icon>
         </template>
       </el-input>
 
       <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
         <el-dropdown placement="bottom-start" size="large">
           <el-button style="width: 30px;">
-            <et-icon icon="el-icon-plus"> </et-icon>
+            <et-icon icon="el-plus"> </et-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu style="min-width: 150px">

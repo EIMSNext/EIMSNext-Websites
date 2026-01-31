@@ -4,7 +4,10 @@
     </MetaItemHeader>
     <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
       @editTag="editTag" />
-    <member-select-dialog v-model="showMemberDialog" @ok="finishSelect" />
+    <member-select-dialog v-model="showMemberDialog" :member-options="{
+      showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic,
+      cascadedDept: true, showCascade: true
+    }" @ok="finishSelect" />
   </template>
 </template>
 <script lang="ts" setup>
@@ -22,6 +25,7 @@ import { useLocale } from "element-plus";
 import { convertCandidateToTag, convertTagToCandidate } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { ISelectedTag } from "@/selectedTags/type";
+import { MemberTabs } from "@/component";
 const { t } = useLocale();
 
 defineOptions({

@@ -17,9 +17,9 @@
             <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
-              <et-icon icon="el-icon-Plus" class="action-item" @click="handleAddClick(data)" />
-              <et-icon icon="el-icon-Edit" class="action-item" @click="handleEditClick(data)" />
-              <et-icon icon="el-icon-Delete" class="action-item" @click="handleDeleteClick(data)" />
+              <et-icon icon="el-Plus" class="action-item" @click="handleAddClick(data)" />
+              <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
+              <et-icon icon="el-Delete" class="action-item" @click="handleDeleteClick(data)" />
             </div>
           </div>
         </div>

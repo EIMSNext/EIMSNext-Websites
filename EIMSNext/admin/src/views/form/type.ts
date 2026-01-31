@@ -46,6 +46,7 @@ export function buildColumns(
       field: statusField.field,
       title: statusField.title,
       type: statusField.type,
+      width: 80,
       mergeField: "_id",
       oriField: SystemField.FlowStatus,
     });

@@ -22,7 +22,7 @@
           {{ item.name }}
         </div>
         <div class="et-upload-list_item-status-label">
-          <et-icon icon="el-icon-Delete" @click="delFile(index)" />
+          <et-icon icon="el-Delete" @click="delFile(index)" />
         </div>
       </div>
     </div>

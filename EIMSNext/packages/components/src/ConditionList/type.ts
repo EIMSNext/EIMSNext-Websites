@@ -71,6 +71,24 @@ export interface IConditionList {
   value?: IConditonValue;
 }
 
+export function toLabel(condList: IConditionList, t: any) {
+  if (!condList.field && (!condList.items || condList.items.length == 0))
+    return "";
+
+  const cond = condList.field === undefined ? condList.items![0] : condList;
+  let val = "";
+  if (
+    cond.value &&
+    cond.op != ConditionOperator.Empty &&
+    cond.op != ConditionOperator.NotEmpty
+  ) {
+    if (cond.value.type == ConditionValueType.Custom) val = cond.value.value;
+    else val = "[...]";
+  }
+
+  return `${cond.field!.label} ${t("condition.op." + (cond.op ?? "eq"))} ${val} ${condList.items && condList.items.length > 1 ? "..." : ""}`;
+}
+
 export function toDynamicFindOptions(
   fields: IFormFieldDef[],
   filter: IConditionList,
@@ -78,7 +96,7 @@ export function toDynamicFindOptions(
   skip: number,
   take: number,
   fixedFilter?: IDynamicFilter,
-  scope?: IDataScope
+  scope?: IDataScope,
 ) {
   let toDynamicFilter = (filter: IConditionList) => {
     let dfilter: IDynamicFilter = {};
@@ -148,7 +166,7 @@ export function toODataQuery<T>(
   sort: IFieldSortList,
   skip: number,
   take: number,
-  fixedFilter?: any
+  fixedFilter?: any,
 ) {
   let getODataOp = (op: string) => {
     switch (op) {
@@ -175,7 +193,7 @@ export function toODataQuery<T>(
   if (sort.items.length > 0) {
     query.orderBy = sort.items
       .map((x) =>
-        x.sort == SortDirection.Desc ? `${x.field.field} desc` : x.field.field
+        x.sort == SortDirection.Desc ? `${x.field.field} desc` : x.field.field,
       )
       .join(",");
   }

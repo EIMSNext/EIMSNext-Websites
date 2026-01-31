@@ -6,24 +6,18 @@
         <div v-if="allowCopy" class="copy-btn" @click.stop="
           copyClick(nodeData.nodeType === FlowNodeType.Condition ? branchItemData! : nodeData)
           ">
-          <el-icon>
-            <CopyDocument />
-          </el-icon>
+          <et-icon icon="el-CopyDocument" />
         </div>
         <div v-if="allowCopy && allowDelete" class="action-split" />
         <div v-if="allowDelete" class="delete-btn" @click.stop="delClick(nodeData)">
-          <el-icon>
-            <Delete />
-          </el-icon>
+          <et-icon icon="el-Delete" />
         </div>
       </div>
       <template #reference>
         <slot>
           <div class="flow-node" :class="[{ active: isActived }]" @click.stop="nodeClick(nodeData)">
             <div class="flow-node-title initiator">
-              <el-icon class="node-icon" :color="iconColor">
-                <component :is="iconName" />
-              </el-icon>
+              <et-icon :icon="'el-' + iconName" class="node-icon" :color="iconColor" />
               <span class="node-title-text">
                 {{ nodeData.name }}
               </span>
@@ -38,9 +32,7 @@
     <AddNodeButton v-if="showAddButton" :p-node-datas="pNodeDatas" :node-data="nodeData" />
 
     <div class="flow-connector" />
-    <el-icon v-if="!isStart" class="arrow-down">
-      <CaretBottom />
-    </el-icon>
+    <et-icon v-if="!isStart" icon="el-CaretBottom" class="arrow-down" />
   </div>
 </template>
 
@@ -91,7 +83,7 @@ watch(
 );
 
 const content = computed(() => {
-  if (flowContext && props.contentFun) return props.contentFun(flowContextRef.activeData.metadata)
+  if (flowContext && props.contentFun) return props.contentFun(props.nodeData.metadata)
 
   return props.nodeData.notes || props.nodeData.name;
 })

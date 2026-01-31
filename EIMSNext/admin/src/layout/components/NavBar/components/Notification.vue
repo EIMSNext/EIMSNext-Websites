@@ -2,10 +2,10 @@
   <el-dropdown trigger="click">
     <div class="middle-center">
       <el-badge v-if="notices.length > 0" class="middle-center" :offset="[-10, 15]" :value="notices.length" :max="99">
-        <et-icon icon="el-icon-Bell" />
+        <et-icon icon="el-Bell" />
       </el-badge>
       <el-badge v-else class="middle-center">
-        <et-icon icon="el-icon-Bell" />
+        <et-icon icon="el-Bell" />
       </el-badge>
     </div>
 

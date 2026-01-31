@@ -21,7 +21,7 @@ function back() {
 
 <template>
   <div class="page-container">
-    <el-button icon="el-icon-arrow-left" class="pan-back-btn" @click="back">返回</el-button>
+    <el-button icon="el-arrow-left" class="pan-back-btn" @click="back">返回</el-button>
     <el-row>
       <el-col :span="12">
         <h1 class="text-jumbo text-ginormous">Oops!</h1>
