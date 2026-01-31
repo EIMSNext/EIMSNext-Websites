@@ -27,7 +27,7 @@
             v-if="isSidebarOpened && (curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin)"
             class="more-wrapper">
             <el-dropdown placement="bottom-start" size="large">
-              <et-icon icon="el-icon-More" @click.prevent=""></et-icon>
+              <et-icon icon="el-More" @click.prevent=""></et-icon>
               <template #dropdown>
                 <el-dropdown-menu style="min-width: 150px">
                   <el-dropdown-item @click="editForm(item.meta?.id)">{{ t("common.edit") }}</el-dropdown-item>

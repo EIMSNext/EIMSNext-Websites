@@ -61,7 +61,7 @@ export function toFormFieldDef(
   }
 }
 export function getFieldIcon(type: FieldType) {
-  return "el-icon-userFilled";
+  return "el-userFilled";
 }
 export function buildFieldListItems(
   formId: string,

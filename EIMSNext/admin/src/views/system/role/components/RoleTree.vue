@@ -12,7 +12,7 @@
     <div class="form-action">
       <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
       <el-button @click="handleAddGroupClick">
-        <et-icon icon="el-icon-plus"> </et-icon>
+        <et-icon icon="el-plus"> </et-icon>
       </el-button>
     </div>
     <el-tree ref="roleTreeRef" class="dept-tree mt-2" :data="roleList"
@@ -24,10 +24,10 @@
             <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
-              <et-icon v-if="data.nodeType == TreeNodeType.Group" icon="el-icon-Plus" class="action-item"
+              <et-icon v-if="data.nodeType == TreeNodeType.Group" icon="el-Plus" class="action-item"
                 @click="handleAddRoleClick(data)" />
-              <et-icon icon="el-icon-Edit" class="action-item" @click="handleEditClick(data)" />
-              <et-icon icon="el-icon-Delete" class="action-item" :disabled="data.children && data.children.length > 0"
+              <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
+              <et-icon icon="el-Delete" class="action-item" :disabled="data.children && data.children.length > 0"
                 @click="handleDeleteClick(data)" />
             </div>
           </div>

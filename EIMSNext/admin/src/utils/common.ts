@@ -30,7 +30,7 @@ export function getFormIcon(form?: AppMenu) {
   if (form) {
     switch (form.menuType) {
       case FormType.Group: {
-        icon = "el-icon-folder";
+        icon = "el-folder";
         break;
       }
       case FormType.Dashboard: {

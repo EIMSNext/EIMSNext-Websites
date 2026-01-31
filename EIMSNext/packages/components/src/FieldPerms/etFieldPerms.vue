@@ -34,7 +34,7 @@
                                 <template #reference>
                                     <div v-if="item.type === FieldType.TableForm" class="subform-tag">
                                         <el-button :plain="true" style="width: 20px; height: 20px; padding: 0;">
-                                            <et-icon icon="el-icon-memo" color="#B4B9C2" /></el-button>
+                                            <et-icon icon="el-memo" color="#B4B9C2" /></el-button>
                                     </div>
                                 </template>
                                 <div>

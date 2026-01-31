@@ -56,12 +56,6 @@ import {
 import { useLocale } from "element-plus";
 const { t } = useLocale()
 
-
-const defaultTitle = computed(() => t("common.message.editConfirm_Title"))
-const defaultCancelText = computed(() => t("common.cancel"))
-const defaultOKText = computed(() => t("common.ok"))
-const defaultNoSaveText = computed(() => t("common.noSave"))
-
 const attrs = useAttrs();
 // const ori = ref(null);
 // defineExpose({ ori });
@@ -90,9 +84,9 @@ const props = withDefaults(
 );
 
 const titleRef = computed(() => props.title || t("common.message.editConfirm_Title"));
-const cancelTextRef = computed(() => props.cancelText || t("common.cancel"));
-const okTextRef = computed(() => props.okText || t("common.ok"));
-const noSaveTextRef = computed(() => props.noSaveText || t("common.noSave"));
+const cancelTextRef = computed(() => t(props.cancelText ?? "common.cancel"));
+const okTextRef = computed(() => t(props.okText ?? "common.ok"));
+const noSaveTextRef = computed(() => t(props.noSaveText ?? "common.noSave"));
 
 const getIconClass = computed(() => {
   let iconCls =

@@ -65,7 +65,7 @@ export default defineComponent({
       () => props.modelValue,
       (newVal) => {
         selectedValue.value = newVal;
-      }
+      },
     );
 
     // 移除部门对象中的data和value字段，只保留必要的字段
@@ -111,6 +111,13 @@ export default defineComponent({
         //TODO:应该动态计算所有子节点
         limit.depts = props.limitScope;
       }
+      const memberOptions = {
+        showTabs: MemberTabs.Department | MemberTabs.CurDept,
+        cascadedDept: props.cascadedDept,
+        multiple: multiple,
+        limit: limit,
+        limitScope: props.limitScope,
+      };
       return (
         <div style={{ width: "100%" }}>
           <div
@@ -133,7 +140,7 @@ export default defineComponent({
                 onClick={() => !isDisabled && handleTagClick()}
               >
                 <et-icon
-                  icon="el-icon-UserFilled"
+                  icon="el-UserFilled"
                   style={css_icon_dept_selected}
                 ></et-icon>
                 {selectedValue.value.label}
@@ -153,7 +160,7 @@ export default defineComponent({
                   }}
                 >
                   <et-icon
-                    icon="el-icon-UserFilled"
+                    icon="el-UserFilled"
                     style={css_icon_dept_selected}
                   ></et-icon>
                   {dept.label}
@@ -175,11 +182,7 @@ export default defineComponent({
                       ? [selectedValue.value]
                       : []
               }
-              showTabs={MemberTabs.Department | MemberTabs.CurDept}
-              cascadedDept={props.cascadedDept}
-              multiple={multiple}
-              limit={limit}
-              limitScope={props.limitScope}
+              memberOptions={memberOptions}
               onOk={handleDepartmentChange}
               onCancel={handleDeptCancel}
             />

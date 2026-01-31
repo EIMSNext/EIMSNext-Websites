@@ -1,7 +1,7 @@
 <template>
-    <div class="_fd-validate">
+    <div class="_fd-validate" :class="{ hideConfigItem: hideConfigItem }">
         <template v-for="(item, idx) in validate">
-            <div class="_fd-validate-item">
+            <div v-if="!hideConfigItem" class="_fd-validate-item">
                 <div class="_fd-validate-title">
                     <div>
                         <span>{{ idx + 1 }}</span>
@@ -26,7 +26,7 @@
                             <template v-else-if="item.mode === 'validator'">
                                 <FnInput v-model="item[item.mode]" name="validator"
                                     :args="['rule', 'value', 'callback']" @change="onInput">{{
-                                    t('validate.modes.validator') }}
+                                        t('validate.modes.validator') }}
                                 </FnInput>
                             </template>
                             <template v-else>
@@ -93,9 +93,11 @@ export default defineComponent({
         t() {
             return this.designer.setupState.t;
         },
+        activeRule() {
+            return this.designer.setupState.activeRule;
+        },
         modes() {
-            const activeRule = this.designer.setupState.activeRule;
-            if (activeRule && activeRule._menu.subForm === 'object') {
+            if (this.activeRule && this.activeRule._menu.subForm === 'object') {
                 return {
                     validator: this.t('validate.modes.validator'),
                 }
@@ -115,6 +117,9 @@ export default defineComponent({
                 { label: 'change', value: 'change' },
                 { label: 'submit', value: 'submit' },
             ]);
+        },
+        hideConfigItem() {
+            return !this.activeRule || this.activeRule.type !== 'input'
         }
     },
     methods: {
@@ -126,8 +131,8 @@ export default defineComponent({
             });
         },
         autoMessage(item) {
-            const title = this.designer.setupState.activeRule.title;
-            if (this.designer.setupState.activeRule) {
+            if (this.activeRule) {
+                const title = this.activeRule.title;
                 item.message = this.t('validate.autoRequired', { title })
                 this.onInput();
             }

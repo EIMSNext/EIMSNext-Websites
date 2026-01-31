@@ -13,3 +13,12 @@ export enum MemberTabs {
 export interface IMemberLimit {
   depts?: ISelectedTag[];
 }
+
+export interface IMemberSelectOptions {
+  showTabs?: MemberTabs | number;
+  cascadedDept?: boolean;
+  showCascade?: boolean;
+  multiple?: boolean;
+  limit?: IMemberLimit;
+  dynamicMembers?: ISelectedTag[];
+}

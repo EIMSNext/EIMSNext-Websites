@@ -70,7 +70,7 @@ export default defineComponent({
       () => props.modelValue,
       (newVal) => {
         selectedValue.value = newVal;
-      }
+      },
     );
 
     const handleEmployeeChange = (employees) => {
@@ -109,7 +109,12 @@ export default defineComponent({
       if (props.limitType == "custom" && props.limitScope?.length > 0) {
         limit.depts = props.limitScope;
       }
-
+      const memberOptions = {
+        showTabs: MemberTabs.Employee | MemberTabs.CurUser,
+        multiple: multiple,
+        limit: limit,
+        limitScope: props.limitScope,
+      };
       return (
         <div style={{ width: "100%" }}>
           <div
@@ -132,7 +137,7 @@ export default defineComponent({
                 onClick={() => !isDisabled && handleTagClick()}
               >
                 <et-icon
-                  icon="el-icon-UserFilled"
+                  icon="el-UserFilled"
                   style={css_icon_user_selected}
                 ></et-icon>
                 {selectedValue.value.label}
@@ -158,7 +163,7 @@ export default defineComponent({
                       }}
                     >
                       <et-icon
-                        icon="el-icon-UserFilled"
+                        icon="el-UserFilled"
                         style={css_icon_user_selected}
                       ></et-icon>
                       {emp.label}
@@ -182,10 +187,7 @@ export default defineComponent({
                       ? [selectedValue.value]
                       : []
               }
-              showTabs={MemberTabs.Employee | MemberTabs.CurUser}
-              multiple={multiple}
-              limit={limit}
-              limitScope={props.limitScope}
+              memberOptions={memberOptions}
               onOk={handleEmployeeChange}
               onCancel={handleEmpCancel}
             />
