@@ -1,9 +1,5 @@
 <template>
-  <AddEditApp 
-    v-if="showAddEditDialog" 
-    :edit="isEditMode" 
-    :app="currentApp" 
-    @cancel="showAddEditDialog = false" 
+  <AddEditApp v-if="showAddEditDialog" :edit="isEditMode" :app="currentApp" @cancel="showAddEditDialog = false"
     @ok="handleSaved">
   </AddEditApp>
   <et-card :title="t('admin.myApp')">
@@ -40,7 +36,8 @@
                         </el-button>
                         <template #dropdown>
                           <el-dropdown-menu style="min-width: 150px">
-                            <el-dropdown-item @click="handleEditClick(app)">{{ t("admin.editNameAndIcon") }}</el-dropdown-item>
+                            <el-dropdown-item @click="handleEditClick(app)">{{ t("admin.editNameAndIcon")
+                              }}</el-dropdown-item>
                             <el-dropdown-item class="btn-delete" @click="handleDeleteClick(app)">{{ t("common.delete")
                             }}</el-dropdown-item>
                           </el-dropdown-menu>
@@ -166,8 +163,10 @@ const handleDeleteClick = async (app: App) => {
             transition: all 0.2s;
 
             .app-item-icon {
-              display: inline-block;
-              vertical-align: middle;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 72px;
             }
 
             .app-title {
