@@ -38,39 +38,39 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      {
-        type: "select",
-        field: "type",
-        options: [
-          {
-            label: "card",
-            value: "card",
-          },
-          { label: "border-card", value: "border-card" },
-        ],
-      },
-      {
-        type: "select",
-        field: "tabPosition",
-        options: localeOptions(t, [
-          { label: "top", value: "top" },
-          { label: "right", value: "right" },
-          {
-            label: "left",
-            value: "left",
-          },
-        ]),
-      },
-      {
-        type: "CheckBoxInput",
-        field: "stretch",
-        wrap: { show: false },
-      },
-      {
-        type: "CheckBoxInput",
-        field: "closable",
-        wrap: { show: false },
-      },
+      // {
+      //   type: "select",
+      //   field: "type",
+      //   options: [
+      //     {
+      //       label: "card",
+      //       value: "card",
+      //     },
+      //     { label: "border-card", value: "border-card" },
+      //   ],
+      // },
+      // {
+      //   type: "select",
+      //   field: "tabPosition",
+      //   options: localeOptions(t, [
+      //     { label: "top", value: "top" },
+      //     { label: "right", value: "right" },
+      //     {
+      //       label: "left",
+      //       value: "left",
+      //     },
+      //   ]),
+      // },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "stretch",
+      //   wrap: { show: false },
+      // },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "closable",
+      //   wrap: { show: false },
+      // },
       //   { type: "switch", field: "closable" },
       //   { type: "switch", field: "stretch" },
     ]);
