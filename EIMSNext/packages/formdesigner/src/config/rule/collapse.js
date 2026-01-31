@@ -40,11 +40,11 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      {
-        type: "CheckBoxInput",
-        field: "accordion",
-        wrap: { show: false },
-      },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "accordion",
+      //   wrap: { show: false },
+      // },
       //   {
       //     type: "switch",
       //     field: "accordion",

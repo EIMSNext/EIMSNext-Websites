@@ -75,7 +75,7 @@
               <div class="right-panel">
                 <et-list v-model="selectedEmps" :data="empData" :selectable="true" :multiple="options.multiple"
                   item-class="custom-list-item" style="padding-top: 0px; height: 100%" @item-check="empChecked"
-                  @all-check="empCheckAll" @item-click="empClicked">
+                  @all-check="empCheckAll">
                 </et-list>
               </div>
             </div>
@@ -451,9 +451,6 @@ const selectEmpDept = (deptId: string) => {
   });
 };
 
-const empClicked = (data: IListItem) => {
-  empChecked(data, !data.checked)
-}
 const empChecked = (data: IListItem, checked: boolean) => {
   //  console.log("empCheck", data, checked);
   if (options.multiple) {
@@ -536,25 +533,14 @@ const curEmpCheckAll = (checked: boolean) => {
       }
     });
   } else {
-    let toRemove: number[] = [];
-    tagsRef.value.forEach((item, index) => {
-      if (item.type == TagType.Employee &&
-        curEmpData.value.find(x => x.id == item.id)
-      ) {
-        toRemove.splice(0, 0, index);
-      }
-    });
-
-    toRemove.forEach((index) => {
-      tagsRef.value.splice(index, 1);
-    });
+    tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Employee || x.id !== curEmpData.value[0].id)
   }
 
   emit("update:modelValue", tagsRef.value);
 };
 
 const dymChecked = (data: IListItem, checked: boolean) => {
-  //  console.log("empCheck", data, checked);
+  console.log("empCheck", data, checked);
   if (options.multiple) {
     if (checked) {
       let index = tagsRef.value.findIndex(
@@ -570,11 +556,7 @@ const dymChecked = (data: IListItem, checked: boolean) => {
         });
       }
     } else {
-      let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == TagType.Dynamic
-      );
-      //  console.log("index", index, tagsRef);
-      if (index && index > -1) tagsRef.value.splice(index, 1);
+      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Dynamic || x.id !== data.id)
     }
 
     emit("update:modelValue", tagsRef.value);
@@ -593,11 +575,7 @@ const dymChecked = (data: IListItem, checked: boolean) => {
         }
       ];
     } else {
-      // 只移除当前标签
-      const index = tagsRef.value.findIndex(x => x.id == data.id && x.type == TagType.Dynamic);
-      if (index > -1) {
-        tagsRef.value = [...tagsRef.value.slice(0, index), ...tagsRef.value.slice(index + 1)];
-      }
+      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Dynamic || x.id !== data.id)
     }
     emit("update:modelValue", tagsRef.value);
   }
@@ -619,16 +597,7 @@ const dymCheckAll = (checked: boolean) => {
       }
     });
   } else {
-    let toRemove: number[] = [];
-    tagsRef.value.forEach((item, index) => {
-      if (item.type == TagType.Dynamic) {
-        toRemove.splice(0, 0, index);
-      }
-    });
-
-    toRemove.forEach((index) => {
-      tagsRef.value.splice(index, 1);
-    });
+    tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Dynamic)
   }
 
   emit("update:modelValue", tagsRef.value);
@@ -723,14 +692,15 @@ const updateRoleTags = (data: ITreeNode, checked: boolean) => {
     }
   } else {
     if (data.nodeType == TreeNodeType.Group) {
+      let roleIds: string[] = []
       if (data.children && data.children.length > 0) {
         data.children.forEach(child => {
-          let index = tagsRef.value.findIndex(
-            (x) => x.id == child.id && x.type == TagType.Role
-          );
-          if (index > -1) tagsRef.value.splice(index, 1);
+          roleIds.push(child.id)
           child.checked = false
         })
+
+        if (roleIds.length > 0)
+          tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Role || roleIds.findIndex(id => x.id == id) == -1)
       }
     }
     else {
@@ -763,10 +733,7 @@ const updateDeptTags = (data: ITreeNode, checked: boolean, isCurDept: boolean) =
         });
       }
     } else {
-      let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == TagType.Department
-      );
-      if (index > -1) tagsRef.value.splice(index, 1);
+      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Department || x.id !== data.id)
     }
   }
   else {

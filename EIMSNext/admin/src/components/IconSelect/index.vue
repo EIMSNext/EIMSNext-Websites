@@ -1,10 +1,6 @@
 <template>
   <div ref="iconSelectRef" :style="{ width: props.width }">
-    <el-popover 
-      :visible="popoverVisible" 
-      :width="props.width" 
-      placement="bottom" 
-      :teleported="true"
+    <el-popover :visible="popoverVisible" :width="props.width" placement="bottom" :teleported="true"
       popper-class="icon-select-popper"
       popper-style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);">
       <template #reference>

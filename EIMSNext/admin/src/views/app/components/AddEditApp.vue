@@ -1,33 +1,15 @@
 <template>
-  <et-dialog
-    v-model="showDialog"
-    width="400px"
-    :title="title"
-    :append-to-body="true"
-    :destroy-on-close="true"
-    @cancel="cancel"
-    @ok="save"
-  >
-    <el-form
-      ref="appRef"
-      :model="formData"
-      :rules="rules"
-      label-width="80px"
-      style="padding: 12px 20px"
-    >
+  <et-dialog v-model="showDialog" width="400px" :title="title" :append-to-body="true" :destroy-on-close="true"
+    @cancel="cancel" @ok="save">
+    <el-form ref="appRef" :model="formData" :rules="rules" label-width="80px" style="padding: 12px 20px">
       <el-form-item label="应用名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入应用名称" />
       </el-form-item>
       <el-form-item label="应用描述" prop="description">
-        <el-input
-          v-model="formData.description"
-          placeholder="请输入应用描述"
-          type="textarea"
-          :rows="5"
-        />
+        <el-input v-model="formData.description" placeholder="请输入应用描述" type="textarea" :rows="5" />
       </el-form-item>
       <el-form-item label="应用图标" prop="icon">
-        <IconSelect v-model="formData.icon" width="80%" />
+        <IconSelect v-model="formData.icon" />
       </el-form-item>
     </el-form>
   </et-dialog>
@@ -69,13 +51,13 @@ const cancel = () => {
 };
 const save = async () => {
   if (!appRef.value) return;
-  
+
   try {
     await appRef.value.validate();
   } catch (error) {
     return;
   }
-  
+
   const newApp: AppRequest = {
     id: formData.value.id,
     name: formData.value.name,
