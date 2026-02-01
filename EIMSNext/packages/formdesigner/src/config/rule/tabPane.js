@@ -1,4 +1,5 @@
 import { localeProps } from "../../utils";
+import { uniqueId } from "@eimsnext/form-render-core";
 
 const label = "选项卡";
 const name = "elTabPane";
@@ -24,11 +25,11 @@ export default {
     return localeProps(t, name + ".props", [
       { type: "input", field: "label" },
       //   { type: "input", field: "name" },
-      {
-        type: "CheckBoxInput",
-        field: "lazy",
-        wrap: { show: false },
-      },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "lazy",
+      //   wrap: { show: false },
+      // },
       {
         type: "CheckBoxInput",
         field: "disabled",

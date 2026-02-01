@@ -1,7 +1,7 @@
 ```markdown
-# EIMSNext-Websites
+# EIMSNext - 东风低代码应用平台
 
-EIMSNext-Websites 是企业低代码应用系统前端项目，基于 Vue 3 和 TypeScript 的提供模块化设计和可扩展的架构，适用于构建企业内部管理系统、流程审批系统、表单系统等应用场景。
+EIMSNext（又名东风低代码）是一款开源企业级信息管理解决方案，以低代码技术为核心，提供 “前端 + 后端” 全栈支持。前端基于 Vue 3 与 TypeScript 构建，采用模块化设计，后端涵盖身份认证、数据管理、工作流引擎等核心模块，支持灵活 API 交互与数据持久化。项目适配企业内部管理、流程审批、动态表单等多种场景，助力企业降低信息化建设成本、提升管理效率。
 
 官方网站： [www.eimsnext.com](https://www.eimsnext.com)
 

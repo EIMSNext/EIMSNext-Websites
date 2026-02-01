@@ -1244,3 +1244,7 @@ html.dark {
     font-weight: 600;
     font-size: 14px;
 }
+
+.fc-form-col:has(.hideConfigItem){
+  display: none !important;
+}

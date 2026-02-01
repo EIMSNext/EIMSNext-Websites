@@ -10,23 +10,24 @@
       <div class="emp-list-col">
         <el-card shadow="never" class="emp-list-card">
           <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+
           <div class="table-container">
-            <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
-              <el-table-column type="selection" width="40" />
-              <el-table-column label="姓名" width="150" prop="empName" />
-              <el-table-column label="编码" width="150" prop="code" />
-              <el-table-column label="工作电话" width="150" prop="workPhone" />
-              <el-table-column label="工作邮箱" width="150" prop="workEmail" />
-              <el-table-column label="部门" prop="department.name" />
-              <!-- <el-table-column label="操作" fixed="right" width="150">
-                <template #default="scope">
-                  <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
-                  </el-button>
-                  <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
-                  </el-button>
-                </template>
-              </el-table-column> -->
-            </el-table>
+           <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="40" />
+            <el-table-column label="姓名" width="150" prop="empName" />
+            <el-table-column label="编码" width="150" prop="code" />
+            <el-table-column label="工作电话" width="150" prop="workPhone" />
+            <el-table-column label="工作邮箱" width="150" prop="workEmail" />
+            <el-table-column label="部门" prop="department.name" />
+            <!-- <el-table-column label="操作" fixed="right" width="150">
+              <template #default="scope">
+                <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
+                </el-button>
+                <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
+                </el-button>
+              </template>
+</el-table-column> -->
+          </el-table>
           </div>
           <div class="pagination-container">
             <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
@@ -42,7 +43,7 @@
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
-    <member-select-dialog v-model="showMemberDialog" :show-tabs="MemberTabs.Employee" destroy-on-close
+    <member-select-dialog v-model="showMemberDialog" :member-options="{ showTabs: MemberTabs.Employee }" destroy-on-close
       @ok="finishSelect" />
   </div>
 </template>
@@ -87,7 +88,7 @@ const leftBars = ref<ToolbarItem[]>([
       type: "success",
       command: "add",
       visible: true,
-      icon: "el-icon-plus",
+      icon: "el-plus",
       onCommand: () => {
         showMemberDialog.value = true;
       },
@@ -100,7 +101,7 @@ const leftBars = ref<ToolbarItem[]>([
       type: "danger",
       command: "delete",
       visible: true,
-      icon: "el-icon-delete",
+      icon: "el-delete",
       disabled: true,
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
@@ -115,8 +116,8 @@ const leftBars = ref<ToolbarItem[]>([
       }
     },
   },
-  // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
-  // { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
+  // { type: "button", config: { text: "导入", command: "upload", icon: "el-upload" } },
+  // { type: "button", config: { text: "导出", command: "download", icon: "el-download" } }
 ]);
 
 const rightBars = ref<ToolbarItem[]>([
@@ -127,7 +128,7 @@ const rightBars = ref<ToolbarItem[]>([
       class: "data-filter",
       command: "filter",
       visible: true,
-      icon: "el-icon-filter",
+      icon: "el-filter",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((filterBtnRef.value = e.currentTarget), (showSort.value = false));
         showFilter.value = !showFilter.value;
@@ -141,7 +142,7 @@ const rightBars = ref<ToolbarItem[]>([
       class: "data-filter",
       command: "sort",
       visible: true,
-      icon: "el-icon-sort",
+      icon: "el-sort",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((sortBtnRef.value = e.currentTarget), (showFilter.value = false));
         showSort.value = !showSort.value;
@@ -155,7 +156,7 @@ const rightBars = ref<ToolbarItem[]>([
       class: "data-filter",
       command: "refresh",
       visible: true,
-      icon: "el-icon-refresh",
+      icon: "el-refresh",
       onCommand: () => {
         handleQuery();
       },

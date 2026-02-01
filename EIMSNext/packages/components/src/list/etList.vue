@@ -10,8 +10,8 @@
     <ul class="list-content-wrapper">
       <li v-for="item in data" :key="item.id" class="list-item">
         <slot :item="item">
-          <div class="content-wrapper" @click.stop="itemClick(item)" :class="{ clickable: !selectable }">
-            <div class="item-content">
+          <div class="content-wrapper">
+            <div class="item-content clickable" @click.stop="handleItemClick(item)">
               <et-icon v-if="item.icon" :icon="item.icon" :color="item.color" style="padding-right: 5px"></et-icon>
               <div class="item-label">
                 {{ item.label }}
@@ -137,7 +137,12 @@ const handleRadioCheck = (item: IListItem, val: string) => {
   }
 };
 
-const itemClick = (item: IListItem) => {
-  if (!props.selectable) emit("itemClick", item);
+const handleItemClick = (item: IListItem) => {
+  if (props.selectable) {
+    if (props.multiple) handleItemCheck(item, !!!props.modelValue?.find(x => x == item.id))
+    else handleRadioCheck(item, item.id)
+  }
+
+  emit("itemClick", item);
 };
 </script>

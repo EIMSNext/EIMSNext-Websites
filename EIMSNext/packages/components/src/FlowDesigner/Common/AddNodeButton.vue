@@ -1,58 +1,58 @@
 <template>
   <el-popover ref="popoverRef" :show-arrow="false" placement="right" width="200" trigger="click">
-    <el-button :disabled="!canPaste" icon="el-icon-plus" style="width: 100%" @click.stop="pasteNode">
+    <el-button :disabled="!canPaste" icon="el-plus" style="width: 100%" @click.stop="pasteNode">
       {{ t("workflow.pasteNode") }}
     </el-button>
     <template v-if="flowContext.flowType == FlowType.Workflow">
-      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Approve)">
         {{ t("workflow.taskNode") }}
       </el-button>
-      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.CopyTo)">
         {{ t("workflow.ccNode") }}
       </el-button>
-      <el-button icon="el-icon-copy-document" style="width: 100%; margin-left: 0; margin-top: 10px"
+      <el-button icon="el-copy-document" style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Branch)">
         {{ t("workflow.branchNode") }}
       </el-button>
     </template>
     <template v-if="flowContext.flowType == FlowType.Dataflow">
-      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.QueryOne)">
         {{ t("workflow.queryOneNode") }}
       </el-button>
-      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.QueryMany)">
         {{ t("workflow.queryManyNode") }}
       </el-button>
-      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Insert)">
         {{ t("workflow.insertDataNode") }}
       </el-button>
-      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Update)">
         {{ t("workflow.updateDataNode") }}
       </el-button>
-      <el-button icon="el-icon-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
+      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Delete)">
         {{ t("workflow.deleteDataNode") }}
       </el-button>
       <!-- <el-button
-        icon="el-icon-plus"
+        icon="el-plus"
         style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Print)"
       >
         {{ t("workflow.printNode") }}
       </el-button>
       <el-button
-        icon="el-icon-plus"
+        icon="el-plus"
         style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Plugin)"
       >
         {{ t("workflow.pluginNode") }}
       </el-button> -->
-      <el-button icon="el-icon-copy-document" style="width: 100%; margin-left: 0; margin-top: 10px"
+      <el-button icon="el-copy-document" style="width: 100%; margin-left: 0; margin-top: 10px"
         @click.stop="addNode(FlowNodeType.Branch2)">
         {{ t("workflow.branch2Node") }}
       </el-button>

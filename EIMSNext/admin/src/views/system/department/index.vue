@@ -103,7 +103,7 @@ const leftBars = ref<ToolbarItem[]>([
       type: "success",
       command: "add",
       visible: true,
-      icon: "el-icon-plus",
+      icon: "el-plus",
       onCommand: () => {
         editMode.value = false;
         showAddEditDialog.value = true;
@@ -117,7 +117,7 @@ const leftBars = ref<ToolbarItem[]>([
       type: "danger",
       command: "delete",
       visible: true,
-      icon: "el-icon-delete",
+      icon: "el-delete",
       disabled: true,
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
@@ -131,8 +131,8 @@ const leftBars = ref<ToolbarItem[]>([
       }
     },
   },
-  // { type: "button", config: { text: "导入", command: "upload", icon: "el-icon-upload" } },
-  // { type: "button", config: { text: "导出", command: "download", icon: "el-icon-download" } }
+  // { type: "button", config: { text: "导入", command: "upload", icon: "el-upload" } },
+  // { type: "button", config: { text: "导出", command: "download", icon: "el-download" } }
 ]);
 
 const rightBars = ref<ToolbarItem[]>([
@@ -143,7 +143,7 @@ const rightBars = ref<ToolbarItem[]>([
       class: "data-filter",
       command: "filter",
       visible: true,
-      icon: "el-icon-filter",
+      icon: "el-filter",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((filterBtnRef.value = e.currentTarget), (showSort.value = false));
         showFilter.value = !showFilter.value;
@@ -157,7 +157,7 @@ const rightBars = ref<ToolbarItem[]>([
       class: "data-filter",
       command: "sort",
       visible: true,
-      icon: "el-icon-sort",
+      icon: "el-sort",
       onCommand: (cmd: string, e: MouseEvent) => {
         ((sortBtnRef.value = e.currentTarget), (showFilter.value = false));
         showSort.value = !showSort.value;
@@ -171,7 +171,7 @@ const rightBars = ref<ToolbarItem[]>([
       class: "data-filter",
       command: "refresh",
       visible: true,
-      icon: "el-icon-refresh",
+      icon: "el-refresh",
       onCommand: () => {
         handleQuery();
       },

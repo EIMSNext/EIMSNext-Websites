@@ -5,7 +5,7 @@
         <img :src="userStore.currentUser.avatar" class="rounded-full" />
       </template>
       <template v-else>
-        <et-icon icon="el-icon-User" class="rounded-full"></et-icon>
+        <et-icon icon="el-User" class="rounded-full"></et-icon>
       </template>
       <!-- <span>{{ userStore.currentUser.empName }}</span> -->
     </div>

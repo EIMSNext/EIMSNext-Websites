@@ -94,7 +94,6 @@ export function createFlowNode(
               id: uniqueId(),
               nodeType: FlowNodeType.Condition,
               name: t("workflow.conditionNode"),
-              notes: t("common.notset"),
               metadata: {
                 conditionMeta: {
                   condition: { id: uniqueId(), rel: "and", items: [] },
@@ -114,7 +113,6 @@ export function createFlowNode(
               id: uniqueId(),
               nodeType: FlowNodeType.ConditionOther,
               name: t("workflow.conditionOtherNode"),
-              notes: t("workflow.othersNoMatched"),
               metadata: { conditionMeta: {} },
               prevId: bId2,
             },

@@ -13,16 +13,16 @@
         <div>{{ t("comp.conditions") }}</div>
       </div>
       <div v-if="groupLevel > 1">
-        <et-icon icon="el-icon-delete" class="pointer" @click="onRemove"></et-icon>
+        <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
       </div>
     </div>
     <div class="btn-add-item">
       <el-link type="primary" underline="never" class="add-item" @click="addItem">
-        <et-icon icon="el-icon-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
+        <et-icon icon="el-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
         {{ t("computed.addCondition") }}
       </el-link>
       <el-link v-if="groupLevel < maxLevel" type="primary" underline="never" class="add-item" @click="addGroup">
-        <et-icon icon="el-icon-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
+        <et-icon icon="el-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
         {{ t("computed.addGroup") }}
       </el-link>
       <div class="flex-1"></div>

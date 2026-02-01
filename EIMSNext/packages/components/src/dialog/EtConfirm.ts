@@ -15,7 +15,8 @@ export interface ConfirmOptions {
  */
 const confirm = (
   message: string | VNode,
-  options: ConfirmOptions = {}
+  options: ConfirmOptions = {},
+  t?: any,
 ): Promise<boolean> => {
   return new Promise((resolve) => {
     // 创建容器
@@ -65,7 +66,8 @@ const confirm = (
       title: options.title || "确认操作吗？",
       showCancel: options.showCancel ?? true,
       showNoSave: false,
-      okText: "确定",
+      cancelText: t !== undefined ? t("common.cancel") : "取消",
+      okText: t !== undefined ? t("common.ok") : "确定",
       icon: options.icon || MessageIcon.Warning,
       iconColor: options.iconColor,
       width: options.width || "500px",
@@ -76,7 +78,7 @@ const confirm = (
     // 渲染到容器
     render(
       h(EtConfirmDialog, props, { default: () => messageVNode }),
-      container
+      container,
     );
   });
 };
@@ -84,8 +86,9 @@ const confirm = (
 export const EtConfirm = {
   showDialog: (
     message: string,
-    options: ConfirmOptions = {}
+    options: ConfirmOptions = {},
+    t?: any,
   ): Promise<boolean> => {
-    return confirm(message, options);
+    return confirm(message, options, t);
   },
 };

@@ -1,5 +1,7 @@
 <template>
-  <AddEditApp v-if="showAddEditDialog" :edit="false" @cancel="showAddEditDialog = false" @ok="handleSaved"></AddEditApp>
+  <AddEditApp v-if="showAddEditDialog" :edit="isEditMode" :app="currentApp" @cancel="showAddEditDialog = false"
+    @ok="handleSaved">
+  </AddEditApp>
   <et-card :title="t('admin.myApp')">
     <template #action>
       <el-button v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin" icon="plus"
@@ -24,17 +26,18 @@
                       </div>
                     </div>
                     <div class="favorite-icon">
-                      <et-icon icon="el-icon-star" size="large"></et-icon>
+                      <et-icon icon="el-star" size="large"></et-icon>
                     </div>
                     <div v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
                       class="setting-icon">
                       <el-dropdown placement="bottom-start" size="large">
-                        <el-button>
-                          <et-icon icon="el-icon-setting" size="large"></et-icon>
+                        <el-button class="setting-btn">
+                          <et-icon icon="el-setting" size="large"></et-icon>
                         </el-button>
                         <template #dropdown>
                           <el-dropdown-menu style="min-width: 150px">
-                            <el-dropdown-item>{{ t("admin.editNameAndIcon") }}</el-dropdown-item>
+                            <el-dropdown-item @click="handleEditClick(app)">{{ t("admin.editNameAndIcon")
+                              }}</el-dropdown-item>
                             <el-dropdown-item class="btn-delete" @click="handleDeleteClick(app)">{{ t("common.delete")
                             }}</el-dropdown-item>
                           </el-dropdown-menu>
@@ -60,6 +63,7 @@ import { App, UserType } from "@eimsnext/models";
 import { useAppStore, useContextStore, useUserStore } from "@eimsnext/store";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
+import { EtConfirm } from "@eimsnext/components";
 const { t } = useI18n()
 
 const router = useRouter();
@@ -69,12 +73,25 @@ const { items: appsRef } = storeToRefs(appStore);
 const userStore = useUserStore()
 const curUser = toRef(userStore.currentUser)
 const showAddEditDialog = ref(false);
+const isEditMode = ref(false);
+const currentApp = ref<App | undefined>(undefined);
 
 const createApp = () => {
+  isEditMode.value = false;
+  currentApp.value = undefined;
   showAddEditDialog.value = true;
 };
+
+const handleEditClick = (app: App) => {
+  isEditMode.value = true;
+  currentApp.value = app;
+  showAddEditDialog.value = true;
+};
+
 const handleSaved = () => {
   showAddEditDialog.value = false;
+  isEditMode.value = false;
+  currentApp.value = undefined;
 };
 
 const gotoApp = async (app: App) => {
@@ -82,8 +99,11 @@ const gotoApp = async (app: App) => {
   const path = "/app/" + app.id + "/mytasks";
   router.push(path);
 };
-const handleDeleteClick = (app: App) => {
-  appStore.remove(app.id)
+const handleDeleteClick = async (app: App) => {
+  var confirm = await EtConfirm.showDialog(t("admin.deleteFormConfirm_Content"), { title: t('admin.deleteFormConfirm_Title', [app?.name]) }, t)
+  if (confirm) {
+    appStore.remove(app.id)
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -143,8 +163,10 @@ const handleDeleteClick = (app: App) => {
             transition: all 0.2s;
 
             .app-item-icon {
-              display: inline-block;
-              vertical-align: middle;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 72px;
             }
 
             .app-title {
@@ -153,6 +175,8 @@ const handleDeleteClick = (app: App) => {
           }
 
           &:hover {
+            background-color: var(--et-bg-color-primary);
+
             .favorite-icon {
               visibility: visible
             }
@@ -172,6 +196,15 @@ const handleDeleteClick = (app: App) => {
             line-height: 16px;
             position: absolute;
             visibility: hidden;
+          }
+
+          .setting-btn {
+            border: none;
+            background-color: var(--et-bg-color-primary);
+
+            &:hover {
+              border: none;
+            }
           }
 
           .setting-icon {

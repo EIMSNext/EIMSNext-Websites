@@ -64,7 +64,7 @@
           </template>
 
           <div class="ml-[8px]" @click="delTrigger(item.id)">
-            <et-icon icon="el-icon-delete" class="btn-delete-trigger"></et-icon>
+            <et-icon icon="el-delete" class="btn-delete-trigger"></et-icon>
           </div>
         </div>
       </template>
