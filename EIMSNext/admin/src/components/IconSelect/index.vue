@@ -32,8 +32,8 @@
         <el-tabs v-model="activeTab" @tab-click="handleTabClick">
           <el-tab-pane label="SVG 图标" name="svg">
             <el-scrollbar height="300px">
-              <ul class="icon-grid">
-                <li v-for="icon in filteredSvgIcons" :key="'svg-' + icon" class="icon-grid-item"
+              <ul class="et-icon-grid">
+                <li v-for="icon in filteredSvgIcons" :key="'svg-' + icon" class="et-icon-grid-item"
                   @click="selectIcon(icon)">
                   <el-tooltip :content="icon" placement="bottom" effect="light">
                     <et-icon :icon="icon" />
@@ -44,8 +44,8 @@
           </el-tab-pane>
           <el-tab-pane label="Element 图标" name="element">
             <el-scrollbar height="300px">
-              <ul class="icon-grid">
-                <li v-for="icon in filteredElementIcons" :key="icon" class="icon-grid-item" @click="selectIcon(icon)">
+              <ul class="et-icon-grid">
+                <li v-for="icon in filteredElementIcons" :key="icon" class="et-icon-grid-item" @click="selectIcon(icon)">
                   <et-icon :icon="'el-' + icon" />
                 </li>
               </ul>
@@ -157,12 +157,12 @@ onMounted(() => {
   cursor: pointer;
 }
 
-.icon-grid {
+.et-icon-grid {
   display: flex;
   flex-wrap: wrap;
 }
 
-.icon-grid-item {
+.et-icon-grid-item {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,7 +174,7 @@ onMounted(() => {
   transition: all 0.3s;
 }
 
-.icon-grid-item:hover {
+.et-icon-grid-item:hover {
   border-color: #4080ff;
   transform: scale(1.2);
 }

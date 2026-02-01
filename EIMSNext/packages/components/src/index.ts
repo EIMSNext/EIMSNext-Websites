@@ -21,6 +21,7 @@ import {
   DataflowMetaEditor,
 } from "./FlowDesigner";
 import { EtFieldPerms } from "./FieldPerms";
+import { UserAvatar } from "./avatar";
 
 export default [
   SvgIcon,
@@ -54,4 +55,5 @@ export default [
   DataflowDiagram,
   DataflowMetaEditor,
   EtFieldPerms,
+  UserAvatar,
 ];

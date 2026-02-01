@@ -51,6 +51,7 @@ export default {
                 wrap: { class: "_fd-default-value" },
                 props: {
                   multiple: true,
+                  showContract:true
                 },
               },
             ],

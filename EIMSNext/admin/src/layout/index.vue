@@ -21,7 +21,7 @@
                 path: '/system/department',
               }">
                 <div class="main-left-menu-item">
-                  <et-icon icon="el-Notebook" size="18px" :color="getAppIconColor()"></et-icon>
+                  <et-icon icon="icon-settings" size="18px" :color="getAppIconColor()"></et-icon>
                 </div>
               </AppLink>
             </el-tooltip>
