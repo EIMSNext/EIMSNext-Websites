@@ -16,25 +16,25 @@
       <el-menu mode="vertical">
         <AppLink :to="{ name: 'mytasks', params: { appId: app?.id } }">
           <el-menu-item index="mytodo" :class="{ 'pl-15px': !isSidebarOpened }">
-            <et-icon icon="iconfont-mytodo" class="step-image" size="14px" />
+            <et-icon icon="icon-mytodo" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.mytasks") }}</span>
           </el-menu-item>
         </AppLink>
         <AppLink :to="{ name: 'mystarted', params: { appId: app?.id } }">
           <el-menu-item index="mystarted" :class="{ 'pl-15px': !isSidebarOpened }">
-            <et-icon icon="iconfont-mystarted" class="step-image" size="14px" />
+            <et-icon icon="icon-mystarted" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.mystarted") }}</span>
           </el-menu-item>
         </AppLink>
         <AppLink :to="{ name: 'myapproved', params: { appId: app?.id } }">
           <el-menu-item index="myapproved" :class="{ 'pl-15px': !isSidebarOpened }">
-            <et-icon icon="iconfont-myapproved" class="step-image" size="14px" />
+            <et-icon icon="icon-myapproved" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.myapproved") }}</span>
           </el-menu-item>
         </AppLink>
         <AppLink :to="{ name: 'cctome', params: { appId: app?.id } }">
           <el-menu-item index="mycced" :class="{ 'pl-15px': !isSidebarOpened }">
-            <et-icon icon="iconfont-mycced" class="step-image" size="14px" />
+            <et-icon icon="icon-mycced" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.cctome") }}</span>
           </el-menu-item>
         </AppLink>

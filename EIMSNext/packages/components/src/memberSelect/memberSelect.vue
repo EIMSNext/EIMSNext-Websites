@@ -13,7 +13,7 @@
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, deptFilter, false)">
                     <div class="node-wrapper">
-                      <et-icon :icon="data.icon" class="node-icon" />
+                      <et-icon :icon="data.icon" class="node-icon" :color="getNodeIconColor(data)" />
                       <span class="node-label">{{ data.label }}</span>
                       <div v-if="!data.readonly" class="node-action">
                         <el-checkbox v-if="options.multiple" v-model="data.checked" @click.stop=""
@@ -38,7 +38,7 @@
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, roleFilter, true)">
                     <div class="node-wrapper">
-                      <et-icon :icon="data.icon" class="node-icon" />
+                      <et-icon :icon="data.icon" class="node-icon" :color="getNodeIconColor(data)" />
                       <span class="node-label">{{ data.label }}</span>
                       <div class="node-action">
                         <el-checkbox v-model="data.checked" @click.stop="" :disabled="!roleFilter(keyword, data)"
@@ -65,7 +65,7 @@
                   <template #default="{ node, data }">
                     <div class="node-data" :title="data.label" @click.stop="selectEmpDept(data.id)">
                       <div class="node-wrapper">
-                        <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
+                        <et-icon :icon="data.icon" icon-class="node-icon" :color="getNodeIconColor(data)"></et-icon>
                         <span class="node-label">{{ data.label }}</span>
                       </div>
                     </div>
@@ -98,7 +98,7 @@
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, deptFilter, false)">
                     <div class="node-wrapper">
-                      <et-icon :icon="data.icon" class="node-icon" />
+                      <et-icon :icon="data.icon" class="node-icon" :color="getNodeIconColor(data)" />
                       <span class="node-label">{{ data.label }}</span>
                       <div class="node-action">
                         <el-checkbox v-if="options.multiple" v-model="data.checked" @click.stop=""
@@ -593,6 +593,7 @@ const dymCheckAll = (checked: boolean) => {
           label: data.label,
           type: TagType.Dynamic,
           data: data.data,
+          icon: data.icon
         });
       }
     });
@@ -744,7 +745,7 @@ const updateDeptTags = (data: ITreeNode, checked: boolean, isCurDept: boolean) =
         {
           id: data.id,
           code: data.code,
-          label: data.label,
+          label: data.data?.name || data.label,
           type: TagType.Department,
           data: data.data,
         }
@@ -786,8 +787,16 @@ const cascadeChanged = (val: boolean) => {
       setNodeChecked(TagType.Department, deptData.value)
     }
   }
-
 }
+const getNodeIconColor = (node: ITreeNode) => {
+  switch (node.nodeType) {
+    case TreeNodeType.Dept:
+      return "#46c26f";
+    default:
+      return "#46c26f";
+  }
+}
+
 </script>
 <style scoped>
 /* 隐藏标签栏 */
