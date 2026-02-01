@@ -5,8 +5,8 @@
     :active-text-color="variables['menu-active-text']" :unique-opened="false" :collapse-transition="false"
     mode="vertical" style="width: 100%;" @open="onMenuOpen" @close="onMenuClose">
     <!-- 菜单项 -->
-    <SidebarMenuItem v-for="route in appMenus" :key="route.path" :item="route"
-      :base-path="resolveFullPath(route.path)" />
+    <SidebarMenuItem v-for="route in appMenus" :key="route.path" :item="route" :base-path="resolveFullPath(route.path)"
+      @editForm="editForm" />
   </el-menu>
 </template>
 
@@ -76,4 +76,9 @@ const onMenuOpen = (index: string) => {
 const onMenuClose = (index: string) => {
   expandedMenuIndexes.value = expandedMenuIndexes.value.filter((item) => item !== index);
 };
+
+const emit = defineEmits(["editForm"]);
+function editForm(formId: string) {
+  emit("editForm", formId)
+}
 </script>
