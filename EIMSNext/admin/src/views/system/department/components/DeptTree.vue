@@ -19,7 +19,7 @@
             <div v-if="editable" class="node-action">
               <et-icon icon="el-icon-Plus" class="action-item" @click="handleAddClick(data)" />
               <et-icon icon="el-icon-Edit" class="action-item" @click="handleEditClick(data)" />
-              <et-icon icon="el-icon-Delete" class="action-item" @click="handleDeleteClick(data)" />
+              <et-icon v-if="data.data.parentId" icon="el-icon-Delete" class="action-item" @click="handleDeleteClick(data)" />
             </div>
           </div>
         </div>
@@ -98,12 +98,18 @@ const handleSaved = (data: Department) => {
 };
 const handleDeleteClick = (data: ITreeNode) => {
   selectedDept.value = data.data;
-  if (selectedDept.value) showDeleteDialog.value = true;
+  if (selectedDept.value && selectedDept.value.parentId) showDeleteDialog.value = true;
 };
 const handleDeleteConfirm = async () => {
   await departmentService.delete(selectedDept.value?.id!);
 
   deptStore.remove(selectedDept.value?.id!);
+  // 删除后直接从service获取最新部门数据，刷新界面
+  departmentService.query<Department>().then((depts: Department[]) => {
+    deptList.value = buildDeptTree(depts);
+    // 同时更新store中的数据
+    deptStore.load().then();
+  });
   showDeleteDialog.value = false;
 };
 </script>
@@ -116,6 +122,8 @@ const handleDeleteConfirm = async () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 300px; // 设置最小宽度
+  padding: 0;
 }
 
 // 搜索框样式
@@ -126,19 +134,34 @@ const handleDeleteConfirm = async () => {
 // 部门树样式
 .dept-tree {
   flex: 1;
-  overflow-x: auto; // 启用横向滚动
-  overflow-y: auto; // 启用纵向滚动
   min-height: 0; // 解决flex子元素高度问题
+  width: 100%;
+  max-height: 100%; // 限制高度，由父容器负责滚动
 
   // 确保节点内容不会被截断
   :deep(.el-tree-node) {
-    min-width: 100%;
     white-space: nowrap;
   }
 
   // 调整节点内容样式
   :deep(.el-tree-node__content) {
+    white-space: nowrap;
+  }
+  
+  // 调整树容器样式
+  :deep(.el-tree) {
     min-width: 100%;
+    height: 100%; // 确保树容器占满可用空间
+  }
+  
+  // 调整树节点展开图标样式
+  :deep(.el-tree-node__expand-icon) {
+    flex-shrink: 0;
+  }
+  
+  // 调整树节点内容样式
+  :deep(.el-tree-node__content) {
+    flex-shrink: 0;
   }
 }
 
@@ -150,26 +173,23 @@ const handleDeleteConfirm = async () => {
 }
 
 .node-wrapper {
-  // 设置相对定位，作为.node-action的定位基准
-  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
 
   .node-label {
-    // 移除固定的margin-right，改为flex布局自动分配空间
     flex: 1;
     padding-left: 5px;
+    white-space: nowrap;
   }
 
   .node-action {
-    // 调整绝对定位，确保和部门名称在同一行
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: none;
     white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
 
     .action-item {
       margin-right: 5px;
@@ -188,8 +208,8 @@ const handleDeleteConfirm = async () => {
   // 确保整个.node-wrapper都能触发hover效果
   &:hover {
     .node-action {
-      display: flex;
-      align-items: center;
+      opacity: 1;
+      pointer-events: auto;
     }
   }
 }

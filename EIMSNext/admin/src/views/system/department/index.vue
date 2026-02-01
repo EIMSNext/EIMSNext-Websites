@@ -1,9 +1,9 @@
 <!-- 用户管理 -->
 <template>
   <div class="dept-manager-container">
-    <el-row :gutter="20" class="main-row">
+    <div class="main-row">
       <!-- 部门树 -->
-      <el-col :lg="6" :xs="24" class="dept-tree-col">
+      <div class="dept-tree-col">
         <div class="org-menu">员工</div>
         <div class="menu-items">
           <el-radio-group v-model="empStatus" @change="handleStatusChanged">
@@ -15,9 +15,9 @@
         <div class="dept-tree-wrapper">
           <dept-tree :editable="true" @node-click="handleDeptChanged" />
         </div>
-      </el-col>
+      </div>
       <!-- 用户列表 -->
-      <el-col :lg="18" :xs="24" class="emp-list-col">
+      <div class="emp-list-col">
         <el-card shadow="never" class="emp-list-card">
           <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
           <div class="table-container">
@@ -44,8 +44,8 @@
             <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
           </div>
         </el-card>
-      </el-col>
-    </el-row>
+      </div>
+    </div>
     <AddEditEmp v-if="showAddEditDialog" :edit="editMode" :emp="selectedEmp" @cancel="showAddEditDialog = false"
       @ok="handleSaved" />
     <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
@@ -346,18 +346,21 @@ onMounted(() => {
 // 主容器样式
 .dept-manager-container {
   height: 100vh;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   padding: 20px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  min-width: 700px; // 设置整个页面的最小宽度
 }
 
 // 主行样式
 .main-row {
   flex: 1;
   display: flex;
-  overflow: hidden;
+  min-width: 660px; // 确保主行内容不会被压缩
+  gap: 20px; // 替代el-row的gutter
 }
 
 // 部门树列样式
@@ -366,6 +369,10 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 300px; // 设置最小宽度
+  max-width: 500px; // 设置最大宽度，防止挤占员工列表
+  flex-shrink: 0; // 防止被压缩
+  max-height: 100%; // 确保不超过父容器高度
 }
 
 // 部门树包装器样式
@@ -376,6 +383,17 @@ onMounted(() => {
   margin-top: 10px;
   background-color: #fff;
   min-height: 0;
+  width: 100%;
+  max-height: calc(100vh - 200px); // 设置最大高度，确保出现滚动条
+  display: flex;
+  flex-direction: column;
+  
+  // 确保内部元素能够触发横向滚动且不产生额外滚动条
+  > * {
+    min-width: 100%;
+    max-height: 100%; // 限制内部元素高度
+    overflow: hidden; // 防止内部元素产生滚动条
+  }
 }
 
 // 员工列表列样式
@@ -384,6 +402,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 360px; // 设置最小宽度
+  flex: 1; // 允许在有空间时扩展
 }
 
 // 员工列表卡片样式
