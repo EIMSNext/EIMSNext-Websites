@@ -13,16 +13,24 @@
       </el-tabs>
     </template>
     <div v-if="activeName == 'formedit'">
-      <form-builder :locale="locale" :formName="formName" :formDef="formDef" :usingFlow="usingFlow" :isLedger="isLedger"
-        @save="onSaved" />
+      <form-builder
+        v-if="formDef"
+        ref="formBuilder"
+        :locale="locale"
+        :formName="formName"
+        :formDef="formDef"
+        :usingFlow="usingFlow"
+        :isLedger="isLedger"
+        @save="onSaved"
+      />
     </div>
-    <div v-if="usingFlow && activeName == 'workflow'" class="main-content-container">
-      <WorkflowDesigner :appId="appId" :formId="formId" />
+    <div v-if="formDef && usingFlow && activeName == 'workflow'" class="main-content-container">
+      <WorkflowDesigner ref="wfDesigner" :appId="appId" :formId="formId" />
     </div>
-    <div v-if="activeName == 'advance'" class="main-content-container">
+    <div v-if="formDef && activeName == 'advance'" class="main-content-container">
       <Advanced :formDef="formDef!"></Advanced>
     </div>
-    <div v-if="activeName == 'publish'" class="main-content-container">
+    <div v-if="formDef && activeName == 'publish'" class="main-content-container">
       <Publish :formDef="formDef!"></Publish>
     </div>
   </et-drawer>
@@ -34,10 +42,11 @@ import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
 import WorkflowDesigner from "../WorkflowDesigner/index.vue";
 import Advanced from "./Advanced/index.vue";
-import Publish from "./Publish/index.vue"
+import Publish from "./Publish/index.vue";
 import { useSystemStore } from "@/store/system";
 import { useFormStore } from "@eimsnext/store";
 import { FormDef } from "@eimsnext/models";
+import { EtConfirm } from "@eimsnext/components";
 
 defineOptions({
   name: "FormEdit",
@@ -50,7 +59,8 @@ const props = defineProps<{
 }>();
 
 const showDrawer = ref(true);
-
+const formBuilder = ref<InstanceType<typeof FormBuilder>>();
+const wfDesigner = ref<InstanceType<typeof WorkflowDesigner>>();
 const systemStore = useSystemStore();
 const formStore = useFormStore();
 const locale = computed(() => systemStore.locale);
@@ -80,7 +90,19 @@ const onSaved = () => {
 };
 const tabChanging = (activeName: TabPaneName, oldActiveName: TabPaneName) => {
   console.log("tabChanging", oldActiveName, activeName);
-  return true
+  if (oldActiveName === "formedit" && formBuilder.value.isDirty()) {
+    let confirm = EtConfirm.showDialog("");
+    if (confirm == ConfirmResult.Yes) await formBuilder.value.onSave();
+
+    return confirm != ConfirmResult.Cancel;
+  } else if (oldActiveName === "workflow" && wfDesigner.value?.isDirty()) {
+    let confirm = EtConfirm.showDialog("");
+    if (confirm == ConfirmResult.Yes) await wfDesigner.value.save();
+
+    return confirm != ConfirmResult.Cancel;
+  }
+
+  return true;
 };
 
 const emit = defineEmits(["close"]);

@@ -8,16 +8,24 @@ export interface ConfirmOptions {
   iconColor?: string;
   width?: string;
   showCancel?: boolean;
+  showNoSave?: boolean;
+  cancelText?: string;
+  noSaveText?: string;
+  okText?: string;
 }
-
+export enum ConfirmResult {
+  Cancel = 0,
+  Yes = 1,
+  No = 2,
+}
 /**
  * 函数式阻塞确认对话框
  */
 const confirm = (
   message: string | VNode,
   options: ConfirmOptions = {},
-  t?: any,
-): Promise<boolean> => {
+  t?: any
+): Promise<ConfirmResult> => {
   return new Promise((resolve) => {
     // 创建容器
     const container = document.createElement("div");
@@ -27,14 +35,14 @@ const confirm = (
     const visible = ref(true);
 
     // 处理确认事件
-    const handleOk = () => {
-      resolve(true);
+    const handleOk = (save: boolean) => {
+      resolve(save ? 1 : 2);
       cleanup();
     };
 
     // 处理取消事件
     const handleCancel = () => {
-      resolve(false);
+      resolve(0);
       cleanup();
     };
 
@@ -65,9 +73,10 @@ const confirm = (
       modelValue: visible.value,
       title: options.title || "确认操作吗？",
       showCancel: options.showCancel ?? true,
-      showNoSave: false,
+      showNoSave: options.showNoSave ?? false,
       cancelText: t !== undefined ? t("common.cancel") : "取消",
       okText: t !== undefined ? t("common.ok") : "确定",
+      noSaveText: t !== undefined ? t("common.noSave") : "不保存",
       icon: options.icon || MessageIcon.Warning,
       iconColor: options.iconColor,
       width: options.width || "500px",
@@ -78,7 +87,7 @@ const confirm = (
     // 渲染到容器
     render(
       h(EtConfirmDialog, props, { default: () => messageVNode }),
-      container,
+      container
     );
   });
 };
@@ -87,8 +96,8 @@ export const EtConfirm = {
   showDialog: (
     message: string,
     options: ConfirmOptions = {},
-    t?: any,
-  ): Promise<boolean> => {
+    t?: any
+  ): Promise<ConfirmResult> => {
     return confirm(message, options, t);
   },
 };

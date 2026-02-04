@@ -21,6 +21,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { WorkflowDiagram, WorkflowMetaEditor } from "@eimsnext/components";
 import {
   FlowNodeType,
   IFlowContext,
@@ -43,7 +44,8 @@ const props = defineProps<{
   formId: string;
 }>();
 
-const ready = ref(false)
+const ready = ref(false);
+const oldFlowDataStr = ref("");
 const currentWfDef = ref<WfDefinition>({
   id: "",
   appId: props.appId,
@@ -54,7 +56,7 @@ const currentWfDef = ref<WfDefinition>({
   isCurrent: true,
   content: "",
   eventSource: EventSourceType.None,
-  sourceId: props.formId
+  sourceId: props.formId,
 });
 
 const flowData = ref<IFlowData>(createWorkflowData(t));
@@ -75,10 +77,11 @@ onBeforeMount(() => {
       currentWfDef.value = res[0];
       flowData.value = JSON.parse(currentWfDef.value.content);
       flowContext.flowData = flowData.value;
+      oldFlowDataStr.value = JSON.stringify(flowData.value);
     }
   });
 
-  ready.value = true
+  ready.value = true;
 });
 
 const save = () => {
@@ -92,7 +95,7 @@ const save = () => {
     isCurrent: currentWfDef.value.isCurrent,
     content: JSON.stringify(flowData.value),
     eventSource: EventSourceType.None,
-    sourceId: currentWfDef.value.sourceId
+    sourceId: currentWfDef.value.sourceId,
   };
 
   // console.log("wf req", req);
@@ -101,5 +104,15 @@ const save = () => {
     wfDefinitionService.put<WfDefinition>(req.id, req).then((res) => (currentWfDef.value = res));
   else wfDefinitionService.post<WfDefinition>(req).then((res) => (currentWfDef.value = res));
 };
+
+const isDirty = () => {
+  let curFlowDataStr = JSON.stringify(flowData.value);
+  return oldFlowDataStr.value !== curFlowDataStr;
+};
+
+defineExpose({
+  save,
+  isDirty,
+});
 </script>
 <style lang="scss"></style>

@@ -7,19 +7,44 @@
         <el-button @click="onPreview">预览</el-button>
       </div>
     </div>
-    <fc-designer ref="designer" :locale="locale" :handle="handle" :config="config">
+    <fc-designer
+      ref="designer"
+      :locale="locale"
+      :handle="handle"
+      :config="config"
+    >
       <template #block_fff="scope">
         &lt;template #block_fff="scope"&gt; 自定义内容 &lt;/template&gt;
       </template>
       <template #handle>
         <div v-if="isgod" class="handle">
-          <el-button size="small" class="btn-info" style="border:none" @click="setJson">导入JSON
+          <el-button
+            size="small"
+            class="btn-info"
+            style="border: none"
+            @click="setJson"
+            >导入JSON
           </el-button>
-          <el-button size="small" class="btn-info" style="border:none" @click="setOption">导入Options
+          <el-button
+            size="small"
+            class="btn-info"
+            style="border: none"
+            @click="setOption"
+            >导入Options
           </el-button>
-          <el-button size="small" class="btn-info" style="border:none" @click="showJson">生成JSON
+          <el-button
+            size="small"
+            class="btn-info"
+            style="border: none"
+            @click="showJson"
+            >生成JSON
           </el-button>
-          <el-button size="small" class="btn-info" style="border:none" @click="showOption">生成Options
+          <el-button
+            size="small"
+            class="btn-info"
+            style="border: none"
+            @click="showOption"
+            >生成Options
           </el-button>
         </div>
       </template>
@@ -61,7 +86,12 @@ import formCreate from "@eimsnext/form-render-elplus";
 import { copyTextToClipboard } from "@eimsnext/form-designer";
 import { ArrowDown } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
-import { FormContent, FormType, FormDefRequest, FormDef } from "@eimsnext/models";
+import {
+  FormContent,
+  FormType,
+  FormDefRequest,
+  FormDef,
+} from "@eimsnext/models";
 import { formDefService } from "@eimsnext/services";
 import "@eimsnext/form-designer/dist/index.css";
 import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
@@ -203,7 +233,7 @@ export default {
           "fcFlex2",
           "timePicker",
           "switch",
-          "rate"
+          "rate",
         ],
         hiddenItemConfig: {
           default: ["field"],
@@ -238,7 +268,7 @@ export default {
       isgod: true,
       oldFormName: "",
       oldLayout: "",
-      oldOptions: ""
+      oldOptions: "",
     };
   },
   watch: {
@@ -286,15 +316,15 @@ export default {
         this.changeDark(n);
       }
     },
-    formDef(n) {
-      if (n) {
-        if (n.content) {
-          if (n.content.layout) this.$refs.designer.setRule(n.content.layout);
-          if (n.content.options)
-            this.$refs.designer.setOptions(n.content.options);
-        }
-      }
-    },
+    // formDef(n) {
+    //   if (n) {
+    //     if (n.content) {
+    //       if (n.content.layout) this.$refs.designer.setRule(n.content.layout);
+    //       if (n.content.options)
+    //         this.$refs.designer.setOptions(n.content.options);
+    //     }
+    //   }
+    // },
   },
   methods: {
     async onSave() {
@@ -323,18 +353,22 @@ export default {
         let resp = await formDefService.patch(req.id, req);
         formStore.update(resp);
         contextStore.setAppChanged(); //reload 菜单
+
+        this.resetDirty(resp.content.layout, resp.content.options);
         ElMessage.success("保存成功");
         this.$emit("save", false);
       } else {
         let resp = await formDefService.post(req);
         formStore.update(resp);
         contextStore.setAppChanged(); //reload 菜单
+
+        this.resetDirty(resp.content.layout, resp.content.options);
         ElMessage.success("保存成功");
         this.$emit("save", true);
       }
     },
     onPreview() {
-      this.$refs.designer.openPreview()
+      this.$refs.designer.openPreview();
     },
     handleChat() {
       this.$refs.designer.activeModule = "ai";
@@ -417,21 +451,41 @@ export default {
       }
       this.state = false;
     },
+    isDirty() {
+      try {
+        const curLayout = this.$refs.designer.getJson();
+        const curOptions = this.$refs.designer.getOptionsJson();
+
+        return (
+          this.formName !== this.oldFormName ||
+          curLayout !== this.oldLayout ||
+          curOptions !== this.oldOptions
+        );
+      } catch (e) {
+        return false;
+      }
+    },
+    resetDirty(layout, options) {
+      this.oldLayout = layout;
+      this.oldOptions = options;
+      this.oldFormName = this.formName;
+    },
   },
   beforeCreate() {
     window.jsonlint = jsonlint;
   },
   mounted() {
-    this.isgod = (process.env.NODE_ENV === 'development' || this.$route.query.god === 'cn')
+    this.isgod =
+      process.env.NODE_ENV === "development" || this.$route.query.god === "cn";
 
-    this.oldFormName = this.formName
+    this.oldFormName = this.formName;
     if (this.formDef && this.formDef.content) {
       if (this.formDef.content.layout) {
         this.oldLayout = this.formDef.content.layout;
         this.$refs.designer.setRule(this.formDef.content.layout);
       }
       if (this.formDef.content.options) {
-        this.oldOptions = this.formDef.content.options
+        this.oldOptions = this.formDef.content.options;
         this.$refs.designer.setOptions(this.formDef.content.options);
       }
     }
@@ -530,7 +584,7 @@ body {
 }
 
 ._fc-t-menu .el-dropdown,
-.handle .el-button+.el-button {
+.handle .el-button + .el-button {
   margin-left: 0;
 }
 
