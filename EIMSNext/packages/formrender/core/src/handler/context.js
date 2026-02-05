@@ -292,18 +292,61 @@ export default function useContext(Handler) {
           computedRule = { value: computedRule };
         }
         Object.keys(computedRule).forEach((k) => {
-          let oldValue = undefined;
+          // 初始化 oldValue 为当前字段的实际值,避免条件不满足时重置为 undefined
+          let oldValue = k === "value" || k === "defaultValue" ? ctx.rule.value : deepGet(ctx.rule, k);
+          let lastConditionResult = null; // 记录上一次条件结果
+          let lastManualValue = ctx.rule.value; // 记录用户最后手动输入的值
           const computedValue = computed(() => {
             const item = computedRule[k];
             if (!item) return undefined;
+            
+            // 简化版本：直接处理当前的联动需求
+            if (item.linkage && item.group && Array.isArray(item.group)) {
+              // 获取条件字段的值
+              const conditionField = item.group[0]?.field; // jz9cm1kjus226gh7.jmbg7hmxc9k2za0k
+              const conditionValue = item.group[0]?.value; // "2"
+              
+              if (conditionField && conditionValue) {
+                // 解析子表单字段路径
+                const parts = conditionField.split('.');
+                let conditionFieldValue;
+                
+                if (parts.length > 1) {
+                  // 子表单字段: jz9cm1kjus226gh7.jmbg7hmxc9k2za0k
+                  const tableField = parts[0];
+                  const childField = parts[1];
+                  const tableData = this.form[tableField];
+                  
+                  if (Array.isArray(tableData) && tableData.length > 0) {
+                    conditionFieldValue = tableData[0][childField];
+                  }
+                } else {
+                  // 普通字段
+                  conditionFieldValue = this.form[conditionField];
+                }
+                
+                // 检查条件是否满足
+                const conditionMet = conditionFieldValue == conditionValue;
+                
+                if (conditionMet) {
+                  // 条件满足，返回联动字段的值
+                  const linkageValue = this.form[item.linkage]; // j4jky6v417amt7z2的值
+                  lastConditionResult = true;
+                  return linkageValue;
+                } else {
+                  // 条件不满足，保持现有值
+                  lastConditionResult = false;
+                  return ctx.rule.value;
+                }
+              }
+            }
+            
+            // 默认情况：使用原有的计算逻辑
             const value =
               k === "defaultValue"
                 ? this.computeDefaultValue(item, ctx)
                 : this.compute(ctx, item);
-            if (item.linkage && value === oldValueTag) {
-              return oldValue;
-            }
-
+                
             return value;
           });
           const callback = (n) => {
@@ -324,6 +367,7 @@ export default function useContext(Handler) {
           }
           ctx.watch.push(
             watch(computedValue, (n) => {
+              // 简化版本：直接执行更新
               oldValue = n;
               setTimeout(() => {
                 callback(n);

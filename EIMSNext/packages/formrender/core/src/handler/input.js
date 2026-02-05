@@ -6,6 +6,24 @@ export default function useInput(Handler) {
   extend(Handler.prototype, {
     setValue(ctx, value, formValue, setFlag) {
       if (ctx.deleted) return;
+      
+      // 为每个字段维护最后的手动输入值
+      if (!ctx._lastManualValue) {
+        ctx._lastManualValue = ctx.rule.value;
+      }
+      
+      // 检查是否是重置操作（值变回初始状态）
+      const isReset = value === ctx.origin.value && value !== ctx._lastManualValue;
+      
+      if (isReset) {
+        // 恢复到最后的手动输入值
+        value = ctx._lastManualValue;
+        formValue = ctx._lastManualValue;
+      } else {
+        // 正常的用户输入，更新最后手动值
+        ctx._lastManualValue = value;
+      }
+      
       ctx.rule.value = value;
       this.changeStatus = true;
       this.nextRefresh();
