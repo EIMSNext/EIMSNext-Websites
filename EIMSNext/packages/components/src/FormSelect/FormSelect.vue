@@ -7,7 +7,6 @@
 <script setup lang="ts">
 import { useFormStore, useAppStore } from "@eimsnext/store";
 import { IFormItem, buildFormListItems } from "./type";
-import { IListItem } from "@/list/type";
 import { ref, watch } from "vue";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
@@ -20,7 +19,7 @@ const props = defineProps<{
   appId: string;
 }>();
 const appStore = useAppStore()
-const formList = ref<IListItem[]>([]);
+const formList = ref<IFormItem[]>([]);
 
 const value = ref(props.modelValue?.id);
 
