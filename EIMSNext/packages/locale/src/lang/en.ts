@@ -1739,28 +1739,28 @@ export default {
         inactiveColor: "Background color when closed",
       },
     },
-    departmentselect: {
+    department1: {
       name: "Single Department",
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
       },
     },
-    departmentselect2: {
+    department2: {
       name: "Multiple Department",
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
       },
     },
-    employeeselect: {
+    employee1: {
       name: "Single Employee",
       props: {
         readonly: "Readonly",
         disabled: "Disabled",
       },
     },
-    employeeselect2: {
+    employee2: {
       name: "Multiple Employee",
       props: {
         readonly: "Readonly",

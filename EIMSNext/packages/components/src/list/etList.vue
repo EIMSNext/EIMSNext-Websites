@@ -12,7 +12,8 @@
         <slot :item="item">
           <div class="content-wrapper">
             <div class="item-content clickable" @click.stop="handleItemClick(item)">
-              <et-icon v-if="item.icon" :icon="item.icon" :color="item.color" style="padding-right: 5px"></et-icon>
+              <et-icon v-if="item.icon" :icon="item.icon" :color="item.iconColor || defaultColor"
+                style="padding-right: 5px"></et-icon>
               <div class="item-label">
                 {{ item.label }}
               </div>
@@ -57,7 +58,7 @@ const props = withDefaults(
 const oldSingleItemId = ref<string>()
 const oldSingleItem = ref<IListItem>()
 const singleItemId = ref<string>()
-
+const defaultColor = "#46c26f"
 
 watch(
   () => props.modelValue,

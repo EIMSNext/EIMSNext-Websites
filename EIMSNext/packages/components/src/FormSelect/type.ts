@@ -1,3 +1,5 @@
+import { DataItemType } from "@/common";
+import { IListItem } from "@/list/type";
 import { App, FormDef, FormType } from "@eimsnext/models";
 
 export interface IFormItem {
@@ -14,8 +16,8 @@ export function buildFormListItems(app: App): IFormItem[] {
       let item: IFormItem = {
         id: x.menuId,
         label: x.title!,
-        icon: x.icon,
-        color: x.iconColor,
+        data: { id: x.menuId, appId: app.id, label: x.title },
+        type: DataItemType.Form,
       };
 
       items.push(item);

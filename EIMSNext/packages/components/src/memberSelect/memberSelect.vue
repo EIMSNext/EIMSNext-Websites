@@ -13,7 +13,7 @@
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, deptFilter, false)">
                     <div class="node-wrapper">
-                      <et-icon :icon="data.icon" class="node-icon" />
+                      <et-icon :icon="data.icon" class="node-icon" :color="getNodeIconColor(data)" />
                       <span class="node-label">{{ data.label }}</span>
                       <div v-if="!data.readonly" class="node-action">
                         <el-checkbox v-if="options.multiple" v-model="data.checked" @click.stop=""
@@ -38,7 +38,7 @@
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, roleFilter, true)">
                     <div class="node-wrapper">
-                      <et-icon :icon="data.icon" class="node-icon" />
+                      <et-icon :icon="data.icon" class="node-icon" :color="getNodeIconColor(data)" />
                       <span class="node-label">{{ data.label }}</span>
                       <div class="node-action">
                         <el-checkbox v-model="data.checked" @click.stop="" :disabled="!roleFilter(keyword, data)"
@@ -65,7 +65,7 @@
                   <template #default="{ node, data }">
                     <div class="node-data" :title="data.label" @click.stop="selectEmpDept(data.id)">
                       <div class="node-wrapper">
-                        <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
+                        <et-icon :icon="data.icon" icon-class="node-icon" :color="getNodeIconColor(data)"></et-icon>
                         <span class="node-label">{{ data.label }}</span>
                       </div>
                     </div>
@@ -98,7 +98,7 @@
                 <template #default="{ node, data }">
                   <div class="node-data" :title="data.label" @click="handleNodeClick(node, data, deptFilter, false)">
                     <div class="node-wrapper">
-                      <et-icon :icon="data.icon" class="node-icon" />
+                      <et-icon :icon="data.icon" class="node-icon" :color="getNodeIconColor(data)" />
                       <span class="node-label">{{ data.label }}</span>
                       <div class="node-action">
                         <el-checkbox v-if="options.multiple" v-model="data.checked" @click.stop=""
@@ -130,8 +130,8 @@
 import "./style/index.less";
 import { ref, reactive, watch, onBeforeMount, toRef } from "vue";
 import { TreeInstance } from "element-plus";
-import { DeptToTreeNode, EmployeeToListItem, ITreeNode, TreeNodeType, buildDeptTree, buildRoleTree } from "../common";
-import { ISelectedTag, TagType } from "../selectedTags/type";
+import { DataItemType, DeptToTreeNode, EmployeeToListItem, ITreeNode,  buildDeptTree, buildRoleTree } from "../common";
+import { ISelectedTag } from "../selectedTags/type";
 import { Department, Employee, RoleGroup, Role } from "@eimsnext/models";
 import { useDeptStore, useUserStore } from "@eimsnext/store";
 import { employeeService, roleGroupService, roleService } from "@eimsnext/services";
@@ -285,7 +285,7 @@ const filterDeptTreeByScope = (treeData: ITreeNode[]): ITreeNode[] => {
 onBeforeMount(() => {
   //复选模式下，如果支持级联选择并且显示级联框，则是否级联由数据决定
   if (options.multiple && options.cascadedDept && options.showCascade) {
-    let firstDept = props.modelValue.find(x => x.type == TagType.Department)
+    let firstDept = props.modelValue.find(x => x.type == DataItemType.Department)
     if (firstDept && firstDept.cascadedDept) orgCascade.value = firstDept.cascadedDept
   }
 
@@ -334,7 +334,7 @@ onBeforeMount(() => {
   })
 
   if (!options.multiple && props.modelValue?.length > 0) {
-    if (props.modelValue[0].type == TagType.Department)
+    if (props.modelValue[0].type == DataItemType.Department)
       singleDeptId.value = props.modelValue[0].id
   }
 });
@@ -346,31 +346,31 @@ const setSelectedNodes = () => {
 
   // 获取员工类型的选中项ID列表
   const employeeSelectedIds = tagsRef.value
-    .filter(tag => tag.type === TagType.Employee)
+    .filter(tag => tag.type === DataItemType.Employee)
     .map(tag => tag.id);
 
   // 如果是单选模式，设置singleDeptId
   if (!options.multiple) {
-    singleDeptId.value = tagsRef.value.find(x => x.type === TagType.Department)?.id ?? "";
+    singleDeptId.value = tagsRef.value.find(x => x.type === DataItemType.Department)?.id ?? "";
   }
 
   // 设置员工列表的选中状态
   selectedEmps.value = employeeSelectedIds;
 
   // 设置部门树的选中状态
-  setNodeChecked(TagType.Department, deptData.value);
+  setNodeChecked(DataItemType.Department, deptData.value);
   if (orgCascade.value) updateCascadeStatus(deptData.value[0])
 
   if (curDeptData.value) {
-    setNodeChecked(TagType.Department, curDeptData.value);
+    setNodeChecked(DataItemType.Department, curDeptData.value);
   }
 
   // 设置角色树的选中状态
-  setNodeChecked(TagType.Role, roleData.value);
+  setNodeChecked(DataItemType.Role, roleData.value);
 };
 
 // 遍历树节点，设置选中状态
-const setNodeChecked = (type: TagType, nodes: ITreeNode[]) => {
+const setNodeChecked = (type: DataItemType, nodes: ITreeNode[]) => {
   if (!nodes) return;
 
   nodes.forEach(node => {
@@ -414,9 +414,9 @@ const singleDeptChecked = (data: ITreeNode, val: string) => {
     // 直接替换整个数组，避免先删除再添加导致的闪烁
     tagsRef.value = [{
       id: data.id,
-      code: data.code,
+      value: data.value,
       label: data.data?.name || data.label,
-      type: TagType.Department,
+      type: DataItemType.Department,
       data: data.data,
     }];
     emit("update:modelValue", tagsRef.value);
@@ -437,7 +437,7 @@ const selectEmpDept = (deptId: string) => {
 
       // 检查当前员工是否在已选标签中
       if (
-        tagsRef.value.find((t) => t.id == x.id && t.type == TagType.Employee)
+        tagsRef.value.find((t) => t.id == x.id && t.type == DataItemType.Employee)
       ) {
         // 单选模式下直接赋值，多选模式下push到数组
         if (options.multiple) {
@@ -456,39 +456,39 @@ const empChecked = (data: IListItem, checked: boolean) => {
   if (options.multiple) {
     if (checked) {
       let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == TagType.Employee
+        (x) => x.id == data.id && x.type == DataItemType.Employee
       );
       if (index == undefined || index == -1) {
         tagsRef.value.push({
           id: data.id,
-          code: data.code,
+          value: data.value,
           label: data.label,
-          type: TagType.Employee,
+          type: DataItemType.Employee,
           data: data.data,
         });
       }
     } else {
-      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Employee || x.id !== data.id)
+      tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Employee || x.id !== data.id)
     }
 
     emit("update:modelValue", tagsRef.value);
   } else {
     if (checked) {
       // 直接创建新数组，保留非员工标签，替换为新的员工标签
-      const noEmployeeTags = tagsRef.value.filter(x => x.type != TagType.Employee);
+      const noEmployeeTags = tagsRef.value.filter(x => x.type != DataItemType.Employee);
       tagsRef.value = [
         ...noEmployeeTags,
         {
           id: data.id,
-          code: data.code,
+          value: data.value,
           label: data.label,
-          type: TagType.Employee,
+          type: DataItemType.Employee,
           data: data.data,
         }
       ];
     } else {
       // 只移除当前员工标签
-      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Employee || x.id !== data.id)
+      tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Employee || x.id !== data.id)
     }
     emit("update:modelValue", tagsRef.value);
   }
@@ -498,19 +498,19 @@ const empCheckAll = (checked: boolean) => {
     //全新增
     empData.value.forEach((data) => {
       let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == TagType.Employee
+        (x) => x.id == data.id && x.type == DataItemType.Employee
       );
       if (index == undefined || index == -1) {
         tagsRef.value.push({
           id: data.id,
           label: data.label,
-          type: TagType.Employee,
+          type: DataItemType.Employee,
           data: data.data,
         });
       }
     });
   } else {
-    tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Employee)
+    tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Employee)
   }
 
   emit("update:modelValue", tagsRef.value);
@@ -521,19 +521,19 @@ const curEmpCheckAll = (checked: boolean) => {
     //全新增
     curEmpData.value.forEach((data) => {
       let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == TagType.Employee
+        (x) => x.id == data.id && x.type == DataItemType.Employee
       );
       if (index == undefined || index == -1) {
         tagsRef.value.push({
           id: data.id,
           label: data.label,
-          type: TagType.Employee,
+          type: DataItemType.Employee,
           data: data.data,
         });
       }
     });
   } else {
-    tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Employee || x.id !== curEmpData.value[0].id)
+    tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Employee || x.id !== curEmpData.value[0].id)
   }
 
   emit("update:modelValue", tagsRef.value);
@@ -544,38 +544,38 @@ const dymChecked = (data: IListItem, checked: boolean) => {
   if (options.multiple) {
     if (checked) {
       let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == TagType.Dynamic
+        (x) => x.id == data.id && x.type == DataItemType.Dynamic
       );
       if (index == undefined || index == -1) {
         tagsRef.value.push({
           id: data.id,
-          code: data.code,
+          value: data.value,
           label: data.label,
-          type: TagType.Dynamic,
+          type: DataItemType.Dynamic,
           data: data.data,
         });
       }
     } else {
-      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Dynamic || x.id !== data.id)
+      tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Dynamic || x.id !== data.id)
     }
 
     emit("update:modelValue", tagsRef.value);
   } else {
     if (checked) {
       // 直接创建新数组
-      const nonDynamics = tagsRef.value.filter(x => x.type != TagType.Dynamic);
+      const nonDynamics = tagsRef.value.filter(x => x.type != DataItemType.Dynamic);
       tagsRef.value = [
         ...nonDynamics,
         {
           id: data.id,
-          code: data.code,
+          value: data.value,
           label: data.label,
-          type: TagType.Dynamic,
+          type: DataItemType.Dynamic,
           data: data.data,
         }
       ];
     } else {
-      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Dynamic || x.id !== data.id)
+      tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Dynamic || x.id !== data.id)
     }
     emit("update:modelValue", tagsRef.value);
   }
@@ -585,19 +585,20 @@ const dymCheckAll = (checked: boolean) => {
     //全新增
     options.dynamicMembers!.forEach((data) => {
       let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == TagType.Dynamic
+        (x) => x.id == data.id && x.type == DataItemType.Dynamic
       );
       if (index == undefined || index == -1) {
         tagsRef.value.push({
           id: data.id,
           label: data.label,
-          type: TagType.Dynamic,
+          type: DataItemType.Dynamic,
           data: data.data,
+          icon: data.icon
         });
       }
     });
   } else {
-    tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Dynamic)
+    tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Dynamic)
   }
 
   emit("update:modelValue", tagsRef.value);
@@ -622,14 +623,14 @@ const removeTag = (tag: ISelectedTag) => {
       if (curDeptTree.value)
         curDeptTree.value.setChecked(tag.id, false, false);
   }
-  else if (tag.type == TagType.Role) {
+  else if (tag.type == DataItemType.Role) {
     if (roleTree.value)
       roleTree.value.setChecked(tag.id, false, false);
   }
-  else if (tag.type == TagType.Employee) {
+  else if (tag.type == DataItemType.Employee) {
     selectedEmps.value = selectedEmps.value?.filter((x) => x != tag.id);
   }
-  else if (tag.type == TagType.Dynamic) {
+  else if (tag.type == DataItemType.Dynamic) {
     selectedDyMembers.value = selectedDyMembers.value?.filter((x) => x != tag.id)
   }
 };
@@ -667,14 +668,14 @@ const updateTags = (data: ITreeNode, checked: boolean, filterFn: (value: string,
 const updateRoleTags = (data: ITreeNode, checked: boolean) => {
   data.checked = checked
   if (checked) {
-    if (data.nodeType == TreeNodeType.Group) {
+    if (data.type == DataItemType.Group) {
       if (data.children && data.children.length > 0) {
         data.children.forEach(child => {
           if (!child.checked) {
             tagsRef.value.push({
               id: child.id,
               label: child.label,
-              type: TagType.Role,
+              type: DataItemType.Role,
               data: child.data,
             });
             child.checked = true
@@ -686,12 +687,12 @@ const updateRoleTags = (data: ITreeNode, checked: boolean) => {
       tagsRef.value.push({
         id: data.id,
         label: data.label,
-        type: TagType.Role,
+        type: DataItemType.Role,
         data: data.data,
       });
     }
   } else {
-    if (data.nodeType == TreeNodeType.Group) {
+    if (data.type == DataItemType.Group) {
       let roleIds: string[] = []
       if (data.children && data.children.length > 0) {
         data.children.forEach(child => {
@@ -700,11 +701,11 @@ const updateRoleTags = (data: ITreeNode, checked: boolean) => {
         })
 
         if (roleIds.length > 0)
-          tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Role || roleIds.findIndex(id => x.id == id) == -1)
+          tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Role || roleIds.findIndex(id => x.id == id) == -1)
       }
     }
     else {
-      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Role || x.id !== data.id)
+      tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Role || x.id !== data.id)
       if (data.data?.roleGroupId) {
         var group = roleData.value?.find(x => x.id == data.data.roleGroupId)
         if (group) group.checked = false
@@ -721,36 +722,36 @@ const updateDeptTags = (data: ITreeNode, checked: boolean, isCurDept: boolean) =
     if (checked) {
       // 添加重复判断，防止重复添加
       const existingIndex = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == TagType.Department
+        (x) => x.id == data.id && x.type == DataItemType.Department
       );
       if (existingIndex === -1) {
         tagsRef.value.push({
           id: data.id,
-          code: data.code,
+          value: data.value,
           label: data.data?.name || data.label,
-          type: TagType.Department,
+          type: DataItemType.Department,
           data: data.data,
         });
       }
     } else {
-      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Department || x.id !== data.id)
+      tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Department || x.id !== data.id)
     }
   }
   else {
     if (checked) {
-      const noDeptTags = tagsRef.value.filter(x => x.type != TagType.Department);
+      const noDeptTags = tagsRef.value.filter(x => x.type != DataItemType.Department);
       tagsRef.value = [
         ...noDeptTags,
         {
           id: data.id,
-          code: data.code,
-          label: data.label,
-          type: TagType.Department,
+          value: data.value,
+          label: data.data?.name || data.label,
+          type: DataItemType.Department,
           data: data.data,
         }
       ];
     } else {
-      tagsRef.value = tagsRef.value.filter(x => x.type !== TagType.Department || x.id !== data.id)
+      tagsRef.value = tagsRef.value.filter(x => x.type !== DataItemType.Department || x.id !== data.id)
     }
   }
 
@@ -770,7 +771,7 @@ const updateCascadeStatus = (data: ITreeNode) => {
     data.children.forEach(child => {
       child.disabled = data.checked
 
-      if (tagsRef.value.findIndex(x => x.type === TagType.Department && x.id === child.id) == -1) {
+      if (tagsRef.value.findIndex(x => x.type === DataItemType.Department && x.id === child.id) == -1) {
         child.checked = data.checked;
 
         updateCascadeStatus(child)
@@ -783,11 +784,19 @@ const cascadeChanged = (val: boolean) => {
   if (deptData.value) {
     if (val) updateCascadeStatus(deptData.value[0])
     else {
-      setNodeChecked(TagType.Department, deptData.value)
+      setNodeChecked(DataItemType.Department, deptData.value)
     }
   }
-
 }
+const getNodeIconColor = (node: ITreeNode) => {
+  switch (node.type) {
+    case DataItemType.Department:
+      return "#46c26f";
+    default:
+      return "#46c26f";
+  }
+}
+
 </script>
 <style scoped>
 /* 隐藏标签栏 */

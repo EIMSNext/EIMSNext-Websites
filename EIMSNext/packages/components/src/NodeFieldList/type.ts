@@ -4,7 +4,7 @@ import {
   splitSubField,
   toFormFieldDef,
 } from "@/FieldSelect/type";
-import { ITreeNode, TreeNodeType } from "@/common";
+import { DataItemType, ITreeNode } from "@/common";
 import { FieldDef, FieldType, FormDef, IFieldPerm } from "@eimsnext/models";
 
 export interface INodeForm {
@@ -50,13 +50,13 @@ export enum ConditionFieldType {
   Number = "number",
   Radio = "radio",
   CheckBox = "checkbox",
-  Select = "select",
+  Select1 = "select",
   Select2 = "select2",
   TimeStamp = "timestamp",
-  EmployeeSelect = "employeeselect",
-  EmployeeSelect2 = "employeeselect2",
-  DepartmentSelect = "departmentselect",
-  DepartmentSelect2 = "departmentselect2",
+  Employee1 = "employee1",
+  Employee2 = "employee2",
+  Department1 = "department1",
+  Department2 = "department2",
   Other = "other",
 }
 export function getConditionFieldType(
@@ -79,8 +79,8 @@ export function getConditionFieldType(
     case FieldType.Radio:
       dataType = ConditionFieldType.Radio;
       break;
-    case FieldType.Select:
-      dataType = ConditionFieldType.Select;
+    case FieldType.Select1:
+      dataType = ConditionFieldType.Select1;
       break;
     case FieldType.CheckBox:
       dataType = ConditionFieldType.CheckBox;
@@ -88,17 +88,17 @@ export function getConditionFieldType(
     case FieldType.Select2:
       dataType = ConditionFieldType.Select2;
       break;
-    case FieldType.DepartmentSelect:
-      dataType = ConditionFieldType.DepartmentSelect;
+    case FieldType.Department1:
+      dataType = ConditionFieldType.Department1;
       break;
-    case FieldType.DepartmentSelect2:
-      dataType = ConditionFieldType.DepartmentSelect2;
+    case FieldType.Department2:
+      dataType = ConditionFieldType.Department2;
       break;
-    case FieldType.EmployeeSelect:
-      dataType = ConditionFieldType.EmployeeSelect;
+    case FieldType.Employee1:
+      dataType = ConditionFieldType.Employee1;
       break;
-    case FieldType.EmployeeSelect2:
-      dataType = ConditionFieldType.EmployeeSelect2;
+    case FieldType.Employee2:
+      dataType = ConditionFieldType.Employee2;
       break;
   }
 
@@ -349,9 +349,9 @@ export function buildNodeFieldTree(
                   );
                   const node: ITreeNode = {
                     id: `${pNode.id}-${fieldDef.field}`,
-                    code: fieldDef.field,
+                    value: fieldDef.field,
                     label: fieldDef.label,
-                    nodeType: TreeNodeType.Field,
+                    type: DataItemType.Field,
                     children: [],
                     data: fieldDef,
                     icon: getFieldIcon(fieldDef.type),
@@ -376,9 +376,9 @@ export function buildNodeFieldTree(
               );
               const node: ITreeNode = {
                 id: `${pNode.id}-${fieldDef.field}`,
-                code: fieldDef.field,
+                value: fieldDef.field,
                 label: fieldDef.label,
-                nodeType: TreeNodeType.Field,
+                type: DataItemType.Field,
                 children: [],
                 data: fieldDef,
                 icon: getFieldIcon(fieldDef.type),
@@ -400,9 +400,9 @@ export function buildNodeFieldTree(
   ) => {
     const rootNode: ITreeNode = {
       id: nodeForm.nodeId,
-      code: nodeForm.nodeId,
+      value: nodeForm.nodeId,
       label: `${nodeForm.nodeName}`,
-      nodeType: TreeNodeType.Form,
+      type: DataItemType.Form,
       children: [],
       data: nodeForm,
     };

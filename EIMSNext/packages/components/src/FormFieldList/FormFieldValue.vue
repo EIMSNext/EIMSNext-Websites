@@ -8,7 +8,7 @@
     <div class="value-value">
       <template v-if="fieldValueType == FieldValueType.Custom">
         <template
-          v-if="fieldType == FieldType.Input || fieldType == FieldType.Select || fieldType == FieldType.Select2">
+          v-if="fieldType == FieldType.Input || fieldType == FieldType.Select1 || fieldType == FieldType.Select2">
           <el-input v-model="value" size="default" @change="onInput"></el-input>
         </template>
         <template v-if="fieldType == FieldType.Number">
@@ -32,19 +32,19 @@
               :key="opt.id"></el-option>
           </el-select>
         </template>
-        <template v-else-if="fieldType == FieldType.DepartmentSelect">
+        <template v-else-if="fieldType == FieldType.Department1">
           <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyDept')"
             @editTag="selectDept(false)" />
         </template>
-        <template v-else-if="fieldType == FieldType.DepartmentSelect2">
+        <template v-else-if="fieldType == FieldType.Department2">
           <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyDept')"
             @editTag="selectDept(true)" />
         </template>
-        <template v-else-if="fieldType == FieldType.EmployeeSelect">
+        <template v-else-if="fieldType == FieldType.Employee1">
           <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyEmp')"
             @editTag="selectEmp(false)" />
         </template>
-        <template v-else-if="fieldType == FieldType.EmployeeSelect2">
+        <template v-else-if="fieldType == FieldType.Employee2">
           <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyEmp')"
             @editTag="selectEmp(true)" />
         </template>
@@ -71,6 +71,7 @@ import { IListItem } from "@/list/type";
 import { toListItem } from "@/ConditionList/type";
 import { MemberTabs } from "@/memberSelect/type";
 import { ISelectedTag } from "@/selectedTags/type";
+import { DataItemType } from "@/common";
 
 const { t } = useLocale();
 
@@ -95,10 +96,10 @@ const dateType = computed(() => ((props.fieldDef.type == FieldType.TimeStamp ? p
 const fieldValueType = ref(props.modelValue.type);
 const value = ref<any>(props.modelValue.value);
 if (!value.value && fieldValueType.value == FieldValueType.Custom
-  && (fieldType.value == FieldType.EmployeeSelect ||
-    fieldType.value == FieldType.EmployeeSelect2 ||
-    fieldType.value == FieldType.DepartmentSelect ||
-    fieldType.value == FieldType.DepartmentSelect2 ||
+  && (fieldType.value == FieldType.Employee1 ||
+    fieldType.value == FieldType.Employee2 ||
+    fieldType.value == FieldType.Department1 ||
+    fieldType.value == FieldType.Department2 ||
     fieldType.value == FieldType.CheckBox ||
     fieldType.value == FieldType.Select2
   )
@@ -107,8 +108,8 @@ if (!value.value && fieldValueType.value == FieldValueType.Custom
 }
 
 if (fieldValueType.value == FieldValueType.Custom
-  && (fieldType.value == FieldType.EmployeeSelect ||
-    fieldType.value == FieldType.DepartmentSelect
+  && (fieldType.value == FieldType.Employee1 ||
+    fieldType.value == FieldType.Department1
   ) && !Array.isArray(value.value)) {
   value.value = [value.value]
 }
@@ -124,9 +125,9 @@ const fieldFieldValue = ref<IFormFieldDef>(
 );
 
 const fieldValueTypes: IListItem[] = [
-  { id: FieldValueType.Custom, label: t("comp.value_Custom") },
-  { id: FieldValueType.Field, label: t("comp.value_Field") },
-  { id: FieldValueType.Empty, label: t("comp.value_Empty") },
+  { id: FieldValueType.Custom, label: t("comp.value_Custom"), type: DataItemType.Unknown },
+  { id: FieldValueType.Field, label: t("comp.value_Field"), type: DataItemType.Unknown },
+  { id: FieldValueType.Empty, label: t("comp.value_Empty"), type: DataItemType.Unknown },
 ];
 
 
@@ -135,10 +136,10 @@ const onValueTypeChange = () => {
   props.modelValue.type = fieldValueType.value;
 
   if (fieldValueType.value == FieldValueType.Custom
-    && (fieldType.value == FieldType.EmployeeSelect ||
-      fieldType.value == FieldType.EmployeeSelect2 ||
-      fieldType.value == FieldType.DepartmentSelect ||
-      fieldType.value == FieldType.DepartmentSelect2 ||
+    && (fieldType.value == FieldType.Employee1 ||
+      fieldType.value == FieldType.Employee2 ||
+      fieldType.value == FieldType.Department1 ||
+      fieldType.value == FieldType.Department2 ||
       fieldType.value == FieldType.CheckBox ||
       fieldType.value == FieldType.Select2
     )

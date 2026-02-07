@@ -4,7 +4,7 @@
       <div class="my-todo">
         <div class="todo-wrapper" @click="goToMyTasks">
           <div class="image-wrapper">
-            <et-icon icon="iconfont-mytodo" size="64px" color="#1296db" />
+            <et-icon icon="icon-mytodo" size="64px" color="#1296db" />
           </div>
           <div class="todo-count">
             <div class="todo-count-text">{{ t("common.wfProcess.mytasks") }}</div>
@@ -15,15 +15,15 @@
       <el-divider direction="vertical" style="height: 100px;" />
       <div class="flow-steps">
         <div class="step-wrapper" @click="goToMyStarted">
-          <et-icon icon="iconfont-mystarted" size="40px" class="step-image" />
+          <et-icon icon="icon-mystarted" size="40px" class="step-image" />
           <div class="step-text">{{ t("common.wfProcess.mystarted") }}</div>
         </div>
         <div class="step-wrapper" @click="goToMyApproved">
-          <et-icon icon="iconfont-myapproved" size="40px" class="step-image" />
+          <et-icon icon="icon-myapproved" size="40px" class="step-image" />
           <div class="step-text">{{ t("common.wfProcess.myapproved") }}</div>
         </div>
         <div class="step-wrapper" @click="goToMyCced">
-          <et-icon icon="iconfont-mycced" size="40px" class="step-image" />
+          <et-icon icon="icon-mycced" size="40px" class="step-image" />
           <div class="step-text">{{ t("common.wfProcess.cctome") }}</div>
         </div>
         <div class="step-wrapper">

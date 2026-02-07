@@ -1,10 +1,6 @@
+import { IDataItemView } from "@/common";
+
 // 数据定义
-export interface IListItem {
-  id: string;
-  code?:string;
-  label: string;
+export interface IListItem extends IDataItemView{
   checked?: boolean;
-  icon?: string;
-  color?: string;
-  data?: any;
 }

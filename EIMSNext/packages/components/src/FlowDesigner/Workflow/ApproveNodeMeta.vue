@@ -12,7 +12,7 @@
     <!-- <el-checkbox v-model="activeData.metadata.approveMeta!.enableCopyto" label="启用抄送" class="sub-item" /> -->
     <member-select-dialog v-model="showMemberDialog" :tags="selectedCandidateTags" :member-options="{
       showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic,
-      dynamicMembers: dynamicMembers, cascadedDept: true, showCascade: true
+      dynamicMembers: dynamicMembers, cascadedDept: true, showCascade: true, showContract: true
     }" destroy-on-close @ok="finishSelect" />
   </template>
 </template>
@@ -31,8 +31,9 @@ import {
 import { useLocale } from "element-plus";
 import { convertCandidateToTag, convertTagToCandidate } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
-import { ISelectedTag, TagType } from "@/selectedTags/type";
+import { ISelectedTag } from "@/selectedTags/type";
 import { MemberTabs } from "@/component";
+import { DataItemType } from "@/common";
 const { t } = useLocale();
 
 defineOptions({
@@ -45,7 +46,7 @@ const flowContextRef = reactive<IFlowContext>(flowContext!);
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const showMemberDialog = ref(false);
 const selectedCandidateTags = ref<ISelectedTag[]>([]);
-const dynamicMembers = ref<ISelectedTag[]>([{ id: "starter", label: t('workflow.starter'), type: TagType.Dynamic, data: { id: "starter", label: t('workflow.starter') } }])
+const dynamicMembers = ref<ISelectedTag[]>([{ id: "starter", label: t('workflow.starter'), icon: "el-UserFilled", type: DataItemType.Dynamic, data: { id: "starter", label: t('workflow.starter') } }])
 
 const editTag = () => {
   showMemberDialog.value = true;

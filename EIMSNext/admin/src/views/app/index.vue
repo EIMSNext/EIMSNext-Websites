@@ -1,6 +1,6 @@
 <template>
-  <form-edit v-if="showFormEditor" :form-id="''" :usingFlow="usingWorkflow" :isLedger="isLedger"
-    @close="showFormEditor = false" />
+  <form-edit v-if="showFormEditor && newForm" :modelValue="showFormEditor" :formDef="newForm!"
+    :usingFlow="usingWorkflow" :isLedger="isLedger" @close="showFormEditor = false" />
   <Layout>
     <div class="empty-app">
       <div class="empty-content">
@@ -41,8 +41,14 @@ import Layout from "@/layout/index.vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore, useFormStore, useContextStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
+import { App, FormDef, FormDefRequest, FormType } from "@eimsnext/models";
+import { formDefService } from "@eimsnext/services";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n()
 
+const newForm = ref<FormDef>()
 const router = useRouter();
+const appStore = useAppStore()
 const formStore = useFormStore();
 const contextStore = useContextStore();
 const route = useRoute();
@@ -51,12 +57,13 @@ const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
 
+const app = ref<App>();
 // console.log("appid", appId, contextStore.appId);
 
 onBeforeMount(async () => {
   // console.log("appid", appId, contextStore.appId);
   await contextStore.setAppId(appId);
-
+  appStore.get(contextStore.appId).then((res) => (app.value = res));
   if (formStore.items.length > 0) {
     const path = `/app/${appId}/form/${formStore.items[0].id}`;
 
@@ -66,9 +73,30 @@ onBeforeMount(async () => {
 });
 
 const createForm = (usingFlow: boolean, ledger: boolean) => {
-  showFormEditor.value = true;
   usingWorkflow.value = usingFlow;
   isLedger.value = ledger;
+
+  //直接创建，防止工作流/数据流等设置报错
+  let req: FormDefRequest = {
+    id: "",
+    appId: contextStore.appId,
+    name: t("admin.untitledForm"),
+    type: FormType.Form,
+    content: {
+      "layout": "[]",
+      "options": "{\"info\":{\"align\":\"left\"},\"form\":{\"inline\":false,\"hideRequiredAsterisk\":false,\"labelPosition\":\"top\",\"size\":\"default\",\"labelWidth\":\"auto\"},\"resetBtn\":{\"show\":false,\"innerText\":\"重置\"},\"submitBtn\":{\"show\":false,\"innerText\":\"提交\"}}"
+    },
+    usingWorkflow: usingFlow,
+    isLedger: ledger,
+  };
+
+  formDefService.post<FormDef>(req).then(resp => {
+    newForm.value = resp
+    formStore.update(resp);
+    contextStore.setAppChanged(); //reload 菜单
+
+    showFormEditor.value = true;
+  });
 };
 </script>
 <style lang="scss" scoped>

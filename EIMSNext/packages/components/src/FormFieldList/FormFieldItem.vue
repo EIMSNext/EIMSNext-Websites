@@ -65,8 +65,8 @@ const onInput = () => {
 
 const emitChange = () => {
   let newModel = { field: field.value, value: value.value };
-  if (value.value.type == FieldValueType.Custom && (field.value.type == FieldType.DepartmentSelect ||
-    field.value.type == FieldType.EmployeeSelect) && Array.isArray(value.value.value)
+  if (value.value.type == FieldValueType.Custom && (field.value.type == FieldType.Department1 ||
+    field.value.type == FieldType.Employee1) && Array.isArray(value.value.value)
   ) {
     newModel.value = value.value.value[0]
   }

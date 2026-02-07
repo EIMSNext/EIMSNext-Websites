@@ -2,7 +2,7 @@
   <div v-if="activeRule" class="_fd-default-value">
     <div class="el-form-item__label"><span class="_fc-field-title">{{
       t('props.inputData')
-    }}</span></div>
+        }}</span></div>
     <el-select v-model="valueMode">
       <el-option :label="t('props.v_custom')" value="custom"></el-option>
       <el-option :label="t('props.v_datalink')" value="datalink"></el-option>
@@ -15,13 +15,13 @@
         :min="activeRule.props.min" :max="activeRule.props.max"></el-input-number>
       <el-date-picker v-if="activeRule.type == 'timestamp'" v-model="customValue" value-format="x"
         :type="activeRule.props.type" :format="activeRule.props.format"></el-date-picker>
-      <fc-department-select v-if="activeRule.type == 'departmentselect'" v-model="customValue"
+      <fc-department-select v-if="activeRule.type == 'department1'" v-model="customValue"
         @change="onOrgChanged"></fc-department-select>
-      <fc-department-select v-if="activeRule.type == 'departmentselect2'" v-model="customValue" @change="onOrgChanged"
+      <fc-department-select v-if="activeRule.type == 'department2'" v-model="customValue" @change="onOrgChanged"
         :multiple="true"></fc-department-select>
-      <fc-employee-select v-if="activeRule.type == 'employeeselect'" v-model="customValue"
+      <fc-employee-select v-if="activeRule.type == 'employee1'" v-model="customValue"
         @change="onOrgChanged"></fc-employee-select>
-      <fc-employee-select v-if="activeRule.type == 'employeeselect2'" v-model="customValue" @change="onOrgChanged"
+      <fc-employee-select v-if="activeRule.type == 'employee2'" v-model="customValue" @change="onOrgChanged"
         :multiple="true"></fc-employee-select>
       <el-select v-if="activeRule.type == 'radio'" v-model="customValue">
         <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
@@ -29,7 +29,7 @@
       <el-select v-if="activeRule.type == 'checkbox'" v-model="customValue" multiple>
         <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
       </el-select>
-      <el-select v-if="activeRule.type == 'select'" v-model="customValue">
+      <el-select v-if="activeRule.type == 'select1'" v-model="customValue">
         <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
       </el-select>
       <el-select v-if="activeRule.type == 'select2'" v-model="customValue" multiple>
@@ -57,7 +57,7 @@ export default defineComponent({
   },
   inject: ["designer"],
   mounted() {
-    // console.log("modelvalue", this.modelValue)
+     console.log("activeRule", this.activeRule)
     if (this.activeRule) {
       if (this.activeRule._computed.value) {
         this.valueMode = 'formula';
@@ -328,6 +328,8 @@ export default defineComponent({
 <style>
 ._fd-default-value {
   width: 100%;
+  margin-bottom: 10px;
+  padding: 0 10px;
 }
 
 ._fd-default-value .el-button {

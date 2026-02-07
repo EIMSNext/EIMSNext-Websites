@@ -66,7 +66,7 @@ export function  getCreateBy(title: string): FieldDef {
   let field = new FieldDef();
   field.field = SystemField.CreateBy;
   field.title = title;
-  field.type = FieldType.EmployeeSelect;
+  field.type = FieldType.Employee1;
   return field;
 }
 
