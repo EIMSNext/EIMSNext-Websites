@@ -7,7 +7,7 @@ import {
 import "./style.css";
 
 export default defineComponent({
-  name: "FcDepartmentSelect",
+  name: "fcDepartmentSelect",
   inheritAttrs: false,
   props: {
     modelValue: {
@@ -79,8 +79,8 @@ export default defineComponent({
     // 移除部门对象中的data和value字段，只保留必要的字段
     const removeUnnecessaryFields = (dept) => {
       if (!dept || typeof dept !== "object") return dept;
-      const { data, value, error, ...rest } = dept;
-      return rest;
+      const { id, value, label, type } = dept;
+      return { id, value, label, type };
     };
 
     const handleDepartmentChange = (departments) => {
@@ -122,7 +122,7 @@ export default defineComponent({
           : selectedValue.value
             ? [selectedValue.value]
             : [];
-      const tagHeight = multiple ? "60px" : "32px";
+      const tagHeight = multiple ? "60px" : "35px";
       const memberOptions = {
         showTabs: MemberTabs.Department | MemberTabs.CurDept,
         cascadedDept: props.cascadedDept,
@@ -137,7 +137,7 @@ export default defineComponent({
             modelValue={tags}
             class={"_fc-org-select"}
             style={{ height: tagHeight }}
-            editable={{ editable }}
+            editable={editable}
             emptyText={placeholder}
             onEditTag={() => editable && (showDialog.value = true)}
           ></SelectedTags>

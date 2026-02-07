@@ -81,7 +81,7 @@ import {
 } from "@/NodeFieldList/type";
 import { IFormItem } from "@/FormSelect/type";
 import { IFormFieldDef, splitSubField } from "@/FieldSelect/type";
-import { EtConfirm } from "@/dialog/EtConfirm";
+import { ConfirmResult, EtConfirm } from "@/dialog/EtConfirm";
 import { MessageIcon } from "@/dialog/type";
 
 const { t } = useLocale();
@@ -193,7 +193,7 @@ const fieldSelecting = async (field: IFormFieldItem) => {
           title: t("dataflow.fieldConflict_MsgTitle"),
           icon: MessageIcon.Warning
         });
-        if (confirm) {
+        if (confirm == ConfirmResult.Yes) {
           if (fieldLimit.limitType == FieldLimitType.MultiResult) {
             // console.log("sub1111", mainField, formFieldList.value.items)
             formFieldList.value.items = formFieldList.value.items.filter(x => x.value.type != FieldValueType.Field || !x.value.fieldValue || x.value.fieldValue.singleResultNode)
@@ -238,7 +238,7 @@ const fieldValueChanging = async (
           icon: MessageIcon.Warning
         });
 
-        if (confirm) {
+        if (confirm == ConfirmResult.Yes) {
           formFieldList.value.items = formFieldList.value.items.filter(x => !x.field.isSubField)
           activeData.value.metadata.updateMeta!.formFieldList = formFieldList.value;
 

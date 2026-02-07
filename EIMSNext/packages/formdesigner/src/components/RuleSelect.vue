@@ -75,7 +75,7 @@ export default defineComponent({
                 if (rule.field) {
                     temp.push(rule);
                 }
-                const childrenFields = rule._menu.subForm === 'array' ? [] : this.getFields(children || [], temp);
+                const childrenFields = this.getFields(children || [], temp);
                 if (!this.onlyField || this.onlyField && rule.field) {
                     const item = {
                         value: parent.length ? (parent.map(item => item[this.valueType || '_fc_id']).join('.') + '.' + rule[this.valueType || '_fc_id']) : rule[this.valueType || '_fc_id'],

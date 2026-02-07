@@ -1,4 +1,5 @@
 import { IFieldLimit } from "@/NodeFieldList/type";
+import { DataItemType } from "@/common";
 import { IListItem } from "@/list/type";
 import {
   FieldDef,
@@ -29,7 +30,7 @@ export function toFormFieldDef(
   field: FieldDef,
   parent?: FieldDef,
   nodeId?: string,
-  singleResultNode?: boolean
+  singleResultNode?: boolean,
 ): IFormFieldDef {
   if (parent) {
     var fieldDef: IFormFieldDef = {
@@ -68,7 +69,7 @@ export function buildFieldListItems(
   fields: FieldDef[],
   usingWf: boolean,
   nodeId?: string,
-  fieldLimit?: IFieldLimit
+  fieldLimit?: IFieldLimit,
 ): IListItem[] {
   const items: IListItem[] = [];
 
@@ -78,12 +79,13 @@ export function buildFieldListItems(
         formId,
         getFlowStatus("流程状态"),
         undefined,
-        nodeId
+        nodeId,
       );
       items.push({
         id: status.field,
         label: status.label,
         data: status,
+        type: DataItemType.Field,
       });
     }
   }
@@ -100,6 +102,7 @@ export function buildFieldListItems(
             id: fieldDef.field,
             label: fieldDef.label,
             data: fieldDef,
+            type: DataItemType.Field,
           };
 
           items.push(item);
@@ -111,12 +114,13 @@ export function buildFieldListItems(
           formId,
           x,
           undefined,
-          nodeId
+          nodeId,
         );
         let item: IListItem = {
           id: fieldDef.field,
           label: fieldDef.label,
           data: fieldDef,
+          type: DataItemType.Field,
         };
 
         items.push(item);
@@ -130,24 +134,26 @@ export function buildFieldListItems(
         formId,
         getCreateBy("提交人"),
         undefined,
-        nodeId
+        nodeId,
       );
       items.push({
         id: submitor.field,
         label: submitor.label,
         data: submitor,
+        type: DataItemType.Field,
       });
 
       let createTime: IFormFieldDef = toFormFieldDef(
         formId,
         getCreateTime("提交时间"),
         undefined,
-        nodeId
+        nodeId,
       );
       items.push({
         id: createTime.field,
         label: createTime.label,
         data: createTime,
+        type: DataItemType.Field,
       });
     }
   }

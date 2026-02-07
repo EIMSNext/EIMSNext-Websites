@@ -12,7 +12,7 @@
         <slot :item="item">
           <div class="content-wrapper">
             <div class="item-content clickable" @click.stop="handleItemClick(item)">
-              <et-icon v-if="item.icon" :icon="item.icon" :color="item.color || defaultColor"
+              <et-icon v-if="item.icon" :icon="item.icon" :color="item.iconColor || defaultColor"
                 style="padding-right: 5px"></et-icon>
               <div class="item-label">
                 {{ item.label }}

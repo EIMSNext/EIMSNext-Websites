@@ -1,9 +1,9 @@
 import { defineComponent, ref, watch, computed } from "vue";
 import { MemberSelectDialog, MemberTabs } from "@eimsnext/components";
-import "../departmentselect/style.css";
+import "../departmentSelect/style.css";
 
 export default defineComponent({
-  name: "FcEmployeeSelect",
+  name: "fcEmployeeSelect",
   inheritAttrs: false,
   props: {
     modelValue: {
@@ -65,8 +65,8 @@ export default defineComponent({
     // 移除员工对象中的data和value字段，只保留必要的字段
     const removeUnnecessaryFields = (emp) => {
       if (!emp || typeof emp !== "object") return emp;
-      const { data, value, error, ...rest } = emp;
-      return rest;
+      const { id, value, label, type } = dept;
+      return { id, value, label, type };
     };
 
     // 监听props.modelValue变化，直接赋值，不进行额外处理
@@ -115,7 +115,7 @@ export default defineComponent({
           : selectedValue.value
             ? [selectedValue.value]
             : [];
-      const tagHeight = multiple ? "60px" : "32px";
+      const tagHeight = multiple ? "60px" : "35px";
       const memberOptions = {
         showTabs: MemberTabs.Employee | MemberTabs.CurUser,
         multiple: multiple,
@@ -129,7 +129,7 @@ export default defineComponent({
             modelValue={tags}
             class={"_fc-org-select"}
             style={{ height: tagHeight }}
-            editable={{ editable }}
+            editable={editable}
             emptyText={placeholder}
             onEditTag={() => editable && (showDialog.value = true)}
           ></SelectedTags>

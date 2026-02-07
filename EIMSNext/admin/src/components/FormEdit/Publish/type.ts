@@ -1,25 +1,25 @@
-import { TagType } from "@eimsnext/components";
+import { DataItemType } from "@eimsnext/components";
 import { MemberType } from "@eimsnext/models";
 
-export const convertMemberTypeToTagType = (mType: MemberType): TagType => {
+export const convertMemberTypeToTagType = (mType: MemberType): DataItemType => {
     switch (mType) {
         case MemberType.Department:
-            return TagType.Department;
+            return DataItemType.Department;
         case MemberType.Employee:
-            return TagType.Employee;
+            return DataItemType.Employee;
         case MemberType.Role:
-            return TagType.Role;
+            return DataItemType.Role;
         default:
-            return TagType.None;
+            return DataItemType.Unknown;
     }
 }
-export const convertTagTypeToMemberType = (tType: TagType): MemberType => {
+export const convertTagTypeToMemberType = (tType: DataItemType): MemberType => {
     switch (tType) {
-        case TagType.Department:
+        case DataItemType.Department:
             return MemberType.Department;
-        case TagType.Employee:
+        case DataItemType.Employee:
             return MemberType.Employee;
-        case TagType.Role:
+        case DataItemType.Role:
             return MemberType.Role;
         default:
             return MemberType.None;

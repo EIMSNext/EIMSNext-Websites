@@ -79,7 +79,7 @@ onBeforeMount(async () => {
     position: relative;
     height: 100%;
     margin-left: $sidebar-width;
-    overflow-y: auto;
+    overflow: hidden;
     transition: margin-left 0.28s;
 
     .fixed-header {

@@ -328,7 +328,7 @@ export enum ApproveMode {
   AutoSign,
 }
 export enum CandidateType {
-  None,
+  Unknown,
   Department,
   Employee,
   Role,

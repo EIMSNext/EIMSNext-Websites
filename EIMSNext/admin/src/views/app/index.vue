@@ -1,6 +1,6 @@
 <template>
-  <form-edit v-if="showFormEditor" :formId="newFormId" :usingFlow="usingWorkflow" :isLedger="isLedger"
-    @close="showFormEditor = false" />
+  <form-edit v-if="showFormEditor && newForm" :modelValue="showFormEditor" :formDef="newForm!"
+    :usingFlow="usingWorkflow" :isLedger="isLedger" @close="showFormEditor = false" />
   <Layout>
     <div class="empty-app">
       <div class="empty-content">
@@ -46,7 +46,7 @@ import { formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n()
 
-const newFormId = ref("")
+const newForm = ref<FormDef>()
 const router = useRouter();
 const appStore = useAppStore()
 const formStore = useFormStore();
@@ -91,7 +91,7 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
   };
 
   formDefService.post<FormDef>(req).then(resp => {
-    newFormId.value = resp.id
+    newForm.value = resp
     formStore.update(resp);
     contextStore.setAppChanged(); //reload 菜单
 

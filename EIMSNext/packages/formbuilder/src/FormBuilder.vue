@@ -13,18 +13,17 @@
       </template>
       <template #handle>
         <div v-if="isgod" class="handle">
-          <el-button size="small" class="btn-info" style="border:none" @click="setJson">导入JSON
+          <el-button size="small" class="btn-info" style="border: none" @click="setJson">导入JSON
           </el-button>
-          <el-button size="small" class="btn-info" style="border:none" @click="setOption">导入Options
+          <el-button size="small" class="btn-info" style="border: none" @click="setOption">导入Options
           </el-button>
-          <el-button size="small" class="btn-info" style="border:none" @click="showJson">生成JSON
+          <el-button size="small" class="btn-info" style="border: none" @click="showJson">生成JSON
           </el-button>
-          <el-button size="small" class="btn-info" style="border:none" @click="showOption">生成Options
+          <el-button size="small" class="btn-info" style="border: none" @click="showOption">生成Options
           </el-button>
         </div>
       </template>
     </fc-designer>
-
     <el-dialog :title="title[type]" v-model="state" class="_fc-t-dialog">
       <div ref="editor" v-if="state"></div>
       <span style="color: red" v-if="err">输入内容格式有误!</span>
@@ -60,11 +59,11 @@ import { is } from "@eimsnext/form-render-core";
 import formCreate from "@eimsnext/form-render-elplus";
 import { copyTextToClipboard } from "@eimsnext/form-designer";
 import { ArrowDown } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
-import { FormContent, FormType, FormDefRequest, FormDef } from "@eimsnext/models";
-import { formDefService } from "@eimsnext/services";
+import {
+  FormContent,
+} from "@eimsnext/models";
 import "@eimsnext/form-designer/dist/index.css";
-import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
+import { cloneDeep } from "lodash";
 
 const TITLE = [
   "生成规则",
@@ -85,21 +84,9 @@ export default {
       type: Object,
       default: () => reactive(null),
     },
-    formName: {
-      type: String,
-      default: () => ref(""),
-    },
     formDef: {
       type: Object,
       default: () => null,
-    },
-    usingFlow: {
-      type: Boolean,
-      default: () => false,
-    },
-    isLedger: {
-      type: Boolean,
-      default: () => false,
     },
   },
   data() {
@@ -203,7 +190,7 @@ export default {
           "fcFlex2",
           "timePicker",
           "switch",
-          "rate"
+          "rate",
         ],
         hiddenItemConfig: {
           default: ["field"],
@@ -236,9 +223,8 @@ export default {
         ],
       },
       isgod: true,
-      oldFormName: "",
       oldLayout: "",
-      oldOptions: ""
+      oldOptions: "",
     };
   },
   watch: {
@@ -251,55 +237,9 @@ export default {
     value() {
       this.load();
     },
-    dark(n) {
-      if (document.startViewTransition) {
-        const c = this.$refs.switch.$el.getBoundingClientRect(),
-          u = c.left + c.width / 2,
-          d = c.top + c.height / 2,
-          f = Math.hypot(
-            Math.max(u, innerWidth - u),
-            Math.max(d, innerHeight - d)
-          );
-        const g = [
-          `circle(0px at ${u}px ${d}px)`,
-          `circle(${f}px at ${u}px ${d}px)`,
-        ];
-        document
-          .startViewTransition(() => {
-            this.changeDark(n);
-          })
-          .ready.then(() => {
-            document.documentElement.animate(
-              {
-                clipPath: n ? [...g].reverse() : g,
-              },
-              {
-                duration: 400,
-                easing: "ease-in",
-                pseudoElement: n
-                  ? "::view-transition-old(root)"
-                  : "::view-transition-new(root)",
-              }
-            );
-          });
-      } else {
-        this.changeDark(n);
-      }
-    },
-    formDef(n) {
-      if (n) {
-        if (n.content) {
-          if (n.content.layout) this.$refs.designer.setRule(n.content.layout);
-          if (n.content.options)
-            this.$refs.designer.setOptions(n.content.options);
-        }
-      }
-    },
   },
   methods: {
-    async onSave() {
-      const contextStore = useContextStore();
-      const formStore = useFormStore();
+    onSave() {
       const rule = this.$refs.designer.getJson();
       const options = this.$refs.designer.getOptionsJson();
 
@@ -308,42 +248,21 @@ export default {
       content.layout = rule;
       content.options = options;
 
-      let req = {
-        id: "",
-        appId: contextStore.appId,
-        name: this.formName,
-        type: FormType.Form,
-        content: content,
-        usingWorkflow: this.usingFlow,
-        isLedger: this.isLedger,
-      };
-
-      if (this.formDef && this.formDef.id) {
-        req.id = this.formDef.id;
-        let resp = await formDefService.patch(req.id, req);
-        formStore.update(resp);
-        contextStore.setAppChanged(); //reload 菜单
-        ElMessage.success("保存成功");
-        this.$emit("save", false);
-      } else {
-        let resp = await formDefService.post(req);
-        formStore.update(resp);
-        contextStore.setAppChanged(); //reload 菜单
-        ElMessage.success("保存成功");
-        this.$emit("save", true);
-      }
+      this.$emit("save", content);
+      this.resetDirty(content);
+    },
+    onCancel() {
+      this.$refs.designer.setRule(JSON.parse(this.oldLayout));
+      this.$refs.designer.setOptions(JSON.parse(this.oldOptions));
     },
     onPreview() {
-      this.$refs.designer.openPreview()
+      this.$refs.designer.openPreview();
     },
     handleChat() {
       this.$refs.designer.activeModule = "ai";
       this.$nextTick(() => {
         document.querySelector("._fd-ai-chat-input textarea").focus();
       });
-    },
-    switchForm() {
-      // console.log("switchForm", arguments);
     },
     changeDark(n) {
       if (n) {
@@ -417,22 +336,40 @@ export default {
       }
       this.state = false;
     },
+    isDirty() {
+      try {
+        const curLayout = JSON.stringify(this.$refs.designer.getJson());
+        const curOptions = JSON.stringify(this.$refs.designer.getOptionsJson());
+
+        return (
+          curLayout !== this.oldLayout ||
+          curOptions !== this.oldOptions
+        );
+      } catch (e) {
+        return false;
+      }
+    },
+    resetDirty(content) {
+      this.oldLayout = content?.layout ? JSON.stringify(content.layout) : "";
+      this.oldOptions = content?.options ? JSON.stringify(content.options) : "";
+    },
   },
   beforeCreate() {
     window.jsonlint = jsonlint;
   },
   mounted() {
-    this.isgod = (process.env.NODE_ENV === 'development' || this.$route.query.god === 'cn')
+    this.isgod =
+      process.env.NODE_ENV === "development" || this.$route.query.god === "cn";
 
-    this.oldFormName = this.formName
     if (this.formDef && this.formDef.content) {
-      if (this.formDef.content.layout) {
-        this.oldLayout = this.formDef.content.layout;
-        this.$refs.designer.setRule(this.formDef.content.layout);
+      const content = cloneDeep(this.formDef.content)
+      if (content.layout) {
+        this.oldLayout = JSON.stringify(content.layout);
+        this.$refs.designer.setRule(content.layout);
       }
-      if (this.formDef.content.options) {
-        this.oldOptions = this.formDef.content.options
-        this.$refs.designer.setOptions(this.formDef.content.options);
+      if (content.options) {
+        this.oldOptions = JSON.stringify(content.options);
+        this.$refs.designer.setOptions(content.options);
       }
     }
   },

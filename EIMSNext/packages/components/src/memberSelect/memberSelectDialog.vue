@@ -12,8 +12,9 @@
 <script lang="ts" setup>
 import "./style/index.less";
 import { ref, reactive, onBeforeMount } from "vue";
-import { ISelectedTag, TagType } from "../selectedTags/type";
+import { ISelectedTag } from "../selectedTags/type";
 import { IMemberLimit, IMemberSelectOptions, MemberTabs } from "./type";
+import { DataItemType } from "@/common";
 
 defineOptions({
   name: "MemberSelectDialog",
@@ -31,7 +32,7 @@ const props = withDefaults(
 
 const tagsRef = ref<ISelectedTag[]>([]);
 onBeforeMount(() => {
-  tagsRef.value = (props.tags || []).filter(x => x.type != TagType.None)
+  tagsRef.value = (props.tags || []).filter(x => x.type != DataItemType.Unknown)
 });
 
 
@@ -41,14 +42,14 @@ const openLink = () => {
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
 const cancel = () => {
-  tagsRef.value = (props.tags || []).filter(x => x.type != TagType.None)
+  tagsRef.value = (props.tags || []).filter(x => x.type != DataItemType.Unknown)
   emit("update:modelValue", false);
   emit("cancel");
 };
 const save = () => {
   emit(
     "ok",
-    tagsRef.value.filter((x) => x.type != TagType.None)
+    tagsRef.value.filter((x) => x.type != DataItemType.Unknown)
   );
 };
 </script>

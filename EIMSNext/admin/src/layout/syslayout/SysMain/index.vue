@@ -1,5 +1,5 @@
 <template>
-    <section class="app-main" :style="{ height: appMainHeight }">
+    <section class="app-main">
         <router-view>
             <template #default="{ Component, route }">
                 <transition enter-active-class="animate__animated animate__fadeIn" mode="out-in">
@@ -14,15 +14,6 @@
 
 <script setup lang="ts">
 import { useSettingsStore } from "@/store";
-import variables from "@/styles/variables.module.scss";
-
-const appMainHeight = computed(() => {
-    if (useSettingsStore().tagsView) {
-        return `calc(100vh - ${variables["navbar-height"]} - ${variables["tags-view-height"]})`;
-    } else {
-        return `calc(100vh - ${variables["navbar-height"]})`;
-    }
-});
 </script>
 
 <style lang="scss" scoped>
@@ -30,6 +21,11 @@ const appMainHeight = computed(() => {
     position: relative;
     overflow: hidden;
     background-color: var(--el-bg-color-page);
-    padding: 12px 12px 0;
+    padding: 12px;
+    height: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 </style>
