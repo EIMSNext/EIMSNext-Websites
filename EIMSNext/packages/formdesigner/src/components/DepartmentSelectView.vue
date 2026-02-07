@@ -1,6 +1,6 @@
 <template>
   <div class="org-select-view">
-    <SelectedTags :modelValue="modelValue" :style="{ height: multiple ? '60px' : '42px' }" :editable="true"
+    <SelectedTags :modelValue="tags" :style="{ height: multiple ? '60px' : '35px' }" :editable="true"
       :emptyText="t('comp.emptyDept')"></SelectedTags>
   </div>
 </template>
@@ -25,6 +25,19 @@ export default defineComponent({
   inject: ['designer'],
   components: {
     SelectedTags,
+  },
+  data() {
+    return {
+      tags: []
+    }
+  },
+  watch: {
+    modelValue: {
+      handler(val) {
+        this.tags = val || [];
+      },
+      deep: true
+    }
   },
   computed: {
     t() {

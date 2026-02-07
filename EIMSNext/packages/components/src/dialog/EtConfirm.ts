@@ -24,7 +24,7 @@ export enum ConfirmResult {
 const confirm = (
   message: string | VNode,
   options: ConfirmOptions = {},
-  t?: any
+  t?: any,
 ): Promise<ConfirmResult> => {
   return new Promise((resolve) => {
     // 创建容器
@@ -74,9 +74,11 @@ const confirm = (
       title: options.title || "确认操作吗？",
       showCancel: options.showCancel ?? true,
       showNoSave: options.showNoSave ?? false,
-      cancelText: t !== undefined ? t("common.cancel") : "取消",
-      okText: t !== undefined ? t("common.ok") : "确定",
-      noSaveText: t !== undefined ? t("common.noSave") : "不保存",
+      cancelText:
+        options.cancelText || (t !== undefined ? t("common.cancel") : "取消"),
+      okText: options.okText || (t !== undefined ? t("common.ok") : "确定"),
+      noSaveText:
+        options.noSaveText || (t !== undefined ? t("common.noSave") : "不保存"),
       icon: options.icon || MessageIcon.Warning,
       iconColor: options.iconColor,
       width: options.width || "500px",
@@ -87,7 +89,7 @@ const confirm = (
     // 渲染到容器
     render(
       h(EtConfirmDialog, props, { default: () => messageVNode }),
-      container
+      container,
     );
   });
 };
@@ -96,7 +98,7 @@ export const EtConfirm = {
   showDialog: (
     message: string,
     options: ConfirmOptions = {},
-    t?: any
+    t?: any,
   ): Promise<ConfirmResult> => {
     return confirm(message, options, t);
   },

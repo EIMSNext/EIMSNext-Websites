@@ -46,11 +46,11 @@ import {
 import { useUserStore } from "@eimsnext/store";
 import {
   ISelectedTag,
-  TagType,
   MessageIcon,
   IListItem,
   EtConfirm,
   MemberTabs,
+  DataItemType,
 } from "@eimsnext/components";
 import { formDefService } from "@eimsnext/services";
 
@@ -62,23 +62,23 @@ const showConfirmDialog = ref(false);
 // const http = inject<HttpClient>("http")!;
 
 const listData: IListItem[] = [
-  { id: "111", label: "111", icon: "el-UserFilled", color: "red" },
-  { id: "222", label: "222", icon: "el-UserFilled", color: "red" },
+  { id: "111", label: "111", icon: "el-UserFilled", iconColor: "red", type: DataItemType.Unknown },
+  { id: "222", label: "222", icon: "el-UserFilled", iconColor: "red", type: DataItemType.Unknown },
 ];
 const listTile = ref("list test");
 const selectedList = ref(["111"]);
 
 const title = ref("标题");
 const selected = ref([
-  { id: "111", label: "aaa", type: TagType.Employee },
-  { id: "222", label: "bbb", type: TagType.Department },
-  { id: "333", label: "ccc", type: TagType.Role, error: true },
+  { id: "111", label: "aaa", type: DataItemType.Employee },
+  { id: "222", label: "bbb", type: DataItemType.Department },
+  { id: "333", label: "ccc", type: DataItemType.Role, error: true },
 ]);
 
 const changeTags = () => {
   selected.value = [
-    { id: "222", label: "bbb", type: TagType.Department },
-    { id: "333", label: "ccc", type: TagType.Role, error: true },
+    { id: "222", label: "bbb", type: DataItemType.Department },
+    { id: "333", label: "ccc", type: DataItemType.Role, error: true },
   ];
 };
 

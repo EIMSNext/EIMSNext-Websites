@@ -34,7 +34,7 @@
                 <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
                 </el-button>
               </template>
-            </el-table-column> -->
+</el-table-column> -->
           </el-table>
 
           <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
@@ -59,7 +59,7 @@ import { ODataQuery } from "@/utils/query";
 import { DataPerms, Department, Employee, FieldType } from "@eimsnext/models";
 import { SortDirection, employeeService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, EtConfirm } from "@eimsnext/components";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, EtConfirm, ConfirmResult } from "@eimsnext/components";
 import { TableInstance, TableTooltipData } from "element-plus";
 
 defineOptions({
@@ -117,7 +117,7 @@ const leftBars = ref<ToolbarItem[]>([
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
-          if (confirm) {
+          if (confirm == ConfirmResult.Yes) {
             await employeeService.delete("batch", { keys: checkedDatas.value.map((x) => x.id) }).then(() => {
               handleQuery();
             });

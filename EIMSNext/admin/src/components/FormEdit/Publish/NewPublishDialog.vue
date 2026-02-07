@@ -27,7 +27,7 @@
 </template>
 <script setup lang="ts">
 import { FormDef, AuthGroup, DataPerms, AuthGroupType, AuthGroupRequest, Member, MemberType } from "@eimsnext/models";
-import { ISelectedTag, SelectedTags, MemberSelectDialog, MemberTabs, TagType } from "@eimsnext/components";
+import { ISelectedTag, SelectedTags, MemberSelectDialog, MemberTabs, } from "@eimsnext/components";
 import AuthGroupEditor from "./AuthGroupEditor.vue";
 
 import { useI18n } from "vue-i18n";
@@ -72,7 +72,7 @@ const save = async () => {
         name: newAuthGrp.value.name,
         desc: newAuthGrp.value.desc,
         type: newAuthGrp.value.type,
-        members: members.value.map<Member>(x => { return { id: x.id, code: x.code, label: x.label, type: convertTagTypeToMemberType(x.type), cascadedDept: x.cascadedDept ?? false } }),
+        members: members.value.map<Member>(x => { return { id: x.id, value: x.value, label: x.label, type: convertTagTypeToMemberType(x.type), cascadedDept: x.cascadedDept ?? false } }),
         dataPerms: newAuthGrp.value.dataPerms,
         dataFilter: newAuthGrp.value.dataFilter,
         disabled: newAuthGrp.value.disabled,

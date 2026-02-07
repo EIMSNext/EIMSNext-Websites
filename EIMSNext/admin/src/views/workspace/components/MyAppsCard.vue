@@ -63,7 +63,7 @@ import { App, UserType } from "@eimsnext/models";
 import { useAppStore, useContextStore, useUserStore } from "@eimsnext/store";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
-import { EtConfirm } from "@eimsnext/components";
+import { ConfirmResult, EtConfirm } from "@eimsnext/components";
 const { t } = useI18n()
 
 const router = useRouter();
@@ -101,7 +101,7 @@ const gotoApp = async (app: App) => {
 };
 const handleDeleteClick = async (app: App) => {
   var confirm = await EtConfirm.showDialog(t("admin.deleteFormConfirm_Content"), { title: t('admin.deleteFormConfirm_Title', [app?.name]) }, t)
-  if (confirm) {
+  if (confirm== ConfirmResult.Yes) {
     appStore.remove(app.id)
   }
 };

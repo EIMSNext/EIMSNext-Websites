@@ -4,7 +4,7 @@ import {
   splitSubField,
   toFormFieldDef,
 } from "@/FieldSelect/type";
-import { ITreeNode, TreeNodeType } from "@/common";
+import { ITreeNode, } from "@/common";
 import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
 
 export interface INodeForm {

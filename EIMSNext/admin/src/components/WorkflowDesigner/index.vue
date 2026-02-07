@@ -21,7 +21,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { WorkflowDiagram, WorkflowMetaEditor } from "@eimsnext/components";
 import {
   FlowNodeType,
   IFlowContext,

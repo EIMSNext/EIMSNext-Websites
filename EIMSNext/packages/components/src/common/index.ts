@@ -1,4 +1,29 @@
 import { IListItem } from "@/component";
+export interface IDataItem {
+  id: string;
+  value?: string;
+  label: string;
+  type: DataItemType;
+}
+export enum DataItemType {
+  Unknown = 0,
+  Department,
+  Employee,
+  Role,
+  Dynamic,
+  AuthGroup,
+  FlowNode,
+  Print,
+  App,
+  Form,
+  Group,
+  Field,
+}
+export interface IDataItemView extends IDataItem {
+  icon?: string;
+  iconColor?: string;
+  data?: any;
+}
 import {
   CurrentUser,
   Department,
@@ -7,26 +32,12 @@ import {
   RoleGroup,
 } from "@eimsnext/models";
 
-export interface ITreeNode {
-  id: string;
-  code?: string;
-  label: string;
+export interface ITreeNode extends IDataItemView {
   displayLabel?: string;
-  nodeType: TreeNodeType;
-  icon?: string;
   children?: ITreeNode[];
-  data?: any;
   checked?: boolean;
   disabled?: boolean;
   readonly?: boolean;
-}
-export enum TreeNodeType {
-  None = 0,
-  Dept,
-  Form,
-  Field,
-  Group,
-  Role,
 }
 
 export function findNode(
@@ -81,9 +92,9 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
 export function DeptToTreeNode(dept: Department): ITreeNode {
   return {
     id: dept.id,
-    code: dept.code,
+    value: dept.code,
     label: `${dept.code} - ${dept.name}`,
-    nodeType: TreeNodeType.Dept,
+    type: DataItemType.Department,
     children: [],
     data: dept,
     icon: "icon-organization",
@@ -106,7 +117,7 @@ export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
     const rootNode: ITreeNode = {
       id: x.id,
       label: x.name,
-      nodeType: TreeNodeType.Group,
+      type: DataItemType.Group,
       children: [],
       data: x,
       icon: "el-Folder",
@@ -122,7 +133,7 @@ export function RoleToTreeNode(role: Role): ITreeNode {
   return {
     id: role.id,
     label: role.name,
-    nodeType: TreeNodeType.Role,
+    type: DataItemType.Role,
     children: [],
     data: role,
     icon: "el-role",
@@ -132,8 +143,9 @@ export function RoleToTreeNode(role: Role): ITreeNode {
 export function EmployeeToListItem(emp: Employee): IListItem {
   return {
     id: emp.id,
-    code: emp.code,
+    value: emp.code,
     label: emp.empName,
+    type: DataItemType.Employee,
     icon: "el-UserFilled",
     data: emp,
   };

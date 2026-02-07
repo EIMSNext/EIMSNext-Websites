@@ -40,8 +40,8 @@
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
-    <member-select-dialog v-model="showMemberDialog" :member-options="{ showTabs: MemberTabs.Employee }" destroy-on-close
-      @ok="finishSelect" />
+    <member-select-dialog v-model="showMemberDialog" :member-options="{ showTabs: MemberTabs.Employee }"
+      destroy-on-close @ok="finishSelect" />
   </div>
 </template>
 
@@ -50,7 +50,7 @@ import { ODataQuery } from "@/utils/query";
 import { DataPerms, Department, Employee, FieldType, Role } from "@eimsnext/models";
 import { SortDirection, employeeService, roleService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm, MemberTabs } from "@eimsnext/components";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm, MemberTabs, ConfirmResult } from "@eimsnext/components";
 
 defineOptions({
   name: "RoleManager",
@@ -103,7 +103,7 @@ const leftBars = ref<ToolbarItem[]>([
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
-          if (confirm) {
+          if (confirm == ConfirmResult.Yes) {
             await roleService.removeEmps(roleId.value, checkedDatas.value.map(x => x.id))
               .then(() => {
                 handleQuery()

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <form-edit v-if="showFormEditor" :formId="newFormId" :usingFlow="usingWorkflow" :isLedger="isLedger"
-      @close="showFormEditor = false" />
+    <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
+      :isLedger="isLedger" @close="showFormEditor = false" />
 
     <div class="app-title">
       <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
@@ -80,7 +80,7 @@ import { formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n()
 
-const newFormId = ref("")
+const newForm = ref<FormDef>()
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
@@ -129,7 +129,7 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
   };
 
   formDefService.post<FormDef>(req).then(resp => {
-    newFormId.value = resp.id
+    newForm.value = resp
     formStore.update(resp);
     contextStore.setAppChanged(); //reload 菜单
 
@@ -140,7 +140,7 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
 const editForm = async (formId: string) => {
   const form = await formStore.get(formId)
   if (form) {
-    newFormId.value = form.id;
+    newForm.value = form;
     usingWorkflow.value = form.usingWorkflow;
     isLedger.value = form.isLedger
 
