@@ -6,7 +6,7 @@
       @editTag="editTag" />
     <member-select-dialog v-model="showMemberDialog" :member-options="{
       showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic,
-      cascadedDept: true, showCascade: true
+      cascadedDept: true, showCascade: true, showContract: true
     }" @ok="finishSelect" />
   </template>
 </template>

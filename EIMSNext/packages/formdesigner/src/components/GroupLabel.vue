@@ -1,5 +1,7 @@
 <template>
-  <div class="el-form-item__label"><span class="_fc-field-title">{{ title }}</span></div>
+  <div style=" padding: 0 10px;">
+    <div class="el-form-item__label"><span class="_fc-field-title">{{ title }}</span></div>
+  </div>
 </template>
 
 <script>

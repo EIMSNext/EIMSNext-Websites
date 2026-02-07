@@ -1,34 +1,4 @@
 ._fc-org-select
 {
     padding: 3px;
-    border: 1px dashed #dcdfe6;
-    border-radius: 4px;
-    min-height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-._fc-org-tag
-{  
-    background: #F5F6F8;
-    color: #525559;
-    padding: 0 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    height: 24px;
-    line-height: 24px;
-    border: 1px solid #D7E3FD
-}
-._fc-org-empty
-{
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #909399;
-    font-size: 14px;
-    height: 24px;
-    line-height: 24px;
 }

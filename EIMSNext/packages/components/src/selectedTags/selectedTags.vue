@@ -1,11 +1,14 @@
 <template>
   <div class="selected-tags" :class="{ clickable: editable }" style="overflow: auto; gap: 4px" @click.stop="editTag">
     <template v-if="modelValue.length > 0">
-      <el-tag v-for="tag in modelValue.filter((x) => x.type != TagType.None)" :key="tag.id" :closable="closable"
+      <el-tag v-for="tag in modelValue.filter((x) => x.type != DataItemType.Unknown)" :key="tag.id" :closable="closable"
         :class="{ 'error-tag': tag.error }" @close="removeTag(tag)" @click.stop="tagClick(tag)">
-        <et-icon icon="el-UserFilled" icon-class="tag-icon" :color="getIconColor(tag)"></et-icon>
-        <el-text class="tag-label" :class="{ 'has-error': tag.error, 'no-padding': closable }"
-          :style="{ color: '#909399' }">{{ tag.label }}</el-text>
+        <div class="et-tag"> 
+          <et-icon :icon="getTagIcon(tag)" icon-class="tag-icon"
+            :color="getIconColor(tag)"></et-icon>
+          <el-text class="tag-label" :class="{ 'has-error': tag.error, 'no-padding': closable }"
+            :style="{ color: '#909399' }">{{ tag.label }}</el-text>
+        </div>
       </el-tag>
     </template>
     <template v-else>
@@ -21,8 +24,9 @@
 <script lang="ts" setup>
 import "./style/index.less";
 import { reactive, ref, toRef } from "vue";
-import { ISelectedTag, TagType } from "./type";
+import { ISelectedTag } from "./type";
 import { useLocale } from "element-plus";
+import { DataItemType } from "@/common";
 const { t } = useLocale();
 
 defineOptions({
@@ -43,12 +47,30 @@ const props = withDefaults(
 );
 
 const tagsRef = toRef(props.modelValue ?? []);
+const getTagIcon = (tag: ISelectedTag) => {
+  let icon = tag.icon;
+  if (!icon) {
+    switch (tag.type) {
+      case DataItemType.Department:
+        icon = "icon-organization";
+        break;
+      case DataItemType.Role:
+        icon = "icon-role";
+        break;
+      default:
+        icon = "el-UserFilled";
+        break
+    }
+  }
+  // console.log("tag icon", tag, icon)
+  return icon;
+}
 const getIconColor = (tag: ISelectedTag) => {
   switch (tag.type) {
-    case TagType.Employee:
-      return "#909399"; // 灰色图标，与选择前的样式一致
+    case DataItemType.Department:
+      return "#46c26f";
     default:
-      return "#909399"; // 灰色图标，与选择前的样式一致
+      return "#46c26f";
   }
 };
 
@@ -67,3 +89,9 @@ const tagClick = (tag: ISelectedTag) => {
   emit("tagClick", tag);
 };
 </script>
+<style lang="scss" scoped>
+.et-tag {
+  display: flex;
+  align-items: center;
+}
+</style>

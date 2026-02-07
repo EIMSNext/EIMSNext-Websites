@@ -1680,28 +1680,28 @@ export default {
         inactiveColor: "关闭时的背景色",
       },
     },
-    departmentselect: {
+    department1: {
       name: "部门单选",
       props: {
         readonly: "只读",
         disabled: "禁用",
       },
     },
-    departmentselect2: {
+    department2: {
       name: "部门多选",
       props: {
         readonly: "只读",
         disabled: "禁用",
       },
     },
-    employeeselect: {
+    employee1: {
       name: "成员单选",
       props: {
         readonly: "只读",
         disabled: "禁用",
       },
     },
-    employeeselect2: {
+    employee2: {
       name: "成员多选",
       props: {
         readonly: "只读",

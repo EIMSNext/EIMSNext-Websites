@@ -101,6 +101,7 @@ import { buildWfNodeListItems } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { IConditionList } from "@/ConditionList/type";
 import { IListItem } from "@/list/type";
+import { DataItemType } from "@/common";
 const { t } = useLocale();
 
 defineOptions({
@@ -121,7 +122,7 @@ const wfNodeId = ref("");
 const nodeAction = ref("submit");
 const nodeList = ref<IListItem[]>([]);
 const actionList = ref<IListItem[]>([
-  { id: "submit", label: t("dataflow.wfAction_Submit") },
+  { id: "submit", label: t("dataflow.wfAction_Submit"), type: DataItemType.Unknown },
   // { id: "return", label: t("dataflow.wfAction_Return") },
 ]);
 

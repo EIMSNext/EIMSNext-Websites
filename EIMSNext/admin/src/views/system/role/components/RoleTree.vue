@@ -8,14 +8,15 @@
     @cancel="showDeleteDialog = false" @ok="handleDeleteConfirm">
     确认删除已选中的数据项?
   </et-confirm-dialog>
-  <el-card shadow="never">
+  <el-card shadow="never"
+    style="border: none; height: 100%; display: flex; flex-direction: column; overflow: hidden; min-width: 300px; padding: 0;">
     <div class="form-action">
       <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
       <el-button @click="handleAddGroupClick">
         <et-icon icon="el-plus"> </et-icon>
       </el-button>
     </div>
-    <el-tree ref="roleTreeRef" class="dept-tree mt-2" :data="roleList"
+    <el-tree ref="roleTreeRef" class="role-tree mt-2" :data="roleList"
       :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false"
       :filter-node-method="handleFilter" default-expand-all @node-click="handleNodeClick">
       <template #default="{ node, data }">
@@ -24,11 +25,11 @@
             <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
-              <et-icon v-if="data.nodeType == TreeNodeType.Group" icon="el-Plus" class="action-item"
+              <et-icon v-if="data.type == DataItemType.Group" icon="el-Plus" class="action-item"
                 @click="handleAddRoleClick(data)" />
               <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
-              <et-icon icon="el-Delete" class="action-item" :disabled="data.children && data.children.length > 0"
-                @click="handleDeleteClick(data)" />
+              <et-icon icon="el-Delete" v-if="node.level > 0" class="action-item"
+                :disabled="data.children && data.children.length > 0" @click="handleDeleteClick(data)" />
             </div>
           </div>
         </div>
@@ -40,7 +41,7 @@
 <script setup lang="ts">
 import { RoleGroup, Role } from "@eimsnext/models";
 import { roleGroupService, roleService } from "@eimsnext/services";
-import { ITreeNode, TreeNodeType, buildRoleTree } from "@eimsnext/components";
+import { DataItemType, ITreeNode, buildRoleTree } from "@eimsnext/components";
 import { TreeInstance } from "element-plus";
 
 const props = defineProps({
@@ -93,7 +94,7 @@ const handleFilter = (value: string, data: any) => {
 
 /** 部门树节点 Click */
 const handleNodeClick = (data: ITreeNode) => {
-  if (data.nodeType == TreeNodeType.Role) {
+  if (data.type == DataItemType.Role) {
     selectedRole.value = data.data;
     currentGroup.value = roleList.value!.find(x => x.id == selectedRole.value?.roleGroupId)?.data
     emit("role-click", data.data);
@@ -115,7 +116,7 @@ const handleAddRoleClick = (data: ITreeNode) => {
 const handleEditClick = (data: ITreeNode) => {
   editMode.value = true;
 
-  if (data.nodeType == TreeNodeType.Role) {
+  if (data.type == DataItemType.Role) {
     selectedRole.value = data.data;
     currentGroup.value = roleList.value!.find(x => x.id == selectedRole.value?.roleGroupId)?.data
     showAddEditRoleDialog.value = true;
@@ -139,13 +140,15 @@ const handleDeleteClick = (data: ITreeNode) => {
   if (toDeleteNode.value.data) showDeleteDialog.value = true;
 };
 const handleDeleteConfirm = async () => {
-  if (toDeleteNode.value!.nodeType == TreeNodeType.Role) {
+  if (toDeleteNode.value!.type == DataItemType.Role) {
     await roleService.delete(toDeleteNode.value?.id!);
   }
   else {
     await roleGroupService.delete(toDeleteNode.value?.id!);
   }
 
+  // 删除后重新加载角色树数据，刷新界面
+  loadData();
   showDeleteDialog.value = false;
 };
 </script>
@@ -153,6 +156,44 @@ const handleDeleteConfirm = async () => {
 .form-action {
   display: flex;
   margin-bottom: 5px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+// 角色树样式
+.role-tree {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  min-height: 0;
+  width: 100%;
+  max-height: calc(100vh - 200px);
+
+  // 确保节点内容不会被截断
+  :deep(.el-tree-node) {
+    white-space: nowrap;
+  }
+
+  // 调整节点内容样式
+  :deep(.el-tree-node__content) {
+    white-space: nowrap;
+  }
+
+  // 调整树容器样式
+  :deep(.el-tree) {
+    min-width: 100%;
+    height: 100%;
+  }
+
+  // 调整树节点展开图标样式
+  :deep(.el-tree-node__expand-icon) {
+    flex-shrink: 0;
+  }
+
+  // 调整树节点内容样式
+  :deep(.el-tree-node__content) {
+    flex-shrink: 0;
+  }
 }
 
 .node-data {
@@ -163,26 +204,23 @@ const handleDeleteConfirm = async () => {
 }
 
 .node-wrapper {
-  // 设置相对定位，作为.node-action的定位基准
-  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
 
   .node-label {
-    // 移除固定的margin-right，改为flex布局自动分配空间
     flex: 1;
     padding-left: 5px;
+    white-space: nowrap;
   }
 
   .node-action {
-    // 调整绝对定位，确保和部门名称在同一行
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: none;
     white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 10px;
+    pointer-events: none;
+    display: none;    
+      align-items: center;
 
     .action-item {
       margin-right: 5px;
@@ -202,7 +240,6 @@ const handleDeleteConfirm = async () => {
   &:hover {
     .node-action {
       display: flex;
-      align-items: center;
     }
   }
 }

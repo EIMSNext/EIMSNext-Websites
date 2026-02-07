@@ -8,7 +8,7 @@ const findTreeLabel = function (find, data, key, props) {
       find.splice(
         find.indexOf(v[key || "id"]),
         1,
-        v[fieldKey.label || "label"]
+        v[fieldKey.label || "label"],
       );
     }
     if (is.trueArray(v[fieldKey.children || "children"])) {
@@ -19,10 +19,11 @@ const findTreeLabel = function (find, data, key, props) {
 };
 
 const findCheckboxLabel = function (find, data) {
-  return find.map(item => {
+  return find.map((item) => {
     // 如果item是对象，获取其value属性进行匹配
-    const valueToFind = typeof item === 'object' && item !== null ? item.value : item;
-    const match = data.find(v => v.value === valueToFind);
+    const valueToFind =
+      typeof item === "object" && item !== null ? item.value : item;
+    const match = data.find((v) => v.value === valueToFind);
     return match ? match.label : item;
   });
 };
@@ -53,20 +54,38 @@ export default function renderPreview(_, ctx) {
     ctx.rule.subForm ||
     (Array.isArray(subForm) ? subForm.length : subForm) ||
     [
-            "fcgroup", "fcsubform", "tableform", "stepform", 
-            "nestedtableform", "infinitetableform", "fcupload", "fc-upload",
-            "departmentselect","employeeselect", "fileupload", "imageupload"
-          ].indexOf(ctx.trueType.toLowerCase()) > -1
+      "fcgroup",
+      "fcsubform",
+      "tableform",
+      "stepform",
+      "nestedtableform",
+      "infinitetableform",
+      "fcupload",
+      "fc-upload",
+      "department2",
+      "employee2",
+      "fileupload",
+      "imageupload",
+    ].indexOf(ctx.trueType.toLowerCase()) > -1
   ) {
     if (ctx.trueType.toLowerCase() === "fcupload") {
       ctx.prop.props.disabled = true;
     }
     return ctx.parser.render(_, ctx);
   }
-  if (["radio", "select", "select2", "checkbox"].indexOf(type) > -1) {
+  if (
+    [
+      "radio",
+      "select",
+      "select2",
+      "checkbox",
+      "department1",
+      "employee1",
+    ].indexOf(type) > -1
+  ) {
     val = findCheckboxLabel(
       [...toArray(val)],
-      ctx.prop.props.options || ctx.prop.props.formCreateInject.options || []
+      ctx.prop.props.options || ctx.prop.props.formCreateInject.options || [],
     ).join(", ");
   } else if (["timePicker", "datePicker", "slider"].indexOf(type) > -1) {
     val = Array.isArray(val) ? val.join(" - ") : val;
@@ -85,7 +104,7 @@ export default function renderPreview(_, ctx) {
             ctx.prop.props.formCreateInject.options ||
             [],
           "value",
-          ctx.prop.props.props
+          ctx.prop.props.props,
         ).join("/");
       })
       .join(", ");
@@ -94,7 +113,7 @@ export default function renderPreview(_, ctx) {
     val = findTreeLabel(
       value,
       ctx.prop.props.data || ctx.prop.props.formCreateInject.options || [],
-      "key"
+      "key",
     ).join(", ");
   } else if (["tree", "elTreeSelect"].indexOf(type) > -1) {
     const data =
@@ -102,7 +121,7 @@ export default function renderPreview(_, ctx) {
     val = findTreeLabel(
       [...toArray(val)],
       data,
-      type === "elTreeSelect" ? "value" : "id"
+      type === "elTreeSelect" ? "value" : "id",
     ).join(", ");
   } else if (type === "fcEditor" || readMode === "html") {
     return h("div", { innerHTML: val });
@@ -120,7 +139,7 @@ export default function renderPreview(_, ctx) {
             fit: "cover",
           }),
         ]);
-      })
+      }),
     );
   } else if (
     (type === "switch" || type === "el-switch") &&

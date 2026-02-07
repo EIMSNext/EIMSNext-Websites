@@ -9,6 +9,7 @@
     @ok="save"
   >
     <el-form
+      ref="formRef"
       :model="formData"
       :rules="rules"
       label-width="80px"
@@ -30,6 +31,7 @@
 import { Department, DepartmentRequest } from "@eimsnext/models";
 import { departmentService } from "@eimsnext/services";
 import { useDeptStore } from "@eimsnext/store";
+import { FormInstance } from "element-plus";
 
 defineOptions({
   name: "AddEditDept",
@@ -49,6 +51,7 @@ const deptStore = useDeptStore();
 const showDialog = ref(true);
 const title = props.edit ? "修改部门信息" : "添加子部门";
 const formData = ref<Department>({ id: "", code: "", name: "", isCompany: false });
+const formRef = ref<FormInstance>();
 if (props.edit) formData.value = props.pDept;
 else {
   formData.value.parentId = props.pDept.id;
@@ -64,21 +67,27 @@ const cancel = () => {
   emit("cancel");
 };
 const save = async () => {
-  const newDept: DepartmentRequest = {
-    id: formData.value.id,
-    code: formData.value.code,
-    name: formData.value.name,
-    parentId: formData.value.parentId,
-    isCompany: false,
-  };
+  if (!formRef.value) return;
+  
+  await formRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      const newDept: DepartmentRequest = {
+        id: formData.value.id,
+        code: formData.value.code,
+        name: formData.value.name,
+        parentId: formData.value.parentId,
+        isCompany: false,
+      };
 
-  if (props.edit) {
-    formData.value = await departmentService.patch<Department>(newDept.id, newDept);
-  } else {
-    formData.value = await departmentService.post<Department>(newDept);
-  }
+      if (props.edit) {
+        formData.value = await departmentService.patch<Department>(newDept.id, newDept);
+      } else {
+        formData.value = await departmentService.post<Department>(newDept);
+      }
 
-  deptStore.update(formData.value);
-  emit("ok", formData.value);
+      deptStore.update(formData.value);
+      emit("ok", formData.value);
+    }
+  });
 };
 </script>

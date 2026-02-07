@@ -4,8 +4,6 @@
     :icon="MessageIcon.Warning" :showNoSave="false" @ok="handleDeleteConfirm">
     <div>{{ t("admin.deleteFormConfirm_Content") }}</div>
   </EtConfirmDialog>
-  <form-edit v-if="showFormEditor" :formId="selectedFormId" :usingFlow="usingWorkflow" :isLedger="isLedger"
-    @close="closeEditor" />
   <div v-if="!item.meta || !item.meta.hidden">
     <!--【叶子节点】显示叶子节点或唯一子节点且父节点未配置始终显示 -->
     <template v-if="
@@ -31,7 +29,7 @@
               <template #dropdown>
                 <el-dropdown-menu style="min-width: 150px">
                   <el-dropdown-item @click="editForm(item.meta?.id)">{{ t("common.edit") }}</el-dropdown-item>
-                  <el-dropdown-item @click="editForm(item.meta?.id)">
+                  <el-dropdown-item @click="editNameAndIcon(item.meta?.id)">
                     {{ t("admin.editNameAndIcon") }}
                   </el-dropdown-item>
                   <el-divider style="margin: 3px 0" />
@@ -65,9 +63,9 @@ defineOptions({
 });
 
 import path from "path-browserify";
-import { RouteMeta, RouteRecordRaw } from "vue-router";
+import { RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
-import { useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
+import { useContextStore, useFormStore, useUserStore, useAppStore } from "@eimsnext/store";
 import { FormDef, UserType } from "@eimsnext/models";
 import { MessageIcon } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
@@ -101,20 +99,19 @@ const props = defineProps({
 });
 
 const contextStore = useContextStore();
+const appStore = useAppStore()
 const formStore = useFormStore();
 // 可见的唯一子节点
 const onlyOneChild = ref();
 const selectedFormId = ref("");
 const selectedForm = ref<FormDef>()
-const showFormEditor = ref(false);
-const usingWorkflow = ref(false);
-const isLedger = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const userStore = useUserStore();
 const curUser = toRef(userStore.currentUser)
 
 const systemStore = useSystemStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
+
 /**
  * 检查是否仅有一个可见子节点
  *
@@ -161,15 +158,18 @@ function resolvePath(routePath: string) {
 /**
  * 编辑表单
  */
-async function editForm(formId?: string) {
+const emit = defineEmits(["editForm"]);
+function editForm(formId?: string) {
+  if (formId) {
+    emit("editForm", formId)
+  }
+}
+async function editNameAndIcon(formId?: string) {
   if (formId) {
     let form = await formStore.get(formId);
     if (form) {
       selectedFormId.value = formId;
       selectedForm.value = form
-      usingWorkflow.value = form.usingWorkflow;
-      isLedger.value = form.isLedger;
-      showFormEditor.value = true;
     }
   }
 }
@@ -193,9 +193,6 @@ async function handleDeleteConfirm() {
 
   showDeleteConfirmDialog.value = false;
 };
-function closeEditor() {
-  showFormEditor.value = false;
-}
 </script>
 
 <style lang="scss" scoped>
