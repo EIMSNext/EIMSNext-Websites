@@ -91,7 +91,7 @@ import { FUniver } from "@univerjs/core/facade";
 import { FWorkbook, FWorksheet, FRange } from "@univerjs/sheets/facade";
 import { useFormStore } from "@eimsnext/store";
 import { FieldDef, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
-import { ITreeNode, TreeNodeType } from "@eimsnext/components";
+import { DataItemType, ITreeNode} from "@eimsnext/components";
 import Draggable from "vuedraggable";
 import { printTemplateService } from "@eimsnext/services";
 import { IPrintMetadata } from "./type";
@@ -124,9 +124,9 @@ const populateFields = () => {
     props.formDef.content.items.forEach((x: FieldDef) => {
       let node: ITreeNode = {
         id: x.field,
-        code: x.field,
+        value: x.field,
         label: x.title,
-        nodeType: TreeNodeType.Field,
+        type: DataItemType.Field,
         data: x,
       };
       //TODO: 此处应该循环
@@ -135,9 +135,9 @@ const populateFields = () => {
         x.columns.forEach((y) => {
           let subNode: ITreeNode = {
             id: `${node.id}-${y.field}`,
-            code: `${node.id}.${y.field}`,
+            value: `${node.id}.${y.field}`,
             label: y.title,
-            nodeType: TreeNodeType.Field,
+            type: DataItemType.Field,
             data: y,
           };
 
@@ -233,7 +233,7 @@ const initSheet = (data = {}) => {
         //字段打印设置
         let printMeata: IPrintMetadata = {
           dataType: "field",
-          id: draggingNode.value.code!,
+          id: draggingNode.value.value!,
           fieldType: draggingNode.value.data.type,
         };
         cell.setCustomMetaData(printMeata);
