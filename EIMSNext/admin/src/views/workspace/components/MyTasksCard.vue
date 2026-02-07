@@ -137,6 +137,10 @@ const goToMyCced = () => {
         height: 40px;
         color: #1296db;
       }
+
+      .step-text {
+        margin-top: 20px;
+      }
     }
   }
 }
