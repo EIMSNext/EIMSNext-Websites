@@ -16,8 +16,8 @@ export function buildFormListItems(app: App): IFormItem[] {
       let item: IFormItem = {
         id: x.menuId,
         label: x.title!,
-        data: { id: x.menuId, appId: app.id, label: x.title },
-        type: DataItemType.Form,
+        icon:x.icon,
+        color:x.iconColor
       };
 
       items.push(item);
