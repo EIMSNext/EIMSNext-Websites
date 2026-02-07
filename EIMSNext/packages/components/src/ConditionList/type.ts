@@ -1,3 +1,4 @@
+import { DataItemType } from "@/common";
 import { IFormFieldDef } from "@/FieldSelect/type";
 import { IFieldSortList } from "@/FieldSortList/type";
 import { IListItem } from "@/list/type";
@@ -45,10 +46,10 @@ export const dataOperators: Record<string, string[]> = {
   checkbox: ["in", "nin", "empty", "notempty"],
   select: ["eq", "ne", "in", "nin", "empty", "notempty"],
   select2: ["in", "nin", "empty", "notempty"],
-  departmentselect: ["eq", "ne", "in", "nin", "empty", "notempty"],
-  departmentselect2: ["in", "nin", "empty", "notempty"],
-  employeeselect: ["eq", "ne", "in", "nin", "empty", "notempty"],
-  employeeselect2: ["in", "nin", "empty", "notempty"],
+  department1: ["eq", "ne", "in", "nin", "empty", "notempty"],
+  department2: ["in", "nin", "empty", "notempty"],
+  employee1: ["eq", "ne", "in", "nin", "empty", "notempty"],
+  employee2: ["in", "nin", "empty", "notempty"],
   other: ["empty", "notempty"],
 };
 
@@ -114,10 +115,10 @@ export function toDynamicFindOptions(
       dfilter.op = filter.op;
       if (
         filter.value?.value &&
-        (dfilter.type == FieldType.EmployeeSelect ||
-          dfilter.type == FieldType.EmployeeSelect2 ||
-          dfilter.type == FieldType.DepartmentSelect ||
-          dfilter.type == FieldType.DepartmentSelect2)
+        (dfilter.type == FieldType.Employee1 ||
+          dfilter.type == FieldType.Employee2 ||
+          dfilter.type == FieldType.Department1 ||
+          dfilter.type == FieldType.Department2)
       ) {
         dfilter.value = filter.value.value.map((x: ISelectedTag) => x.id);
       } else {
@@ -241,5 +242,9 @@ export function toODataQuery<T>(
 
 export function toListItem(options?: ValueOption[]) {
   if (!options) return [];
-  return options.map<IListItem>((opt) => ({ id: opt.value, label: opt.label }));
+  return options.map<IListItem>((opt) => ({
+    id: opt.value,
+    label: opt.label,
+    type: DataItemType.Unknown,
+  }));
 }

@@ -68,6 +68,8 @@ export default {
   array: "fc-group",
   object: "fc-sub-form",
   subForm: "fc-sub-form",
-  departmentselect2: "departmentselect",
-  employeeselect2: "employeeselect",
+  department1: "fc-department-select",
+  department2: "fc-department-select",
+  employee1: "fc-employee-select",
+  employee2: "fc-employee-select",
 };

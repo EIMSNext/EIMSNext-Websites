@@ -35,7 +35,7 @@
               :key="opt.id"></el-option>
           </el-select>
         </template>
-        <template v-else-if="dataType == ConditionFieldType.Select">
+        <template v-else-if="dataType == ConditionFieldType.Select1">
           <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
             <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
               :key="opt.id"></el-option>
@@ -48,19 +48,19 @@
               :key="opt.id"></el-option>
           </el-select>
         </template>
-        <template v-else-if="dataType == ConditionFieldType.DepartmentSelect">
+        <template v-else-if="dataType == ConditionFieldType.Department1">
           <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyDept')"
             @editTag="selectDept(false)" />
         </template>
-        <template v-else-if="dataType == ConditionFieldType.DepartmentSelect2">
+        <template v-else-if="dataType == ConditionFieldType.Department2">
           <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyDept')"
             @editTag="selectDept(true)" />
         </template>
-        <template v-else-if="dataType == ConditionFieldType.EmployeeSelect">
+        <template v-else-if="dataType == ConditionFieldType.Employee1">
           <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyEmp')"
             @editTag="selectEmp(false)" />
         </template>
-        <template v-else-if="dataType == ConditionFieldType.EmployeeSelect2">
+        <template v-else-if="dataType == ConditionFieldType.Employee2">
           <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyEmp')"
             @editTag="selectEmp(true)" />
         </template>
@@ -86,6 +86,7 @@ import memberSelectDialog from "@/memberSelect/memberSelectDialog.vue";
 import { useLocale } from "element-plus";
 import { MemberTabs } from "@/memberSelect/type";
 import { ISelectedTag } from "@/selectedTags/type";
+import { DataItemType } from "@/common";
 const { t } = useLocale();
 
 defineOptions({
@@ -109,10 +110,10 @@ const memberShowTabs = ref(MemberTabs.None)
 const condValueType = toRef(props.modelValue.type);
 const value = toRef<any>(props.modelValue.value);
 if (!value.value && condValueType.value == ConditionValueType.Custom
-  && (dataType.value == ConditionFieldType.EmployeeSelect ||
-    dataType.value == ConditionFieldType.EmployeeSelect2 ||
-    dataType.value == ConditionFieldType.DepartmentSelect ||
-    dataType.value == ConditionFieldType.DepartmentSelect2
+  && (dataType.value == ConditionFieldType.Employee1 ||
+    dataType.value == ConditionFieldType.Employee2 ||
+    dataType.value == ConditionFieldType.Department1 ||
+    dataType.value == ConditionFieldType.Department2
   )
 ) {
   value.value = []
@@ -128,8 +129,8 @@ const condFieldValue = ref<IFormFieldDef>(
 );
 
 const condValueTypes: IListItem[] = [
-  { id: ConditionValueType.Custom, label: t("comp.value_Custom") },
-  { id: ConditionValueType.Field, label: t("comp.value_Field") },
+  { id: ConditionValueType.Custom, label: t("comp.value_Custom"), type: DataItemType.Unknown },
+  { id: ConditionValueType.Field, label: t("comp.value_Field"), type: DataItemType.Unknown },
 ];
 
 const emit = defineEmits(["update:modelValue", "change"]);
@@ -137,10 +138,10 @@ const emit = defineEmits(["update:modelValue", "change"]);
 const onValueTypeChange = () => {
   props.modelValue.type = condValueType.value;
   if (condValueType.value == ConditionValueType.Custom
-    && (dataType.value == ConditionFieldType.EmployeeSelect ||
-      dataType.value == ConditionFieldType.EmployeeSelect2 ||
-      dataType.value == ConditionFieldType.DepartmentSelect ||
-      dataType.value == ConditionFieldType.DepartmentSelect2
+    && (dataType.value == ConditionFieldType.Employee1 ||
+      dataType.value == ConditionFieldType.Employee2 ||
+      dataType.value == ConditionFieldType.Department1 ||
+      dataType.value == ConditionFieldType.Department2
     )
   ) {
     value.value = []

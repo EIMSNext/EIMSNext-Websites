@@ -5,9 +5,7 @@
       <div class="nav-left">
         <slot name="top-left">
           <el-button class="back-btn" @click="close">
-            <el-icon class="back-icon">
-              <ArrowLeft />
-            </el-icon>
+            <et-icon class="back-icon" icon="el-ArrowLeft" />
           </el-button>
           <slot name="title" />
         </slot>
@@ -33,13 +31,20 @@ defineOptions({
 const props = defineProps<{
   modelValue: boolean;
   appendToBody?: boolean;
+  closing?: () => boolean
 }>();
 
 const emit = defineEmits(["update:modelValue", "close"]);
 
 function close() {
-  emit("update:modelValue", false);
-  emit("close");
+  let allow = true;
+  if (props.closing)
+    allow = props.closing()
+
+  if (allow) {
+    emit("update:modelValue", false);
+    emit("close");
+  }
 }
 </script>
 <style lang="scss" scoped>

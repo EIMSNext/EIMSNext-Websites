@@ -19,7 +19,8 @@
             <div v-if="editable" class="node-action">
               <et-icon icon="el-Plus" class="action-item" @click="handleAddClick(data)" />
               <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
-              <et-icon icon="el-Delete" v-if="data.data.parentId" class="action-item" @click="handleDeleteClick(data)" />
+              <et-icon icon="el-Delete" v-if="data.data.parentId" class="action-item"
+                @click="handleDeleteClick(data)" />
             </div>
           </div>
         </div>
@@ -147,18 +148,18 @@ const handleDeleteConfirm = async () => {
   :deep(.el-tree-node__content) {
     white-space: nowrap;
   }
-  
+
   // 调整树容器样式
   :deep(.el-tree) {
     min-width: 100%;
     height: 100%; // 确保树容器占满可用空间
   }
-  
+
   // 调整树节点展开图标样式
   :deep(.el-tree-node__expand-icon) {
     flex-shrink: 0;
   }
-  
+
   // 调整树节点内容样式
   :deep(.el-tree-node__content) {
     flex-shrink: 0;
@@ -187,9 +188,9 @@ const handleDeleteConfirm = async () => {
     white-space: nowrap;
     flex-shrink: 0;
     margin-left: 10px;
-    opacity: 0;
-    transition: opacity 0.2s;
     pointer-events: none;
+    display: none;
+    align-items: center;
 
     .action-item {
       margin-right: 5px;
@@ -208,8 +209,7 @@ const handleDeleteConfirm = async () => {
   // 确保整个.node-wrapper都能触发hover效果
   &:hover {
     .node-action {
-      opacity: 1;
-      pointer-events: auto;
+      display: flex;
     }
   }
 }

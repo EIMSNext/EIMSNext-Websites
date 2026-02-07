@@ -10,7 +10,7 @@ import { FieldBuildRule, IFieldBuildSetting, INodeForm, buildNodeFieldTree } fro
 import { FilterNodeMethodFunction, TreeNodeData } from "element-plus";
 import { IFormFieldDef } from "@/FieldSelect/type";
 import { ref, toRef, watch } from "vue";
-import { ITreeNode, TreeNodeType, findNode } from "@/common";
+import { DataItemType, ITreeNode, findNode } from "@/common";
 import { FieldType } from "@eimsnext/models";
 import { useLocale } from "element-plus"
 const { t } = useLocale()
@@ -41,7 +41,7 @@ const selectedNode = ref<ITreeNode>();
 if (nodeList.value.length == 1) { }
 else {
   nodeList.value.forEach((x) => {
-    if (x.nodeType == TreeNodeType.Form) {
+    if (x.type == DataItemType.Form) {
       defaultExpand.value.push(x.id);
     }
     if (x.data.nodeId == props.modelValue.nodeId && x.data.code == props.modelValue.field) {

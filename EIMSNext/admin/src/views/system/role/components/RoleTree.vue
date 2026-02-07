@@ -8,7 +8,8 @@
     @cancel="showDeleteDialog = false" @ok="handleDeleteConfirm">
     确认删除已选中的数据项?
   </et-confirm-dialog>
-  <el-card shadow="never" style="border: none; height: 100%; display: flex; flex-direction: column; overflow: hidden; min-width: 300px; padding: 0;">
+  <el-card shadow="never"
+    style="border: none; height: 100%; display: flex; flex-direction: column; overflow: hidden; min-width: 300px; padding: 0;">
     <div class="form-action">
       <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
       <el-button @click="handleAddGroupClick">
@@ -24,11 +25,11 @@
             <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
-              <et-icon v-if="data.nodeType == TreeNodeType.Group" icon="el-Plus" class="action-item"
+              <et-icon v-if="data.type == DataItemType.Group" icon="el-Plus" class="action-item"
                 @click="handleAddRoleClick(data)" />
               <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
-              <et-icon icon="el-Delete" v-if="node.level > 0" class="action-item" :disabled="data.children && data.children.length > 0"
-                @click="handleDeleteClick(data)" />
+              <et-icon icon="el-Delete" v-if="node.level > 0" class="action-item"
+                :disabled="data.children && data.children.length > 0" @click="handleDeleteClick(data)" />
             </div>
           </div>
         </div>
@@ -40,7 +41,7 @@
 <script setup lang="ts">
 import { RoleGroup, Role } from "@eimsnext/models";
 import { roleGroupService, roleService } from "@eimsnext/services";
-import { ITreeNode, TreeNodeType, buildRoleTree } from "@eimsnext/components";
+import { DataItemType, ITreeNode, buildRoleTree } from "@eimsnext/components";
 import { TreeInstance } from "element-plus";
 
 const props = defineProps({
@@ -93,7 +94,7 @@ const handleFilter = (value: string, data: any) => {
 
 /** 部门树节点 Click */
 const handleNodeClick = (data: ITreeNode) => {
-  if (data.nodeType == TreeNodeType.Role) {
+  if (data.type == DataItemType.Role) {
     selectedRole.value = data.data;
     currentGroup.value = roleList.value!.find(x => x.id == selectedRole.value?.roleGroupId)?.data
     emit("role-click", data.data);
@@ -115,7 +116,7 @@ const handleAddRoleClick = (data: ITreeNode) => {
 const handleEditClick = (data: ITreeNode) => {
   editMode.value = true;
 
-  if (data.nodeType == TreeNodeType.Role) {
+  if (data.type == DataItemType.Role) {
     selectedRole.value = data.data;
     currentGroup.value = roleList.value!.find(x => x.id == selectedRole.value?.roleGroupId)?.data
     showAddEditRoleDialog.value = true;
@@ -139,7 +140,7 @@ const handleDeleteClick = (data: ITreeNode) => {
   if (toDeleteNode.value.data) showDeleteDialog.value = true;
 };
 const handleDeleteConfirm = async () => {
-  if (toDeleteNode.value!.nodeType == TreeNodeType.Role) {
+  if (toDeleteNode.value!.type == DataItemType.Role) {
     await roleService.delete(toDeleteNode.value?.id!);
   }
   else {
@@ -177,18 +178,18 @@ const handleDeleteConfirm = async () => {
   :deep(.el-tree-node__content) {
     white-space: nowrap;
   }
-  
+
   // 调整树容器样式
   :deep(.el-tree) {
     min-width: 100%;
     height: 100%;
   }
-  
+
   // 调整树节点展开图标样式
   :deep(.el-tree-node__expand-icon) {
     flex-shrink: 0;
   }
-  
+
   // 调整树节点内容样式
   :deep(.el-tree-node__content) {
     flex-shrink: 0;
@@ -217,9 +218,9 @@ const handleDeleteConfirm = async () => {
     white-space: nowrap;
     flex-shrink: 0;
     margin-left: 10px;
-    opacity: 0;
-    transition: opacity 0.2s;
     pointer-events: none;
+    display: none;    
+      align-items: center;
 
     .action-item {
       margin-right: 5px;
@@ -238,10 +239,7 @@ const handleDeleteConfirm = async () => {
   // 确保整个.node-wrapper都能触发hover效果
   &:hover {
     .node-action {
-      opacity: 1;
-      pointer-events: auto;
       display: flex;
-      align-items: center;
     }
   }
 }

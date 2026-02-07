@@ -1,7 +1,13 @@
 import { IListItem } from "@/list/type";
-import { FlowNodeType, IFlowData, IFlowNodeData, getFlowNodeById } from "../Common/FlowData";
+import {
+  FlowNodeType,
+  IFlowData,
+  IFlowNodeData,
+  getFlowNodeById,
+} from "../Common/FlowData";
 import { useFormStore } from "@eimsnext/store";
 import { INodeForm } from "@/NodeFieldList/type";
+import { DataItemType } from "@/common";
 
 export function buildWfNodeListItems(wfFlowData: IFlowData): IListItem[] {
   const items: IListItem[] = [];
@@ -10,6 +16,7 @@ export function buildWfNodeListItems(wfFlowData: IFlowData): IListItem[] {
     let item: IListItem = {
       id: x.id,
       label: x.name,
+      type: DataItemType.FlowNode,
     };
 
     items.push(item);
@@ -20,7 +27,7 @@ export function buildWfNodeListItems(wfFlowData: IFlowData): IListItem[] {
 
 export async function getPrevNodes(
   flowData: IFlowData,
-  flowNode: IFlowNodeData
+  flowNode: IFlowNodeData,
 ): Promise<INodeForm[]> {
   const formStore = useFormStore();
   const nodes: INodeForm[] = [];
@@ -51,7 +58,8 @@ export async function getPrevNodes(
           break;
         case FlowNodeType.Insert:
           formId = prevNode.metadata.insertMeta?.formId;
-          node.singleResult = prevNode.metadata.insertMeta?.singleResult ?? true;
+          node.singleResult =
+            prevNode.metadata.insertMeta?.singleResult ?? true;
           break;
         case FlowNodeType.QueryOne:
           formId = prevNode.metadata.queryOneMeta?.formId;
@@ -73,7 +81,10 @@ export async function getPrevNodes(
   // console.log("nodes", nodes);
   return nodes;
 }
-function getPrevNode(flowData: IFlowData, flowNode: IFlowNodeData): IFlowNodeData | undefined {
+function getPrevNode(
+  flowData: IFlowData,
+  flowNode: IFlowNodeData,
+): IFlowNodeData | undefined {
   if (flowNode.nodeType == FlowNodeType.Start) return undefined;
 
   var prevId = flowNode.prevId;

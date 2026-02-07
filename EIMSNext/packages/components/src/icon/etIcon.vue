@@ -5,9 +5,8 @@
         <el-icon :class="iconClass" :color="color" :size="size">
           <component :is="icon.replace('el-', '')" />
         </el-icon></template>
-      <template v-else-if="icon.startsWith('iconfont-')">
-        <i :class="'iconfont icon-' + icon.replace('iconfont-', '') + ' ' + iconClass"
-          :style="'font-size:' + size + ';color:' + color">
+      <template v-else-if="icon.startsWith('icon-')">
+        <i :class="'iconfont ' + icon + ' ' + iconClass" :style="'font-size:' + size + ';color:' + color">
         </i></template>
       <template v-else-if="icon.startsWith('fc-')">
         <i :class="'fc-icon ' + icon.replace('fc-', '') + ' ' + iconClass"

@@ -22,8 +22,8 @@
           <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
           <div class="table-container">
             <el-table ref="tableRef" v-loading="loading" :data="dataRef" show-overflow-tooltip
-              :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" @selection-change="selectionChanged"
-              @row-click="edit">
+              :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName"
+              @selection-change="selectionChanged" @row-click="edit">
               <el-table-column type="selection" width="40" />
               <el-table-column label="姓名" width="150" prop="empName" />
               <el-table-column label="编码" width="150" prop="code" />
@@ -37,7 +37,7 @@
                   <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
                   </el-button>
                 </template>
-              </el-table-column> -->
+</el-table-column> -->
             </el-table>
           </div>
           <div class="pagination-container">
@@ -64,7 +64,7 @@ import { ODataQuery } from "@/utils/query";
 import { DataPerms, Department, Employee, FieldType } from "@eimsnext/models";
 import { SortDirection, employeeService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, EtConfirm } from "@eimsnext/components";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, EtConfirm, ConfirmResult } from "@eimsnext/components";
 import { TableInstance, TableTooltipData } from "element-plus";
 
 defineOptions({
@@ -122,7 +122,7 @@ const leftBars = ref<ToolbarItem[]>([
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
-          if (confirm) {
+          if (confirm == ConfirmResult.Yes) {
             await employeeService.delete("batch", { keys: checkedDatas.value.map((x) => x.id) }).then(() => {
               handleQuery();
             });
@@ -348,7 +348,7 @@ onMounted(() => {
   height: 100vh;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 20px;
+  padding: 0 8px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -384,12 +384,12 @@ onMounted(() => {
   background-color: #fff;
   min-height: 0;
   width: 100%;
-  max-height: calc(100vh - 200px); // 设置最大高度，确保出现滚动条
+  max-height: calc(100vh - 180px); // 设置最大高度，确保出现滚动条
   display: flex;
   flex-direction: column;
-  
+
   // 确保内部元素能够触发横向滚动且不产生额外滚动条
-  > * {
+  >* {
     min-width: 100%;
     max-height: 100%; // 限制内部元素高度
     overflow: hidden; // 防止内部元素产生滚动条

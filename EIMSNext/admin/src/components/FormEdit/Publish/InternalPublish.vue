@@ -122,7 +122,7 @@ const editTag = (grp: AuthGroup) => {
   showMemberDialog.value = true
 }
 const finishSelect = (tags: ISelectedTag[]) => {
-  let newMembers = tags.map<Member>(x => { return { id: x.id, code: x.code, label: x.label, type: convertTagTypeToMemberType(x.type), cascadedDept: x.cascadedDept ?? false } })
+  let newMembers = tags.map<Member>(x => { return { id: x.id, value: x.value, label: x.label, type: convertTagTypeToMemberType(x.type), cascadedDept: x.cascadedDept ?? false } })
 
   let req: AuthGroupRequest = {
     id: selectedGrp.value!.id,

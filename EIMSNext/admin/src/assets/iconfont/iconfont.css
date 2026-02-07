@@ -1,12 +1,8 @@
-/* stylelint-disable selector-pseudo-element-colon-notation */
-/* stylelint-disable font-family-no-missing-generic-family-keyword */
-/* stylelint-disable font-family-name-quotes */
 @font-face {
   font-family: "iconfont"; /* Project id 5026874 */
-  src:
-    url("//at.alicdn.com/t/c/font_5026874_ny6y5bns7f.woff2?t=1759477290297") format("woff2"),
-    url("//at.alicdn.com/t/c/font_5026874_ny6y5bns7f.woff?t=1759477290297") format("woff"),
-    url("//at.alicdn.com/t/c/font_5026874_ny6y5bns7f.ttf?t=1759477290297") format("truetype");
+  src: url('iconfont.woff2?t=1769927271964') format('woff2'),
+       url('iconfont.woff?t=1769927271964') format('woff'),
+       url('iconfont.ttf?t=1769927271964') format('truetype');
 }
 
 .iconfont {
@@ -17,16 +13,28 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-settings:before {
+  content: "\e60b";
+}
+
+.icon-appdefault:before {
+  content: "\e628";
+}
+
+.icon-role:before {
+  content: "\e7a2";
+}
+
+.icon-organization:before {
+  content: "\e9c8";
+}
+
 .icon-adminFilled:before {
   content: "\e604";
 }
 
 .icon-admin:before {
   content: "\e600";
-}
-
-.icon-organization:before {
-  content: "\e9c8";
 }
 
 .icon-ledgerdefault:before {
@@ -49,10 +57,6 @@
   content: "\e646";
 }
 
-.icon-appdefault:before {
-  content: "\e628";
-}
-
 .icon-myapproved:before {
   content: "\e686";
 }
@@ -64,3 +68,4 @@
 .icon-mytodo:before {
   content: "\e774";
 }
+

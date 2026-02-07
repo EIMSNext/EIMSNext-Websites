@@ -12,14 +12,14 @@
           <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
 
           <div class="table-container">
-           <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="40" />
-            <el-table-column label="姓名" width="150" prop="empName" />
-            <el-table-column label="编码" width="150" prop="code" />
-            <el-table-column label="工作电话" width="150" prop="workPhone" />
-            <el-table-column label="工作邮箱" width="150" prop="workEmail" />
-            <el-table-column label="部门" prop="department.name" />
-            <!-- <el-table-column label="操作" fixed="right" width="150">
+            <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
+              <el-table-column type="selection" width="40" />
+              <el-table-column label="姓名" width="150" prop="empName" />
+              <el-table-column label="编码" width="150" prop="code" />
+              <el-table-column label="工作电话" width="150" prop="workPhone" />
+              <el-table-column label="工作邮箱" width="150" prop="workEmail" />
+              <el-table-column label="部门" prop="department.name" />
+              <!-- <el-table-column label="操作" fixed="right" width="150">
               <template #default="scope">
                 <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
                 </el-button>
@@ -27,7 +27,7 @@
                 </el-button>
               </template>
 </el-table-column> -->
-          </el-table>
+            </el-table>
           </div>
           <div class="pagination-container">
             <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
@@ -43,8 +43,8 @@
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
-    <member-select-dialog v-model="showMemberDialog" :member-options="{ showTabs: MemberTabs.Employee }" destroy-on-close
-      @ok="finishSelect" />
+    <member-select-dialog v-model="showMemberDialog" :member-options="{ showTabs: MemberTabs.Employee }"
+      destroy-on-close @ok="finishSelect" />
   </div>
 </template>
 
@@ -53,7 +53,7 @@ import { ODataQuery } from "@/utils/query";
 import { DataPerms, Department, Employee, FieldType, Role } from "@eimsnext/models";
 import { SortDirection, employeeService, roleService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm, MemberTabs } from "@eimsnext/components";
+import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm, MemberTabs, ConfirmResult } from "@eimsnext/components";
 
 defineOptions({
   name: "RoleManager",
@@ -106,7 +106,7 @@ const leftBars = ref<ToolbarItem[]>([
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
-          if (confirm) {
+          if (confirm == ConfirmResult.Yes) {
             await roleService.removeEmps(roleId.value, checkedDatas.value.map(x => x.id))
               .then(() => {
                 handleQuery()
@@ -307,7 +307,7 @@ onMounted(() => {
   height: 100vh;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 20px;
+  padding: 0 8px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

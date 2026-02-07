@@ -1,12 +1,7 @@
 <template>
   <el-dropdown trigger="click">
     <div class="middle-center">
-      <template v-if="userStore.currentUser.avatar">
-        <img :src="userStore.currentUser.avatar" class="rounded-full" />
-      </template>
-      <template v-else>
-        <et-icon icon="el-User" class="rounded-full"></et-icon>
-      </template>
+      <user-avatar :avatar="userStore.currentUser.avatar" :label="userStore.currentUser.empName" />
       <!-- <span>{{ userStore.currentUser.empName }}</span> -->
     </div>
     <template #dropdown>

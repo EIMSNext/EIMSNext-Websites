@@ -1,10 +1,11 @@
-import { ISelectedTag, TagType } from "@/selectedTags/type";
+import { ISelectedTag } from "@/selectedTags/type";
 import { CandidateType, IApprovalCandidate } from "../Common/FlowData";
+import { DataItemType } from "@/common";
 
 export function convertTagToCandidate(tag: ISelectedTag): IApprovalCandidate {
   return {
     candidateId: tag.id,
-    candidateType: convertTagTypeToCandidateType(tag.type),
+    candidateType: convertItemTypeToCandidateType(tag.type),
     candidateName: tag.label,
     cascadedDept: tag.cascadedDept ?? false,
   };
@@ -15,44 +16,44 @@ export function convertCandidateToTag(
   return {
     id: candidate.candidateId,
     label: candidate.candidateName,
-    type: convertCandidateTypeToTagType(candidate.candidateType),
+    type: convertCandidateTypeToItemType(candidate.candidateType),
     cascadedDept: candidate.cascadedDept,
   };
 }
-export function convertTagTypeToCandidateType(tagType: TagType): CandidateType {
-  let candidateType = CandidateType.None;
+export function convertItemTypeToCandidateType(tagType: DataItemType): CandidateType {
+  let candidateType = CandidateType.Unknown;
   switch (tagType) {
-    case TagType.Department:
+    case DataItemType.Department:
       candidateType = CandidateType.Department;
       break;
-    case TagType.Role:
+    case DataItemType.Role:
       candidateType = CandidateType.Role;
       break;
-    case TagType.Employee:
+    case DataItemType.Employee:
       candidateType = CandidateType.Employee;
       break;
-    case TagType.Dynamic:
+    case DataItemType.Dynamic:
       candidateType = CandidateType.Dynamic;
       break;
   }
   return candidateType;
 }
-export function convertCandidateTypeToTagType(
+export function convertCandidateTypeToItemType(
   candidateType: CandidateType
-): TagType {
-  let tagType = TagType.None;
+): DataItemType {
+  let tagType = DataItemType.Unknown;
   switch (candidateType) {
     case CandidateType.Department:
-      tagType = TagType.Department;
+      tagType = DataItemType.Department;
       break;
     case CandidateType.Role:
-      tagType = TagType.Role;
+      tagType = DataItemType.Role;
       break;
     case CandidateType.Employee:
-      tagType = TagType.Employee;
+      tagType = DataItemType.Employee;
       break;
     case CandidateType.Dynamic:
-      tagType = TagType.Dynamic;
+      tagType = DataItemType.Dynamic;
       break;
   }
   return tagType;
