@@ -21,4 +21,5 @@ export interface IMemberSelectOptions {
   multiple?: boolean;
   limit?: IMemberLimit;
   dynamicMembers?: ISelectedTag[];
+  showContract?: false;
 }

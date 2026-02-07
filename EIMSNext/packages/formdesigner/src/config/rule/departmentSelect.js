@@ -52,6 +52,7 @@ export default {
                 props: {
                   multiple: true,
                   cascadedDept: true,
+                  showContract:true
                 },
               },
             ],

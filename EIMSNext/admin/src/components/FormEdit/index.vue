@@ -74,9 +74,9 @@ const loadForm = (formId: string) => {
 };
 
 const onSaved = () => {
-  if (props.formId) {
-    loadForm(props.formId);
-  }
+  // if (props.formId) {
+  //   loadForm(props.formId);
+  // }
 };
 const tabChanging = (activeName: TabPaneName, oldActiveName: TabPaneName) => {
   console.log("tabChanging", oldActiveName, activeName);

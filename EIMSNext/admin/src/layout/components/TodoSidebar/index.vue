@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="app-title">
-      <et-icon icon="iconfont-mytodo" size="16px" class="step-image"></et-icon>
+      <et-icon icon="icon-mytodo" size="16px" class="step-image"></et-icon>
       <span v-if="isSidebarOpened" class="ml-[10px]">{{ t('admin.flowcenter') }}</span>
       <el-button class="side-bar-control" @click.stop="toggleSideBar"> <et-icon v-if="isSidebarOpened"
           icon="el-DArrowLeft" size="14px"></et-icon>
@@ -14,7 +14,7 @@
         <!-- 我的待办 -->
         <el-sub-menu index="mytasks">
           <template #title>
-            <et-icon icon="iconfont-mytodo" size="14px" class="step-image" />
+            <et-icon icon="icon-mytodo" size="14px" class="step-image" />
             <span class="app-menu-text" @click.stop="goToTaskType('mytasks')">{{ t("common.wfProcess.mytasks")
             }}</span>
           </template>
@@ -29,7 +29,7 @@
         <!-- 我发起的 -->
         <el-sub-menu index="mystarted">
           <template #title>
-            <et-icon icon="iconfont-mystarted" size="14px" class="step-image" />
+            <et-icon icon="icon-mystarted" size="14px" class="step-image" />
             <span class="app-menu-text" @click.stop="goToTaskType('mystarted')">{{ t("common.wfProcess.mystarted")
             }}</span>
           </template>
@@ -45,7 +45,7 @@
         <!-- 我审核的 -->
         <el-sub-menu index="myapproved">
           <template #title>
-            <et-icon icon="iconfont-myapproved" size="14px" class="step-image" />
+            <et-icon icon="icon-myapproved" size="14px" class="step-image" />
             <span class="app-menu-text" @click.stop="goToTaskType('myapproved')">{{ t("common.wfProcess.myapproved")
             }}</span>
           </template>
@@ -61,7 +61,7 @@
         <!-- 抄送我的 -->
         <el-sub-menu index="cctome">
           <template #title>
-            <et-icon icon="iconfont-mycced" size="14px" class="step-image" />
+            <et-icon icon="icon-mycced" size="14px" class="step-image" />
             <span class="app-menu-text" @click.stop="goToTaskType('cctome')">{{ t("common.wfProcess.cctome") }}</span>
           </template>
           <template v-for="app in appsRef" :key="app.id">
@@ -78,22 +78,22 @@
         @select="handleMenuSelect" class="todo-sidebar-menu">
         <!-- 我的待办 -->
         <el-menu-item index="mytasks" class="pl-15px" @click.stop="goToTaskType('mytasks')">
-          <et-icon icon="iconfont-mytodo" size="14px" class="step-image" />
+          <et-icon icon="icon-mytodo" size="14px" class="step-image" />
         </el-menu-item>
 
         <!-- 我发起的 -->
         <el-menu-item index="mystarted" class="pl-15px" @click.stop="goToTaskType('mystarted')">
-          <et-icon icon="iconfont-mystarted" size="14px" class="step-image" />
+          <et-icon icon="icon-mystarted" size="14px" class="step-image" />
         </el-menu-item>
 
         <!-- 我审核的 -->
         <el-menu-item index="myapproved" class="pl-15px" @click.stop="goToTaskType('myapproved')">
-          <et-icon icon="iconfont-myapproved" size="14px" class="step-image" />
+          <et-icon icon="icon-myapproved" size="14px" class="step-image" />
         </el-menu-item>
 
         <!-- 抄送我的 -->
         <el-menu-item index="cctome" class="pl-15px" @click.stop="goToTaskType('cctome')">
-          <et-icon icon="iconfont-mycced" size="14px" class="step-image" />
+          <et-icon icon="icon-mycced" size="14px" class="step-image" />
         </el-menu-item>
       </el-menu>
     </div>

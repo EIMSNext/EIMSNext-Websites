@@ -12,7 +12,7 @@
     <!-- <el-checkbox v-model="activeData.metadata.approveMeta!.enableCopyto" label="启用抄送" class="sub-item" /> -->
     <member-select-dialog v-model="showMemberDialog" :tags="selectedCandidateTags" :member-options="{
       showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic,
-      dynamicMembers: dynamicMembers, cascadedDept: true, showCascade: true
+      dynamicMembers: dynamicMembers, cascadedDept: true, showCascade: true, showContract: true
     }" destroy-on-close @ok="finishSelect" />
   </template>
 </template>
@@ -45,7 +45,7 @@ const flowContextRef = reactive<IFlowContext>(flowContext!);
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const showMemberDialog = ref(false);
 const selectedCandidateTags = ref<ISelectedTag[]>([]);
-const dynamicMembers = ref<ISelectedTag[]>([{ id: "starter", label: t('workflow.starter'), type: TagType.Dynamic, data: { id: "starter", label: t('workflow.starter') } }])
+const dynamicMembers = ref<ISelectedTag[]>([{ id: "starter", label: t('workflow.starter'), icon: "el-UserFilled", type: TagType.Dynamic, data: { id: "starter", label: t('workflow.starter') } }])
 
 const editTag = () => {
   showMemberDialog.value = true;

@@ -5,7 +5,7 @@
       <member-select v-model="tagsRef" :options="memberOptions" />
     </div>
     <template #footer-left>
-      <el-button @click="openLink">通讯录</el-button>
+      <el-button v-if="memberOptions?.showContract" @click="openLink">通讯录</el-button>
     </template>
   </et-dialog>
 </template>
@@ -31,11 +31,7 @@ const props = withDefaults(
 
 const tagsRef = ref<ISelectedTag[]>([]);
 onBeforeMount(() => {
-  if (props.tags && props.tags.length > 0) {
-    props.tags.forEach((x) => {
-      if (x.type != TagType.None) tagsRef.value.push(x);
-    });
-  }
+  tagsRef.value = (props.tags || []).filter(x => x.type != TagType.None)
 });
 
 
@@ -45,6 +41,7 @@ const openLink = () => {
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
 const cancel = () => {
+  tagsRef.value = (props.tags || []).filter(x => x.type != TagType.None)
   emit("update:modelValue", false);
   emit("cancel");
 };

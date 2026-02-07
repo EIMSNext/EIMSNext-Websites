@@ -86,7 +86,7 @@ export function DeptToTreeNode(dept: Department): ITreeNode {
     nodeType: TreeNodeType.Dept,
     children: [],
     data: dept,
-    icon: "el-UserFilled",
+    icon: "icon-organization",
   };
 }
 
@@ -125,7 +125,7 @@ export function RoleToTreeNode(role: Role): ITreeNode {
     nodeType: TreeNodeType.Role,
     children: [],
     data: role,
-    icon: "el-UserFilled",
+    icon: "el-role",
   };
 }
 

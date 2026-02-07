@@ -2,6 +2,7 @@ export interface ISelectedTag {
   id: string;
   label: string;
   type: TagType;
+  icon?: string;
   error?: boolean;
   data?: any;
   code?: string;

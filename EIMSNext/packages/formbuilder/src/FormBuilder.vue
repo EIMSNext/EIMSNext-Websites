@@ -235,7 +235,10 @@ export default {
           },
         ],
       },
-      isgod: true
+      isgod: true,
+      oldFormName: "",
+      oldLayout: "",
+      oldOptions: ""
     };
   },
   watch: {
@@ -318,23 +321,14 @@ export default {
       if (this.formDef && this.formDef.id) {
         req.id = this.formDef.id;
         let resp = await formDefService.patch(req.id, req);
-
         formStore.update(resp);
-        const appStore = useAppStore();
-        const app = await appStore.get(this.formDef.appId)
-        if (app) {
-          const menu = app.appMenus.find(x => x.menuId == this.formDef.id)
-          if (menu) {
-            menu.title = this.formName;
-            contextStore.setAppChanged(); //reload 菜单
-          }
-        }
+        contextStore.setAppChanged(); //reload 菜单
         ElMessage.success("保存成功");
         this.$emit("save", false);
       } else {
         let resp = await formDefService.post(req);
-        contextStore.setAppChanged(); //reload 菜单
         formStore.update(resp);
+        contextStore.setAppChanged(); //reload 菜单
         ElMessage.success("保存成功");
         this.$emit("save", true);
       }
@@ -430,11 +424,16 @@ export default {
   mounted() {
     this.isgod = (process.env.NODE_ENV === 'development' || this.$route.query.god === 'cn')
 
+    this.oldFormName = this.formName
     if (this.formDef && this.formDef.content) {
-      if (this.formDef.content.layout)
+      if (this.formDef.content.layout) {
+        this.oldLayout = this.formDef.content.layout;
         this.$refs.designer.setRule(this.formDef.content.layout);
-      if (this.formDef.content.options)
+      }
+      if (this.formDef.content.options) {
+        this.oldOptions = this.formDef.content.options
         this.$refs.designer.setOptions(this.formDef.content.options);
+      }
     }
   },
 };

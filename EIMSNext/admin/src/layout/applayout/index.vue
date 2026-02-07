@@ -23,16 +23,10 @@ import { useContextStore } from "@eimsnext/store";
 import AppMain from "./AppMain/index.vue"
 
 const contextStore = useContextStore();
-const systemStore = useSystemStore();
 const settingsStore = useSettingsStore();
-const isOpenSidebar = computed(() => systemStore.sidebar.opened);
 const fixedHeader = computed(() => settingsStore.fixedHeader); // 是否固定header
 const showTagsView = computed(() => settingsStore.tagsView); // 是否显示tagsView
 const route = useRoute();
-
-function handleOutsideClick() {
-  systemStore.closeSideBar();
-}
 
 watch(
   () => route.params.appId,

@@ -12,7 +12,7 @@ export default defineComponent({
     },
     placeholder: {
       type: String,
-      default: "+ 选择成员",
+      default: "选择成员",
     },
     multiple: {
       type: Boolean,
@@ -33,6 +33,10 @@ export default defineComponent({
     limitScope: {
       type: Array,
       default: () => [],
+    },
+    showContract: {
+      type: Boolean,
+      default: false,
     },
     // 从FormRender的prop.props中接收formCreateInject
     formCreateInject: {
@@ -96,97 +100,44 @@ export default defineComponent({
       showDialog.value = true;
     };
 
-    const css_icon_user_selected = {
-      color: "#52B59A",
-      marginRight: "4px",
-    };
-
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
       // 计算最终的禁用状态：禁用属性或查看模式
-      const isDisabled = disabled || isPreviewMode.value;
+      const editable = !(disabled || isPreviewMode.value);
       const limit = { depts: undefined };
       if (props.limitType == "custom" && props.limitScope?.length > 0) {
         limit.depts = props.limitScope;
       }
+      const tags = multiple
+        ? selectedValue.value || []
+        : selectedValue.value && Array.isArray(selectedValue.value)
+          ? selectedValue.value
+          : selectedValue.value
+            ? [selectedValue.value]
+            : [];
+      const tagHeight = multiple ? "60px" : "32px";
       const memberOptions = {
         showTabs: MemberTabs.Employee | MemberTabs.CurUser,
         multiple: multiple,
         limit: limit,
         limitScope: props.limitScope,
+        showContract: props.showContract,
       };
       return (
         <div style={{ width: "100%" }}>
-          <div
-            class={`_fc-org-select ${isDisabled ? "is-disabled" : ""}`}
-            style={{
-              cursor: isDisabled ? "not-allowed" : "pointer",
-              backgroundColor: isDisabled ? "#f5f7fa" : "#ffffff",
-            }}
-            onClick={() => !isDisabled && (showDialog.value = true)}
-          >
-            {selectedValue.value &&
-            typeof selectedValue.value === "object" &&
-            !Array.isArray(selectedValue.value) &&
-            selectedValue.value.label ? (
-              <div
-                class="_fc-org-tag"
-                style={{
-                  cursor: isDisabled ? "not-allowed" : "pointer",
-                }}
-                onClick={() => !isDisabled && handleTagClick()}
-              >
-                <et-icon
-                  icon="el-UserFilled"
-                  style={css_icon_user_selected}
-                ></et-icon>
-                {selectedValue.value.label}
-              </div>
-            ) : Array.isArray(selectedValue.value) &&
-              selectedValue.value.length > 0 ? (
-              selectedValue.value
-                .map((emp, index) => {
-                  // 确保每个元素都有label字段，否则跳过
-                  if (!emp || typeof emp !== "object" || !emp.label) {
-                    return null;
-                  }
-                  return (
-                    <div
-                      key={index}
-                      class="_fc-org-tag"
-                      style={{
-                        cursor: isDisabled ? "not-allowed" : "pointer",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        !isDisabled && handleTagClick();
-                      }}
-                    >
-                      <et-icon
-                        icon="el-UserFilled"
-                        style={css_icon_user_selected}
-                      ></et-icon>
-                      {emp.label}
-                    </div>
-                  );
-                })
-                .filter(Boolean)
-            ) : (
-              <div class={"_fc-org-empty"}>{placeholder}</div>
-            )}
-          </div>
-          {!isDisabled && showDialog.value && (
+          <SelectedTags
+            modelValue={tags}
+            class={"_fc-org-select"}
+            style={{ height: tagHeight }}
+            editable={{ editable }}
+            emptyText={placeholder}
+            onEditTag={() => editable && (showDialog.value = true)}
+          ></SelectedTags>
+
+          {editable && showDialog.value && (
             <MemberSelectDialog
               modelValue={showDialog.value}
-              tags={
-                props.multiple
-                  ? selectedValue.value || []
-                  : selectedValue.value && Array.isArray(selectedValue.value)
-                    ? selectedValue.value
-                    : selectedValue.value
-                      ? [selectedValue.value]
-                      : []
-              }
+              tags={tags}
               memberOptions={memberOptions}
               onOk={handleEmployeeChange}
               onCancel={handleEmpCancel}

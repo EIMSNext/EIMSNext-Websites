@@ -2,7 +2,7 @@
   <div v-if="activeRule" class="_fd-default-value">
     <div class="el-form-item__label"><span class="_fc-field-title">{{
       t('props.inputData')
-    }}</span></div>
+        }}</span></div>
     <el-select v-model="valueMode">
       <el-option :label="t('props.v_custom')" value="custom"></el-option>
       <el-option :label="t('props.v_datalink')" value="datalink"></el-option>
@@ -328,6 +328,8 @@ export default defineComponent({
 <style>
 ._fd-default-value {
   width: 100%;
+  margin-bottom: 10px;
+  padding: 0 10px;
 }
 
 ._fd-default-value .el-button {
