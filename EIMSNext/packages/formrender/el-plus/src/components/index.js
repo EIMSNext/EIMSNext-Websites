@@ -2,6 +2,7 @@ import { FcSubForm as subForm } from '@eimsnext/form-render-core';
 import IconWarning from './icon/IconWarning.vue';
 
 import { FcCheckbox as checkbox } from "./checkbox";
+import { FcDataSelect as dataSelect } from "./dataselect";
 import { FcDepartmentSelect as departmentSelect } from "./departmentselect";
 import { FcEmployeeSelect as employeeSelect } from "./employeeselect";
 import { FcFrame as frame } from "./frame";
@@ -17,6 +18,7 @@ export { FcEditor }
 
 export default [
     checkbox,
+    dataSelect,
     departmentSelect,
     employeeSelect,
     frame,

@@ -63,7 +63,8 @@ export default {
     availableScope: "可选范围",
     allDepts: "全部部门",
     allEmps: "所有成员",
-    selectDataSource:"选择数据源"
+    selectDataSource:"选择数据源",
+    emptySelect: "选择数据"
   },
   //主项目
   admin: {
@@ -963,6 +964,9 @@ export default {
     },
   },
   com: {
+    dataSelect: {
+      name: "选择数据",
+    },
     cascader: {
       name: "级联选择器",
       event: {

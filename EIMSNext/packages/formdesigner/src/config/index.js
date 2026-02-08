@@ -80,6 +80,7 @@ import title from "./rule/title";
 import id from "./rule/id";
 import city from "./rule/city";
 import statistic from "./rule/statistic";
+import dataSelect from "./rule/dataSelect";
 import lineChart from "./rule/charts/lineChart";
 import areaChart from "./rule/charts/areaChart";
 import barChart from "./rule/charts/barChart";
@@ -121,6 +122,7 @@ const ruleList = [
   tree,
   treeSelect,
   city,
+  dataSelect,
   department1,
   department2,
   employee1,
