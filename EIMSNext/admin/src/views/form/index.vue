@@ -1,7 +1,7 @@
 <template>
   <div class="formdata-container">
-    <et-dialog v-model="showAddDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
-      width="800px" :close-on-click-modal="false">
+    <et-dialog v-model="showAddDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
+      :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
         <AddFormData :formId="formId" :isView="false" :fieldPerms="fieldPerms" @save="onDataSaved"
           @submit="onDataSaved"></AddFormData>
@@ -11,8 +11,8 @@
       :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
       <div>{{ t("common.message.deleteConfirm_Content", [checkedDatas.length]) }}</div>
     </EtConfirmDialog>
-    <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
-      width="800px" :close-on-click-modal="false">
+    <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
+      :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
         <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms"
           @ok="handleViewOk">
