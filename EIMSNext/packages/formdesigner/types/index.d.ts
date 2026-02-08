@@ -857,8 +857,8 @@ export declare const FcDesigner: import("vue").DefineComponent<
     openGlobalEventDialog: () => void;
     //打开全局样式弹窗
     openGlobalClassDialog: () => void;
+    //设置当前设计的表单Id
     setFormId: (formId: string) => void;
-    getFormId: () => string;
   }
 > &
   FcDesignerProtoType &

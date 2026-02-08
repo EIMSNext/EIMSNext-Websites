@@ -4,6 +4,7 @@ import setupPlugins from "@/plugins";
 import "element-plus/dist/index.css";
 import "@/assets/iconfont/iconfont.css";
 import "@eimsnext/components/dist/index.css";
+import "@eimsnext/form-render-elplus/dist/index.css"
 // 本地SVG图标
 import "virtual:svg-icons-register";
 // 样式
