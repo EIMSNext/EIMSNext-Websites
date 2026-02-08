@@ -1102,9 +1102,6 @@ export default defineComponent({
             setFormId(formId) {
                 data.formId = formId
             },
-            getFormId() {
-                return data.formId
-            },
             setDevice(device) {
                 data.device = device;
                 vm.emit('changeDevice', device);

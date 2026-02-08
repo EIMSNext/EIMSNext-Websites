@@ -9,7 +9,7 @@ import { useAppStore } from "@eimsnext/store";
 import { IFormItem, IFormSelectOptions, buildFormListItems } from "./type";
 import { ref, watch } from "vue";
 import { useLocale } from "element-plus";
-import { isObject } from "@eimsnext/utils";
+import { isObject, isString } from "@eimsnext/utils";
 const { t } = useLocale();
 
 defineOptions({
@@ -46,10 +46,11 @@ watch(
       })
     }
     if (newModel && newModel != oldModel) {
-      if (isObject(newModel))
-        value.value = (newModel as IFormItem).id || ""
-      else
+      console.log("newmode", newModel)
+      if (isString(newModel))
         value.value = newModel || ""
+      else
+        value.value = (newModel as IFormItem).id || ""
     }
   },
   { immediate: true }
