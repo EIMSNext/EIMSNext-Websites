@@ -60,8 +60,8 @@ const wfDesigner = ref<InstanceType<typeof WorkflowDesigner>>();
 const systemStore = useSystemStore();
 const locale = computed(() => systemStore.locale);
 
-const formName = ref("");
-const formDefRef = ref<FormDef>()
+const formName = ref(props.formDef.name);
+const formDefRef = ref<FormDef>(props.formDef)
 const activeName = ref("formedit");
 // const formDef = ref<FormDef>();
 
@@ -88,7 +88,7 @@ const onSave = async (content: FormContent) => {
   };
 
   let resp = await formDefService.patch<FormDef>(req.id, req);
-
+  formDefRef.value = resp
   formStore.update(resp);
   contextStore.setAppChanged(); //reload 菜单
 
@@ -108,7 +108,7 @@ const askSave = async (tabName: string): Promise<boolean> => {
       okText: "保存并继续"
     }, t);
     if (confirm == ConfirmResult.Yes) formBuilder.value.onSave();
-    else formBuilder.value.onCancel()
+    else if (confirm == ConfirmResult.No) formBuilder.value.onCancel()
 
     return confirm != ConfirmResult.Cancel;
   } else if (tabName === "workflow" && wfDesigner.value?.isDirty()) {
@@ -138,8 +138,8 @@ function close() {
 }
 
 onBeforeMount(() => {
-  formName.value = props.formDef.name
-  formDefRef.value = props.formDef
+  // formName.value = props.formDef.name
+  // formDefRef.value = props.formDef
   //初始化
   // if (props.formId) {
   //   loadForm(props.formId);

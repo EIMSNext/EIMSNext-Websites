@@ -362,14 +362,13 @@ export default {
       process.env.NODE_ENV === "development" || this.$route.query.god === "cn";
 
     if (this.formDef && this.formDef.content) {
-      const content = cloneDeep(this.formDef.content)
-      if (content.layout) {
-        this.oldLayout = JSON.stringify(content.layout);
-        this.$refs.designer.setRule(content.layout);
+      if (this.formDef.content.layout) {
+        this.oldLayout = JSON.stringify(this.formDef.content.layout);
+        this.$refs.designer.setRule(this.formDef.content.layout);
       }
-      if (content.options) {
-        this.oldOptions = JSON.stringify(content.options);
-        this.$refs.designer.setOptions(content.options);
+      if (this.formDef.content.options) {
+        this.oldOptions = JSON.stringify(this.formDef.content.options);
+        this.$refs.designer.setOptions(this.formDef.content.options);
       }
     }
   },
