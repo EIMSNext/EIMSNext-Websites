@@ -5,24 +5,30 @@
 </template>
 
 <script setup lang="ts">
-import { useFormStore, useAppStore } from "@eimsnext/store";
-import { IFormItem, buildFormListItems } from "./type";
-import { IListItem } from "@/list/type";
+import { useAppStore } from "@eimsnext/store";
+import { IFormItem, IFormSelectOptions, buildFormListItems } from "./type";
 import { ref, watch } from "vue";
 import { useLocale } from "element-plus";
+import { isObject, isString } from "@eimsnext/utils";
 const { t } = useLocale();
 
 defineOptions({
   name: "FormSelect",
 });
 const props = defineProps<{
-  modelValue: IFormItem;
+  modelValue: IFormItem | string;
   appId: string;
+  options?: IFormSelectOptions
 }>();
-const appStore = useAppStore()
-const formList = ref<IListItem[]>([]);
 
-const value = ref(props.modelValue?.id);
+const appStore = useAppStore()
+const formList = ref<IFormItem[]>([]);
+
+const value = ref("");
+if (isObject(props.modelValue))
+  value.value = (props.modelValue as IFormItem).id || ""
+else
+  value.value = props.modelValue || ""
 
 const emit = defineEmits(["update:modelValue", "change"]);
 const onInput = (val: string) => {
@@ -36,10 +42,16 @@ watch(
   ([newAppId, newModel], [oldAppId, oldModel]) => {
     if (newAppId && newAppId != oldAppId) {
       appStore.get(newAppId).then(app => {
-        formList.value = buildFormListItems(app!);
+        formList.value = buildFormListItems(app!, props.options);
       })
     }
-    if (newModel && newModel != oldModel) value.value = newModel.id;
+    if (newModel && newModel != oldModel) {
+      console.log("newmode", newModel)
+      if (isString(newModel))
+        value.value = newModel || ""
+      else
+        value.value = (newModel as IFormItem).id || ""
+    }
   },
   { immediate: true }
 );

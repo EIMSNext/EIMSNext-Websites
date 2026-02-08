@@ -2,7 +2,7 @@
   <div v-if="activeRule" class="_fd-default-value">
     <div class="el-form-item__label"><span class="_fc-field-title">{{
       t('props.inputData')
-        }}</span></div>
+    }}</span></div>
     <el-select v-model="valueMode">
       <el-option :label="t('props.v_custom')" value="custom"></el-option>
       <el-option :label="t('props.v_datalink')" value="datalink"></el-option>
@@ -57,7 +57,7 @@ export default defineComponent({
   },
   inject: ["designer"],
   mounted() {
-     console.log("activeRule", this.activeRule)
+    //  console.log("activeRule", this.activeRule)
     if (this.activeRule) {
       if (this.activeRule._computed.value) {
         this.valueMode = 'formula';
@@ -90,39 +90,6 @@ export default defineComponent({
     activeRule() {
       return this.designer.setupState.activeRule;
     },
-    // eventNum() {
-    //   let num = 0;
-    //   Object.keys(this.modelValue || {}).forEach((k) => {
-    //     num += Array.isArray(this.modelValue[k])
-    //       ? this.modelValue[k].length
-    //       : 1;
-    //   });
-    //   return num;
-    // },
-    // eventInfo() {
-    //   const info = {};
-    //   this.eventName.forEach((v) => {
-    //     info[v] =
-    //       this.t("com." + this.componentName + ".event." + v) ||
-    //       this.t("eventInfo." + v) ||
-    //       "";
-    //   });
-    //   return info;
-    // },
-    // globalEvent() {
-    //   return this.designer.setupState.formOptions.globalEvent || {};
-    // },
-    // options() {
-    //   return Object.keys(this.globalEvent).map((k) => {
-    //     return {
-    //       label: this.globalEvent[k].label,
-    //       value: "$GLOBAL:" + k,
-    //     };
-    //   });
-    // },
-    // fnArgs() {
-    //   return [getInjectArg(this.t)];
-    // },
   },
   watch: {
     customValue(v) {
@@ -152,7 +119,6 @@ export default defineComponent({
         if (this.valueMode == "formula") {
           if (this.activeRule._computed) this.activeRule._computed.value = v;
           else this.activeRule["_computed"] = { value: v };
-          // console.log("activeRule", this.activeRule);
         }
 
         if (this.activeRule._computed.defaultValue) delete this.activeRule._computed.defaultValue
@@ -160,157 +126,6 @@ export default defineComponent({
         this.$emit("update:modelValue", undefined);
       }
     },
-    // openConfig() {
-    //   this.designer.setupState.openGlobalEventDialog();
-    // },
-    // addCus() {
-    //   const val = this.cusValue && this.cusValue.trim();
-    //   if (val) {
-    //     this.closeCus();
-    //     this.add(val);
-    //   }
-    // },
-    // closeCus() {
-    //   this.cus = false;
-    //   this.cusValue = "";
-    // },
-    // cusEvent() {
-    //   this.cus = true;
-    // },
-    // loadFN(e) {
-    //   const val = {};
-    //   Object.keys(e).forEach((k) => {
-    //     if (Array.isArray(e[k])) {
-    //       const data = [];
-    //       e[k].forEach((v) => {
-    //         if (isFNX(v)) {
-    //           data.push(v.replace($T, ""));
-    //         } else if (is.Function(v) && isFNX(v.__json)) {
-    //           data.push(v.__json.replace($T, ""));
-    //         } else if (v && v.indexOf("$GLOBAL:") === 0) {
-    //           data.push(v);
-    //         }
-    //       });
-    //       val[k] = data;
-    //     } else if (isFNX(e[k])) {
-    //       val[k] = [e[k].replace($T, "")];
-    //     } else if (is.Function(e[k]) && isFNX(e[k].__json)) {
-    //       val[k] = [e[k].__json.replace($T, "")];
-    //     } else if (e[k] && e[k].indexOf("$GLOBAL:") === 0) {
-    //       val[k] = [e[k]];
-    //     }
-    //   });
-    //   return val;
-    // },
-    // parseFN(e) {
-    //   const on = {};
-    //   Object.keys(e).forEach((k) => {
-    //     const lst = [];
-    //     e[k].forEach((v, i) => {
-    //       lst[i] = v.indexOf("$GLOBAL:") !== 0 ? $T + v : v;
-    //     });
-    //     if (lst.length > 0) {
-    //       on[k] = lst.length === 1 ? lst[0] : lst;
-    //     }
-    //   });
-    //   return on;
-    // },
-    // add(name) {
-    //   let data = {};
-    //   if (Array.isArray(this.event[name])) {
-    //     this.event[name].push("");
-    //     data = {
-    //       name,
-    //       item: this.event[name],
-    //       index: this.event[name].length - 1,
-    //     };
-    //   } else if (this.event[name]) {
-    //     const arr = [this.event[name], ""];
-    //     this.event[name] = arr;
-    //     data = {
-    //       name,
-    //       item: arr,
-    //       index: 1,
-    //     };
-    //   } else {
-    //     const arr = [""];
-    //     this.event[name] = arr;
-    //     data = {
-    //       name,
-    //       item: arr,
-    //       index: 0,
-    //     };
-    //   }
-    //   if (!this.activeData) {
-    //     this.edit(data);
-    //   }
-    // },
-    // edit(data) {
-    //   const key = data.name + (data.index || 0);
-    //   if (this.defActive === key) {
-    //     return;
-    //   }
-    //   data.key = uniqueId();
-    //   if (data.item) {
-    //     this.val = data.item[data.index];
-    //   } else {
-    //     this.val = this.event[data.name];
-    //   }
-    //   this.activeData = data;
-    //   this.eventType = this.val.indexOf("$GLOBAL:") === 0 ? "event" : "fn";
-    //   if (this.eventType === "event") {
-    //     this.eventKey = this.val;
-    //     this.eventStr = "";
-    //   } else {
-    //     this.eventStr = this.val;
-    //     this.eventKey = "";
-    //   }
-    //   this.defActive = key;
-    // },
-    // save() {
-    //   let str = this.eventKey;
-    //   if (this.eventType !== "event") {
-    //     if (!this.$refs.fn.save()) {
-    //       return false;
-    //     }
-    //     str = this.eventStr;
-    //   }
-
-    //   if (this.activeData.item) {
-    //     this.activeData.item[this.activeData.index] = str;
-    //   } else {
-    //     this.event[this.activeData.name] = str;
-    //   }
-    //   this.destroy();
-    //   return true;
-    // },
-    // rm(data) {
-    //   if (data.index !== undefined) {
-    //     data.item.splice(data.index, 1);
-    //   } else {
-    //     this.$delete(this.event, data.name);
-    //   }
-    //   if (this.defActive === data.name + (data.index || 0)) {
-    //     this.destroy();
-    //   }
-    // },
-    // destroy() {
-    //   this.activeData = null;
-    //   this.val = null;
-    //   this.defActive = "no";
-    // },
-    // close() {
-    //   this.destroy();
-    // },
-    // submit() {
-    //   if (this.activeData && !this.save()) {
-    //     return;
-    //   }
-    //   this.$emit("update:modelValue", this.parseFN(this.event));
-    //   this.visible = false;
-    //   this.destroy();
-    //   this.closeCus();
-    // },
   },
   beforeCreate() {
     window.$inject = {

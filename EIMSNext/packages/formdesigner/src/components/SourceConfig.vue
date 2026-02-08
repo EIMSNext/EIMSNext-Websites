@@ -3,7 +3,8 @@
     <!-- 表单选择 -->
     <div class="form-select-item">
       <div class="el-form-item__label"><span>{{ t('props.form') }}</span></div>
-      <form-select-in-designer v-model="source.formId" @change="onFormChange" />
+      <form-select v-model="source.formId" :appId="contextStore.appId" :options="{ exclude: [formId] }"
+        @change="onFormChange" />
     </div>
 
     <!-- Label字段选择 -->
@@ -22,8 +23,9 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, inject } from "vue";
-import { IFormFieldDef } from "@eimsnext/components";
+import { IFormFieldDef, IFormItem } from "@eimsnext/components";
 import { FieldType } from "@eimsnext/models";
+import { useContextStore } from "@eimsnext/store"
 
 interface ISourceConfig {
   formId: string;
@@ -44,6 +46,8 @@ const emit = defineEmits(["update:modelValue", "change"]);
 
 const designer: any = inject('designer');
 const t = computed(() => designer.setupState.t);
+const formId = computed(() => designer.setupState.formId);
+const contextStore = useContextStore()
 
 const source = ref<ISourceConfig>({
   formId: props.modelValue?.formId || '',
@@ -62,17 +66,20 @@ const source = ref<ISourceConfig>({
 });
 
 // 监听表单变化，更新label和value的formId，并清空之前的选择
-const onFormChange = (form: any) => {
+
+const onFormChange = (form: IFormItem) => {
+  console.log("form...", form)
   if (form) {
+    source.value.formId = form.id
     // 清空之前选择的label和value字段
     source.value.label = {
-      formId: form.value,
+      formId: form.id,
       field: '',
       label: '',
       type: FieldType.None
     };
     source.value.value = {
-      formId: form.value,
+      formId: form.id,
       field: '',
       label: '',
       type: FieldType.None

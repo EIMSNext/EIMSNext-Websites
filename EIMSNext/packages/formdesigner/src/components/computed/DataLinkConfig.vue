@@ -44,7 +44,6 @@ import ConditionGroup from "./ConditionGroup.vue";
 import { is, deepCopy } from "@eimsnext/form-render-core";
 import RuleSelect from "../RuleSelect.vue";
 import Warning from "../Warning.vue";
-import { ConditionList, ConditionType } from "@eimsnext/components"
 
 export default defineComponent({
     name: "DataLinkConfig",

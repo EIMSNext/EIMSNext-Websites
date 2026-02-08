@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { ref, reactive } from "vue";
+import { reactive } from "vue";
 import jsonlint from "jsonlint-mod";
 import "codemirror/lib/codemirror.css";
 import "codemirror/addon/lint/lint.css";
@@ -57,7 +57,7 @@ import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/mode/pug/pug";
 import { is } from "@eimsnext/form-render-core";
 import formCreate from "@eimsnext/form-render-elplus";
-import { copyTextToClipboard } from "@eimsnext/form-designer";
+// import { copyTextToClipboard } from "@eimsnext/form-designer";
 import { ArrowDown } from "@element-plus/icons-vue";
 import {
   FormContent,
@@ -362,6 +362,8 @@ export default {
       process.env.NODE_ENV === "development" || this.$route.query.god === "cn";
 
     if (this.formDef && this.formDef.content) {
+      this.$refs.designer.setFormId(this.formDef.id)
+
       if (this.formDef.content.layout) {
         this.oldLayout = JSON.stringify(this.formDef.content.layout);
         this.$refs.designer.setRule(this.formDef.content.layout);
