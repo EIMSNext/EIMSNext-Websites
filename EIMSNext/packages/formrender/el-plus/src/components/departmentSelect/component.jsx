@@ -102,9 +102,6 @@ export default defineComponent({
     const handleDeptCancel = () => {
       showDialog.value = false;
     };
-    const handleTagClick = () => {
-      showDialog.value = true;
-    };
 
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
