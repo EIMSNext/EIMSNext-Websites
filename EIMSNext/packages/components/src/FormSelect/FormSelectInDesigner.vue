@@ -49,7 +49,7 @@ const loadForms = async () => {
 
     // 处理哈希路由，从哈希路径中提取表单ID（如 #/app/xxx/form/xxx）
     const hash = window.location.hash;
-    const formIdRegex = /\/form\/(\w+)/;
+    const formIdRegex = /\/form\/([^/]+)/;
     const match = hash.match(formIdRegex);
 
     if (match && match[1]) {
