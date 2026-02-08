@@ -151,11 +151,11 @@
                                                         </div>
                                                         <span class="_fc-l-name">{{
                                                             t('com.' + element.name + '.name') || element.label
-                                                        }}</span>
+                                                            }}</span>
                                                     </template>
                                                     <span class="_fc-l-name" v-else>{{
                                                         t('tmp.' + element.name) || element.label
-                                                    }}</span>
+                                                        }}</span>
                                                 </div>
                                             </template>
                                         </fcDraggable>
@@ -175,7 +175,7 @@
                                                     :class="(data.rule._menu && data.rule._menu.icon) || 'icon-cell'"></i>
                                                 <span>{{
                                                     getTitle(data.rule)
-                                                }}</span>
+                                                    }}</span>
                                             </div>
                                             <div class="_fc-tree-more" @click.stop
                                                 v-if="!data.slot && !data.rule._fc_page_tag">
@@ -281,7 +281,7 @@
                                     <div class="_fd-input-btn">
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
-                                            }}: </span>
+                                        }}: </span>
                                         <el-switch :model-value="inputForm.state" inline-prompt
                                             @update:model-value="openInputData" />
                                     </div>
@@ -409,7 +409,7 @@
                                     <div style="grid-area: props;">
                                         <!-- <ConfigTitle v-if="propsForm.isShow" id="_fd-config-props">{{
                                             t('designer.props') }} -->
-                                            <!-- <VariableConfig v-if="propsForm.variable"></VariableConfig>
+                                        <!-- <VariableConfig v-if="propsForm.variable"></VariableConfig>
                                             <PropsInput v-if="activeRule && getConfig('showCustomProps', true)">
                                             </PropsInput> -->
                                         <!-- </ConfigTitle> -->
@@ -498,7 +498,8 @@
                             </el-main>
                         </el-container>
                     </el-aside>
-                    <el-dialog v-model="preview.state" width="80%" class="_fd-preview-dialog" append-to-body>
+                    <el-dialog v-model="preview.state" width="80%" class="_fd-preview-dialog formdatadialog"
+                        append-to-body>
                         <el-tabs class="_fd-preview-tabs" v-model="previewStatus">
                             <el-tab-pane :label="t('form.formMode')" name="form"></el-tab-pane>
                             <el-tab-pane :label="t('form.previewMode')" name="preview"></el-tab-pane>
@@ -534,12 +535,14 @@
                                 </div>
                             </template>
                             <template v-else>
-                                <ViewForm :rule="preview.rule" :option="preview.option" @submit="previewSubmit"
-                                    @reset="previewReset" v-model:api="preview.api" v-if="preview.state">
-                                    <template v-for="(_, name) in $slots" #[name]="scope">
-                                        <slot :name="name" v-bind="scope ?? {}" />
-                                    </template>
-                                </ViewForm>
+                                <div class="data-container" style="margin: 10px;height: calc(100vh - 150px);">
+                                    <ViewForm :rule="preview.rule" :option="preview.option" @submit="previewSubmit"
+                                        @reset="previewReset" v-model:api="preview.api" v-if="preview.state">
+                                        <template v-for="(_, name) in $slots" #[name]="scope">
+                                            <slot :name="name" v-bind="scope ?? {}" />
+                                        </template>
+                                    </ViewForm>
+                                </div>
                             </template>
                         </template>
                         <pre class="_fd-preview-code" ref="previewCode" v-else-if="previewStatus === 'component'"><code
@@ -796,6 +799,7 @@ export default defineComponent({
         }
 
         const data = reactive({
+            formId: "",
             cacheProps: {},
             operation: {
                 idx: -1,
@@ -1095,6 +1099,12 @@ export default defineComponent({
         });
 
         const methods = {
+            setFormId(formId) {
+                data.formId = formId
+            },
+            getFormId() {
+                return data.formId
+            },
             setDevice(device) {
                 data.device = device;
                 vm.emit('changeDevice', device);
@@ -1840,7 +1850,7 @@ export default defineComponent({
                     // 清理effect.source中的label和value对象，去掉无用字段
                     if (rule.effect && rule.effect.source) {
                         const source = rule.effect.source;
-                        
+
                         // 清理label对象，保留formId字段
                         if (source.label) {
                             source.label = {
@@ -1850,7 +1860,7 @@ export default defineComponent({
                                 type: source.label.type
                             };
                         }
-                        
+
                         // 清理value对象，保留formId字段
                         if (source.value) {
                             source.value = {
@@ -1860,13 +1870,13 @@ export default defineComponent({
                                 type: source.value.type
                             };
                         }
-                        
+
                         // 去掉空的fetch字段
                         if (rule.effect.fetch === "" || rule.effect.fetch === undefined) {
                             delete rule.effect.fetch;
                         }
                     }
-                    
+
                     [rule.wrap, rule.title, rule.info, rule].forEach(item => {
                         if (item) {
                             Object.keys(item).filter(k => k.indexOf('__') === 0 || item[k] === '' || (Array.isArray(item[k]) && item[k].length === 0) || (is.Object(item[k]) && Object.keys(item[k]).length === 0)).forEach(k => {
@@ -3064,7 +3074,7 @@ export default defineComponent({
             configFormOrderStyle,
         }
     },
-    created() {        
+    created() {
         /* eslint-enable */
         document.body.ondrop = e => {
             e.preventDefault();

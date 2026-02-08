@@ -1,35 +1,29 @@
-import { DataItemType } from "@/common";
-import { IListItem } from "@/list/type";
 import { App, FormDef, FormType } from "@eimsnext/models";
 
 export interface IFormItem {
   id: string;
   label?: string;
+  icon?: string;
+  iconColor?: string;
 }
 
-// export function buildFormListItems(forms: FormDef[]): IListItem[] {
-//   const items: IListItem[] = [];
-//   forms.forEach((x) => {
-//     let item: IListItem = {
-//       id: x.id,
-//       label: x.name,
-//       data: { id: x.id, appId: x.appId, label: x.name },
-//     };
+export interface IFormSelectOptions {
+  exclude?: string[];
+}
 
-//     items.push(item);
-//   });
-
-//   return items;
-// }
-export function buildFormListItems(app: App): IListItem[] {
-  const items: IListItem[] = [];
+export function buildFormListItems(
+  app: App,
+  options?: IFormSelectOptions,
+): IFormItem[] {
+  const items: IFormItem[] = [];
+  const exclude = options?.exclude || [];
   app.appMenus.forEach((x) => {
-    if (x.menuType == FormType.Form) {
-      let item: IListItem = {
+    if (x.menuType == FormType.Form && exclude.indexOf(x.menuId) == -1) {
+      let item: IFormItem = {
         id: x.menuId,
         label: x.title!,
-        data: { id: x.menuId, appId: app.id, label: x.title },
-        type: DataItemType.Form,
+        icon: x.icon,
+        iconColor: x.iconColor,
       };
 
       items.push(item);

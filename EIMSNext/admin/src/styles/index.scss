@@ -69,3 +69,11 @@
   height: calc(100% - 50px);
   margin: 25px auto;
 }
+
+  .data-container
+  {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: calc(100vh - 180px);
+    padding: 0 10px 10px 0;
+  }

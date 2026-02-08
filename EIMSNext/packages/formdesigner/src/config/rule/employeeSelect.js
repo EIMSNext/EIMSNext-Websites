@@ -45,7 +45,7 @@ export default {
             value: "custom",
             rule: [
               {
-                type: "FcDepartmentSelect",
+                type: "fcDepartmentSelect",
                 field: "limitScope",
                 title: "",
                 wrap: { class: "_fd-default-value" },

@@ -56,7 +56,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const showDialog = ref(false);
     const selectedValue = ref(props.modelValue ?? []);
-
+    // 计算最终的禁用状态：禁用属性或查看模式
+    const editable = ref(!(props.disabled || isPreviewMode.value));
+    console.log("editable", editable);
     // 结合props和上下文的preview属性，确定是否处于查看模式
     // 优先使用props.preview，因为FormDataView组件会将isView=true传递给FormView组件，
     // 然后FormView组件会将preview=isView传递给formCreate组件
@@ -81,6 +83,9 @@ export default defineComponent({
       if (!dept || typeof dept !== "object") return dept;
       const { id, value, label, type } = dept;
       return { id, value, label, type };
+    };
+    const handleEditTag = () => {
+      if (editable.value) showDialog.value = true;
     };
 
     const handleDepartmentChange = (departments) => {
@@ -108,8 +113,7 @@ export default defineComponent({
 
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
-      // 计算最终的禁用状态：禁用属性或查看模式
-      const editable = !(disabled || isPreviewMode.value);
+
       const limit = { depts: undefined };
       if (props.limitType == "custom" && props.limitScope?.length > 0) {
         //TODO:应该动态计算所有子节点
@@ -137,12 +141,12 @@ export default defineComponent({
             modelValue={tags}
             class={"_fc-org-select"}
             style={{ height: tagHeight }}
-            editable={editable}
+            editable={editable.value}
             emptyText={placeholder}
-            onEditTag={() => editable && (showDialog.value = true)}
+            onEditTag={handleEditTag}
           ></SelectedTags>
 
-          {editable && showDialog.value && (
+          {editable.value && showDialog.value && (
             <MemberSelectDialog
               modelValue={showDialog.value}
               tags={tags}
