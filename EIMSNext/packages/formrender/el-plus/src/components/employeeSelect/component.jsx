@@ -96,10 +96,7 @@ export default defineComponent({
     const handleEmpCancel = () => {
       showDialog.value = false;
     };
-    const handleTagClick = () => {
-      showDialog.value = true;
-    };
-
+ 
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
       // 计算最终的禁用状态：禁用属性或查看模式
