@@ -534,6 +534,16 @@ const processData = () => {
       var dataItem = { ...item, ...item.data };
       delete dataItem["data"];
 
+      // 处理嵌套的value属性结构
+      for (const key in dataItem) {
+        if (dataItem.hasOwnProperty(key)) {
+          const value = dataItem[key];
+          if (value && typeof value === 'object' && 'value' in value) {
+            dataItem[key] = value.value;
+          }
+        }
+      }
+
       if (childrenFields.value.length > 0) {
         let maxItemCount = 0;
         childrenFields.value.forEach(
