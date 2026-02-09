@@ -1,6 +1,8 @@
 <template>
   <div class="form-wrapper">
-    <formCreate ref="fcInst" :modelValue="dataRef" :rule="rules" :option="options" :preview="isView" />
+    <div class="data-container">
+      <formCreate ref="fcInst" :modelValue="dataRef" :rule="rules" :option="options" :preview="isView" />
+    </div>
     <div v-if="actions" class="form-actions">
       <el-button v-if="actions.submit && (!actions.submit.visible || actions.submit.visible)" type="primary"
         :disabled="actions.submit.disabled" @click="handleSubmit">
