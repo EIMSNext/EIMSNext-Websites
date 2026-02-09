@@ -1,7 +1,7 @@
 <template>
   <div class="formdata-container">
-    <et-dialog v-model="showAddDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
-      width="800px" :close-on-click-modal="false">
+    <et-dialog v-model="showAddDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
+      :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
         <AddFormData :formId="formId" :isView="false" :fieldPerms="fieldPerms" @save="onDataSaved"
           @submit="onDataSaved"></AddFormData>
@@ -11,8 +11,8 @@
       :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
       <div>{{ t("common.message.deleteConfirm_Content", [checkedDatas.length]) }}</div>
     </EtConfirmDialog>
-    <et-dialog v-model="showDetailsDialog" :title="formDef?.name" :show-footer="false" :destroy-on-close="true"
-      width="800px" :close-on-click-modal="false">
+    <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
+      :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
         <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms"
           @ok="handleViewOk">
@@ -533,6 +533,16 @@ const processData = () => {
     dataRef.value.forEach((item) => {
       var dataItem = { ...item, ...item.data };
       delete dataItem["data"];
+
+      // 处理嵌套的value属性结构
+      for (const key in dataItem) {
+        if (dataItem.hasOwnProperty(key)) {
+          const value = dataItem[key];
+          if (value && typeof value === 'object' && 'value' in value) {
+            dataItem[key] = value.value;
+          }
+        }
+      }
 
       if (childrenFields.value.length > 0) {
         let maxItemCount = 0;

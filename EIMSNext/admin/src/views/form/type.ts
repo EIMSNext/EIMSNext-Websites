@@ -1,5 +1,12 @@
 import { IFormFieldDef } from "@eimsnext/components";
-import { FieldDef, IFieldPerm, SystemField, getCreateTime, getFlowStatus } from "@eimsnext/models";
+import {
+  FieldDef,
+  IFieldPerm,
+  SystemField,
+  getCreateBy,
+  getCreateTime,
+  getFlowStatus,
+} from "@eimsnext/models";
 import { Dictionary } from "@eimsnext/utils";
 
 export interface ITableColumn {
@@ -81,6 +88,17 @@ export function buildColumns(
       columns.push(col);
     }
   });
+
+  if (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateBy)) {
+    const createByField = getCreateBy("提交人");
+    columns.push({
+      field: createByField.field,
+      title: createByField.title,
+      type: createByField.type,
+      mergeField: "_id",
+      oriField: SystemField.CreateBy,
+    });
+  }
 
   if (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateTime)) {
     const createTimeField = getCreateTime("提交时间");

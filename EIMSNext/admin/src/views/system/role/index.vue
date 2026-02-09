@@ -221,7 +221,7 @@ const updateQueryParams = () => {
   );
   queryParams.value.expand = "department";
 
-  console.log("queryParams filter", queryParams.value.filter);
+  // console.log("queryParams filter", queryParams.value.filter);
 };
 
 const queryParams = ref<ODataQuery<Employee>>({

@@ -1,1 +1,3 @@
-export { default as FcEmployeeSelect } from './component';
+import FcEmployeeSelect from './component';
+
+export { FcEmployeeSelect };
