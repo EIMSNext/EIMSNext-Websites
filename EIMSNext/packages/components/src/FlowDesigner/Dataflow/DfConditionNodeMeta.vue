@@ -41,7 +41,7 @@ const init = () => {
     nodeId.value = activeData.value.id;
     nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
 
-    console.log("df cond nodes", flowContextRef, nodes.value);
+    // console.log("df cond nodes", flowContextRef, nodes.value);
 
     condList.value = { id: uniqueId(), rel: "and", items: [] };
     if (activeData.value.metadata.conditionMeta!.condition) {

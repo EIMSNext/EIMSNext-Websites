@@ -540,7 +540,7 @@ const curEmpCheckAll = (checked: boolean) => {
 };
 
 const dymChecked = (data: IListItem, checked: boolean) => {
-  console.log("empCheck", data, checked);
+  // console.log("empCheck", data, checked);
   if (options.multiple) {
     if (checked) {
       let index = tagsRef.value.findIndex(

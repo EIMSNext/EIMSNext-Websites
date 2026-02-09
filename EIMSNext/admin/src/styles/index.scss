@@ -70,10 +70,28 @@
   margin: 25px auto;
 }
 
-  .data-container
-  {
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: calc(100vh - 180px);
-    padding: 0 10px 10px 0;
+.data-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100vh - 180px);
+  padding: 0 10px 10px 0;
+}
+
+.form-wrapper.editdata > .data-container {
+  height: calc(100vh - 201px);
+}
+
+.toolbar-container.small-bar {
+  margin: 8px 0 0;
+  padding: 0 20px;
+  height: 24px;
+
+  .el-button {
+    border: none;
+    height: 24px;
+    padding: 3px;
   }
+  .el-button + .el-button {
+    margin-left: 6px;
+  }
+}
