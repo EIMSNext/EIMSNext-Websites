@@ -58,6 +58,8 @@
               <el-dropdown-item @click="createForm(true, false)">{{ t("admin.newFlowForm") }}</el-dropdown-item>
               <el-dropdown-item @click="createForm(false, true)">{{ t("admin.newLedgerForm") }}</el-dropdown-item>
               <el-divider style="margin: 3px 0" />
+              <el-dropdown-item @click="createDashboard">{{ t("admin.newDashboard") }}</el-dropdown-item>
+              <el-divider style="margin: 3px 0" />
               <el-dropdown-item @click="createFolder">{{ t("admin.newGroup") }}</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -94,7 +96,7 @@ const formStore = useFormStore();
 const contextStore = useContextStore();
 const userStore = useUserStore()
 const curUser = toRef(userStore.currentUser)
-
+const appId = toRef(contextStore.appId)
 const app = ref<App>();
 
 const systemStore = useSystemStore();

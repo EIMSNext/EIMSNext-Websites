@@ -183,7 +183,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         output: {
           experimentalMinChunkSize: 500 * 1024,
           manualChunks(id) {
-            if (id.includes("@eimsnext")) console.log("id", id);
+            // if (id.includes("@eimsnext")) console.log("id", id);
             if (id.includes("@eimsnext/form-designer")) {
               return "form-designer"; // 单独拆成 vendor-formdesigner.js
             }
