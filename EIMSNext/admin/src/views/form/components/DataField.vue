@@ -49,8 +49,10 @@ const onClickOutside = (e: MouseEvent) => {
 };
 onBeforeMount(() => {
     formStore.get(props.formId).then((form) => {
+        console.log(form?.content?.items)
         if (form?.content?.items)
             fieldList.value = buildFieldListItems(form.id, form.content.items, form.usingWorkflow, undefined, { fieldPerms: props.fieldPerms });
+        console.log(fieldList.value)
     });
 })
 </script>

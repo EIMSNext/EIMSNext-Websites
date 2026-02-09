@@ -21,8 +21,9 @@
 
   &__left {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
     min-width: 40px;
     height: 50px;
     line-height: 50px;

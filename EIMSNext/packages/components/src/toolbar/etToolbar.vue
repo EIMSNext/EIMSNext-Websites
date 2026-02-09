@@ -1,5 +1,5 @@
 <template>
-    <div class="toolbar-container">
+    <div class="toolbar-container" :class="{ 'small-bar': type == 'small' }">
         <div v-if="leftGroup && leftGroup.length > 0" class="left-group" :class="leftGroupClass">
             <EtToolbarItem v-for="(item, index) in leftGroup" :key="'left-' + item.config.command" :data="item"
                 @command="handleCommand" />
@@ -25,8 +25,10 @@ const props = withDefaults(
         rightGroup?: ToolbarItem[]
         leftGroupClass?: string;
         rightGroupClass?: string;
+        type?: "normal" | "small"
     }>(),
     {
+        type: "normal"
     }
 );
 

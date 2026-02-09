@@ -28,7 +28,7 @@
                   <el-switch :model-value="!flow.disabled" @change="toggleDisable(flow)"></el-switch>
                 </div>
               </template>
-              <div class="flow-content">触发: {{ flow.eventSource }}</div>
+              <div class="flow-content">触发: {{ getTriggerSource(flow) }}</div>
             </et-card>
           </template>
         </el-space>
@@ -43,6 +43,8 @@ import { wfDefinitionService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
+import { useFormStore } from "@eimsnext/store";
+import { Dictionary } from "@eimsnext/utils";
 
 defineOptions({
   name: "DataflowList",
@@ -56,6 +58,8 @@ const showDrawer = ref(false);
 const showDeleteConfirmDialog = ref(false)
 const dataflows = ref<WfDefinition[]>([]);
 const selectedFlow = ref<WfDefinition>();
+const formStore = useFormStore()
+// const formNamesCache = new Dictionary<string>()
 
 // console.log("formid", props.formId);
 
@@ -64,7 +68,17 @@ const loadDataflows = (formId: string) => {
   wfDefinitionService.query<WfDefinition>(query).then((res) => {
     dataflows.value = res;
   });
+
+  // formStore.get(formId).then(form => { if (form) formNamesCache.add(formId, form.name) })
 };
+
+const getTriggerSource = (flow: WfDefinition) => {
+  if (flow.eventSource == EventSourceType.Form) {
+    return props.formDef.name
+  }
+
+  return "定时触发"
+}
 
 const addNew = (eventSource: EventSourceType) => {
   selectedFlow.value = {

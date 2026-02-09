@@ -148,12 +148,6 @@ const handleReset = () => {
 .form-wrapper {
   padding: 20px;
 
-  .data-container
-  {
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: calc(100vh - 180px);
-  }
   .form-actions {
     display: flex;
     justify-content: flex-end;

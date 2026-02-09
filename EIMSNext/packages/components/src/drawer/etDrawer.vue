@@ -24,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+
 defineOptions({
   name: "EtDrawer",
 });
@@ -31,15 +32,15 @@ defineOptions({
 const props = defineProps<{
   modelValue: boolean;
   appendToBody?: boolean;
-  closing?: () => boolean
+  closing?: () => Promise<boolean>
 }>();
 
 const emit = defineEmits(["update:modelValue", "close"]);
 
-function close() {
+async function close() {
   let allow = true;
   if (props.closing)
-    allow = props.closing()
+    allow = await props.closing()
 
   if (allow) {
     emit("update:modelValue", false);

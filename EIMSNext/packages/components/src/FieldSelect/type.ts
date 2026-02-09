@@ -73,7 +73,11 @@ export function buildFieldListItems(
 ): IListItem[] {
   const items: IListItem[] = [];
 
-  if (!fieldLimit || fieldLimit.limitField == "master") {
+  if (
+    !fieldLimit ||
+    !fieldLimit.limitField ||
+    fieldLimit.limitField == "master"
+  ) {
     if (usingWf) {
       let status: IFormFieldDef = toFormFieldDef(
         formId,
@@ -92,7 +96,9 @@ export function buildFieldListItems(
   fields.forEach((x: FieldDef) => {
     if (x.type == FieldType.TableForm) {
       if (
-        (!fieldLimit || fieldLimit.limitField == x.field) &&
+        (!fieldLimit ||
+          !fieldLimit.limitField ||
+          fieldLimit.limitField == x.field) &&
         x.columns &&
         x.columns.length > 0
       ) {
@@ -109,7 +115,11 @@ export function buildFieldListItems(
         });
       }
     } else {
-      if (!fieldLimit || fieldLimit.limitField == "master") {
+      if (
+        !fieldLimit ||
+        !fieldLimit.limitField ||
+        fieldLimit.limitField == "master"
+      ) {
         var fieldDef: IFormFieldDef = toFormFieldDef(
           formId,
           x,
@@ -128,7 +138,11 @@ export function buildFieldListItems(
     }
   });
 
-  if (!fieldLimit || fieldLimit.limitField == "master") {
+  if (
+    !fieldLimit ||
+    !fieldLimit.limitField ||
+    fieldLimit.limitField == "master"
+  ) {
     if (formId != "employee") {
       let submitor: IFormFieldDef = toFormFieldDef(
         formId,
