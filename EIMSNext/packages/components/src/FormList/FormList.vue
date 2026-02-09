@@ -7,7 +7,7 @@
                     <div class="item-wrapper clickable" @click.stop="itemClick(item)"
                         :class="{ active: item.id == modelValue?.id }">
                         <div class="item-content">
-                            <et-icon v-if="item.icon" :icon="item.icon" :color="item.color"
+                            <et-icon v-if="item.icon" :icon="item.icon" :color="item.iconColor"
                                 style="padding-right: 5px"></et-icon>
                             <div class="item-label">
                                 {{ item.label }}
