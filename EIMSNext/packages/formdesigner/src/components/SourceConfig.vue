@@ -68,7 +68,7 @@ const source = ref<ISourceConfig>({
 // 监听表单变化，更新label和value的formId，并清空之前的选择
 
 const onFormChange = (form: IFormItem) => {
-  console.log("form...", form)
+  // console.log("form...", form)
   if (form) {
     source.value.formId = form.id
     // 清空之前选择的label和value字段

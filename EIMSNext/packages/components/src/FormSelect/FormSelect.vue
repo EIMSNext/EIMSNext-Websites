@@ -8,9 +8,9 @@
 import { useAppStore } from "@eimsnext/store";
 import { IFormItem, IFormSelectOptions, buildFormListItems } from "./type";
 import { ref, watch } from "vue";
-import { useLocale } from "element-plus";
 import { isObject, isString } from "@eimsnext/utils";
-const { t } = useLocale();
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineOptions({
   name: "FormSelect",
@@ -46,7 +46,7 @@ watch(
       })
     }
     if (newModel && newModel != oldModel) {
-      console.log("newmode", newModel)
+      // console.log("newmode", newModel)
       if (isString(newModel))
         value.value = newModel || ""
       else

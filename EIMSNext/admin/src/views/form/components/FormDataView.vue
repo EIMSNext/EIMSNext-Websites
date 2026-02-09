@@ -3,9 +3,9 @@
         :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
         <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
     </EtConfirmDialog>
-    <et-toolbar :left-group="leftBars" @command="toolbarHandler" class="dataview-bar"></et-toolbar>
+    <et-toolbar type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
     <FormView v-if="formData" :def="formDef" :data="formData" :isView="isView" :actions="actions"
-        :fieldPerms="fieldPerms" @draft="saveDraft" @submit="submitData">
+        :fieldPerms="fieldPerms" class="editdata" @draft="saveDraft" @submit="submitData">
     </FormView>
 </template>
 <script lang="ts" setup>
@@ -128,9 +128,4 @@ onBeforeMount(async () => {
     }
 });
 </script>
-<style lang="scss" scoped>
-.dataview-bar {
-    margin: 12px 0 0;
-    padding: 0 20px;
-}
-</style>
+<style lang="scss" scoped></style>
