@@ -63,7 +63,7 @@ export default {
     availableScope: "可选范围",
     allDepts: "全部部门",
     allEmps: "所有成员",
-    selectDataSource:"选择数据源"
+    selectDataSource: "选择数据源",
   },
   //主项目
   admin: {
@@ -108,10 +108,10 @@ export default {
     counterSign: "会签",
     starter: "流程发起人",
     approver: "节点负责人",
-    noApprover:"无负责人",
+    noApprover: "无负责人",
     maxApproverTips: "最多选择100人",
     ccMember: "抄送人",
-    noCCMember:"无抄送人",
+    noCCMember: "无抄送人",
     nodeName: "节点名称",
     nodeProps: "节点属性",
     flowProps: "流程属性",
@@ -848,7 +848,7 @@ export default {
     key: "键名",
     name: "名称",
     value: "值",
-    label:"标签",
+    label: "标签",
     inputData: "默认值",
     append: "插入",
     options: "选项数据",
@@ -1088,7 +1088,7 @@ export default {
         shadow: "阴影显示时机",
       },
     },
-    elCollapse: {
+    collapse: {
       name: "折叠面板",
       event: {
         change:
@@ -1132,7 +1132,7 @@ export default {
         className: "列的内容自定义类名",
       },
     },
-    elDivider: {
+    divider: {
       name: "分割线",
       props: {
         direction: "设置分割线方向",
@@ -1149,7 +1149,7 @@ export default {
         lazy: "标签延迟渲染",
       },
     },
-    elTabs: {
+    tabs: {
       name: "标签页",
       event: {
         tabClick: "tab 被选中时触发",

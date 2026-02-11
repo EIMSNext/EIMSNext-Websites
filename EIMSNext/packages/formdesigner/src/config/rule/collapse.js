@@ -1,7 +1,7 @@
 import { localeProps } from "../../utils";
 
 const label = "折叠面板";
-const name = "elCollapse";
+const name = "collapse";
 
 export default {
   menu: "layout",

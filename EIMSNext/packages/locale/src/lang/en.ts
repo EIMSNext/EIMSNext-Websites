@@ -1120,7 +1120,7 @@ export default {
         shadow: "Shadow display timing",
       },
     },
-    elCollapse: {
+    collapse: {
       name: "Collapse",
       event: {
         change:
@@ -1164,7 +1164,7 @@ export default {
         className: "Column content custom class name",
       },
     },
-    elDivider: {
+    divider: {
       name: "Divider",
       props: {
         direction: "Set the direction of the dividing line",
@@ -1181,7 +1181,7 @@ export default {
         lazy: "Lazy rendering",
       },
     },
-    elTabs: {
+    tabs: {
       name: "Tabs",
       event: {
         tabClick: "Triggered when tab is selected",

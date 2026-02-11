@@ -92,7 +92,7 @@ import {
 import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
 import dayjs from "dayjs";
-import { getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
+import { dateFormat, getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
 import Pagination from "../../components/Pagination/index.vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -398,8 +398,7 @@ const formatter = (row: any, column: any, cellValue: any) => {
   const colSetting = getColumnSetting(column.property);
   if (colSetting) {
     if (colSetting.type == FieldType.TimeStamp) {
-      const format = colSetting.format || "YYYY-MM-DD";
-      return cellValue ? dayjs(cellValue).format(format) : "";
+      return dateFormat(cellValue, colSetting.format);
     }
     // 添加对图片字段的处理
     if (colSetting.type == FieldType.ImageUpload) {
