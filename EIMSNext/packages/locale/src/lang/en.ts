@@ -6,6 +6,7 @@ export default {
     addNew: "AddNew",
     edit: "Edit",
     delete: "Delete",
+    print: "Print",
     deleteAll: "Delete All",
     reset: "Reset",
     clear: "Clear",

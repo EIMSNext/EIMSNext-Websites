@@ -29,9 +29,10 @@ export interface CorpModelBase extends ModelBase, ICorpModel {
   corpId?: string;
 }
 
-export class Operator {
-  empId?: string;
-  empName?: string;
+export interface Operator {
+  id?: string;
+  value?: string;
+  label?: string;
 }
 
 export enum SystemField {
@@ -62,7 +63,7 @@ export function getIdDef(title: string): FieldDef {
   return field;
 }
 
-export function  getCreateBy(title: string): FieldDef {
+export function getCreateBy(title: string): FieldDef {
   let field = new FieldDef();
   field.field = SystemField.CreateBy;
   field.title = title;

@@ -1,5 +1,5 @@
 <template>
-    <div :id="divId" v-if="modelValue">
+    <div id="formprintdiv">
         <div class="page">
             <div v-html="printHtml" class="et-system-print"></div>
         </div>
@@ -29,12 +29,10 @@ interface ITableItem {
 // 声明Props
 const props = withDefaults(defineProps<{
     modelValue: boolean,
-    divId?: string;
     appendToBody?: boolean;
     title?: string;
     printData: IPrintData
 }>(), {
-    divId: "formprintdiv",
     appendToBody: false,
     title: "",
 });
@@ -231,6 +229,7 @@ const getValue = (el: FieldDef, vObj: any): string => {
 
 // 生成最终HTML
 const generateHtml = () => {
+    console.log("generateHtml")
     if (!fieldValues.value || fieldValues.value.length === 0) {
         printHtml.value = "";
         return;
@@ -379,6 +378,7 @@ const generateHtml = () => {
 watch(
     () => props.printData,
     (val) => {
+        console.log("watch printdata", val)
         if (val) {
             generateTableHtml();
         }
@@ -390,7 +390,8 @@ onMounted(() => {
     if (props.appendToBody) {
         document.body.appendChild(<HTMLElement>el.value);
     }
-    generateTableHtml();
+    if (props.printData.formData)
+        generateTableHtml();
 });
 
 onBeforeUnmount(() => {

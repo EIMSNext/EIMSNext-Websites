@@ -6,6 +6,7 @@ export default {
     cancel: "取消",
     addNew: "新增",
     edit: "编辑",
+    print:"打印",
     delete: "删除",
     deleteAll: "删除全部",
     reset: "重置",

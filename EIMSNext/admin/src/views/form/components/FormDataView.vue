@@ -8,7 +8,8 @@
         :fieldPerms="fieldPerms" class="editdata" @draft="saveDraft" @submit="submitData">
     </FormView>
     <div ref="printTrigger" v-print="printConfig" style="display: none"></div>
-    <FormPrintDiv v-model="printConfig.showPrintDiv" :title="formDef?.name" :printData="formPrintData"></FormPrintDiv>
+    <FormPrintDiv v-if="formPrintData" v-model="printConfig.showPrintDiv" :title="formDef?.name"
+        :printData="formPrintData"></FormPrintDiv>
 </template>
 <script lang="ts" setup>
 defineOptions({
@@ -55,7 +56,7 @@ const formPrintData = ref()
 const printTrigger = ref<HTMLElement | null>(null)
 
 const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "common.edit", command: "edit", visible: canEdit, icon: "el-edit" } }, { type: "button", config: { text: "common.delete", command: "delete", visible: canRemove, icon: "el-delete", disabled: false } }
-    , { type: "button", config: { text: "common.print", command: "print", visible: true, icon: "el-print", disabled: false } }
+    , { type: "button", config: { text: "common.print", command: "print", visible: true, icon: "el-printer", disabled: false } }
 ])
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
     switch (cmd) {
@@ -130,7 +131,12 @@ const generatePrintData = () => {
     };
     formPrintData.value = printData;
 };
-
+watch(() => formData,
+    (val) => {
+        if (val) generatePrintData()
+    },
+    { deep: true }
+)
 onBeforeMount(async () => {
     let form = await formStore.get(props.formId);
     if (form) {
@@ -144,8 +150,5 @@ onBeforeMount(async () => {
         leftBars.value.find(x => x.config.command == "delete")!.config.disabled = formDef.value?.usingWorkflow && formData.value.flowStatus != FlowStatus.Draft;
     }
 });
-onMounted(() => {
-    generatePrintData()
-})
 </script>
 <style lang="scss" scoped></style>
