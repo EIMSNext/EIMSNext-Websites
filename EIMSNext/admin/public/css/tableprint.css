@@ -1,9 +1,11 @@
 @media print {
-    .page {
-        page-break-before: always;
-        page-break-inside: avoid;
-        page-break-after: auto;
-    }
+  .page {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  .page + .page {
+    page-break-before: always;
+  }
 }
 
 .et-table-print {

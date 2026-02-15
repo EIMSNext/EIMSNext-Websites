@@ -1,8 +1,24 @@
 @media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important; 
+  }
+
+  body {
+    display: block !important; 
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+  }
+
   .page {
-    page-break-before: always;
     page-break-inside: avoid;
     page-break-after: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .page + .page {
+    page-break-before: always;
   }
 }
 

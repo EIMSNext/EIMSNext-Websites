@@ -2,9 +2,11 @@ import { FormDef, IFieldPerm, FormData } from "@eimsnext/models";
 
 export const getPrintConfig = (isTablePrint: boolean) => {
   let printObj = {
+    // preview: true,
     showPrintDiv: false,
     id: "printdiv",
     popTitle: "&nbsp;",
+    noStyles: true,
     extraCss: "",
     beforeOpenCallback() {
       // console.log("打开之前");

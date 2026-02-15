@@ -31,7 +31,7 @@ const props = withDefaults(defineProps<{
     modelValue: boolean,
     appendToBody?: boolean;
     title?: string;
-    printData: IPrintData
+    printData?: IPrintData
 }>(), {
     appendToBody: false,
     title: "",
@@ -46,7 +46,7 @@ const fieldValues = ref<IFieldValue[]>([])
 
 // 核心方法：生成表格HTML
 const generateTableHtml = () => {
-    if (!props.printData) return;
+    if (!props.printData || !props.printData.formDef || !props.printData.formData) return;
 
     getDisplayFields();
     getFieldValues();
@@ -57,8 +57,8 @@ const generateTableHtml = () => {
 const getDisplayFields = () => {
     let fields: Record<string, boolean> = {};
 
-    if (props.printData.fieldPerms) {
-        props.printData.fieldPerms.forEach(x => {
+    if (props.printData?.fieldPerms) {
+        props.printData?.fieldPerms.forEach(x => {
             fields[x.id] = x.visible;
         });
     }
@@ -67,9 +67,9 @@ const getDisplayFields = () => {
 };
 
 const shouldDisplay = (p: FieldDef): boolean => {
-    if (!props.printData.fieldPerms) return true;
+    if (!props.printData?.fieldPerms) return true;
 
-    let fp = props.printData.fieldPerms.find(x => x.id == p.field)
+    let fp = props.printData?.fieldPerms.find(x => x.id == p.field)
     if (!fp) return true;
 
     return fp.visible;
@@ -78,8 +78,8 @@ const shouldDisplay = (p: FieldDef): boolean => {
 const getFieldValues = () => {
     fieldValues.value = []
 
-    const fields = props.printData.formDef.content?.items
-    const data = props.printData.formData.data
+    const fields = props.printData?.formDef.content?.items
+    const data = props.printData?.formData.data
     if (!fields || fields.length == 0 || !data) return;
 
     let ignoreFields: string[] = [SystemField.FlowStatus];
@@ -89,7 +89,7 @@ const getFieldValues = () => {
         if (ignoreFields.includes(f.field)) return;
 
         if (shouldDisplay(f)) {
-            let fv: IFieldValue = { field: f.field, type: f.type, label: "" }
+            let fv: IFieldValue = { field: f.field, type: f.type, label: f.title }
 
             if (f.i18n) fv.label = t(f.i18n);
 
@@ -106,7 +106,7 @@ const getFieldValues = () => {
                         let item: ITableItem = { fieldValues: [] }
                         columns.forEach(c => {
                             let cdata = d[c.field]
-                            let cv: IFieldValue = { field: c.field, type: c.type, label: "" }
+                            let cv: IFieldValue = { field: c.field, type: c.type, label: c.title }
                             if (c.i18n) cv.label = t(c.i18n);
                             cv.value = getValue(c, cdata)
 
@@ -118,7 +118,7 @@ const getFieldValues = () => {
                 else {
                     let item: ITableItem = { fieldValues: [] }
                     columns.forEach(c => {
-                        let cv: IFieldValue = { field: c.field, type: c.type, label: "", value: "" }
+                        let cv: IFieldValue = { field: c.field, type: c.type, label: c.title, value: "" }
                         if (c.i18n) cv.label = t(c.i18n);
                         item.fieldValues.push(cv)
                     });
@@ -229,7 +229,6 @@ const getValue = (el: FieldDef, vObj: any): string => {
 
 // 生成最终HTML
 const generateHtml = () => {
-    console.log("generateHtml")
     if (!fieldValues.value || fieldValues.value.length === 0) {
         printHtml.value = "";
         return;
@@ -378,7 +377,6 @@ const generateHtml = () => {
 watch(
     () => props.printData,
     (val) => {
-        console.log("watch printdata", val)
         if (val) {
             generateTableHtml();
         }
@@ -390,7 +388,7 @@ onMounted(() => {
     if (props.appendToBody) {
         document.body.appendChild(<HTMLElement>el.value);
     }
-    if (props.printData.formData)
+    if (props.printData && props.printData.formData)
         generateTableHtml();
 });
 

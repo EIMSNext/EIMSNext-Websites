@@ -7,9 +7,10 @@
     <FormView v-if="formDef && formData" :def="formDef.content!" :data="formData" :isView="isView" :actions="actions"
         :fieldPerms="fieldPerms" class="editdata" @draft="saveDraft" @submit="submitData">
     </FormView>
-    <div ref="printTrigger" v-print="printConfig" style="display: none"></div>
-    <FormPrintDiv v-if="formPrintData" v-model="printConfig.showPrintDiv" :title="formDef?.name"
-        :printData="formPrintData"></FormPrintDiv>
+    <div ref="printTrigger" v-print="printConfig" style="display: none">
+        <FormPrintDiv v-model="printConfig.showPrintDiv" :title="formDef?.name" :printData="formPrintData">
+        </FormPrintDiv>
+    </div>
 </template>
 <script lang="ts" setup>
 defineOptions({
@@ -52,6 +53,7 @@ const canEdit = computed(() => hasDataPerm(currentUser.userType, DataPerms.Edit,
 const canRemove = computed(() => hasDataPerm(currentUser.userType, DataPerms.Remove, props.dataPerms))
 
 const printConfig = ref(getPrintConfig(false));
+
 const formPrintData = ref()
 const printTrigger = ref<HTMLElement | null>(null)
 
