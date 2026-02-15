@@ -2,7 +2,7 @@
   <div class="adv-container">
     <el-tabs v-model="activeName" tabPosition="left" class="adv-tabs" @tab-click="handleClick">
       <el-tab-pane label="数据推送" name="webpush" class="adv-panel">
-        <DataflowList :form-def="formDef" />
+        <WebhookList :form-def="formDef" />
       </el-tab-pane>
       <el-tab-pane label="智能助手" name="dataflow" class="adv-panel">
         <DataflowList :form-def="formDef" />
@@ -15,6 +15,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import WebhookList from "./WebhookList.vue";
 import DataflowList from "./DataflowList.vue";
 import { useSystemStore } from "@/store/system";
 import { useFormStore } from "@eimsnext/store";
