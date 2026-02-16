@@ -15,6 +15,7 @@ import EtPlus from "@eimsnext/components";
 import setupHttp from "../utils/http";
 import { createI18n } from "vue-i18n";
 import { useSystemStoreHook } from "@/store";
+import print from "vue3-print-nb";
 
 export default {
   install(app: App<Element>) {
@@ -48,6 +49,7 @@ export default {
     app.use(EtPlus);
     app.use(formCreate);
     app.use(FcDesigner);
+    app.use(print);
     FcDesigner.setFormula([
       {
         menu: "math",

@@ -31,6 +31,7 @@ export class FieldDef {
   field: string = "";
   title: string = "";
   type: FieldType = FieldType.None;
+  i18n?: string;
   columns?: FieldDef[];
   props?: FieldProp;
 }
