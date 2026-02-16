@@ -1,0 +1,138 @@
+@media print {
+  .page {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  .page + .page {
+    page-break-before: always;
+  }
+}
+
+.et-table-print {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.et-table-print>.print-title {
+    color: #141e31;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 22px;
+    padding-top: 16px;
+    text-align: center;
+}
+
+.et-table-print>.print-description {
+    color: #141e31;
+    font-size: 10px;
+    line-height: 16px;
+    margin-top: 8px;
+}
+
+.et-table-print .et-preview-table:first-child {
+    margin-top: 8px;
+}
+
+.et-preview-table+.et-preview-table {
+    margin-top: 40px;
+}
+
+.et-table-print .et-preview-table {
+    border: 1px solid #d7d9dc;
+    border-collapse: collapse;
+    border-spacing: 2;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.et-table-print .et-preview-table tr {
+    height: 22px;
+}
+
+.et-table-print .et-preview-table thead tr th {
+    background: #e6e8ed;
+    font-weight: 400;
+    text-align: left;
+}
+
+.et-table-print .et-preview-table tr td, .et-table-print .et-preview-table tr th {
+    word-wrap: break-word;
+    border: 1px solid #d7d9dc;
+    box-sizing: border-box;
+    color: #141e31;
+    font-size: 10px;
+    line-height: 16px;
+    padding: 3px;
+    word-break: break-word;
+}
+
+.et-table-print table {
+    display: table;
+    border-collapse: separate;
+    box-sizing: border-box;
+    text-indent: initial;
+    line-height: normal;
+    font-weight: normal;
+    font-size: medium;
+    font-style: normal;
+    color: -internal-quirk-inherit;
+    text-align: start;
+    border-spacing: 2px;
+    border-color: gray;
+    white-space: normal;
+    font-variant: normal;
+}
+
+.et-table-print colgroup {
+    display: table-column-group;
+}
+
+.et-table-print col {
+    display: table-column;
+}
+
+.et-table-print thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+
+.et-table-print tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+
+.et-table-print th {
+    display: table-cell;
+    vertical-align: inherit;
+    font-weight: bold;
+    text-align: -internal-center;
+}
+
+.et-table-print tbody {
+    display: table-row-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+
+.et-table-print td {
+    display: table-cell;
+    vertical-align: inherit;
+}
+
+.et-table-print table img {
+    display: block;
+    height: 60px;
+    max-width: 100%;
+    border: 0;
+    outline: none;
+}
+
+.et-table-print table img.signature {
+    height: 60px;
+}
+
+.et-table-print pre{
+    white-space:pre-wrap;
+}

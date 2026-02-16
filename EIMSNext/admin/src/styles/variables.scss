@@ -30,8 +30,21 @@
   --et-menu-text: var(--el-menu-text-color);
   --et-menu-active-text: var(--el-menu-active-color);
   --et-menu-hover: var(--el-menu-hover-bg-color);
+  // --et-color-text: #141e31;
+  // --et-color-text-tertiary: #838892;
+  --et-color-primary: #409eff;
   --et-color-text: #141e31;
+  --et-color-text-secondary: #525967;
   --et-color-text-tertiary: #838892;
+  --et-color-warning: #f0a800;
+  --et-color-info: #2f7deb;
+  --et-color-info-bg: #eaf2fd;
+  --et-color-error: #eb5050;
+  --et-color-error-bg: #fdeeee;
+  --et-color-border: #dcdfe6;
+  --et-color-bg-primary: #e6f8f5;
+  --et-color-bg-secondary: #f0f2f5;
+  --et-color-bg-tertiary: #f0f2f5;
 
   // 修复表格 fixed 列被选中后由于透明色导致叠字的 bug
   .el-table {

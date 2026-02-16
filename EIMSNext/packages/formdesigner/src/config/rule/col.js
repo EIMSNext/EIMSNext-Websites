@@ -38,7 +38,7 @@ export default {
                 },
                 children: [
                     {
-                        type: 'elTabs',
+                        type: 'tabs',
                         style: {
                             width: '100%'
                         },

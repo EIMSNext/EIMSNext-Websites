@@ -4,9 +4,13 @@
         <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
     </EtConfirmDialog>
     <et-toolbar type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
-    <FormView v-if="formData" :def="formDef" :data="formData" :isView="isView" :actions="actions"
+    <FormView v-if="formDef && formData" :def="formDef.content!" :data="formData" :isView="isView" :actions="actions"
         :fieldPerms="fieldPerms" class="editdata" @draft="saveDraft" @submit="submitData">
     </FormView>
+    <div ref="printTrigger" v-print="printConfig" style="display: none">
+        <FormPrintDiv v-model="printConfig.showPrintDiv" :title="formDef?.name" :printData="formPrintData">
+        </FormPrintDiv>
+    </div>
 </template>
 <script lang="ts" setup>
 defineOptions({
@@ -14,13 +18,15 @@ defineOptions({
 });
 
 import { ref, onBeforeMount } from "vue";
-import { FormData, FormContent, FormDataRequest, DataAction, FlowStatus, IFieldPerm, DataPerms } from "@eimsnext/models";
+import { FormData, FormDataRequest, DataAction, FlowStatus, IFieldPerm, DataPerms, FormDef } from "@eimsnext/models";
 import { useFormStore, useUserStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
 import { MessageIcon, ToolbarItem } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 import { hasDataPerm } from "@/utils/common";
+import FormPrintDiv from "@/components/Print/FormPrintDiv.vue";
+import { getPrintConfig, IPrintData } from "@/components/Print/type";
 const { t } = useI18n();
 
 const props = withDefaults(
@@ -36,10 +42,8 @@ const props = withDefaults(
 
 const isView = ref(true)
 const actions = ref<FormActionSettings>({})
-const appId = ref("");
 const formStore = useFormStore();
-const formDef = ref<FormContent>(new FormContent());
-const usingWorkflow = ref(false)
+const formDef = ref<FormDef>();
 const formData = ref<FormData>();
 const showDeleteConfirmDialog = ref(false)
 const userStore = useUserStore()
@@ -48,8 +52,14 @@ const { currentUser } = userStore
 const canEdit = computed(() => hasDataPerm(currentUser.userType, DataPerms.Edit, props.dataPerms))
 const canRemove = computed(() => hasDataPerm(currentUser.userType, DataPerms.Remove, props.dataPerms))
 
+const printConfig = ref(getPrintConfig(false));
 
-const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "common.edit", command: "edit", visible: canEdit, icon: "el-edit" } }, { type: "button", config: { text: "common.delete", command: "delete", visible: canRemove, icon: "el-delete", disabled: false } }])
+const formPrintData = ref()
+const printTrigger = ref<HTMLElement | null>(null)
+
+const leftBars = ref<ToolbarItem[]>([{ type: "button", config: { text: "common.edit", command: "edit", visible: canEdit, icon: "el-edit" } }, { type: "button", config: { text: "common.delete", command: "delete", visible: canRemove, icon: "el-delete", disabled: false } }
+    , { type: "button", config: { text: "common.print", command: "print", visible: true, icon: "el-printer", disabled: false } }
+])
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
     switch (cmd) {
         case 'edit':
@@ -58,6 +68,9 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
             break;
         case 'delete':
             showDeleteConfirmDialog.value = true
+            break;
+        case 'print':
+            printTrigger.value?.click()
             break;
     }
 }
@@ -77,7 +90,7 @@ const saveDraft = (data: any) => {
     let fdata: FormDataRequest = {
         action: DataAction.Save,
         id: props.dataId,
-        appId: appId.value,
+        appId: formDef.value?.appId!,
         formId: props.formId,
         data: data,
     };
@@ -96,7 +109,7 @@ const submitData = (data: any) => {
     let fdata: FormDataRequest = {
         action: DataAction.Submit,
         id: props.dataId,
-        appId: appId.value,
+        appId: formDef.value?.appId!,
         formId: props.formId,
         data: data,
     };
@@ -112,19 +125,31 @@ const submitData = (data: any) => {
     });
 };
 
+const generatePrintData = () => {
+    let printData: IPrintData = {
+        formDef: formDef.value!,
+        formData: formData.value!,
+        fieldPerms: props.fieldPerms
+    };
+    formPrintData.value = printData;
+};
+watch(() => formData,
+    (val) => {
+        if (val) generatePrintData()
+    },
+    { deep: true }
+)
 onBeforeMount(async () => {
     let form = await formStore.get(props.formId);
     if (form) {
-        appId.value = form.appId;
-        usingWorkflow.value = form.usingWorkflow
-        formDef.value = form.content!;
+        formDef.value = form
     }
 
     let data = await formDataService.get<FormData>(props.dataId);
     if (data) {
         formData.value = data;
-        leftBars.value.find(x => x.config.command == "edit")!.config.disabled = usingWorkflow.value && formData.value.flowStatus != FlowStatus.Draft;
-        leftBars.value.find(x => x.config.command == "delete")!.config.disabled = usingWorkflow.value && formData.value.flowStatus != FlowStatus.Draft;
+        leftBars.value.find(x => x.config.command == "edit")!.config.disabled = formDef.value?.usingWorkflow && formData.value.flowStatus != FlowStatus.Draft;
+        leftBars.value.find(x => x.config.command == "delete")!.config.disabled = formDef.value?.usingWorkflow && formData.value.flowStatus != FlowStatus.Draft;
     }
 });
 </script>

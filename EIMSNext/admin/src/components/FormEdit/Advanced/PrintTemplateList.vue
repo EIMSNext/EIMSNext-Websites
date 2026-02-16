@@ -1,26 +1,8 @@
 <template>
-  <div class="flow-container">
-    <div><el-button @click="addNew(PrintTemplateType.Pdf)">Add</el-button></div>
-    <el-space direction="vertical" class="flow-space">
-      <template v-for="print in prints">
-        <et-card class="flow-card">
-          <template #header>
-            <div class="flex-y-center">
-              <div class="flow-header">
-                <div class="flow-name" :title="print.name">
-                  <span>{{ print.name }}</span>
-                </div>
-                <div style="margin-left: 50px">
-                  <el-button @click="edit(print)">编辑</el-button>
-                </div>
-              </div>
-            </div>
-          </template>
-          <div class="flow-content">触发: {{ print.printType }}</div>
-        </et-card>
-      </template>
-    </el-space>
-  </div>
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
+    :showNoSave="false" okText="确定" @ok="execDelete">
+    <div>数据删除后将不可恢复</div>
+  </EtConfirmDialog>
   <EtDrawer v-model="showDrawer" @close="close">
     <template #title>
       <el-input v-model="selectedPrint!.name" class="title-editor" />
@@ -28,10 +10,40 @@
 
     <PdfPrintDesigner :form-def="formDef" :print-def="selectedPrint!" />
   </EtDrawer>
+  <AdvanceLayout title="打印模板" desc="打印表单时将按照使用中的模板格式打印">
+    <div class="flow-container">
+      <div class="panel-header">
+        <div class="header-left"> <el-button type="primary" icon="plus"
+            @click="addNew(PrintTemplateType.Pdf)">新建打印模板</el-button>
+        </div>
+        <div class="header-right"></div>
+      </div>
+      <div>
+        <el-space direction="vertical" class="flow-space">
+          <template v-for="print in prints">
+            <et-card class="flow-card" :title="print.name">
+              <template #action>
+                <div class="flow-header">
+                  <el-button @click="edit(print)">编辑</el-button>
+                  <el-button @click="remove(print)">删除</el-button>
+                </div>
+              </template>
+              <div class="flow-content">
+                <div class="item-line">使用范围: aaaa</div>
+                <div class="item-line">文件名称: bbbb</div>
+              </div>
+            </et-card>
+          </template>
+        </el-space>
+      </div>
+    </div>
+  </AdvanceLayout>
 </template>
+
 <script setup lang="ts">
 import PdfPrintDesigner from "@/components/PrintDesigner/PdfPrintDesigner.vue";
 import { FormDef, PrintTemplate, PrintTemplateType } from "@eimsnext/models";
+import { MessageIcon } from "@eimsnext/components";
 import { printTemplateService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 
@@ -44,7 +56,7 @@ const props = defineProps<{
 }>();
 
 const showDrawer = ref(false);
-
+const showDeleteConfirmDialog = ref(false)
 const prints = ref<PrintTemplate[]>([]);
 const selectedPrint = ref<PrintTemplate>();
 
@@ -77,6 +89,17 @@ const edit = (print: PrintTemplate) => {
   showDrawer.value = true;
 };
 
+const remove = (print: PrintTemplate) => {
+  selectedPrint.value = print
+  showDeleteConfirmDialog.value = true
+};
+const execDelete = () => {
+  printTemplateService.delete<PrintTemplate>(selectedPrint.value!.id).then((res) => {
+    loadPrints(props.formDef.id)
+    showDeleteConfirmDialog.value = false
+  });
+}
+
 // const emit = defineEmits(["close"]);
 
 function close() {
@@ -95,8 +118,15 @@ onBeforeMount(() => {
 </script>
 <style lang="scss" scoped>
 .flow-container {
-  padding: 20px;
   display: flex;
+  flex-direction: column;
+
+  .panel-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 16px;
+  }
 
   .flow-space {
     width: 100%;
@@ -108,6 +138,7 @@ onBeforeMount(() => {
 
     .flow-header {
       display: flex;
+      justify-content: space-between;
 
       .flow-name {
         font-size: 15px;
@@ -117,13 +148,45 @@ onBeforeMount(() => {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+
+      .el-button {
+        margin: 0px;
+        border: none;
+      }
     }
 
     .flow-content {
       display: flex;
       font-size: 13px;
       padding: 10px 20px;
+      flex-direction: column;
+
+      .item-line {
+        word-wrap: break-word;
+        align-items: center;
+        color: var(--et-color-text-secondary);
+        display: flex;
+        font-size: 14px;
+        line-height: 22px;
+        word-break: break-word;
+      }
     }
   }
+}
+
+.main-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.main-content {
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 60px;
 }
 </style>

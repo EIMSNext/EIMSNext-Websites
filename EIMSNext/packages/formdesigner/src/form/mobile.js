@@ -245,7 +245,7 @@ export function useAdvanced(formCreate) {
                     ctx.prop.component = 'elCascader';
                 }
             },
-            elDivider: {
+            divider: {
                 mergeProp(ctx) {
                     ctx.prop.component = 'vanDivider';
                 }
