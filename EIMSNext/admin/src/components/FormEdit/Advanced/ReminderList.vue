@@ -5,16 +5,16 @@
     </EtConfirmDialog>
     <el-drawer v-model="showDrawer" direction="btt" size="95%" @close="close">
         <template #header>
-            <div class="main-title"> <span>数据推送</span></div>
+            <div class="main-title"> <span>提醒助手</span></div>
         </template>
         <div class="main-content">
             <WebhookEditor v-model="selectedItem!" :formDef="formDef" />
         </div>
     </el-drawer>
-    <AdvanceLayout title="数据推送" desc="数据推送可将表单数据推送至你指定的服务器">
+    <AdvanceLayout title="提醒助手" desc="设置推送规则，根据规则自动给相关人员发送提醒消息">
         <div class="flow-container">
             <div class="panel-header">
-                <div class="header-left"> <el-button type="primary" icon="plus" @click="addNew()">新建数据推送</el-button>
+                <div class="header-left"> <el-button type="primary" icon="plus" @click="addNew()">新建提醒助手</el-button>
                 </div>
                 <div class="header-right"></div>
             </div>
@@ -30,7 +30,7 @@
                                 </div>
                             </template>
                             <div class="flow-content">
-                                <div class="item-line">服务器地址: {{ hook.url }}</div>
+                                 <div class="item-line">服务器地址: {{ hook.url }}</div>
                                 <div class="item-line">推送事件: {{ hook.triggers }}</div>
                             </div>
                         </et-card>
@@ -51,7 +51,7 @@ import { useFormStore } from "@eimsnext/store";
 import { Dictionary } from "@eimsnext/utils";
 
 defineOptions({
-    name: "WebhookList",
+    name: "ReminderList",
 });
 
 const props = defineProps<{
@@ -69,9 +69,9 @@ const formStore = useFormStore()
 
 const loadWebhooks = (formId: string) => {
     let query = buildQuery({ filter: { formId: formId } });
-    webhookService.query<Webhook>(query).then((res) => {
-        webhooks.value = res;
-    });
+    // webhookService.query<Webhook>(query).then((res) => {
+    //     webhooks.value = res;
+    // });
 
     // formStore.get(formId).then(form => { if (form) formNamesCache.add(formId, form.name) })
 };

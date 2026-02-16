@@ -2,7 +2,7 @@
     <div class="api-config-pane">
         <div class="config-content">
             <div class="config-pane">
-                <div class="pane-label">服务器地址</div>
+                <!-- <div class="pane-label">服务器地址</div>
                 <div class="pane-row">
                     <el-input v-model="hook.url" class="pane-row-stretch" autocomplete="new-password" />
                     <el-button type="primary" class="btn-test">服务器连接测试</el-button>
@@ -39,7 +39,7 @@
                                 @change="(val) => triggerChanged(WebHookTrigger.WfTodo_Updated, val)">流程待办变更时</el-checkbox>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
             <div class="btn-pane"><el-button type="primary" @click="save">保存</el-button></div>
         </div>
@@ -53,7 +53,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n()
 
 defineOptions({
-    name: "WebhookEditor",
+    name: "ReminderEditor",
 });
 
 const props = defineProps<{
@@ -84,31 +84,32 @@ const triggerChanged = (perm: WebHookTrigger, checked: any) => {
 }
 
 const save = async () => {
-    if (!hook.value) return;
+    
+    // if (!hook.value) return;
 
-    // try {
-    //     await appRef.value.validate();
-    // } catch (error) {
-    //     return;
+    // // try {
+    // //     await appRef.value.validate();
+    // // } catch (error) {
+    // //     return;
+    // // }
+
+    // const newHook: WebhookRequest = {
+    //     id: hook.value.id,
+    //     appId: props.formDef.appId,
+    //     formId: props.formDef.id,
+    //     url: hook.value.url,
+    //     secret: hook.value.secret,
+    //     triggers: hook.value.triggers,
+    //     disabled: false
+    // };
+
+    // if (hook.value.id) {
+    //     hook.value = await webhookService.patch<Webhook>(hook.value.id, newHook);
+    // } else {
+    //     hook.value = await webhookService.post<Webhook>(newHook);
     // }
 
-    const newHook: WebhookRequest = {
-        id: hook.value.id,
-        appId: props.formDef.appId,
-        formId: props.formDef.id,
-        url: hook.value.url,
-        secret: hook.value.secret,
-        triggers: hook.value.triggers,
-        disabled: false
-    };
-
-    if (hook.value.id) {
-        hook.value = await webhookService.patch<Webhook>(hook.value.id, newHook);
-    } else {
-        hook.value = await webhookService.post<Webhook>(newHook);
-    }
-
-    emit("saved", hook.value);
+    // emit("saved", hook.value);
 }
 
 </script>

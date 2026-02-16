@@ -156,6 +156,8 @@ const handleReset = () => {
   .form-actions {
     display: flex;
     justify-content: flex-end;
+    margin-top: 10px;
+    padding-right: 20px;
   }
 }
 </style>

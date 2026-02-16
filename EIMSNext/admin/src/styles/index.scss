@@ -95,3 +95,10 @@
     margin-left: 6px;
   }
 }
+.no-border {
+  border: none;
+
+  &:hover {
+    border: none;
+  }
+}

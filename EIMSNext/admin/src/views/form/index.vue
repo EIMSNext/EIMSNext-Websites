@@ -537,8 +537,8 @@ const processData = () => {
       for (const key in dataItem) {
         if (dataItem.hasOwnProperty(key)) {
           const value = dataItem[key];
-          if (value && typeof value === 'object' && 'value' in value) {
-            dataItem[key] = value.value;
+          if (value && typeof value === 'object' && 'label' in value) {
+            dataItem[key] = value.label;
           }
         }
       }
