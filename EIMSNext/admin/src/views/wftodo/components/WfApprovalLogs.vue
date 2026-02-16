@@ -1,7 +1,7 @@
 <template>
     <div class="mytasks-container">
-        <et-dialog v-model="showDetailsDialog" :title="selectedTask?.formName" :show-footer="false"
-            :destroy-on-close="true">
+        <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="selectedTask?.formName"
+            :show-footer="false" width="800px" :destroy-on-close="true">
             <div class="form-container">
                 <WfApprovalLogView :approvalLog="selectedTask!"> </WfApprovalLogView>
             </div>
@@ -30,8 +30,8 @@
                     <div class="flow-content">
                         <div class="creator-info">
                             <et-icon icon="el-user" size="14px"></et-icon>
-                            <span class="creator-name" :title="task.approver?.empName">
-                                {{ task.approver?.empName }}
+                            <span class="creator-name" :title="task.approver?.label">
+                                {{ task.approver?.label }}
                             </span>
                         </div>
                         <ul class="flow-brief">

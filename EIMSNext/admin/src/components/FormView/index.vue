@@ -148,9 +148,16 @@ const handleReset = () => {
 .form-wrapper {
   padding: 20px;
 
+  &.editdata {
+    padding-top: 10px;
+    border-top: 1px solid var(--el-border-color);
+  }
+
   .form-actions {
     display: flex;
     justify-content: flex-end;
+    margin-top: 10px;
+    padding-right: 20px;
   }
 }
 </style>

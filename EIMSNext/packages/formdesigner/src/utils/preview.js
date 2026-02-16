@@ -62,10 +62,10 @@ export default function renderPreview(_, ctx) {
       "infinitetableform",
       "fcupload",
       "fc-upload",
-      "department2",
-      "employee2",
       "fileupload",
       "imageupload",
+      "fcdepartmentselect",
+      "fcemployeeselect",
     ].indexOf(ctx.trueType.toLowerCase()) > -1
   ) {
     if (ctx.trueType.toLowerCase() === "fcupload") {
@@ -73,16 +73,7 @@ export default function renderPreview(_, ctx) {
     }
     return ctx.parser.render(_, ctx);
   }
-  if (
-    [
-      "radio",
-      "select",
-      "select2",
-      "checkbox",
-      "department1",
-      "employee1",
-    ].indexOf(type) > -1
-  ) {
+  if (["radio", "select", "select2", "checkbox"].indexOf(type) > -1) {
     val = findCheckboxLabel(
       [...toArray(val)],
       ctx.prop.props.options || ctx.prop.props.formCreateInject.options || [],

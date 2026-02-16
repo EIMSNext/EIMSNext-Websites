@@ -1,7 +1,7 @@
 import { localeOptions, localeProps } from "../../utils";
 
 const label = "标签页";
-const name = "elTabs";
+const name = "tabs";
 
 export default {
   menu: "layout",
