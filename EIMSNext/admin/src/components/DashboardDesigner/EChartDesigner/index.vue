@@ -8,7 +8,7 @@
             <div class="choose-data" @click="changeDataSource">更改数据源</div>
           </div>
           <div class="data-source-name">
-            <et-icon icon="el-icon-document"></et-icon>
+            <et-icon icon="el-Document"></et-icon>
             <span>{{ dataSource?.label }}</span>
           </div>
         </div>
@@ -31,7 +31,7 @@
             <span>字段</span>
             <!-- <div class="field-operation">
               <div @click="addComputedField" v-if="dataSourceType == DataSourceType.Form">
-                <et-icon icon="el-icon-plus"></et-icon>
+                <et-icon icon="el-plus"></et-icon>
               </div>
             </div> -->
           </div>
@@ -41,18 +41,18 @@
               <template #item="{ element, index }">
                 <div class="field-wrapper" :title="element.title">
                   <div class="field-name">
-                    <et-icon icon="el-icon-copyDocument" class="mr-[8px]"></et-icon>
+                    <et-icon icon="el-copyDocument" class="mr-[8px]"></et-icon>
                     <span class="name">{{ element.title }}</span>
                   </div>
                   <!-- <div v-if="element.isComputed" class="tool-icons">
                     <span @click="copyField(element)">
-                      <et-icon icon="el-icon-copyDocument" class="icon"></et-icon>
+                      <et-icon icon="el-copyDocument" class="icon"></et-icon>
                     </span>
                     <span @click="editField(element, index)">
-                      <et-icon icon="el-icon-edit" class="icon"></et-icon>
+                      <et-icon icon="el-edit" class="icon"></et-icon>
                     </span>
                     <span @click="removeField(element, index)">
-                      <et-icon icon="el-icon-delete" class="icon"></et-icon>
+                      <et-icon icon="el-delete" class="icon"></et-icon>
                     </span>
                   </div> -->
                 </div>

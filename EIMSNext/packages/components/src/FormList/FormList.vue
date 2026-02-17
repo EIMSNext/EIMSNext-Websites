@@ -2,10 +2,10 @@
     <div class="form-list">
         <!-- 列表项 -->
         <ul class="form-list-wrapper">
-            <li v-for="item in formList" :key="item.id" class="list-item">
+            <li v-for="item in formList" :key="item.id" class="list-item"
+                :class="{ active: item.id == modelValue?.id }">
                 <slot :item="item">
-                    <div class="item-wrapper clickable" @click.stop="itemClick(item)"
-                        :class="{ active: item.id == modelValue?.id }">
+                    <div class="item-wrapper clickable" @click.stop="itemClick(item)">
                         <div class="item-content">
                             <et-icon v-if="item.icon" :icon="item.icon" :color="item.iconColor"
                                 style="padding-right: 5px"></et-icon>

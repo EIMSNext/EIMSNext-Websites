@@ -2,7 +2,7 @@
   <div>
     <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
       :isLedger="isLedger" @close="showFormEditor = false" />
-
+    <DashboardDesigner v-model="showDshEditor" :appId="appId"></DashboardDesigner>
     <div class="app-title">
       <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
       <span v-if="isSidebarOpened" class="ml-[10px]">{{ app?.name
@@ -73,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import DashboardDesigner from "@/components/DashboardDesigner/index.vue"
 import { usePermissionStore, useSystemStore } from "@/store";
 import { App, FormDef, FormDefRequest, FormType, UserType } from "@eimsnext/models";
 import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";

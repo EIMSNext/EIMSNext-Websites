@@ -1,6 +1,8 @@
 <template>
-    <et-dialog v-model="showDialog" :title="t('comp.selectDataSource')" @cancel="cancel" @ok="save">
-        <FormList v-model="formItem" :appId="appId" @itemClick="formSelected"></FormList>
+    <et-dialog :modelValue="modelValue" :title="t('comp.selectDataSource')" width="450px" @cancel="cancel" @ok="save">
+        <div style="padding: 20px;">
+            <FormList v-model="formItem" :appId="appId" @itemClick="formSelected"></FormList>
+        </div>
     </et-dialog>
 </template>
 <script setup lang="ts">
@@ -20,7 +22,6 @@ const props = defineProps<{
     dataSource?: IDataSource
 }>();
 
-const showDialog = toRef(props.modelValue)
 const formItem = ref<IFormItem>({ id: "" })
 const dataSource = toRef(props.dataSource)
 
