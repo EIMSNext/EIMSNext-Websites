@@ -24,3 +24,5 @@ export * from "./wfDefinitionService";
 export * from "./wfTodoService";
 export * from "./workflowService";
 export * from "./wfApprovalLogService";
+export * from "./dashboardDefService";
+export * from "./dashboardItemDefService";

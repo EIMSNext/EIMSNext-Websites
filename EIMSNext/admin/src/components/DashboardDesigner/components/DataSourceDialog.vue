@@ -1,6 +1,6 @@
 <template>
     <et-dialog :modelValue="modelValue" :title="t('comp.selectDataSource')" width="450px" @cancel="cancel" @ok="save">
-        <div style="padding: 20px;">
+        <div style="padding: 20px;height: 400px;">
             <FormList v-model="formItem" :appId="appId" @itemClick="formSelected"></FormList>
         </div>
     </et-dialog>
@@ -40,6 +40,6 @@ const cancel = () => {
     emit("cancel");
 };
 const save = () => {
-    emit("ok", dataSource.value);
+    emit("ok", formItem.value);
 };
 </script>

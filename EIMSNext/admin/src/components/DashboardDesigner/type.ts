@@ -1,3 +1,5 @@
+import { DashItemType } from "@eimsnext/models";
+
 export interface IDataSource {
   id: string;
   type: DataSourceType;
@@ -6,11 +8,7 @@ export interface IDataSource {
 export enum DataSourceType {
   Form,
 }
-export enum DashItemType {
-  Chart = "chart",
-  Comp = "comp",
-  Tool = "tool",
-}
+
 export interface IDraggableItem {
   id: string;
   icon: string;
@@ -58,4 +56,10 @@ export interface IGridLayoutItem {
   drag?: boolean;
   type?: DashItemType; // 关联拖拽项类型
   [key: string]: any;
+}
+
+export interface IGridLayoutState {
+  layout: IGridLayoutItem[];
+  draggable: boolean;
+  resizable: boolean;
 }

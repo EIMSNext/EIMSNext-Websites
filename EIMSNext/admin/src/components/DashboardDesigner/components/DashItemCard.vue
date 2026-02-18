@@ -1,17 +1,16 @@
 <template>
-    <div class="react-grid-item layout-grid-item react-draggable cssTransforms react-resizable"
-        style="background: rgb(255, 255, 255); width: 615px; height: 290px; position: absolute; transform: translate(10px, 10px);">
+    <div class="layout-grid-item">
         <div class="container-group-drag-handle"></div>
         <div class="container-header">
             <div class="header-operate-container">
                 <div class="header-operate">
                     <div class="selected-operate-btn">
-                        <div class="operate-btn" title="在桌面端隐藏该组件"><i class="x-icon iconfont-fx-pc icon-eye-close"></i>
+                        <div class="operate-btn" title="在桌面端隐藏该组件"><et-icon icon="el-hide" />
                         </div>
                     </div>
-                    <div class="operate-btn" title="编辑"><i class="x-icon iconfont-fx-pc icon-pencil-edit"></i></div>
-                    <div class="operate-btn" title="复制"><i class="x-icon iconfont-fx-pc icon-copy"></i></div>
-                    <div class="operate-btn" title="删除"><i class="x-icon iconfont-fx-pc icon-trash"></i></div>
+                    <div class="operate-btn" title="编辑"><et-icon icon="el-editpen" /></div>
+                    <div class="operate-btn" title="复制"><et-icon icon="el-documentcopy" /></div>
+                    <div class="operate-btn" title="删除"><et-icon icon="el-delete" /></div>
                     <span></span>
                     <div class="operate-btn custom-line-operate"></div>
                 </div>
@@ -49,14 +48,23 @@ const props = withDefaults(
 
 </script>
 <style lang="scss" scoped>
-.react-grid-item {
-    -webkit-transition: all .2s ease;
+.layout-grid-item {
+    z-index: 10;
     transition: all .2s ease;
-    -webkit-transition-property: left, top;
     transition-property: left, top;
-    background: var(--et-color-bg-container);
-    -webkit-box-shadow: 0 2px 6px 0 rgba(84, 48, 132, .1);
+    background: #fff;
     box-shadow: 0 2px 6px 0 rgba(84, 48, 132, .1);
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+
+    &:hover .header-operate-container {
+        opacity: 1;
+    }
 
     .container-group-drag-handle,
     .group-container-item-handle {
@@ -88,29 +96,21 @@ const props = withDefaults(
             pointer-events: auto;
             position: absolute;
             right: 0;
-            -webkit-transition: .2s;
             transition: .2s;
 
             .header-operate {
                 background: var(--et-color-bg-container);
                 border-radius: 3px;
-                -webkit-box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .15);
                 box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .15);
-                display: -webkit-box;
-                display: -ms-flexbox;
                 display: flex;
 
                 .selected-operate-btn {
-                    display: -webkit-box;
-                    display: -ms-flexbox;
                     display: flex;
                     margin-right: 15px;
                     position: relative;
                 }
 
                 .operate-btn {
-                    -webkit-box-flex: 1;
-                    -ms-flex: 1 1 auto;
                     flex: 1 1 auto;
                     height: 30px;
                     line-height: 30px;
@@ -129,11 +129,7 @@ const props = withDefaults(
         }
 
         .header-title {
-            -webkit-box-align: center;
-            -ms-flex-align: center;
             align-items: center;
-            display: -webkit-box;
-            display: -ms-flexbox;
             display: flex;
             font-weight: 700;
             overflow: hidden;
@@ -142,8 +138,6 @@ const props = withDefaults(
             white-space: nowrap;
 
             .title-text {
-                -webkit-box-flex: 0;
-                -ms-flex: 0 1 auto;
                 flex: 0 1 auto;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -162,13 +156,9 @@ const props = withDefaults(
         top: 40px;
 
         .fx-dash-empty {
-            -webkit-box-align: center;
-            -ms-flex-align: center;
             align-items: center;
             background: transparent;
             bottom: 0;
-            display: -webkit-box;
-            display: -ms-flexbox;
             display: flex;
             left: 0;
             position: absolute;
@@ -186,17 +176,6 @@ const props = withDefaults(
                 }
             }
         }
-    }
-
-    .layout-grid-item {
-        z-index: 10;
-    }
-
-    .cssTransforms {
-        -webkit-transition-property: -webkit-transform;
-        transition-property: -webkit-transform;
-        transition-property: transform;
-        transition-property: transform, -webkit-transform;
     }
 }
 </style>

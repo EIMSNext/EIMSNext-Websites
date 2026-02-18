@@ -2,7 +2,7 @@
   <div>
     <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
       :isLedger="isLedger" @close="showFormEditor = false" />
-    <DashboardDesigner v-model="showDshEditor" :appId="appId"></DashboardDesigner>
+    <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :appId="appId" :dash-def="newDash!"></DashboardDesigner>
     <div class="app-title">
       <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
       <span v-if="isSidebarOpened" class="ml-[10px]">{{ app?.name
@@ -75,11 +75,11 @@
 <script setup lang="ts">
 import DashboardDesigner from "@/components/DashboardDesigner/index.vue"
 import { usePermissionStore, useSystemStore } from "@/store";
-import { App, FormDef, FormDefRequest, FormType, UserType } from "@eimsnext/models";
+import { App, DashboardDef, DashboardDefRequest, FormDef, FormDefRequest, FormType, UserType } from "@eimsnext/models";
 import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
-import { formDefService } from "@eimsnext/services";
+import { dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n()
 
@@ -88,6 +88,7 @@ const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
 
+const newDash = ref<DashboardDef>()
 const showDshEditor = ref(false);
 var permissionStore = usePermissionStore()
 const { appMenus } = storeToRefs(permissionStore);
@@ -122,7 +123,6 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
     id: "",
     appId: contextStore.appId,
     name: t("admin.untitledForm"),
-    type: FormType.Form,
     content: {
       "layout": "[]",
       "options": "{\"info\":{\"align\":\"left\"},\"form\":{\"inline\":false,\"hideRequiredAsterisk\":false,\"labelPosition\":\"top\",\"size\":\"default\",\"labelWidth\":\"auto\"},\"resetBtn\":{\"show\":false,\"innerText\":\"重置\"},\"submitBtn\":{\"show\":false,\"innerText\":\"提交\"}}"
@@ -152,7 +152,19 @@ const editForm = async (formId: string) => {
 }
 
 const createDashboard = () => {
-  showDshEditor.value = true;
+  let req: DashboardDefRequest = {
+    id: "",
+    appId: contextStore.appId,
+    name: t("admin.untitledForm"),
+    layout: "[]"
+  };
+
+  dashboardDefService.post<DashboardDef>(req).then(resp => {
+    newDash.value = resp
+    contextStore.setAppChanged(); //reload 菜单
+
+    showDshEditor.value = true;
+  });
 };
 
 const createFolder = () => { };

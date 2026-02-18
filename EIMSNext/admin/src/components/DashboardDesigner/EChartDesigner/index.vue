@@ -70,7 +70,7 @@
 <script setup lang="ts">
 import Draggable from "vuedraggable";
 import { DataSourceType, IDataSource, IDataSourceField } from "../type";
-import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
+import { DashboardItemDef, FieldDef, FieldType, FormDef } from "@eimsnext/models";
 import { IFormItem } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
@@ -82,6 +82,7 @@ defineOptions({
 });
 
 const props = defineProps<{
+  modelValue: DashboardItemDef
   appId: string;
   dataSource: IDataSource,
   layout?: string
