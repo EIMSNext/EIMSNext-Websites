@@ -28,13 +28,15 @@
               <et-icon icon="el-More" @click.prevent=""></et-icon>
               <template #dropdown>
                 <el-dropdown-menu style="min-width: 150px">
-                  <el-dropdown-item @click="editForm(item.meta?.id)">{{ t("common.edit") }}</el-dropdown-item>
-                  <el-dropdown-item @click="editNameAndIcon(item.meta?.id)">
+                  <el-dropdown-item @click="editForm(item.meta?.id, item.meta?.type)">{{ t("common.edit")
+                  }}</el-dropdown-item>
+                  <el-dropdown-item @click="editNameAndIcon(item.meta?.id, item.meta?.type)">
                     {{ t("admin.editNameAndIcon") }}
                   </el-dropdown-item>
                   <el-divider style="margin: 3px 0" />
-                  <el-dropdown-item class="btn-delete" @click="deleteForm(item.meta?.id)">{{ t("common.delete")
-                  }}</el-dropdown-item>
+                  <el-dropdown-item class="btn-delete" @click="deleteForm(item.meta?.id, item.meta?.type)">{{
+                    t("common.delete")
+                    }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -66,7 +68,7 @@ import path from "path-browserify";
 import { RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
 import { useContextStore, useFormStore, useUserStore, useAppStore } from "@eimsnext/store";
-import { FormDef, UserType } from "@eimsnext/models";
+import { FormDef, FormType, UserType } from "@eimsnext/models";
 import { MessageIcon } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 import { useSystemStore } from "@/store";
@@ -159,27 +161,31 @@ function resolvePath(routePath: string) {
  * 编辑表单
  */
 const emit = defineEmits(["editForm"]);
-function editForm(formId?: string) {
+function editForm(formId?: string, type?: FormType) {
   if (formId) {
-    emit("editForm", formId)
+    emit("editForm", formId, type)
   }
 }
-async function editNameAndIcon(formId?: string) {
+async function editNameAndIcon(formId?: string, type?: FormType) {
   if (formId) {
-    let form = await formStore.get(formId);
-    if (form) {
-      selectedFormId.value = formId;
-      selectedForm.value = form
+    if (type && type == FormType.Form) {
+      let form = await formStore.get(formId);
+      if (form) {
+        selectedFormId.value = formId;
+        selectedForm.value = form
+      }
     }
   }
 }
-async function deleteForm(formId?: string) {
+async function deleteForm(formId?: string, type?: FormType) {
   if (formId) {
-    let form = await formStore.get(formId);
-    if (form) {
-      selectedFormId.value = formId;
-      selectedForm.value = form
-      showDeleteConfirmDialog.value = true;
+    if (type && type == FormType.Form) {
+      let form = await formStore.get(formId);
+      if (form) {
+        selectedFormId.value = formId;
+        selectedForm.value = form
+        showDeleteConfirmDialog.value = true;
+      }
     }
   }
 }

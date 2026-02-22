@@ -1,80 +1,91 @@
 <template>
-  <el-container class="design-container">
-    <el-aside width="250px" class="left-aside">
-      <div class="left-container">
-        <div class="data-source">
-          <div class="data-source-setting">
-            <span>数据源</span>
-            <div class="choose-data" @click="changeDataSource">更改数据源</div>
+  <EtDrawer :model-value="modelValue" @close="close">
+    <template #title>
+      <el-input v-model="dashItemDef.name" class="title-editor" />
+    </template>
+    <template #top-right>
+      <el-button @click="onSave">保存</el-button>
+    </template>
+    <el-container class="design-container">
+      <el-aside width="250px" class="left-aside">
+        <div class="left-container">
+          <div class="data-source">
+            <div class="data-source-setting">
+              <span>数据源</span>
+              <div class="choose-data" @click="changeDataSource">更改数据源</div>
+            </div>
+            <div class="data-source-name">
+              <et-icon icon="el-Document"></et-icon>
+              <span>{{ chartSetting.datasource?.label }}</span>
+            </div>
           </div>
-          <div class="data-source-name">
-            <et-icon icon="el-icon-document"></et-icon>
-            <span>{{ dataSource?.label }}</span>
-          </div>
-        </div>
-        <div class="data-source" v-if="dataSource.type == DataSourceType.Form">
-          <div class="data-source-setting">
-            <span>数据获取权限</span>
-            <!-- <div class="choose-data" v-if="selectedRole === 2">
+          <div class="data-source" v-if="chartSetting.datasource.type == DatasourceType.Form">
+            <div class="data-source-setting">
+              <span>数据获取权限</span>
+              <!-- <div class="choose-data" v-if="selectedRole === 2">
               <a :href="getFormRoleLink(queryId)" target="_blank">{{ $t("FormRoleConfig") }}</a>
             </div> -->
+            </div>
+            <div class="data-source-name">
+              <el-select size="small" v-model="selectedRole" @change="roleChanged">
+                <el-option :label="t('表单中的全部数据')" value="1"></el-option>
+                <el-option :label="t('继承成员对表单的权限')" value="2"></el-option>
+              </el-select>
+            </div>
           </div>
-          <div class="data-source-name">
-            <el-select size="small" v-model="selectedRole" @change="roleChanged">
-              <el-option :label="t('表单中的全部数据')" value="1"></el-option>
-              <el-option :label="t('继承成员对表单的权限')" value="2"></el-option>
-            </el-select>
-          </div>
-        </div>
-        <div class="fields-container">
-          <div class="field-title">
-            <span>字段</span>
-            <!-- <div class="field-operation">
-              <div @click="addComputedField" v-if="dataSourceType == DataSourceType.Form">
-                <et-icon icon="el-icon-plus"></et-icon>
+          <div class="fields-container">
+            <div class="field-title">
+              <span>字段</span>
+              <!-- <div class="field-operation">
+              <div @click="addComputedField" v-if="DatasourceType == DatasourceType.Form">
+                <et-icon icon="el-plus"></et-icon>
               </div>
             </div> -->
-          </div>
-          <div style="overflow-y: auto">
-            <Draggable :list="fields" :sort="false" ghost-class="ghost" @start="dragStart"
-              :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
-              <template #item="{ element, index }">
-                <div class="field-wrapper" :title="element.title">
-                  <div class="field-name">
-                    <et-icon icon="el-icon-copyDocument" class="mr-[8px]"></et-icon>
-                    <span class="name">{{ element.title }}</span>
-                  </div>
-                  <!-- <div v-if="element.isComputed" class="tool-icons">
+            </div>
+            <div style="overflow-y: auto">
+              <Draggable :list="fields" :sort="false" ghost-class="ghost" @start="dragStart"
+                :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
+                <template #item="{ element, index }">
+                  <div class="field-wrapper" :title="element.title">
+                    <div class="field-name">
+                      <et-icon icon="el-copyDocument" class="mr-[8px]"></et-icon>
+                      <span class="name">{{ element.title }}</span>
+                    </div>
+                    <!-- <div v-if="element.isComputed" class="tool-icons">
                     <span @click="copyField(element)">
-                      <et-icon icon="el-icon-copyDocument" class="icon"></et-icon>
+                      <et-icon icon="el-copyDocument" class="icon"></et-icon>
                     </span>
                     <span @click="editField(element, index)">
-                      <et-icon icon="el-icon-edit" class="icon"></et-icon>
+                      <et-icon icon="el-edit" class="icon"></et-icon>
                     </span>
                     <span @click="removeField(element, index)">
-                      <et-icon icon="el-icon-delete" class="icon"></et-icon>
+                      <et-icon icon="el-delete" class="icon"></et-icon>
                     </span>
                   </div> -->
-                </div>
-              </template>
-            </Draggable>
+                  </div>
+                </template>
+              </Draggable>
+            </div>
           </div>
         </div>
-      </div>
-    </el-aside>
-    <el-main style="min-width: 460px"></el-main>
-    <el-aside width="300px"></el-aside>
-    <DataSourceDialog v-model="showDataSourceDialog" :appId="appId" :dataSource="dataSource"></DataSourceDialog>
-  </el-container>
+      </el-aside>
+      <el-main style="min-width: 460px"></el-main>
+      <el-aside width="300px"></el-aside>
+      <DataSourceDialog v-model="showDataSourceDialog" :appId="dashItemDef.appId" :dataSource="chartSetting.datasource">
+      </DataSourceDialog>
+    </el-container>
+  </EtDrawer>
 </template>
 <script setup lang="ts">
 import Draggable from "vuedraggable";
-import { DataSourceType, IDataSource, IDataSourceField } from "../type";
-import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
+import { DatasourceType, IDataSource, IDataSourceField } from "../type";
+import { DashboardItemDef, FieldDef, FieldType, FormDef } from "@eimsnext/models";
 import { IFormItem } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
 import { useLocale } from "element-plus";
+import { IChartSetting } from "./type";
+import { dashboardItemDefService } from "@eimsnext/services";
 const { t } = useLocale();
 
 defineOptions({
@@ -82,13 +93,12 @@ defineOptions({
 });
 
 const props = defineProps<{
-  appId: string;
-  dataSource: IDataSource,
-  layout?: string
+  modelValue: boolean;
+  dashItemDef: DashboardItemDef
 }>();
 
+const chartSetting = ref<IChartSetting>(JSON.parse(props.dashItemDef.details))
 const selectedRole = ref("1");
-const dataSource = toRef(props.dataSource);
 const formItem = ref<IFormItem>()
 const formStore = useFormStore();
 const formDef = ref<FormDef>()
@@ -129,7 +139,7 @@ const populateFormFields = () => {
 const chartType = ref(0);
 
 const changeDataSource = () => {
-  // if (dataSourceType == DataSourceType.Form) {
+  // if (DatasourceType == DatasourceType.Form) {
 
   // }
 };
@@ -139,10 +149,30 @@ const dragStart = (e: any) => {
   e.preventDefault();
   draggingNode.value = e.originalEvent.srcElement._underlying_vm_;
 };
+
 const addComputedField = () => { };
 const copyField = (field: IDataSourceField) => { };
 const editField = (field: IDataSourceField, index: number) => { };
 const removeField = (field: IDataSourceField, index: number) => { };
+
+const onSave = async () => {
+  var details = JSON.stringify(chartSetting.value)
+
+  let req = {
+    id: props.dashItemDef.id,
+    name: props.dashItemDef.name,
+    details: details
+  };
+
+  let resp = await dashboardItemDefService.patch<DashboardItemDef>(req.id, req);
+  // contextStore.setAppChanged(); //reload 菜单
+}
+
+const emit = defineEmits(["update:modelValue", "close"]);
+const close = () => {
+  emit("update:modelValue", false)
+  emit("close");
+}
 </script>
 <style lang="scss" scoped>
 .design-container {

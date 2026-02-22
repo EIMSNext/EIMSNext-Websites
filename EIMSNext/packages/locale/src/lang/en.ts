@@ -81,6 +81,8 @@ export default {
       "If you delete it, the records will be cleared and cannot be restored.",
     flowcenter: "Flow Center",
     untitledForm: "Untitled Form",
+    untitledDashboard: "Untitled Dashboard",
+    untitledChart: "Untitled Chart",
   },
   workflow: {
     startNode: "Start",

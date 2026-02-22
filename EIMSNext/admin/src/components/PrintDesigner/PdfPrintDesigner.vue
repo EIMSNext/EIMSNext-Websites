@@ -168,7 +168,7 @@ const save = () => {
 
 const onStart = (e: any) => {
   e.preventDefault();
-  draggingNode.value = e.originalEvent.srcElement._underlying_vm_;
+  draggingNode.value = e.item._underlying_vm_;
 };
 
 const initSheet = (data = {}) => {

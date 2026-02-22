@@ -1,15 +1,26 @@
 import type { RouteRecordRaw } from "vue-router";
 import { SysLayout, constantRoutes } from "@/router";
-import { store, useAppStoreHook, useContextStoreHook, useFormStore } from "@eimsnext/store";
+import {
+  store,
+  useAppStoreHook,
+  useContextStoreHook,
+  useFormStore,
+  useUserStoreHook,
+} from "@eimsnext/store";
 import router from "@/router";
 import { getAppIcon, getFormIcon, getAppIconColor } from "@/utils/common";
 
-import { AppMenu, FormDef, FormType } from "@eimsnext/models";
-import { formDefService } from "@eimsnext/services";
+import { AppMenu, CurrentUser, FormDef, FormType, UserType } from "@eimsnext/models";
+import { formDefService, systemService } from "@eimsnext/services";
 const modules = import.meta.glob("../../views/**/**.vue");
 const AppLayout = () => import("@/layout/applayout/index.vue");
 
 export const usePermissionStore = defineStore("permission", () => {
+  interface IAppMenuPerm {
+    id: string;
+    type: FormType;
+  }
+
   // 所有路由，包括静态和动态路由
   const routes = ref<RouteRecordRaw[]>([]);
   // 表单动态菜单
@@ -19,7 +30,9 @@ export const usePermissionStore = defineStore("permission", () => {
 
   const appStore = useAppStoreHook();
   const contextStore = useContextStoreHook();
+  const userStore = useUserStoreHook();
   const { appId, appChanged } = storeToRefs(contextStore);
+
   watch([appChanged], async ([newVal]) => {
     // console.log("appChanged", newVal);
     await generateAppMenus();
@@ -32,13 +45,12 @@ export const usePermissionStore = defineStore("permission", () => {
     if (appId.value) {
       let app = await appStore.get(appId.value);
       if (app) {
-        let forms = await formDefService.query<FormDef>(
-          `$filter=appid eq '${appId.value}'&appid=${appId.value}`
-        );
+        let appMenuPerms: IAppMenuPerm[] = [];
+        if (!userStore.isAppAdmin())
+          appMenuPerms = await systemService.getAppMenuPerms(appId.value);
+
         app.appMenus.forEach((x: AppMenu) => {
-          if (x.menuType == FormType.Group || forms.findIndex((y) => y.id == x.menuId) > -1) {
-            generateAppMenu(appId.value, x, forms, menus);
-          }
+          generateAppMenu(appId.value, x, menus, appMenuPerms);
         });
 
         appMenus.value = menus;
@@ -48,33 +60,38 @@ export const usePermissionStore = defineStore("permission", () => {
   const generateAppMenu = (
     appId: string,
     x: AppMenu,
-    forms: FormDef[],
-    menus: RouteRecordRaw[]
+    menus: RouteRecordRaw[],
+    perms?: IAppMenuPerm[]
   ) => {
     let formRoute: RouteRecordRaw;
 
     if (x.menuType != FormType.Group) {
-      formRoute = {
-        path: `/app/${appId}/form/${x.menuId}`,
-        redirect: `/app/${appId}/form/${x.menuId}`,
-        meta: {
-          id: x.menuId,
-          title: x.title,
-          icon: getFormIcon(x),
-          iconColor: getAppIconColor(x),
-          isGroup: false,
-        },
-      };
-      menus.push(formRoute);
+      if (hasMenuPerm(x.menuId, perms)) {
+        const ftype = x.menuType == FormType.Dashboard ? "dash" : "form";
+        formRoute = {
+          path: `/app/${appId}/${ftype}/${x.menuId}`,
+          redirect: `/app/${appId}/${ftype}/${x.menuId}`,
+          meta: {
+            id: x.menuId,
+            type: x.menuType,
+            title: x.title,
+            icon: getFormIcon(x),
+            iconColor: getAppIconColor(x),
+            isGroup: false,
+          },
+        };
+        menus.push(formRoute);
+      }
     } else {
       if (x.menuType == FormType.Group && x.subMenus && x.subMenus.length > 0) {
-        var subMenus = x.subMenus.filter((x) => forms.findIndex((y) => y.id == x.menuId) > -1);
+        var subMenus = x.subMenus.filter((x) => hasMenuPerm(x.menuId, perms));
         if (subMenus.length > 0) {
           formRoute = {
             path: `#`,
             redirect: `#`,
             meta: {
               id: x.menuId,
+              type: x.menuType,
               title: x.title,
               icon: getFormIcon(x),
               iconColor: getAppIconColor(x),
@@ -83,10 +100,15 @@ export const usePermissionStore = defineStore("permission", () => {
             },
           };
           menus.push(formRoute);
-          subMenus.forEach((s: AppMenu) => generateAppMenu(appId, s, forms, formRoute.children!));
+          subMenus.forEach((s: AppMenu) => generateAppMenu(appId, s, formRoute.children!, perms));
         }
       }
     }
+  };
+  const hasMenuPerm = (menuId: string, menuPerms?: IAppMenuPerm[]) => {
+    if (userStore.isAppAdmin()) return true;
+    if (!menuPerms || menuPerms.length == 0) return false;
+    return menuPerms.findIndex((m) => m.id == menuId) > -1;
   };
   /**
    * 生成动态路由

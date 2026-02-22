@@ -38,7 +38,13 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "",
         name: "mytasks-global",
         component: () => import("@/views/wftodo/global/mytasks.vue"),
-        meta: { title: "我的待办", affix: false, keepAlive: true, requiresAuth: true, closable: true },
+        meta: {
+          title: "我的待办",
+          affix: false,
+          keepAlive: true,
+          requiresAuth: true,
+          closable: true,
+        },
       },
     ],
   },
@@ -50,7 +56,13 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "",
         name: "mystarted-global",
         component: () => import("@/views/wftodo/global/mystarted.vue"),
-        meta: { title: "我发起的", affix: false, keepAlive: true, requiresAuth: true, closable: true },
+        meta: {
+          title: "我发起的",
+          affix: false,
+          keepAlive: true,
+          requiresAuth: true,
+          closable: true,
+        },
       },
     ],
   },
@@ -62,7 +74,13 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "",
         name: "myapproved-global",
         component: () => import("@/views/wftodo/global/myapproved.vue"),
-        meta: { title: "我审批的", affix: false, keepAlive: true, requiresAuth: true, closable: true },
+        meta: {
+          title: "我审批的",
+          affix: false,
+          keepAlive: true,
+          requiresAuth: true,
+          closable: true,
+        },
       },
     ],
   },
@@ -74,7 +92,13 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "",
         name: "cctome-global",
         component: () => import("@/views/wftodo/global/cctome.vue"),
-        meta: { title: "抄送我的", affix: false, keepAlive: true, requiresAuth: true, closable: true },
+        meta: {
+          title: "抄送我的",
+          affix: false,
+          keepAlive: true,
+          requiresAuth: true,
+          closable: true,
+        },
       },
     ],
   },
@@ -90,7 +114,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "collection",
           keepAlive: true,
           requiresAuth: true,
-          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
         },
       },
     ],
@@ -107,7 +131,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "collection",
           keepAlive: true,
           requiresAuth: true,
-          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
         },
       },
     ],
@@ -124,7 +148,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "collection",
           keepAlive: true,
           requiresAuth: true,
-          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] 
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
         },
       },
     ],
@@ -134,6 +158,35 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: SysLayout,
     redirect: "/system/$route.params.formId",
     children: [
+      {
+        path: "401",
+        component: () => import("@/views/error/401.vue"),
+        meta: { hidden: true },
+      },
+      {
+        path: "404",
+        component: () => import("@/views/error/404.vue"),
+        meta: { hidden: true },
+      },
+    ],
+  },
+  {
+    path: "/app/:appId/dash/:dashId",
+    component: AppLayout,
+    redirect: "/app/$route.params.appId/dash/$route.params.dashId",
+    children: [
+      {
+        path: "/app/:appId/dash/:dashId",
+        component: () => import("@/views/dash/index.vue"),
+        // name: "form",
+        meta: {
+          title: "dash",
+          icon: "collection",
+          // affix: true,
+          keepAlive: true,
+          requiresAuth: true,
+        },
+      },
       {
         path: "401",
         component: () => import("@/views/error/401.vue"),
@@ -172,12 +225,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "404",
         component: () => import("@/views/error/404.vue"),
         meta: { hidden: true },
-      },
-      {
-        path: "profile",
-        name: "Profile",
-        component: () => import("@/views/profile/index.vue"),
-        meta: { title: "个人中心", icon: "user", hidden: true, requiresAuth: true },
       },
     ],
   },
@@ -264,6 +311,12 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/",
     redirect: "/workspace",
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: () => import("@/views/profile/index.vue"),
+    meta: { title: "个人中心", icon: "user", hidden: true, requiresAuth: true },
   },
 ];
 
