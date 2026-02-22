@@ -2,7 +2,7 @@
   <div>
     <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
       :isLedger="isLedger" @close="showFormEditor = false" />
-    <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :appId="appId" :dash-def="newDash!"></DashboardDesigner>
+    <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
     <div class="app-title">
       <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
       <span v-if="isSidebarOpened" class="ml-[10px]">{{ app?.name

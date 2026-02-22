@@ -24,7 +24,8 @@
                   </div>
                   <template #reference>
                     <div class="menu-line">
-                      <div class="line-content" draggable="true" @click="openSourceDialog(true, DashItemType.Chart)"
+                      <div class="line-content" draggable="true"
+                        @dragstart="dashItemDragStart($event, DashItemType.Chart)"
                         @drag="dashItemDrag($event, DashItemType.Chart), (hoverMenu = false)"
                         @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
                         @mouseover="setHoverMenu(true, DashItemType.Chart)" @mouseleave="hoverMenu = false">
@@ -92,7 +93,8 @@
                   </div>
                   <template #reference>
                     <div class="menu-line">
-                      <div class="line-content" draggable="true" @click="openSourceDialog(true, DashItemType.Comp)"
+                      <div class="line-content" draggable="true"
+                        @dragstart="dashItemDragStart($event, DashItemType.Comp)"
                         @drag="dashItemDrag($event, DashItemType.Comp), (hoverMenu = false)"
                         @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
                         @mouseover="setHoverMenu(true, DashItemType.Comp)" @mouseleave="hoverMenu = false">
@@ -149,7 +151,8 @@
                   </div>
                   <template #reference>
                     <div class="menu-line">
-                      <div class="line-content" draggable="true" @click="openSourceDialog(true, DashItemType.Tool)"
+                      <div class="line-content" draggable="true"
+                        @dragstart="dashItemDragStart($event, DashItemType.Tool)"
                         @drag="dashItemDrag($event, DashItemType.Tool), (hoverMenu = false)"
                         @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
                         @mouseover="setHoverMenu(true, DashItemType.Tool)" @mouseleave="hoverMenu = false">
@@ -184,41 +187,40 @@
         </div>
       </el-aside>
       <el-main style="min-width: 460px">
-        <div class="dash-edit-layout custom-scroll" style="background: rgb(244, 246, 249);">
+        <div class="dash-edit-layout custom-scroll" style="background: rgb(244, 246, 249);" @dragover="gridDragOver">
           <grid-layout ref="gridRef" v-model:layout="state.layout" :col-num="colNum" :col-width="colWidth"
             :row-height="rowHeight" :is-draggable="state.draggable" :is-resizable="state.resizable" :is-mirrored="false"
-            :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true">
+            :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true" :responsive="true"
+            :breakpoints="{ xs: 0, sm: 576, md: 768, lg: 992, xl: 1200 }"
+            :layout-breakpoints="{ xs: 6, sm: 12, md: 18, lg: 24, xl: 24 }">
             <grid-item v-for="item in state.layout" :ref="e => setItemRef(item, e)" :x="item.x" :y="item.y" :w="item.w"
               :h="item.h" :i="item.i" :key="item.i" @resize="resizeEvent" @resized="resizedEvent" @moved="movedEvent"
               @container-resized="containerResizedEvent" :minW="getMinWidth(item)" :minH="getMinHeight(item)" :maxW="60"
-              :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag" :class="{
-                edited: item.inEdit,
-                gridNoTran: item.drag,
-              }" :style="{
-                'z-index': getZIndex(item),
-              }">
-              <DashItemCard />
+              :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag"
+              :class="{ edited: item.inEdit, gridNoTran: item.drag, }" :style="{ 'z-index': getZIndex(item), }">
+              <DashItemCard :item-def="dashItemsRef[item.i]" :height="item.h" :width="item.w" :is-view="false"
+                @hide="handleItemHide" @edit="handleItemEdit" @copy="handleItemCopy" @delete="handleItemDelete" />
             </grid-item>
           </grid-layout>
         </div>
       </el-main>
     </el-container>
   </EtDrawer>
-  <DataSourceDialog v-model="showDataSourceDialog" :appId="appId" :dataSource="dataSource" @cancel="handleSourceCancel"
-    @ok="handleSourceOk"></DataSourceDialog>
-  <EChartDesigner v-if="dashItemDefRef" v-model="dashItemDefRef" :app-id="appId" :data-source="dataSource!" />
+  <DataSourceDialog v-model="showDataSourceDialog" :appId="dashDef.appId" :dataSource="dataSource"
+    @cancel="handleSourceCancel" @ok="handleSourceOk"></DataSourceDialog>
+  <EChartDesigner v-if="dashItemDefRef" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
 
 </template>
 <script setup lang="ts">
 import { EtDrawer } from "@eimsnext/components/src/drawer";
 import DashItemCard from "./components/DashItemCard.vue"
-import { DataSourceType, IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
+import { DatasourceType, IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
 import { uniqueId } from "@eimsnext/utils";
 import { useContextStore } from "@eimsnext/store";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
-import { DataItemType, IFormItem } from "@eimsnext/components";
-import { DashboardDef, DashboardItemDef, DashItemType } from "@eimsnext/models";
-import { dashboardDefService } from "@eimsnext/services";
+import { IFormItem } from "@eimsnext/components";
+import { DashboardDef, DashboardDefRequest, DashboardItemDef, DashboardItemDefRequest, DashItemType } from "@eimsnext/models";
+import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import EChartDesigner from "./EChartDesigner/index.vue"
 
 defineOptions({
@@ -227,7 +229,6 @@ defineOptions({
 
 const props = defineProps<{
   modelValue: boolean;
-  appId: string;
   dashDef: DashboardDef
 }>();
 
@@ -243,6 +244,8 @@ const hoverMenuType = ref<DashItemType | "">("")
 const showDataSourceDialog = ref(false)
 const dataSource = ref<IDataSource>()
 
+const showChartEditor = ref(false)
+
 const state = reactive<IGridLayoutState>({
   layout: [],
   draggable: true,
@@ -250,11 +253,11 @@ const state = reactive<IGridLayoutState>({
 });
 
 const dashItemsRef = ref<any>({})
-const colNum = ref(60)
+const colNum = ref(24)
 const colWidth = ref(150)
 const rowHeight = ref(10)
-const newWidth = 30
-const newHeight = 30
+const newWidth = 12
+const newHeight = 12
 const mouseXY = { x: -1, y: -1 };
 const dragPos: IGridLayoutItem = { x: -1, y: -1, w: 1, h: 1, i: "" };
 const draggingItemType = ref<DashItemType>()
@@ -274,14 +277,34 @@ const openSourceDialog = (b: boolean, type: DashItemType) => {
   draggingItemType.value = type
   showDataSourceDialog.value = true
 }
+
 const handleSourceCancel = async () => {
   showDataSourceDialog.value = false
   state.layout = state.layout.filter(obj => obj.i !== 'drop');
   await nextTick();
 }
-const handleSourceOk = (source: IFormItem) => {
-  dataSource.value = { id: source.id, type: DataSourceType.Form, label: source.label! };
+const handleSourceOk = async (source: IFormItem) => {
+  console.log("handleSourceOk", dragPos)
+  dataSource.value = { id: source.id, type: DatasourceType.Form, label: source.label! };
   showDataSourceDialog.value = false
+
+  let details = { datasource: dataSource.value }
+  let layoutId = uniqueId();
+
+  await createNewDashItem("未命名", dragPos.type!, JSON.stringify(details), layoutId);
+
+  state.layout.push({
+    x: dragPos.x,
+    y: dragPos.y,
+    w: dragPos.w,
+    h: dragPos.h,
+    i: layoutId,
+    type: dragPos.type,
+  });
+  await nextTick();
+  gridRef.value.emitter.emit('dragEvent', ['dragend', dragPos.i, dragPos.x, dragPos.y, dragPos.h, dragPos.w]);
+
+  showChartEditor.value = true
 }
 
 const setHoverMenu = (b: boolean, type: DashItemType) => {
@@ -293,9 +316,19 @@ const setItemRef = (item: IGridLayoutItem, e: any) => {
   console.log("setItemRef", item, e)
   dashItemsRef.value[item.i] = e;
 }
+const dashItemDragStart = (e: DragEvent, type: DashItemType) => {
+  if (!e.dataTransfer) return;
+  e.dataTransfer.dropEffect = 'copy';
+  e.dataTransfer.setData('text', JSON.stringify({ type }));
+  // e.dataTransfer.setDragImage(new Image(), 0, 0);
+}
+const gridDragOver = (e: DragEvent) => {
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = "copy"
+}
 
 const dashItemDrag = async (e: DragEvent, type: DashItemType) => {
-  console.log("dashItemDrag", e, type, gridRef.value)
+  // console.log("dashItemDrag", e, type, gridRef.value)
   let parentRect = gridRef.value!.$el.getBoundingClientRect();
   let mouseInGrid = false;
 
@@ -304,8 +337,8 @@ const dashItemDrag = async (e: DragEvent, type: DashItemType) => {
   }
   if (mouseInGrid === true && (state.layout.findIndex(item => item.i === 'drop')) === -1) {
     state.layout.push({
-      x: (state.layout.length * 2) % (colNum.value || 60),
-      y: state.layout.length + (colNum.value || 60),
+      x: (state.layout.length * 2) % (colNum.value),
+      y: state.layout.length + (colNum.value),
       w: newWidth,
       h: newHeight,
       i: 'drop',
@@ -328,15 +361,15 @@ const dashItemDrag = async (e: DragEvent, type: DashItemType) => {
     const itemRef = dashItemsRef.value.drop;
     const new_pos = itemRef.calcXY(mouseXY.y - parentRect.top, mouseXY.x - parentRect.left);
     if (mouseInGrid === true) {
-      gridRef.value.emitter.emit('dragEvent', ['dragstart', 'drop', new_pos.x, new_pos.y, 1, 1]);
-      dragPos.i = uniqueId();
+      gridRef.value.emitter.emit('dragEvent', ['dragstart', 'drop', new_pos.x, new_pos.y, state.layout[index].h, state.layout[index].w]);
+      dragPos.i = "drop";
       dragPos.x = state.layout[index].x;
       dragPos.y = state.layout[index].y;
-      dragPos.w = newWidth
-      dragPos.h = newHeight
+      dragPos.h = newWidth;
+      dragPos.w = newHeight
     }
     if (mouseInGrid === false) {
-      gridRef.value.emitter.emit('dragEvent', ['dragend', 'drop', new_pos.x, new_pos.y, 1, 1]);
+      gridRef.value.emitter.emit('dragEvent', ['dragend', 'drop', new_pos.x, new_pos.y, state.layout[index].h, state.layout[index].w]);
       state.layout = state.layout.filter(obj => obj.i !== 'drop');
       await nextTick();
     }
@@ -360,20 +393,49 @@ const dashItemDrop = async (e: DragEvent, callback: any) => {
     gridRef.value.emitter.emit('dragEvent', ['dragend', 'drop', dragPos.x, dragPos.y, dragPos.h, dragPos.w]);
     state.layout = state.layout.filter(obj => obj.i !== 'drop');
 
-    state.layout.push({
-      x: dragPos.x,
-      y: dragPos.y,
-      w: dragPos.w,
-      h: dragPos.h,
-      i: dragPos.i,
-      type: dragPos.type,
-    });
-    await nextTick();
-    gridRef.value.emitter.emit('dragEvent', ['dragend', dragPos.i, dragPos.x, dragPos.y, dragPos.h, dragPos.w]);
     if (callback) {
+      console.log("dashItemDrop", dragPos)
       callback(true, dragPos.type)
     }
+    else {
+      let layoutId = uniqueId();
+      await createNewDashItem("未命名", dragPos.type!, "", layoutId);
+
+      state.layout.push({
+        x: dragPos.x,
+        y: dragPos.y,
+        w: dragPos.w,
+        h: dragPos.h,
+        i: layoutId,
+        type: dragPos.type,
+      });
+      await nextTick();
+      gridRef.value.emitter.emit('dragEvent', ['dragend', dragPos.i, dragPos.x, dragPos.y, dragPos.h, dragPos.w]);
+    }
   }
+}
+
+const createNewDashItem = async (name: string, itemType: DashItemType, details: string, layoutId: string) => {
+  let req: DashboardDefRequest = {
+    id: props.dashDef.id,
+    layout: JSON.stringify(state.layout)
+  };
+
+  dashboardDefService.patch<DashboardDef>(req.id, req).then(resp => {
+    dashDefRef.value = resp
+  });
+
+  let itemReq: DashboardItemDefRequest = {
+    id: "",
+    appId: dashDefRef.value.appId,
+    dashboardId: dashDefRef.value.id,
+    itemType: itemType,
+    layoutId: layoutId,
+    name: name,
+    details: details || "{}"
+  };
+
+  dashItemDefRef.value = await dashboardItemDefService.post<DashboardItemDef>(itemReq);
 }
 
 const onSave = async () => {
@@ -404,10 +466,28 @@ document.addEventListener('dragover', (e) => {
   mouseXY.x = e.clientX;
   mouseXY.y = e.clientY;
 }, false);
+
+const handleItemHide = (item: DashboardItemDef) => { }
+const handleItemEdit = (item: DashboardItemDef) => {
+  dashItemDefRef.value = item
+  showChartEditor.value = true
+}
+const handleItemCopy = (item: DashboardItemDef) => { }
+const handleItemDelete = (item: DashboardItemDef) => { }
 </script>
 <style lang="scss" scoped>
 .design-container {
   height: 100%;
+  display: flex;
+}
+
+.left-aside {
+  flex-shrink: 0;
+}
+
+.el-main {
+  flex: 1;
+  padding: 0 !important;
 }
 
 .dash-designer-menu {
@@ -438,10 +518,14 @@ document.addEventListener('dragover', (e) => {
         .line-content {
           align-items: center;
           border-radius: 4px;
-          cursor: move;
+          cursor: copy;
           display: flex;
           line-height: 36px;
           padding: 0 16px;
+
+          &:hover {
+            background: var(--et-color-bg-hover);
+          }
 
           .line-icon {
             color: var(--et-color-text-secondary);
@@ -463,13 +547,17 @@ document.addEventListener('dragover', (e) => {
 
 .dash-edit-layout {
   height: 100%;
+  width: 100%;
   overflow: auto;
   position: relative;
-  padding-bottom: 10px;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-.vue-grid-layout {
-  min-height: 200px;
+:deep(.vue-grid-layout) {
+  width: 100% !important;
+  min-height: calc(100% - 20px);
+  box-sizing: border-box;
 }
 
 :deep(.vue-resizable-handle) {
@@ -477,7 +565,8 @@ document.addEventListener('dragover', (e) => {
 }
 
 :deep(.vue-grid-item.vue-grid-placeholder) {
-  background: #b5b5b5;
+  background: rgba(106, 131, 252, 0.2);
+  border: 1px dashed #6a83fc;
 }
 
 :deep(.vue-grid-item:not(.vue-grid-placeholder).checked) {

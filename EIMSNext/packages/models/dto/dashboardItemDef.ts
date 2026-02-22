@@ -5,6 +5,7 @@ export interface DashboardItemDefRequest extends IdBase {
   dashboardId?: string;
   layoutId?: string;
   itemType?: DashItemType;
+  name?: string;
   details?: string;
 }
 
@@ -13,6 +14,7 @@ export interface DashboardItemDef extends CorpModelBase {
   dashboardId: string;
   layoutId: string;
   itemType: DashItemType;
+  name: string;
   details: string;
 }
 

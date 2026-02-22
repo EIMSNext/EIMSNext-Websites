@@ -2,10 +2,10 @@ import { DashItemType } from "@eimsnext/models";
 
 export interface IDataSource {
   id: string;
-  type: DataSourceType;
+  type: DatasourceType;
   label: string;
 }
-export enum DataSourceType {
+export enum DatasourceType {
   Form,
 }
 
@@ -23,7 +23,7 @@ export interface IDataSourceField {
 }
 export interface IGridLayoutItem {
   /** 唯一标识 (必需) */
-  i: string | number;
+  i: string;
   /** 起始列 (必需) */
   x: number;
   /** 起始行 (必需) */
