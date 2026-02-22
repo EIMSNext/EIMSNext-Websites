@@ -1,7 +1,7 @@
 <template>
   <EtDrawer :model-value="modelValue" @close="close">
     <template #title>
-      <el-input v-model="dashName" class="title-editor" />
+      <el-input v-model="dashDefRef.name" class="title-editor" />
     </template>
     <template #top-right>
       <el-button @click="onSave">保存</el-button>
@@ -198,8 +198,9 @@
               @container-resized="containerResizedEvent" :minW="getMinWidth(item)" :minH="getMinHeight(item)" :maxW="60"
               :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag"
               :class="{ edited: item.inEdit, gridNoTran: item.drag, }" :style="{ 'z-index': getZIndex(item), }">
-              <DashItemCard :item-def="dashItemsRef[item.i]" :height="item.h" :width="item.w" :is-view="false"
-                @hide="handleItemHide" @edit="handleItemEdit" @copy="handleItemCopy" @delete="handleItemDelete" />
+              <DashItemCard v-if="dashItemsRef[item.i]" :item-def="dashItemsRef[item.i]" :height="item.h"
+                :width="item.w" :is-view="false" @hide="handleItemHide" @edit="handleItemEdit" @copy="handleItemCopy"
+                @delete="handleItemDelete" />
             </grid-item>
           </grid-layout>
         </div>
@@ -222,6 +223,8 @@ import { IFormItem } from "@eimsnext/components";
 import { DashboardDef, DashboardDefRequest, DashboardItemDef, DashboardItemDefRequest, DashItemType } from "@eimsnext/models";
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import EChartDesigner from "./EChartDesigner/index.vue"
+import { useI18n } from "vue-i18n";
+const { t } = useI18n()
 
 defineOptions({
   name: "DashboardDesigner",
@@ -233,7 +236,6 @@ const props = defineProps<{
 }>();
 
 const contextStore = useContextStore()
-const dashName = ref("未命名仪表盘");
 const dashDefRef = ref<DashboardDef>(props.dashDef)
 const dashItemDefRef = ref<DashboardItemDef>()
 const gridRef = ref<any>()
@@ -273,7 +275,7 @@ const getMaxHeight = (item: IGridLayoutItem) => { return 60 }
 const getZIndex = (item: IGridLayoutItem) => { return 99999 }
 
 const openSourceDialog = (b: boolean, type: DashItemType) => {
-  console.log("openSourceDialog", b, type)
+  // console.log("openSourceDialog", b, type)
   draggingItemType.value = type
   showDataSourceDialog.value = true
 }
@@ -284,14 +286,12 @@ const handleSourceCancel = async () => {
   await nextTick();
 }
 const handleSourceOk = async (source: IFormItem) => {
-  console.log("handleSourceOk", dragPos)
+  // console.log("handleSourceOk", dragPos)
   dataSource.value = { id: source.id, type: DatasourceType.Form, label: source.label! };
   showDataSourceDialog.value = false
 
   let details = { datasource: dataSource.value }
   let layoutId = uniqueId();
-
-  await createNewDashItem("未命名", dragPos.type!, JSON.stringify(details), layoutId);
 
   state.layout.push({
     x: dragPos.x,
@@ -301,6 +301,9 @@ const handleSourceOk = async (source: IFormItem) => {
     i: layoutId,
     type: dragPos.type,
   });
+
+  await createNewDashItem(dragPos.type!, JSON.stringify(details), layoutId);
+
   await nextTick();
   gridRef.value.emitter.emit('dragEvent', ['dragend', dragPos.i, dragPos.x, dragPos.y, dragPos.h, dragPos.w]);
 
@@ -313,7 +316,7 @@ const setHoverMenu = (b: boolean, type: DashItemType) => {
 }
 
 const setItemRef = (item: IGridLayoutItem, e: any) => {
-  console.log("setItemRef", item, e)
+  // console.log("setItemRef", item, e)
   dashItemsRef.value[item.i] = e;
 }
 const dashItemDragStart = (e: DragEvent, type: DashItemType) => {
@@ -366,7 +369,8 @@ const dashItemDrag = async (e: DragEvent, type: DashItemType) => {
       dragPos.x = state.layout[index].x;
       dragPos.y = state.layout[index].y;
       dragPos.h = newWidth;
-      dragPos.w = newHeight
+      dragPos.w = newHeight;
+      dragPos.type = state.layout[index].type
     }
     if (mouseInGrid === false) {
       gridRef.value.emitter.emit('dragEvent', ['dragend', 'drop', new_pos.x, new_pos.y, state.layout[index].h, state.layout[index].w]);
@@ -394,13 +398,11 @@ const dashItemDrop = async (e: DragEvent, callback: any) => {
     state.layout = state.layout.filter(obj => obj.i !== 'drop');
 
     if (callback) {
-      console.log("dashItemDrop", dragPos)
+      // console.log("dashItemDrop", dragPos)
       callback(true, dragPos.type)
     }
     else {
       let layoutId = uniqueId();
-      await createNewDashItem("未命名", dragPos.type!, "", layoutId);
-
       state.layout.push({
         x: dragPos.x,
         y: dragPos.y,
@@ -409,21 +411,32 @@ const dashItemDrop = async (e: DragEvent, callback: any) => {
         i: layoutId,
         type: dragPos.type,
       });
+      await createNewDashItem(dragPos.type!, "", layoutId);
+
       await nextTick();
       gridRef.value.emitter.emit('dragEvent', ['dragend', dragPos.i, dragPos.x, dragPos.y, dragPos.h, dragPos.w]);
     }
   }
 }
 
-const createNewDashItem = async (name: string, itemType: DashItemType, details: string, layoutId: string) => {
+const createNewDashItem = async (itemType: DashItemType, details: string, layoutId: string) => {
+  // console.log("state.layout", state.layout, JSON.stringify(state.layout))
   let req: DashboardDefRequest = {
     id: props.dashDef.id,
     layout: JSON.stringify(state.layout)
   };
 
-  dashboardDefService.patch<DashboardDef>(req.id, req).then(resp => {
-    dashDefRef.value = resp
-  });
+  dashDefRef.value = await dashboardDefService.patch<DashboardDef>(req.id, req);
+
+  let name = "";
+  switch (itemType) {
+    case DashItemType.Chart:
+      name = t("admin.untitledChart");
+      break;
+    default:
+      name = t("admin.untitledChart")
+      break;
+  }
 
   let itemReq: DashboardItemDefRequest = {
     id: "",
@@ -444,7 +457,7 @@ const onSave = async () => {
   let req = {
     id: props.dashDef.id,
     appId: props.dashDef.appId,
-    name: dashName.value,
+    name: props.dashDef.name,
     layout: layout
   };
 
@@ -474,6 +487,25 @@ const handleItemEdit = (item: DashboardItemDef) => {
 }
 const handleItemCopy = (item: DashboardItemDef) => { }
 const handleItemDelete = (item: DashboardItemDef) => { }
+
+watch(() => props.dashDef, (newVal) => {
+  if (newVal && newVal.layout) {
+    dashDefRef.value = { ...newVal };
+    try {
+      const parsedLayout = JSON.parse(newVal.layout) || [];
+      state.layout.splice(0, state.layout.length);
+      state.layout.push(...parsedLayout);
+    } catch (e) {
+      console.error('布局JSON解析失败：', e);
+      state.layout.splice(0, state.layout.length); // 解析失败则清空布局
+    }
+  } else if (newVal) {
+    dashDefRef.value = { ...newVal };
+    state.layout.splice(0, state.layout.length); // layout为空时清空
+  }
+},
+  { immediate: true, deep: true }
+)
 </script>
 <style lang="scss" scoped>
 .design-container {

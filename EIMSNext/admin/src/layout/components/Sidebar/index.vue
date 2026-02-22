@@ -140,14 +140,23 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
   });
 };
 
-const editForm = async (formId: string) => {
-  const form = await formStore.get(formId)
-  if (form) {
-    newForm.value = form;
-    usingWorkflow.value = form.usingWorkflow;
-    isLedger.value = form.isLedger
+const editForm = async (formId: string, type: FormType) => {
+  if (type == FormType.Form) {
+    const form = await formStore.get(formId)
+    if (form) {
+      newForm.value = form;
+      usingWorkflow.value = form.usingWorkflow;
+      isLedger.value = form.isLedger
 
-    showFormEditor.value = true
+      showFormEditor.value = true
+    }
+  }
+  else if (type == FormType.Dashboard) {
+    const dash = await dashboardDefService.get<DashboardDef>(formId)
+    if (dash) {
+      newDash.value = dash;
+      showDshEditor.value = true
+    }
   }
 }
 
@@ -155,7 +164,7 @@ const createDashboard = () => {
   let req: DashboardDefRequest = {
     id: "",
     appId: contextStore.appId,
-    name: t("admin.untitledForm"),
+    name: t("admin.untitledDashboard"),
     layout: "[]"
   };
 

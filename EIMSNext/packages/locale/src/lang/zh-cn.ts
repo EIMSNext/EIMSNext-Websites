@@ -6,7 +6,7 @@ export default {
     cancel: "取消",
     addNew: "新增",
     edit: "编辑",
-    print:"打印",
+    print: "打印",
     delete: "删除",
     deleteAll: "删除全部",
     reset: "重置",
@@ -80,6 +80,8 @@ export default {
     deleteFormConfirm_Content: "表单删除后将不可恢复，包括所有相关数据",
     flowcenter: "流程中心",
     untitledForm: "未命名表单",
+    untitledDashboard: "未命名仪表盘",
+    untitledChart: "未命名统计表",
   },
   workflow: {
     startNode: "发起流程",

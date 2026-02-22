@@ -16,6 +16,7 @@ import { useSystemStore, } from "@/store";
 import { isExternal } from "@/utils/index";
 
 import variables from "@/styles/variables.module.scss";
+import { FormType } from "@eimsnext/models";
 
 const props = defineProps({
   menuList: {
@@ -78,7 +79,7 @@ const onMenuClose = (index: string) => {
 };
 
 const emit = defineEmits(["editForm"]);
-function editForm(formId: string) {
-  emit("editForm", formId)
+function editForm(formId: string, type: FormType) {
+  emit("editForm", formId, type)
 }
 </script>
