@@ -198,8 +198,8 @@
               @container-resized="containerResizedEvent" :minW="getMinWidth(item)" :minH="getMinHeight(item)" :maxW="60"
               :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag"
               :class="{ edited: item.inEdit, gridNoTran: item.drag, }" :style="{ 'z-index': getZIndex(item), }">
-              <DashItemCard v-if="dashItemsRef[item.i]" :item-def="dashItemsRef[item.i]" :height="item.h"
-                :width="item.w" :is-view="false" @hide="handleItemHide" @edit="handleItemEdit" @copy="handleItemCopy"
+              <DashItemCard v-if="state.items[item.i]" :item-def="state.items[item.i]" :height="item.h" :width="item.w"
+                :is-view="false" @hide="handleItemHide" @edit="handleItemEdit" @copy="handleItemCopy"
                 @delete="handleItemDelete" />
             </grid-item>
           </grid-layout>
@@ -250,11 +250,12 @@ const showChartEditor = ref(false)
 
 const state = reactive<IGridLayoutState>({
   layout: [],
+  items: {},
   draggable: true,
   resizable: true,
 });
 
-const dashItemsRef = ref<any>({})
+const elItemsRef = ref<any>({})
 const colNum = ref(24)
 const colWidth = ref(150)
 const rowHeight = ref(10)
@@ -317,7 +318,7 @@ const setHoverMenu = (b: boolean, type: DashItemType) => {
 
 const setItemRef = (item: IGridLayoutItem, e: any) => {
   // console.log("setItemRef", item, e)
-  dashItemsRef.value[item.i] = e;
+  elItemsRef.value[item.i] = e;
 }
 const dashItemDragStart = (e: DragEvent, type: DashItemType) => {
   if (!e.dataTransfer) return;
@@ -352,17 +353,17 @@ const dashItemDrag = async (e: DragEvent, type: DashItemType) => {
     await nextTick();
   }
 
-  if (!dashItemsRef.value.drop) {
+  if (!elItemsRef.value.drop) {
     return;
   }
 
   const index = state.layout.findIndex(item => item.i === 'drop');
   if (index !== -1) {
-    if (dashItemsRef.value.drop?.el?.style) {
-      dashItemsRef.value.drop.el.style.display = 'none';
+    if (elItemsRef.value.drop?.el?.style) {
+      elItemsRef.value.drop.el.style.display = 'none';
     }
-    const itemRef = dashItemsRef.value.drop;
-    const new_pos = itemRef.calcXY(mouseXY.y - parentRect.top, mouseXY.x - parentRect.left);
+    const elRef = elItemsRef.value.drop;
+    const new_pos = elRef.calcXY(mouseXY.y - parentRect.top, mouseXY.x - parentRect.left);
     if (mouseInGrid === true) {
       gridRef.value.emitter.emit('dragEvent', ['dragstart', 'drop', new_pos.x, new_pos.y, state.layout[index].h, state.layout[index].w]);
       dragPos.i = "drop";
@@ -449,6 +450,7 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
   };
 
   dashItemDefRef.value = await dashboardItemDefService.post<DashboardItemDef>(itemReq);
+  state.items[layoutId] = dashItemDefRef.value
 }
 
 const onSave = async () => {
@@ -488,13 +490,20 @@ const handleItemEdit = (item: DashboardItemDef) => {
 const handleItemCopy = (item: DashboardItemDef) => { }
 const handleItemDelete = (item: DashboardItemDef) => { }
 
-watch(() => props.dashDef, (newVal) => {
+watch(() => props.dashDef, async (newVal) => {
   if (newVal && newVal.layout) {
     dashDefRef.value = { ...newVal };
     try {
       const parsedLayout = JSON.parse(newVal.layout) || [];
       state.layout.splice(0, state.layout.length);
       state.layout.push(...parsedLayout);
+
+      state.items = {}
+
+      let itemDefs = await dashboardItemDefService.query<DashboardItemDef>(`$filter=appid eq '${newVal.appId}'&DashboardId=${newVal.id}`);
+      if (itemDefs && itemDefs.length > 0) {
+        itemDefs.forEach(x => { state.items[x.layoutId] = x })
+      }
     } catch (e) {
       console.error('布局JSON解析失败：', e);
       state.layout.splice(0, state.layout.length); // 解析失败则清空布局

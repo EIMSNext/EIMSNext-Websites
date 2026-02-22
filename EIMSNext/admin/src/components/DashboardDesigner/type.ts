@@ -1,4 +1,4 @@
-import { DashItemType } from "@eimsnext/models";
+import { DashboardItemDef, DashItemType } from "@eimsnext/models";
 
 export interface IDataSource {
   id: string;
@@ -60,6 +60,7 @@ export interface IGridLayoutItem {
 
 export interface IGridLayoutState {
   layout: IGridLayoutItem[];
+  items: Record<string, DashboardItemDef>;
   draggable: boolean;
   resizable: boolean;
 }
