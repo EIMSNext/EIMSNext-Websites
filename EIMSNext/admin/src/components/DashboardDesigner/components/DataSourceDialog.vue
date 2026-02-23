@@ -23,7 +23,8 @@ const props = defineProps<{
 }>();
 
 const formItem = ref<IFormItem>({ id: "" })
-const dataSource = toRef(props.dataSource)
+const dataSource = ref<IDataSource>()
+if (props.dataSource) dataSource.value = { ...props.dataSource }
 
 if (dataSource.value) {
     if (dataSource.value.type == DatasourceType.Form)
@@ -40,6 +41,6 @@ const cancel = () => {
     emit("cancel");
 };
 const save = () => {
-    emit("ok", formItem.value);
+    emit("ok", dataSource.value);
 };
 </script>

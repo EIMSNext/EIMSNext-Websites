@@ -286,9 +286,9 @@ const handleSourceCancel = async () => {
   state.layout = state.layout.filter(obj => obj.i !== 'drop');
   await nextTick();
 }
-const handleSourceOk = async (source: IFormItem) => {
+const handleSourceOk = async (source: IDataSource) => {
   // console.log("handleSourceOk", dragPos)
-  dataSource.value = { id: source.id, type: DatasourceType.Form, label: source.label! };
+  dataSource.value = source;
   showDataSourceDialog.value = false
 
   let details = { datasource: dataSource.value }
