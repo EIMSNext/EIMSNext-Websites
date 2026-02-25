@@ -21,6 +21,7 @@ export * from "./FieldSortList/type";
 export * from "./FormFieldList";
 export * from "./FormFieldList/type";
 export * from "./FieldSelect";
+export * from "./FormSelect";
 export * from "./FormSelect/type";
 export * from "./NodeFieldList";
 export * from "./NodeFieldList/type";

@@ -29,6 +29,10 @@ export default defineComponent({
       type: String,
       default: "",
     },
+    buttonText: {
+      type: String,
+      default: "",
+    },
     // 从FormRender的prop.props中接收formCreateInject
     formCreateInject: {
       type: Object,
@@ -53,6 +57,23 @@ export default defineComponent({
       (newVal) => {
         selectedValue.value = newVal;
       },
+    );
+
+    // 监听buttonText变化
+    watch(
+      () => props.buttonText,
+      (newText) => {
+        console.log('FcDataSelect: Button text changed:', newText);
+      },
+    );
+
+    // 监听props.props变化
+    watch(
+      () => props.props,
+      (newProps) => {
+        console.log('FcDataSelect: Props changed:', newProps);
+      },
+      { deep: true }
     );
 
     const handleDataChange = (data) => {
@@ -83,10 +104,10 @@ export default defineComponent({
         <div style={{ width: "100%" }}>
           <SelectedTags
             modelValue={tags}
-            class={"_fc-data-select"}
+            class="_fc-data-select"
             style={{ height: tagHeight }}
             editable={editable}
-            emptyText={placeholder}
+            emptyText={(props.props?.buttonText || props.buttonText) || placeholder}
             onEditTag={() => editable && (showDialog.value = true)}
           ></SelectedTags>
 

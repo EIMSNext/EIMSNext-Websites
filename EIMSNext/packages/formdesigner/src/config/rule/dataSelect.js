@@ -1,5 +1,5 @@
 import { uniqueId } from "@eimsnext/form-render-core";
-import { makeTitleRule, localeProps } from "../../utils";
+import { makeTitleRule, localeProps } from "../../utils/index";
 
 const label = "选择数据";
 const name = "dataSelect";
@@ -22,6 +22,7 @@ export default {
       props: {
         placeholder: t("comp.emptySelect"),
         dataSource: "",
+        buttonText: t("com.dataSelect.buttonText"),
       },
     };
   },
@@ -32,17 +33,17 @@ export default {
         type: "DefaultValueConfig",
       },
       {
-        type: "select",
+        type: "FormSelect",
         field: "dataSource",
         title: "数据源",
         required: true,
         props: {
-          clearable: true,
-          filterable: true,
-          remote: true,
-          remoteMethod: "{{ (query) => { $inject.api.get('FormDef/$query', { params: { $filter: `contains(name, '${query}')`, $select: 'id,name' } }).then(res => { $inject.self.options = res.value.map(item => ({ label: item.name, value: item.id })); }); } }}",
+          appId: "{{ $root.$route.params.id }}",
         },
-        options: [],
+        on: {
+          "update:buttonText": "$value.buttonText = $event",
+          "update:buttonTextField": "$value.buttonText = $event"
+        },
         control: [
           {
             value: "",
@@ -51,6 +52,14 @@ export default {
           {
             value: "*",
             rule: [
+              {
+                type: "input",
+                field: "buttonText",
+                title: "按钮文字",
+                props: {
+                  placeholder: "请输入按钮文字",
+                },
+              },
               {
                 type: "button",
                 field: "dataSelectConfig",
@@ -90,7 +99,7 @@ export default {
       {
         type: "CheckBoxInput",
         field: "disabled",
-        title: t("props.disabled"),
+        title: "禁用",
         wrap: { show: false },
       },
     ]);

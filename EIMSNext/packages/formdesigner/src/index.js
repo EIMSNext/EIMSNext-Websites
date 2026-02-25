@@ -76,6 +76,7 @@ import FcTitle from "./components/aide/FcTitle.vue";
 import DepartmentSelectView from "./components/DepartmentSelectView.vue";
 import EmployeeSelectView from "./components/EmployeeSelectView.vue";
 import DataSelectView from "./components/DataSelectView.vue";
+import { FormSelect } from "@eimsnext/components";
 import 
   fcDepartmentSelect from "@eimsnext/form-render-elplus";
 import fcEmployeeSelect from "@eimsnext/form-render-elplus";
@@ -212,6 +213,7 @@ addComponent("FcCity", FcCity);
 addComponent("FcDepartmentSelect", fcDepartmentSelect, DepartmentSelectView);
 addComponent("FcEmployeeSelect", fcEmployeeSelect, EmployeeSelectView);
 addComponent("FcDataSelect", fcDataSelect, DataSelectView);
+addComponent("FormSelect", FormSelect);
 addComponent("FcId", Id);
 
 const setFormula = function (formula) {
