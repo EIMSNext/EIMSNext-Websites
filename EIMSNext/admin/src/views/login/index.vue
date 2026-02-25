@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <el-link :underline="false" class="brand-logo" target="_self" href="https://www.eimsnext.com">
-      <img src="@/assets/logo2.png" alt=""></img>
+      <img class="logo" src="@/assets/logo2.png" alt=""></img>
     </el-link>
     <div class="banner">
       <div class="bg-banner"></div>
@@ -176,6 +176,10 @@ function checkCapslock(event: KeyboardEvent) {
 </script>
 
 <style lang="scss" scoped>
+.logo {
+  height: 36px;
+}
+
 .login {
   align-items: center;
   background: #f5f6f8;
