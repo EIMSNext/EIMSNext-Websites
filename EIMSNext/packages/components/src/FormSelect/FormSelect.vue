@@ -110,7 +110,7 @@
 import { useFormStore, useAppStore } from "@eimsnext/store";
 import { ref, watch, computed } from "vue";
 import { IFormItem, IFormSelectOptions, buildFormListItems } from "./type";
-import { isObject, isString } from "@eimsnext/utils";
+import { isObject, isString, http } from "@eimsnext/utils";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
@@ -128,7 +128,7 @@ const appStore = useAppStore()
 const formList = ref<IFormItem[]>([]);
 
 
-const value = ref(props.modelValue?.id);
+const value = ref("");
 if (isObject(props.modelValue))
   value.value = (props.modelValue as IFormItem).id || ""
 else
@@ -153,6 +153,9 @@ const dataList = ref<Array<{
   status: string;
   [key: string]: any;
 }>>([]);
+
+// 原始数据列表，用于筛选
+const originalDataList = ref<any[]>([]);
 
 // 选择表单的字段列表
 const selectedFormFields = ref([
@@ -288,9 +291,11 @@ watch(displayFields, async () => {
 
 const emit = defineEmits(["update:modelValue", "change", "update:buttonText", "update:buttonTextField"]);
 const onInput = (val: string) => {
-  let formtem = formList.value.find((x) => x.id == val)!;
-  emit("update:modelValue", formtem);
-  emit("change", formtem);
+  let formtem = formList.value.find((x) => x.id == val);
+  if (formtem) {
+    emit("update:modelValue", formtem);
+    emit("change", formtem);
+  }
 };
 
 // 监听按钮文字变化，通知父组件
@@ -308,9 +313,6 @@ watch(() => props.buttonText, (newText) => {
     buttonText.value = newText;
   }
 });
-
-// 原始数据列表，用于筛选
-const originalDataList = ref<any[]>([]);
 
 // 处理筛选功能
 const handleFilter = () => {
