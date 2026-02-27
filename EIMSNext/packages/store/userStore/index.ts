@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import { accessToken, http } from "@eimsnext/utils";
-import { CurrentUser } from "@eimsnext/models";
+import { CurrentUser, UserType } from "@eimsnext/models";
 import { useStorage } from "@vueuse/core";
 import { store } from "../setup";
-import { authService, LoginModel } from "@eimsnext/services";
+import { authService, systemService, LoginModel } from "@eimsnext/services";
 import { useAppStoreHook } from "../genericStore/appStore";
 import { useFormStoreHook } from "../genericStore/formStore";
 import { useDeptStoreHook } from "../genericStore/deptStore";
@@ -15,7 +15,7 @@ export const useUserStore = defineStore("currentuser", () => {
   const currentUser = useStorage<CurrentUser>(
     "currentuser",
     new CurrentUser(),
-    sessionStorage
+    sessionStorage,
   );
 
   const initialized = ref(false);
@@ -25,8 +25,8 @@ export const useUserStore = defineStore("currentuser", () => {
     return new Promise<CurrentUser>((resolve, reject) => {
       if (fromCache && currentUser.value.userId) resolve(currentUser.value);
       else {
-        http.api
-          .get<CurrentUser>("/system/currentuser")
+        systemService
+          .getCurrentUser()
           .then((res) => {
             Object.assign(currentUser.value, { ...res });
             initialized.value = true;
@@ -43,6 +43,12 @@ export const useUserStore = defineStore("currentuser", () => {
     currentUser.value.userName = userName;
   };
 
+  const isAppAdmin = () => {
+    return (
+      (UserType.App_Admins & currentUser.value.userType) ===
+      currentUser.value.userType
+    );
+  };
   const updateEmpName = (empName: string) => {
     currentUser.value.empName = empName;
   };
@@ -80,7 +86,7 @@ export const useUserStore = defineStore("currentuser", () => {
         useFormStoreHook().clear();
         useDeptStoreHook().clear();
         promises.push(
-          useContextStoreHook().setCorpId(currentUser.value.corpId, true)
+          useContextStoreHook().setCorpId(currentUser.value.corpId, true),
         );
         promises.push(useDeptStoreHook().load("", false));
       }
@@ -93,6 +99,7 @@ export const useUserStore = defineStore("currentuser", () => {
   return {
     currentUser,
     get,
+    isAppAdmin,
     updateUserName,
     updateEmpName,
     login,

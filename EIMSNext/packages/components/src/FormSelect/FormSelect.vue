@@ -108,25 +108,35 @@
 
 <script setup lang="ts">
 import { useFormStore, useAppStore } from "@eimsnext/store";
-import { http } from "@eimsnext/utils";
-import { IFormItem, buildFormListItems } from "./type";
 import { ref, watch, computed } from "vue";
+import { IFormItem, IFormSelectOptions, buildFormListItems } from "./type";
+import { isObject, isString } from "@eimsnext/utils";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineOptions({
   name: "FormSelect",
 });
 const props = defineProps<{
-  modelValue: IFormItem;
+  modelValue: IFormItem | string;
   appId: string;
   buttonText?: string;
+  options?: IFormSelectOptions
 }>();
+
 const appStore = useAppStore()
 const formList = ref<IFormItem[]>([]);
 
+
 const value = ref(props.modelValue?.id);
+if (isObject(props.modelValue))
+  value.value = (props.modelValue as IFormItem).id || ""
+else
+  value.value = props.modelValue || ""
 const selectedForm = computed(() => {
   return formList.value.find(item => item.id === value.value);
 });
+
 
 // 对话框相关状态
 const dataSelectDialogVisible = ref(false);
@@ -523,6 +533,7 @@ watch(
   [() => props.appId, () => props.modelValue],
   ([newAppId, newModel], [oldAppId, oldModel]) => {
     if (newAppId && newAppId != oldAppId) {
+
       // 处理模板字符串格式的appId
       let actualAppId = newAppId;
       
@@ -552,7 +563,13 @@ watch(
         });
       } 
     }
-    if (newModel && newModel != oldModel) value.value = newModel.id;
+    if (newModel && newModel != oldModel) {
+      // console.log("newmode", newModel)
+      if (isString(newModel))
+        value.value = newModel || ""
+      else
+        value.value = (newModel as IFormItem).id || ""
+    }
   },
   { immediate: true }
 );

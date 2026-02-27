@@ -65,7 +65,7 @@ export default defineComponent({
     // 移除员工对象中的data和value字段，只保留必要的字段
     const removeUnnecessaryFields = (emp) => {
       if (!emp || typeof emp !== "object") return emp;
-      const { id, value, label, type } = dept;
+      const { id, value, label, type } = emp;
       return { id, value, label, type };
     };
 
@@ -96,10 +96,7 @@ export default defineComponent({
     const handleEmpCancel = () => {
       showDialog.value = false;
     };
-    const handleTagClick = () => {
-      showDialog.value = true;
-    };
-
+ 
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
       // 计算最终的禁用状态：禁用属性或查看模式

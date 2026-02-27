@@ -9,7 +9,8 @@ import {
   UserType,
 } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
-import { FlagEnum } from "@eimsnext/utils";
+import { appSetting, FlagEnum } from "@eimsnext/utils";
+import dayjs from "dayjs";
 
 export function getAuthGroupDataPerms(authGrp?: AuthGroup) {
   if (authGrp) {
@@ -79,4 +80,27 @@ export function getFormIcon(form?: AppMenu) {
   }
 
   return icon;
+}
+
+export function getObjectType(obj: any) {
+  if (Object.prototype.toString.call(obj) === "[object String]") {
+    return "String";
+  } else if (Object.prototype.toString.call(obj) === "[object Object]") {
+    return "Object";
+  } else if (Object.prototype.toString.call(obj) === "[object Array]") {
+    return "Array";
+  } else if (Object.prototype.toString.call(obj) === "[object Number]") {
+    return "Number";
+  } else if (Object.prototype.toString.call(obj) === "[object Boolean]") {
+    return "Boolean";
+  }
+}
+
+export function getAttachmentRootPath() {
+  return appSetting.uploadUrl;
+}
+
+export function dateFormat(val: any, fmt?: string) {
+  const format = fmt || "YYYY-MM-DD";
+  return val ? dayjs(val).format(format) : "";
 }

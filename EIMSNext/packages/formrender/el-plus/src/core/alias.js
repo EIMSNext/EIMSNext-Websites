@@ -34,6 +34,9 @@
 // };
 
 export default {
+  divider: "el-divider",
+  tabs: "el-tabs",
+  collapse: "el-collapse",
   button: "el-button",
   icon: "el-icon",
   slider: "el-slider",

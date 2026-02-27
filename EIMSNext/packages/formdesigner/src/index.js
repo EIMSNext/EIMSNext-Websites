@@ -73,6 +73,7 @@ import IframeBox from "./components/aide/IframeBox.vue";
 import QrCodeBox from "./components/aide/QrCodeBox.vue";
 import FcCity from "./components/City.vue";
 import FcTitle from "./components/aide/FcTitle.vue";
+
 import DepartmentSelectView from "./components/DepartmentSelectView.vue";
 import EmployeeSelectView from "./components/EmployeeSelectView.vue";
 import DataSelectView from "./components/DataSelectView.vue";
@@ -81,6 +82,7 @@ import
   fcDepartmentSelect from "@eimsnext/form-render-elplus";
 import fcEmployeeSelect from "@eimsnext/form-render-elplus";
 import fcDataSelect from "@eimsnext/form-render-elplus";
+
 import SignaturePad from "./components/SignaturePad.vue";
 import Echarts from "./components/echarts/Echarts.vue";
 import SourceConfig from "./components/SourceConfig.vue";
@@ -210,10 +212,12 @@ addComponent("SignaturePad", SignaturePad);
 addComponent("FcEcharts", Echarts);
 addComponent("FcTitle", FcTitle);
 addComponent("FcCity", FcCity);
+
 addComponent("FcDepartmentSelect", fcDepartmentSelect, DepartmentSelectView);
 addComponent("FcEmployeeSelect", fcEmployeeSelect, EmployeeSelectView);
 addComponent("FcDataSelect", fcDataSelect, DataSelectView);
 addComponent("FormSelect", FormSelect);
+
 addComponent("FcId", Id);
 
 const setFormula = function (formula) {

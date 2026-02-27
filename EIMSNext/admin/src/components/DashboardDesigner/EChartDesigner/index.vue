@@ -1,80 +1,190 @@
 <template>
-  <el-container class="design-container">
-    <el-aside width="250px" class="left-aside">
-      <div class="left-container">
-        <div class="data-source">
-          <div class="data-source-setting">
-            <span>数据源</span>
-            <div class="choose-data" @click="changeDataSource">更改数据源</div>
+  <EtDrawer :model-value="modelValue" @close="close">
+    <template #title>
+      <el-input v-model="dashItemDef.name" class="title-editor" />
+    </template>
+    <template #top-right>
+      <el-button @click="onSave">保存</el-button>
+    </template>
+    <el-container class="design-container">
+      <el-aside width="250px" class="left-aside">
+        <div class="left-container">
+          <div class="data-source">
+            <div class="data-source-setting">
+              <span>数据源</span>
+              <div class="choose-data" @click="changeDataSource">更改数据源</div>
+            </div>
+            <div class="data-source-title">
+              <et-icon size="16px" :icon="getFormIcon()" :color="getAppIconColor()"></et-icon>
+              <span class="data-source-name">{{ chartSetting.datasource?.label }}</span>
+            </div>
           </div>
-          <div class="data-source-name">
-            <et-icon icon="el-icon-document"></et-icon>
-            <span>{{ dataSource?.label }}</span>
+          <div class="data-source" v-if="chartSetting.datasource.type == DatasourceType.Form">
+            <div class="data-source-setting">
+              <span>数据获取权限</span>
+            </div>
+            <div class="data-source-title">
+              <el-select v-model="selectedRole" @change="roleChanged">
+                <el-option :label="t('表单中的全部数据')" value="1"></el-option>
+                <el-option :label="t('继承成员对表单的权限')" value="2"></el-option>
+              </el-select>
+            </div>
           </div>
-        </div>
-        <div class="data-source" v-if="dataSource.type == DataSourceType.Form">
-          <div class="data-source-setting">
-            <span>数据获取权限</span>
-            <!-- <div class="choose-data" v-if="selectedRole === 2">
-              <a :href="getFormRoleLink(queryId)" target="_blank">{{ $t("FormRoleConfig") }}</a>
-            </div> -->
-          </div>
-          <div class="data-source-name">
-            <el-select size="small" v-model="selectedRole" @change="roleChanged">
-              <el-option :label="t('表单中的全部数据')" value="1"></el-option>
-              <el-option :label="t('继承成员对表单的权限')" value="2"></el-option>
-            </el-select>
-          </div>
-        </div>
-        <div class="fields-container">
-          <div class="field-title">
-            <span>字段</span>
-            <!-- <div class="field-operation">
-              <div @click="addComputedField" v-if="dataSourceType == DataSourceType.Form">
-                <et-icon icon="el-icon-plus"></et-icon>
+          <div class="fields-container">
+            <div class="field-title">
+              <span>字段</span>
+              <!-- <div class="field-operation">
+              <div @click="addComputedField" v-if="DatasourceType == DatasourceType.Form">
+                <et-icon icon="el-plus"></et-icon>
               </div>
             </div> -->
-          </div>
-          <div style="overflow-y: auto">
-            <Draggable :list="fields" :sort="false" ghost-class="ghost" @start="dragStart"
-              :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
-              <template #item="{ element, index }">
-                <div class="field-wrapper" :title="element.title">
-                  <div class="field-name">
-                    <et-icon icon="el-icon-copyDocument" class="mr-[8px]"></et-icon>
-                    <span class="name">{{ element.title }}</span>
-                  </div>
-                  <!-- <div v-if="element.isComputed" class="tool-icons">
+            </div>
+            <div style="overflow-y: auto">
+              <Draggable :list="fields" :sort="false" ghost-class="ghost" @start="dragStart"
+                :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
+                <template #item="{ element, index }">
+                  <div class="field-wrapper" :title="element.label">
+                    <div class="field-name">
+                      <et-icon size="16px" icon="el-copyDocument" class="mr-[8px]"></et-icon>
+                      <span class="name">{{ element.label }}</span>
+                    </div>
+                    <!-- <div v-if="element.isComputed" class="tool-icons">
                     <span @click="copyField(element)">
-                      <et-icon icon="el-icon-copyDocument" class="icon"></et-icon>
+                      <et-icon icon="el-copyDocument" class="icon"></et-icon>
                     </span>
                     <span @click="editField(element, index)">
-                      <et-icon icon="el-icon-edit" class="icon"></et-icon>
+                      <et-icon icon="el-edit" class="icon"></et-icon>
                     </span>
                     <span @click="removeField(element, index)">
-                      <et-icon icon="el-icon-delete" class="icon"></et-icon>
+                      <et-icon icon="el-delete" class="icon"></et-icon>
                     </span>
                   </div> -->
+                  </div>
+                </template>
+              </Draggable>
+            </div>
+          </div>
+        </div>
+      </el-aside>
+      <el-main class="center-echarts" style="min-width: 460px">
+        <div class="center-box" :class="{ 'green-line': dropable.dim1 }">
+          <div class="title">
+            维度
+          </div>
+          <div class="drag-target-container container-veidoo">
+            <Draggable :list="chartSetting.dim1Fields" :sort="false" ghost-class="ghost" @start="dragStart"
+              :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
+              <template #item="{ item, idx }">
+                <div :key="item.Alias" class="item dimension-item forbid" :ref="'dim1' + idx">
+                  <div @click="onDimFieldClick(idx, item, 'dim1', 'dim1' + idx)" class="item-text"
+                    :class="fieldIsDelete(item) ? 'style-red' : ''">
+                    <i :style="{ color: fieldIsDelete(item) ? '#eb5050' : '#fff' }"
+                      class="el-icon-arrow-down ml-5 mr-2"></i>
+                    {{ item.localName || item.label }}
+                    <div :class="fieldIsDelete(item) ? 'close-icon-delete' : 'close-icon'">
+                      <et-icon icon="el-delete" />
+                    </div>
+                  </div>
                 </div>
               </template>
             </Draggable>
           </div>
         </div>
-      </div>
-    </el-aside>
-    <el-main style="min-width: 460px"></el-main>
-    <el-aside width="300px"></el-aside>
-    <DataSourceDialog v-model="showDataSourceDialog" :appId="appId" :dataSource="dataSource"></DataSourceDialog>
-  </el-container>
+        <div class="center-box" :class="{ 'green-line': dropable.dim1 }">
+          <div class="title">
+            指标
+          </div>
+          <div class="drag-target-container container-veidoo">
+            <Draggable :list="chartSetting.dim2Fields" :sort="false" ghost-class="ghost" @start="dragStart"
+              :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
+              <template #item="{ item, idx }">
+                <div :key="item.Alias" class="item dimension-item forbid" :ref="'dim2' + idx">
+                  <div @click="onDimFieldClick(idx, item, 'dim2', 'dim2' + idx)" class="item-text"
+                    :class="fieldIsDelete(item) ? 'style-red' : ''">
+                    <i :style="{ color: fieldIsDelete(item) ? '#eb5050' : '#fff' }"
+                      class="el-icon-arrow-down ml-5 mr-2"></i>
+                    {{ item.localName || item.label }}
+                    <div :class="fieldIsDelete(item) ? 'close-icon-delete' : 'close-icon'">
+                      <et-icon icon="el-delete" />
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </Draggable>
+          </div>
+        </div>
+        <div class="center-box" :class="{ 'green-line': dropable.dim1 }">
+          <div class="title">
+            过滤条件
+          </div>
+          <div class="drag-target-container container-veidoo">
+            <Draggable :list="chartSetting.dim2Fields" :sort="false" ghost-class="ghost" @start="dragStart"
+              :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
+              <template #item="{ item, idx }">
+                <div :key="item.Alias" class="item dimension-item forbid" :ref="'dim2' + idx">
+                  <div @click="onDimFieldClick(idx, item, 'dim2', 'dim2' + idx)" class="item-text"
+                    :class="fieldIsDelete(item) ? 'style-red' : ''">
+                    <i :style="{ color: fieldIsDelete(item) ? '#eb5050' : '#fff' }"
+                      class="el-icon-arrow-down ml-5 mr-2"></i>
+                    {{ item.localName || item.label }}
+                    <div :class="fieldIsDelete(item) ? 'close-icon-delete' : 'close-icon'">
+                      <et-icon icon="el-delete" />
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </Draggable>
+          </div>
+        </div>
+
+        <div class="center-box chart-main"></div>
+      </el-main>
+      <el-aside width="300px" class="echarts-config">
+        <div class="config-box">
+          <el-collapse v-model="activeCollItems" expand-icon-position="left">
+            <el-collapse-item name="charttype" title="图表类型" class="box-head">
+              <div class="box-body chart-type-body pt-5">
+                <template v-for="cc in chartConfigs" :key="cc.id">
+                  <el-button @click="selectChartType(cc)" class="chart-type"
+                    :class="{ active: chartSetting.chartType == cc.id }">
+                    <i class="icon" :class="cc.cssClass"></i>
+                  </el-button></template>
+              </div>
+            </el-collapse-item>
+          </el-collapse>
+          <div v-if="chartConfig">
+            <el-collapse v-model="activeSettingItems" expand-icon-position="left">
+              <el-collapse-item v-if="chartConfig.subType" name="charttype" title="柱状图类型" class="box-head">
+                <div class="box-body chart-type-body pt-5">
+                  <template v-for="ct in chartConfig.subType" :key="ct.id">
+                    <el-button @click="selectChartSubType(chartConfig, ct.id)" class="chart-type"
+                      :class="{ active: chartSetting.chartSubType == ct.id }">
+                      <i class="icon" :class="ct.cssClass || chartConfig.cssClass"></i>
+                    </el-button></template>
+                </div>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
+        </div>
+      </el-aside>
+      <DataSourceDialog v-model="showDataSourceDialog" :appId="dashItemDef.appId" :dataSource="chartSetting.datasource"
+        @ok="handleSourceOk">
+      </DataSourceDialog>
+    </el-container>
+  </EtDrawer>
 </template>
 <script setup lang="ts">
 import Draggable from "vuedraggable";
-import { DataSourceType, IDataSource, IDataSourceField } from "../type";
-import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
+import { DatasourceType, IDataSource, IDataSourceField } from "../type";
+import { DashboardItemDef, FieldDef, FieldType, FormDef, FormType } from "@eimsnext/models";
 import { IFormItem } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
 import { useLocale } from "element-plus";
+import { ChartType, getChartConfigs, IChartConfig, IChartSetting } from "./type";
+import { dashboardItemDefService } from "@eimsnext/services";
+import { getAppIconColor, getFormIcon } from "@/utils/common";
+
 const { t } = useLocale();
 
 defineOptions({
@@ -82,13 +192,13 @@ defineOptions({
 });
 
 const props = defineProps<{
-  appId: string;
-  dataSource: IDataSource,
-  layout?: string
+  modelValue: boolean;
+  dashItemDef: DashboardItemDef
 }>();
 
+const chartConfigs = getChartConfigs()
+const chartSetting = reactive<IChartSetting>(JSON.parse(props.dashItemDef.details))
 const selectedRole = ref("1");
-const dataSource = toRef(props.dataSource);
 const formItem = ref<IFormItem>()
 const formStore = useFormStore();
 const formDef = ref<FormDef>()
@@ -96,9 +206,21 @@ const fields = ref<IDataSourceField[]>([]);
 const draggingNode = ref<IDataSourceField>();
 const showDataSourceDialog = ref(false)
 
-const populateFormFields = () => {
+const populateDatasourceFields = () => {
   fields.value = [];
+  switch (chartSetting.datasource.type) {
+    case DatasourceType.Form:
+      formStore.get(chartSetting.datasource.id).then(form => {
+        formDef.value = form;
+        populateFormFields()
+      })
+      break;
+    default:
+      break;
+  }
+}
 
+const populateFormFields = () => {
   if (formDef.value?.content && formDef.value?.content.items) {
     formDef.value?.content.items.forEach((x: FieldDef) => {
       if (x.type != FieldType.TableForm) {
@@ -126,27 +248,80 @@ const populateFormFields = () => {
   }
 };
 
-const chartType = ref(0);
-
 const changeDataSource = () => {
-  // if (dataSourceType == DataSourceType.Form) {
-
-  // }
+  showDataSourceDialog.value = true
 };
+
+const handleSourceOk = async (source: IDataSource) => {
+  chartSetting.datasource = source;
+  showDataSourceDialog.value = false
+  populateDatasourceFields()
+}
+
 const roleChanged = () => { };
+
+const activeCollItems = ref(["charttype"])
+const activeSettingItems = ref(["subcharttype"])
+const chartConfig = ref<IChartConfig>()
+const dropable = ref<any>({})
+
+const selectChartType = (cc: IChartConfig) => {
+  chartConfig.value = cc
+  chartSetting.chartType = cc.id
+}
+
+const selectChartSubType = (cc: IChartConfig, sub: any) => {
+  chartSetting.chartSubType = sub.id
+}
+
+const onDimFieldClick = (idx: number, item: any, type: string, ref: any, e?: MouseEvent) => { }
+
+const fieldIsDelete = (item: any) => {
+  let notExist = false;
+  // if (this.editItem.setting && this.editItem.setting.dataSourceNotExist) {
+  //   notExist = true;
+  // }
+  return notExist || item.IsDelete;
+}
 
 const dragStart = (e: any) => {
   e.preventDefault();
   draggingNode.value = e.originalEvent.srcElement._underlying_vm_;
 };
+
 const addComputedField = () => { };
 const copyField = (field: IDataSourceField) => { };
 const editField = (field: IDataSourceField, index: number) => { };
 const removeField = (field: IDataSourceField, index: number) => { };
+
+const onSave = async () => {
+  var details = JSON.stringify(chartSetting)
+
+  let req = {
+    id: props.dashItemDef.id,
+    name: props.dashItemDef.name,
+    details: details
+  };
+
+  let resp = await dashboardItemDefService.patch<DashboardItemDef>(req.id, req);
+  // contextStore.setAppChanged(); //reload 菜单
+}
+
+const emit = defineEmits(["update:modelValue", "close"]);
+const close = () => {
+  emit("update:modelValue", false)
+  emit("close");
+}
+
+onMounted(() => {
+  if (chartSetting.datasource)
+    populateDatasourceFields()
+})
 </script>
 <style lang="scss" scoped>
 .design-container {
   background: #f4f6f9;
+  height: 100%;
 
   .left-aside {
     border-right: 1px solid #e9e9e9;
@@ -162,16 +337,16 @@ const removeField = (field: IDataSourceField, index: number) => { };
       }
 
       .data-source {
-        padding: 12px 12px 0 15px;
+        padding: 10px 10px 0 20px;
         border-bottom: 1px solid #f3f3f3;
 
         .data-source-setting {
           display: flex;
           justify-content: space-between;
           box-sizing: border-box;
-          margin-top: 5px;
           font-size: 14px;
-          line-height: 21px;
+          font-weight: 600;
+          line-height: 30px;
 
           .choose-data {
             color: var(--el-color-primary);
@@ -179,36 +354,30 @@ const removeField = (field: IDataSourceField, index: number) => { };
           }
         }
 
-        .data-source-name {
-          margin: 15px 0 15px 0;
-          line-height: 18px;
+        .data-source-title {
+          font-size: 12px;
+          overflow: auto;
+          padding: 5px 0;
+          display: flex;
+          align-items: center;
 
-          .icon {
-            vertical-align: text-bottom;
-          }
-
-          .el-select {
-            width: 100%;
-          }
-
-          .icon-red {
-            vertical-align: text-bottom;
-            color: #eb5050 !important;
-          }
-
-          .style-red {
-            color: #eb5050 !important;
+          .data-source-name {
+            margin-left: 10px;
+            cursor: pointer;
           }
         }
       }
 
       .fields-container {
-        padding: 18px 0 0 10px;
+        padding: 10px 10px 0 20px;
 
         .field-title {
+          display: flex;
+          justify-content: space-between;
+          box-sizing: border-box;
           font-size: 14px;
-          margin-left: 5px;
-          line-height: 21px;
+          font-weight: 600;
+          line-height: 30px;
 
           .field-operation {
             float: right;
@@ -222,20 +391,18 @@ const removeField = (field: IDataSourceField, index: number) => { };
           border-radius: 5px;
           padding: 0px 0px 0px 8px;
           line-height: 30px;
-          margin: 4px 0;
-          width: 225px;
+          margin: 5px 0;
           display: flex !important;
           align-items: center;
           justify-content: space-between;
           cursor: move;
 
           .field-name {
-            display: inline-flex;
+            border-radius: 5px;
+            line-height: 30px;
+            display: flex !important;
             align-items: center;
-
-            .icon {
-              font-size: 13px;
-            }
+            justify-content: space-between;
 
             .name {
               max-width: 110px;
@@ -272,10 +439,6 @@ const removeField = (field: IDataSourceField, index: number) => { };
                 color: var(--el-color-primary);
                 cursor: pointer;
               }
-
-              .icon {
-                padding: 8px 5px;
-              }
             }
           }
         }
@@ -284,7 +447,9 @@ const removeField = (field: IDataSourceField, index: number) => { };
   }
 
   .center-echarts {
-    padding: 0 8px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
 
     .green-line {
       background-color: #e6f8f9 !important;
@@ -292,6 +457,7 @@ const removeField = (field: IDataSourceField, index: number) => { };
     }
 
     .center-box {
+      flex: 0 0 auto;
       border: 1px dashed #d9d9d9;
       background-color: #fff;
       margin-bottom: 8px;
@@ -652,7 +818,10 @@ const removeField = (field: IDataSourceField, index: number) => { };
     }
 
     .chart-main {
+      background-color: #fff;
       position: relative;
+      flex: 1 1 auto;
+      overflow: hidden;
     }
   }
 
@@ -663,10 +832,6 @@ const removeField = (field: IDataSourceField, index: number) => { };
     overflow-x: hidden;
     padding: 0 10px;
     background: #fff;
-
-    .vs-tabs--content {
-      padding: 10px 0;
-    }
 
     .config-box {
       padding-bottom: 11px;
@@ -730,103 +895,40 @@ const removeField = (field: IDataSourceField, index: number) => { };
           }
         }
 
-        .disabled {
-          cursor: not-allowed;
-          //background-color: #fff;
-          //border: 3px solid #fff;
-
-          //.icon-border {
-          //  border: 3px solid #fff;
-          //}
-
-          .icon {
-            opacity: 0.5;
-          }
-
-          //&:hover {
-          //  border: 3px solid #fff;
-          //  background-color: #fff;
-          //
-          //  .icon-border {
-          //    border: 3px solid #fff;
-          //
-          //    .icon {
-          //      border: 3px solid #fff;
-          //    }
-          //  }
-          //}
-        }
-
         .line {
           background-image: url("../../../assets/images/charts/Line.svg");
         }
 
-        .linearea {
-          background-image: url("../../../assets/images/charts/LineArea.svg");
+        .line-area {
+          background-image: url("../../../assets/images/charts/Line.area.svg");
         }
 
-        .horizontalbar {
-          background-image: url("../../../assets/images/charts/HorizontalBar.svg");
+        .hbar {
+          background-image: url("../../../assets/images/charts/HBar.svg");
         }
 
-        .verticalbar {
-          background-image: url("../../../assets/images/charts/VerticalBar.svg");
+        .hbar-stack {
+          background-image: url("../../../assets/images/charts/HBar.stack.svg");
+        }
+
+        .vbar {
+          background-image: url("../../../assets/images/charts/VBar.svg");
+        }
+
+        .vbar-stack {
+          background-image: url("../../../assets/images/charts/VBar.stack.svg");
+        }
+
+        .vbar-waterfall {
+          background-image: url("../../../assets/images/charts/VBar.waterfall.svg");
         }
 
         .pie {
-          background-image: url("../../../assets/images/charts/Pie1.svg");
+          background-image: url("../../../assets/images/charts/Pie.svg");
         }
 
-        .index {
-          background-image: url("../../../assets/images/charts/Index.svg");
-        }
-
-        .double {
-          background-image: url("../../../assets/images/charts/Double.svg");
-        }
-
-        .funnel {
-          background-image: url("../../../assets/images/charts/Funnel.svg");
-        }
-
-        .radar {
-          background-image: url("../../../assets/images/charts/Radar.svg");
-        }
-
-        .fittext {
-          background-image: url("../../../assets/images/charts/FitText.svg");
-        }
-
-        .gauge {
-          background-image: url("../../../assets/images/charts/gauge.svg");
-        }
-
-        .map {
-          background-image: url("../../../assets/images/charts/map.svg");
-        }
-
-        .scatter {
-          background-image: url("../../../assets/images/charts/scatter.svg");
-        }
-
-        .bubble {
-          background-image: url("../../../assets/images/charts/bubble.svg");
-        }
-
-        .detailtable {
-          background-image: url("../../../assets/images/charts/detailtable.svg");
-        }
-
-        .treemap {
-          background-image: url("../../../assets/images/charts/treemap.svg");
-        }
-
-        .wordcloud {
-          background-image: url("../../../assets/images/charts/wordcloud.svg");
-        }
-
-        .heatmap {
-          background-image: url("../../../assets/images/charts/heatmap.svg");
+        .pie-circle {
+          background-image: url("../../../assets/images/charts/Pie.circle.svg");
         }
       }
     }

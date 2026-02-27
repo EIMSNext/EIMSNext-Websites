@@ -7,7 +7,6 @@ export enum FormType {
 export interface FormDefRequest extends IdBase {
   appId?: string;
   name?: string;
-  type?: FormType;
   content?: FormContent;
   isLedger?: boolean;
   usingWorkflow?: boolean;
@@ -16,7 +15,6 @@ export interface FormDefRequest extends IdBase {
 export interface FormDef extends CorpModelBase {
   name: string;
   appId: string;
-  type?: FormType;
   content?: FormContent;
   isLedger: boolean;
   usingWorkflow: boolean;
@@ -31,6 +29,7 @@ export class FieldDef {
   field: string = "";
   title: string = "";
   type: FieldType = FieldType.None;
+  i18n?: string;
   columns?: FieldDef[];
   props?: FieldProp;
 }

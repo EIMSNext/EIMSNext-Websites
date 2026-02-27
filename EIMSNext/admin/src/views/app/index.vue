@@ -81,7 +81,6 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
     id: "",
     appId: contextStore.appId,
     name: t("admin.untitledForm"),
-    type: FormType.Form,
     content: {
       "layout": "[]",
       "options": "{\"info\":{\"align\":\"left\"},\"form\":{\"inline\":false,\"hideRequiredAsterisk\":false,\"labelPosition\":\"top\",\"size\":\"default\",\"labelWidth\":\"auto\"},\"resetBtn\":{\"show\":false,\"innerText\":\"重置\"},\"submitBtn\":{\"show\":false,\"innerText\":\"提交\"}}"
