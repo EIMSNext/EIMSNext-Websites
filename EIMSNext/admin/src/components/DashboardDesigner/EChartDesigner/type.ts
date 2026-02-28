@@ -7,13 +7,21 @@ export interface IChartSetting {
   chartSubType?: string;
   dim1Fields?: IDimensionField[];
   dim2Fields?: IDimensionField[];
+  metrics?: IMetricsField[];
   filter?: IConditionList;
 }
 
 export interface IDimensionField {
   id: string;
   label?: string;
-  aggFun?: AggerateFun;
+  title?: string;
+}
+
+export interface IMetricsField {
+  id: string;
+  label?: string;
+  title?: string;
+  aggFun?: AggregateFun;
 }
 
 export enum ChartType {
@@ -22,10 +30,10 @@ export enum ChartType {
   Line = "line", //折线图
   Pie = "pie", //饼图
 }
-export enum AggerateFun {
-  Count = "COUNT",
-  Sum = "SUM",
-  AVg = "AVG",
+export enum AggregateFun {
+  Count = "count",
+  Sum = "sum",
+  AVg = "avg",
 }
 export interface IChartConfig {
   id: ChartType;
