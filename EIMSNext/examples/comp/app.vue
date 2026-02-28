@@ -134,7 +134,6 @@ const save = () => {
     id: "",
     appId: "",
     name: "test1",
-    type: FormType.Form,
     content: content,
   };
 
