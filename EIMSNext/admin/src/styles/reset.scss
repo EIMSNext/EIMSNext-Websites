@@ -20,7 +20,7 @@ html {
   tab-size: 4;
   text-size-adjust: 100%;
   color: #141e31;
-  font-size: 14px;  
+  font-size: 14px;
   // background-color: #f2f3f8;
 }
 
@@ -94,4 +94,8 @@ a:focus,
 a:active,
 div:focus {
   outline: none;
+}
+
+.fc-form-title {
+  font-weight: 600;
 }
