@@ -2,11 +2,11 @@
     <el-dropdown ref="dropdownRef" trigger="contextmenu">
         <div :key="field.title" class="item dimension-item forbid">
             <div @click="onFieldClick" class="item-text" :class="isDeleted ? 'style-red' : ''">
-                <i :style="{ color: isDeleted ? '#eb5050' : '#fff' }" class="el-icon-arrow-down ml-5 mr-2"></i>
+                <et-icon icon="el-arrowDown" :color="isDeleted ? '#eb5050' : '#fff'" style="margin: 0 5px;"></et-icon>
                 {{ field.title || field.label }}
-                <div :class="isDeleted ? 'close-icon-delete' : 'close-icon'">
-                    <et-icon icon="el-delete" />
-                </div>
+            </div>
+            <div :class="isDeleted ? 'close-icon-delete' : 'close-icon'">
+                <et-icon icon="el-close" size="10px" :color="isDeleted ? '#fff' : '#8095fe'" />
             </div>
         </div>
         <template #dropdown>
@@ -48,12 +48,21 @@ const onFieldClick = () => {
 
     &:hover {
         .close-icon {
-            display: block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .close-icon-delete {
-            display: block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+    }
+
+    .style-red {
+        background-color: #fdeeee;
+        color: #eb5050 !important;
     }
 
     .el-submenu [class^="el-icon-"] {
@@ -73,10 +82,6 @@ const onFieldClick = () => {
         height: 15px;
         line-height: 16px;
         text-align: center;
-
-        .vs-icon {
-            font-size: 10px;
-        }
     }
 
     .close-icon-delete {
@@ -91,11 +96,6 @@ const onFieldClick = () => {
         height: 15px;
         line-height: 16px;
         text-align: center;
-
-        .vs-icon {
-            font-size: 10px;
-            color: #fff;
-        }
     }
 
     .item-text {
@@ -109,9 +109,5 @@ const onFieldClick = () => {
 .dimension-item {
     background-color: #8095fe;
     color: #fff;
-
-    .vs-icon {
-        color: #8095fe;
-    }
 }
 </style>
