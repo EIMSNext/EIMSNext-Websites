@@ -190,17 +190,16 @@
         <div class="dash-edit-layout custom-scroll" style="background: rgb(244, 246, 249);" @dragover="gridDragOver">
           <grid-layout ref="gridRef" v-model:layout="state.layout" :col-num="colNum" :col-width="colWidth"
             :row-height="rowHeight" :is-draggable="state.draggable" :is-resizable="state.resizable" :is-mirrored="false"
-            :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true" :responsive="true"
-            :breakpoints="{ xs: 0, sm: 576, md: 768, lg: 992, xl: 1200 }"
-            :layout-breakpoints="{ xs: 6, sm: 12, md: 18, lg: 24, xl: 24 }">
+            :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true"
+            :responsive="true">
             <grid-item v-for="item in state.layout" :ref="e => setItemRef(item, e)" :x="item.x" :y="item.y" :w="item.w"
               :h="item.h" :i="item.i" :key="item.i" @resize="resizeEvent" @resized="resizedEvent" @moved="movedEvent"
               @container-resized="containerResizedEvent" :minW="getMinWidth(item)" :minH="getMinHeight(item)" :maxW="60"
               :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag"
               :class="{ edited: item.inEdit, gridNoTran: item.drag, }" :style="{ 'z-index': getZIndex(item), }">
               <DashItemCard v-if="state.items[item.i]" :item-def="state.items[item.i]" :height="item.h" :width="item.w"
-                :is-view="false" @hide="handleItemHide" @edit="handleItemEdit" @copy="handleItemCopy"
-                @delete="handleItemDelete" />
+                :is-view="false" @hide="handleItemHide(state.items[item.i])" @edit="handleItemEdit(state.items[item.i])"
+                @copy="handleItemCopy(state.items[item.i])" @delete="handleItemDelete(state.items[item.i])" />
             </grid-item>
           </grid-layout>
         </div>
@@ -209,7 +208,7 @@
   </EtDrawer>
   <DataSourceDialog v-model="showDataSourceDialog" :appId="dashDef.appId" :dataSource="dataSource"
     @cancel="handleSourceCancel" @ok="handleSourceOk"></DataSourceDialog>
-  <EChartDesigner v-if="dashItemDefRef" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
+  <EChartsDesigner v-if="dashItemDefRef" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
 
 </template>
 <script setup lang="ts">
@@ -222,7 +221,7 @@ import { GridLayout, GridItem } from "vue-grid-layout-v3";
 import { IFormItem } from "@eimsnext/components";
 import { DashboardDef, DashboardDefRequest, DashboardItemDef, DashboardItemDefRequest, DashItemType } from "@eimsnext/models";
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
-import EChartDesigner from "./EChartDesigner/index.vue"
+import EChartsDesigner from "./ECharts/EChartsDesigner.vue"
 import { useI18n } from "vue-i18n";
 const { t } = useI18n()
 

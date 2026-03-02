@@ -16,17 +16,23 @@
             </div>
         </div>
         <div class="container-content-wrapper">
-            <el-empty class="et-dash-empty">
-                <div class="empty-wrapper"><i class="x-icon iconfont-fx-pc icon-info-o"></i>
-                    <div class="empty-text">组件配置异常</div>
-                </div>
-            </el-empty>
+            <template v-if="chartSetting">
+                <e-charts-viewer :setting="chartSetting" />
+            </template>
+            <template v-else>
+                <el-empty class="et-dash-empty">
+                    <div class="empty-wrapper"><i class="x-icon iconfont-fx-pc icon-info-o"></i>
+                        <div class="empty-text">组件配置异常</div>
+                    </div>
+                </el-empty></template>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { DashboardItemDef } from "@eimsnext/models";
 import { useLocale } from "element-plus";
+import { IChartSetting } from "../ECharts/type";
+import EChartsViewer from "../ECharts/EChartsViewer.vue";
 const { t } = useLocale();
 
 defineOptions({
@@ -44,6 +50,8 @@ const props = withDefaults(
         isView: false
     }
 );
+
+const chartSetting = ref<IChartSetting>(JSON.parse(props.itemDef.details))
 
 const emit = defineEmits(["hide", "edit", "copy", "delete"]);
 const onHide = () => {

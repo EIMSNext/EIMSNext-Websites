@@ -8,7 +8,7 @@
     </basic-field>
 </template>
 <script setup lang="ts">
-import { IFilterField } from '../../EChartDesigner/type';
+import { IFilterField } from '../../ECharts/type';
 import BasicField from './BasicField.vue';
 
 defineOptions({

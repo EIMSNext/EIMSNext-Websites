@@ -8,7 +8,7 @@
     </basic-field>
 </template>
 <script setup lang="ts">
-import { IDimensionField } from '../../EChartDesigner/type';
+import { IDimensionField } from '../../ECharts/type';
 import BasicField from './BasicField.vue';
 
 defineOptions({

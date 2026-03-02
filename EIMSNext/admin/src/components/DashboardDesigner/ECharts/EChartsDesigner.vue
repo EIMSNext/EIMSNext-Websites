@@ -107,7 +107,15 @@
           </div>
         </div>
 
-        <div class="center-box chart-main"></div>
+        <div class="center-box chart-main">
+          <div class="chart-container">
+            <div class="chart-title" style="color: rgb(31, 45, 61);"><span>{{
+              dashItemDef.name
+            }}</span>
+            </div>
+            <EChartsViewer :setting="chartSetting" />
+          </div>
+        </div>
       </el-main>
       <el-aside width="300px" class="echarts-config">
         <div class="config-box">
@@ -124,10 +132,10 @@
           </el-collapse>
           <div v-if="chartConfig">
             <el-collapse v-model="activeSettingItems" expand-icon-position="left">
-              <el-collapse-item v-if="chartConfig.subType" name="charttype" title="柱状图类型" class="box-head">
+              <el-collapse-item v-if="chartConfig.subType" name="chartsubtype" title="柱状图类型" class="box-head">
                 <div class="box-body chart-type-body pt-5">
                   <template v-for="ct in chartConfig.subType" :key="ct.id">
-                    <el-button @click="selectChartSubType(chartConfig, ct.id)" class="chart-type"
+                    <el-button @click="selectChartSubType(chartConfig, ct)" class="chart-type"
                       :class="{ active: chartSetting.chartSubType == ct.id }">
                       <i class="icon" :class="ct.cssClass || chartConfig.cssClass"></i>
                     </el-button></template>
@@ -155,11 +163,12 @@ import { ChartType, getChartConfigs, IChartConfig, IChartSetting } from "./type"
 import { dashboardItemDefService } from "@eimsnext/services";
 import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { SortableEvent } from "sortablejs";
+import EChartsViewer from "./EChartsViewer.vue";
 
 const { t } = useLocale();
 
 defineOptions({
-  name: "EChartDesigner",
+  name: "EChartsDesigner",
 });
 
 const props = defineProps<{
@@ -231,7 +240,7 @@ const handleSourceOk = async (source: IDataSource) => {
 const roleChanged = () => { };
 
 const activeCollItems = ref(["charttype"])
-const activeSettingItems = ref(["subcharttype"])
+const activeSettingItems = ref(["chartsubtype"])
 const chartConfig = ref<IChartConfig>()
 const dropable = ref<any>({})
 
@@ -298,7 +307,6 @@ const onSave = async () => {
   };
 
   let resp = await dashboardItemDefService.patch<DashboardItemDef>(req.id, req);
-  // contextStore.setAppChanged(); //reload 菜单
 }
 
 const emit = defineEmits(["update:modelValue", "close"]);
@@ -402,6 +410,7 @@ onMounted(() => {
             display: flex !important;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: nowrap;
 
             .name {
               max-width: 110px;
@@ -478,13 +487,13 @@ onMounted(() => {
       }
 
       .chart-container {
+        width: 100%;
 
-        // display: flex;
         .chart-title {
           font-size: 14px;
           text-align: left;
           padding: 20px 20px 10px 20px;
-          position: relative;
+          // position: relative;
 
           .index-sort {
             position: absolute;
