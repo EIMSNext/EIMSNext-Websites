@@ -11,6 +11,7 @@ import { FcSelect as select } from "./select";
 import { FcTree as tree } from "./tree";
 import { FcUpload as upload } from "./upload";
 import { FcEditor } from './wangeditor';
+import { FcFormSelectedData as formSelectedData } from "./formselecteddata";
 
 // export { FcCheckbox, FcFrame, FcGroup, FcRadio, FcSelect, FcTree, FcUpload, FcEditor }
 export { FcEditor }
@@ -25,6 +26,7 @@ export default [
     tree,
     upload,
     group,
+    formSelectedData,
     subForm,
     IconWarning
 ]

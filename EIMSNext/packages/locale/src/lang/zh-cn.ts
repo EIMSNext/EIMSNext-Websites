@@ -1711,6 +1711,13 @@ export default {
         disabled: "禁用",
       },
     },
+    formselecteddata: {
+      name: "选择数据",
+      props: {
+        readonly: "只读",
+        disabled: "禁用",
+      },
+    },
     tableform: {
       name: "子表单",
       event: {

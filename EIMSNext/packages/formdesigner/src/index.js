@@ -57,6 +57,7 @@ import DrawerView from "./components/drawer/DrawerView.vue";
 import Drawer from "./components/drawer/Drawer.vue";
 import Cell from "./components/cell/Cell.vue";
 import CellView from "./components/cell/CellView.vue";
+import FormSelectedDataView from "./components/FormSelectedDataView.vue";
 import Row from "./components/Row.vue";
 import ConfigItem from "./components/style/ConfigItem.vue";
 import ConfigTitle from "./components/style/ConfigTitle.vue";
@@ -203,6 +204,7 @@ addComponent("FcEcharts", Echarts);
 addComponent("FcTitle", FcTitle);
 addComponent("FcCity", FcCity);
 addComponent("FcId", Id);
+addComponent("formSelectedData", FormSelectedDataView, FormSelectedDataView);
 
 const setFormula = function (formula) {
   const _formulas = Array.isArray(formula) ? formula : [formula];
