@@ -99,36 +99,6 @@ export function toDynamicFindOptions(
   fixedFilter?: IDynamicFilter,
   scope?: IDataScope,
 ) {
-  let toDynamicFilter = (filter: IConditionList) => {
-    let dfilter: IDynamicFilter = {};
-
-    if (filter.items && filter.items.length > 0) {
-      dfilter = { rel: filter.rel || "and", items: [] };
-      filter.items.forEach((x) => {
-        dfilter.items?.push(toDynamicFilter(x));
-      });
-    } else if (filter.field?.field) {
-      dfilter.field = isSystemField(filter.field.field)
-        ? filter.field.field
-        : `data.${filter.field.field}`;
-      dfilter.type = filter.field.type;
-      dfilter.op = filter.op;
-      if (
-        filter.value?.value &&
-        (dfilter.type == FieldType.Employee1 ||
-          dfilter.type == FieldType.Employee2 ||
-          dfilter.type == FieldType.Department1 ||
-          dfilter.type == FieldType.Department2)
-      ) {
-        dfilter.value = filter.value.value.map((x: ISelectedTag) => x.id);
-      } else {
-        dfilter.value = filter.value?.value;
-      }
-    }
-
-    return dfilter;
-  };
-
   const findOpt = {} as IDynamicFindOptions;
   findOpt.skip = skip;
   findOpt.take = take;
@@ -160,6 +130,35 @@ export function toDynamicFindOptions(
   }
 
   return findOpt;
+}
+export function toDynamicFilter(filter: IConditionList) {
+  let dfilter: IDynamicFilter = {};
+
+  if (filter.items && filter.items.length > 0) {
+    dfilter = { rel: filter.rel || "and", items: [] };
+    filter.items.forEach((x) => {
+      dfilter.items?.push(toDynamicFilter(x));
+    });
+  } else if (filter.field?.field) {
+    dfilter.field = isSystemField(filter.field.field)
+      ? filter.field.field
+      : `data.${filter.field.field}`;
+    dfilter.type = filter.field.type;
+    dfilter.op = filter.op;
+    if (
+      filter.value?.value &&
+      (dfilter.type == FieldType.Employee1 ||
+        dfilter.type == FieldType.Employee2 ||
+        dfilter.type == FieldType.Department1 ||
+        dfilter.type == FieldType.Department2)
+    ) {
+      dfilter.value = filter.value.value.map((x: ISelectedTag) => x.id);
+    } else {
+      dfilter.value = filter.value?.value;
+    }
+  }
+
+  return dfilter;
 }
 
 export function toODataQuery<T>(

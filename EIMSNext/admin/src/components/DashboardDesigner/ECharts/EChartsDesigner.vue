@@ -93,17 +93,15 @@
             </Draggable>
           </div>
         </div>
-        <div class="center-box" :class="{ 'green-line': dropable.filter }">
+        <div class="center-box">
           <div class="title">
             过滤条件
           </div>
           <div class="drag-target-container container-veidoo">
-            <Draggable class="filter" :list="chartSetting.filter" :sort="false" ghost-class="ghost"
-              :group="{ name: 'fields', pull: false, put: true }" item-key="id">
-              <template #item="{ element, index }">
-                <FilterField :field="element" :isDeleted="fieldIsDeleted(element)"></FilterField>
-              </template>
-            </Draggable>
+            <div class="filter">
+              <FilterField :form-id="chartSetting.datasource.id" :filter="chartSetting.filter" @ok="onFilter">
+              </FilterField>
+            </div>
           </div>
         </div>
 
@@ -111,7 +109,7 @@
           <div class="chart-container">
             <div class="chart-title" style="color: rgb(31, 45, 61);"><span>{{
               dashItemDef.name
-            }}</span>
+                }}</span>
             </div>
             <EChartsViewer :setting="chartSetting" />
           </div>
@@ -155,12 +153,12 @@
 import Draggable from "vuedraggable";
 import { IDataSource, IDataSourceField } from "../type";
 import { DashboardItemDef, FieldDef, FieldType, FormDef, FormType } from "@eimsnext/models";
-import { IFormItem } from "@eimsnext/components";
+import { IConditionList, IFormItem } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
 import { useLocale } from "element-plus";
 import { ChartType, getChartConfigs, IChartConfig, IChartSetting } from "./type";
-import { dashboardItemDefService,DatasourceType } from "@eimsnext/services";
+import { dashboardItemDefService, DatasourceType } from "@eimsnext/services";
 import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { SortableEvent } from "sortablejs";
 import EChartsViewer from "./EChartsViewer.vue";
@@ -277,8 +275,6 @@ const dragMove = (e: SortableEvent) => {
     dropable.value.dimension2 = true;
   } else if (targetClass.includes('metrics')) {
     dropable.value.metrics = true;
-  } else if (targetClass.includes('filter')) {
-    dropable.value.filter = true;
   }
 }
 
@@ -300,6 +296,9 @@ const copyField = (field: IDataSourceField) => { };
 const editField = (field: IDataSourceField, index: number) => { };
 const removeField = (field: IDataSourceField, index: number) => { };
 
+const onFilter = (filter: IConditionList) => {
+  chartSetting.filter = filter
+}
 const onSave = async () => {
   var details = JSON.stringify(chartSetting)
 
@@ -322,7 +321,7 @@ onMounted(() => {
   if (!chartSetting.dimension1) chartSetting.dimension1 = [];
   if (!chartSetting.dimension2) chartSetting.dimension2 = [];
   if (!chartSetting.metrics) chartSetting.metrics = [];
-  if (!chartSetting.filter) chartSetting.filter = [];
+
   /*  */
   if (chartSetting.datasource)
     populateDatasourceFields()

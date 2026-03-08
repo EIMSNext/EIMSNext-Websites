@@ -10,7 +10,7 @@ export interface IChartSetting {
   dimension1?: IDimensionField[];
   dimension2?: IDimensionField[];
   metrics?: IMetricsField[];
-  filter?: IFilterField[];
+  filter?: IConditionList;
 }
 
 export interface IDimensionField {
@@ -26,12 +26,6 @@ export interface IMetricsField {
   label?: string;
   title?: string;
   aggFun?: AggregateFun;
-}
-
-export interface IFilterField {
-  id: string;
-  label?: string;
-  title?: string;
 }
 
 export enum ChartType {

@@ -6,7 +6,8 @@
                 {{ field.title || field.label }}
             </div>
             <div :class="isDeleted ? 'close-icon-delete' : 'close-icon'">
-                <et-icon icon="el-close" size="10px" :color="isDeleted ? '#fff' : '#8095fe'" />
+                <et-icon icon="el-close" size="10px" :color="isDeleted ? '#fff' : '#8095fe'"
+                    @click.stop="onRemoveClick" />
             </div>
         </div>
         <template #dropdown>
@@ -37,6 +38,11 @@ const onFieldClick = () => {
         dropdownRef.value.handleOpen()
     }
 }
+
+const onRemoveClick = () => { 
+
+}
+
 </script>
 <style lang="scss" scoped>
 .item {

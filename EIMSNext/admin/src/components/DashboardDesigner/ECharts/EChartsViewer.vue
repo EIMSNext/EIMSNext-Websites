@@ -15,6 +15,7 @@ import echarts from '@/plugins/echarts';
 import { chartSettingValidate, ChartType, IChartSetting } from './type';
 import { AggCalcRequest, AggregateFun, aggregateService } from '@eimsnext/services';
 import { convertToFieldArray } from '@eimsnext/utils';
+import { toDynamicFilter } from '@eimsnext/components';
 
 defineOptions({
     name: "EChartsViewer",
@@ -27,7 +28,6 @@ const props = withDefaults(defineProps<{
     }
 );
 
-const isValid = ref<boolean>(false)
 const chartOpts = ref<echarts.EChartsCoreOption>();
 
 const getChartOpts = async (setting: IChartSetting) => {
@@ -39,7 +39,8 @@ const getChartOpts = async (setting: IChartSetting) => {
     let aggRequest: AggCalcRequest = {
         dataSource: setting.datasource,
         dimensions: [...setting.dimension1 || [], ...setting.dimension2 || []],
-        metrics: [...setting.metrics || []]
+        metrics: [...setting.metrics || []],
+        filter: setting.filter ? toDynamicFilter(setting.filter) : undefined
     }
     let aggResult = await aggregateService.calucate(aggRequest)
     let ds = convertToFieldArray(aggResult);
