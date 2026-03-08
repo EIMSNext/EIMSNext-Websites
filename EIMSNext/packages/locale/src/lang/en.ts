@@ -85,6 +85,14 @@ export default {
     untitledChart: "Untitled Chart",
   },
   workflow: {
+    flowStatus: {
+      draft: "Draft",
+      approving: "Approving",
+      approved: "Approved",
+      rejected: "Rejected",
+      discarded: "Discarded",
+      suspended: "Suspended",
+    },
     startNode: "Start",
     endNode: "End",
     branchNode: "Branch Node",

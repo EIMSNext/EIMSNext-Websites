@@ -1,6 +1,7 @@
 <template>
     <div v-click-outside="onClickOutside">
-        <ConditionList v-model="condList" :form-id="formId" :max-level="1" @change="onChange"></ConditionList>
+        <ConditionList v-model="condList" :form-id="formId" :max-level="1" @change="onChange" @remove="onClear">
+        </ConditionList>
         <div class="actions">
             <el-button type="primary" @click="onSearch">{{ t("common.filter") }}</el-button>
             <el-button>{{ t("common.reset") }}</el-button>
@@ -26,9 +27,13 @@ const props = withDefaults(
 );
 
 const condList = toRef<IConditionList>(props.modelValue);
-const onChange = (filter: IConditionList) => {
+
+    const onChange = (filter: IConditionList) => {
     condList.value = filter;
 };
+const onClear = () => {
+    condList.value.items = []
+}
 
 const emit = defineEmits(["ok", "cancel"]);
 const onSearch = () => {

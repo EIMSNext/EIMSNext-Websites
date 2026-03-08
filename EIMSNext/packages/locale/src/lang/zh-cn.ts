@@ -84,6 +84,14 @@ export default {
     untitledChart: "未命名统计表",
   },
   workflow: {
+    flowStatus: {
+      draft: "草稿",
+      approving: "审批中",
+      approved: "已审批",
+      rejected: "已驳回",
+      discarded: "已废弃",
+      suspended: "已挂起",
+    },
     startNode: "发起流程",
     endNode: "结束",
     branchNode: "并行分支",

@@ -13,6 +13,8 @@
 <script setup lang="ts">
 import { IConditionList } from '@eimsnext/components';
 import DashFilter from '../DashFilter.vue';
+import { uniqueId } from '@eimsnext/utils';
+import { cloneDeep } from 'lodash-es';
 
 defineOptions({
     name: "FilterField",
@@ -25,7 +27,9 @@ const props = defineProps<{
 
 const showFilter = ref(false);
 const filterBtnRef = ref(null)
-const condList = toRef<IConditionList>(props.filter || { id: "", rel: "and" });
+const condList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
+if (props.filter)
+    condList.value = cloneDeep(props.filter)
 
 const emit = defineEmits(["ok", "cancel"]);
 
@@ -35,7 +39,7 @@ const onFieldClick = () => {
 const setFilter = (filter: IConditionList) => {
     condList.value = filter;
     showFilter.value = false;
-    emit("ok", condList.value);
+    emit("ok", cloneDeep(condList.value));
 };
 
 </script>

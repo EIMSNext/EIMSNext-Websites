@@ -14,7 +14,7 @@
     </div>
     <MetaItemHeader class="mt-[8px]" :label="t('dataflow.dataCondition')" :required="true"></MetaItemHeader>
     <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes"
-      :fieldBuildRule="FieldBuildRule.SingleResultOnly" @change="onCondition"></ConditionList>
+      :fieldBuildRule="FieldBuildRule.SingleResultOnly" @change="onCondition" @remove="onCondClear"></ConditionList>
   </template>
 </template>
 <script lang="ts" setup>
@@ -91,6 +91,11 @@ const formChanged = async (form: IFormItem) => {
 const onCondition = (list: IConditionList) => {
   activeData.value.metadata.deleteMeta!.condition = list;
 };
+
+const onCondClear = () => {
+  condList.value.items = []
+  activeData.value.metadata.deleteMeta!.condition = condList.value
+}
 
 const init = () => {
   nextTick(async () => {

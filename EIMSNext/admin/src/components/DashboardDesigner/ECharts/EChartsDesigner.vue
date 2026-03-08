@@ -162,6 +162,7 @@ import { dashboardItemDefService, DatasourceType } from "@eimsnext/services";
 import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { SortableEvent } from "sortablejs";
 import EChartsViewer from "./EChartsViewer.vue";
+import { uniqueId } from "@eimsnext/utils";
 
 const { t } = useLocale();
 
@@ -321,6 +322,7 @@ onMounted(() => {
   if (!chartSetting.dimension1) chartSetting.dimension1 = [];
   if (!chartSetting.dimension2) chartSetting.dimension2 = [];
   if (!chartSetting.metrics) chartSetting.metrics = [];
+  if (!chartSetting.filter) chartSetting.filter = { id: uniqueId(), rel: "and", items: [] }
 
   /*  */
   if (chartSetting.datasource)

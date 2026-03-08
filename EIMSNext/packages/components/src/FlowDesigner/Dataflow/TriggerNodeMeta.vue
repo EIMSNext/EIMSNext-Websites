@@ -71,7 +71,7 @@
     </div>
   </div>
   <MetaItemHeader class="mt-[12px]" :label="t('dataflow.triggerCondition')" :required="true"></MetaItemHeader>
-  <ConditionList v-model="condList" :formId="flowContext!.formId" @change="onCondInput"></ConditionList>
+  <ConditionList v-model="condList" :formId="flowContext!.formId" @change="onCondInput" @remove="onCondClear"></ConditionList>
 </template>
 <script lang="ts" setup>
 import {
@@ -182,7 +182,10 @@ const delTrigger = (t: EventType) => {
 const onCondInput = (list: IConditionList) => {
   activeData.value.metadata.triggerMeta!.condition = list;
 };
-
+const onCondClear = () => {
+  condList.value.items = []
+  activeData.value.metadata.queryManyMeta!.condition = condList.value;
+}
 const onNodeInput = (val: string) => {
   activeData.value.metadata.triggerMeta!.wfNodeId = val;
 };
