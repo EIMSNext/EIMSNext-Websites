@@ -1,9 +1,6 @@
 <template>
     <basic-field :field="field" :is-deleted="isDeleted" @remove="onRemoveClick">
         <template #dropdown-item="{ field, isDeleted }">
-            <el-dropdown-item @click="setTitle">
-                设置显示名
-            </el-dropdown-item>
             <el-dropdown-item>
                 <template #default>
                     <el-dropdown trigger="hover" placement="right-start" :show-arrow="false">
@@ -59,8 +56,6 @@ const props = defineProps<{
     field: IMetricsField,
     isDeleted: boolean
 }>();
-
-const setTitle = () => { }
 
 const setAggFun = (agFun: AggregateFun) => {
     props.field.aggFun = agFun;

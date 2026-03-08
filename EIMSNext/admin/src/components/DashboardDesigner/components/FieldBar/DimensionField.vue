@@ -1,9 +1,7 @@
 <template>
     <basic-field :field="field" :is-deleted="isDeleted" @remove="onRemoveClick">
         <template #dropdown-item="{ field, isDeleted }">
-            <el-dropdown-item @click="setTitle">
-                设置显示名
-            </el-dropdown-item>
+           
         </template>
     </basic-field>
 </template>
@@ -19,8 +17,6 @@ const props = defineProps<{
     field: IDimensionField,
     isDeleted: boolean
 }>();
-
-const setTitle = () => { }
 
 const emit = defineEmits(["remove"]);
 const onRemoveClick = () => {
