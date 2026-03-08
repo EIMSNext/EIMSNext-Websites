@@ -214,7 +214,7 @@
 <script setup lang="ts">
 import { EtDrawer } from "@eimsnext/components/src/drawer";
 import DashItemCard from "./components/DashItemCard.vue"
-import { DatasourceType, IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
+import { IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
 import { uniqueId } from "@eimsnext/utils";
 import { useContextStore } from "@eimsnext/store";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";

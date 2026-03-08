@@ -6,8 +6,9 @@
     </et-dialog>
 </template>
 <script setup lang="ts">
-import { DatasourceType, IDataSource } from "../type";
+import { IDataSource } from "../type";
 import { EtDialog, FormList, IFormItem } from "@eimsnext/components";
+import { DatasourceType } from "@eimsnext/services";
 import { useLocale } from "element-plus";
 import { ref, toRef } from "vue";
 const { t } = useLocale();

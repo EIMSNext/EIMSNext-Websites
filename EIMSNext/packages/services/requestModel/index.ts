@@ -1,3 +1,4 @@
-export * from "./odataQueryModel";
-export * from "./batchDeleteModel";
-export * from "./loginModel";
+export * from "./odataQueryRequest";
+export * from "./batchDeleteRequest";
+export * from "./loginRequest";
+export * from "./aggCalcRequest";

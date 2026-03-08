@@ -1,5 +1,7 @@
 import { IConditionList } from "@eimsnext/components";
 import { IDataSource, IDataSourceField } from "../type";
+import { FieldType } from "@eimsnext/models";
+import { AggregateFun } from "@eimsnext/services";
 
 export interface IChartSetting {
   datasource: IDataSource;
@@ -13,12 +15,14 @@ export interface IChartSetting {
 
 export interface IDimensionField {
   id: string;
+  type: FieldType;
   label?: string;
   title?: string;
 }
 
 export interface IMetricsField {
   id: string;
+  type: FieldType;
   label?: string;
   title?: string;
   aggFun?: AggregateFun;
@@ -36,16 +40,22 @@ export enum ChartType {
   Line = "line", //折线图
   Pie = "pie", //饼图
 }
-export enum AggregateFun {
-  Count = "count",
-  Sum = "sum",
-  AVg = "avg",
-}
+
 export interface IChartConfig {
   id: ChartType;
   i18n: string;
   subType?: Array<any>;
   cssClass: string;
+}
+
+export function chartSettingValidate(setting: IChartSetting): boolean {
+  if (!setting.datasource.id) return false;
+
+  if (!setting.dimension1 || setting.dimension1.length == 0) return false;
+
+  if (!setting.metrics || setting.metrics.length == 0) return false;
+
+  return true;
 }
 
 export function getChartConfigs() {

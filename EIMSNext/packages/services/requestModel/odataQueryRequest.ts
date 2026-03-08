@@ -1,4 +1,4 @@
-export class ODataQueryModel {
+export class ODataQueryRequest {
   $filter?: string;
   $expand?: string;
   $select?: string;

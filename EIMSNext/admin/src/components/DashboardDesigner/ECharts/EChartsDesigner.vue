@@ -153,14 +153,14 @@
 </template>
 <script setup lang="ts">
 import Draggable from "vuedraggable";
-import { DatasourceType, IDataSource, IDataSourceField } from "../type";
+import { IDataSource, IDataSourceField } from "../type";
 import { DashboardItemDef, FieldDef, FieldType, FormDef, FormType } from "@eimsnext/models";
 import { IFormItem } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
 import { useLocale } from "element-plus";
 import { ChartType, getChartConfigs, IChartConfig, IChartSetting } from "./type";
-import { dashboardItemDefService } from "@eimsnext/services";
+import { dashboardItemDefService,DatasourceType } from "@eimsnext/services";
 import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { SortableEvent } from "sortablejs";
 import EChartsViewer from "./EChartsViewer.vue";
@@ -205,6 +205,7 @@ const populateFormFields = () => {
       if (x.type != FieldType.TableForm) {
         let node: IDataSourceField = {
           id: x.field,
+          type: x.type,
           label: x.title,
           isComputed: false
         };
@@ -216,6 +217,7 @@ const populateFormFields = () => {
           x.columns.forEach((y) => {
             let subNode: IDataSourceField = {
               id: `${x.field}>${y.field}`,
+              type: y.type,
               label: `${x.title}.${y.title}`,
               isComputed: false
             };
@@ -283,6 +285,7 @@ const dragMove = (e: SortableEvent) => {
 const cloneDragField = (f: IDataSourceField) => {
   return {
     id: f.id,
+    type: f.type,
     label: f.label,
     title: f.label
   }

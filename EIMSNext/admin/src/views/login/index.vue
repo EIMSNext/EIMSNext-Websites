@@ -71,7 +71,7 @@ import { useSettingsStore } from "@/store";
 import {
   useUserStore,
 } from "@eimsnext/store";
-import { LoginModel } from "@eimsnext/services";
+import { LoginRequest } from "@eimsnext/services";
 import { useLocale } from "element-plus";
 
 const { t } = useLocale();
@@ -86,7 +86,7 @@ const isDark = ref(settingsStore.theme === Themes.DARK); // 是否暗黑模式
 const loading = ref(false); // 按钮 loading 状态
 const isCapslock = ref(false); // 是否大写锁定
 
-const loginData = ref<LoginModel>({
+const loginData = ref<LoginRequest>({
   username: "admin@eimsnext.com",
   password: "123456",
   grant_type: "password",

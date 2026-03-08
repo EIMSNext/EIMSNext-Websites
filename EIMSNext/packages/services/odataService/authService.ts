@@ -1,9 +1,9 @@
 import { ServiceBase } from "../interface";
-import { LoginModel } from "../requestModel";
+import { LoginRequest } from "../requestModel";
 
 export class AuthService extends ServiceBase {
-    login(loginModel: LoginModel) {
-        return this.http().auth.login(loginModel.username, loginModel.password, loginModel.grant_type)
+    login(request: LoginRequest) {
+        return this.http().auth.login(request.username, request.password, request.grant_type)
     }
 }
 
