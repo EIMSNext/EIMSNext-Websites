@@ -1,7 +1,7 @@
 <template>
-    <el-dropdown ref="dropdownRef" trigger="contextmenu">
+    <el-dropdown :show-arrow="false" trigger="click" placement="bottom-start">
         <div :key="field.title" class="item dimension-item forbid">
-            <div @click="onFieldClick" class="item-text" :class="isDeleted ? 'style-red' : ''">
+            <div class="item-text" :class="isDeleted ? 'style-red' : ''">
                 <et-icon icon="el-arrowDown" :color="isDeleted ? '#eb5050' : '#fff'" style="margin: 0 5px;"></et-icon>
                 {{ field.title || field.label }}
             </div>
@@ -18,7 +18,6 @@
     </el-dropdown>
 </template>
 <script setup lang="ts">
-import { DropdownInstance } from 'element-plus';
 
 defineOptions({
     name: "BasicField",
@@ -29,18 +28,9 @@ const props = defineProps<{
     isDeleted: boolean
 }>();
 
-console.log("dim field", props.field)
-
-const dropdownRef = ref<DropdownInstance>()
-
-const onFieldClick = () => {
-    if (dropdownRef.value) {
-        dropdownRef.value.handleOpen()
-    }
-}
-
-const onRemoveClick = () => { 
-
+const emit = defineEmits(["remove"]);
+const onRemoveClick = () => {
+    emit("remove", props.field)
 }
 
 </script>
