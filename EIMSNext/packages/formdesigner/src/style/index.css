@@ -141,6 +141,13 @@ html.dark {
 ._fd-plain-button {
     border-color: var(--fc-style-color-1);
     color: var(--fc-style-color-1);
+    background-color: #ffffff;
+}
+
+._fc-designer ._fd-plain-button.el-button--primary.is-plain {
+    --el-button-bg-color: #ffffff;
+    --el-button-text-color: var(--fc-style-color-1);
+    --el-button-border-color: var(--fc-style-color-1);
 }
 
 ._fc-designer .CodeMirror-gutters, ._fd-config-dialog .CodeMirror-gutters {
@@ -1248,4 +1255,13 @@ html.dark {
 
 .fc-form-col:has(.hideConfigItem){
   display: none !important;
+}
+
+._fd-button-full-width {
+  width: 100%;
+}
+
+._fd-button-full-width .el-button {
+  width: 100%;
+  text-align: center;
 }
