@@ -40,8 +40,8 @@
             </div> -->
             </div>
             <div style="overflow-y: auto">
-              <Draggable :list="fields" :sort="false" ghost-class="ghost" @start="dragStart"
-                :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
+              <Draggable :list="fields" :sort="false" ghost-class="ghost" :move="dragMove" :clone="cloneDragField"
+                @start="dragStart" @end="dragEnd" :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
                 <template #item="{ element, index }">
                   <div class="field-wrapper" :title="element.label">
                     <div class="field-name">
@@ -67,77 +67,53 @@
         </div>
       </el-aside>
       <el-main class="center-echarts" style="min-width: 460px">
-        <div class="center-box" :class="{ 'green-line': dropable.dim1 }">
+        <div class="center-box" :class="{ 'green-line': dropable.dimension1 }">
           <div class="title">
             维度
           </div>
           <div class="drag-target-container container-veidoo">
-            <Draggable :list="chartSetting.dim1Fields" :sort="false" ghost-class="ghost" @start="dragStart"
-              :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
-              <template #item="{ item, idx }">
-                <div :key="item.Alias" class="item dimension-item forbid" :ref="'dim1' + idx">
-                  <div @click="onDimFieldClick(idx, item, 'dim1', 'dim1' + idx)" class="item-text"
-                    :class="fieldIsDelete(item) ? 'style-red' : ''">
-                    <i :style="{ color: fieldIsDelete(item) ? '#eb5050' : '#fff' }"
-                      class="el-icon-arrow-down ml-5 mr-2"></i>
-                    {{ item.localName || item.label }}
-                    <div :class="fieldIsDelete(item) ? 'close-icon-delete' : 'close-icon'">
-                      <et-icon icon="el-delete" />
-                    </div>
-                  </div>
-                </div>
+            <Draggable class="dimension1" :list="chartSetting.dimension1" :sort="false" ghost-class="ghost"
+              :group="{ name: 'fields', pull: false, put: true }" item-key="id">
+              <template #item="{ element, index }">
+                <DimensionField :field="element" :isDeleted="fieldIsDeleted(element)"></DimensionField>
               </template>
             </Draggable>
           </div>
         </div>
-        <div class="center-box" :class="{ 'green-line': dropable.dim1 }">
+        <div class="center-box" :class="{ 'green-line': dropable.metrics }">
           <div class="title">
             指标
           </div>
           <div class="drag-target-container container-veidoo">
-            <Draggable :list="chartSetting.dim2Fields" :sort="false" ghost-class="ghost" @start="dragStart"
-              :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
-              <template #item="{ item, idx }">
-                <div :key="item.Alias" class="item dimension-item forbid" :ref="'dim2' + idx">
-                  <div @click="onDimFieldClick(idx, item, 'dim2', 'dim2' + idx)" class="item-text"
-                    :class="fieldIsDelete(item) ? 'style-red' : ''">
-                    <i :style="{ color: fieldIsDelete(item) ? '#eb5050' : '#fff' }"
-                      class="el-icon-arrow-down ml-5 mr-2"></i>
-                    {{ item.localName || item.label }}
-                    <div :class="fieldIsDelete(item) ? 'close-icon-delete' : 'close-icon'">
-                      <et-icon icon="el-delete" />
-                    </div>
-                  </div>
-                </div>
+            <Draggable class="metrics" :list="chartSetting.metrics" :sort="false" ghost-class="ghost"
+              :group="{ name: 'fields', pull: false, put: true }" item-key="id">
+              <template #item="{ element, index }">
+                <MetricsField :field="element" :isDeleted="fieldIsDeleted(element)"></MetricsField>
               </template>
             </Draggable>
           </div>
         </div>
-        <div class="center-box" :class="{ 'green-line': dropable.dim1 }">
+        <div class="center-box">
           <div class="title">
             过滤条件
           </div>
           <div class="drag-target-container container-veidoo">
-            <Draggable :list="chartSetting.dim2Fields" :sort="false" ghost-class="ghost" @start="dragStart"
-              :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
-              <template #item="{ item, idx }">
-                <div :key="item.Alias" class="item dimension-item forbid" :ref="'dim2' + idx">
-                  <div @click="onDimFieldClick(idx, item, 'dim2', 'dim2' + idx)" class="item-text"
-                    :class="fieldIsDelete(item) ? 'style-red' : ''">
-                    <i :style="{ color: fieldIsDelete(item) ? '#eb5050' : '#fff' }"
-                      class="el-icon-arrow-down ml-5 mr-2"></i>
-                    {{ item.localName || item.label }}
-                    <div :class="fieldIsDelete(item) ? 'close-icon-delete' : 'close-icon'">
-                      <et-icon icon="el-delete" />
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </Draggable>
+            <div class="filter">
+              <FilterField :form-id="chartSetting.datasource.id" :filter="chartSetting.filter" @ok="onFilter">
+              </FilterField>
+            </div>
           </div>
         </div>
 
-        <div class="center-box chart-main"></div>
+        <div class="center-box chart-main">
+          <div class="chart-container">
+            <div class="chart-title" style="color: rgb(31, 45, 61);"><span>{{
+              dashItemDef.name
+                }}</span>
+            </div>
+            <EChartsViewer :setting="chartSetting" />
+          </div>
+        </div>
       </el-main>
       <el-aside width="300px" class="echarts-config">
         <div class="config-box">
@@ -154,10 +130,10 @@
           </el-collapse>
           <div v-if="chartConfig">
             <el-collapse v-model="activeSettingItems" expand-icon-position="left">
-              <el-collapse-item v-if="chartConfig.subType" name="charttype" title="柱状图类型" class="box-head">
+              <el-collapse-item v-if="chartConfig.subType" name="chartsubtype" title="柱状图类型" class="box-head">
                 <div class="box-body chart-type-body pt-5">
                   <template v-for="ct in chartConfig.subType" :key="ct.id">
-                    <el-button @click="selectChartSubType(chartConfig, ct.id)" class="chart-type"
+                    <el-button @click="selectChartSubType(chartConfig, ct)" class="chart-type"
                       :class="{ active: chartSetting.chartSubType == ct.id }">
                       <i class="icon" :class="ct.cssClass || chartConfig.cssClass"></i>
                     </el-button></template>
@@ -175,20 +151,23 @@
 </template>
 <script setup lang="ts">
 import Draggable from "vuedraggable";
-import { DatasourceType, IDataSource, IDataSourceField } from "../type";
+import { IDataSource, IDataSourceField } from "../type";
 import { DashboardItemDef, FieldDef, FieldType, FormDef, FormType } from "@eimsnext/models";
-import { IFormItem } from "@eimsnext/components";
+import { IConditionList, IFormItem } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
 import { useLocale } from "element-plus";
 import { ChartType, getChartConfigs, IChartConfig, IChartSetting } from "./type";
-import { dashboardItemDefService } from "@eimsnext/services";
+import { dashboardItemDefService, DatasourceType } from "@eimsnext/services";
 import { getAppIconColor, getFormIcon } from "@/utils/common";
+import { SortableEvent } from "sortablejs";
+import EChartsViewer from "./EChartsViewer.vue";
+import { uniqueId } from "@eimsnext/utils";
 
 const { t } = useLocale();
 
 defineOptions({
-  name: "EChartDesigner",
+  name: "EChartsDesigner",
 });
 
 const props = defineProps<{
@@ -203,7 +182,6 @@ const formItem = ref<IFormItem>()
 const formStore = useFormStore();
 const formDef = ref<FormDef>()
 const fields = ref<IDataSourceField[]>([]);
-const draggingNode = ref<IDataSourceField>();
 const showDataSourceDialog = ref(false)
 
 const populateDatasourceFields = () => {
@@ -226,6 +204,7 @@ const populateFormFields = () => {
       if (x.type != FieldType.TableForm) {
         let node: IDataSourceField = {
           id: x.field,
+          type: x.type,
           label: x.title,
           isComputed: false
         };
@@ -237,6 +216,7 @@ const populateFormFields = () => {
           x.columns.forEach((y) => {
             let subNode: IDataSourceField = {
               id: `${x.field}>${y.field}`,
+              type: y.type,
               label: `${x.title}.${y.title}`,
               isComputed: false
             };
@@ -261,7 +241,7 @@ const handleSourceOk = async (source: IDataSource) => {
 const roleChanged = () => { };
 
 const activeCollItems = ref(["charttype"])
-const activeSettingItems = ref(["subcharttype"])
+const activeSettingItems = ref(["chartsubtype"])
 const chartConfig = ref<IChartConfig>()
 const dropable = ref<any>({})
 
@@ -274,26 +254,52 @@ const selectChartSubType = (cc: IChartConfig, sub: any) => {
   chartSetting.chartSubType = sub.id
 }
 
-const onDimFieldClick = (idx: number, item: any, type: string, ref: any, e?: MouseEvent) => { }
-
-const fieldIsDelete = (item: any) => {
+const fieldIsDeleted = (item: any) => {
   let notExist = false;
   // if (this.editItem.setting && this.editItem.setting.dataSourceNotExist) {
   //   notExist = true;
   // }
-  return notExist || item.IsDelete;
+  return notExist;//|| item.IsDelete;
 }
 
-const dragStart = (e: any) => {
+const dragStart = (e: SortableEvent) => {
   e.preventDefault();
-  draggingNode.value = e.originalEvent.srcElement._underlying_vm_;
 };
+
+const dragMove = (e: SortableEvent) => {
+  dropable.value = {};
+  const targetClass = e.to?.className || '';
+
+  if (targetClass.includes('dimension1')) {
+    dropable.value.dimension1 = true;
+  } else if (targetClass.includes('dimension2')) {
+    dropable.value.dimension2 = true;
+  } else if (targetClass.includes('metrics')) {
+    dropable.value.metrics = true;
+  }
+}
+
+const cloneDragField = (f: IDataSourceField) => {
+  return {
+    id: f.id,
+    type: f.type,
+    label: f.label,
+    title: f.label
+  }
+}
+
+const dragEnd = (e: SortableEvent) => {
+  dropable.value = {}
+}
 
 const addComputedField = () => { };
 const copyField = (field: IDataSourceField) => { };
 const editField = (field: IDataSourceField, index: number) => { };
 const removeField = (field: IDataSourceField, index: number) => { };
 
+const onFilter = (filter: IConditionList) => {
+  chartSetting.filter = filter
+}
 const onSave = async () => {
   var details = JSON.stringify(chartSetting)
 
@@ -304,7 +310,6 @@ const onSave = async () => {
   };
 
   let resp = await dashboardItemDefService.patch<DashboardItemDef>(req.id, req);
-  // contextStore.setAppChanged(); //reload 菜单
 }
 
 const emit = defineEmits(["update:modelValue", "close"]);
@@ -314,6 +319,12 @@ const close = () => {
 }
 
 onMounted(() => {
+  if (!chartSetting.dimension1) chartSetting.dimension1 = [];
+  if (!chartSetting.dimension2) chartSetting.dimension2 = [];
+  if (!chartSetting.metrics) chartSetting.metrics = [];
+  if (!chartSetting.filter) chartSetting.filter = { id: uniqueId(), rel: "and", items: [] }
+
+  /*  */
   if (chartSetting.datasource)
     populateDatasourceFields()
 })
@@ -403,6 +414,7 @@ onMounted(() => {
             display: flex !important;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: nowrap;
 
             .name {
               max-width: 110px;
@@ -466,7 +478,6 @@ onMounted(() => {
       .el-dropdown {
         cursor: pointer;
         margin-right: 8px;
-        margin-top: 9px;
 
         .builder-filter-icon {
           display: flex;
@@ -480,13 +491,13 @@ onMounted(() => {
       }
 
       .chart-container {
+        width: 100%;
 
-        // display: flex;
         .chart-title {
           font-size: 14px;
           text-align: left;
           padding: 20px 20px 10px 20px;
-          position: relative;
+          // position: relative;
 
           .index-sort {
             position: absolute;
@@ -522,81 +533,14 @@ onMounted(() => {
         width: calc(100% - 120px);
         overflow: hidden;
 
-        .item {
-          cursor: pointer !important;
-          margin: 5px 10px 4px 0px;
-          border-radius: 20px;
-          padding: 4px 25px 4px 2px;
-          position: relative;
-          height: 25px;
-
-          &:hover {
-            .close-icon {
-              display: block;
-            }
-
-            .close-icon-delete {
-              display: block;
-            }
-          }
-
-          .el-submenu [class^="el-icon-"] {
-            vertical-align: text-bottom;
-            width: 18px;
-          }
-
-          .close-icon {
-            position: absolute;
-            right: 6px;
-            top: 4px;
-            display: none;
-            cursor: pointer;
-            background-color: #fff;
-            border-radius: 50%;
-            width: 15px;
-            height: 15px;
-            line-height: 16px;
-            text-align: center;
-
-            .vs-icon {
-              font-size: 10px;
-            }
-          }
-
-          .close-icon-delete {
-            position: absolute;
-            right: 6px;
-            top: 4px;
-            display: none;
-            cursor: pointer;
-            background-color: #eb5050;
-            border-radius: 50%;
-            width: 15px;
-            height: 15px;
-            line-height: 16px;
-            text-align: center;
-
-            .vs-icon {
-              font-size: 10px;
-              color: #fff;
-            }
-          }
-
-          .item-text {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 16px;
-          }
-        }
-
-        .dimension-item {
-          background-color: #8095fe;
-          color: #fff;
-
-          .vs-icon {
-            color: #8095fe;
-          }
+        .dimension1,
+        .dimension2,
+        .metrics,
+        .filter {
+          height: 100%;
+          display: flex;
+          align-items: center;
+          flex-direction: row;
         }
 
         .quota-item {

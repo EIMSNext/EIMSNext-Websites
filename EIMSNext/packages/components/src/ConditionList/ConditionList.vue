@@ -12,9 +12,9 @@
         </el-select>
         <div>{{ t("comp.conditions") }}</div>
       </div>
-      <div v-if="groupLevel > 1">
+      <!-- <div v-if="groupLevel > 1"> -->
         <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
-      </div>
+      <!-- </div> -->
     </div>
     <div class="btn-add-item">
       <el-link type="primary" underline="never" class="add-item" @click="addItem">
@@ -155,6 +155,8 @@ watch(
       color: #333;
       font-size: 14px;
       display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
   }
 

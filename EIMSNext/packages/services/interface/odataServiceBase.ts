@@ -1,19 +1,19 @@
 import { IdBase } from "@eimsnext/models";
-import { BatchDeleteModel, ODataQueryModel } from "../requestModel";
+import { BatchDeleteRequest, ODataQueryRequest } from "../requestModel";
 import { ServiceBase } from "./serviceBase";
 
 export abstract class ReadonlyODataServiceBase<T = IdBase> extends ServiceBase {
   protected abstract modelName(): string;
 
-  get<T>(id: string, query?: ODataQueryModel | string): Promise<T> {
+  get<T>(id: string, query?: ODataQueryRequest | string): Promise<T> {
     return this.http().odata.get<T>(this.modelName(), id, query);
   }
 
-  count(query?: ODataQueryModel | string): Promise<number> {
+  count(query?: ODataQueryRequest | string): Promise<number> {
     return this.http().odata.count(this.modelName(), query);
   }
 
-  query<T>(query?: ODataQueryModel | string): Promise<T[]> {
+  query<T>(query?: ODataQueryRequest | string): Promise<T[]> {
     return this.http().odata.query(this.modelName(), query);
   }
 
@@ -40,15 +40,15 @@ export abstract class ODataServiceBase<
 > extends ServiceBase {
   protected abstract modelName(): string;
 
-  get<T>(id: string, query?: ODataQueryModel | string): Promise<T> {
+  get<T>(id: string, query?: ODataQueryRequest | string): Promise<T> {
     return this.http().odata.get<T>(this.modelName(), id, query);
   }
 
-  count(query?: ODataQueryModel | string): Promise<number> {
+  count(query?: ODataQueryRequest | string): Promise<number> {
     return this.http().odata.count(this.modelName(), query);
   }
 
-  query<T>(query?: ODataQueryModel | string): Promise<T[]> {
+  query<T>(query?: ODataQueryRequest | string): Promise<T[]> {
     return this.http().odata.query(this.modelName(), query);
   }
 
@@ -64,7 +64,7 @@ export abstract class ODataServiceBase<
     return this.http().odata.patch<T>(this.modelName(), id, data);
   }
 
-  delete<T>(id: string, data?: BatchDeleteModel) {
+  delete<T>(id: string, data?: BatchDeleteRequest) {
     return this.http().odata.delete<T>(this.modelName(), id, data);
   }
 }

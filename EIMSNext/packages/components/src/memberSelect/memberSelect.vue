@@ -130,7 +130,7 @@
 import "./style/index.less";
 import { ref, reactive, watch, onBeforeMount, toRef } from "vue";
 import { TreeInstance } from "element-plus";
-import { DataItemType, DeptToTreeNode, EmployeeToListItem, ITreeNode,  buildDeptTree, buildRoleTree } from "../common";
+import { DataItemType, deptToTreeNode, employeeToListItem, ITreeNode,  buildDeptTree, buildRoleTree } from "../common";
 import { ISelectedTag } from "../selectedTags/type";
 import { Department, Employee, RoleGroup, Role } from "@eimsnext/models";
 import { useDeptStore, useUserStore } from "@eimsnext/store";
@@ -298,7 +298,7 @@ onBeforeMount(() => {
     if (userStore.currentUser.deptId) {
       deptStore.get(userStore.currentUser.deptId).then(x => {
         if (x) {
-          const curDeptNode = [DeptToTreeNode(x)];
+          const curDeptNode = [deptToTreeNode(x)];
           // 不应用范围过滤，直接显示当前用户部门
           curDeptData.value = curDeptNode;
         }
@@ -314,7 +314,7 @@ onBeforeMount(() => {
         approved: true,
         isManager: false
       }
-      curEmpData.value = [EmployeeToListItem(emp)]
+      curEmpData.value = [employeeToListItem(emp)]
     }
 
     // 部门树数据加载完成后，手动触发一次选中状态的设置
@@ -433,7 +433,7 @@ const selectEmpDept = (deptId: string) => {
   selectedEmps.value = [];
   employeeService.query<Employee>($filter).then((res) => {
     res.forEach((x) => {
-      empData.value.push(EmployeeToListItem(x));
+      empData.value.push(employeeToListItem(x));
 
       // 检查当前员工是否在已选标签中
       if (

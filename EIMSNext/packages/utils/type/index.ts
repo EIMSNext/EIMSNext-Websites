@@ -76,6 +76,32 @@ export function deepMerge<T = any>(src: any = {}, target: any = {}): T {
   return res;
 }
 
+/**
+ * 将对象数组拆分为 { 字段名: [值列表] } 格式的对象
+ * @param data 原始对象数组（动态字段）
+ * @returns { 字段名: [值列表] } 格式的结果
+ */
+export function convertToFieldArray(
+  data: Record<string, any>[],
+): Record<string, any[]> {
+  // 空数组直接返回空对象
+  if (!data.length) return {};
+
+  // 初始化结果：提取所有字段并创建空数组
+  const result: Record<string, any[]> = {};
+  const allFields = Object.keys(data[0]);
+  allFields.forEach((field) => (result[field] = []));
+
+  // 遍历数据填充值
+  data.forEach((item) => {
+    allFields.forEach((field) => {
+      result[field].push(item[field] ?? "<NULL>"); // 空值兜底为''，可按需改为null/undefined
+    });
+  });
+
+  return result;
+}
+
 export * from "./flagEnum";
 export * from "./dictionary";
 export * from "./unique";

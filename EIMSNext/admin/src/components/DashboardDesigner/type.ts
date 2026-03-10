@@ -1,12 +1,10 @@
-import { DashboardItemDef, DashItemType } from "@eimsnext/models";
+import { DashboardItemDef, DashItemType, FieldType } from "@eimsnext/models";
+import { DatasourceType } from "@eimsnext/services";
 
 export interface IDataSource {
   id: string;
   type: DatasourceType;
   label: string;
-}
-export enum DatasourceType {
-  Form,
 }
 
 export interface IDraggableItem {
@@ -18,6 +16,7 @@ export interface IDraggableItem {
 export interface IDataSourceField {
   formId?: string;
   id: string;
+  type: FieldType;
   label?: string;
   isComputed?: boolean;
 }

@@ -13,7 +13,8 @@
       </el-select>
     </div>
     <MetaItemHeader class="mt-[8px]" :label="t('dataflow.dataCondition')" :required="true"></MetaItemHeader>
-    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition">
+    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition"
+      @remove="onCondClear">
     </ConditionList>
     <div>
       <el-checkbox v-model="activeData.metadata.updateMeta!.insertIfNoData"
@@ -38,7 +39,7 @@
           {{ t("dataflow.subCondition_Tips") }}
         </div>
         <ConditionList v-model="subCondList" :formId="formId" :nodeId="nodeId" :nodes="nodes" :maxLevel="1"
-          :field-build-setting="subCondBuildSetting" @change="onSubCondition"></ConditionList>
+          :field-build-setting="subCondBuildSetting" @change="onSubCondition" @remove="onSubCondClear"></ConditionList>
       </div>
     </div>
     <div v-if="
@@ -179,9 +180,19 @@ const formChanged = async (form: IFormItem) => {
 const onCondition = (list: IConditionList) => {
   activeData.value.metadata.updateMeta!.condition = list;
 };
+const onCondClear = () => {
+  condList.value.items = []
+  activeData.value.metadata.updateMeta!.condition = condList.value;
+}
+
 const onSubCondition = (list: IConditionList) => {
   activeData.value.metadata.updateMeta!.subCondition = list;
 };
+const onSubCondClear = () => { }
+{
+  subCondList.value.items = []
+  activeData.value.metadata.updateMeta!.subCondition = subCondList.value;
+}
 const fieldSelecting = async (field: IFormFieldItem) => {
   let allowed = true;
   let fieldLimit = subCondBuildSetting.value.fieldLimit

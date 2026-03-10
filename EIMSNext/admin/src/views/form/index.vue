@@ -88,6 +88,7 @@ import {
   IFieldSortList,
   IFormFieldDef,
   IToolbarItemDropdownItem,
+  flowStatusArray,
 } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
@@ -479,22 +480,8 @@ const getColumnSetting = (field: string) => {
   return findSub(columns.value, field);
 };
 const getFlowStatusName = (status: FlowStatus) => {
-  switch (status) {
-    case FlowStatus.Draft:
-      return "草稿";
-    case FlowStatus.Approving:
-      return "审批中";
-    case FlowStatus.Approved:
-      return "已审批";
-    case FlowStatus.Rejected:
-      return "已驳回";
-    case FlowStatus.Discarded:
-      return "已废弃";
-    case FlowStatus.Suspended:
-      return "已挂起";
-    default:
-      return "";
-  }
+  let st = flowStatusArray().find(x => x.id == status)
+  return st ? t(st.i18n) : "";
 };
 const tableToolFormatter = (data: TableTooltipData<FormData>) => {
   return formatter(data.row, data.column, data.cellValue);
