@@ -44,6 +44,14 @@ const emitChange = () => {
 const onRemove = () => {
   emit("remove", props.modelValue);
 };
+
+watch(
+  [() => props.modelValue],
+  () => {
+    sort.value = props.modelValue.sort
+  },
+  { immediate: true }
+);
 </script>
 <style lang="scss" scoped>
 .cond-item {

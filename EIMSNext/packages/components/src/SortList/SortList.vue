@@ -60,22 +60,31 @@ const addField = (field: ISortField) => {
 
 const onRemove = (sortItem: ISortItem) => {
   if (sortItem && selectedFields.value.items) {
-    let index = selectedFields.value.items.findIndex((x) => x.field.field == sortItem.field.field);
-    if (index > -1) {
-      selectedFields.value.items.splice(index, 1);
-    }
+    selectedFields.value.items = selectedFields.value.items.filter(x => x.field.field != sortItem.field.field)
   }
 
   emitChange();
 };
 
 const onChange = (sortItem: ISortItem) => {
-  if (sortItem && selectedFields.value.items) {
-    let item = selectedFields.value.items.find((x) => x.field.field == sortItem.field.field);
-    if (item) {
-      item.sort = sortItem.sort;
+  if (props.multiple) {
+    if (sortItem && selectedFields.value.items) {
+      let item = selectedFields.value.items.find((x) => x.field.field == sortItem.field.field);
+      if (item) {
+        item.sort = sortItem.sort;
+      }
     }
   }
+  else {
+    if (sortItem && selectedFields.value.items) {
+      const newSortItems = selectedFields.value.items.map((item) => ({
+        ...item,
+        sort: item.field.field === sortItem.field.field ? sortItem.sort : SortDirection.Unset
+      }));
+      selectedFields.value.items = newSortItems
+    }
+  }
+
   emitChange();
 };
 

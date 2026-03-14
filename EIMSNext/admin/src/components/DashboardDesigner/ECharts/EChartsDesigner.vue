@@ -75,7 +75,8 @@
             <Draggable class="dimension1" :list="chartSetting.dimension1" :sort="false" ghost-class="ghost"
               :group="{ name: 'fields', pull: false, put: true }" item-key="id" @add="addDim1">
               <template #item="{ element, index }">
-                <DimensionField :field="element" :isDeleted="fieldIsDeleted(element)"></DimensionField>
+                <DimensionField :field="element" :isDeleted="fieldIsDeleted(element)" @remove="removeDim1">
+                </DimensionField>
               </template>
             </Draggable>
           </div>
@@ -88,7 +89,8 @@
             <Draggable class="metrics" :list="chartSetting.metrics" :sort="false" ghost-class="ghost"
               :group="{ name: 'fields', pull: false, put: true }" item-key="id" @add="addMetric">
               <template #item="{ element, index }">
-                <MetricsField :field="element" :isDeleted="fieldIsDeleted(element)"></MetricsField>
+                <MetricsField :field="element" :isDeleted="fieldIsDeleted(element)" @remove="removeMetric">
+                </MetricsField>
               </template>
             </Draggable>
           </div>
@@ -161,12 +163,13 @@ import { IConditionList, IFormItem, ISortItem, ISortList } from "@eimsnext/compo
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
 import { useLocale } from "element-plus";
-import { ChartType, getChartConfigs, IChartConfig, IChartSetting } from "./type";
-import { dashboardItemDefService, DatasourceType, SortDirection } from "@eimsnext/services";
+import { ChartType, getChartConfigs, IChartConfig, IChartSetting, IDimensionField, IMetricsField } from "./type";
+import { dashboardItemDefService, DatasourceType, IDimension, SortDirection } from "@eimsnext/services";
 import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { SortableEvent } from "sortablejs";
 import EChartsViewer from "./EChartsViewer.vue";
 import { uniqueId } from "@eimsnext/utils";
+import { remove } from "lodash-es";
 
 const { t } = useLocale();
 
@@ -299,9 +302,21 @@ const dragEnd = (e: SortableEvent) => {
 const addDim1 = () => {
   updateSortList()
 }
+
+const removeDim1 = (dim: IDimensionField) => {
+  chartSetting.dimension1 = chartSetting.dimension1?.filter(x => x.id != dim.id)
+  updateSortList()
+}
+
 const addMetric = () => {
   updateSortList()
 }
+
+const removeMetric = (metric: IMetricsField) => {
+  chartSetting.metrics = chartSetting.metrics?.filter(x => x.id != metric.id)
+  updateSortList()
+}
+
 
 const updateSortList = () => {
   let newSorts: ISortItem[] = []
