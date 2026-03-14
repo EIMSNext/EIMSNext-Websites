@@ -36,13 +36,34 @@
                   </template>
                 </el-popover>
 
-                <!--  <div class="menu-line">
+                <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Chart" placement="right-start"
+                  trigger="hover" fit-content no-fade width="auto"
+                  :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Chart }">
+                  <div class="menu-guide">
+                    <div class="guide-title">统计表</div>
+                    <img src="@/assets/images/dsheditor/guide-chart.svg" />
+                    <div class="guide-des">提供多种图表样式，对数据进行汇总统计</div>
+                  </div>
+                  <template #reference>
+                    <div class="menu-line">
+                      <div class="line-content" draggable="true"
+                        @dragstart="dashItemDragStart($event, DashItemType.Chart)"
+                        @drag="dashItemDrag($event, DashItemType.Chart), (hoverMenu = false)"
+                        @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
+                        @mouseover="setHoverMenu(true, DashItemType.Chart)" @mouseleave="hoverMenu = false">
+                        <et-icon icon="el-PieChart" class="line-icon" />
+                        <div class="line-text">明细表</div>
+                      </div>
+                    </div>
+                  </template>
+                </el-popover> -->
+                <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-table"></i></div>
                     <div class="line-text">明细表</div>
                   </div>
                 </div>
-                <div class="menu-line">
+                <!--  <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-manage-table"></i></div>
                     <div class="line-text">数据管理表</div>
@@ -81,9 +102,9 @@
               </div>
             </div>
             <div>
-              <div class="menu-label">组件</div>
+              <!-- <div class="menu-label">组件</div> -->
               <div class="menu-group">
-                <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Comp" placement="right-start"
+                <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Comp" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
                   :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Comp }">
                   <div class="menu-guide">
@@ -103,7 +124,7 @@
                       </div>
                     </div>
                   </template>
-                </el-popover>
+                </el-popover> -->
 
                 <!-- <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
@@ -139,9 +160,9 @@
               </div>
             </div>
             <div>
-              <div class="menu-label">工具</div>
+              <!-- <div class="menu-label">工具</div> -->
               <div class="menu-group">
-                <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Tool" placement="right-start"
+                <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Tool" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
                   :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Tool }">
                   <div class="menu-guide">
@@ -161,7 +182,7 @@
                       </div>
                     </div>
                   </template>
-                </el-popover>
+                </el-popover> -->
                 <!-- <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-filter"></i></div>

@@ -17,7 +17,7 @@
         </div>
         <div class="container-content-wrapper">
             <template v-if="chartSetting && chartSettingValidate(chartSetting)">
-                <e-charts-viewer :setting="chartSetting" />
+                <e-charts-viewer :setting="chartSetting" :title="itemDef.name" :show-header="isView"/>
             </template>
             <template v-else>
                 <el-empty class="et-dash-empty">

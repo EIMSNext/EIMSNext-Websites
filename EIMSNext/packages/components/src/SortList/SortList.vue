@@ -1,6 +1,7 @@
 <template>
   <div class="field-list">
-    <el-dropdown :hide-on-click="false" trigger="click" popper-class="data-triggers" @command="addField">
+    <el-dropdown v-if="editable" :hide-on-click="false" trigger="click" popper-class="data-triggers"
+      @command="addField">
       <el-button class="btn-add-trigger">
         {{ "+ " + t("comp.addSortRule") }}
       </el-button>
@@ -15,7 +16,7 @@
       </template>
     </el-dropdown>
     <template v-for="(item, idx) in selectedFields.items" :key="item.field.field">
-      <SortItem :modelValue="item" @change="onChange" @remove="onRemove"></SortItem>
+      <SortItem :modelValue="item" @editable="editable" @change="onChange" @remove="onRemove"></SortItem>
     </template>
   </div>
 </template>
@@ -88,6 +89,14 @@ watch(
   () => {
     if (props.editable)
       allFields.value = buildSortListItems(props.sortFields);
+  },
+  { immediate: true }
+);
+
+watch(
+  [() => props.modelValue],
+  () => {
+    selectedFields.value = props.modelValue
   },
   { immediate: true }
 );

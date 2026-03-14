@@ -1,4 +1,4 @@
-import { IConditionList } from "@eimsnext/components";
+import { IConditionList, ISortList } from "@eimsnext/components";
 import { IDataSource, IDataSourceField } from "../type";
 import { FieldType } from "@eimsnext/models";
 import { AggregateFun } from "@eimsnext/services";
@@ -11,6 +11,8 @@ export interface IChartSetting {
   dimension2?: IDimensionField[];
   metrics?: IMetricsField[];
   filter?: IConditionList;
+  sort?: ISortList;
+  take?: number;
 }
 
 export interface IDimensionField {

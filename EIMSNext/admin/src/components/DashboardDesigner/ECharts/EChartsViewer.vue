@@ -1,12 +1,31 @@
 <template>
-    <EChartsContainer v-if="chartOpts" :options="chartOpts"></EChartsContainer>
-    <template v-else>
-        <el-empty class="et-dash-empty">
-            <div class="empty-wrapper"><i class="x-icon iconfont-fx-pc icon-info-o"></i>
-                <div class="empty-text">组件配置异常</div>
+    <div style="width: 100%;height: 100%;">
+        <el-popover :visible="showSort" :virtual-ref="sortRef" :show-arrow="false" :offset="0" placement="bottom-end"
+            width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+            <DashSort :model-value="sortList" :sortFields="[]" @ok="setSort" @cancel="showSort = false">
+            </DashSort>
+        </el-popover>
+        <div v-if="showHeader" class="view-header" style="color: rgb(31, 45, 61);">
+            <div class="header-actions">
+                <div v-if="!designerMode" class="header-btn"><et-icon icon="el-refresh" size="16px" /> </div>
+                <div ref="sortRef" class="header-btn" @click.stop="showSort = true"><et-icon icon="el-sort"
+                        size="16px" />
+                </div>
             </div>
-        </el-empty>
-    </template>
+            <div class="header-title" title="未命名统计表">{{ title }}</div>
+        </div>
+
+        <template v-if="chartOpts">
+            <EChartsContainer :options="chartOpts" style="margin-top: 20px;"></EChartsContainer>
+        </template>
+        <template v-else>
+            <el-empty class="et-dash-empty">
+                <div class="empty-wrapper"><i class="x-icon iconfont-fx-pc icon-info-o"></i>
+                    <div class="empty-text">组件配置异常</div>
+                </div>
+            </el-empty>
+        </template>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -15,7 +34,8 @@ import echarts from '@/plugins/echarts';
 import { chartSettingValidate, ChartType, IChartSetting } from './type';
 import { AggCalcRequest, AggregateFun, aggregateService } from '@eimsnext/services';
 import { convertToFieldArray } from '@eimsnext/utils';
-import { toDynamicFilter } from '@eimsnext/components';
+import { ISortItem, ISortList, toDynamicFilter } from '@eimsnext/components';
+import DashSort from '../components/DashSort.vue';
 
 defineOptions({
     name: "EChartsViewer",
@@ -23,8 +43,13 @@ defineOptions({
 
 const props = withDefaults(defineProps<{
     setting: IChartSetting;
+    title: string;
+    showHeader?: boolean
+    designerMode?: boolean
 }>(),
     {
+        showHeader: true,
+        designerMode: false
     }
 );
 
@@ -199,8 +224,25 @@ const getChartOpts = async (setting: IChartSetting) => {
 
     console.log("getchartopts", setting, chartOpts.value)
 }
+
+const sortRef = ref()
+const showSort = ref(false);
+const sortList = ref<ISortList>({
+    items: [],
+});
+
+const emit = defineEmits(["sort"]);
+const setSort = (sort: ISortList) => {
+    sortList.value = sort;
+    showSort.value = false;
+    if (props.designerMode)
+        emit("sort", sort)
+};
+
 watch(() => props.setting, async (newVal) => {
     if (newVal) {
+        sortList.value = newVal.sort || { items: [] }
+
         await getChartOpts(newVal)
     }
 }, {
@@ -210,12 +252,36 @@ watch(() => props.setting, async (newVal) => {
 
 </script>
 
-<style scoped>
-.w-full {
-    width: 100%;
-}
+<style lang="scss" scoped>
+.view-header {
+    height: 30px;
+    line-height: 30px;
+    padding: 20px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 1;
+    font-size: 14px;
 
-.h-full {
-    height: 100%;
+    .header-title {
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .header-actions {
+        background: transparent;
+        color: rgba(19, 29, 46, 0.78);
+        cursor: pointer;
+        float: right;
+
+        .header-btn {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+        }
+    }
 }
 </style>

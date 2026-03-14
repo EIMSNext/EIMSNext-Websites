@@ -9,7 +9,7 @@
           <el-radio-button :label="t('comp.orderby_Desc')" :value="SortDirection.Desc" />
         </el-radio-group>
       </div>
-      <div><et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon></div>
+      <div v-if="editable"><et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon></div>
     </div>
   </div>
 </template>
@@ -26,6 +26,7 @@ defineOptions({
 
 const props = defineProps<{
   modelValue: ISortItem;
+  editable: boolean
 }>();
 
 const sort = ref(props.modelValue.sort);
