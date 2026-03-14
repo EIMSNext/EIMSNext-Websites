@@ -34,6 +34,7 @@ export interface IDynamicSort {
   dir: SortDirection;
 }
 export enum SortDirection {
+  Unset = 0,
   Asc = 1,
   Desc = -1,
 }
