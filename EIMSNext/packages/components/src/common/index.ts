@@ -28,6 +28,7 @@ import {
   CurrentUser,
   Department,
   Employee,
+  FlowStatus,
   Role,
   RoleGroup,
 } from "@eimsnext/models";
@@ -69,7 +70,7 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
   const attachChildren = (pNode: ITreeNode) => {
     const children = depts.filter((x) => x.parentId == pNode.id);
     children.forEach((x) => {
-      const node: ITreeNode = DeptToTreeNode(x);
+      const node: ITreeNode = deptToTreeNode(x);
       attachChildren(node);
       if (!pNode.children) pNode.children = [];
       pNode.children.push(node);
@@ -81,7 +82,7 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
     (x) => x.parentId == undefined || x.parentId == "",
   );
   if (rootDept) {
-    const rootNode: ITreeNode = DeptToTreeNode(rootDept);
+    const rootNode: ITreeNode = deptToTreeNode(rootDept);
     attachChildren(rootNode);
     treeNoes.push(rootNode);
   }
@@ -89,7 +90,7 @@ export function buildDeptTree(depts: Department[]): ITreeNode[] {
   return treeNoes;
 }
 
-export function DeptToTreeNode(dept: Department): ITreeNode {
+export function deptToTreeNode(dept: Department): ITreeNode {
   return {
     id: dept.id,
     value: dept.code,
@@ -105,7 +106,7 @@ export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
   const attachChildren = (pNode: ITreeNode) => {
     const children = roles.filter((x) => x.roleGroupId == pNode.id);
     children.forEach((x) => {
-      const node: ITreeNode = RoleToTreeNode(x);
+      const node: ITreeNode = roleToTreeNode(x);
       attachChildren(node);
       if (!pNode.children) pNode.children = [];
       pNode.children.push(node);
@@ -129,7 +130,7 @@ export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
 
   return treeNoes;
 }
-export function RoleToTreeNode(role: Role): ITreeNode {
+export function roleToTreeNode(role: Role): ITreeNode {
   return {
     id: role.id,
     label: role.name,
@@ -140,7 +141,7 @@ export function RoleToTreeNode(role: Role): ITreeNode {
   };
 }
 
-export function EmployeeToListItem(emp: Employee): IListItem {
+export function employeeToListItem(emp: Employee): IListItem {
   return {
     id: emp.id,
     value: emp.code,
@@ -149,4 +150,35 @@ export function EmployeeToListItem(emp: Employee): IListItem {
     icon: "el-UserFilled",
     data: emp,
   };
+}
+
+export function flowStatusArray() {
+  return [
+    { id: FlowStatus.Draft, i18n: "workflow.flowStatus.draft", label: "草稿" },
+    {
+      id: FlowStatus.Approving,
+      i18n: "workflow.flowStatus.approving",
+      label: "审批中",
+    },
+    {
+      id: FlowStatus.Approved,
+      i18n: "workflow.flowStatus.approved",
+      label: "已审批",
+    },
+    {
+      id: FlowStatus.Rejected,
+      i18n: "workflow.flowStatus.rejected",
+      label: "已驳回",
+    },
+    {
+      id: FlowStatus.Discarded,
+      i18n: "workflow.flowStatus.discarded",
+      label: "已废弃",
+    },
+    {
+      id: FlowStatus.Suspended,
+      i18n: "workflow.flowStatus.suspended",
+      label: "已挂起",
+    },
+  ];
 }

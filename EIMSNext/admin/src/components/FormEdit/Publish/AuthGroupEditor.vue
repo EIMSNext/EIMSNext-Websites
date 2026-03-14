@@ -47,7 +47,7 @@
                     <div class="ag-data-filter">
                         <div class="ag-desc">可以管理哪些数据</div>
                         <ConditionList v-model="dataFilter" :formId="formDef.id" :max-level="1"
-                            @change="dataFilterChanged"></ConditionList>
+                            @change="dataFilterChanged" @remove="dataFilterClear"></ConditionList>
                     </div>
                 </div>
             </el-tab-pane>
@@ -59,9 +59,9 @@
     </div>
 </template>
 <script setup lang="ts">
-import { IConditionList, IFieldPermItem } from "@eimsnext/components";
+import { DataflowDiagram, IConditionList, IFieldPermItem } from "@eimsnext/components";
 import { FormDef, AuthGroup, DataPerms, AuthGroupType, IFieldPerm } from "@eimsnext/models";
-import { FlagEnum } from "@eimsnext/utils";
+import { FlagEnum, uniqueId } from "@eimsnext/utils";
 
 import { useI18n } from "vue-i18n";
 const { t } = useI18n()
@@ -102,10 +102,15 @@ const canRemove = computed(() => FlagEnum.has(dataPerms.value, DataPerms.Remove)
 const canImport = computed(() => FlagEnum.has(dataPerms.value, DataPerms.Import))
 const canExport = computed(() => FlagEnum.has(dataPerms.value, DataPerms.Export))
 
-const dataFilter = ref<IConditionList>(props.modelValue.dataFilter ? JSON.parse(props.modelValue.dataFilter) : { id: "", rel: "and" })
+const dataFilter = ref<IConditionList>(props.modelValue.dataFilter ? JSON.parse(props.modelValue.dataFilter) : { id: uniqueId(), rel: "and", items: [] })
 const dataFilterChanged = (condList: IConditionList) => {
-
     authGrp.value.dataFilter = JSON.stringify(condList);
+    emit("update:modelValue", authGrp.value)
+}
+
+const dataFilterClear = () => {
+    dataFilter.value.items = []
+    authGrp.value.dataFilter = JSON.stringify(dataFilter.value);
     emit("update:modelValue", authGrp.value)
 }
 

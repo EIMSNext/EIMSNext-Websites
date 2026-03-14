@@ -50,6 +50,7 @@ import { FormDef, Webhook, WebhookRequest, WebHookTrigger } from "@eimsnext/mode
 import { FlagEnum } from "@eimsnext/utils";
 import { webhookService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
+import { cloneDeep } from "lodash-es";
 const { t } = useI18n()
 
 defineOptions({
@@ -61,7 +62,7 @@ const props = defineProps<{
     formDef: FormDef;
 }>();
 
-const hook = ref(props.modelValue)
+const hook = ref<Webhook>(cloneDeep(props.modelValue) || {})
 
 const dataCreated = computed(() => FlagEnum.has(triggers.value, WebHookTrigger.Data_Created))
 const dataUpdated = computed(() => FlagEnum.has(triggers.value, WebHookTrigger.Data_Updated))

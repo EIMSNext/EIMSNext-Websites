@@ -83,7 +83,6 @@ const onSave = async (content: FormContent) => {
     id: props.formDef.id,
     appId: props.formDef.appId,
     name: formName.value,
-    type: FormType.Form,
     content: content,
   };
 

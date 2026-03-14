@@ -1,6 +1,6 @@
 <template>
   <ConditionList v-if="ready" v-model="condList" :formId="flowContext!.formId" :nodeId="nodeId" :nodes="nodes"
-    :condType="ConditionType.Node" @change="onInput"></ConditionList>
+    :condType="ConditionType.Node" @change="onInput" @remove="onRemove"></ConditionList>
 </template>
 <script lang="ts" setup>
 import { inject, nextTick, reactive, ref, watch } from "vue";
@@ -33,6 +33,11 @@ const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const onInput = (list: IConditionList) => {
   activeData.value.metadata.conditionMeta!.condition = list;
 };
+
+const onRemove = () => {
+  condList.value.items = []
+  activeData.value.metadata.conditionMeta!.condition = condList.value;
+}
 
 const init = () => {
   nextTick(async () => {

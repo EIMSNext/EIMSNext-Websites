@@ -102,3 +102,9 @@
     border: none;
   }
 }
+
+.no-drag {
+  position: relative;
+  z-index: 999;
+  pointer-events: auto;
+}

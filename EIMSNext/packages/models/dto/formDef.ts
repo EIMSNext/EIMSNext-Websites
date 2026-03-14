@@ -7,7 +7,6 @@ export enum FormType {
 export interface FormDefRequest extends IdBase {
   appId?: string;
   name?: string;
-  type?: FormType;
   content?: FormContent;
   isLedger?: boolean;
   usingWorkflow?: boolean;
@@ -16,7 +15,6 @@ export interface FormDefRequest extends IdBase {
 export interface FormDef extends CorpModelBase {
   name: string;
   appId: string;
-  type?: FormType;
   content?: FormContent;
   isLedger: boolean;
   usingWorkflow: boolean;
@@ -66,3 +64,13 @@ export enum FieldType {
   Department1 = "department1",
   Department2 = "department2",
 }
+
+export const SortableFieldTypes = [
+  FieldType.Input,
+  FieldType.Number,
+  FieldType.TimeStamp,
+  FieldType.Radio,
+  FieldType.Select1,
+  FieldType.Employee1,
+  FieldType.Department1,
+];

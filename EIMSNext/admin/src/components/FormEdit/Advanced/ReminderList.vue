@@ -8,7 +8,7 @@
             <div class="main-title"> <span>提醒助手</span></div>
         </template>
         <div class="main-content">
-            <WebhookEditor v-model="selectedItem!" :formDef="formDef" />
+            <ReminderEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" />
         </div>
     </el-drawer>
     <AdvanceLayout title="提醒助手" desc="设置推送规则，根据规则自动给相关人员发送提醒消息">
@@ -30,7 +30,7 @@
                                 </div>
                             </template>
                             <div class="flow-content">
-                                 <div class="item-line">服务器地址: {{ hook.url }}</div>
+                                <div class="item-line">服务器地址: {{ hook.url }}</div>
                                 <div class="item-line">推送事件: {{ hook.triggers }}</div>
                             </div>
                         </et-card>
@@ -41,7 +41,7 @@
     </AdvanceLayout>
 </template>
 <script setup lang="ts">
-import WebhookEditor from "./WebhookEditor.vue";
+import ReminderEditor from "./ReminderEditor.vue";
 import { FormDef, WebHookTrigger, Webhook } from "@eimsnext/models";
 import { webhookService, } from "@eimsnext/services";
 import buildQuery from "odata-query";

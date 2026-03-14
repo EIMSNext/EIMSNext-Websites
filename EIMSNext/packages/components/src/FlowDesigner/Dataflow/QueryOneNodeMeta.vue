@@ -3,7 +3,7 @@
     <MetaItemHeader :label="t('dataflow.targetForm')" :required="true"></MetaItemHeader>
     <FormSelect v-model="formItem" :appId="appId" @change="formChanged"></FormSelect>
     <MetaItemHeader class="mt-[8px]" :label="t('dataflow.queryCondition')" :required="true"></MetaItemHeader>
-    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition">
+    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition"  @remove="onCondClear">
     </ConditionList>
     <MetaItemHeader class="mt-[8px]" :label="t('dataflow.sortRule')"></MetaItemHeader>
     <FieldSortList v-model="sortList" :form-id="formId" @change="onSort"></FieldSortList>
@@ -62,6 +62,11 @@ const formChanged = async (form: IFormItem) => {
 const onCondition = (list: IConditionList) => {
   activeData.value.metadata.queryOneMeta!.condition = list;
 };
+const onCondClear = () => {
+  condList.value.items = []
+  activeData.value.metadata.queryManyMeta!.condition = condList.value;
+}
+
 const onSort = (list: IFieldSortList) => {
   activeData.value.metadata.queryOneMeta!.sort = list;
 };

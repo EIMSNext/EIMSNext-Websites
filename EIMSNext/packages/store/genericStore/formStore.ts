@@ -7,7 +7,6 @@ export const useFormStore = createStore<FormDef>("forms", "FormDef", [
     appId: "system",
     id: "employee",
     name: "Employee",
-    type: FormType.Form,
     isLedger: true,
     usingWorkflow: false,
     content: {

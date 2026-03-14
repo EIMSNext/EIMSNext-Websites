@@ -80,6 +80,7 @@
     "sortablejs": "^1.15.6",
     "v-jsoneditor": "^1.4.5",
     "vant": "^4.9.21",
+    "vue-grid-layout-v3": "^3.1.2",
     "vue-i18n": "^11.2.7",
     "vue-router": "^4.6.3",
     "vue3-print-nb": "^0.1.4",

@@ -1,4 +1,4 @@
-import { UserType } from "@eimsnext/models";
+import { FormType, UserType } from "@eimsnext/models";
 import "vue-router";
 
 declare module "vue-router" {
@@ -59,7 +59,7 @@ declare module "vue-router" {
 
     //菜单ID
     id?: string;
-
+    type?: FormType;
     //是否分组
     isGroup?: boolean;
 

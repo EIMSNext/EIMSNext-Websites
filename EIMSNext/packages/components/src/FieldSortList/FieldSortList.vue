@@ -23,8 +23,8 @@
 import { computed, ref, toRef, watch } from "vue";
 import { useFormStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
-import { IFieldSortItem, IFieldSortList } from "./type";
-import { IFormFieldDef, buildFieldListItems } from "../FieldSelect/type";
+import { buildSortFieldListItems, IFieldSortItem, IFieldSortList } from "./type";
+import { IFormFieldDef } from "../FieldSelect/type";
 import { SortDirection } from "@eimsnext/services";
 import { IListItem } from "@/list/type";
 import { IFieldPerm } from "@eimsnext/models";
@@ -89,7 +89,7 @@ watch(
     if (newFormId && newFormId != oldFormId) {
       let form = await formStore.get(newFormId);
       if (form && form.content && form.content.items) {
-        allFields.value = buildFieldListItems(newFormId, form.content.items, form.usingWorkflow);
+        allFields.value = buildSortFieldListItems(newFormId, form.content.items, form.usingWorkflow);
       }
     }
   },

@@ -52,6 +52,11 @@ export enum UserType {
   AppAdmin = 16,
 
   /// <summary>
+  /// 普通管理员或企业创建者或超级管理员
+  /// </summary>
+  App_Admins = 28,
+
+  /// <summary>
   /// 应用管理员
   /// </summary>
   FormAdmin = 32,

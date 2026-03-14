@@ -7,13 +7,22 @@
     </div>
     <div class="value-value">
       <template v-if="nodes && condValueType == ConditionValueType.Field">
-        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="props.fieldDef"
+        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="fieldDef"
           :fieldBuildSetting="fieldBuildSetting" @change="onValueChange">
         </NodeFieldList>
       </template>
       <template v-else>
         <template v-if="dataType == ConditionFieldType.Input">
-          <el-input size="default" v-model="value" @blur="onInput"></el-input>
+          <template v-if="fieldDef?.field == SystemField.FlowStatus">
+            <el-select size="default" filterable allow-create default-first-option v-model="value" :multiple="true"
+              @change="onInput">
+              <el-option v-for="opt in flowStatusArray()" :label="t(opt.i18n)" :value="opt.id"
+                :key="opt.id"></el-option>
+            </el-select>
+          </template>
+          <template v-else>
+            <el-input size="default" v-model="value" @blur="onInput"></el-input>
+          </template>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Number">
           <el-input-number size="default" v-model="value" @change="onInput"></el-input-number>
@@ -77,7 +86,7 @@
 </template>
 <script setup lang="ts">
 import { ConditionValueType, IConditonValue, toListItem } from "./type";
-import { FieldType } from "@eimsnext/models";
+import { FieldType, SystemField } from "@eimsnext/models";
 import { IFormFieldDef } from "../FieldSelect/type";
 import { IFieldBuildSetting, INodeForm, getConditionFieldType, ConditionFieldType } from "@/NodeFieldList/type";
 import { IListItem } from "@/list/type";
@@ -86,7 +95,7 @@ import memberSelectDialog from "@/memberSelect/memberSelectDialog.vue";
 import { useLocale } from "element-plus";
 import { MemberTabs } from "@/memberSelect/type";
 import { ISelectedTag } from "@/selectedTags/type";
-import { DataItemType } from "@/common";
+import { DataItemType, flowStatusArray } from "@/common";
 const { t } = useLocale();
 
 defineOptions({

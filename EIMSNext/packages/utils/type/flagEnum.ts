@@ -70,7 +70,7 @@ export const FlagEnum = {
    */
   parse: <T extends number>(
     enumObj: Record<string, T | string>,
-    target: T
+    target: T,
   ): T[] => {
     const validFlags: T[] = [];
     // 过滤枚举的数值成员（排除TS自动生成的反向字符串映射）
@@ -105,14 +105,31 @@ export const FlagEnum = {
    */
   getMinValue: <T extends number>(
     enumObj: Record<string, T | string>,
-    target: T
+    target: T,
   ): T => {
     // 复用 parse 方法解析目标值包含的成员
     const includedFlags = FlagEnum.parse(enumObj, target);
     const validFlags = includedFlags.filter((flag) => flag !== 0);
 
-    return validFlags.length === 0 
-    ? 0 as T 
-    : validFlags.reduce((min, curr) => Math.min(min, curr) as T, validFlags[0] as T);
+    return validFlags.length === 0
+      ? (0 as T)
+      : validFlags.reduce(
+          (min, curr) => Math.min(min, curr) as T,
+          validFlags[0] as T,
+        );
+  },
+
+  /**
+   * 枚举转数组（提取真实枚举值）
+   * 通用适配：字符串枚举 / 数值枚举（自动过滤TS反向映射）
+   * @param enumObj TS枚举对象（字符串/数值类型均可）
+   * @returns 纯枚举值数组（无反向映射，类型与原枚举一致）
+   */
+  enumToValues<T extends Record<string, string | number>>(
+    enumObj: T,
+  ): T[keyof T][] {
+    return Object.entries(enumObj)
+      .filter(([key]) => isNaN(Number(key))) // 过滤反向映射的数字键
+      .map(([_, value]) => value) as T[keyof T][]; // 精准断言，让TS推导为原枚举的类型
   },
 };

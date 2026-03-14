@@ -8,7 +8,7 @@
             <div class="main-title"> <span>数据推送</span></div>
         </template>
         <div class="main-content">
-            <WebhookEditor v-model="selectedItem!" :formDef="formDef" />
+            <WebhookEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" />
         </div>
     </el-drawer>
     <AdvanceLayout title="数据推送" desc="数据推送可将表单数据推送至你指定的服务器">

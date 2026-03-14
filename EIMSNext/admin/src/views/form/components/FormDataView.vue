@@ -25,8 +25,8 @@ import { FormActionSettings } from "@/components/FormView/type";
 import { MessageIcon, ToolbarItem } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 import { hasDataPerm } from "@/utils/common";
-import FormPrintDiv from "@/components/Print/FormPrintDiv.vue";
-import { getPrintConfig, IPrintData } from "@/components/Print/type";
+import FormPrintDiv from "@/components/WebPrint/FormPrintDiv.vue";
+import { getPrintConfig, IPrintData } from "@/components/WebPrint/type";
 const { t } = useI18n();
 
 const props = withDefaults(
