@@ -38,11 +38,17 @@ export enum ChartType {
   Pie = "pie", //饼图
 }
 
+export interface ILimitation {
+  dimension?: number;
+  metric?: number;
+}
+
 export interface IChartConfig {
   id: ChartType;
   i18n: string;
   subType?: Array<any>;
   cssClass: string;
+  limitation: ILimitation;
 }
 
 export function chartSettingValidate(setting: IChartSetting): boolean {
@@ -96,12 +102,14 @@ export function getChartConfigs() {
         { id: "waterfall", cssClass: "vbar-waterfall" },
       ],
       cssClass: "vbar",
+      limitation: { dimension: 1, metric: 1 },
     },
     {
       id: ChartType.HBar,
       i18n: "dash.hbar",
       subType: [{ id: "basic" }, { id: "stack", cssClass: "hbar-stack" }],
       cssClass: "hbar",
+      limitation: { dimension: 1, metric: 1 },
     },
     {
       id: ChartType.Line,
@@ -114,6 +122,7 @@ export function getChartConfigs() {
         { id: "step", cssClass: "" },
       ],
       cssClass: "line",
+      limitation: { dimension: 1, metric: 1 },
     },
     {
       id: ChartType.Pie,
@@ -124,6 +133,7 @@ export function getChartConfigs() {
         { id: "area", cssClass: "" },
       ],
       cssClass: "pie",
+      limitation: { dimension: 1, metric: 1 },
     },
   ];
 

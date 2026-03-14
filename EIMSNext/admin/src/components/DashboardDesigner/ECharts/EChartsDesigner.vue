@@ -169,7 +169,6 @@ import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { SortableEvent } from "sortablejs";
 import EChartsViewer from "./EChartsViewer.vue";
 import { uniqueId } from "@eimsnext/utils";
-import { remove } from "lodash-es";
 
 const { t } = useLocale();
 
@@ -670,91 +669,9 @@ onMounted(() => {
               display: inline-block;
               opacity: 1; //0.5;
             }
-
-            .line {
-              background-image: url("../../../assets/images/charts/Line.svg");
-            }
-
-            .linearea {
-              background-image: url("../../../assets/images/charts/LineArea.svg");
-            }
-
-            .horizontalbar {
-              background-image: url("../../../assets/images/charts/HorizontalBar.svg");
-            }
-
-            .verticalbar {
-              background-image: url("../../../assets/images/charts/VerticalBar.svg");
-            }
-
-            .pie {
-              background-image: url("../../../assets/images/charts/Pie1.svg");
-            }
-
-            .index {
-              background-image: url("../../../assets/images/charts/Index.svg");
-            }
-
-            .double {
-              background-image: url("../../../assets/images/charts/Double.svg");
-            }
-
-            .funnel {
-              background-image: url("../../../assets/images/charts/Funnel.svg");
-            }
-
-            .radar {
-              background-image: url("../../../assets/images/charts/Radar.svg");
-            }
-
-            .fittext {
-              background-image: url("../../../assets/images/charts/FitText.svg");
-            }
-
-            .gauge {
-              background-image: url("../../../assets/images/charts/gauge.svg");
-            }
-
-            .map {
-              background-image: url("../../../assets/images/charts/map.svg");
-            }
-
-            .scatter {
-              background-image: url("../../../assets/images/charts/scatter.svg");
-            }
-
-            .bubble {
-              background-image: url("../../../assets/images/charts/bubble.svg");
-            }
-
-            .detailtable {
-              background-image: url("../../../assets/images/charts/detailtable.svg");
-            }
-
-            .treemap {
-              background-image: url("../../../assets/images/charts/treemap.svg");
-            }
-
-            .wordcloud {
-              background-image: url("../../../assets/images/charts/wordcloud.svg");
-            }
-
-            .heatmap {
-              background-image: url("../../../assets/images/charts/heatmap.svg");
-            }
           }
         }
-
-        .layer-chevron-right {
-          padding: 9px 4px 0px 0px;
-          margin-left: -5px;
-
-          .vs-icon {
-            font-size: 16px;
-            color: #ccc;
-          }
-        }
-
+      
         .active {
           background: var(--el-color-primary);
           color: #fff;
