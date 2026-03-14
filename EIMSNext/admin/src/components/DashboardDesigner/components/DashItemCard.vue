@@ -1,8 +1,8 @@
 <template>
     <div class="layout-grid-item">
         <div class="container-group-drag-handle"></div>
-        <div class="container-header">
-            <div v-if="!isView" class="header-action-container">
+        <div v-if="!isView" class="container-header">
+            <div class="header-action-container">
                 <div class="header-action">
                     <div class="action-btn" title="在桌面端隐藏该组件" @click="onHide"><et-icon icon="el-hide" /> </div>
                     <div class="action-btn" title="编辑" @click="onEdit"><et-icon icon="el-editPen" /></div>
@@ -17,7 +17,7 @@
         </div>
         <div class="container-content-wrapper">
             <template v-if="chartSetting && chartSettingValidate(chartSetting)">
-                <e-charts-viewer :setting="chartSetting" :title="itemDef.name" :show-header="isView"/>
+                <e-charts-viewer :setting="chartSetting" :title="itemDef.name" :show-header="isView" />
             </template>
             <template v-else>
                 <el-empty class="et-dash-empty">
@@ -88,8 +88,7 @@ const onDelete = () => {
     }
 
     // 拖拽层：允许穿透鼠标事件（核心修复，不再拦截hover）
-    .container-group-drag-handle,
-    .group-container-item-handle {
+    .container-group-drag-handle {
         position: absolute;
         top: 0;
         left: 0;
@@ -196,7 +195,7 @@ const onDelete = () => {
     // 卡片内容区
     .container-content-wrapper {
         position: absolute;
-        top: 40px;
+        top: 0px;
         left: 10px;
         right: 10px;
         bottom: 10px;

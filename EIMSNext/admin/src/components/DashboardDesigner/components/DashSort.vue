@@ -1,5 +1,5 @@
 <template>
-    <div v-click-outside="onClickOutside">
+    <div v-click-outside="onClickOutside" class="no-drag">
         <div class="sort-title">设置排序规则</div>
         <SortList v-model="sortList" :sortFields="sortFields" :editable="false" :multiple="false" @change="onChange">
         </SortList>

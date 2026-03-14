@@ -7,8 +7,9 @@
         </el-popover>
         <div v-if="showHeader" class="view-header" style="color: rgb(31, 45, 61);">
             <div class="header-actions">
-                <div v-if="!designerMode" class="header-btn"><et-icon icon="el-refresh" size="16px" /> </div>
-                <div ref="sortRef" class="header-btn" @click.stop="showSort = true"><et-icon icon="el-sort"
+                <div v-if="!designerMode" class="header-btn no-drag" @click.stop="onRefresh"><et-icon icon="el-refresh"
+                        size="16px" /> </div>
+                <div ref="sortRef" class="header-btn no-drag" @click.stop="onSort"><et-icon icon="el-sort"
                         size="16px" />
                 </div>
             </div>
@@ -223,8 +224,6 @@ const getChartOpts = async (setting: IChartSetting) => {
             chartOpts.value = undefined;
             break;
     }
-
-    console.log("getchartopts", setting, chartOpts.value)
 }
 
 const sortRef = ref()
@@ -233,12 +232,15 @@ const sortList = ref<ISortList>({
     items: [],
 });
 
-const emit = defineEmits(["sort"]);
+const emit = defineEmits(["refresh", "sort"]);
+const onRefresh = async () => {
+    await getChartOpts(props.setting)
+}
+const onSort = () => { showSort.value = true }
 const setSort = (sort: ISortList) => {
     sortList.value = sort;
     showSort.value = false;
-    if (props.designerMode)
-        emit("sort", sort)
+    props.setting.sort = sort
 };
 
 watch(() => props.setting, async (newVal) => {
