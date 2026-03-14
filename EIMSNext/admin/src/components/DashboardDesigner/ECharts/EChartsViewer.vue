@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import echarts from '@/plugins/echarts';
-import { chartSettingValidate, ChartType, IChartSetting } from './type';
+import { chartSettingValidate, ChartType, getChartSort, IChartSetting } from './type';
 import { AggCalcRequest, AggregateFun, aggregateService } from '@eimsnext/services';
 import { convertToFieldArray } from '@eimsnext/utils';
 import { ISortItem, ISortList, toDynamicFilter } from '@eimsnext/components';
@@ -65,7 +65,9 @@ const getChartOpts = async (setting: IChartSetting) => {
         dataSource: setting.datasource,
         dimensions: [...setting.dimension1 || [], ...setting.dimension2 || []],
         metrics: [...setting.metrics || []],
-        filter: setting.filter ? toDynamicFilter(setting.filter) : undefined
+        filter: setting.filter ? toDynamicFilter(setting.filter) : undefined,
+        sort: getChartSort(setting),
+        take: setting.takeEnable ? setting.take : -1
     }
     let aggResult = await aggregateService.calucate(aggRequest)
     let ds = convertToFieldArray(aggResult);

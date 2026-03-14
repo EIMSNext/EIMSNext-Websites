@@ -1,7 +1,7 @@
 import { IConditionList, ISortList } from "@eimsnext/components";
 import { IDataSource, IDataSourceField } from "../type";
 import { FieldType } from "@eimsnext/models";
-import { AggregateFun } from "@eimsnext/services";
+import { AggregateFun, IAgSortItem, SortDirection } from "@eimsnext/services";
 
 export interface IChartSetting {
   datasource: IDataSource;
@@ -12,6 +12,7 @@ export interface IChartSetting {
   metrics?: IMetricsField[];
   filter?: IConditionList;
   sort?: ISortList;
+  takeEnable?: boolean;
   take?: number;
 }
 
@@ -52,6 +53,36 @@ export function chartSettingValidate(setting: IChartSetting): boolean {
   if (!setting.metrics || setting.metrics.length == 0) return false;
 
   return true;
+}
+
+export function getChartSort(setting: IChartSetting) {
+  let sorts: IAgSortItem[] = [];
+  let dims = [...(setting.dimension1 || []), ...(setting.dimension2 || [])];
+  let metrics = [...(setting.metrics || [])];
+
+  if (setting.sort && setting.sort.items.length > 0) {
+    setting.sort.items.forEach((sort) => {
+      if (sort.sort != SortDirection.Unset) {
+        let dim = dims.find((x) => x.id == sort.field.field);
+        if (dim) {
+          sorts.push({ id: sort.field.field, type: sort.field.type, dir: sort.sort });
+          return;
+        }
+
+        let metric = metrics.find((x) => x.id == sort.field.field);
+        if (metric) {
+          sorts.push({
+            id: `${metric.id}_${metric.aggFun ?? "count"}`,
+            type: FieldType.Number,
+            dir: sort.sort,
+          });
+          return;
+        }
+      }
+    });
+  }
+
+  return sorts;
 }
 
 export function getChartConfigs() {

@@ -115,7 +115,7 @@
         <div class="config-box">
           <el-collapse v-model="activeCollItems" expand-icon-position="left">
             <el-collapse-item name="charttype" title="图表类型" class="box-head">
-              <div class="box-body chart-type-body pt-5">
+              <div class="box-body chart-type-body">
                 <template v-for="cc in chartConfigs" :key="cc.id">
                   <el-button @click="selectChartType(cc)" class="chart-type"
                     :class="{ active: chartSetting.chartType == cc.id }">
@@ -127,7 +127,7 @@
           <el-collapse v-model="activeSettingItems" expand-icon-position="left">
             <el-collapse-item v-if="chartConfig && chartConfig.subType" name="chartsubtype" title="柱状图类型"
               class="box-head">
-              <div class="box-body chart-type-body pt-5">
+              <div class="box-body chart-type-body">
                 <template v-for="ct in chartConfig.subType" :key="ct.id">
                   <el-button @click="selectChartSubType(chartConfig, ct)" class="chart-type"
                     :class="{ active: chartSetting.chartSubType == ct.id }">
@@ -136,8 +136,12 @@
               </div>
             </el-collapse-item>
             <el-collapse-item name="charttopn" title="数据显示" class="box-head">
-              <div class="box-body chart-type-body pt-5">
-                <el-checkbox>显示前</el-checkbox><el-input-number /><span>条数据</span>
+              <div class="box-body chart-type-body">
+                <div class="data-top">
+                  <el-checkbox v-model="chartSetting.takeEnable">显示前</el-checkbox><el-input-number
+                    v-model="chartSetting.take" :disabled="!chartSetting.takeEnable" size="small" :controls="false"
+                    style="width:60px;margin: 0 5px;" /><span style="font-weight: normal;">条数据</span>
+                </div>
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -782,6 +786,16 @@ onMounted(() => {
     padding: 0 10px;
     background: #fff;
 
+    :deep(.el-collapse-item__header) {
+      line-height: 32px;
+      height: 32px;
+      min-height: 32px;
+    }
+
+    :deep(.el-collapse-item__content) {
+      padding-bottom: 0;
+    }
+
     .config-box {
       padding-bottom: 11px;
 
@@ -792,6 +806,10 @@ onMounted(() => {
         font-weight: 700;
         cursor: pointer;
         margin-top: 10px;
+      }
+
+      .box-body {
+        margin-bottom: 15px;
       }
 
       .chart-type-body {
@@ -873,6 +891,11 @@ onMounted(() => {
         .pie-circle {
           background-image: url("../../../assets/images/charts/Pie.circle.svg");
         }
+      }
+
+      .data-top {
+        display: flex;
+        align-items: center;
       }
     }
   }
