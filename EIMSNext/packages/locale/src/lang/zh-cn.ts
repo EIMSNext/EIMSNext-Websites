@@ -52,6 +52,7 @@ export default {
     value_Field: "字段值",
     value_Empty: "空值",
     value_Custom: "自定义",
+    orderby_Unset: "未设置",
     orderby_Asc: "升序",
     orderby_Desc: "降序",
     meetCondition: "满足以下",

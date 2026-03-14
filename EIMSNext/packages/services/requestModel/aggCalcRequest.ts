@@ -1,11 +1,13 @@
 import { FieldType } from "@eimsnext/models";
-import { IDynamicFilter } from "./odataQueryRequest";
+import { IDynamicFilter, SortDirection } from "./odataQueryRequest";
 
 export interface AggCalcRequest {
   dataSource: IAgDatasource;
   dimensions?: IDimension[];
   metrics?: IMetric[];
   filter?: IDynamicFilter;
+  sort?: IAgSortItem[];
+  take?: number;
 }
 
 export interface IAgDatasource {
@@ -30,4 +32,9 @@ export enum AggregateFun {
   Avg = "avg",
   Max = "max",
   Min = "min",
+}
+export interface IAgSortItem {
+  id: string;
+  type: FieldType;
+  dir: SortDirection;
 }

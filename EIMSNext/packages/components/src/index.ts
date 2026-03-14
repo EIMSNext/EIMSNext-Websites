@@ -23,6 +23,7 @@ import {
 } from "./FlowDesigner";
 import { EtFieldPerms } from "./FieldPerms";
 import { UserAvatar } from "./avatar";
+import { SortList, SortItem } from "./SortList";
 
 export default [
   SvgIcon,
@@ -57,4 +58,6 @@ export default [
   DataflowMetaEditor,
   EtFieldPerms,
   UserAvatar,
+  SortList,
+  SortItem,
 ];

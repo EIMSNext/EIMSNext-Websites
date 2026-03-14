@@ -29,3 +29,5 @@ export * from "./FlowDesigner/type";
 export * from "./FieldPerms";
 export * from "./FieldPerms/type";
 export * from "./FormList";
+export * from "./SortList";
+export * from "./SortList/type";

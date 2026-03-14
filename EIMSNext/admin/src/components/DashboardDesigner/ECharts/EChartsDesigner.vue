@@ -73,9 +73,10 @@
           </div>
           <div class="drag-target-container container-veidoo">
             <Draggable class="dimension1" :list="chartSetting.dimension1" :sort="false" ghost-class="ghost"
-              :group="{ name: 'fields', pull: false, put: true }" item-key="id">
+              :group="{ name: 'fields', pull: false, put: true }" item-key="id" @add="addDim1">
               <template #item="{ element, index }">
-                <DimensionField :field="element" :isDeleted="fieldIsDeleted(element)"></DimensionField>
+                <DimensionField :field="element" :isDeleted="fieldIsDeleted(element)" @remove="removeDim1">
+                </DimensionField>
               </template>
             </Draggable>
           </div>
@@ -86,9 +87,10 @@
           </div>
           <div class="drag-target-container container-veidoo">
             <Draggable class="metrics" :list="chartSetting.metrics" :sort="false" ghost-class="ghost"
-              :group="{ name: 'fields', pull: false, put: true }" item-key="id">
+              :group="{ name: 'fields', pull: false, put: true }" item-key="id" @add="addMetric">
               <template #item="{ element, index }">
-                <MetricsField :field="element" :isDeleted="fieldIsDeleted(element)"></MetricsField>
+                <MetricsField :field="element" :isDeleted="fieldIsDeleted(element)" @remove="removeMetric">
+                </MetricsField>
               </template>
             </Draggable>
           </div>
@@ -107,11 +109,7 @@
 
         <div class="center-box chart-main">
           <div class="chart-container">
-            <div class="chart-title" style="color: rgb(31, 45, 61);"><span>{{
-              dashItemDef.name
-                }}</span>
-            </div>
-            <EChartsViewer :setting="chartSetting" />
+            <EChartsViewer :setting="chartSetting" :title="dashItemDef.name" :designer-mode="true" />
           </div>
         </div>
       </el-main>
@@ -119,7 +117,7 @@
         <div class="config-box">
           <el-collapse v-model="activeCollItems" expand-icon-position="left">
             <el-collapse-item name="charttype" title="图表类型" class="box-head">
-              <div class="box-body chart-type-body pt-5">
+              <div class="box-body chart-type-body">
                 <template v-for="cc in chartConfigs" :key="cc.id">
                   <el-button @click="selectChartType(cc)" class="chart-type"
                     :class="{ active: chartSetting.chartType == cc.id }">
@@ -128,19 +126,27 @@
               </div>
             </el-collapse-item>
           </el-collapse>
-          <div v-if="chartConfig">
-            <el-collapse v-model="activeSettingItems" expand-icon-position="left">
-              <el-collapse-item v-if="chartConfig.subType" name="chartsubtype" title="柱状图类型" class="box-head">
-                <div class="box-body chart-type-body pt-5">
-                  <template v-for="ct in chartConfig.subType" :key="ct.id">
-                    <el-button @click="selectChartSubType(chartConfig, ct)" class="chart-type"
-                      :class="{ active: chartSetting.chartSubType == ct.id }">
-                      <i class="icon" :class="ct.cssClass || chartConfig.cssClass"></i>
-                    </el-button></template>
+          <el-collapse v-model="activeSettingItems" expand-icon-position="left">
+            <el-collapse-item v-if="chartConfig && chartConfig.subType" name="chartsubtype" title="柱状图类型"
+              class="box-head">
+              <div class="box-body chart-type-body">
+                <template v-for="ct in chartConfig.subType" :key="ct.id">
+                  <el-button @click="selectChartSubType(chartConfig, ct)" class="chart-type"
+                    :class="{ active: chartSetting.chartSubType == ct.id }">
+                    <i class="icon" :class="ct.cssClass || chartConfig.cssClass"></i>
+                  </el-button></template>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item name="charttopn" title="数据显示" class="box-head">
+              <div class="box-body chart-type-body">
+                <div class="data-top">
+                  <el-checkbox v-model="chartSetting.takeEnable">显示前</el-checkbox><el-input-number
+                    v-model="chartSetting.take" :disabled="!chartSetting.takeEnable" size="small" :controls="false"
+                    style="width:60px;margin: 0 5px;" /><span style="font-weight: normal;">条数据</span>
                 </div>
-              </el-collapse-item>
-            </el-collapse>
-          </div>
+              </div>
+            </el-collapse-item>
+          </el-collapse>
         </div>
       </el-aside>
       <DataSourceDialog v-model="showDataSourceDialog" :appId="dashItemDef.appId" :dataSource="chartSetting.datasource"
@@ -153,16 +159,17 @@
 import Draggable from "vuedraggable";
 import { IDataSource, IDataSourceField } from "../type";
 import { DashboardItemDef, FieldDef, FieldType, FormDef, FormType } from "@eimsnext/models";
-import { IConditionList, IFormItem } from "@eimsnext/components";
+import { IConditionList, IFormItem, ISortItem, ISortList } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
 import { useLocale } from "element-plus";
-import { ChartType, getChartConfigs, IChartConfig, IChartSetting } from "./type";
-import { dashboardItemDefService, DatasourceType } from "@eimsnext/services";
+import { ChartType, getChartConfigs, IChartConfig, IChartSetting, IDimensionField, IMetricsField } from "./type";
+import { dashboardItemDefService, DatasourceType, IDimension, SortDirection } from "@eimsnext/services";
 import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { SortableEvent } from "sortablejs";
 import EChartsViewer from "./EChartsViewer.vue";
 import { uniqueId } from "@eimsnext/utils";
+import { remove } from "lodash-es";
 
 const { t } = useLocale();
 
@@ -292,6 +299,51 @@ const dragEnd = (e: SortableEvent) => {
   dropable.value = {}
 }
 
+const addDim1 = () => {
+  updateSortList()
+}
+
+const removeDim1 = (dim: IDimensionField) => {
+  chartSetting.dimension1 = chartSetting.dimension1?.filter(x => x.id != dim.id)
+  updateSortList()
+}
+
+const addMetric = () => {
+  updateSortList()
+}
+
+const removeMetric = (metric: IMetricsField) => {
+  chartSetting.metrics = chartSetting.metrics?.filter(x => x.id != metric.id)
+  updateSortList()
+}
+
+
+const updateSortList = () => {
+  let newSorts: ISortItem[] = []
+  let sortList: ISortList = chartSetting.sort || { items: [] }
+
+  if (chartSetting.dimension1) {
+    chartSetting.dimension1.forEach(x => {
+      let oldSort = sortList.items.find(s => s.field.field == x.id)
+      newSorts.push({ field: { field: x.id, label: x.label!, type: x.type! }, sort: oldSort ? oldSort.sort : SortDirection.Unset })
+    })
+  }
+  // if (chartSetting.dimension2) {
+  //   chartSetting.dimension2.forEach(x => {
+  //     let oldSort = sortList.items.find(s => s.field.field == x.id)
+  //     newSorts.push({ field: { field: x.id, label: x.label!, type: x.type! }, sort: oldSort ? oldSort.sort : SortDirection.Unset })
+  //   })
+  // }
+  if (chartSetting.metrics) {
+    chartSetting.metrics.forEach(x => {
+      let oldSort = sortList.items.find(s => s.field.field == x.id)
+      newSorts.push({ field: { field: x.id, label: x.label!, type: x.type! }, sort: oldSort ? oldSort.sort : SortDirection.Unset })
+    })
+  }
+
+  chartSetting.sort = { items: newSorts }
+}
+
 const addComputedField = () => { };
 const copyField = (field: IDataSourceField) => { };
 const editField = (field: IDataSourceField, index: number) => { };
@@ -323,6 +375,7 @@ onMounted(() => {
   if (!chartSetting.dimension2) chartSetting.dimension2 = [];
   if (!chartSetting.metrics) chartSetting.metrics = [];
   if (!chartSetting.filter) chartSetting.filter = { id: uniqueId(), rel: "and", items: [] }
+  if (!chartSetting.sort) chartSetting.sort = { items: [] }
 
   /*  */
   if (chartSetting.datasource)
@@ -492,35 +545,6 @@ onMounted(() => {
 
       .chart-container {
         width: 100%;
-
-        .chart-title {
-          font-size: 14px;
-          text-align: left;
-          padding: 20px 20px 10px 20px;
-          // position: relative;
-
-          .index-sort {
-            position: absolute;
-            right: 54px;
-            top: 20px;
-            padding: 6px;
-            box-shadow: 0px 1px 4px rgba(84, 48, 132, 0.1);
-            cursor: pointer;
-
-            i {
-              font-size: 16px;
-              font-weight: 500;
-            }
-          }
-        }
-
-        .index-chart-main {
-          width: 100%;
-          height: 100%;
-          padding: 20px 20px;
-          overflow-y: auto;
-          overflow-x: auto;
-        }
       }
 
       .title {
@@ -777,6 +801,16 @@ onMounted(() => {
     padding: 0 10px;
     background: #fff;
 
+    :deep(.el-collapse-item__header) {
+      line-height: 32px;
+      height: 32px;
+      min-height: 32px;
+    }
+
+    :deep(.el-collapse-item__content) {
+      padding-bottom: 0;
+    }
+
     .config-box {
       padding-bottom: 11px;
 
@@ -787,12 +821,10 @@ onMounted(() => {
         font-weight: 700;
         cursor: pointer;
         margin-top: 10px;
+      }
 
-        .fa {
-          font-size: 18px;
-          width: 14px;
-          text-align: center;
-        }
+      .box-body {
+        margin-bottom: 15px;
       }
 
       .chart-type-body {
@@ -874,6 +906,11 @@ onMounted(() => {
         .pie-circle {
           background-image: url("../../../assets/images/charts/Pie.circle.svg");
         }
+      }
+
+      .data-top {
+        display: flex;
+        align-items: center;
       }
     }
   }

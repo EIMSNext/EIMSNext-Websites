@@ -1,6 +1,7 @@
 <template>
   <div class="field-list">
-    <el-dropdown :hide-on-click="false" trigger="click" popper-class="data-triggers" @command="addField">
+    <el-dropdown v-if="editable" :hide-on-click="false" trigger="click" popper-class="data-triggers"
+      @command="addField">
       <el-button class="btn-add-trigger">
         {{ "+ " + t("comp.addSortRule") }}
       </el-button>
@@ -15,37 +16,37 @@
       </template>
     </el-dropdown>
     <template v-for="(item, idx) in selectedFields.items" :key="item.field.field">
-      <FieldSortItem :modelValue="item" @change="onChange" @remove="onRemove"></FieldSortItem>
+      <SortItem :modelValue="item" @editable="editable" @change="onChange" @remove="onRemove"></SortItem>
     </template>
   </div>
 </template>
 <script setup lang="ts">
 import { computed, ref, toRef, watch } from "vue";
-import { useFormStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
-import { buildSortFieldListItems, IFieldSortItem, IFieldSortList } from "./type";
-import { IFormFieldDef } from "../FieldSelect/type";
+import { buildSortListItems, ISortField, ISortItem, ISortList } from "./type";
 import { SortDirection } from "@eimsnext/services";
 import { IListItem } from "@/list/type";
-import { IFieldPerm } from "@eimsnext/models";
+
 const { t } = useLocale();
 
 defineOptions({
-  name: "FieldSortList",
+  name: "SortList",
 });
 
 const props = withDefaults(
   defineProps<{
-    modelValue: IFieldSortList;
-    formId: string;
-    fieldPerms?: IFieldPerm[];
+    modelValue: ISortList;
+    sortFields: ISortField[];
+    editable?: boolean;
+    multiple?: boolean;
   }>(),
-  {}
+  {
+    editable: true,
+    multiple: true
+  }
 );
 
-const formStore = useFormStore();
-
-const selectedFields = toRef<IFieldSortList>(props.modelValue);
+const selectedFields = toRef<ISortList>(props.modelValue);
 const allFields = ref<IListItem[]>([]);
 const disabledFieldIds = computed(() => {
   return selectedFields.value.items.map(item => item.field.field);
@@ -53,28 +54,37 @@ const disabledFieldIds = computed(() => {
 
 const emit = defineEmits(["update:modelValue", "change"]);
 
-const addField = (field: IFormFieldDef) => {
+const addField = (field: ISortField) => {
   selectedFields.value.items.push({ field: field, sort: SortDirection.Asc });
 };
 
-const onRemove = (sortItem: IFieldSortItem) => {
+const onRemove = (sortItem: ISortItem) => {
   if (sortItem && selectedFields.value.items) {
-    let index = selectedFields.value.items.findIndex((x) => x.field.field == sortItem.field.field);
-    if (index > -1) {
-      selectedFields.value.items.splice(index, 1);
-    }
+    selectedFields.value.items = selectedFields.value.items.filter(x => x.field.field != sortItem.field.field)
   }
 
   emitChange();
 };
 
-const onChange = (sortItem: IFieldSortItem) => {
-  if (sortItem && selectedFields.value.items) {
-    let item = selectedFields.value.items.find((x) => x.field.field == sortItem.field.field);
-    if (item) {
-      item.sort = sortItem.sort;
+const onChange = (sortItem: ISortItem) => {
+  if (props.multiple) {
+    if (sortItem && selectedFields.value.items) {
+      let item = selectedFields.value.items.find((x) => x.field.field == sortItem.field.field);
+      if (item) {
+        item.sort = sortItem.sort;
+      }
     }
   }
+  else {
+    if (sortItem && selectedFields.value.items) {
+      const newSortItems = selectedFields.value.items.map((item) => ({
+        ...item,
+        sort: item.field.field === sortItem.field.field ? sortItem.sort : SortDirection.Unset
+      }));
+      selectedFields.value.items = newSortItems
+    }
+  }
+
   emitChange();
 };
 
@@ -84,14 +94,18 @@ const emitChange = () => {
 };
 
 watch(
-  [() => props.formId],
-  async ([newFormId], [oldFormId]) => {
-    if (newFormId && newFormId != oldFormId) {
-      let form = await formStore.get(newFormId);
-      if (form && form.content && form.content.items) {
-        allFields.value = buildSortFieldListItems(newFormId, form.content.items, form.usingWorkflow);
-      }
-    }
+  [() => props.sortFields],
+  () => {
+    if (props.editable)
+      allFields.value = buildSortListItems(props.sortFields);
+  },
+  { immediate: true }
+);
+
+watch(
+  [() => props.modelValue],
+  () => {
+    selectedFields.value = props.modelValue
   },
   { immediate: true }
 );

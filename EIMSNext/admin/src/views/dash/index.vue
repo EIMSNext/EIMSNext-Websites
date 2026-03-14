@@ -2,8 +2,8 @@
     <div class="dash-edit-layout custom-scroll" style="background: rgb(244, 246, 249);">
         <grid-layout ref="gridRef" v-model:layout="state.layout" :col-num="colNum" :col-width="colWidth"
             :row-height="rowHeight" :is-draggable="state.draggable" :is-resizable="state.resizable" :is-mirrored="false"
-            :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true"
-            :responsive="true">
+            :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true" :responsive="true"
+            drag-ignore-from=".no-drag" resize-ignore-from=".no-drag">
             <grid-item v-for="item in state.layout" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
                 :key="item.i" @container-resized="containerResizedEvent" :minW="getMinWidth(item)"
                 :minH="getMinHeight(item)" :maxW="60" :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag">
