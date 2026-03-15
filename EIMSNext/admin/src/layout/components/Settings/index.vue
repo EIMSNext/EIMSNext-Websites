@@ -1,22 +1,22 @@
 <template>
   <el-drawer v-model="settingsVisible" header-class="uisetting-header" size="300" :title="t('settings.uisetting')">
     <div class="py-1 flex-x-between">
-      <span class="text-xs">{{ t("settings.theme") }}</span>
+      <span>{{ t("settings.theme") }}</span>
       <el-switch v-model="isDark" @change="changeTheme" />
     </div>
 
     <div class="py-1 flex-x-between">
-      <span class="text-xs">{{ t("settings.themeColor") }}</span>
+      <span>{{ t("settings.themeColor") }}</span>
       <ThemeColorPicker v-model="settingsStore.themeColor" @update:model-value="changeThemeColor" />
     </div>
 
     <div class="py-1 flex-x-between">
-      <span class="text-xs">{{ t("settings.tagsView") }}</span>
+      <span>{{ t("settings.tagsView") }}</span>
       <el-switch v-model="settingsStore.tagsView" />
     </div>
 
     <div class="py-1 flex-x-between">
-      <span class="text-xs">{{ t("settings.watermark") }}</span>
+      <span>{{ t("settings.watermark") }}</span>
       <el-switch v-model="settingsStore.watermarkEnabled" />
     </div>
   </el-drawer>
