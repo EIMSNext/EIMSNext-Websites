@@ -4,7 +4,7 @@
       <router-link v-for="tag in visitedViews" ref="tagRef" :key="tag.path"
         :class="'tags-item ' + (tagsViewStore.isActive(tag) ? 'active' : '')" :to="{ path: tag.path, query: tag.query }"
         @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''" @contextmenu.prevent="openContentMenu(tag, $event)">
-        {{ translateRouteTitle(tag.title) }}
+        {{ translateRouteTitle(t, tag.title) }}
         <et-icon v-if="!isAffix(tag) || isClosable(tag)" icon="el-Close" class="tag-close-icon"
           @click.prevent.stop="closeSelectedTag(tag)"></et-icon>
       </router-link>
@@ -43,9 +43,10 @@
 <script setup lang="ts">
 import { useRoute, useRouter, RouteRecordRaw } from "vue-router";
 import { resolve } from "path-browserify";
-import { translateRouteTitle } from "@/utils/i18n";
-
+import { translateRouteTitle } from "@/utils/common";
 import { usePermissionStore, useTagsViewStore, useSettingsStore, useSystemStore } from "@/store";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n()
 
 const { proxy } = getCurrentInstance()!;
 const router = useRouter();
@@ -549,14 +550,43 @@ onMounted(() => {
 }
 
 // 为每个标签添加不同的动画延迟，创造更流畅的效果
-.tags-item:nth-child(1) { animation-delay: 0.05s; }
-.tags-item:nth-child(2) { animation-delay: 0.1s; }
-.tags-item:nth-child(3) { animation-delay: 0.15s; }
-.tags-item:nth-child(4) { animation-delay: 0.2s; }
-.tags-item:nth-child(5) { animation-delay: 0.25s; }
-.tags-item:nth-child(6) { animation-delay: 0.3s; }
-.tags-item:nth-child(7) { animation-delay: 0.35s; }
-.tags-item:nth-child(8) { animation-delay: 0.4s; }
-.tags-item:nth-child(9) { animation-delay: 0.45s; }
-.tags-item:nth-child(10) { animation-delay: 0.5s; }
+.tags-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.tags-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.tags-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.tags-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.tags-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.tags-item:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+.tags-item:nth-child(7) {
+  animation-delay: 0.35s;
+}
+
+.tags-item:nth-child(8) {
+  animation-delay: 0.4s;
+}
+
+.tags-item:nth-child(9) {
+  animation-delay: 0.45s;
+}
+
+.tags-item:nth-child(10) {
+  animation-delay: 0.5s;
+}
 </style>
