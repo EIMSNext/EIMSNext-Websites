@@ -218,8 +218,8 @@ export default {
   navbar: {
     workspace: "Workspace",
     logout: "Logout",
-    document: "Document",
-    gitee: "Gitee",
+    homepage: "Project Home",
+    source: "Source Code",
     profile: "User Profile",
   },
   sizeSelect: {
@@ -237,14 +237,10 @@ export default {
     },
   },
   settings: {
-    project: "Project Settings",
+    uisetting: "UI Settings",
     theme: "Theme",
-    interface: "Interface",
-    navigation: "Navigation",
     themeColor: "Theme Color",
     tagsView: "Tags View",
-    fixedHeader: "Fixed Header",
-    sidebarLogo: "Sidebar Logo",
     watermark: "Watermark",
   },
   condition: {

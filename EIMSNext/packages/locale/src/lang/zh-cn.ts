@@ -215,10 +215,10 @@ export default {
   // 导航栏国际化
   navbar: {
     workspace: "工作台",
-    logout: "注销登出",
-    document: "项目文档",
-    gitee: "项目地址",
-    profile: "个人中心",
+    logout: "退出",
+    homepage: "项目官网",
+    source: "源码地址",
+    profile: "个人设置",
   },
   sizeSelect: {
     tooltip: "布局大小",
@@ -235,14 +235,10 @@ export default {
     },
   },
   settings: {
-    project: "项目配置",
-    theme: "主题设置",
-    interface: "界面设置",
-    navigation: "导航设置",
+    uisetting: "页面设置",
+    theme: "暗黑模式",
     themeColor: "主题颜色",
-    tagsView: "开启 Tags-View",
-    fixedHeader: "固定 Header",
-    sidebarLogo: "侧边栏 Logo",
+    tagsView: "标签视图",
     watermark: "开启水印",
   },
   condition: {
