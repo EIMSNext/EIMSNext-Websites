@@ -83,7 +83,7 @@ function handleOpenUserProfile() {
  * 注销登出
  */
 function logout() {
-  ElMessageBox.confirm("确定注销并退出系统吗？", "提示", {
+  ElMessageBox.confirm("确定退出系统吗？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",

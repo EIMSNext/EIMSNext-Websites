@@ -5,7 +5,7 @@
       <member-select v-model="tagsRef" :options="memberOptions" />
     </div>
     <template #footer-left>
-      <el-button v-if="memberOptions?.showContract" @click="openLink">通讯录</el-button>
+      <el-button v-if="memberOptions?.showContract" link @click="openLink">通讯录</el-button>
     </template>
   </et-dialog>
 </template>
