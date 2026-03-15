@@ -169,6 +169,22 @@ export default {
     fieldConflict_MsgContent:
       "If you use this field, there will be a conflict between field and subfield configurations. This operation will clear certain configurations for value assigning and cannot be undone.",
   },
+  dash: {
+    chart: {
+      vbar: "Column Chart",
+      hbar: "Bar Chart",
+      line: "Line Chart",
+      pie: "Pie Chart",
+    },
+    limitation: {
+      dimension: "{0} dimension(s)",
+      metric: "{0} metric(s)",
+      dimensionRange: "{0}-{1}dimension(s)",
+      metricRange: "{0}-{1}metric(s)",
+      moreDimensions: "{0} or more dimension(s)",
+      moreMetrics: "{0} or more metric(s)",
+    },
+  },
   // 菜单国际化
   route: {
     workspace: "Workspace",

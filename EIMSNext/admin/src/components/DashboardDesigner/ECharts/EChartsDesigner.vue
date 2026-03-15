@@ -119,10 +119,19 @@
             <el-collapse-item name="charttype" title="图表类型" class="box-head">
               <div class="box-body chart-type-body">
                 <template v-for="cc in chartConfigs" :key="cc.id">
-                  <el-button @click="selectChartType(cc)" class="chart-type"
-                    :class="{ active: chartSetting.chartType == cc.id }">
-                    <i class="icon" :class="cc.cssClass"></i>
-                  </el-button></template>
+                  <el-tooltip placement="left" effect="light">
+                    <template #content>
+                      <div style="margin: 8px;width: 120px; height: 60px;">
+                        <div style="margin-bottom: 6px;font-weight: 600;">{{ t(cc.i18n) }}</div>
+                        <div>{{ getLimitationDesc(t, cc.limitation) }}</div>
+                      </div>
+                    </template>
+                    <el-button @click="selectChartType(cc)" class="chart-type"
+                      :class="{ active: chartSetting.chartType == cc.id }">
+                      <i class="icon" :class="cc.cssClass"></i>
+                    </el-button>
+                  </el-tooltip>
+                </template>
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -137,7 +146,7 @@
                   </el-button></template>
               </div>
             </el-collapse-item>
-            <el-collapse-item name="charttopn" title="数据显示" class="box-head">
+            <el-collapse-item name="datatake" title="数据显示" class="box-head">
               <div class="box-body chart-type-body">
                 <div class="data-top">
                   <el-checkbox v-model="chartSetting.takeEnable">显示前</el-checkbox><el-input-number
@@ -162,15 +171,14 @@ import { DashboardItemDef, FieldDef, FieldType, FormDef, FormType } from "@eimsn
 import { IConditionList, IFormItem, ISortItem, ISortList } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
-import { useLocale } from "element-plus";
-import { ChartType, getChartConfigs, IChartConfig, IChartSetting, IDimensionField, IMetricsField } from "./type";
+import { ChartType, getChartConfigs, getLimitationDesc, IChartConfig, IChartSetting, IDimensionField, IMetricsField } from "./type";
 import { dashboardItemDefService, DatasourceType, IDimension, SortDirection } from "@eimsnext/services";
 import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { SortableEvent } from "sortablejs";
 import EChartsViewer from "./EChartsViewer.vue";
 import { uniqueId } from "@eimsnext/utils";
-
-const { t } = useLocale();
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineOptions({
   name: "EChartsDesigner",
@@ -247,7 +255,7 @@ const handleSourceOk = async (source: IDataSource) => {
 const roleChanged = () => { };
 
 const activeCollItems = ref(["charttype"])
-const activeSettingItems = ref(["chartsubtype"])
+const activeSettingItems = ref(["chartsubtype", "datatake"])
 const chartConfig = ref<IChartConfig>()
 const dropable = ref<any>({})
 
@@ -671,7 +679,7 @@ onMounted(() => {
             }
           }
         }
-      
+
         .active {
           background: var(--el-color-primary);
           color: #fff;

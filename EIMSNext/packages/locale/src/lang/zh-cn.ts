@@ -167,6 +167,22 @@ export default {
     fieldConflict_MsgContent:
       "使用该字段后，主字段和子字段的配置冲突。此操作会清除部分已设置的字段赋值，无法还原",
   },
+  dash: {
+    chart: {
+      vbar: "柱状图",
+      hbar: "条形图",
+      line: "折线图",
+      pie: "饼图",
+    },
+    limitation: {
+      dimension: "{0}个维度",
+      metric: "{0}个指标",
+      dimensionRange: "{0}-{1}个维度",
+      metricRange: "{0}-{1}个指标",
+      moreDimensions: "{0}个或多个维度",
+      moreMetrics: "{0}或多个个指标",
+    },
+  },
   // 菜单国际化
   route: {
     workspace: "工作台",
