@@ -66,5 +66,6 @@ const changeTheme = (val: any) => {
 <style lang="scss">
 .uisetting-header {
   margin-bottom: 0 !important;
+  font-weight: 600;
 }
 </style>

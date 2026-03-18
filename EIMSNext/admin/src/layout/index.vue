@@ -46,6 +46,7 @@
       </el-container>
     </el-container>
     <Settings v-if="defaultSettings.showSettings" />
+    <MessageCenter />
   </div>
 </template>
 

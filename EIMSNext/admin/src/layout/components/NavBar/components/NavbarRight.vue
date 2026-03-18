@@ -5,7 +5,7 @@
     <!-- 全屏 -->
     <Fullscreen />
     <!-- 消息通知 -->
-    <Notification />
+    <Notification @click="settingStore.messageCenterVisible = true"/>
     <!-- </template> -->
     <!-- 语言选择 -->
     <LangSelect :show-label="false" />
@@ -21,10 +21,9 @@
 </template>
 <script setup lang="ts">
 import defaultSettings from "@/settings";
-import { useSystemStore, useSettingsStore } from "@/store";
+import { useSettingsStore } from "@/store";
 import UserProfile from "./UserProfile.vue";
 
-const appStore = useSystemStore();
 const settingStore = useSettingsStore();
 </script>
 

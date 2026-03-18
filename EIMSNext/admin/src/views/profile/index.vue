@@ -1,13 +1,10 @@
 <template>
   <div class="personal-setting">
-    <div class="navigation-bar">
-      <div class="navigation-left">
-        <div class="navigation-bar-back-btn">
-          <el-button class="back-btn" @click="close">
-            <et-icon icon="el-ArrowLeft" size="24px" />
-          </el-button>
-          <span class="nav-text">个人设置</span>
-        </div>
+    <div class="top-nav-bar">
+      <div class="nav-left"><el-button class="back-btn" @click="close">
+          <et-icon icon="el-ArrowLeft" size="32px" />
+        </el-button>
+        <span class="nav-text">个人设置</span>
       </div>
     </div>
     <div class="main-container">
@@ -117,6 +114,54 @@ const close = () => {
 </script>
 
 <style lang="scss" scoped>
+.top-nav-bar {
+  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  font-size: 16px;
+  height: 60px;
+  justify-content: space-between;
+  left: 0;
+  line-height: 30px;
+  padding: 0 10px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--fc-bg-color-2);
+  box-shadow: unset;
+
+  .nav-left {
+    align-items: center;
+    display: flex;
+    flex: none;
+
+    .back-btn {
+      align-items: center;
+      display: flex;
+      position: relative;
+      padding: 0px;
+      border: none;
+      width: 40px;
+      background-color: transparent;
+
+      .back-icon {
+        cursor: pointer;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+    }
+
+    .nav-text {
+      margin-left: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 24px;
+    }
+  }
+
+}
+
+
 .link-btn {
   padding: 0 12px;
 }
