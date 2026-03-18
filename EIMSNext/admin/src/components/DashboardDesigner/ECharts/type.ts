@@ -38,11 +38,30 @@ export enum ChartType {
   Pie = "pie", //饼图
 }
 
+export interface ILimitation {
+  dimension?: ILimitOption;
+  metric?: ILimitOption;
+}
+
+export interface ILimitOption {
+  type: LimitType;
+  value: ILimitValue;
+}
+export enum LimitType {
+  Strict = 0,
+  Range = 1,
+}
+export interface ILimitValue {
+  value1: number;
+  value2?: number;
+}
+
 export interface IChartConfig {
   id: ChartType;
   i18n: string;
   subType?: Array<any>;
   cssClass: string;
+  limitation: ILimitation;
 }
 
 export function chartSettingValidate(setting: IChartSetting): boolean {
@@ -89,23 +108,31 @@ export function getChartConfigs() {
   let configs: IChartConfig[] = [
     {
       id: ChartType.VBar,
-      i18n: "dash.vbar",
+      i18n: "dash.chart.vbar",
       subType: [
         { id: "basic" },
         { id: "stack", cssClass: "vbar-stack" },
         { id: "waterfall", cssClass: "vbar-waterfall" },
       ],
       cssClass: "vbar",
+      limitation: {
+        dimension: { type: LimitType.Strict, value: { value1: 1 } },
+        metric: { type: LimitType.Strict, value: { value1: 1 } },
+      },
     },
     {
       id: ChartType.HBar,
-      i18n: "dash.hbar",
+      i18n: "dash.chart.hbar",
       subType: [{ id: "basic" }, { id: "stack", cssClass: "hbar-stack" }],
       cssClass: "hbar",
+      limitation: {
+        dimension: { type: LimitType.Strict, value: { value1: 1 } },
+        metric: { type: LimitType.Strict, value: { value1: 1 } },
+      },
     },
     {
       id: ChartType.Line,
-      i18n: "dash.line",
+      i18n: "dash.chart.line",
       subType: [
         { id: "basic" },
         { id: "stack", cssClass: "" },
@@ -114,18 +141,60 @@ export function getChartConfigs() {
         { id: "step", cssClass: "" },
       ],
       cssClass: "line",
+      limitation: {
+        dimension: { type: LimitType.Strict, value: { value1: 1 } },
+        metric: { type: LimitType.Strict, value: { value1: 1 } },
+      },
     },
     {
       id: ChartType.Pie,
-      i18n: "dash.pie",
+      i18n: "dash.chart.pie",
       subType: [
         { id: "basic" },
         { id: "circle", cssClass: "pie-circle" },
         { id: "area", cssClass: "" },
       ],
       cssClass: "pie",
+      limitation: {
+        dimension: { type: LimitType.Strict, value: { value1: 1 } },
+        metric: { type: LimitType.Strict, value: { value1: 1 } },
+      },
     },
   ];
 
   return configs;
+}
+
+export function getLimitationDesc(t: any, limitation?: ILimitation) {
+  if (!limitation) return "";
+
+  let limits: string[] = [];
+
+  if (limitation.dimension) {
+    if (limitation.dimension.type == LimitType.Range) {
+      if (limitation.dimension.value.value2)
+        limits.push(
+          t("dash.limitation.dimensionRange", [
+            limitation.dimension.value.value1,
+            limitation.dimension.value.value2,
+          ])
+        );
+      else limits.push(t("dash.limitation.moreDimensions", [limitation.dimension.value.value1]));
+    } else limits.push(t("dash.limitation.dimension", [limitation.dimension.value.value1]));
+  }
+
+  if (limitation.metric) {
+    if (limitation.metric.type == LimitType.Range) {
+      if (limitation.metric.value.value2)
+        limits.push(
+          t("dash.limitation.metricRange", [
+            limitation.metric.value.value1,
+            limitation.metric.value.value2,
+          ])
+        );
+      else limits.push(t("dash.limitation.moreMetrics", [limitation.metric.value.value1]));
+    } else limits.push(t("dash.limitation.metric", [limitation.metric.value.value1]));
+  }
+
+  return limits.join(", ");
 }

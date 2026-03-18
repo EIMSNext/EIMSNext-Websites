@@ -17,9 +17,9 @@
   padding: calc(var(--el-card-padding) - 8px) var(--el-card-padding);
 }
 
-.link-type,
-.link-type:focus {
-  color: #337ab7;
+.link-text,
+.link-text:focus {
+  color: #337ab7 !important;
   cursor: pointer;
 
   &:hover {

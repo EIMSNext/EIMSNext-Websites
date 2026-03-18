@@ -2,7 +2,7 @@ import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } fro
 import { accessToken } from "@eimsnext/utils";
 import router from "@/router";
 import { usePermissionStore } from "@/store";
-import { useUserStore, useFormStore } from "@eimsnext/store";
+import { useUserStore, useFormStore, useAppStore } from "@eimsnext/store";
 
 export function setupPermission() {
   // 白名单路由
@@ -43,11 +43,17 @@ export function setupPermission() {
                 // 动态设置页面标题
                 // console.log("to route", to);
                 let title = (to.params.title as string) || (to.query.title as string);
-                if ((!title || title == "form") && to.params.formId) {
-                  // console.log("meta title", title);
-                  const formStore = useFormStore();
-                  const form = await formStore.get(to.params.formId as string);
-                  if (form) title = form.name;
+                if (
+                  (!title || title == "form" || title == "dash") &&
+                  (to.params.formId || to.params.dashId)
+                ) {
+                  const appStore = useAppStore();
+                  const app = await appStore.get(to.params.appId as string);
+                  const menuId = to.params.formId || to.params.dashId;
+                  if (menuId) {
+                    const form = app?.appMenus.find((x) => x.menuId == menuId);
+                    if (form?.title) title = form.title;
+                  }
                 }
                 if (title) {
                   to.meta.title = title;

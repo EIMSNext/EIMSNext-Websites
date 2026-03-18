@@ -57,12 +57,12 @@
                     </div>
                   </template>
                 </el-popover> -->
-                <div class="menu-line">
+                <!-- <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-table"></i></div>
                     <div class="line-text">明细表</div>
                   </div>
-                </div>
+                </div> -->
                 <!--  <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-manage-table"></i></div>

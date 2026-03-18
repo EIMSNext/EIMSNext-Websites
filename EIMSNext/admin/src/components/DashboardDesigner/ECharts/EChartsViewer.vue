@@ -13,7 +13,7 @@
                         size="16px" />
                 </div>
             </div>
-            <div class="header-title" title="未命名统计表">{{ title }}</div>
+            <div class="header-title" :title="title">{{ title }}</div>
         </div>
 
         <template v-if="chartOpts">
