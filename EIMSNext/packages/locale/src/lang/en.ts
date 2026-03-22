@@ -84,6 +84,11 @@ export default {
     untitledForm: "Untitled Form",
     untitledDashboard: "Untitled Dashboard",
     untitledChart: "Untitled Chart",
+    data_created: "When data is submitted",
+    data_updated: "When data is updated",
+    data_removed: "When data is deleted",
+    wfstatus_updated: "When workflow status changes",
+    wftodo_updated: "When workflow task changes",
   },
   workflow: {
     flowStatus: {

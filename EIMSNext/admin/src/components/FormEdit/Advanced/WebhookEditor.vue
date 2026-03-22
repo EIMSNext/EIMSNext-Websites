@@ -21,11 +21,11 @@
                         </div>
                         <div class="push-event-triggers">
                             <el-checkbox :modelValue="dataCreated"
-                                @change="(val) => triggerChanged(WebHookTrigger.Data_Created, val)">有新数据提交时</el-checkbox>
+                                @change="(val) => triggerChanged(WebHookTrigger.Data_Created, val)">{{t("admin.data_created")}}</el-checkbox>
                             <el-checkbox :modelValue="dataUpdated"
-                                @change="(val) => triggerChanged(WebHookTrigger.Data_Updated, val)">有数据被修改时</el-checkbox>
+                                @change="(val) => triggerChanged(WebHookTrigger.Data_Updated, val)">{{t("admin.data_updated")}}</el-checkbox>
                             <el-checkbox :modelValue="dataRemoved"
-                                @change="(val) => triggerChanged(WebHookTrigger.Data_Removed, val)">有数据被删除时</el-checkbox>
+                                @change="(val) => triggerChanged(WebHookTrigger.Data_Removed, val)">{{t("admin.data_removed")}}</el-checkbox>
 
                         </div>
                         <div class="push-event-title"><span>流程事件</span><span
@@ -34,9 +34,9 @@
                         </div>
                         <div class="push-event-triggers">
                             <el-checkbox :modelValue="wfStatusUpdated"
-                                @change="(val) => triggerChanged(WebHookTrigger.WfStatus_Updated, val)">流程状态变更时</el-checkbox>
+                                @change="(val) => triggerChanged(WebHookTrigger.WfStatus_Updated, val)">{{t("admin.wfstatus_updated")}}</el-checkbox>
                             <el-checkbox :modelValue="wfTodoUpdated"
-                                @change="(val) => triggerChanged(WebHookTrigger.WfTodo_Updated, val)">流程待办变更时</el-checkbox>
+                                @change="(val) => triggerChanged(WebHookTrigger.WfTodo_Updated, val)">{{t("admin.wftodo_updated")}}</el-checkbox>
                         </div>
                     </div>
                 </div>

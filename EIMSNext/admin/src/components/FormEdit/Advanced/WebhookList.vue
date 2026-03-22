@@ -3,12 +3,20 @@
         :showNoSave="false" okText="确定" @ok="execDelete">
         <div>数据删除后将不可恢复</div>
     </EtConfirmDialog>
-    <el-drawer v-model="showDrawer" direction="btt" size="95%" @close="close">
+    <el-drawer v-model="showEditor" direction="btt" size="95%" @close="close">
         <template #header>
             <div class="main-title"> <span>数据推送</span></div>
         </template>
         <div class="main-content">
             <WebhookEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" />
+        </div>
+    </el-drawer>
+    <el-drawer v-model="showLog" direction="btt" size="95%" @close="showLog = false">
+        <template #header>
+            <div class="main-title"> <span>推送日志</span></div>
+        </template>
+        <div class="main-content">
+            <WebPushLogView v-if="selectedItem" v-model="selectedItem" />
         </div>
     </el-drawer>
     <AdvanceLayout title="数据推送" desc="数据推送可将表单数据推送至你指定的服务器">
@@ -24,6 +32,7 @@
                         <et-card class="flow-card" :title="'推送到自定义服务器'">
                             <template #action>
                                 <div class="flow-header">
+                                    <el-button @click="viewLog(hook)">推送日志</el-button>
                                     <el-button @click="edit(hook)">编辑</el-button>
                                     <el-button @click="remove(hook)">删除</el-button>
                                     <el-switch :model-value="!hook.disabled" @change="toggleDisable(hook)"></el-switch>
@@ -42,13 +51,13 @@
 </template>
 <script setup lang="ts">
 import WebhookEditor from "./WebhookEditor.vue";
+import WebPushLogView from "./WebPushLogView.vue";
 import { FormDef, WebHookTrigger, Webhook } from "@eimsnext/models";
 import { webhookService, } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
-import { Dictionary } from "@eimsnext/utils";
 
 defineOptions({
     name: "WebhookList",
@@ -58,7 +67,8 @@ const props = defineProps<{
     formDef: FormDef;
 }>();
 
-const showDrawer = ref(false);
+const showEditor = ref(false);
+const showLog = ref(false)
 const showDeleteConfirmDialog = ref(false)
 const webhooks = ref<Webhook[]>([]);
 const selectedItem = ref<Webhook>();
@@ -87,18 +97,23 @@ const addNew = () => {
         disabled: false
     };
 
-    showDrawer.value = true;
+    showEditor.value = true;
 };
 
-const edit = (flow: Webhook) => {
-    // console.log("edit df", flow);
-    selectedItem.value = flow;
+const viewLog = (hook: Webhook) => {
+    selectedItem.value = hook;
 
-    showDrawer.value = true;
+    showLog.value = true;
+}
+
+const edit = (hook: Webhook) => {
+    selectedItem.value = hook;
+
+    showEditor.value = true;
 };
 
-const remove = (flow: Webhook) => {
-    selectedItem.value = flow
+const remove = (hook: Webhook) => {
+    selectedItem.value = hook
     showDeleteConfirmDialog.value = true
 };
 const execDelete = () => {
@@ -116,7 +131,7 @@ const toggleDisable = (hook: Webhook) => {
 // const emit = defineEmits(["close"]);
 
 function close() {
-    showDrawer.value = false;
+    showEditor.value = false;
 
     loadWebhooks(props.formDef.id);
     // emit("close");

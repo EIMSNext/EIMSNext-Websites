@@ -91,7 +91,7 @@ import { FUniver } from "@univerjs/core/facade";
 import { FWorkbook, FWorksheet, FRange } from "@univerjs/sheets/facade";
 import { useFormStore } from "@eimsnext/store";
 import { FieldDef, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
-import { DataItemType, ITreeNode} from "@eimsnext/components";
+import { DataItemType, ITreeNode } from "@eimsnext/components";
 import Draggable from "vuedraggable";
 import { printTemplateService } from "@eimsnext/services";
 import { IPrintMetadata } from "./type";
@@ -135,7 +135,7 @@ const populateFields = () => {
         x.columns.forEach((y) => {
           let subNode: ITreeNode = {
             id: `${node.id}-${y.field}`,
-            value: `${node.id}.${y.field}`,
+            value: `${node.id}>${y.field}`,
             label: y.title,
             type: DataItemType.Field,
             data: y,
@@ -229,12 +229,12 @@ const initSheet = (data = {}) => {
     if (draggingNode.value) {
       const cell: FRange = params.worksheet.getRange(params.row, params.column);
       if (cell) {
-        cell.setValue(draggingNode.value.label);
+        cell.setValue(`\${${draggingNode.value.label}}`);
         //字段打印设置
         let printMeata: IPrintMetadata = {
           dataType: "field",
           id: draggingNode.value.value!,
-          fieldType: draggingNode.value.data.type,
+          // fieldType: draggingNode.value.data.type,
         };
         cell.setCustomMetaData(printMeata);
       }
