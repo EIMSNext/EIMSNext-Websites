@@ -52,24 +52,15 @@ export default defineComponent({
     },
   },
   emits: ["update:modelValue", "change"],
-  setup(props, { emit }) {
-    console.log('=== formSelectedData 组件初始化 ===');
-    console.log('props.modelValue:', props.modelValue);
-    console.log('props.modelValue 类型:', typeof props.modelValue);
+  setup(props, { emit }) {  
     
     const showDialog = ref(false);
     // 初始化时检查props.modelValue是否是包含 [object Object] 的字符串
-    let initialValue = props.modelValue ?? [];
-    console.log('初始值 before:', initialValue);
-    console.log('初始值类型:', typeof initialValue);
-    console.log('初始值是否为字符串:', typeof initialValue === 'string');
+    let initialValue = props.modelValue ?? [];  
     if (typeof initialValue === 'string') {
-      console.log('初始值是否包含[object Object]:', initialValue.includes('[object Object]'));
-      if (initialValue.includes('[object Object]')) {
-        console.log('检测到 [object Object] 格式字符串，转换为结构化数据');
+      if (initialValue.includes('[object Object]')) {        
         // 检查是否有选择的字段配置
         if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-          console.log('使用 selectedFields 配置构建显示数据');
           initialValue = props.selectionProcess.selectedFields.map(field => {
             return {
               label: field.label,
@@ -81,7 +72,6 @@ export default defineComponent({
         }
       }
     } else if (Array.isArray(initialValue)) {
-      console.log('初始值是数组，检查数组元素');
       // 检查数组元素是否包含[object Object]字符串
       const hasObjectString = initialValue.some(item => {
         if (typeof item === 'string') {
@@ -90,7 +80,6 @@ export default defineComponent({
         return false;
       });
       if (hasObjectString) {
-        console.log('检测到数组中包含[object Object]字符串，转换为结构化数据');
         if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
           initialValue = props.selectionProcess.selectedFields.map(field => {
             return {
@@ -129,21 +118,13 @@ export default defineComponent({
     watch(
       () => props.modelValue,
       (newVal) => {
-        console.log('=== props.modelValue 变化 ===');
-        console.log('newVal:', newVal);
-        console.log('newVal 类型:', typeof newVal);
         
         let processedValue = newVal ?? [];
-        console.log('处理前的值:', processedValue);
-        console.log('处理前的值类型:', typeof processedValue);
         
         if (typeof processedValue === 'string') {
-          console.log('值是字符串，是否包含[object Object]:', processedValue.includes('[object Object]'));
           if (processedValue.includes('[object Object]')) {
-            console.log('检测到 [object Object] 格式字符串，转换为结构化数据');
             // 检查是否有选择的字段配置
             if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-              console.log('使用 selectedFields 配置构建显示数据');
               processedValue = props.selectionProcess.selectedFields.map(field => {
                 return {
                   label: field.label,
@@ -155,7 +136,6 @@ export default defineComponent({
             }
           }
         } else if (Array.isArray(processedValue)) {
-          console.log('值是数组，检查数组元素');
           // 检查数组元素是否包含[object Object]字符串
           const hasObjectString = processedValue.some(item => {
             if (typeof item === 'string') {
@@ -164,7 +144,6 @@ export default defineComponent({
             return false;
           });
           if (hasObjectString) {
-            console.log('检测到数组中包含[object Object]字符串，转换为结构化数据');
             if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
               processedValue = props.selectionProcess.selectedFields.map(field => {
                 return {
@@ -263,7 +242,6 @@ export default defineComponent({
         // 检查是否有显示字段配置
         const displayRules = props.displayFields?.displayRules || [];
         if (displayRules.length > 0) {
-            console.log('使用 displayFields 配置构建显示数据');
             selectedData = displayRules.map(rule => {
                 return {
                     label: rule.label,
@@ -271,7 +249,6 @@ export default defineComponent({
                 };
             });
         } else {
-            console.log('使用默认 selectedFields 构建显示数据');
             selectedData = selectedFields.value.map(field => {
                 return {
                     label: field.label,
@@ -282,64 +259,33 @@ export default defineComponent({
         
         // 处理填充规则
         const fillRules = props.fillFields?.fillRules || [];
-        console.log('=== 填充规则调试信息 ===');
-        console.log('fillRules:', fillRules);
-        console.log('formCreateInject:', props.formCreateInject);
-        console.log('formCreateInject.api:', props.formCreateInject?.api);
-        console.log('formCreateInject.api 方法:', props.formCreateInject?.api ? Object.keys(props.formCreateInject.api) : '无');
-        console.log('selectedRecord:', selectedRecord.value);
         
         if (fillRules.length > 0 && props.formCreateInject) {
-            console.log('开始处理填充规则');
             
             // 构建要填充的表单数据
             const formData = {};
             
             // 遍历填充规则，将数据填充到对应字段
             fillRules.forEach(rule => {
-                console.log('处理规则:', rule);
                 if (rule.targetField) {
-                    const fieldValue = selectedRecord.value[rule.field.value] || "";
-                    console.log('填充字段:', rule.targetField, '值:', fieldValue);
+                    const fieldValue = selectedRecord.value[rule.field.value] || "";                    
                     formData[rule.targetField] = fieldValue;
                 }
             });
             
             // 尝试多种方法设置字段值
             try {
-                console.log('当前表单数据:', props.formCreateInject.form);
-                console.log('要填充的表单数据:', formData);
-                console.log('表单字段列表:', Object.keys(props.formCreateInject.form || {}));
                 
                 // 检查 fillRules 中的 targetField 是否存在于表单字段中
-                console.log('=== 检查填充规则 ===');
                 const formFields = Object.keys(props.formCreateInject.form || {});
                 fillRules.forEach(rule => {
                     const fieldExists = formFields.includes(rule.targetField);
-                    console.log('规则:', rule.targetField, '存在于表单中:', fieldExists);
                 });
-                
-                // 检查 formCreateInject 的完整结构
-                console.log('=== 检查 formCreateInject 结构 ===');
-                console.log('formCreateInject 所有属性:', Object.keys(props.formCreateInject));
-                console.log('formCreateInject.api 所有方法:', props.formCreateInject.api ? Object.keys(props.formCreateInject.api) : '无');
-                console.log('formCreateInject.form 所有属性:', props.formCreateInject.form ? Object.keys(props.formCreateInject.form) : '无');
-                
-                // 检查 formCreateInject.formCreate 结构
-                if (props.formCreateInject.formCreate) {
-                    console.log('=== 检查 formCreateInject.formCreate 结构 ===');
-                    console.log('formCreateInject.formCreate 所有属性:', Object.keys(props.formCreateInject.formCreate));
-                    if (props.formCreateInject.formCreate.api) {
-                        console.log('formCreateInject.formCreate.api 所有方法:', Object.keys(props.formCreateInject.formCreate.api));
-                    }
-                }
-                
+
                 // 方法 1: 先清除所有字段值，然后再设置新值
                 if (props.formCreateInject.api && props.formCreateInject.api.setValue) {
-                    console.log('=== 清除字段值 ===');
                     // 先清除所有字段值
                     Object.keys(formData).forEach(field => {
-                        console.log('清除字段:', field);
                         props.formCreateInject.api.setValue(field, '');
                     });
                 }
@@ -349,9 +295,6 @@ export default defineComponent({
                 
                 // 方法 2: 尝试使用 formCreateInject.api.setFormData 一次性设置所有字段
                 if (props.formCreateInject.api && props.formCreateInject.api.setFormData) {
-                    console.log('=== 填充表单数据 ===');
-                    console.log('使用 formCreateInject.api.setFormData 方法');
-                    console.log('要填充的表单数据:', formData);
                     props.formCreateInject.api.setFormData(formData);
                 }
                 
@@ -360,11 +303,9 @@ export default defineComponent({
                 
                 // 方法 3: 尝试使用 formCreateInject.api.setValue 逐个设置字段
                 if (props.formCreateInject.api && props.formCreateInject.api.setValue) {
-                    console.log('使用 formCreateInject.api.setValue 方法');
                     
                     // 逐个设置字段值
                     Object.keys(formData).forEach(field => {
-                        console.log('设置字段:', field, '值:', formData[field]);
                         props.formCreateInject.api.setValue(field, formData[field]);
                     });
                 }
@@ -374,11 +315,9 @@ export default defineComponent({
                 
                 // 方法 4: 尝试使用 formCreateInject.form 直接设置
                 if (props.formCreateInject.form) {
-                    console.log('使用 formCreateInject.form 直接设置');
                     
                     // 遍历所有字段，直接设置值
                     Object.keys(formData).forEach(field => {
-                        console.log('直接设置字段:', field, '值:', formData[field]);
                         // 先设置为一个不同的值，然后再设置新值，强制触发Vue的响应式更新
                         props.formCreateInject.form[field] = null;
                         props.formCreateInject.form[field] = formData[field];
@@ -390,7 +329,6 @@ export default defineComponent({
                 
                 // 方法 5: 刷新表单
                 if (props.formCreateInject.api && props.formCreateInject.api.refresh) {
-                    console.log('使用 formCreateInject.api.refresh 方法');
                     props.formCreateInject.api.refresh();
                 }
                 
@@ -399,9 +337,7 @@ export default defineComponent({
                 
                 // 方法 6: 再次使用 formCreateInject.api.setValue 逐个设置字段
                 if (props.formCreateInject.api && props.formCreateInject.api.setValue) {
-                    console.log('再次使用 formCreateInject.api.setValue 方法');
-                    Object.keys(formData).forEach(field => {
-                        console.log('再次设置字段:', field, '值:', formData[field]);
+                    Object.keys(formData).forEach(field => {                        
                         props.formCreateInject.api.setValue(field, formData[field]);
                     });
                 }
@@ -411,23 +347,15 @@ export default defineComponent({
                 
                 // 方法 7: 再次刷新表单
                 if (props.formCreateInject.api && props.formCreateInject.api.refresh) {
-                    console.log('再次使用 formCreateInject.api.refresh 方法');
                     props.formCreateInject.api.refresh();
                 }
                 
                 // 等待 DOM 更新
                 await nextTick();
-                
-                console.log('填充规则处理完成');
-                console.log('更新后表单数据:', props.formCreateInject.form);
             } catch (error) {
                 console.error('设置字段值时出错:', error);
             }
-        } else {
-            console.log('没有填充规则或 formCreateInject');
-            console.log('fillRules.length:', fillRules.length);
-            console.log('formCreateInject:', props.formCreateInject);
-        }
+        } 
         
         handleDataChange(selectedData);
       }
@@ -452,31 +380,19 @@ export default defineComponent({
       fetchFormData(1, size);
     };
 
-    return () => {
-      console.log('=== formSelectedData 渲染函数执行 ===');
-      console.log('props.modelValue:', props.modelValue);
-      console.log('props.modelValue 类型:', typeof props.modelValue);
-      console.log('selectedValue.value:', selectedValue.value);
-      console.log('selectedValue.value 类型:', typeof selectedValue.value);
-      
+    return () => {      
       const { disabled, preview, ...attrs } = props;
       const editable = !(disabled || isPreviewMode.value);
-      console.log('editable:', editable);
-      console.log('isPreviewMode.value:', isPreviewMode.value);
       
       let tags = selectedValue.value || [];
-      console.log('tags before:', tags);
-      console.log('tags 类型:', typeof tags);
       
       const tagHeight = "60px";
 
       // 直接检查 tags 是否是包含 [object Object] 的字符串
       if (typeof tags === 'string' && tags.includes('[object Object]')) {
-        console.log('检测到 [object Object] 格式字符串，转换为结构化数据');
         // 尝试从字符串中提取有意义的信息
         // 检查是否有选择的字段配置
         if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-          console.log('使用 selectedFields 配置构建显示数据');
           tags = props.selectionProcess.selectedFields.map(field => {
             return {
               label: field.label,
@@ -487,8 +403,6 @@ export default defineComponent({
           tags = [{ label: '已选择数据', value: '数据已选择但无法显示详细信息' }];
         }
       }
-      console.log('tags after:', tags);
-
       // 简化数据处理逻辑，确保能正确处理各种数据格式
       let displayTags = [];
       

@@ -70,36 +70,24 @@ export default defineComponent({
         },
         // 获取当前表单的所有字段（排除本控件）
         currentFormFields() {
-            console.log('=== 调试信息 ===');
-            console.log('activeRule:', this.activeRule);
             
             const currentField = this.activeRule?.field;
-            console.log('当前字段:', currentField);
             
             const fields = [];
-            
-            // 打印 designer 对象的结构，查看可用的方法和属性
-            console.log('designer 对象类型:', typeof this.designer);
-            console.log('designer 对象键:', Object.keys(this.designer));
-            
+
             // 获取真正的 designer 实例（在 Vue 3 中，getCurrentInstance() 返回的实例需要通过 proxy 访问方法）
             const designerInstance = this.designer.proxy || this.designer;
-            console.log('designer 实例:', designerInstance);
-            console.log('designer 实例方法:', Object.keys(designerInstance));
             
             // 尝试从 designerInstance.getJson() 获取字段（这是保存时使用的方法）
             if (fields.length === 0 && designerInstance.getJson) {
-                console.log('尝试从 designer.getJson() 获取字段');
                 try {
                     const json = designerInstance.getJson();
-                    console.log('designer.getJson() 返回:', json);
                     
                     // 解析 JSON 字符串为对象
                     let ruleArray;
                     if (typeof json === 'string') {
                         try {
                             ruleArray = JSON.parse(json);
-                            console.log('解析后的规则数组:', ruleArray);
                         } catch (e) {
                             console.error('解析 JSON 失败:', e);
                             ruleArray = [];
@@ -114,13 +102,11 @@ export default defineComponent({
                     const extractFieldsFromJson = (array) => {
                         array.forEach(item => {
                             if (item.field && item.title) {
-                                console.log(`找到字段: ${item.title} (${item.field})`);
                                 if (item.field !== currentField && item.type !== 'formselecteddata') {
                                     fields.push({
                                         label: item.title,
                                         value: item.field
                                     });
-                                    console.log('添加字段:', { label: item.title, value: item.field });
                                 }
                             }
                             if (item.children && Array.isArray(item.children)) {
@@ -139,23 +125,19 @@ export default defineComponent({
             
             // 如果还是没有获取到字段，尝试从 designerInstance.getRule() 获取
             if (fields.length === 0 && designerInstance.getRule) {
-                console.log('尝试从 designer.getRule() 获取字段');
                 try {
                     const rule = designerInstance.getRule();
-                    console.log('designer.getRule() 返回:', rule);
                     
                     if (Array.isArray(rule)) {
                         // 递归遍历规则数组，提取字段
                         const extractFieldsFromRule = (ruleArray) => {
                             ruleArray.forEach(item => {
                                 if (item.field && item.title) {
-                                    console.log(`找到字段: ${item.title} (${item.field})`);
-                                    if (item.field !== currentField && item.type !== 'formselecteddata') {
+                                      if (item.field !== currentField && item.type !== 'formselecteddata') {
                                         fields.push({
                                             label: item.title,
                                             value: item.field
                                         });
-                                        console.log('添加字段:', { label: item.title, value: item.field });
                                     }
                                 }
                                 if (item.children && Array.isArray(item.children)) {
@@ -172,21 +154,17 @@ export default defineComponent({
             
             // 尝试从 designerInstance.children 获取字段
             if (fields.length === 0 && designerInstance.children) {
-                console.log('尝试从 designer.children 获取字段');
-                console.log('designer.children:', designerInstance.children);
                 
                 // 递归遍历 children，提取字段
                 const extractFieldsFromChildren = (childrenArray) => {
                     childrenArray.forEach(item => {
                         // 检查是否是字段组件
                         if (item.field && item.title) {
-                            console.log(`找到字段: ${item.title} (${item.field})`);
                             if (item.field !== currentField && item.type !== 'formselecteddata') {
                                 fields.push({
                                     label: item.title,
                                     value: item.field
-                                });
-                                console.log('添加字段:', { label: item.title, value: item.field });
+                                });                                
                             }
                         }
                         // 递归处理子组件
@@ -200,8 +178,6 @@ export default defineComponent({
                     extractFieldsFromChildren(designerInstance.children);
                 }
             }
-            
-            console.log('最终字段列表:', fields);
             return fields;
         }
     },
@@ -216,7 +192,6 @@ export default defineComponent({
         modelValue(n) {
             this.value = n;
             // 不在这里直接设置 fillRules，而是在 loadConfig 中处理
-            console.log('modelValue 变化:', n);
         },
         visible(v) {
             if (v) {
@@ -228,7 +203,6 @@ export default defineComponent({
                 // 当选择的字段变化时，更新填充规则
                 // 只有当对话框可见时才更新，避免在加载配置时触发
                 if (this.visible) {
-                    console.log('selectedFields 变化:', newFields);
                     this.updateFillRules(newFields);
                 }
             },
@@ -297,7 +271,6 @@ export default defineComponent({
             const config = {
                 fillRules: JSON.parse(JSON.stringify(orderedFillRules))
             };
-            console.log('保存的填充规则:', config);
             this.$emit('update:modelValue', config);
             this.$emit('change', config);
             this.visible = false;

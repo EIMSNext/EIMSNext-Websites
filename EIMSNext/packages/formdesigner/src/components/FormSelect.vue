@@ -50,8 +50,6 @@ export default {
         const match = url.match(/\/app\/(.*?)\/form\/(.*?)(?:\/|$)/);
         const appId = match ? match[1] : '';
         const currentFormId = match ? match[2] : '';
-        console.log('应用ID:', appId);
-        console.log('当前表单ID:', currentFormId);
         
         if (!appId) {
           console.error('无法获取应用ID');
@@ -61,9 +59,7 @@ export default {
         
         // 直接使用完整的API地址
         const apiUrl = window.appSetting?.apiUrl || '';
-        console.log('API地址:', apiUrl);
         if (!apiUrl) {
-          console.error('无法获取API地址');
           this.loading = false;
           return;
         }
@@ -77,13 +73,10 @@ export default {
             'Accept': 'application/json;odata.metadata=none'
           },
           onSuccess: (data) => {
-            console.log('API返回数据:', data);
             // 根据应用ID过滤数据
             const appData = data.value.find(item => item.id === appId);
-            console.log('找到的应用数据:', appData);
             
             if (appData && appData.appMenus) {
-              console.log('应用菜单数据:', appData.appMenus);
               // 转换为下拉选项格式，并排除当前表单
               this.formList = appData.appMenus
                 .filter(menu => menu.menuId !== currentFormId)
@@ -91,7 +84,6 @@ export default {
                   label: menu.title,
                   value: menu.menuId
                 }));
-              console.log('转换后的表单列表:', this.formList);
             }
             this.loading = false;
           },
