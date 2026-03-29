@@ -233,8 +233,7 @@ const initSheet = (data = {}) => {
         //字段打印设置
         let printMeata: IPrintMetadata = {
           dataType: "field",
-          id: draggingNode.value.value!,
-          // fieldType: draggingNode.value.data.type,
+          id: draggingNode.value.value!
         };
         cell.setCustomMetaData(printMeata);
       }
