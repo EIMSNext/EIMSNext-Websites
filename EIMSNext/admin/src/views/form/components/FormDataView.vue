@@ -8,6 +8,12 @@
   >
     <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
+  <PdfPreview
+    v-model="showPdfPreview"
+    :title="pdfPreviewTitle"
+    subtitle="Custom print preview"
+    :source="pdfPreviewUrl"
+  />
   <et-toolbar type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
   <FormView
     v-if="formDef && formData"
@@ -33,7 +39,7 @@ defineOptions({
   name: "FormDataView",
 });
 
-import { ref, onBeforeMount } from "vue";
+import { computed, onBeforeMount, ref, watch } from "vue";
 import {
   FormData,
   FormDataRequest,
@@ -42,16 +48,19 @@ import {
   IFieldPerm,
   DataPerms,
   FormDef,
+  PrintTemplate,
 } from "@eimsnext/models";
 import { useFormStore, useUserStore } from "@eimsnext/store";
-import { formDataService } from "@eimsnext/services";
+import { formDataService, printTemplateService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
 import { MessageIcon, ToolbarItem } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 import { hasDataPerm } from "@/utils/common";
 import FormPrintDiv from "@/components/WebPrint/FormPrintDiv.vue";
+import PdfPreview from "@/components/WebPrint/PdfPreview.vue";
 import { getPrintConfig, IPrintData } from "@/components/WebPrint/type";
-const { t } = useI18n();
+import buildQuery from "odata-query";
+const { t, locale, mergeLocaleMessage } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -81,6 +90,11 @@ const printConfig = ref(getPrintConfig(false));
 
 const formPrintData = ref();
 const printTrigger = ref<HTMLElement | null>(null);
+const customPrintTemplates = ref<PrintTemplate[]>([]);
+const showPdfPreview = ref(false);
+const pdfPreviewTitle = ref("");
+const pdfPreviewUrl = ref("");
+const mockPdfPreviewUrl = "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf";
 
 const leftBars = ref<ToolbarItem[]>([
   {
@@ -108,7 +122,87 @@ const leftBars = ref<ToolbarItem[]>([
     },
   },
 ]);
+
+const getPrintTemplateTextKey = (print: PrintTemplate) => `form.printTemplate.${print.id}`;
+
+const syncPrintTemplateLocales = (prints: PrintTemplate[]) => {
+  const currentLocale = locale.value;
+  const messages = prints.reduce<Record<string, string>>((acc, print) => {
+    acc[getPrintTemplateTextKey(print)] = print.name;
+    return acc;
+  }, {});
+
+  mergeLocaleMessage(currentLocale, messages);
+};
+
+const updatePrintToolbar = () => {
+  const printIndex = leftBars.value.findIndex((item) => item.config.command == "print");
+  if (printIndex < 0) return;
+
+  const currentItem = leftBars.value[printIndex];
+  const baseConfig = {
+    text: "common.print",
+    command: "print",
+    visible: true,
+    icon: "el-printer",
+    disabled: currentItem.config.disabled,
+  };
+
+  if (!customPrintTemplates.value.length) {
+    leftBars.value[printIndex] = {
+      type: "button",
+      config: baseConfig,
+    };
+    return;
+  }
+
+  leftBars.value[printIndex] = {
+    type: "dropdown",
+    config: {
+      ...baseConfig,
+      menuItems: [
+        {
+          text: "common.print",
+          command: "print",
+          visible: true,
+        },
+        ...customPrintTemplates.value.map((print) => ({
+          text: getPrintTemplateTextKey(print),
+          command: `custom-print:${print.id}`,
+          visible: true,
+        })),
+      ],
+    },
+  };
+};
+
+const loadPrintTemplates = async (formId: string) => {
+  const query = buildQuery({ filter: { formId } });
+  customPrintTemplates.value = await printTemplateService.query<PrintTemplate>(query);
+  syncPrintTemplateLocales(customPrintTemplates.value);
+  updatePrintToolbar();
+};
+
+const openCustomPrintPreview = (print: PrintTemplate) => {
+  pdfPreviewUrl.value = mockPdfPreviewUrl;
+  pdfPreviewTitle.value = `${print.name}.pdf`;
+  showPdfPreview.value = true;
+};
+
 const toolbarHandler = (cmd: string, e: MouseEvent) => {
+  if (cmd.startsWith("custom-print:")) {
+    const templateId = cmd.replace("custom-print:", "");
+    const print = customPrintTemplates.value.find((item) => item.id == templateId);
+
+    if (!print) {
+      ElMessage.warning("未找到打印模板");
+      return;
+    }
+
+    openCustomPrintPreview(print);
+    return;
+  }
+
   switch (cmd) {
     case "edit":
       actions.value = {
@@ -191,10 +285,18 @@ watch(
   },
   { deep: true }
 );
+
+watch(showPdfPreview, (visible) => {
+  if (!visible) {
+    pdfPreviewUrl.value = "";
+  }
+});
+
 onBeforeMount(async () => {
   let form = await formStore.get(props.formId);
   if (form) {
     formDef.value = form;
+    await loadPrintTemplates(form.id);
   }
 
   let data = await formDataService.get<FormData>(props.dataId);
