@@ -7,26 +7,47 @@
         <el-button @click="onPreview">预览</el-button>
       </div>
     </div>
-    <fc-designer ref="designer" :locale="locale" :handle="handle" :config="config">
+    <fc-designer
+      ref="designer"
+      :locale="locale"
+      :handle="handle"
+      :config="config"
+    >
       <template #block_fff="scope">
         &lt;template #block_fff="scope"&gt; 自定义内容 &lt;/template&gt;
       </template>
       <template #handle>
         <div v-if="isgod" class="handle">
-          <el-button size="small" class="btn-info" style="border: none" @click="setJson">导入JSON
+          <el-button
+            size="small"
+            class="btn-info builder-action-btn"
+            @click="setJson"
+            >导入JSON
           </el-button>
-          <el-button size="small" class="btn-info" style="border: none" @click="setOption">导入Options
+          <el-button
+            size="small"
+            class="btn-info builder-action-btn"
+            @click="setOption"
+            >导入Options
           </el-button>
-          <el-button size="small" class="btn-info" style="border: none" @click="showJson">生成JSON
+          <el-button
+            size="small"
+            class="btn-info builder-action-btn"
+            @click="showJson"
+            >生成JSON
           </el-button>
-          <el-button size="small" class="btn-info" style="border: none" @click="showOption">生成Options
+          <el-button
+            size="small"
+            class="btn-info builder-action-btn"
+            @click="showOption"
+            >生成Options
           </el-button>
         </div>
       </template>
     </fc-designer>
     <el-dialog :title="title[type]" v-model="state" class="_fc-t-dialog">
       <div ref="editor" v-if="state"></div>
-      <span style="color: red" v-if="err">输入内容格式有误!</span>
+      <span v-if="err" class="builder-error-text">输入内容格式有误!</span>
       <template #footer v-if="type > 2">
         <span slot="footer" class="dialog-footer">
           <el-button @click="state = false" size="small">取 消</el-button>
@@ -59,9 +80,7 @@ import { is } from "@eimsnext/form-render-core";
 import formCreate from "@eimsnext/form-render-elplus";
 // import { copyTextToClipboard } from "@eimsnext/form-designer";
 import { ArrowDown } from "@element-plus/icons-vue";
-import {
-  FormContent,
-} from "@eimsnext/models";
+import { FormContent } from "@eimsnext/models";
 import "@eimsnext/form-designer/dist/index.css";
 import { cloneDeep } from "lodash";
 
@@ -101,23 +120,23 @@ export default {
       theme: "",
       themes: [
         {
-          value: "#2E73FF",
+          value: "var(--et-color-primary)",
           label: "",
         },
         {
-          value: "#F27024",
+          value: "var(--et-color-warning)",
           label: "orange",
         },
         {
-          value: "#18BF82",
+          value: "var(--et-color-success)",
           label: "green",
         },
         {
-          value: "#884CFF",
+          value: "var(--et-color-secondary)",
           label: "purple",
         },
         {
-          value: "#FE679A",
+          value: "var(--et-color-danger)",
           label: "pink",
         },
       ],
@@ -341,10 +360,7 @@ export default {
         const curLayout = JSON.stringify(this.$refs.designer.getJson());
         const curOptions = JSON.stringify(this.$refs.designer.getOptionsJson());
 
-        return (
-          curLayout !== this.oldLayout ||
-          curOptions !== this.oldOptions
-        );
+        return curLayout !== this.oldLayout || curOptions !== this.oldOptions;
       } catch (e) {
         return false;
       }
@@ -362,7 +378,7 @@ export default {
       process.env.NODE_ENV === "development" || this.$route.query.god === "cn";
 
     if (this.formDef && this.formDef.content) {
-      this.$refs.designer.setFormId(this.formDef.id)
+      this.$refs.designer.setFormId(this.formDef.id);
 
       if (this.formDef.content.layout) {
         this.oldLayout = JSON.stringify(this.formDef.content.layout);
@@ -467,8 +483,16 @@ body {
   align-items: center;
 }
 
+.builder-action-btn {
+  border: none;
+}
+
+.builder-error-text {
+  color: var(--et-color-danger);
+}
+
 ._fc-t-menu .el-dropdown,
-.handle .el-button+.el-button {
+.handle .el-button + .el-button {
   margin-left: 0;
 }
 

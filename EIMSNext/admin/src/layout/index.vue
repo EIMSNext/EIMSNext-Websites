@@ -1,46 +1,59 @@
 <template>
   <div class="wh-full layout-left" :class="classObj">
-    <el-container style="height: 100vh;">
-      <el-header style="height: 50px; padding: 0 12px">
+    <el-container class="layout-shell">
+      <el-header class="layout-header">
         <NavBar />
       </el-header>
-      <el-container style="height: calc(100vh - 50px); border-top: 1px solid var(--el-menu-border-color)">
+      <el-container class="layout-main-shell">
         <el-aside width="45px" class="main-left-menu">
           <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
-            <AppLink :to="{
-              path: '/workspace',
-            }">
+            <AppLink
+              :to="{
+                path: '/workspace',
+              }"
+            >
               <div class="main-left-menu-item">
                 <et-icon icon="homepage" size="18px" :color="getAppIconColor()"></et-icon>
               </div>
             </AppLink>
           </el-tooltip>
-          <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
+          <template
+            v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
+          >
             <el-tooltip :content="t('route.system')" placement="right" :hide-after="0">
-              <AppLink :to="{
-                path: '/system/department',
-              }">
+              <AppLink
+                :to="{
+                  path: '/system/department',
+                }"
+              >
                 <div class="main-left-menu-item">
                   <et-icon icon="icon-settings" size="18px" :color="getAppIconColor()"></et-icon>
                 </div>
               </AppLink>
             </el-tooltip>
           </template>
-          <el-divider style="margin: 3px 0" />
+          <el-divider class="layout-divider" />
           <template v-for="app in appsRef">
             <template v-if="app.id != 'system'">
               <el-tooltip :content="app.name" placement="right" :hide-after="0">
-                <AppLink :to="{
-                  path: `/app/${app.id}/mytasks`,
-                }">
+                <AppLink
+                  :to="{
+                    path: `/app/${app.id}/mytasks`,
+                  }"
+                >
                   <div class="main-left-menu-item">
-                    <et-icon :icon="getAppIcon(app)" size="18px" :color="getAppIconColor()"></et-icon>
+                    <et-icon
+                      :icon="getAppIcon(app)"
+                      size="18px"
+                      :color="getAppIconColor()"
+                    ></et-icon>
                   </div>
                 </AppLink>
-              </el-tooltip></template>
+              </el-tooltip>
+            </template>
           </template>
         </el-aside>
-        <el-main style="padding: 0">
+        <el-main class="layout-main">
           <slot></slot>
         </el-main>
       </el-container>
@@ -58,7 +71,7 @@ import defaultSettings from "@/settings";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
 import { UserType } from "@eimsnext/models";
-const { t } = useI18n()
+const { t } = useI18n();
 
 defineOptions({
   name: "Layout",
@@ -66,24 +79,45 @@ defineOptions({
 
 const systemStore = useSystemStore();
 
-const userStore = useUserStore()
+const userStore = useUserStore();
 const appStore = useAppStore();
 const { items: appsRef } = storeToRefs(appStore);
-const curUser = toRef(userStore.currentUser)
+const curUser = toRef(userStore.currentUser);
 
 const classObj = computed(() => ({
   hideSidebar: !systemStore.sidebar.opened,
   openSidebar: systemStore.sidebar.opened,
 }));
-
 </script>
 
 <style lang="scss" scoped>
+.layout-shell {
+  height: 100vh;
+}
+
+.layout-header {
+  height: var(--et-size-50);
+  padding: 0 var(--et-space-12);
+}
+
+.layout-main-shell {
+  height: calc(100vh - var(--et-size-50));
+  border-top: 1px solid var(--et-border-color-light);
+}
+
+.layout-divider {
+  margin: var(--et-space-3) 0;
+}
+
+.layout-main {
+  padding: var(--et-space-0);
+}
+
 .main-left-menu {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-right: 1px solid var(--el-menu-border-color);
+  border-right: 1px solid var(--et-border-color-light);
 }
 
 .main-left-menu-item {
@@ -91,7 +125,7 @@ const classObj = computed(() => ({
   width: 100%;
   align-items: center;
   justify-content: center;
-  height: 40px;
+  height: var(--et-size-40);
   cursor: pointer;
   box-sizing: border-box;
 }

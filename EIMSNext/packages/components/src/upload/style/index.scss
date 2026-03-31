@@ -1,0 +1,48 @@
+@use "../../common/index" as *;
+
+.#{$prefix}-upload {
+  .#{$prefix}-upload-list {
+    .#{$prefix}-upload-list_item:first-child {
+      margin-top: var(--et-space-10);
+    }
+
+    .#{$prefix}-upload-list_item {
+      transition: all var(--et-duration-slow) cubic-bezier(0.55, 0, 0.1, 1);
+      font-size: var(--et-font-size-14);
+      color: var(--et-text-secondary);
+      line-height: 1.8;
+      margin-top: var(--et-space-5);
+      position: relative;
+      box-sizing: border-box;
+      border-radius: var(--et-radius-4);
+      width: 100%;
+
+      .#{$prefix}-upload-list_item-name {
+        color: var(--et-text-secondary);
+        display: block;
+        margin-right: var(--et-size-40);
+        overflow: hidden;
+        padding-left: var(--et-space-4);
+        text-overflow: ellipsis;
+        transition: color var(--et-duration-normal);
+        white-space: nowrap;
+      }
+
+      .#{$prefix}-upload-list_item-status-label {
+        position: absolute;
+        right: var(--et-space-5);
+        top: var(--et-space-0);
+        line-height: inherit;
+      }
+
+      &:hover {
+        cursor: pointer;
+        background: var(--et-bg-hover);
+
+        .#{$prefix}-upload-list_item-name {
+          color: var(--et-color-primary);
+        }
+      }
+    }
+  }
+}

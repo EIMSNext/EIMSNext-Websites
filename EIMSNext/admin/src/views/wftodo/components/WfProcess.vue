@@ -1,14 +1,27 @@
 <template>
-  <FormView v-if="formData" :def="formDef" :data="formData" :isView="true" :actions="actions" @approve="handleApprove"
-    @reject="handleReject">
-  </FormView>
+  <FormView
+    v-if="formData"
+    :def="formDef"
+    :data="formData"
+    :isView="true"
+    :actions="actions"
+    @approve="handleApprove"
+    @reject="handleReject"
+  ></FormView>
 </template>
 <script lang="ts" setup>
 defineOptions({
   name: "WfProcess",
 });
 
-import { FormDef, FormData as FormData_2, FormContent, FormDataRequest, WfTodo, ApproveAction } from "@eimsnext/models";
+import {
+  FormDef,
+  FormData as FormData_2,
+  FormContent,
+  FormDataRequest,
+  WfTodo,
+  ApproveAction,
+} from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService, workflowService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
@@ -17,11 +30,13 @@ const props = withDefaults(
   defineProps<{
     todo: WfTodo;
   }>(),
-  {
-  }
+  {}
 );
 
-const actions = ref<FormActionSettings>({ approve: { text: "common.wfProcess.approve", visible: true }, reject: { text: "common.wfProcess.reject", visible: true } })
+const actions = ref<FormActionSettings>({
+  approve: { text: "common.wfProcess.approve", visible: true },
+  reject: { text: "common.wfProcess.reject", visible: true },
+});
 const appId = ref("");
 const dataId = ref(props.todo.dataId);
 const formStore = useFormStore();
@@ -51,16 +66,14 @@ const handleReject = (data: any) => {
 
 onMounted(async () => {
   let form = await formStore.get(props.todo.formId);
-  // console.log("form def11111", form?.appId)
   if (form) {
     appId.value = form.appId;
     formDef.value = form.content!;
   }
 
   let data = await formDataService.get<FormData_2>(props.todo!.dataId);
-  // console.log("form data11111", data, data?.id)
   if (data) {
-    formData.value = data
+    formData.value = data;
   }
 });
 </script>

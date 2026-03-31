@@ -1,0 +1,36 @@
+@use "../../common/index" as *;
+
+.#{$prefix}-upload-dragger {
+  background-color: var(--et-bg-container);
+  border: 1px dashed var(--et-border-color-strong);
+  border-radius: var(--et-radius-6);
+  box-sizing: border-box;
+  width: var(--et-size-360);
+  height: var(--et-size-180);
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    border-color: var(--et-color-primary);
+  }
+
+  .#{$prefix}-upload-content {
+    text-align: center;
+    color: var(--et-text-secondary);
+
+    .#{$prefix}-upload-icon {
+      font-size: var(--et-size-20);
+    }
+
+    em {
+      color: var(--et-color-primary);
+      font-style: normal;
+    }
+  }
+}
+
+.#{$prefix}-upload-draggerenter {
+  border-color: var(--et-color-primary);
+}

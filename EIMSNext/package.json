@@ -90,7 +90,6 @@
   "devDependencies": {
     "@eslint/js": "^9.38.0",
     "@types/codemirror": "^5.60.17",
-    "@types/less": "^3.0.8",
     "@types/lodash": "^4.17.20",
     "@types/node": "^22.18.12",
     "@types/path-browserify": "^1.0.3",
@@ -110,7 +109,6 @@
     "js-beautify": "^1.15.4",
     "jsbarcode": "^3.12.1",
     "jsonlint-mod": "^1.7.6",
-    "less": "^4.4.2",
     "lint-staged": "^15.5.2",
     "loadjs": "^4.3.0",
     "path-browserify": "^1.0.1",

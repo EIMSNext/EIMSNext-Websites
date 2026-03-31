@@ -60,7 +60,7 @@ export enum ConditionFieldType {
   Other = "other",
 }
 export function getConditionFieldType(
-  fieldtype?: FieldType | string
+  fieldtype?: FieldType | string,
 ): ConditionFieldType {
   if (!fieldtype) return ConditionFieldType.None;
 
@@ -106,24 +106,22 @@ export function getConditionFieldType(
 }
 export function isFieldTypeMatched(
   conFieldType: ConditionFieldType,
-  fieldType: FieldType
+  fieldType: FieldType,
 ) {
   return conFieldType == getConditionFieldType(fieldType);
 }
 export function buildNodeFieldTree(
   forms: INodeForm[],
   setting: IFieldBuildSetting,
-  fieldDef?: IFormFieldDef
+  fieldDef?: IFormFieldDef,
 ): ITreeNode[] {
-  // console.log("buildNodeFieldTree", forms);
   const fieldDataType = getConditionFieldType(fieldDef?.type);
 
   const attachChildren = (
     pNode: ITreeNode,
     singleResult: boolean,
-    ignoreTable: boolean
+    ignoreTable: boolean,
   ) => {
-    // console.log("0...ignoretagle", ignoreTable);
     const children = forms.find((x) => x.nodeId == pNode.id)?.form?.content
       ?.items;
     if (children && children.length > 0) {
@@ -149,29 +147,15 @@ export function buildNodeFieldTree(
             );
 
             if (x.type == FieldType.TableForm) {
-              // 1.1 右边为子表字段
-              // console.log(
-              //   "map 1.1:" + fieldDef?.label,
-              //   fieldDef?.field,
-              //   masterMap,
-              //   mapped,
-              //   pNode.id,
-              //   singleResult,
-              //   x.field,
-              //   showLv2,
-              //   singleOnly
-              // );
               if (!singleOnly) {
                 if (
                   !ignoreTable ||
                   (showLv2 && pNode.id == masterMap.mapNodeId)
                 ) {
                   if (!mapped) {
-                    // console.log("1.1.1", pNode.id);
                     if (!masterMap || pNode.id == masterMap.mapNodeId)
                       shouldHidden = false;
                   } else {
-                    // console.log("1.1.2", pNode.id);
                     //当同级字段只有一个在MAP并且是当前字段时，不过滤。
                     if (
                       mapped.mapCount == 1 &&
@@ -189,27 +173,13 @@ export function buildNodeFieldTree(
                     }
                   }
                 } else {
-                  // console.log("1.1.3", ignoreTable);
                   shouldHidden = ignoreTable;
                 }
               }
             } else {
-              //1.2 右边为主表
-              // console.log(
-              //   "map 1.2:" + fieldDef?.label,
-              //   fieldDef?.field,
-              //   masterMap,
-              //   mapped,
-              //   pNode.id,
-              //   singleResult,
-              //   x.field,
-              //   showLv2,
-              //   singleOnly
-              // );
               if (!mapped) {
                 if (!masterMap) shouldHidden = false;
                 else shouldHidden = !singleResult || showLv2;
-                // console.log("1.2.1", shouldHidden);
               } else {
                 if (singleOnly) {
                   if (!(showLv2 && pNode.id == masterMap.mapNodeId)) {
@@ -245,7 +215,6 @@ export function buildNodeFieldTree(
             let singleOnly = false;
             let subMap: IFormFieldMap | undefined = undefined;
             for (const [key, map] of Object.entries(setting.fieldMapping)) {
-              // console.log("find sub map", key, map);
               if (key != "master") {
                 singleOnly = true;
                 subMap = map;
@@ -253,27 +222,13 @@ export function buildNodeFieldTree(
               }
             }
 
-            // console.log(
-            //   "map 2:" + fieldDef?.label,
-            //   fieldDef?.field,
-            //   subMap,
-            //   mapped,
-            //   pNode,
-            //   singleResult,
-            //   x.field,
-            //   singleOnly,
-            //   x.type
-            // );
-
             if (x.type == FieldType.TableForm) {
               //2.1 右边为子表
               if (!singleOnly) {
                 if (!ignoreTable) {
                   if (!mapped) {
-                    // console.log("map 2.1.1:");
                     shouldHidden = false;
                   } else {
-                    // console.log("map 2.1.2:");
                     //当同级字段只有一个在MAP并且是当前字段时，不过滤。
                     if (
                       mapped.mapCount == 1 &&
@@ -291,7 +246,6 @@ export function buildNodeFieldTree(
                     }
                   }
                 } else {
-                  // console.log("map 2.1.3:");
                   shouldHidden = ignoreTable;
                 }
               }
@@ -303,9 +257,7 @@ export function buildNodeFieldTree(
                   shouldHidden =
                     !singleResult ||
                     (!subMap.mapSingleResult && pNode.id == subMap.mapNodeId);
-                // console.log("map 2.2.1:", shouldHidden);
               } else {
-                // console.log("map 2.2.2:");
                 if (!singleOnly) {
                   //当同级字段只有一个在MAP并且是当前字段时，不过滤。
                   if (
@@ -319,7 +271,6 @@ export function buildNodeFieldTree(
                     shouldHidden = false;
                   }
                 } else {
-                  // console.log("map 2.2.3:");
                   if (singleResult) shouldHidden = false;
                   else
                     //右边为多数据节点主表
@@ -345,7 +296,7 @@ export function buildNodeFieldTree(
                     sub,
                     x,
                     pNode.id,
-                    singleResult
+                    singleResult,
                   );
                   const node: ITreeNode = {
                     id: `${pNode.id}-${fieldDef.field}`,
@@ -372,7 +323,7 @@ export function buildNodeFieldTree(
                 x,
                 undefined,
                 pNode.id,
-                singleResult
+                singleResult,
               );
               const node: ITreeNode = {
                 id: `${pNode.id}-${fieldDef.field}`,
@@ -396,7 +347,7 @@ export function buildNodeFieldTree(
   const buildTreeNode = (
     treeNoes: ITreeNode[],
     nodeForm: INodeForm,
-    ignoreTable: boolean = false
+    ignoreTable: boolean = false,
   ) => {
     const rootNode: ITreeNode = {
       id: nodeForm.nodeId,

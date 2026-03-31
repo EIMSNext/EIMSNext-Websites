@@ -1,17 +1,17 @@
-@import "../../common/index.less";
+@use "../../common/index" as *;
 
-.@{prefix}-field-perms {
+.#{$prefix}-field-perms {
   .field-list-header {
-    background-color: var(--et-color-bg-secondary);
-    height: 30px;
-    line-height: 30px;
-    padding: 0 8px;
+    background-color: var(--et-bg-muted);
+    height: var(--et-size-30);
+    line-height: var(--et-line-height-30);
+    padding: 0 var(--et-space-8);
     position: relative;
     width: 100%;
 
     .tips {
-      color: #f56c6c;
-      margin-left: 2px;
+      color: var(--et-color-danger);
+      margin-left: var(--et-space-2);
     }
   }
 
@@ -23,7 +23,7 @@
     justify-content: center;
     position: absolute;
     top: 0;
-    width: 60px;
+    width: var(--et-size-60);
     right: 175px;
   }
 
@@ -35,7 +35,7 @@
     justify-content: center;
     position: absolute;
     top: 0;
-    width: 60px;
+    width: var(--et-size-60);
     right: 55px;
   }
 
@@ -47,23 +47,24 @@
 
     .check-all {
       color: var(--et-color-primary);
-      height: 40px;
-      padding: 8px;
+      height: var(--et-size-40);
+      padding: var(--et-space-8);
       position: relative;
       width: 100%;
     }
+
     .all-items {
       width: 100%;
 
       .check-item {
-        min-height: 40px;
-        padding: 8px;
+        min-height: var(--et-size-40);
+        padding: var(--et-space-8);
         position: relative;
 
         .check-item-text {
           word-wrap: break-word;
           word-break: break-word;
-          max-width: 200px;
+          max-width: var(--et-size-200);
         }
 
         .subform-tag {
@@ -75,6 +76,16 @@
           position: absolute;
           top: 0;
           right: -8px;
+        }
+
+        .subform-button {
+          width: var(--et-size-20);
+          height: var(--et-size-20);
+          padding: var(--et-space-0);
+        }
+
+        .subform-icon {
+          color: var(--et-text-disabled);
         }
       }
     }

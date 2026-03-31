@@ -1,20 +1,20 @@
-@import "../../common/index.less";
+@use "../../common/index" as *;
 
-.@{prefix}-list {
+.#{$prefix}-list {
   border: none;
-  border-radius: 4px;
-  padding: 0;
+  border-radius: var(--et-radius-4);
+  padding: var(--et-space-0);
   display: flex;
   flex-direction: column;
   height: 100%;
 
   .list-header {
-    line-height: 36px;
+    line-height: var(--et-line-height-36);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0px 8px;
-    border-bottom: 1px solid var(--el-border-color);
+    padding: 0 var(--et-space-8);
+    border-bottom: 1px solid var(--el-border-color, var(--et-border-color));
     flex-shrink: 0;
 
     .item-header {
@@ -25,19 +25,19 @@
 
   .list-content-wrapper {
     list-style: none;
-    padding: 0;
-    margin: 0px;
+    padding: var(--et-space-0);
+    margin: var(--et-space-0);
     flex: 1;
     overflow-y: auto;
-    max-height: calc(100% - 36px);
+    max-height: calc(100% - var(--et-size-36));
 
     .list-item {
-      padding: 0px 8px;
-      line-height: 32px;
-      transition: background-color 0.3s;
+      padding: 0 var(--et-space-8);
+      line-height: var(--et-line-height-32);
+      transition: background-color var(--et-duration-normal);
 
       &:hover {
-        background-color: var(--el-fill-color-light);
+        background-color: var(--el-fill-color-light, var(--et-bg-hover));
       }
 
       .content-wrapper {
@@ -48,12 +48,12 @@
           display: flex;
           flex: 1;
           align-items: center;
-          margin-right: 5px;
+          margin-right: var(--et-space-5);
         }
 
         .item-label {
           font-weight: 500;
-          color: var(--et-color-text-secondary);
+          color: var(--et-text-secondary);
         }
       }
     }

@@ -38,13 +38,10 @@ import variables from "@/styles/variables.module.scss";
 
 const systemStore = useSystemStore();
 const settingsStore = useSettingsStore();
-const isOpenSidebar = computed(() => systemStore.sidebar.opened);
 const fixedHeader = computed(() => settingsStore.fixedHeader); // 是否固定header
 const showTagsView = computed(() => settingsStore.tagsView); // 是否显示tagsView
-// 缓存页面集合
 const cachedViews = computed(() => useTagsViewStore().cachedViews);
 
-// 应用主区域高度
 const appMainHeight = computed(() => {
   if (showTagsView.value) {
     return `calc(100vh - ${variables["navbar-height"]} - ${variables["tags-view-height"]})`;
@@ -52,11 +49,6 @@ const appMainHeight = computed(() => {
     return `calc(100vh - ${variables["navbar-height"]})`;
   }
 });
-
-function handleOutsideClick() {
-  systemStore.closeSideBar();
-}
-
 </script>
 
 <style lang="scss" scoped>
@@ -87,8 +79,8 @@ function handleOutsideClick() {
   }
 
   .tag-header {
-    padding: 0 12px;
-    background-color: var(--el-bg-color-page);
+    padding: 0 var(--et-space-12);
+    background-color: var(--et-bg-page);
   }
 }
 
@@ -111,7 +103,7 @@ function handleOutsideClick() {
 .app-main {
   position: relative;
   overflow: hidden;
-  background-color: var(--el-bg-color-page);
-  padding: 12px 12px 0;
+  background-color: var(--et-bg-page);
+  padding: var(--et-space-12) var(--et-space-12) 0;
 }
 </style>

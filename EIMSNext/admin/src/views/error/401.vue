@@ -10,7 +10,7 @@ const state = reactive({
   errGif: new URL("../../assets/images/401.gif", import.meta.url).href,
 });
 
-const { errGif} = toRefs(state);
+const { errGif } = toRefs(state);
 
 const router = useRouter();
 
@@ -26,23 +26,23 @@ function back() {
       <el-col :span="12">
         <h1 class="text-jumbo text-ginormous">Oops!</h1>
         <h2>你没有权限去该页面</h2>
-        <h6>如有不满请联系你领导</h6>       
+        <h6>如有不满请联系你领导</h6>
       </el-col>
       <el-col :span="12">
         <img :src="errGif" width="313" height="428" alt="Girl has dropped her ice cream." />
       </el-col>
-    </el-row>  
+    </el-row>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .page-container {
   width: 100%;
-  padding: 100px;
+  padding: var(--et-size-100);
 
   .pan-back-btn {
-    color: #fff;
-    background: #008489;
+    color: var(--et-text-on-primary);
+    background: var(--et-color-success);
     border: none !important;
   }
 
@@ -58,20 +58,20 @@ function back() {
   }
 
   .text-jumbo {
-    font-size: 60px;
+    font-size: var(--et-size-60);
     font-weight: 700;
-    color: #484848;
+    color: var(--et-text-primary);
   }
 
   .list-unstyled {
-    font-size: 14px;
+    font-size: var(--et-font-size-14);
 
     li {
-      padding-bottom: 5px;
+      padding-bottom: var(--et-space-5);
     }
 
     a {
-      color: #008489;
+      color: var(--et-color-success);
       text-decoration: none;
 
       &:hover {

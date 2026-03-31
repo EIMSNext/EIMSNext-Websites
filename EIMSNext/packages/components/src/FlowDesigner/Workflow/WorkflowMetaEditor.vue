@@ -5,31 +5,52 @@
         <div class="flow-node-meta">
           <div class="attr-content">
             <div class="attr-item has-padding">
-              <MetaItemHeader :label="t('workflow.nodeName')" :required="true"></MetaItemHeader>
-              <el-input v-model="activeData.name" :readonly="nodeType == FlowNodeType.Start" size="default"
-                style="width: 100%" />
+              <MetaItemHeader
+                :label="t('workflow.nodeName')"
+                :required="true"
+              ></MetaItemHeader>
+              <el-input
+                v-model="activeData.name"
+                :readonly="nodeType == FlowNodeType.Start"
+                size="default"
+                class="full-width-input"
+              />
             </div>
-            <div v-if="nodeType == FlowNodeType.Approve" class="attr-item has-padding">
+            <div
+              v-if="nodeType == FlowNodeType.Approve"
+              class="attr-item has-padding"
+            >
               <ApproveNodeMeta></ApproveNodeMeta>
             </div>
-            <div v-if="nodeType == FlowNodeType.Condition" class="attr-item has-padding">
+            <div
+              v-if="nodeType == FlowNodeType.Condition"
+              class="attr-item has-padding"
+            >
               <WfConditionNodeMeta></WfConditionNodeMeta>
             </div>
-            <div v-if="nodeType == FlowNodeType.CopyTo" class="attr-item has-padding">
+            <div
+              v-if="nodeType == FlowNodeType.CopyTo"
+              class="attr-item has-padding"
+            >
               <CopyNodeMeta></CopyNodeMeta>
             </div>
           </div>
         </div>
       </el-tab-pane>
       <el-tab-pane :label="t('workflow.flowProps')" name="flow">
-        <div>{{ t('workflow.reminderSetting') }}</div>
+        <div>{{ t("workflow.reminderSetting") }}</div>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 <script lang="ts" setup>
 import { inject, nextTick, reactive, ref, watch } from "vue";
-import { FlowNodeType, IFlowContext, IFlowNodeData, createFlowNode } from "../Common/FlowData";
+import {
+  FlowNodeType,
+  IFlowContext,
+  IFlowNodeData,
+  createFlowNode,
+} from "../Common/FlowData";
 import { useLocale } from "element-plus";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import ApproveNodeMeta from "./ApproveNodeMeta.vue";
@@ -56,15 +77,19 @@ watch(
       nodeType.value = activeData.value.nodeType;
     });
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 <style lang="scss">
 .flow-meta-editor {
+  .full-width-input {
+    width: 100%;
+  }
+
   .flow-node-meta {
     height: 100%;
     overflow: auto;
-    padding: 8px 8px 8px;
+    padding: var(--et-space-8);
     position: relative;
 
     .attr-content {
@@ -77,7 +102,7 @@ watch(
       flex-direction: column;
 
       .attr-item {
-        font-size: 14px;
+        font-size: var(--et-font-size-14);
 
         .item-header {
           -webkit-box-align: center;
@@ -86,38 +111,38 @@ watch(
           display: -webkit-box;
           display: -ms-flexbox;
           display: flex;
-          line-height: 22px;
-          margin-bottom: 8px;
+          line-height: var(--et-line-height-22);
+          margin-bottom: var(--et-space-8);
           position: relative;
-          color: var(--et-color-text);
+          color: var(--et-text-primary);
 
           .title {
             // color: var(--fd-color-text);
-            font-size: 14px;
+            font-size: var(--et-font-size-14);
             font-weight: 700;
           }
         }
 
-        .sub-item+.sub-item {
-          margin-top: 8px;
+        .sub-item + .sub-item {
+          margin-top: var(--et-space-8);
         }
       }
 
       .has-padding {
-        padding: 12px;
+        padding: var(--et-space-12);
       }
     }
   }
 
   .required {
-    color: #eb5050;
+    color: var(--et-color-danger);
   }
 
   .help-icon {
-    color: #b5b8be;
-    font-size: 16px;
-    line-height: 20px;
-    margin-left: 10px;
+    color: var(--et-text-disabled);
+    font-size: var(--et-font-size-16);
+    line-height: var(--et-line-height-20);
+    margin-left: var(--et-space-10);
   }
 }
 </style>

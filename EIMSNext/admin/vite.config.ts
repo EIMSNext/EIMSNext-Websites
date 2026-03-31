@@ -183,7 +183,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         output: {
           experimentalMinChunkSize: 500 * 1024,
           manualChunks(id) {
-            // if (id.includes("@eimsnext")) console.log("id", id);
             if (id.includes("@eimsnext/form-designer")) {
               return "form-designer"; // 单独拆成 vendor-formdesigner.js
             }
@@ -200,7 +199,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           assetFileNames: (assetInfo: any) => {
             const info = assetInfo.name.split(".");
             let extType = info[info.length - 1];
-            // console.log('文件信息', assetInfo.name)
             if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)) {
               extType = "media";
             } else if (/\.(png|jpe?g|gif|svg)(\?.*)?$/.test(assetInfo.name)) {

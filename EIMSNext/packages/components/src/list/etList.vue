@@ -11,19 +11,34 @@
       <li v-for="item in data" :key="item.id" class="list-item">
         <slot :item="item">
           <div class="content-wrapper">
-            <div class="item-content clickable" @click.stop="handleItemClick(item)">
-              <et-icon v-if="item.icon" :icon="item.icon" :color="item.iconColor || defaultColor"
-                style="padding-right: 5px"></et-icon>
+            <div
+              class="item-content clickable"
+              @click.stop="handleItemClick(item)"
+            >
+              <et-icon
+                v-if="item.icon"
+                :icon="item.icon"
+                :color="item.iconColor || defaultColor"
+                class="item-icon"
+              ></et-icon>
               <div class="item-label">
                 {{ item.label }}
               </div>
             </div>
             <template v-if="selectable">
-              <el-checkbox v-if="multiple" :model-value="modelValue && modelValue.includes(item.id)"
-                @change="(val: boolean) => handleItemCheck(item, val)">
+              <el-checkbox
+                v-if="multiple"
+                :model-value="modelValue && modelValue.includes(item.id)"
+                @change="(val: boolean) => handleItemCheck(item, val)"
+              >
               </el-checkbox>
-              <el-radio v-if="!multiple" v-model="singleItemId" :value="item.id"
-                @change="(val: string) => handleRadioCheck(item, val)"></el-radio></template>
+              <el-radio
+                v-if="!multiple"
+                v-model="singleItemId"
+                :value="item.id"
+                @change="(val: string) => handleRadioCheck(item, val)"
+              ></el-radio
+            ></template>
           </div>
         </slot>
       </li>
@@ -31,7 +46,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import "./style/index.less";
+import "./style/index.scss";
 import { computed, ref, watch } from "vue";
 import { IListItem } from "./type";
 
@@ -51,25 +66,27 @@ const props = withDefaults(
     selectable: false,
     itemClass: "",
     multiple: true,
-    showCount: true
-  }
+    showCount: true,
+  },
 );
 
-const oldSingleItemId = ref<string>()
-const oldSingleItem = ref<IListItem>()
-const singleItemId = ref<string>()
-const defaultColor = "#46c26f"
+const oldSingleItemId = ref<string>();
+const oldSingleItem = ref<IListItem>();
+const singleItemId = ref<string>();
+const defaultColor = "var(--et-color-success)";
 
 watch(
   () => props.modelValue,
   () => {
     if (!props.multiple && props.modelValue?.length > 0) {
-      singleItemId.value = props.modelValue[0]
-      oldSingleItemId.value = singleItemId.value
-      oldSingleItem.value = props.data.find(x => x.id == oldSingleItemId.value)
+      singleItemId.value = props.modelValue[0];
+      oldSingleItemId.value = singleItemId.value;
+      oldSingleItem.value = props.data.find(
+        (x) => x.id == oldSingleItemId.value,
+      );
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const headerText = computed(() => {
@@ -125,14 +142,13 @@ const handleRadioCheck = (item: IListItem, val: string) => {
       }
       emit("itemCheck", item, true);
       oldSingleItem.value = item;
-      oldSingleItemId.value = val
-    }
-    else {
+      oldSingleItemId.value = val;
+    } else {
       emit("update:modelValue", []);
       if (oldSingleItem.value) {
         emit("itemCheck", oldSingleItem.value, false);
         oldSingleItem.value = undefined;
-        oldSingleItemId.value = ""
+        oldSingleItemId.value = "";
       }
     }
   }
@@ -140,10 +156,17 @@ const handleRadioCheck = (item: IListItem, val: string) => {
 
 const handleItemClick = (item: IListItem) => {
   if (props.selectable) {
-    if (props.multiple) handleItemCheck(item, !!!props.modelValue?.find(x => x == item.id))
-    else handleRadioCheck(item, item.id)
+    if (props.multiple)
+      handleItemCheck(item, !!!props.modelValue?.find((x) => x == item.id));
+    else handleRadioCheck(item, item.id);
   }
 
   emit("itemClick", item);
 };
 </script>
+
+<style scoped>
+.item-icon {
+  padding-right: var(--et-space-5);
+}
+</style>

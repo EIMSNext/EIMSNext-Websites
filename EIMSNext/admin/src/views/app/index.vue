@@ -1,6 +1,12 @@
 <template>
-  <form-edit v-if="showFormEditor && newForm" :modelValue="showFormEditor" :formDef="newForm!"
-    :usingFlow="usingWorkflow" :isLedger="isLedger" @close="showFormEditor = false" />
+  <form-edit
+    v-if="showFormEditor && newForm"
+    :modelValue="showFormEditor"
+    :formDef="newForm!"
+    :usingFlow="usingWorkflow"
+    :isLedger="isLedger"
+    @close="showFormEditor = false"
+  />
   <Layout>
     <div class="empty-app">
       <div class="empty-content">
@@ -44,11 +50,11 @@ import FormEdit from "@/components/FormEdit/index.vue";
 import { App, FormDef, FormDefRequest, FormType } from "@eimsnext/models";
 import { formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
-const { t } = useI18n()
+const { t } = useI18n();
 
-const newForm = ref<FormDef>()
+const newForm = ref<FormDef>();
 const router = useRouter();
-const appStore = useAppStore()
+const appStore = useAppStore();
 const formStore = useFormStore();
 const contextStore = useContextStore();
 const route = useRoute();
@@ -58,16 +64,12 @@ const usingWorkflow = ref(false);
 const isLedger = ref(false);
 
 const app = ref<App>();
-// console.log("appid", appId, contextStore.appId);
 
 onBeforeMount(async () => {
-  // console.log("appid", appId, contextStore.appId);
   await contextStore.setAppId(appId);
   appStore.get(contextStore.appId).then((res) => (app.value = res));
   if (formStore.items.length > 0) {
     const path = `/app/${appId}/form/${formStore.items[0].id}`;
-
-    // console.log("forms", path, formStore.items);
     router.push(path);
   }
 });
@@ -82,15 +84,16 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
     appId: contextStore.appId,
     name: t("admin.untitledForm"),
     content: {
-      "layout": "[]",
-      "options": "{\"info\":{\"align\":\"left\"},\"form\":{\"inline\":false,\"hideRequiredAsterisk\":false,\"labelPosition\":\"top\",\"size\":\"default\",\"labelWidth\":\"auto\"},\"resetBtn\":{\"show\":false,\"innerText\":\"重置\"},\"submitBtn\":{\"show\":false,\"innerText\":\"提交\"}}"
+      layout: "[]",
+      options:
+        '{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":false,"innerText":"提交"}}',
     },
     usingWorkflow: usingFlow,
     isLedger: ledger,
   };
 
-  formDefService.post<FormDef>(req).then(resp => {
-    newForm.value = resp
+  formDefService.post<FormDef>(req).then((resp) => {
+    newForm.value = resp;
     formStore.update(resp);
     contextStore.setAppChanged(); //reload 菜单
 
@@ -100,10 +103,10 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
 </script>
 <style lang="scss" scoped>
 .empty-app {
-  background: #f5f6f8;
+  background: var(--et-bg-page);
   height: 100%;
   overflow: auto;
-  padding: 10px 0;
+  padding: var(--et-space-10) 0;
   width: 100%;
 
   .empty-content {
@@ -112,21 +115,21 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
     flex-direction: column;
     height: 100%;
     justify-content: center;
-    max-height: 660px;
-    min-height: 540px;
-    min-width: 906px;
+    max-height: var(--et-size-660);
+    min-height: var(--et-size-540);
+    min-width: var(--et-size-906);
 
     .empty-tips {
       display: flex;
       flex: 0 0 auto;
-      margin-top: 50px;
-      padding: 0 24px;
+      margin-top: var(--et-size-50);
+      padding: 0 var(--et-space-24);
 
       .empty-title {
         flex: 1 1 auto;
-        font-size: 16px;
+        font-size: var(--et-font-size-16);
         font-weight: 700;
-        line-height: 22px;
+        line-height: var(--et-line-height-22);
       }
     }
 
@@ -134,51 +137,51 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
       display: flex;
 
       .creator-item {
-        background: #fff;
-        border-radius: 8px;
+        background: var(--et-bg-container);
+        border-radius: var(--et-radius-8);
         cursor: pointer;
         flex-direction: column;
-        height: 300px;
-        margin: 15px 24px;
-        padding: 10px 10px 80px;
-        width: 270px;
+        height: var(--et-size-300);
+        margin: var(--et-space-15) var(--et-space-24);
+        padding: var(--et-space-10) var(--et-space-10) var(--et-space-80);
+        width: var(--et-size-270);
         display: flex;
 
         .tip-icon {
-          border-radius: 8px;
+          border-radius: var(--et-radius-8);
           flex: 0 0 auto;
-          height: 210px;
+          height: var(--et-size-210);
           text-align: center;
-          width: 250px;
+          width: var(--et-size-250);
 
           .create-icon {
             background-repeat: no-repeat;
             background-size: cover;
-            height: 110px;
-            margin: 42px auto 14px;
-            width: 90px;
+            height: var(--et-size-110);
+            margin: var(--et-space-42) auto var(--et-space-14);
+            width: var(--et-size-90);
           }
 
           &.flow {
-            background: #fff2e8;
+            background: var(--et-bg-warning-soft);
           }
 
           &.generic {
-            background: #eaf2fd;
+            background: var(--et-bg-info-soft);
           }
 
           .tip-title {
             flex: 1 1 auto;
-            font-size: 16px;
+            font-size: var(--et-font-size-16);
             font-weight: 700;
-            line-height: 22px;
+            line-height: var(--et-line-height-22);
           }
         }
 
         .tip-desc {
-          color: var(--et-color-text-secondary);
-          font-size: 12px;
-          margin-top: 12px;
+          color: var(--et-text-secondary);
+          font-size: var(--et-font-size-12);
+          margin-top: var(--et-space-12);
           text-align: center;
         }
       }

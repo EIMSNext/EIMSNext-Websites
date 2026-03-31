@@ -1,18 +1,32 @@
 <!-- 菜单组件 -->
 <template>
-  <el-menu :default-active="currentRoute.path" :collapse="!systemStore.sidebar.opened"
-    :background-color="variables['menu-background']" :text-color="variables['menu-text']"
-    :active-text-color="variables['menu-active-text']" :unique-opened="false" :collapse-transition="false"
-    mode="vertical" style="width: 100%;" @open="onMenuOpen" @close="onMenuClose">
+  <el-menu
+    :default-active="currentRoute.path"
+    :collapse="!systemStore.sidebar.opened"
+    :background-color="variables['menu-background']"
+    :text-color="variables['menu-text']"
+    :active-text-color="variables['menu-active-text']"
+    :unique-opened="false"
+    :collapse-transition="false"
+    mode="vertical"
+    class="sidebar-menu"
+    @open="onMenuOpen"
+    @close="onMenuClose"
+  >
     <!-- 菜单项 -->
-    <SidebarMenuItem v-for="route in appMenus" :key="route.path" :item="route" :base-path="resolveFullPath(route.path)"
-      @editForm="editForm" />
+    <SidebarMenuItem
+      v-for="route in appMenus"
+      :key="route.path"
+      :item="route"
+      :base-path="resolveFullPath(route.path)"
+      @editForm="editForm"
+    />
   </el-menu>
 </template>
 
 <script lang="ts" setup>
 import path from "path-browserify";
-import { useSystemStore, } from "@/store";
+import { useSystemStore } from "@/store";
 import { isExternal } from "@/utils/index";
 
 import variables from "@/styles/variables.module.scss";
@@ -32,16 +46,17 @@ const props = defineProps({
 
 const systemStore = useSystemStore();
 const currentRoute = useRoute();
-const appMenus = toRef(props.menuList)
+const appMenus = toRef(props.menuList);
 
 // 存储已展开的菜单项索引
 const expandedMenuIndexes = ref<string[]>([]);
-watch(() => props.menuList,
+watch(
+  () => props.menuList,
   () => {
-    appMenus.value = props.menuList
+    appMenus.value = props.menuList;
   },
   { immediate: true }
-)
+);
 /**
  * 获取完整路径
  *
@@ -80,6 +95,12 @@ const onMenuClose = (index: string) => {
 
 const emit = defineEmits(["editForm"]);
 function editForm(formId: string, type: FormType) {
-  emit("editForm", formId, type)
+  emit("editForm", formId, type);
 }
 </script>
+
+<style lang="scss" scoped>
+.sidebar-menu {
+  width: 100%;
+}
+</style>

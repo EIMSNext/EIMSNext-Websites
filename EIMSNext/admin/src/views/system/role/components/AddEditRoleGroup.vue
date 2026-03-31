@@ -1,7 +1,14 @@
 <template>
-  <et-dialog v-model="showDialog" width="400px" :title="title" :append-to-body="true" :destroy-on-close="true"
-    @cancel="cancel" @ok="save">
-    <el-form :model="formData" :rules="rules" label-width="80px" style="padding: 12px 20px">
+  <et-dialog
+    v-model="showDialog"
+    width="400px"
+    :title="title"
+    :append-to-body="true"
+    :destroy-on-close="true"
+    @cancel="cancel"
+    @ok="save"
+  >
+    <el-form :model="formData" :rules="rules" label-width="80px" class="dialog-form">
       <el-form-item label="分组名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入分组名称" />
       </el-form-item>
@@ -59,3 +66,9 @@ const save = async () => {
   emit("ok", formData.value);
 };
 </script>
+
+<style lang="scss" scoped>
+.dialog-form {
+  padding: var(--et-space-12) var(--et-space-20);
+}
+</style>

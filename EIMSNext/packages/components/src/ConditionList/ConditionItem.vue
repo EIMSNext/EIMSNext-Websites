@@ -2,41 +2,77 @@
   <div class="cond-item">
     <div class="cond-detail">
       <template v-if="condType == ConditionType.Node">
-        <NodeFieldList class="cond-field" v-model="field" :nodes="nodes!" :fieldBuildSetting="fieldBuildSetting"
-          :field-def="modelValue.field" @change="changeField"></NodeFieldList>
+        <NodeFieldList
+          class="cond-field"
+          v-model="field"
+          :nodes="nodes!"
+          :fieldBuildSetting="fieldBuildSetting"
+          :field-def="modelValue.field"
+          @change="changeField"
+        ></NodeFieldList>
       </template>
       <template v-else>
-        <FieldSelect class="cond-field" v-model="field" :formId="formId" :fieldLimit="fieldBuildSetting.fieldLimit"
-          @change="changeField"></FieldSelect>
+        <FieldSelect
+          class="cond-field"
+          v-model="field"
+          :formId="formId"
+          :fieldLimit="fieldBuildSetting.fieldLimit"
+          @change="changeField"
+        ></FieldSelect>
       </template>
 
-      <el-dropdown v-model="op" class="cond-op" size="default" trigger="click" @command="onOpChanged">
-        <span style="display: flex; align-items: center">
+      <el-dropdown
+        v-model="op"
+        class="cond-op"
+        size="default"
+        trigger="click"
+        @command="onOpChanged"
+      >
+        <span class="cond-op-label">
           {{ opLabel }}
           <et-icon icon="el-arrow-down"></et-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
             <template v-for="item in dataOperators[dataType]" :key="item">
-              <el-dropdown-item :command="item">{{ opLabels[item] }}</el-dropdown-item>
+              <el-dropdown-item :command="item">{{
+                opLabels[item]
+              }}</el-dropdown-item>
             </template>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
       <div class="flex-1"></div>
-      <div><et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon></div>
+      <div>
+        <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
+      </div>
     </div>
     <div v-if="op != 'empty' && op != 'notempty'" class="cond-detail mt-[10px]">
-      <ConditionValue v-model="value" :field-def="field" :nodes="nodes" :fieldBuildSetting="valueBuildSetting"
-        @change="onInput"></ConditionValue>
+      <ConditionValue
+        v-model="value"
+        :field-def="field"
+        :nodes="nodes"
+        :fieldBuildSetting="valueBuildSetting"
+        @change="onInput"
+      ></ConditionValue>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { FieldType } from "@eimsnext/models";
-import { ConditionType, ConditionValueType, IConditionList, dataOperators } from "./type";
+import {
+  ConditionType,
+  ConditionValueType,
+  IConditionList,
+  dataOperators,
+} from "./type";
 import { useLocale } from "element-plus";
-import { ConditionFieldType, IFieldBuildSetting, INodeForm, getConditionFieldType } from "@/NodeFieldList/type";
+import {
+  ConditionFieldType,
+  IFieldBuildSetting,
+  INodeForm,
+  getConditionFieldType,
+} from "@/NodeFieldList/type";
 import { IFormFieldDef } from "@/FieldSelect/type";
 import { computed, ref, toRef } from "vue";
 
@@ -56,15 +92,24 @@ const props = defineProps<{
 }>();
 
 const field = ref<IFormFieldDef>(
-  props.modelValue.field ?? { formId: props.formId, field: "", label: "", type: FieldType.None }
+  props.modelValue.field ?? {
+    formId: props.formId,
+    field: "",
+    label: "",
+    type: FieldType.None,
+  },
 );
 const op = toRef(props.modelValue.op ?? "empty");
-const value = ref(props.modelValue.value ?? { type: ConditionValueType.Custom, value: null });
+const value = ref(
+  props.modelValue.value ?? { type: ConditionValueType.Custom, value: null },
+);
 
 const fieldType = ref<FieldType>(field.value?.type ?? FieldType.Input);
 
 const dataType = computed(() => {
-  return field.value.field ? getConditionFieldType(fieldType.value) : ConditionFieldType.Other;
+  return field.value.field
+    ? getConditionFieldType(fieldType.value)
+    : ConditionFieldType.Other;
 });
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
@@ -72,7 +117,18 @@ const emit = defineEmits(["update:modelValue", "change", "remove"]);
 const buildOpLabels = () => {
   let p: Record<string, string> = {};
 
-  ["eq", "ne", "in", "nin", "empty", "notempty", "gt", "gte", "lt", "lte"].forEach((o) => {
+  [
+    "eq",
+    "ne",
+    "in",
+    "nin",
+    "empty",
+    "notempty",
+    "gt",
+    "gte",
+    "lt",
+    "lte",
+  ].forEach((o) => {
     p[o] = t("condition.op." + o);
   });
   return p;
@@ -84,7 +140,9 @@ const opLabel = computed(() => {
 
 const changeField = (item: IFormFieldDef) => {
   field.value = item;
-  let newDataType = item.field ? getConditionFieldType(item.type) : ConditionFieldType.None;
+  let newDataType = item.field
+    ? getConditionFieldType(item.type)
+    : ConditionFieldType.None;
 
   if (dataType.value != newDataType) {
     value.value.value = null;
@@ -108,7 +166,12 @@ const onInput = () => {
   emitChange();
 };
 const emitChange = () => {
-  let newModel = { id: props.modelValue.id, field: field.value, op: op.value, value: value.value };
+  let newModel = {
+    id: props.modelValue.id,
+    field: field.value,
+    op: op.value,
+    value: value.value,
+  };
   emit("update:modelValue", newModel);
   emit("change", newModel);
 };
@@ -119,22 +182,27 @@ const onRemove = () => {
 </script>
 <style lang="scss" scoped>
 .cond-item {
-  border: 1px dashed #eee;
-  background: #fcfcfc;
-  padding: 10px;
-  border-radius: 3px;
+  border: 1px dashed var(--et-border-color-light);
+  background: var(--et-bg-container);
+  padding: var(--et-space-10);
+  border-radius: var(--et-radius-3);
 
   .cond-detail {
     display: flex;
     align-items: center;
 
     .cond-field {
-      margin-right: 5px;
+      margin-right: var(--et-space-5);
     }
 
     .cond-op {
-      min-width: 90px;
+      min-width: var(--et-size-90);
     }
   }
+}
+
+.cond-op-label {
+  display: flex;
+  align-items: center;
 }
 </style>
