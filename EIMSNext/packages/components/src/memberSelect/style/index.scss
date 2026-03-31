@@ -1,56 +1,61 @@
-@import "../../common/index.less";
+@use "../../common/index" as *;
 
 .member-select-dialog {
-  width: 750px;
+  width: var(--et-size-750);
 
-  // 确保对话框底部按钮在一行上显示
   :deep(.el-dialog__footer) {
     display: flex !important;
     justify-content: flex-end !important;
-    gap: 12px !important;
+    gap: var(--et-space-12) !important;
     flex-direction: row !important;
 
-    // 确保按钮在一行上显示
     .el-button {
-      margin: 0 !important;
+      margin: var(--et-space-0) !important;
     }
+  }
+
+  .dialog-body {
+    padding: var(--et-space-12) var(--et-space-20);
   }
 
   .member-select {
     width: 100%;
-    height: 480px;
+    height: var(--et-size-480);
     display: flex;
     flex-direction: column;
     overflow: hidden;
 
     .search-input {
       width: 100%;
-      margin-top: 10px;
+      margin-top: var(--et-space-10);
       margin-bottom: -1px;
     }
+
     .search-result {
-      border: 1px solid #eee;
+      border: 1px solid var(--et-border-color-light);
       display: flex;
       flex: 1;
       overflow: hidden;
       min-height: 0;
     }
+
     .result-container {
-      padding: 0 12px;
-      border-bottom: 1px solid #eeeeee;
+      padding: 0 var(--et-space-12);
+      border-bottom: 1px solid var(--et-border-color-light);
       display: flex;
       flex: 1;
       flex-direction: column;
 
-      .el-tabs__nav-wrap:after {
+      .el-tabs__nav-wrap::after {
         height: 0;
       }
 
       .el-tabs__header.is-top {
-        margin: 0;
+        margin: var(--et-space-0);
 
         .el-tabs__nav.is-top {
           float: left;
+
           .el-tabs__item {
             flex: none;
           }
@@ -66,7 +71,7 @@
 
       .el-tabs__content {
         flex: 1;
-        margin-top: 0 !important;
+        margin-top: var(--et-space-0) !important;
         overflow: hidden;
       }
 
@@ -88,21 +93,18 @@
       flex-direction: column;
 
       .filter-item {
-        border-radius: 4px;
-        color: var(--et-color-text);
+        border-radius: var(--et-radius-4);
+        color: var(--et-text-primary);
         cursor: pointer;
-        font-size: 14px;
-        height: 30px;
-        line-height: 30px;
-        padding-left: 12px;
-        margin: 5px 8px 0 0;
+        font-size: var(--et-font-size-14);
+        height: var(--et-size-30);
+        line-height: var(--et-line-height-30);
+        padding-left: var(--et-space-12);
+        margin: var(--et-space-5) var(--et-space-8) 0 0;
 
-        &:hover {
-          background: var(--et-color-bg-primary);
-          color: var(--et-color-primary);
-        }
+        &:hover,
         &.active {
-          background: var(--et-color-bg-primary);
+          background: var(--et-bg-primary-soft);
           color: var(--et-color-primary);
         }
       }
@@ -120,18 +122,20 @@
           align-items: center;
 
           .node-icon {
-            width: 20px;
-            height: 20px;
+            width: var(--et-size-20);
+            height: var(--et-size-20);
           }
+
           .node-label {
-            padding-left: 5px;
+            padding-left: var(--et-space-5);
             flex: 1 1 auto;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
           }
+
           .node-action {
-            margin: 0 5px;
+            margin: 0 var(--et-space-5);
             flex: none;
           }
         }
@@ -139,6 +143,7 @@
     }
   }
 }
+
 .dept-select {
   width: 100%;
   height: 100%;
@@ -148,8 +153,13 @@
   position: relative;
 
   .dept-tree {
-    margin-top: 12px;
-    height: calc(100% - 12px);
+    margin-top: var(--et-space-12);
+    height: calc(100% - var(--et-space-12));
+  }
+
+  .options-footer {
+    display: flex;
+    justify-content: flex-end;
   }
 }
 
@@ -163,14 +173,14 @@
     width: 50%;
     height: 100%;
     overflow-y: auto;
-    border-right: 1px solid #eee;
+    border-right: 1px solid var(--et-border-color-light);
     box-sizing: border-box;
 
     .dept-tree {
-      height: calc(100% - 36px);
-      margin-top: 0;
+      height: calc(100% - var(--et-size-36));
+      margin-top: var(--et-space-0);
       box-sizing: border-box;
-      margin-right: 8px;
+      margin-right: var(--et-space-8);
     }
   }
 
@@ -180,4 +190,13 @@
     overflow-y: auto;
     box-sizing: border-box;
   }
+}
+
+.full-height-list {
+  padding-top: var(--et-space-0);
+  height: 100%;
+}
+
+.borderless-list {
+  border: none;
 }

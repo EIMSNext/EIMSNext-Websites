@@ -83,6 +83,11 @@ export default {
     untitledForm: "未命名表单",
     untitledDashboard: "未命名仪表盘",
     untitledChart: "未命名统计表",
+    data_created: "有新数据提交时",
+    data_updated: "有数据被修改时",
+    data_removed: "有数据被删除时",
+    wfstatus_updated: "流程状态变更时",
+    wftodo_updated: "流程待办变更时",
   },
   workflow: {
     flowStatus: {

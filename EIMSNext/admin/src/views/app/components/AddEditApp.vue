@@ -1,12 +1,24 @@
 <template>
-  <et-dialog v-model="showDialog" width="400px" :title="title" :append-to-body="true" :destroy-on-close="true"
-    @cancel="cancel" @ok="save">
-    <el-form ref="appRef" :model="formData" :rules="rules" label-width="80px" style="padding: 12px 20px">
+  <et-dialog
+    v-model="showDialog"
+    width="400px"
+    :title="title"
+    :append-to-body="true"
+    :destroy-on-close="true"
+    @cancel="cancel"
+    @ok="save"
+  >
+    <el-form ref="appRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
       <el-form-item label="应用名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入应用名称" />
       </el-form-item>
       <el-form-item label="应用描述" prop="description">
-        <el-input v-model="formData.description" placeholder="请输入应用描述" type="textarea" :rows="5" />
+        <el-input
+          v-model="formData.description"
+          placeholder="请输入应用描述"
+          type="textarea"
+          :rows="5"
+        />
       </el-form-item>
       <el-form-item label="应用图标" prop="icon">
         <IconSelect v-model="formData.icon" />
@@ -76,3 +88,9 @@ const save = async () => {
   emit("ok", formData.value);
 };
 </script>
+
+<style lang="scss" scoped>
+.dialog-form {
+  padding: var(--et-space-12) var(--et-space-20);
+}
+</style>

@@ -1,6 +1,12 @@
 <template>
-  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
-    :showNoSave="false" okText="确定" @ok="execDelete">
+  <EtConfirmDialog
+    v-model="showDeleteConfirmDialog"
+    title="你确定要删除所选数据吗？"
+    :icon="MessageIcon.Warning"
+    :showNoSave="false"
+    okText="确定"
+    @ok="execDelete"
+  >
     <div>数据删除后将不可恢复</div>
   </EtConfirmDialog>
   <et-drawer v-model="showDrawer" @close="close">
@@ -12,8 +18,10 @@
   <AdvanceLayout title="智能助手" desc="实现自动同步更新表单数据、执行插件等智能化操作">
     <div class="flow-container">
       <div class="panel-header">
-        <div class="header-left"> <el-button type="primary" icon="plus"
-            @click="addNew(EventSourceType.Form)">新建智能助手</el-button>
+        <div class="header-left">
+          <el-button type="primary" icon="plus" @click="addNew(EventSourceType.Form)">
+            新建智能助手
+          </el-button>
         </div>
         <div class="header-right"></div>
       </div>
@@ -25,7 +33,10 @@
                 <div class="flow-header">
                   <el-button @click="edit(flow)">编辑</el-button>
                   <el-button @click="remove(flow)">删除</el-button>
-                  <el-switch :model-value="!flow.disabled" @change="toggleDisable(flow)"></el-switch>
+                  <el-switch
+                    :model-value="!flow.disabled"
+                    @change="toggleDisable(flow)"
+                  ></el-switch>
                 </div>
               </template>
               <div class="flow-content">触发: {{ getTriggerSource(flow) }}</div>
@@ -43,8 +54,6 @@ import { wfDefinitionService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
-import { useFormStore } from "@eimsnext/store";
-import { Dictionary } from "@eimsnext/utils";
 
 defineOptions({
   name: "DataflowList",
@@ -55,13 +64,9 @@ const props = defineProps<{
 }>();
 
 const showDrawer = ref(false);
-const showDeleteConfirmDialog = ref(false)
+const showDeleteConfirmDialog = ref(false);
 const dataflows = ref<WfDefinition[]>([]);
 const selectedFlow = ref<WfDefinition>();
-const formStore = useFormStore()
-// const formNamesCache = new Dictionary<string>()
-
-// console.log("formid", props.formId);
 
 const loadDataflows = (formId: string) => {
   let query = buildQuery({ filter: { flowType: FlowType.Dataflow, sourceId: formId } });
@@ -74,11 +79,11 @@ const loadDataflows = (formId: string) => {
 
 const getTriggerSource = (flow: WfDefinition) => {
   if (flow.eventSource == EventSourceType.Form) {
-    return props.formDef.name
+    return props.formDef.name;
   }
 
-  return "定时触发"
-}
+  return "定时触发";
+};
 
 const addNew = (eventSource: EventSourceType) => {
   selectedFlow.value = {
@@ -98,39 +103,36 @@ const addNew = (eventSource: EventSourceType) => {
 };
 
 const edit = (flow: WfDefinition) => {
-  // console.log("edit df", flow);
   selectedFlow.value = flow;
 
   showDrawer.value = true;
 };
 
 const remove = (flow: WfDefinition) => {
-  selectedFlow.value = flow
-  showDeleteConfirmDialog.value = true
+  selectedFlow.value = flow;
+  showDeleteConfirmDialog.value = true;
 };
 const execDelete = () => {
-  wfDefinitionService.delete<WfDefinition>(selectedFlow.value!.id).then((res) => {
-    loadDataflows(props.formDef.id)
-    showDeleteConfirmDialog.value = false
+  wfDefinitionService.delete<WfDefinition>(selectedFlow.value!.id).then(() => {
+    loadDataflows(props.formDef.id);
+    showDeleteConfirmDialog.value = false;
   });
-}
+};
 const toggleDisable = (flow: WfDefinition) => {
-  wfDefinitionService.patch<WfDefinition>(flow.id, { id: flow.id, disabled: !flow.disabled }).then((res) => {
-    flow.disabled = !flow.disabled
-  });
-}
-
-// const emit = defineEmits(["close"]);
+  wfDefinitionService
+    .patch<WfDefinition>(flow.id, { id: flow.id, disabled: !flow.disabled })
+    .then(() => {
+      flow.disabled = !flow.disabled;
+    });
+};
 
 function close() {
   showDrawer.value = false;
 
   loadDataflows(props.formDef.id);
-  // emit("close");
 }
 
 onBeforeMount(() => {
-  //初始化
   if (props.formDef) {
     loadDataflows(props.formDef.id);
   }
@@ -145,7 +147,7 @@ onBeforeMount(() => {
     align-items: center;
     display: flex;
     justify-content: space-between;
-    padding-bottom: 16px;
+    padding-bottom: var(--et-space-16);
   }
 
   .flow-space {
@@ -161,7 +163,7 @@ onBeforeMount(() => {
       justify-content: space-between;
 
       .flow-name {
-        font-size: 15px;
+        font-size: var(--et-font-size-15);
         font-weight: 600;
         max-width: 50%;
         overflow: hidden;
@@ -170,15 +172,15 @@ onBeforeMount(() => {
       }
 
       .el-button {
-        margin: 0px;
+        margin: var(--et-space-0);
         border: none;
       }
     }
 
     .flow-content {
       display: flex;
-      font-size: 13px;
-      padding: 10px 20px;
+      font-size: var(--et-font-size-13);
+      padding: var(--et-space-10) var(--et-space-20);
     }
   }
 }

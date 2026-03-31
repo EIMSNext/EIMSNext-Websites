@@ -1,35 +1,73 @@
 <!-- 部门树 -->
 <template>
-  <AddEditRoleGroup v-if="showAddEditGroupDialog" :edit="editMode" :p-group="currentGroup"
-    @cancel="showAddEditGroupDialog = false" @ok="handleGroupSaved"></AddEditRoleGroup>
-  <AddEditRole v-if="showAddEditRoleDialog" :edit="editMode" :p-group="currentGroup!" :p-role="selectedRole"
-    @cancel="showAddEditRoleDialog = false" @ok="handleRoleSaved"></AddEditRole>
-  <et-confirm-dialog v-model="showDeleteDialog" title="确认要删除吗?" :showNoSave="false" okText="确认"
-    @cancel="showDeleteDialog = false" @ok="handleDeleteConfirm">
+  <AddEditRoleGroup
+    v-if="showAddEditGroupDialog"
+    :edit="editMode"
+    :p-group="currentGroup"
+    @cancel="showAddEditGroupDialog = false"
+    @ok="handleGroupSaved"
+  ></AddEditRoleGroup>
+  <AddEditRole
+    v-if="showAddEditRoleDialog"
+    :edit="editMode"
+    :p-group="currentGroup!"
+    :p-role="selectedRole"
+    @cancel="showAddEditRoleDialog = false"
+    @ok="handleRoleSaved"
+  ></AddEditRole>
+  <et-confirm-dialog
+    v-model="showDeleteDialog"
+    title="确认要删除吗?"
+    :showNoSave="false"
+    okText="确认"
+    @cancel="showDeleteDialog = false"
+    @ok="handleDeleteConfirm"
+  >
     确认删除已选中的数据项?
   </et-confirm-dialog>
-  <el-card shadow="never"
-    style="border: none; height: 100%; display: flex; flex-direction: column; overflow: hidden; min-width: 300px; padding: 0;">
+  <el-card shadow="never" class="role-card">
     <div class="form-action">
-      <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
+      <el-input
+        v-model="keyword"
+        class="search-input"
+        prefix-icon="Search"
+        clearable
+        placeholder="请输入"
+      />
       <el-button @click="handleAddGroupClick">
-        <et-icon icon="el-plus"> </et-icon>
+        <et-icon icon="el-plus"></et-icon>
       </el-button>
     </div>
-    <el-tree ref="roleTreeRef" class="role-tree mt-2" :data="roleList"
-      :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false"
-      :filter-node-method="handleFilter" default-expand-all @node-click="handleNodeClick">
+    <el-tree
+      ref="roleTreeRef"
+      class="role-tree mt-2"
+      :data="roleList"
+      :props="{ children: 'children', label: 'label', disabled: '' }"
+      :expand-on-click-node="false"
+      :filter-node-method="handleFilter"
+      default-expand-all
+      @node-click="handleNodeClick"
+    >
       <template #default="{ node, data }">
         <div class="node-data" :title="data.label">
           <div class="node-wrapper">
             <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
-              <et-icon v-if="data.type == DataItemType.Group" icon="el-Plus" class="action-item"
-                @click="handleAddRoleClick(data)" />
+              <et-icon
+                v-if="data.type == DataItemType.Group"
+                icon="el-Plus"
+                class="action-item"
+                @click="handleAddRoleClick(data)"
+              />
               <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
-              <et-icon icon="el-Delete" v-if="node.level > 0" class="action-item"
-                :disabled="data.children && data.children.length > 0" @click="handleDeleteClick(data)" />
+              <et-icon
+                icon="el-Delete"
+                v-if="node.level > 0"
+                class="action-item"
+                :disabled="data.children && data.children.length > 0"
+                @click="handleDeleteClick(data)"
+              />
             </div>
           </div>
         </div>
@@ -54,13 +92,13 @@ const props = defineProps({
 const roleList = ref<ITreeNode[]>(); // 部门列表
 const roleTreeRef = ref<TreeInstance>(); // 部门树
 const keyword = ref(); // 部门名称
-const currentGroup = ref<RoleGroup>()
+const currentGroup = ref<RoleGroup>();
 const selectedRole = ref<Role>();
 const showAddEditRoleDialog = ref(false);
-const showAddEditGroupDialog = ref(false)
+const showAddEditGroupDialog = ref(false);
 const editMode = ref(false);
 const showDeleteDialog = ref(false);
-const toDeleteNode = ref<ITreeNode>()
+const toDeleteNode = ref<ITreeNode>();
 
 const emit = defineEmits(["role-click"]);
 
@@ -69,18 +107,21 @@ watch(keyword, (val) => {
 });
 
 onBeforeMount(() => {
-  loadData()
+  loadData();
 });
 
 const loadData = () => {
   let roleGroups: RoleGroup[] = [];
-  let roles: Role[] = []
+  let roles: Role[] = [];
   Promise.all([
-    roleGroupService.query<RoleGroup>().then(data => { roleGroups = data }),
-    roleService.query<Role>().then(data => { roles = data })
-  ]
-  ).then(() => roleList.value = buildRoleTree(roleGroups, roles))
-}
+    roleGroupService.query<RoleGroup>().then((data) => {
+      roleGroups = data;
+    }),
+    roleService.query<Role>().then((data) => {
+      roles = data;
+    }),
+  ]).then(() => (roleList.value = buildRoleTree(roleGroups, roles)));
+};
 
 /**
  * 部门筛选
@@ -96,11 +137,10 @@ const handleFilter = (value: string, data: any) => {
 const handleNodeClick = (data: ITreeNode) => {
   if (data.type == DataItemType.Role) {
     selectedRole.value = data.data;
-    currentGroup.value = roleList.value!.find(x => x.id == selectedRole.value?.roleGroupId)?.data
+    currentGroup.value = roleList.value!.find((x) => x.id == selectedRole.value?.roleGroupId)?.data;
     emit("role-click", data.data);
-  }
-  else {
-    currentGroup.value = data.data
+  } else {
+    currentGroup.value = data.data;
   }
 };
 
@@ -118,32 +158,30 @@ const handleEditClick = (data: ITreeNode) => {
 
   if (data.type == DataItemType.Role) {
     selectedRole.value = data.data;
-    currentGroup.value = roleList.value!.find(x => x.id == selectedRole.value?.roleGroupId)?.data
+    currentGroup.value = roleList.value!.find((x) => x.id == selectedRole.value?.roleGroupId)?.data;
     showAddEditRoleDialog.value = true;
-  }
-  else {
-    currentGroup.value = data.data
-    showAddEditGroupDialog.value = true
+  } else {
+    currentGroup.value = data.data;
+    showAddEditGroupDialog.value = true;
   }
 };
 const handleGroupSaved = (data: RoleGroup) => {
   showAddEditGroupDialog.value = false;
-  loadData()
+  loadData();
 };
 const handleRoleSaved = (data: Role) => {
   showAddEditRoleDialog.value = false;
-  loadData()
+  loadData();
 };
 const handleDeleteClick = (data: ITreeNode) => {
-  toDeleteNode.value = data
+  toDeleteNode.value = data;
 
   if (toDeleteNode.value.data) showDeleteDialog.value = true;
 };
 const handleDeleteConfirm = async () => {
   if (toDeleteNode.value!.type == DataItemType.Role) {
     await roleService.delete(toDeleteNode.value?.id!);
-  }
-  else {
+  } else {
     await roleGroupService.delete(toDeleteNode.value?.id!);
   }
 
@@ -155,9 +193,19 @@ const handleDeleteConfirm = async () => {
 <style scoped lang="scss">
 .form-action {
   display: flex;
-  margin-bottom: 5px;
-  padding: 10px;
+  margin-bottom: var(--et-space-5);
+  padding: var(--et-space-10);
   box-sizing: border-box;
+}
+
+.role-card {
+  border: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: var(--et-size-300);
+  padding: var(--et-space-0);
 }
 
 // 角色树样式
@@ -210,20 +258,20 @@ const handleDeleteConfirm = async () => {
 
   .node-label {
     flex: 1;
-    padding-left: 5px;
+    padding-left: var(--et-space-5);
     white-space: nowrap;
   }
 
   .node-action {
     white-space: nowrap;
     flex-shrink: 0;
-    margin-left: 10px;
+    margin-left: var(--et-space-10);
     pointer-events: none;
-    display: none;    
-      align-items: center;
+    display: none;
+    align-items: center;
 
     .action-item {
-      margin-right: 5px;
+      margin-right: var(--et-space-5);
       cursor: pointer;
 
       &:last-child {
@@ -231,7 +279,7 @@ const handleDeleteConfirm = async () => {
       }
 
       &:hover {
-        color: #409eff;
+        color: var(--et-color-primary);
       }
     }
   }

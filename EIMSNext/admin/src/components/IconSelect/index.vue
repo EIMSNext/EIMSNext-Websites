@@ -1,8 +1,12 @@
 <template>
   <div ref="iconSelectRef" :style="{ width: props.width }">
-    <el-popover :visible="popoverVisible" :width="props.width" placement="bottom" :teleported="true"
+    <el-popover
+      :visible="popoverVisible"
+      :width="props.width"
+      placement="bottom"
+      :teleported="true"
       popper-class="icon-select-popper"
-      popper-style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+    >
       <template #reference>
         <div @click="popoverVisible = !popoverVisible">
           <slot>
@@ -13,13 +17,21 @@
               </template>
               <template #suffix>
                 <!-- 清空按钮 -->
-                <et-icon v-if="selectedIcon" style="margin-right: 8px" @click.stop="clearSelectedIcon"
-                  icon="el-CircleClose" />
+                <et-icon
+                  v-if="selectedIcon"
+                  class="clear-icon"
+                  @click.stop="clearSelectedIcon"
+                  icon="el-CircleClose"
+                />
 
-                <et-icon icon="el-ArrowDown" :style="{
-                  transform: popoverVisible ? 'rotate(180deg)' : 'rotate(0)',
-                  transition: 'transform .5s',
-                }" @click.stop="togglePopover" />
+                <et-icon
+                  icon="el-ArrowDown"
+                  :style="{
+                    transform: popoverVisible ? 'rotate(180deg)' : 'rotate(0)',
+                    transition: 'transform .5s',
+                  }"
+                  @click.stop="togglePopover"
+                />
               </template>
             </el-input>
           </slot>
@@ -33,8 +45,12 @@
           <el-tab-pane label="SVG 图标" name="svg">
             <el-scrollbar height="300px">
               <ul class="et-icon-grid">
-                <li v-for="icon in filteredSvgIcons" :key="'svg-' + icon" class="et-icon-grid-item"
-                  @click="selectIcon(icon)">
+                <li
+                  v-for="icon in filteredSvgIcons"
+                  :key="'svg-' + icon"
+                  class="et-icon-grid-item"
+                  @click="selectIcon(icon)"
+                >
                   <el-tooltip :content="icon" placement="bottom" effect="light">
                     <et-icon :icon="icon" />
                   </el-tooltip>
@@ -45,7 +61,12 @@
           <el-tab-pane label="Element 图标" name="element">
             <el-scrollbar height="300px">
               <ul class="et-icon-grid">
-                <li v-for="icon in filteredElementIcons" :key="icon" class="et-icon-grid-item" @click="selectIcon(icon)">
+                <li
+                  v-for="icon in filteredElementIcons"
+                  :key="icon"
+                  class="et-icon-grid-item"
+                  @click="selectIcon(icon)"
+                >
                   <et-icon :icon="'el-' + icon" />
                 </li>
               </ul>
@@ -112,8 +133,8 @@ function filterIcons() {
   } else {
     filteredElementIcons.value = filterText.value
       ? elementIcons.value.filter((icon) =>
-        icon.toLowerCase().includes(filterText.value.toLowerCase())
-      )
+          icon.toLowerCase().includes(filterText.value.toLowerCase())
+        )
       : elementIcons.value;
   }
 }
@@ -166,17 +187,21 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  margin: 4px;
+  padding: var(--et-space-8);
+  margin: var(--et-space-4);
   cursor: pointer;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
+  border: 1px solid var(--et-border-color-light);
+  border-radius: var(--et-radius-4);
   transition: all 0.3s;
 }
 
 .et-icon-grid-item:hover {
-  border-color: #4080ff;
+  border-color: var(--et-color-primary);
   transform: scale(1.2);
+}
+
+.clear-icon {
+  margin-right: var(--et-space-8);
 }
 
 :deep(.icon-select-popper) {

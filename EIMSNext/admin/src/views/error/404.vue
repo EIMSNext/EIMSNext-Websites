@@ -24,7 +24,7 @@ function back() {
       <div class="bullshit__oops">OOPS!</div>
       <div class="bullshit__info">
         All rights reserved
-        <a style="color: #20a0ff" href="https://wallstreetcn.com" target="_blank">wallstreetcn</a>
+        <a class="info-link" href="https://wallstreetcn.com" target="_blank">wallstreetcn</a>
       </div>
       <div class="bullshit__headline">The webmaster said that you can not enter this page...</div>
       <div class="bullshit__info">
@@ -39,10 +39,10 @@ function back() {
 <style lang="scss" scoped>
 .page-container {
   display: flex;
-  padding: 100px;
+  padding: var(--et-size-100);
 
   .pic-404 {
-    width: 600px;
+    width: var(--et-size-600);
     overflow: hidden;
 
     &__parent {
@@ -53,7 +53,7 @@ function back() {
       &.left {
         top: 17px;
         left: 220px;
-        width: 80px;
+        width: var(--et-size-80);
         opacity: 0;
         animation-name: cloudLeft;
         animation-duration: 2s;
@@ -65,7 +65,7 @@ function back() {
       &.mid {
         top: 10px;
         left: 420px;
-        width: 46px;
+        width: var(--et-size-46);
         opacity: 0;
         animation-name: cloudMid;
         animation-duration: 2s;
@@ -77,7 +77,7 @@ function back() {
       &.right {
         top: 100px;
         left: 500px;
-        width: 62px;
+        width: var(--et-size-62);
         opacity: 0;
         animation-name: cloudRight;
         animation-duration: 2s;
@@ -167,16 +167,16 @@ function back() {
   }
 
   .bullshit {
-    width: 300px;
-    padding: 30px 0;
+    width: var(--et-size-300);
+    padding: var(--et-space-30) 0;
     overflow: hidden;
 
     &__oops {
-      margin-bottom: 20px;
-      font-size: 32px;
+      margin-bottom: var(--et-space-20);
+      font-size: var(--et-size-32);
       font-weight: bold;
-      line-height: 40px;
-      color: #1482f0;
+      line-height: var(--et-line-height-40);
+      color: var(--et-color-primary);
       opacity: 0;
       animation-name: slideUp;
       animation-duration: 0.5s;
@@ -184,11 +184,11 @@ function back() {
     }
 
     &__headline {
-      margin-bottom: 10px;
-      font-size: 20px;
+      margin-bottom: var(--et-space-10);
+      font-size: var(--et-font-size-20);
       font-weight: bold;
-      line-height: 24px;
-      color: #222;
+      line-height: var(--et-line-height-24);
+      color: var(--et-text-primary);
       opacity: 0;
       animation-name: slideUp;
       animation-duration: 0.5s;
@@ -197,10 +197,10 @@ function back() {
     }
 
     &__info {
-      margin-bottom: 30px;
-      font-size: 13px;
-      line-height: 21px;
-      color: grey;
+      margin-bottom: var(--et-space-30);
+      font-size: var(--et-font-size-13);
+      line-height: var(--et-line-height-20);
+      color: var(--et-text-secondary);
       opacity: 0;
       animation-name: slideUp;
       animation-duration: 0.5s;
@@ -211,15 +211,15 @@ function back() {
     &__return-home {
       display: block;
       float: left;
-      width: 110px;
-      height: 36px;
-      font-size: 14px;
-      line-height: 36px;
-      color: #fff;
+      width: var(--et-size-110);
+      height: var(--et-size-36);
+      font-size: var(--et-font-size-14);
+      line-height: var(--et-line-height-36);
+      color: var(--et-text-on-primary);
       text-align: center;
       cursor: pointer;
-      background: #1482f0;
-      border-radius: 100px;
+      background: var(--et-color-primary);
+      border-radius: var(--et-radius-100);
       opacity: 0;
       animation-name: slideUp;
       animation-duration: 0.5s;
@@ -239,5 +239,9 @@ function back() {
       }
     }
   }
+}
+
+.info-link {
+  color: var(--et-color-primary);
 }
 </style>

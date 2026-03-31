@@ -1,23 +1,40 @@
 <template>
   <div class="branch-body">
-    <el-popover :show-arrow="false" placement="right" width="200" trigger="click">
-      <el-button icon="el-plus" style="width: 100%" @click.stop="addBranchItem">
+    <el-popover
+      :show-arrow="false"
+      placement="right"
+      width="200"
+      trigger="click"
+    >
+      <el-button
+        icon="el-plus"
+        class="popover-action-button"
+        @click.stop="addBranchItem"
+      >
         {{ t("workflow.addBranch") }}
       </el-button>
-      <el-button :disabled="!canPaste" icon="el-copy-document"
-        style="width: 100%; margin-left: 0; margin-top: 10px" @click.stop="pasteBranchItem">
+      <el-button
+        :disabled="!canPaste"
+        icon="el-copy-document"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="pasteBranchItem"
+      >
         {{ t("workflow.pasteBranch") }}
       </el-button>
       <template #reference>
-        <div class="branch-head" :style="'opacity:1'">
+        <div class="branch-head branch-head-visible">
           <i class="add-icon" />
         </div>
       </template>
     </el-popover>
 
     <div class="branch-list">
-      <BranchItem v-for="(item, index) in nodeData.childNodes" :p-node-datas="nodeData.childNodes!" :node-data="item"
-        :data-index="index" />
+      <BranchItem
+        v-for="(item, index) in nodeData.childNodes"
+        :p-node-datas="nodeData.childNodes!"
+        :node-data="item"
+        :data-index="index"
+      />
     </div>
     <div class="branch-foot">
       <AddNodeButton :p-node-datas="pNodeDatas" :node-data="nodeData" />
@@ -61,7 +78,7 @@ watch(
       canPaste.value = false;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const addBranchItem = () => {
@@ -84,3 +101,18 @@ function addNewNode(pNodeDatas: IFlowNodeData[], newBranchItem: IFlowNodeData) {
   });
 }
 </script>
+
+<style scoped>
+.popover-action-button {
+  width: 100%;
+}
+
+.popover-action-button-spaced {
+  margin-left: var(--et-space-0);
+  margin-top: var(--et-space-10);
+}
+
+.branch-head-visible {
+  opacity: 1;
+}
+</style>

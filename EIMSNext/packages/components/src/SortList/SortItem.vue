@@ -3,13 +3,29 @@
     <div class="cond-detail">
       <div class="flex-1">{{ modelValue.field.label }}</div>
       <div>
-        <el-radio-group v-model="sort" size="default" class="mr-[5px]" @change="onSortChanged">
-          <el-radio-button :label="t('comp.orderby_Unset')" :value="SortDirection.Unset" />
-          <el-radio-button :label="t('comp.orderby_Asc')" :value="SortDirection.Asc" />
-          <el-radio-button :label="t('comp.orderby_Desc')" :value="SortDirection.Desc" />
+        <el-radio-group
+          v-model="sort"
+          size="default"
+          class="mr-[5px]"
+          @change="onSortChanged"
+        >
+          <el-radio-button
+            :label="t('comp.orderby_Unset')"
+            :value="SortDirection.Unset"
+          />
+          <el-radio-button
+            :label="t('comp.orderby_Asc')"
+            :value="SortDirection.Asc"
+          />
+          <el-radio-button
+            :label="t('comp.orderby_Desc')"
+            :value="SortDirection.Desc"
+          />
         </el-radio-group>
       </div>
-      <div v-if="editable"><et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon></div>
+      <div v-if="editable">
+        <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
+      </div>
     </div>
   </div>
 </template>
@@ -26,7 +42,7 @@ defineOptions({
 
 const props = defineProps<{
   modelValue: ISortItem;
-  editable: boolean
+  editable: boolean;
 }>();
 
 const sort = ref(props.modelValue.sort);
@@ -48,28 +64,28 @@ const onRemove = () => {
 watch(
   [() => props.modelValue],
   () => {
-    sort.value = props.modelValue.sort
+    sort.value = props.modelValue.sort;
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 <style lang="scss" scoped>
 .cond-item {
-  border: 1px dashed #eee;
-  background: #fcfcfc;
-  padding: 10px;
-  border-radius: 3px;
+  border: 1px dashed var(--et-border-color-light);
+  background: var(--et-bg-container);
+  padding: var(--et-space-10);
+  border-radius: var(--et-radius-3);
 
   .cond-detail {
     display: flex;
     align-items: center;
 
     .cond-field {
-      margin-right: 5px;
+      margin-right: var(--et-space-5);
     }
 
     .cond-op {
-      min-width: 90px;
+      min-width: var(--et-size-90);
     }
   }
 }

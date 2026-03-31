@@ -1,16 +1,40 @@
 <!-- 部门树 -->
 <template>
-  <AddEditDept v-if="showAddEditDialog" :edit="editMode" :p-dept="selectedDept!" @cancel="showAddEditDialog = false"
-    @ok="handleSaved"></AddEditDept>
-  <et-confirm-dialog v-model="showDeleteDialog" title="确认要删除吗?" :showNoSave="false" okText="确认"
-    @cancel="showDeleteDialog = false" @ok="handleDeleteConfirm">
+  <AddEditDept
+    v-if="showAddEditDialog"
+    :edit="editMode"
+    :p-dept="selectedDept!"
+    @cancel="showAddEditDialog = false"
+    @ok="handleSaved"
+  ></AddEditDept>
+  <et-confirm-dialog
+    v-model="showDeleteDialog"
+    title="确认要删除吗?"
+    :showNoSave="false"
+    okText="确认"
+    @cancel="showDeleteDialog = false"
+    @ok="handleDeleteConfirm"
+  >
     确认删除已选中的数据项?
   </et-confirm-dialog>
-  <el-card shadow="never" style="border: none;">
-    <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
-    <el-tree ref="deptTreeRef" class="dept-tree mt-2" :data="deptList"
-      :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false"
-      :filter-node-method="handleFilter" default-expand-all @node-click="handleNodeClick">
+  <el-card shadow="never" class="dept-card">
+    <el-input
+      v-model="keyword"
+      class="search-input"
+      prefix-icon="Search"
+      clearable
+      placeholder="请输入"
+    />
+    <el-tree
+      ref="deptTreeRef"
+      class="dept-tree mt-2"
+      :data="deptList"
+      :props="{ children: 'children', label: 'label', disabled: '' }"
+      :expand-on-click-node="false"
+      :filter-node-method="handleFilter"
+      default-expand-all
+      @node-click="handleNodeClick"
+    >
       <template #default="{ node, data }">
         <div class="node-data" :title="data.label">
           <div class="node-wrapper">
@@ -19,8 +43,12 @@
             <div v-if="editable" class="node-action">
               <et-icon icon="el-Plus" class="action-item" @click="handleAddClick(data)" />
               <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
-              <et-icon icon="el-Delete" v-if="data.data.parentId" class="action-item"
-                @click="handleDeleteClick(data)" />
+              <et-icon
+                icon="el-Delete"
+                v-if="data.data.parentId"
+                class="action-item"
+                @click="handleDeleteClick(data)"
+              />
             </div>
           </div>
         </div>
@@ -105,17 +133,18 @@ const handleDeleteConfirm = async () => {
   await departmentService.delete(selectedDept.value?.id!);
 
   deptStore.remove(selectedDept.value?.id!);
-  // 删除后直接从service获取最新部门数据，刷新界面
   departmentService.query<Department>().then((depts: Department[]) => {
     deptList.value = buildDeptTree(depts);
-    // 同时更新store中的数据
     deptStore.load().then();
   });
   showDeleteDialog.value = false;
 };
 </script>
 <style scoped lang="scss">
-// 去掉el-card的边框
+.dept-card {
+  border: none;
+}
+
 :deep(.el-card) {
   border: none;
   box-shadow: none;
@@ -123,51 +152,43 @@ const handleDeleteConfirm = async () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 300px; // 设置最小宽度
+  min-width: var(--et-size-300);
   padding: 0;
 }
 
-// 搜索框样式
 .search-input {
-  margin-bottom: 8px;
+  margin-bottom: var(--et-space-8);
 }
 
-// 部门树样式
 .dept-tree {
   flex: 1;
-  min-height: 0; // 解决flex子元素高度问题
+  min-height: 0;
   width: 100%;
-  max-height: 100%; // 限制高度，由父容器负责滚动
+  max-height: 100%;
 
-  // 确保节点内容不会被截断
   :deep(.el-tree-node) {
     white-space: nowrap;
   }
 
-  // 调整节点内容样式
   :deep(.el-tree-node__content) {
     white-space: nowrap;
   }
 
-  // 调整树容器样式
   :deep(.el-tree) {
     min-width: 100%;
-    height: 100%; // 确保树容器占满可用空间
+    height: 100%;
   }
 
-  // 调整树节点展开图标样式
   :deep(.el-tree-node__expand-icon) {
     flex-shrink: 0;
   }
 
-  // 调整树节点内容样式
   :deep(.el-tree-node__content) {
     flex-shrink: 0;
   }
 }
 
 .node-data {
-  // 确保整个节点区域都能触发hover效果
   width: 100%;
   display: flex;
   align-items: center;
@@ -180,20 +201,20 @@ const handleDeleteConfirm = async () => {
 
   .node-label {
     flex: 1;
-    padding-left: 5px;
+    padding-left: var(--et-space-5);
     white-space: nowrap;
   }
 
   .node-action {
     white-space: nowrap;
     flex-shrink: 0;
-    margin-left: 10px;
+    margin-left: var(--et-space-10);
     pointer-events: none;
     display: none;
     align-items: center;
 
     .action-item {
-      margin-right: 5px;
+      margin-right: var(--et-space-5);
       cursor: pointer;
 
       &:last-child {
@@ -201,12 +222,11 @@ const handleDeleteConfirm = async () => {
       }
 
       &:hover {
-        color: #409eff;
+        color: var(--et-color-primary);
       }
     }
   }
 
-  // 确保整个.node-wrapper都能触发hover效果
   &:hover {
     .node-action {
       display: flex;

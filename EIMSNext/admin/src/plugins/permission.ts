@@ -5,12 +5,7 @@ import { usePermissionStore } from "@/store";
 import { useUserStore, useFormStore, useAppStore } from "@eimsnext/store";
 
 export function setupPermission() {
-  // 白名单路由
-  // const whiteList = ["/login"];
-
   router.beforeEach(async (to, from, next) => {
-    // console.log("router before", accessToken, to);
-
     if (!to.meta?.requiresAuth) {
       next();
     } else {
@@ -18,7 +13,6 @@ export function setupPermission() {
       if (isLogin) {
         //从链接进来的地址，可能还没有初始化用户信息
         const userStore = useUserStore();
-        // console.log("logined in :", userStore.isInitialized(), userStore.currentUser);
         await userStore.initialize();
 
         let allowed = true;
@@ -41,7 +35,6 @@ export function setupPermission() {
                 next("/404");
               } else {
                 // 动态设置页面标题
-                // console.log("to route", to);
                 let title = (to.params.title as string) || (to.query.title as string);
                 if (
                   (!title || title == "form" || title == "dash") &&

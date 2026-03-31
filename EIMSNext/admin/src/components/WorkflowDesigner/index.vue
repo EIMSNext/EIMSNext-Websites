@@ -97,8 +97,6 @@ const save = () => {
     sourceId: currentWfDef.value.sourceId,
   };
 
-  // console.log("wf req", req);
-
   if (req.id)
     wfDefinitionService.put<WfDefinition>(req.id, req).then((res) => (currentWfDef.value = res));
   else wfDefinitionService.post<WfDefinition>(req).then((res) => (currentWfDef.value = res));

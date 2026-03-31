@@ -24,7 +24,6 @@ import { useRouter } from "vue-router";
 import Layout from "@/layout/index.vue";
 import MyAppsCard from "./components/MyAppsCard.vue";
 
-import WebSocketManager from "@/utils/websocket";
 import { useUserStore, useAppStore, useFormStore, useContextStore } from "@eimsnext/store";
 
 import MyTasksCard from "./components/MyTasksCard.vue";
@@ -33,19 +32,12 @@ const router = useRouter();
 const userStore = useUserStore();
 const appStore = useAppStore();
 const contextStore = useContextStore();
-
-onMounted(() => {
-  // WebSocketManager.subscribeToTopic("/topic/onlineUserCount", (data) => {
-  //   console.log("收到在线用户数量：", data);
-  //   onlineUserCount.value = JSON.parse(data);
-  // });
-});
 </script>
 
 <style lang="scss" scoped>
 .workspace-container {
   position: relative;
-  padding: 24px;
+  padding: var(--et-space-24);
 
   .github-corner {
     position: absolute;

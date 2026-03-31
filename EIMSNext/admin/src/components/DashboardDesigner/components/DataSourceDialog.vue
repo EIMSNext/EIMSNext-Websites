@@ -1,9 +1,15 @@
 <template>
-    <et-dialog :modelValue="modelValue" :title="t('comp.selectDataSource')" width="450px" @cancel="cancel" @ok="save">
-        <div style="padding: 20px;height: 400px;">
-            <FormList v-model="formItem" :appId="appId" @itemClick="formSelected"></FormList>
-        </div>
-    </et-dialog>
+  <et-dialog
+    :modelValue="modelValue"
+    :title="t('comp.selectDataSource')"
+    width="450px"
+    @cancel="cancel"
+    @ok="save"
+  >
+    <div class="dialog-body">
+      <FormList v-model="formItem" :appId="appId" @itemClick="formSelected"></FormList>
+    </div>
+  </et-dialog>
 </template>
 <script setup lang="ts">
 import { IDataSource } from "../type";
@@ -14,34 +20,41 @@ import { ref, toRef } from "vue";
 const { t } = useLocale();
 
 defineOptions({
-    name: "DataSourceDialog",
+  name: "DataSourceDialog",
 });
 
 const props = defineProps<{
-    modelValue: boolean,
-    appId: string,
-    dataSource?: IDataSource
+  modelValue: boolean;
+  appId: string;
+  dataSource?: IDataSource;
 }>();
 
-const formItem = ref<IFormItem>({ id: "" })
-const dataSource = ref<IDataSource>()
-if (props.dataSource) dataSource.value = { ...props.dataSource }
+const formItem = ref<IFormItem>({ id: "" });
+const dataSource = ref<IDataSource>();
+if (props.dataSource) dataSource.value = { ...props.dataSource };
 
 if (dataSource.value) {
-    if (dataSource.value.type == DatasourceType.Form)
-        formItem.value = { id: dataSource.value.id, label: dataSource.value.label }
+  if (dataSource.value.type == DatasourceType.Form)
+    formItem.value = { id: dataSource.value.id, label: dataSource.value.label };
 }
 
 const formSelected = (form: IFormItem) => {
-    formItem.value = form;
-    dataSource.value = { id: form.id, label: form.label ?? "", type: DatasourceType.Form }
-}
+  formItem.value = form;
+  dataSource.value = { id: form.id, label: form.label ?? "", type: DatasourceType.Form };
+};
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
 const cancel = () => {
-    emit("update:modelValue", false);
-    emit("cancel");
+  emit("update:modelValue", false);
+  emit("cancel");
 };
 const save = () => {
-    emit("ok", dataSource.value);
+  emit("ok", dataSource.value);
 };
 </script>
+
+<style lang="scss" scoped>
+.dialog-body {
+  padding: var(--et-space-20);
+  height: var(--et-size-400);
+}
+</style>

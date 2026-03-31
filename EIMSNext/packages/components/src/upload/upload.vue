@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import "./style/index.less";
+import "./style/index.scss";
 import { ref } from "vue";
 import EtIcon from "../icon/etIcon.vue";
 import Dragger from "./dragger.vue";

@@ -4,7 +4,7 @@
       <div class="my-todo">
         <div class="todo-wrapper" @click="goToMyTasks">
           <div class="image-wrapper">
-            <et-icon icon="icon-mytodo" size="64px" color="#1296db" />
+            <et-icon icon="icon-mytodo" size="64px" color="var(--et-color-info)" />
           </div>
           <div class="todo-count">
             <div class="todo-count-text">{{ t("common.wfProcess.mytasks") }}</div>
@@ -12,7 +12,7 @@
           </div>
         </div>
       </div>
-      <el-divider direction="vertical" style="height: 100px;" />
+      <el-divider direction="vertical" class="tasks-divider" />
       <div class="flow-steps">
         <div class="step-wrapper" @click="goToMyStarted">
           <et-icon icon="icon-mystarted" size="40px" class="step-image" />
@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-const { t } = useI18n()
+const { t } = useI18n();
 const router = useRouter();
 
 defineOptions({
@@ -64,64 +64,64 @@ const goToMyCced = () => {
 <style lang="scss" scoped>
 .flow-center-wrapper {
   align-items: center;
-  border-radius: 6px;
+  border-radius: var(--et-radius-6);
   display: flex;
-  min-height: 160px;
+  min-height: var(--et-size-160);
   position: relative;
   width: 100%;
 
   .my-todo {
-    border-radius: 6px;
+    border-radius: var(--et-radius-6);
     height: 100%;
-    padding: 20px;
+    padding: var(--et-space-20);
     width: 32%;
 
     .todo-wrapper {
       align-items: center;
-      border-radius: 6px;
+      border-radius: var(--et-radius-6);
       cursor: pointer;
       display: flex;
       height: 100%;
       justify-content: center;
 
       &:hover {
-        background-color: var(--et-bg-color-primary);
+        background-color: var(--et-bg-page);
       }
 
       .image-wrapper {
-        margin-right: 40px;
-        width: 64px;
+        margin-right: var(--et-space-40);
+        width: var(--et-size-64);
       }
 
       .todo-count {
         .todo-count-text {
-          font-size: 18px;
+          font-size: var(--et-font-size-18);
           font-weight: 500;
-          height: 24px;
-          line-height: 24px;
-          margin-bottom: 5px;
+          height: var(--et-size-24);
+          line-height: var(--et-line-height-24);
+          margin-bottom: var(--et-space-5);
         }
 
         .todo-count-number {
-          font-size: 36px;
+          font-size: var(--et-font-size-36);
           font-weight: 700;
-          height: 36px;
-          line-height: 36px;
+          height: var(--et-size-36);
+          line-height: var(--et-line-height-36);
         }
       }
     }
   }
 
   .flow-steps {
-    border-radius: 6px;
+    border-radius: var(--et-radius-6);
     display: flex;
-    height: 96px;
+    height: var(--et-size-96);
     justify-content: space-between;
     width: 68%;
 
     .step-wrapper {
       align-items: center;
-      border-radius: 12px;
+      border-radius: var(--et-radius-12);
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -130,18 +130,22 @@ const goToMyCced = () => {
       width: 23%;
 
       &:hover {
-        background-color: var(--et-bg-color-primary);
+        background-color: var(--et-bg-page);
       }
 
       .step-image {
-        height: 40px;
-        color: #1296db;
+        height: var(--et-size-40);
+        color: var(--et-color-info);
       }
 
       .step-text {
-        margin-top: 20px;
+        margin-top: var(--et-space-20);
       }
     }
   }
+}
+
+.tasks-divider {
+  height: var(--et-size-100);
 }
 </style>

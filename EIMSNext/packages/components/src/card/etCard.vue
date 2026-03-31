@@ -17,7 +17,7 @@
   </el-card>
 </template>
 <script setup lang="ts">
-import "./style/index.less"
+import "./style/index.scss";
 
 defineOptions({
   name: "EtCard",
@@ -30,6 +30,6 @@ const props = withDefaults(
   {
     title: "",
     showHeader: true,
-  }
+  },
 );
 </script>

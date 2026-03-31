@@ -1,26 +1,51 @@
 <template>
   <div class="field-list">
-    <el-dropdown v-if="!showAll" :hide-on-click="false" trigger="click" popper-class="data-triggers"
-      @command="addingField">
+    <el-dropdown
+      v-if="!showAll"
+      :hide-on-click="false"
+      trigger="click"
+      popper-class="data-triggers"
+      @command="addingField"
+    >
       <el-button class="btn-add-trigger">
         {{ "+ " + t("comp.selectField") }}
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">
           <template v-for="field in allFields" :key="field.field.field">
-            <el-dropdown-item class="add-trigger"
-              :disabled="!!selectedFields.items.find((x) => x.field.field == field.field.field)" :class="{
-                notAllow: selectedFields.items.find((x) => x.field.field == field.field.field),
-              }" :command="field">
+            <el-dropdown-item
+              class="add-trigger"
+              :disabled="
+                !!selectedFields.items.find(
+                  (x) => x.field.field == field.field.field,
+                )
+              "
+              :class="{
+                notAllow: selectedFields.items.find(
+                  (x) => x.field.field == field.field.field,
+                ),
+              }"
+              :command="field"
+            >
               {{ field.field.label }}
             </el-dropdown-item>
           </template>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <template v-for="(item, idx) in selectedFields.items" :key="item.field.field">
-      <FormFieldItem :modelValue="item" :nodes="nodes" :field-setting="fieldSetting" :removable="!showAll"
-        :fieldValueChanging="fieldValueChanging" @change="onInput" @remove="onRemove"></FormFieldItem>
+    <template
+      v-for="(item, idx) in selectedFields.items"
+      :key="item.field.field"
+    >
+      <FormFieldItem
+        :modelValue="item"
+        :nodes="nodes"
+        :field-setting="fieldSetting"
+        :removable="!showAll"
+        :fieldValueChanging="fieldValueChanging"
+        @change="onInput"
+        @remove="onRemove"
+      ></FormFieldItem>
     </template>
   </div>
 </template>
@@ -28,7 +53,13 @@
 import { FormDef, FieldDef, FieldType } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
-import { IFormFieldList, IFormFieldItem, buildFormFieldList, FieldValueType, FormFieldListInstance } from "./type";
+import {
+  IFormFieldList,
+  IFormFieldItem,
+  buildFormFieldList,
+  FieldValueType,
+  FormFieldListInstance,
+} from "./type";
 import {
   FieldBuildRule,
   IFieldBuildSetting,
@@ -51,11 +82,15 @@ const props = withDefaults(
     nodes: INodeForm[];
     showAll?: boolean;
     fieldSelecting?: (fieldItem: IFormFieldItem) => Promise<boolean>;
-    fieldValueChanging?: (field: IFormFieldDef, oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => Promise<boolean>;
+    fieldValueChanging?: (
+      field: IFormFieldDef,
+      oldVal?: IFormFieldDef,
+      newVal?: IFormFieldDef,
+    ) => Promise<boolean>;
   }>(),
   {
     showAll: true,
-  }
+  },
 );
 
 const allFields = ref<IFormFieldItem[]>([]);
@@ -73,16 +108,17 @@ const formDef = ref<FormDef>();
 const emit = defineEmits(["update:modelValue", "change"]);
 
 const addingField = async (fieldItem: IFormFieldItem) => {
-  // console.log("addingField", fieldItem)
-  if (!props.fieldSelecting || await props.fieldSelecting(fieldItem)) {
+  if (!props.fieldSelecting || (await props.fieldSelecting(fieldItem))) {
     selectedFields.value.items.push(fieldItem);
-    emitChange()
+    emitChange();
   }
 };
 
 const onRemove = (fieldItem: IFormFieldItem) => {
   if (fieldItem && selectedFields.value.items) {
-    let index = selectedFields.value.items.findIndex((x) => x.field == fieldItem.field);
+    let index = selectedFields.value.items.findIndex(
+      (x) => x.field == fieldItem.field,
+    );
     if (index > -1) {
       selectedFields.value.items.splice(index, 1);
     }
@@ -92,10 +128,10 @@ const onRemove = (fieldItem: IFormFieldItem) => {
 };
 
 const onInput = (fieldItem: IFormFieldItem) => {
-  // console.log("field item changed", fieldItem.field, selectedFields.value.items);
   if (fieldItem && selectedFields.value.items) {
-    let item = selectedFields.value.items.find((x) => x.field.field == fieldItem.field.field);
-    // console.log("field item changed", fieldItem.field, item)
+    let item = selectedFields.value.items.find(
+      (x) => x.field.field == fieldItem.field.field,
+    );
     if (item) {
       item.field = fieldItem.field;
       item.value = fieldItem.value;
@@ -107,7 +143,6 @@ const onInput = (fieldItem: IFormFieldItem) => {
 };
 
 const updateFieldSetting = () => {
-  // console.log("field mapping", selectedFields.value)
   let mapping: Record<string, IFormFieldMap> = {};
   selectedFields.value.items.forEach((x) => {
     if (
@@ -115,7 +150,6 @@ const updateFieldSetting = () => {
       x.value.fieldValue &&
       (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField)
     ) {
-      // console.log("field mapping xxx", x)
       let mapMainField = x.value.fieldValue.isSubField
         ? splitSubField(x.value.fieldValue.field)[0]
         : "master";
@@ -156,7 +190,6 @@ const updateFieldSetting = () => {
 
   fieldSetting.value.fieldMapping = mapping;
   fieldSetting.value.version += 1;
-  // console.log("field mapping updated", fieldSetting)
 };
 
 const emitChange = () => {
@@ -166,7 +199,7 @@ const emitChange = () => {
 
 onMounted(() => {
   nextTick(() => updateFieldSetting());
-})
+});
 
 watch(
   [() => props.formId],
@@ -174,7 +207,12 @@ watch(
     if (newFormId && newFormId != oldFormId) {
       let form = await formStore.get(newFormId);
       if (form && form.content && form.content.items) {
-        allFields.value = buildFormFieldList(newFormId, form.content.items, [], true);
+        allFields.value = buildFormFieldList(
+          newFormId,
+          form.content.items,
+          [],
+          true,
+        );
         fieldSetting.value.fieldMapping = {};
         fieldSetting.value.version = 0;
       }
@@ -182,7 +220,7 @@ watch(
 
     updateFieldSetting();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // 暴露的属性和方法

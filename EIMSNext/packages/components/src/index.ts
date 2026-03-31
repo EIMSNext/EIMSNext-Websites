@@ -1,3 +1,4 @@
+import "./theme/index.scss";
 import { SvgIcon, EtIcon } from "./icon";
 import { EtUpload } from "./upload";
 import { EtDialog, EtConfirmDialog } from "./dialog";
@@ -24,6 +25,12 @@ import {
 import { EtFieldPerms } from "./FieldPerms";
 import { UserAvatar } from "./avatar";
 import { SortList, SortItem } from "./SortList";
+
+export {
+  applyTheme,
+  generateThemeColors,
+  toggleDarkMode,
+} from "./theme/runtime";
 
 export default [
   SvgIcon,

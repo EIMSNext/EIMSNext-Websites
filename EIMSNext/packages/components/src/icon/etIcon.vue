@@ -3,23 +3,35 @@
     <div class="icon-container">
       <template v-if="icon.startsWith('el-')">
         <el-icon :class="iconClass" :color="color" :size="size">
-          <component :is="icon.replace('el-', '')" />
-        </el-icon></template>
+          <component :is="icon.replace('el-', '')" /> </el-icon
+      ></template>
       <template v-else-if="icon.startsWith('icon-')">
-        <i :class="'iconfont ' + icon + ' ' + iconClass" :style="'font-size:' + size + ';color:' + color">
-        </i></template>
+        <i
+          :class="'iconfont ' + icon + ' ' + iconClass"
+          :style="'font-size:' + size + ';color:' + color"
+        >
+        </i
+      ></template>
       <template v-else-if="icon.startsWith('fc-')">
-        <i :class="'fc-icon ' + icon.replace('fc-', '') + ' ' + iconClass"
-          :style="'font-size:' + size + ';color:' + color">
-        </i></template>
+        <i
+          :class="'fc-icon ' + icon.replace('fc-', '') + ' ' + iconClass"
+          :style="'font-size:' + size + ';color:' + color"
+        >
+        </i
+      ></template>
       <template v-else>
-        <SvgIcon :icon="icon" :color="color" :size="size" :iconClass="iconClass" />
+        <SvgIcon
+          :icon="icon"
+          :color="color"
+          :size="size"
+          :iconClass="iconClass"
+        />
       </template>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import "./style/index.less";
+import "./style/index.scss";
 import SvgIcon from "./svgIcon.vue";
 
 defineOptions({
@@ -37,6 +49,6 @@ const props = withDefaults(
     color: "currentcolor",
     size: "1em",
     iconClass: "",
-  }
+  },
 );
 </script>

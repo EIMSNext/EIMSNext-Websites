@@ -1,7 +1,7 @@
-﻿import { ODataServiceBase } from "../interface";
+﻿import { ReadonlyODataServiceBase } from "../interface";
 import { DfExecLog } from "@eimsnext/models";
 
-export class DfExecLogService extends ODataServiceBase<DfExecLog, DfExecLog> {
+export class DfExecLogService extends ReadonlyODataServiceBase< DfExecLog> {
     protected modelName(): string {
         return "DfExecLog";
     }
