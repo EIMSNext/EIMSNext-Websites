@@ -1,7 +1,13 @@
 <template>
-  <et-dialog v-model="showDialog" width="400px" :title="title" :append-to-body="true" :destroy-on-close="true"
-    @cancel="cancel">
-    <el-form :model="formData" :rules="rules" label-width="80px" style="padding: 12px 20px">
+  <et-dialog
+    v-model="showDialog"
+    width="400px"
+    :title="title"
+    :append-to-body="true"
+    :destroy-on-close="true"
+    @cancel="cancel"
+  >
+    <el-form :model="formData" :rules="rules" label-width="80px" class="dialog-form">
       <el-form-item label="员工编码" prop="nickname">
         <el-input v-model="formData.code" placeholder="请输入员工编码" />
       </el-form-item>
@@ -15,9 +21,15 @@
         <el-input v-model="formData.workEmail" placeholder="请输入邮箱" maxlength="50" />
       </el-form-item>
       <el-form-item label="所属部门" prop="departmentId">
-        <el-tree-select v-model="formData.departmentId" placeholder="请选择所属部门" :data="deptList"
-          :props="{ children: 'children', label: 'label', value: 'id', disabled: '' }" filterable check-strictly
-          :render-after-expand="false" />
+        <el-tree-select
+          v-model="formData.departmentId"
+          placeholder="请选择所属部门"
+          :data="deptList"
+          :props="{ children: 'children', label: 'label', value: 'id', disabled: '' }"
+          filterable
+          check-strictly
+          :render-after-expand="false"
+        />
       </el-form-item>
       <!-- <el-form-item label="邮箱" prop="email">
         <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50" />
@@ -113,7 +125,7 @@ const saveAndInvite = async () => {
     workEmail: formData.value.workEmail,
     departmentId: formData.value.departmentId,
     isManager: false,
-    invite: formData.value.workPhone || formData.value.workEmail
+    invite: formData.value.workPhone || formData.value.workEmail,
   };
 
   if (props.edit) {
@@ -145,3 +157,9 @@ const save = async () => {
   emit("ok", formData.value);
 };
 </script>
+
+<style lang="scss" scoped>
+.dialog-form {
+  padding: var(--et-space-12) var(--et-space-20);
+}
+</style>

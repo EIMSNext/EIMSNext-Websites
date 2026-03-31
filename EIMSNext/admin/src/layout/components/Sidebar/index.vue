@@ -1,14 +1,23 @@
 <template>
   <div>
-    <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
-      :isLedger="isLedger" @close="showFormEditor = false" />
-    <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
+    <form-edit
+      v-if="showFormEditor && newForm"
+      v-model="showFormEditor"
+      :form-def="newForm!"
+      :usingFlow="usingWorkflow"
+      :isLedger="isLedger"
+      @close="showFormEditor = false"
+    />
+    <DashboardDesigner
+      v-if="showDshEditor && newDash"
+      v-model="showDshEditor"
+      :dash-def="newDash!"
+    ></DashboardDesigner>
     <div class="app-title">
       <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
-      <span v-if="isSidebarOpened" class="ml-[10px]">{{ app?.name
-      }}</span>
-      <el-button class="side-bar-control" @click.stop="toggleSideBar"> <et-icon v-if="isSidebarOpened"
-          icon="el-DArrowLeft" size="14px"></et-icon>
+      <span v-if="isSidebarOpened" class="ml-[10px]">{{ app?.name }}</span>
+      <el-button class="side-bar-control" @click.stop="toggleSideBar">
+        <et-icon v-if="isSidebarOpened" icon="el-DArrowLeft" size="14px"></et-icon>
         <et-icon v-else icon="el-DArrowRight" size="14px"></et-icon>
       </el-button>
     </div>
@@ -17,25 +26,33 @@
         <AppLink :to="{ name: 'mytasks', params: { appId: app?.id } }">
           <el-menu-item index="mytodo" :class="{ 'pl-15px': !isSidebarOpened }">
             <et-icon icon="icon-mytodo" class="step-image" size="14px" />
-            <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.mytasks") }}</span>
+            <span v-if="isSidebarOpened" class="app-menu-text">
+              {{ t("common.wfProcess.mytasks") }}
+            </span>
           </el-menu-item>
         </AppLink>
         <AppLink :to="{ name: 'mystarted', params: { appId: app?.id } }">
           <el-menu-item index="mystarted" :class="{ 'pl-15px': !isSidebarOpened }">
             <et-icon icon="icon-mystarted" class="step-image" size="14px" />
-            <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.mystarted") }}</span>
+            <span v-if="isSidebarOpened" class="app-menu-text">
+              {{ t("common.wfProcess.mystarted") }}
+            </span>
           </el-menu-item>
         </AppLink>
         <AppLink :to="{ name: 'myapproved', params: { appId: app?.id } }">
           <el-menu-item index="myapproved" :class="{ 'pl-15px': !isSidebarOpened }">
             <et-icon icon="icon-myapproved" class="step-image" size="14px" />
-            <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.myapproved") }}</span>
+            <span v-if="isSidebarOpened" class="app-menu-text">
+              {{ t("common.wfProcess.myapproved") }}
+            </span>
           </el-menu-item>
         </AppLink>
         <AppLink :to="{ name: 'cctome', params: { appId: app?.id } }">
           <el-menu-item index="mycced" :class="{ 'pl-15px': !isSidebarOpened }">
             <et-icon icon="icon-mycced" class="step-image" size="14px" />
-            <span v-if="isSidebarOpened" class="app-menu-text">{{ t("common.wfProcess.cctome") }}</span>
+            <span v-if="isSidebarOpened" class="app-menu-text">
+              {{ t("common.wfProcess.cctome") }}
+            </span>
           </el-menu-item>
         </AppLink>
       </el-menu>
@@ -43,23 +60,33 @@
     <div v-if="isSidebarOpened" class="form-action">
       <el-input>
         <template #prefix>
-          <et-icon icon="el-search" size="14px"> </et-icon>
+          <et-icon icon="el-search" size="14px"></et-icon>
         </template>
       </el-input>
 
-      <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
+      <template
+        v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
+      >
         <el-dropdown placement="bottom-start" size="large">
-          <el-button style="width: 30px;">
-            <et-icon icon="el-plus"> </et-icon>
+          <el-button class="create-button">
+            <et-icon icon="el-plus"></et-icon>
           </el-button>
           <template #dropdown>
-            <el-dropdown-menu style="min-width: 150px">
-              <el-dropdown-item @click="createForm(false, false)">{{ t("admin.newForm") }}</el-dropdown-item>
-              <el-dropdown-item @click="createForm(true, false)">{{ t("admin.newFlowForm") }}</el-dropdown-item>
-              <el-dropdown-item @click="createForm(false, true)">{{ t("admin.newLedgerForm") }}</el-dropdown-item>
-              <el-divider style="margin: 3px 0" />
-              <el-dropdown-item @click="createDashboard">{{ t("admin.newDashboard") }}</el-dropdown-item>
-              <el-divider style="margin: 3px 0" />
+            <el-dropdown-menu class="sidebar-dropdown-menu">
+              <el-dropdown-item @click="createForm(false, false)">
+                {{ t("admin.newForm") }}
+              </el-dropdown-item>
+              <el-dropdown-item @click="createForm(true, false)">
+                {{ t("admin.newFlowForm") }}
+              </el-dropdown-item>
+              <el-dropdown-item @click="createForm(false, true)">
+                {{ t("admin.newLedgerForm") }}
+              </el-dropdown-item>
+              <el-divider class="sidebar-divider" />
+              <el-dropdown-item @click="createDashboard">
+                {{ t("admin.newDashboard") }}
+              </el-dropdown-item>
+              <el-divider class="sidebar-divider" />
               <el-dropdown-item @click="createFolder">{{ t("admin.newGroup") }}</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -73,32 +100,40 @@
 </template>
 
 <script setup lang="ts">
-import DashboardDesigner from "@/components/DashboardDesigner/index.vue"
+import DashboardDesigner from "@/components/DashboardDesigner/index.vue";
 import { usePermissionStore, useSystemStore } from "@/store";
-import { App, DashboardDef, DashboardDefRequest, FormDef, FormDefRequest, FormType, UserType } from "@eimsnext/models";
+import {
+  App,
+  DashboardDef,
+  DashboardDefRequest,
+  FormDef,
+  FormDefRequest,
+  FormType,
+  UserType,
+} from "@eimsnext/models";
 import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
-const { t } = useI18n()
+const { t } = useI18n();
 
-const newForm = ref<FormDef>()
+const newForm = ref<FormDef>();
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
 
-const newDash = ref<DashboardDef>()
+const newDash = ref<DashboardDef>();
 const showDshEditor = ref(false);
-var permissionStore = usePermissionStore()
+var permissionStore = usePermissionStore();
 const { appMenus } = storeToRefs(permissionStore);
 
 const appStore = useAppStore();
 const formStore = useFormStore();
 const contextStore = useContextStore();
-const userStore = useUserStore()
-const curUser = toRef(userStore.currentUser)
-const appId = toRef(contextStore.appId)
+const userStore = useUserStore();
+const curUser = toRef(userStore.currentUser);
+const appId = toRef(contextStore.appId);
 const app = ref<App>();
 
 const systemStore = useSystemStore();
@@ -109,10 +144,13 @@ function toggleSideBar() {
   systemStore.toggleSidebar();
 }
 
-watch(() => contextStore.appId,
-  () => { appStore.get(contextStore.appId).then((res) => (app.value = res)); },
+watch(
+  () => contextStore.appId,
+  () => {
+    appStore.get(contextStore.appId).then((res) => (app.value = res));
+  },
   { immediate: true }
-)
+);
 
 const createForm = (usingFlow: boolean, ledger: boolean) => {
   usingWorkflow.value = usingFlow;
@@ -124,15 +162,16 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
     appId: contextStore.appId,
     name: t("admin.untitledForm"),
     content: {
-      "layout": "[]",
-      "options": "{\"info\":{\"align\":\"left\"},\"form\":{\"inline\":false,\"hideRequiredAsterisk\":false,\"labelPosition\":\"top\",\"size\":\"default\",\"labelWidth\":\"auto\"},\"resetBtn\":{\"show\":false,\"innerText\":\"重置\"},\"submitBtn\":{\"show\":false,\"innerText\":\"提交\"}}"
+      layout: "[]",
+      options:
+        '{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":false,"innerText":"提交"}}',
     },
     usingWorkflow: usingFlow,
     isLedger: ledger,
   };
 
-  formDefService.post<FormDef>(req).then(resp => {
-    newForm.value = resp
+  formDefService.post<FormDef>(req).then((resp) => {
+    newForm.value = resp;
     formStore.update(resp);
     contextStore.setAppChanged(); //reload 菜单
 
@@ -142,80 +181,91 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
 
 const editForm = async (formId: string, type: FormType) => {
   if (type == FormType.Form) {
-    const form = await formStore.get(formId)
+    const form = await formStore.get(formId);
     if (form) {
       newForm.value = form;
       usingWorkflow.value = form.usingWorkflow;
-      isLedger.value = form.isLedger
+      isLedger.value = form.isLedger;
 
-      showFormEditor.value = true
+      showFormEditor.value = true;
     }
-  }
-  else if (type == FormType.Dashboard) {
-    const dash = await dashboardDefService.get<DashboardDef>(formId)
+  } else if (type == FormType.Dashboard) {
+    const dash = await dashboardDefService.get<DashboardDef>(formId);
     if (dash) {
       newDash.value = dash;
-      showDshEditor.value = true
+      showDshEditor.value = true;
     }
   }
-}
+};
 
 const createDashboard = () => {
   let req: DashboardDefRequest = {
     id: "",
     appId: contextStore.appId,
     name: t("admin.untitledDashboard"),
-    layout: "[]"
+    layout: "[]",
   };
 
-  dashboardDefService.post<DashboardDef>(req).then(resp => {
-    newDash.value = resp
+  dashboardDefService.post<DashboardDef>(req).then((resp) => {
+    newDash.value = resp;
     contextStore.setAppChanged(); //reload 菜单
 
     showDshEditor.value = true;
   });
 };
 
-const createFolder = () => { };
+const createFolder = () => {};
 </script>
 
 <style lang="scss" scoped>
 .side-bar-control {
   border: none;
   position: absolute;
-  top: 10px;
-  right: 1px;
+  top: var(--et-space-10);
+  right: var(--et-space-0);
 }
 
 .app-title {
   display: flex;
   overflow: hidden;
-  padding: 15px;
-  font-size: 16px;
+  padding: var(--et-space-15);
+  font-size: var(--et-font-size-16);
   align-items: center;
 }
 
 .form-action {
   display: flex;
-  padding: 0 8px;
-  margin-bottom: 5px;
+  padding: 0 var(--et-space-8);
+  margin-bottom: var(--et-space-5);
 }
 
 .step-image {
-  color: #1296db;
+  color: var(--et-color-primary);
 }
 
 .app-menu-text {
-  margin-left: 5px
+  margin-left: var(--et-space-5);
+}
+
+.create-button {
+  width: var(--et-size-30);
+}
+
+.sidebar-dropdown-menu {
+  min-width: var(--et-size-150);
+}
+
+.sidebar-divider {
+  margin: var(--et-space-3) 0;
 }
 
 :deep(.el-sub-menu__title) {
-  line-height: 40px;
-  height: 40px;
+  line-height: var(--et-line-height-40);
+  height: var(--et-size-40);
 }
 
 :deep(.el-menu-item) {
-  line-height: 40px;
-  height: 40px;
+  line-height: var(--et-line-height-40);
+  height: var(--et-size-40);
 }
 </style>

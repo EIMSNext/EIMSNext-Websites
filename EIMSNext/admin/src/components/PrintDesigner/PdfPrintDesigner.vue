@@ -11,11 +11,23 @@
     <div class="print-design-container">
       <el-tabs v-model="activeTab" class="field-container">
         <el-tab-pane label="表单字段" name="form" class="field-panel">
-          <el-tree ref="formFieldsTreeRef" class="mt-2" :data="formFieldNodes" item-key="id"
-            :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false">
+          <el-tree
+            ref="formFieldsTreeRef"
+            class="mt-2"
+            :data="formFieldNodes"
+            item-key="id"
+            :props="{ children: 'children', label: 'label', disabled: '' }"
+            :expand-on-click-node="false"
+          >
             <template #default="{ node, data }">
-              <Draggable :list="[data]" :sort="false" ghost-class="ghost" @start="onStart"
-                :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
+              <Draggable
+                :list="[data]"
+                :sort="false"
+                ghost-class="ghost"
+                @start="onStart"
+                :group="{ name: 'fields', pull: 'clone', put: false }"
+                item-key="id"
+              >
                 <template #item="{ element }">
                   <div class="node-data" :title="data.label">
                     <div class="node-wrapper">
@@ -91,7 +103,7 @@ import { FUniver } from "@univerjs/core/facade";
 import { FWorkbook, FWorksheet, FRange } from "@univerjs/sheets/facade";
 import { useFormStore } from "@eimsnext/store";
 import { FieldDef, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
-import { DataItemType, ITreeNode} from "@eimsnext/components";
+import { DataItemType, ITreeNode } from "@eimsnext/components";
 import Draggable from "vuedraggable";
 import { printTemplateService } from "@eimsnext/services";
 import { IPrintMetadata } from "./type";
@@ -129,13 +141,12 @@ const populateFields = () => {
         type: DataItemType.Field,
         data: x,
       };
-      //TODO: 此处应该循环
       if (x.columns && x.columns.length > 0) {
         node.children = [];
         x.columns.forEach((y) => {
           let subNode: ITreeNode = {
             id: `${node.id}-${y.field}`,
-            value: `${node.id}.${y.field}`,
+            value: `${node.id}>${y.field}`,
             label: y.title,
             type: DataItemType.Field,
             data: y,
@@ -158,7 +169,6 @@ const save = () => {
     content: JSON.stringify(workbookApi.save()),
     printType: currentPrintDef.value.printType,
   };
-  // console.log("print req", req);
   if (req.id)
     printTemplateService
       .put<PrintTemplate>(req.id, req)
@@ -229,12 +239,11 @@ const initSheet = (data = {}) => {
     if (draggingNode.value) {
       const cell: FRange = params.worksheet.getRange(params.row, params.column);
       if (cell) {
-        cell.setValue(draggingNode.value.label);
+        cell.setValue(`\${${draggingNode.value.label}}`);
         //字段打印设置
         let printMeata: IPrintMetadata = {
           dataType: "field",
           id: draggingNode.value.value!,
-          fieldType: draggingNode.value.data.type,
         };
         cell.setCustomMetaData(printMeata);
       }
@@ -260,7 +269,7 @@ onBeforeUnmount(() => {
   display: flex;
 
   .field-container {
-    width: 300px;
+    width: var(--et-size-300);
     height: 100%;
 
     .field-panel {
@@ -275,7 +284,7 @@ onBeforeUnmount(() => {
 }
 
 .drop-active {
-  background-color: #f0f7ff;
-  border: 2px dashed #409eff !important;
+  background-color: var(--et-bg-primary-soft);
+  border: 2px dashed var(--et-color-primary) !important;
 }
 </style>

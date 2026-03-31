@@ -1,22 +1,39 @@
 <template>
   <div class="tags-container">
     <el-scrollbar class="scroll-container" :vertical="false" @wheel.prevent="handleScroll">
-      <router-link v-for="tag in visitedViews" ref="tagRef" :key="tag.path"
-        :class="'tags-item ' + (tagsViewStore.isActive(tag) ? 'active' : '')" :to="{ path: tag.path, query: tag.query }"
-        @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''" @contextmenu.prevent="openContentMenu(tag, $event)">
-        {{ translateRouteTitle(tag.title) }}
-        <et-icon v-if="!isAffix(tag) || isClosable(tag)" icon="el-Close" class="tag-close-icon"
-          @click.prevent.stop="closeSelectedTag(tag)"></et-icon>
+      <router-link
+        v-for="tag in visitedViews"
+        ref="tagRef"
+        :key="tag.path"
+        :class="'tags-item ' + (tagsViewStore.isActive(tag) ? 'active' : '')"
+        :to="{ path: tag.path, query: tag.query }"
+        @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"
+        @contextmenu.prevent="openContentMenu(tag, $event)"
+      >
+        {{ translateRouteTitle(t, tag.title) }}
+        <et-icon
+          v-if="!isAffix(tag) || isClosable(tag)"
+          icon="el-Close"
+          class="tag-close-icon"
+          @click.prevent.stop="closeSelectedTag(tag)"
+        ></et-icon>
       </router-link>
     </el-scrollbar>
 
     <!-- tag标签操作菜单 -->
-    <ul v-show="contentMenuVisible" class="contextmenu" :style="{ left: left + 'px', top: top + 'px' }">
+    <ul
+      v-show="contentMenuVisible"
+      class="contextmenu"
+      :style="{ left: left + 'px', top: top + 'px' }"
+    >
       <!-- <li @click="refreshSelectedTag(selectedTag)">
         <et-icon icon="refresh" />
         刷新
       </li> -->
-      <li v-if="!isAffix(selectedTag) || isClosable(selectedTag)" @click="closeSelectedTag(selectedTag)">
+      <li
+        v-if="!isAffix(selectedTag) || isClosable(selectedTag)"
+        @click="closeSelectedTag(selectedTag)"
+      >
         <et-icon icon="close" />
         关闭
       </li>
@@ -43,9 +60,10 @@
 <script setup lang="ts">
 import { useRoute, useRouter, RouteRecordRaw } from "vue-router";
 import { resolve } from "path-browserify";
-import { translateRouteTitle } from "@/utils/i18n";
-
+import { translateRouteTitle } from "@/utils/common";
 import { usePermissionStore, useTagsViewStore, useSettingsStore, useSystemStore } from "@/store";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const { proxy } = getCurrentInstance()!;
 const router = useRouter();
@@ -144,7 +162,7 @@ function addTags() {
       query: route.query,
     };
     // 检查视图是否已存在
-    const isViewExist = visitedViews.value.some(v => v.path === view.path);
+    const isViewExist = visitedViews.value.some((v) => v.path === view.path);
     if (isViewExist) {
       // 如果视图已存在，只更新属性，不重新添加
       tagsViewStore.updateVisitedView(view);
@@ -230,7 +248,6 @@ function closeOtherTags() {
 }
 
 function closeAllTags(view: TagView) {
-  // console.log("close all")
   tagsViewStore.delAllViews().then((res: any) => {
     tagsViewStore.toLastView(res.visitedViews, view);
   });
@@ -314,69 +331,69 @@ onMounted(() => {
 <style lang="scss" scoped>
 .tags-container {
   width: 100%;
-  height: 42px;
-  background-color: var(--el-bg-color);
+  height: var(--et-size-42);
+  background-color: var(--et-bg-container);
   border: none;
-  border-bottom: 1px solid var(--el-border-color-light);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s ease;
+  border-bottom: 1px solid var(--et-border-color-light);
+  box-shadow: var(--et-shadow-sm);
+  transition: box-shadow var(--et-duration-normal) var(--et-ease-standard);
 
   &:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--et-shadow-md);
   }
 
   .tags-item {
     display: inline-flex;
     align-items: center;
-    padding: 6px 16px;
-    margin: 5px 0 0 0;
-    font-size: 14px;
+    padding: var(--et-space-6) var(--et-space-16);
+    margin: var(--et-space-5) 0 0 0;
+    font-size: var(--et-font-size-14);
     cursor: pointer;
     border: none;
-    background-color: var(--el-bg-color);
-    color: var(--el-text-color-regular);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: var(--et-bg-container);
+    color: var(--et-text-secondary);
+    transition: all 0.25s var(--et-ease-emphasized);
     position: relative;
     overflow: hidden;
-    max-width: 180px;
+    max-width: var(--et-size-180);
     text-overflow: ellipsis;
     white-space: nowrap;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 1px;
+      height: var(--et-z-base);
       background-color: transparent;
       transition: background-color 0.25s ease;
     }
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       right: 0;
-      top: 12px;
-      height: 18px;
-      width: 1px;
-      background-color: var(--el-border-color-light);
+      top: var(--et-space-12);
+      height: var(--et-size-18);
+      width: var(--et-z-base);
+      background-color: var(--et-border-color-light);
       opacity: 0.5;
     }
 
     &:hover {
-      color: var(--el-color-primary);
-      background-color: var(--el-fill-color-light);
+      color: var(--et-color-primary);
+      background-color: var(--et-bg-hover);
       transform: translateY(-1px);
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--et-shadow-md);
     }
 
     &:first-of-type {
-      margin-left: 16px;
+      margin-left: var(--et-space-16);
     }
 
     &:last-of-type {
-      margin-right: 16px;
+      margin-right: var(--et-space-16);
 
       &::after {
         display: none;
@@ -386,39 +403,39 @@ onMounted(() => {
     .tag-close-icon {
       vertical-align: middle;
       cursor: pointer;
-      border-radius: 50%;
-      margin-left: 8px;
-      width: 18px;
-      height: 18px;
+      border-radius: var(--et-radius-round);
+      margin-left: var(--et-space-8);
+      width: var(--et-size-18);
+      height: var(--et-size-18);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: var(--et-font-size-12);
       opacity: 0.6;
-      transition: all 0.2s ease;
+      transition: all var(--et-duration-fast) var(--et-ease-standard);
 
       &:hover {
-        color: #fff;
-        background-color: var(--el-color-primary);
+        color: var(--et-text-on-primary);
+        background-color: var(--et-color-primary);
         opacity: 1;
         transform: scale(1.15);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--et-shadow-md);
       }
     }
 
     &.active {
-      color: var(--el-color-primary);
-      background-color: rgba(64, 158, 255, 0.1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      color: var(--et-color-primary);
+      background-color: var(--et-bg-primary-soft);
+      box-shadow: var(--et-shadow-lg);
       font-weight: 500;
 
       &::before {
-        background-color: var(--el-color-primary);
+        background-color: var(--et-color-primary);
       }
 
       &:hover {
-        color: var(--el-color-primary);
-        background-color: rgba(64, 158, 255, 0.15);
+        color: var(--et-color-primary);
+        background-color: var(--et-bg-primary-soft);
         transform: none;
       }
 
@@ -426,8 +443,8 @@ onMounted(() => {
         opacity: 0.7;
 
         &:hover {
-          color: #fff;
-          background-color: var(--el-color-primary);
+          color: var(--et-text-on-primary);
+          background-color: var(--et-color-primary);
         }
       }
     }
@@ -435,16 +452,16 @@ onMounted(() => {
     // 固定标签样式
     &.tags-item[data-affix="true"] {
       font-weight: 500;
-      color: var(--el-text-color-primary);
+      color: var(--et-text-primary);
 
       &:hover {
-        color: var(--el-text-color-primary);
-        background-color: var(--el-fill-color-light);
+        color: var(--et-text-primary);
+        background-color: var(--et-bg-hover);
       }
 
       &.active {
-        color: var(--el-color-primary);
-        background-color: rgba(64, 158, 255, 0.1);
+        color: var(--et-color-primary);
+        background-color: var(--et-bg-primary-soft);
       }
     }
   }
@@ -452,34 +469,34 @@ onMounted(() => {
 
 .contextmenu {
   position: absolute;
-  z-index: 9999;
-  font-size: 13px;
-  background: var(--el-bg-color-overlay);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  border: 1px solid var(--el-border-color-light);
-  padding: 6px 0;
-  min-width: 130px;
-  backdrop-filter: blur(8px);
+  z-index: var(--et-z-overlay);
+  font-size: var(--et-font-size-13);
+  background: var(--et-bg-elevated);
+  box-shadow: var(--et-shadow-overlay);
+  border: 1px solid var(--et-border-color-light);
+  padding: var(--et-space-6) 0;
+  min-width: var(--et-size-130);
+  backdrop-filter: var(--et-blur-overlay);
 
   li {
-    padding: 9px 18px;
+    padding: var(--et-space-9) var(--et-space-18);
     cursor: pointer;
     display: flex;
     align-items: center;
-    transition: all 0.2s ease;
+    transition: all var(--et-duration-fast) var(--et-ease-standard);
 
     et-icon {
-      margin-right: 8px;
-      font-size: 15px;
+      margin-right: var(--et-space-8);
+      font-size: var(--et-font-size-15);
     }
 
     &:hover {
-      background-color: var(--el-fill-color-light);
-      color: var(--el-color-primary);
+      background-color: var(--et-bg-hover);
+      color: var(--et-color-primary);
     }
 
     &:not(:last-child) {
-      border-bottom: 1px solid var(--el-border-color-transparent);
+      border-bottom: 1px solid transparent;
     }
   }
 }
@@ -492,26 +509,26 @@ onMounted(() => {
 
   .el-scrollbar__bar {
     bottom: 0;
-    height: 4px;
+    height: var(--et-space-4);
 
     &.is-vertical {
       display: none;
     }
 
     .el-scrollbar__thumb {
-      background-color: rgba(144, 147, 153, 0.3);
-      border-radius: 2px;
-      transition: background-color 0.3s ease;
+      background-color: rgb(144 147 153 / 30%);
+      border-radius: var(--et-radius-2);
+      transition: background-color var(--et-duration-normal) var(--et-ease-standard);
 
       &:hover {
-        background-color: rgba(144, 147, 153, 0.5);
+        background-color: rgb(144 147 153 / 50%);
       }
     }
   }
 
   .el-scrollbar__wrap {
-    height: 52px;
-    padding-bottom: 12px;
+    height: var(--et-size-52);
+    padding-bottom: var(--et-space-12);
   }
 }
 
@@ -549,14 +566,43 @@ onMounted(() => {
 }
 
 // 为每个标签添加不同的动画延迟，创造更流畅的效果
-.tags-item:nth-child(1) { animation-delay: 0.05s; }
-.tags-item:nth-child(2) { animation-delay: 0.1s; }
-.tags-item:nth-child(3) { animation-delay: 0.15s; }
-.tags-item:nth-child(4) { animation-delay: 0.2s; }
-.tags-item:nth-child(5) { animation-delay: 0.25s; }
-.tags-item:nth-child(6) { animation-delay: 0.3s; }
-.tags-item:nth-child(7) { animation-delay: 0.35s; }
-.tags-item:nth-child(8) { animation-delay: 0.4s; }
-.tags-item:nth-child(9) { animation-delay: 0.45s; }
-.tags-item:nth-child(10) { animation-delay: 0.5s; }
+.tags-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.tags-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.tags-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.tags-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.tags-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.tags-item:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+.tags-item:nth-child(7) {
+  animation-delay: 0.35s;
+}
+
+.tags-item:nth-child(8) {
+  animation-delay: 0.4s;
+}
+
+.tags-item:nth-child(9) {
+  animation-delay: 0.45s;
+}
+
+.tags-item:nth-child(10) {
+  animation-delay: 0.5s;
+}
 </style>

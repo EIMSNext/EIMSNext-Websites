@@ -1,15 +1,15 @@
 @use "./reset";
 
 .app-container {
-  padding: 15px;
+  padding: var(--et-space-15);
 }
 
 .search-bar {
-  padding: 18px 0 0 10px;
-  margin-bottom: 10px;
+  padding: var(--et-space-18) 0 0 var(--et-space-10);
+  margin-bottom: var(--et-space-10);
   background-color: var(--el-bg-color-overlay);
   border: 1px solid var(--el-border-color-light);
-  border-radius: 4px;
+  border-radius: var(--et-radius-4);
   box-shadow: var(--el-box-shadow-light);
 }
 
@@ -17,13 +17,14 @@
   padding: calc(var(--el-card-padding) - 8px) var(--el-card-padding);
 }
 
-.link-type,
-.link-type:focus {
-  color: #337ab7;
+.link-text,
+.link-text:focus {
+  border: none !important;
+  color: var(--et-color-secondary) !important;
   cursor: pointer;
 
   &:hover {
-    color: rgb(32 160 255);
+    color: var(--et-color-primary-hover);
   }
 }
 
@@ -35,7 +36,7 @@
 }
 
 .pl-15px {
-  padding-left: 15px !important;
+  padding-left: var(--et-space-15) !important;
 }
 
 .adv-container {
@@ -43,12 +44,12 @@
   height: 100%;
   display: flex;
   justify-content: center;
-  background-color: var(--et-bg-color-primary);
+  background-color: var(--et-bg-page);
 
   .adv-tabs {
     height: 100%;
-    width: 1000px;
-    background-color: #fff;
+    width: var(--et-size-1000);
+    background-color: var(--et-bg-container);
 
     .adv-panel {
       height: 100%;
@@ -66,15 +67,15 @@
 }
 
 .formdatadialog {
-  height: calc(100% - 50px);
-  margin: 25px auto;
+  height: calc(100% - var(--et-size-50));
+  margin: var(--et-space-25) auto;
 }
 
 .data-container {
   overflow-y: auto;
   overflow-x: hidden;
   height: calc(100vh - 180px);
-  padding: 0 10px 10px 0;
+  padding: 0 var(--et-space-10) var(--et-space-10) 0;
 }
 
 .form-wrapper.editdata > .data-container {
@@ -82,17 +83,17 @@
 }
 
 .toolbar-container.small-bar {
-  margin: 5px 0;
-  padding: 0 20px;
-  height: 24px;
+  margin: var(--et-space-5) 0;
+  padding: 0 var(--et-space-20);
+  height: var(--et-size-24);
 
   .el-button {
     border: none;
-    height: 24px;
-    padding: 3px;
+    height: var(--et-size-24);
+    padding: var(--et-space-3);
   }
   .el-button + .el-button {
-    margin-left: 6px;
+    margin-left: var(--et-space-6);
   }
 }
 .no-border {

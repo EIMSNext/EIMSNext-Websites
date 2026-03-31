@@ -5,7 +5,7 @@
     <!-- 全屏 -->
     <Fullscreen />
     <!-- 消息通知 -->
-    <Notification />
+    <Notification @click="settingStore.messageCenterVisible = true" />
     <!-- </template> -->
     <!-- 语言选择 -->
     <LangSelect :show-label="false" />
@@ -21,10 +21,9 @@
 </template>
 <script setup lang="ts">
 import defaultSettings from "@/settings";
-import { useSystemStore, useSettingsStore } from "@/store";
+import { useSettingsStore } from "@/store";
 import UserProfile from "./UserProfile.vue";
 
-const appStore = useSystemStore();
 const settingStore = useSettingsStore();
 </script>
 
@@ -34,28 +33,24 @@ const settingStore = useSettingsStore();
   align-items: center;
   justify-content: center;
 
-  &>* {
+  & > * {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-width: 40px;
-    height: 50px;
-    line-height: 50px;
-    color: var(--et-color-text);
+    min-width: var(--et-size-40);
+    height: var(--et-size-50);
+    line-height: var(--et-size-50);
+    color: var(--et-text-primary);
     align-items: center;
     cursor: pointer;
 
     &:hover {
-      background: rgb(0 0 0 / 10%);
+      background: var(--et-bg-hover);
     }
   }
 }
 
 :deep(.el-divider--horizontal) {
-  margin: 10px 0;
-}
-
-.dark .navbar__right>*:hover {
-  background: rgb(255 255 255 / 20%);
+  margin: var(--et-space-10) 0;
 }
 </style>

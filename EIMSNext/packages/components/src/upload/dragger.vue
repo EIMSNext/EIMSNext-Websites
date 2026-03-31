@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import "./style/drag.less";
+import "./style/drag.scss";
 import { ref, onMounted } from "vue";
 import EtIcon from "../icon/etIcon.vue";
 const emits = defineEmits(["getFilesList", "fileUpload"]);
@@ -35,7 +35,7 @@ onMounted(() => {
       filesList.value.push(...Array.from(e.dataTransfer.files as FileList));
       emits("getFilesList", filesList.value);
     },
-    false
+    false,
   );
   fileArea.value.addEventListener("dragover", onDragover, false);
 });

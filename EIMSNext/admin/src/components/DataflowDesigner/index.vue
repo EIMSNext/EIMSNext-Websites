@@ -11,7 +11,7 @@
       <div class="flow-editor">
         <DataflowDiagram :flow-data="flowData" />
       </div>
-      <div class="flow-meta-container" style="width: 500px">
+      <div class="flow-meta-container dataflow-meta-container">
         <DataflowMetaEditor v-if="ready" />
       </div>
     </div>
@@ -39,7 +39,7 @@ const props = defineProps<{
   flowDef: WfDefinition;
 }>();
 
-const ready = ref(false)
+const ready = ref(false);
 const currentWfDef = ref<WfDefinition>(props.flowDef);
 
 const flowData = ref<IFlowData>(createDataflowData(EventSourceType.Form, t));
@@ -68,7 +68,7 @@ onBeforeMount(() => {
     flowContext.activeData = flowData.value.startNode;
   }
 
-  ready.value = true
+  ready.value = true;
 });
 
 const save = () => {
@@ -84,10 +84,13 @@ const save = () => {
     eventSource: currentWfDef.value.eventSource,
     sourceId: currentWfDef.value.sourceId,
   };
-  // console.log("wf req", req);
   if (req.id)
     wfDefinitionService.put<WfDefinition>(req.id, req).then((res) => (currentWfDef.value = res));
   else wfDefinitionService.post<WfDefinition>(req).then((res) => (currentWfDef.value = res));
 };
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+.dataflow-meta-container {
+  width: var(--et-size-500);
+}
+</style>

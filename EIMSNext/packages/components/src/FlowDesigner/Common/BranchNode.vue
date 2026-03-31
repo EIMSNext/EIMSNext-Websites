@@ -1,5 +1,5 @@
 <template>
-  <div style="margin-top: 5px">
+  <div class="branch-node">
     <BranchHeader :p-node-datas="pNodeDatas" :node-data="nodeData" />
     <BranchBody :p-node-datas="pNodeDatas" :node-data="nodeData" />
   </div>
@@ -19,3 +19,9 @@ const props = defineProps<{
   nodeData: IFlowNodeData;
 }>();
 </script>
+
+<style scoped>
+.branch-node {
+  margin-top: var(--et-space-5);
+}
+</style>

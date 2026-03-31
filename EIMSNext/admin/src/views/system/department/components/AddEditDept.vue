@@ -8,13 +8,7 @@
     @cancel="cancel"
     @ok="save"
   >
-    <el-form
-      ref="formRef"
-      :model="formData"
-      :rules="rules"
-      label-width="80px"
-      style="padding: 12px 20px"
-    >
+    <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
       <el-form-item label="上级部门" prop="parentName">
         <el-input :model-value="formData.parentName" readonly />
       </el-form-item>
@@ -68,7 +62,7 @@ const cancel = () => {
 };
 const save = async () => {
   if (!formRef.value) return;
-  
+
   await formRef.value.validate(async (valid: boolean) => {
     if (valid) {
       const newDept: DepartmentRequest = {
@@ -91,3 +85,9 @@ const save = async () => {
   });
 };
 </script>
+
+<style lang="scss" scoped>
+.dialog-form {
+  padding: var(--et-space-12) var(--et-space-20);
+}
+</style>

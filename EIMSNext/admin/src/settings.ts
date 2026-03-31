@@ -6,7 +6,7 @@ const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
 const defaultSettings: AppSettings = {
   // 系统Title
-  title: "EIMS Next",
+  title: "东风低代码 - EIMS Next",
   // 系统版本
   version: "1.0.0",
   // 是否显示设置

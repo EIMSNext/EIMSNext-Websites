@@ -1,6 +1,12 @@
 <template>
-  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
-    :showNoSave="false" okText="确定" @ok="execDelete">
+  <EtConfirmDialog
+    v-model="showDeleteConfirmDialog"
+    title="你确定要删除所选数据吗？"
+    :icon="MessageIcon.Warning"
+    :showNoSave="false"
+    okText="确定"
+    @ok="execDelete"
+  >
     <div>数据删除后将不可恢复</div>
   </EtConfirmDialog>
   <EtDrawer v-model="showDrawer" @close="close">
@@ -13,8 +19,10 @@
   <AdvanceLayout title="打印模板" desc="打印表单时将按照使用中的模板格式打印">
     <div class="flow-container">
       <div class="panel-header">
-        <div class="header-left"> <el-button type="primary" icon="plus"
-            @click="addNew(PrintTemplateType.Pdf)">新建打印模板</el-button>
+        <div class="header-left">
+          <el-button type="primary" icon="plus" @click="addNew(PrintTemplateType.Pdf)">
+            新建打印模板
+          </el-button>
         </div>
         <div class="header-right"></div>
       </div>
@@ -56,11 +64,9 @@ const props = defineProps<{
 }>();
 
 const showDrawer = ref(false);
-const showDeleteConfirmDialog = ref(false)
+const showDeleteConfirmDialog = ref(false);
 const prints = ref<PrintTemplate[]>([]);
 const selectedPrint = ref<PrintTemplate>();
-
-// console.log("formid", props.formId);
 
 const loadPrints = (formId: string) => {
   let query = buildQuery({ filter: { formId: formId } });
@@ -83,22 +89,21 @@ const addNew = (printType: PrintTemplateType) => {
 };
 
 const edit = (print: PrintTemplate) => {
-  // console.log("edit df", flow);
   selectedPrint.value = print;
 
   showDrawer.value = true;
 };
 
 const remove = (print: PrintTemplate) => {
-  selectedPrint.value = print
-  showDeleteConfirmDialog.value = true
+  selectedPrint.value = print;
+  showDeleteConfirmDialog.value = true;
 };
 const execDelete = () => {
   printTemplateService.delete<PrintTemplate>(selectedPrint.value!.id).then((res) => {
-    loadPrints(props.formDef.id)
-    showDeleteConfirmDialog.value = false
+    loadPrints(props.formDef.id);
+    showDeleteConfirmDialog.value = false;
   });
-}
+};
 
 // const emit = defineEmits(["close"]);
 
@@ -125,7 +130,7 @@ onBeforeMount(() => {
     align-items: center;
     display: flex;
     justify-content: space-between;
-    padding-bottom: 16px;
+    padding-bottom: var(--et-space-16);
   }
 
   .flow-space {
@@ -141,7 +146,7 @@ onBeforeMount(() => {
       justify-content: space-between;
 
       .flow-name {
-        font-size: 15px;
+        font-size: var(--et-font-size-15);
         font-weight: 600;
         max-width: 50%;
         overflow: hidden;
@@ -150,24 +155,24 @@ onBeforeMount(() => {
       }
 
       .el-button {
-        margin: 0px;
+        margin: var(--et-space-0);
         border: none;
       }
     }
 
     .flow-content {
       display: flex;
-      font-size: 13px;
-      padding: 10px 20px;
+      font-size: var(--et-font-size-13);
+      padding: var(--et-space-10) var(--et-space-20);
       flex-direction: column;
 
       .item-line {
         word-wrap: break-word;
         align-items: center;
-        color: var(--et-color-text-secondary);
+        color: var(--et-text-secondary);
         display: flex;
-        font-size: 14px;
-        line-height: 22px;
+        font-size: var(--et-font-size-14);
+        line-height: var(--et-line-height-22);
         word-break: break-word;
       }
     }
@@ -179,7 +184,7 @@ onBeforeMount(() => {
   justify-content: center;
   align-items: center;
   font-weight: 600;
-  font-size: 16px;
+  font-size: var(--et-font-size-16);
 }
 
 .main-content {
@@ -187,6 +192,6 @@ onBeforeMount(() => {
   left: 0;
   position: absolute;
   right: 0;
-  top: 60px;
+  top: var(--et-size-60);
 }
 </style>

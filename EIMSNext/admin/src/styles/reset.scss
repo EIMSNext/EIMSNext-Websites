@@ -20,7 +20,7 @@ html {
   tab-size: 4;
   text-size-adjust: 100%;
   color: #141e31;
-  font-size: 14px;
+  font-size: var(--et-font-size-14);
   // background-color: #f2f3f8;
 }
 
@@ -40,18 +40,8 @@ pre,
 select,
 textarea {
   font-family:
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    Helvetica Neue,
-    Arial,
-    Noto Sans,
-    sans-serif,
-    Apple Color Emoji,
-    Segoe UI Emoji,
-    Segoe UI Symbol,
-    Noto Color Emoji;
-  font-variant-numeric: tabular-nums;
+    Inter, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "微软雅黑", Arial, sans-serif;
 }
 
 a {

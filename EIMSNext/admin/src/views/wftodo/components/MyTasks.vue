@@ -1,7 +1,13 @@
 <template>
   <div class="mytasks-container">
-    <et-dialog v-model="showProcessDialog" class="formdatadialog" :title="selectedTask?.formName" :show-footer="false"
-      width="800px" :destroy-on-close="true">
+    <et-dialog
+      v-model="showProcessDialog"
+      class="formdatadialog"
+      :title="selectedTask?.formName"
+      :show-footer="false"
+      width="800px"
+      :destroy-on-close="true"
+    >
       <div class="form-container">
         <WfProcess :todo="selectedTask!"></WfProcess>
       </div>
@@ -64,8 +70,8 @@ defineOptions({
 });
 
 import { useRoute } from "vue-router";
-import { WfTodo, } from "@eimsnext/models";
-import { wfTodoService, } from "@eimsnext/services";
+import { WfTodo } from "@eimsnext/models";
+import { wfTodoService } from "@eimsnext/services";
 import { ODataQuery } from "@/utils/query";
 import { EtDialog } from "@eimsnext/components";
 import buildQuery from "odata-query";
@@ -76,7 +82,7 @@ const route = useRoute();
 const appId = route.params.appId.toString();
 const totalRef = ref(0);
 const dataRef = ref<WfTodo[]>();
-const selectedTask = ref<WfTodo>()
+const selectedTask = ref<WfTodo>();
 
 const queryParams = reactive<ODataQuery<any>>({
   skip: 0,
@@ -98,7 +104,7 @@ const loadData = () => {
 };
 
 const processTodo = async (task: WfTodo) => {
-  selectedTask.value = task
+  selectedTask.value = task;
   showProcessDialog.value = true;
 };
 
@@ -109,7 +115,6 @@ onMounted(() => {
 </script>
 <style lang="scss" scoped>
 .mytasks-container {
-  // padding: 20px;
   display: flex;
 
   .task-space {
@@ -125,7 +130,7 @@ onMounted(() => {
       display: flex;
 
       .app-name {
-        font-size: 15px;
+        font-size: var(--et-font-size-15);
         font-weight: 600;
         max-width: 50%;
         overflow: hidden;
@@ -134,23 +139,23 @@ onMounted(() => {
       }
 
       .current-node {
-        color: var(--et-color-text-secondary);
-        font-size: 12px;
-        margin-left: 12px;
+        color: var(--et-text-secondary);
+        font-size: var(--et-font-size-12);
+        margin-left: var(--et-space-12);
         width: fit-content;
         display: flex;
         align-items: center;
 
         .node-name {
-          margin-left: 5px;
+          margin-left: var(--et-space-5);
         }
       }
     }
 
     .flow-content {
       display: flex;
-      font-size: 13px;
-      padding: 10px 20px;
+      font-size: var(--et-font-size-13);
+      padding: var(--et-space-10) var(--et-space-20);
 
       .creator-info {
         align-self: center;
@@ -163,13 +168,13 @@ onMounted(() => {
         align-items: center;
 
         .creator-name {
-          margin-left: 5px;
+          margin-left: var(--et-space-5);
         }
       }
 
       .flow-brief {
         flex-shrink: 0;
-        height: 72px;
+        height: var(--et-size-72);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -178,16 +183,16 @@ onMounted(() => {
         .brief-item {
           align-items: center;
           display: flex;
-          font-size: 13px;
-          height: 24px;
-          line-height: 22px;
-          padding: 0 12px;
+          font-size: var(--et-font-size-13);
+          height: var(--et-size-24);
+          line-height: var(--et-line-height-22);
+          padding: 0 var(--et-space-12);
 
           .brief-label {
-            color: var(--et-color-text-secondary);
+            color: var(--et-text-secondary);
             display: inline-block;
             flex: none;
-            max-width: 100px;
+            max-width: var(--et-size-100);
             overflow: hidden;
             text-overflow: ellipsis;
             vertical-align: top;
@@ -195,7 +200,7 @@ onMounted(() => {
           }
 
           .sep {
-            color: var(--et-color-text-secondary);
+            color: var(--et-text-secondary);
           }
 
           .brief-val {

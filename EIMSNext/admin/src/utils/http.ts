@@ -30,7 +30,6 @@ export default {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-expect-error
     if (window.appSetting) appSetting.merge(window.appSetting);
-    // console.log("final app setting", appSetting);
     const httpConfig = initHttpConfig();
     http.setConfig(httpConfig, httpConfig);
     app.provide("http", http);

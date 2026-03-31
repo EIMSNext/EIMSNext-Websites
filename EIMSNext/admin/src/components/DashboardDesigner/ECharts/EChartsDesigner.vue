@@ -39,9 +39,18 @@
               </div>
             </div> -->
             </div>
-            <div style="overflow-y: auto">
-              <Draggable :list="fields" :sort="false" ghost-class="ghost" :move="dragMove" :clone="cloneDragField"
-                @start="dragStart" @end="dragEnd" :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
+            <div class="field-list">
+              <Draggable
+                :list="fields"
+                :sort="false"
+                ghost-class="ghost"
+                :move="dragMove"
+                :clone="cloneDragField"
+                @start="dragStart"
+                @end="dragEnd"
+                :group="{ name: 'fields', pull: 'clone', put: false }"
+                item-key="id"
+              >
                 <template #item="{ element, index }">
                   <div class="field-wrapper" :title="element.label">
                     <div class="field-name">
@@ -66,50 +75,71 @@
           </div>
         </div>
       </el-aside>
-      <el-main class="center-echarts" style="min-width: 460px">
+      <el-main class="center-echarts center-echarts-main">
         <div class="center-box" :class="{ 'green-line': dropable.dimension1 }">
-          <div class="title">
-            维度
-          </div>
+          <div class="title">维度</div>
           <div class="drag-target-container container-veidoo">
-            <Draggable class="dimension1" :list="chartSetting.dimension1" :sort="false" ghost-class="ghost"
-              :group="{ name: 'fields', pull: false, put: true }" item-key="id" @add="addDim1">
+            <Draggable
+              class="dimension1"
+              :list="chartSetting.dimension1"
+              :sort="false"
+              ghost-class="ghost"
+              :group="{ name: 'fields', pull: false, put: true }"
+              item-key="id"
+              @add="addDim1"
+            >
               <template #item="{ element, index }">
-                <DimensionField :field="element" :isDeleted="fieldIsDeleted(element)" @remove="removeDim1">
-                </DimensionField>
+                <DimensionField
+                  :field="element"
+                  :isDeleted="fieldIsDeleted(element)"
+                  @remove="removeDim1"
+                ></DimensionField>
               </template>
             </Draggable>
           </div>
         </div>
         <div class="center-box" :class="{ 'green-line': dropable.metrics }">
-          <div class="title">
-            指标
-          </div>
+          <div class="title">指标</div>
           <div class="drag-target-container container-veidoo">
-            <Draggable class="metrics" :list="chartSetting.metrics" :sort="false" ghost-class="ghost"
-              :group="{ name: 'fields', pull: false, put: true }" item-key="id" @add="addMetric">
+            <Draggable
+              class="metrics"
+              :list="chartSetting.metrics"
+              :sort="false"
+              ghost-class="ghost"
+              :group="{ name: 'fields', pull: false, put: true }"
+              item-key="id"
+              @add="addMetric"
+            >
               <template #item="{ element, index }">
-                <MetricsField :field="element" :isDeleted="fieldIsDeleted(element)" @remove="removeMetric">
-                </MetricsField>
+                <MetricsField
+                  :field="element"
+                  :isDeleted="fieldIsDeleted(element)"
+                  @remove="removeMetric"
+                ></MetricsField>
               </template>
             </Draggable>
           </div>
         </div>
         <div class="center-box">
-          <div class="title">
-            过滤条件
-          </div>
+          <div class="title">过滤条件</div>
           <div class="drag-target-container container-veidoo">
             <div class="filter">
-              <FilterField :form-id="chartSetting.datasource.id" :filter="chartSetting.filter" @ok="onFilter">
-              </FilterField>
+              <FilterField
+                :form-id="chartSetting.datasource.id"
+                :filter="chartSetting.filter"
+                @ok="onFilter"
+              ></FilterField>
             </div>
           </div>
         </div>
 
         <div class="center-box chart-main">
           <div class="chart-container">
-            <EChartsViewer :setting="chartSetting" :title="dashItemDef.name" :designer-mode="true" />
+            <EChartsViewer
+              :setting="chartSetting"
+              :title="dashItemDef.name"
+              :designer-mode="true"
+            />
           </div>
         </div>
       </el-main>
@@ -119,39 +149,68 @@
             <el-collapse-item name="charttype" title="图表类型" class="box-head">
               <div class="box-body chart-type-body">
                 <template v-for="cc in chartConfigs" :key="cc.id">
-                  <el-button @click="selectChartType(cc)" class="chart-type"
-                    :class="{ active: chartSetting.chartType == cc.id }">
-                    <i class="icon" :class="cc.cssClass"></i>
-                  </el-button></template>
+                  <el-tooltip placement="left" effect="light">
+                    <template #content>
+                      <div class="chart-type-tooltip">
+                        <div class="chart-type-tooltip-title">{{ t(cc.i18n) }}</div>
+                        <div>{{ getLimitationDesc(t, cc.limitation) }}</div>
+                      </div>
+                    </template>
+                    <el-button
+                      @click="selectChartType(cc)"
+                      class="chart-type"
+                      :class="{ active: chartSetting.chartType == cc.id }"
+                    >
+                      <i class="icon" :class="cc.cssClass"></i>
+                    </el-button>
+                  </el-tooltip>
+                </template>
               </div>
             </el-collapse-item>
           </el-collapse>
           <el-collapse v-model="activeSettingItems" expand-icon-position="left">
-            <el-collapse-item v-if="chartConfig && chartConfig.subType" name="chartsubtype" title="柱状图类型"
-              class="box-head">
+            <el-collapse-item
+              v-if="chartConfig && chartConfig.subType"
+              name="chartsubtype"
+              title="柱状图类型"
+              class="box-head"
+            >
               <div class="box-body chart-type-body">
                 <template v-for="ct in chartConfig.subType" :key="ct.id">
-                  <el-button @click="selectChartSubType(chartConfig, ct)" class="chart-type"
-                    :class="{ active: chartSetting.chartSubType == ct.id }">
+                  <el-button
+                    @click="selectChartSubType(chartConfig, ct)"
+                    class="chart-type"
+                    :class="{ active: chartSetting.chartSubType == ct.id }"
+                  >
                     <i class="icon" :class="ct.cssClass || chartConfig.cssClass"></i>
-                  </el-button></template>
+                  </el-button>
+                </template>
               </div>
             </el-collapse-item>
-            <el-collapse-item name="charttopn" title="数据显示" class="box-head">
+            <el-collapse-item name="datatake" title="数据显示" class="box-head">
               <div class="box-body chart-type-body">
                 <div class="data-top">
-                  <el-checkbox v-model="chartSetting.takeEnable">显示前</el-checkbox><el-input-number
-                    v-model="chartSetting.take" :disabled="!chartSetting.takeEnable" size="small" :controls="false"
-                    style="width:60px;margin: 0 5px;" /><span style="font-weight: normal;">条数据</span>
+                  <el-checkbox v-model="chartSetting.takeEnable">显示前</el-checkbox>
+                  <el-input-number
+                    v-model="chartSetting.take"
+                    :disabled="!chartSetting.takeEnable"
+                    size="small"
+                    :controls="false"
+                    class="take-input"
+                  />
+                  <span class="take-label">条数据</span>
                 </div>
               </div>
             </el-collapse-item>
           </el-collapse>
         </div>
       </el-aside>
-      <DataSourceDialog v-model="showDataSourceDialog" :appId="dashItemDef.appId" :dataSource="chartSetting.datasource"
-        @ok="handleSourceOk">
-      </DataSourceDialog>
+      <DataSourceDialog
+        v-model="showDataSourceDialog"
+        :appId="dashItemDef.appId"
+        :dataSource="chartSetting.datasource"
+        @ok="handleSourceOk"
+      ></DataSourceDialog>
     </el-container>
   </EtDrawer>
 </template>
@@ -162,16 +221,27 @@ import { DashboardItemDef, FieldDef, FieldType, FormDef, FormType } from "@eimsn
 import { IConditionList, IFormItem, ISortItem, ISortList } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
-import { useLocale } from "element-plus";
-import { ChartType, getChartConfigs, IChartConfig, IChartSetting, IDimensionField, IMetricsField } from "./type";
-import { dashboardItemDefService, DatasourceType, IDimension, SortDirection } from "@eimsnext/services";
+import {
+  ChartType,
+  getChartConfigs,
+  getLimitationDesc,
+  IChartConfig,
+  IChartSetting,
+  IDimensionField,
+  IMetricsField,
+} from "./type";
+import {
+  dashboardItemDefService,
+  DatasourceType,
+  IDimension,
+  SortDirection,
+} from "@eimsnext/services";
 import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { SortableEvent } from "sortablejs";
 import EChartsViewer from "./EChartsViewer.vue";
 import { uniqueId } from "@eimsnext/utils";
-import { remove } from "lodash-es";
-
-const { t } = useLocale();
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineOptions({
   name: "EChartsDesigner",
@@ -179,31 +249,31 @@ defineOptions({
 
 const props = defineProps<{
   modelValue: boolean;
-  dashItemDef: DashboardItemDef
+  dashItemDef: DashboardItemDef;
 }>();
 
-const chartConfigs = getChartConfigs()
-const chartSetting = reactive<IChartSetting>(JSON.parse(props.dashItemDef.details))
+const chartConfigs = getChartConfigs();
+const chartSetting = reactive<IChartSetting>(JSON.parse(props.dashItemDef.details));
 const selectedRole = ref("1");
-const formItem = ref<IFormItem>()
+const formItem = ref<IFormItem>();
 const formStore = useFormStore();
-const formDef = ref<FormDef>()
+const formDef = ref<FormDef>();
 const fields = ref<IDataSourceField[]>([]);
-const showDataSourceDialog = ref(false)
+const showDataSourceDialog = ref(false);
 
 const populateDatasourceFields = () => {
   fields.value = [];
   switch (chartSetting.datasource.type) {
     case DatasourceType.Form:
-      formStore.get(chartSetting.datasource.id).then(form => {
+      formStore.get(chartSetting.datasource.id).then((form) => {
         formDef.value = form;
-        populateFormFields()
-      })
+        populateFormFields();
+      });
       break;
     default:
       break;
   }
-}
+};
 
 const populateFormFields = () => {
   if (formDef.value?.content && formDef.value?.content.items) {
@@ -213,21 +283,20 @@ const populateFormFields = () => {
           id: x.field,
           type: x.type,
           label: x.title,
-          isComputed: false
+          isComputed: false,
         };
 
         fields.value.push(node);
-      }
-      else {
+      } else {
         if (x.columns && x.columns.length > 0) {
           x.columns.forEach((y) => {
             let subNode: IDataSourceField = {
               id: `${x.field}>${y.field}`,
               type: y.type,
               label: `${x.title}.${y.title}`,
-              isComputed: false
+              isComputed: false,
             };
-            fields.value.push(subNode)
+            fields.value.push(subNode);
           });
         }
       }
@@ -236,38 +305,38 @@ const populateFormFields = () => {
 };
 
 const changeDataSource = () => {
-  showDataSourceDialog.value = true
+  showDataSourceDialog.value = true;
 };
 
 const handleSourceOk = async (source: IDataSource) => {
   chartSetting.datasource = source;
-  showDataSourceDialog.value = false
-  populateDatasourceFields()
-}
+  showDataSourceDialog.value = false;
+  populateDatasourceFields();
+};
 
-const roleChanged = () => { };
+const roleChanged = () => {};
 
-const activeCollItems = ref(["charttype"])
-const activeSettingItems = ref(["chartsubtype"])
-const chartConfig = ref<IChartConfig>()
-const dropable = ref<any>({})
+const activeCollItems = ref(["charttype"]);
+const activeSettingItems = ref(["chartsubtype", "datatake"]);
+const chartConfig = ref<IChartConfig>();
+const dropable = ref<any>({});
 
 const selectChartType = (cc: IChartConfig) => {
-  chartConfig.value = cc
-  chartSetting.chartType = cc.id
-}
+  chartConfig.value = cc;
+  chartSetting.chartType = cc.id;
+};
 
 const selectChartSubType = (cc: IChartConfig, sub: any) => {
-  chartSetting.chartSubType = sub.id
-}
+  chartSetting.chartSubType = sub.id;
+};
 
 const fieldIsDeleted = (item: any) => {
   let notExist = false;
   // if (this.editItem.setting && this.editItem.setting.dataSourceNotExist) {
   //   notExist = true;
   // }
-  return notExist;//|| item.IsDelete;
-}
+  return notExist; //|| item.IsDelete;
+};
 
 const dragStart = (e: SortableEvent) => {
   e.preventDefault();
@@ -275,58 +344,60 @@ const dragStart = (e: SortableEvent) => {
 
 const dragMove = (e: SortableEvent) => {
   dropable.value = {};
-  const targetClass = e.to?.className || '';
+  const targetClass = e.to?.className || "";
 
-  if (targetClass.includes('dimension1')) {
+  if (targetClass.includes("dimension1")) {
     dropable.value.dimension1 = true;
-  } else if (targetClass.includes('dimension2')) {
+  } else if (targetClass.includes("dimension2")) {
     dropable.value.dimension2 = true;
-  } else if (targetClass.includes('metrics')) {
+  } else if (targetClass.includes("metrics")) {
     dropable.value.metrics = true;
   }
-}
+};
 
 const cloneDragField = (f: IDataSourceField) => {
   return {
     id: f.id,
     type: f.type,
     label: f.label,
-    title: f.label
-  }
-}
+    title: f.label,
+  };
+};
 
 const dragEnd = (e: SortableEvent) => {
-  dropable.value = {}
-}
+  dropable.value = {};
+};
 
 const addDim1 = () => {
-  updateSortList()
-}
+  updateSortList();
+};
 
 const removeDim1 = (dim: IDimensionField) => {
-  chartSetting.dimension1 = chartSetting.dimension1?.filter(x => x.id != dim.id)
-  updateSortList()
-}
+  chartSetting.dimension1 = chartSetting.dimension1?.filter((x) => x.id != dim.id);
+  updateSortList();
+};
 
 const addMetric = () => {
-  updateSortList()
-}
+  updateSortList();
+};
 
 const removeMetric = (metric: IMetricsField) => {
-  chartSetting.metrics = chartSetting.metrics?.filter(x => x.id != metric.id)
-  updateSortList()
-}
-
+  chartSetting.metrics = chartSetting.metrics?.filter((x) => x.id != metric.id);
+  updateSortList();
+};
 
 const updateSortList = () => {
-  let newSorts: ISortItem[] = []
-  let sortList: ISortList = chartSetting.sort || { items: [] }
+  let newSorts: ISortItem[] = [];
+  let sortList: ISortList = chartSetting.sort || { items: [] };
 
   if (chartSetting.dimension1) {
-    chartSetting.dimension1.forEach(x => {
-      let oldSort = sortList.items.find(s => s.field.field == x.id)
-      newSorts.push({ field: { field: x.id, label: x.label!, type: x.type! }, sort: oldSort ? oldSort.sort : SortDirection.Unset })
-    })
+    chartSetting.dimension1.forEach((x) => {
+      let oldSort = sortList.items.find((s) => s.field.field == x.id);
+      newSorts.push({
+        field: { field: x.id, label: x.label!, type: x.type! },
+        sort: oldSort ? oldSort.sort : SortDirection.Unset,
+      });
+    });
   }
   // if (chartSetting.dimension2) {
   //   chartSetting.dimension2.forEach(x => {
@@ -335,142 +406,148 @@ const updateSortList = () => {
   //   })
   // }
   if (chartSetting.metrics) {
-    chartSetting.metrics.forEach(x => {
-      let oldSort = sortList.items.find(s => s.field.field == x.id)
-      newSorts.push({ field: { field: x.id, label: x.label!, type: x.type! }, sort: oldSort ? oldSort.sort : SortDirection.Unset })
-    })
+    chartSetting.metrics.forEach((x) => {
+      let oldSort = sortList.items.find((s) => s.field.field == x.id);
+      newSorts.push({
+        field: { field: x.id, label: x.label!, type: x.type! },
+        sort: oldSort ? oldSort.sort : SortDirection.Unset,
+      });
+    });
   }
 
-  chartSetting.sort = { items: newSorts }
-}
+  chartSetting.sort = { items: newSorts };
+};
 
-const addComputedField = () => { };
-const copyField = (field: IDataSourceField) => { };
-const editField = (field: IDataSourceField, index: number) => { };
-const removeField = (field: IDataSourceField, index: number) => { };
+const addComputedField = () => {};
+const copyField = (field: IDataSourceField) => {};
+const editField = (field: IDataSourceField, index: number) => {};
+const removeField = (field: IDataSourceField, index: number) => {};
 
 const onFilter = (filter: IConditionList) => {
-  chartSetting.filter = filter
-}
+  chartSetting.filter = filter;
+};
 const onSave = async () => {
-  var details = JSON.stringify(chartSetting)
+  var details = JSON.stringify(chartSetting);
 
   let req = {
     id: props.dashItemDef.id,
     name: props.dashItemDef.name,
-    details: details
+    details: details,
   };
 
   let resp = await dashboardItemDefService.patch<DashboardItemDef>(req.id, req);
-}
+};
 
 const emit = defineEmits(["update:modelValue", "close"]);
 const close = () => {
-  emit("update:modelValue", false)
+  emit("update:modelValue", false);
   emit("close");
-}
+};
 
 onMounted(() => {
   if (!chartSetting.dimension1) chartSetting.dimension1 = [];
   if (!chartSetting.dimension2) chartSetting.dimension2 = [];
   if (!chartSetting.metrics) chartSetting.metrics = [];
-  if (!chartSetting.filter) chartSetting.filter = { id: uniqueId(), rel: "and", items: [] }
-  if (!chartSetting.sort) chartSetting.sort = { items: [] }
+  if (!chartSetting.filter) chartSetting.filter = { id: uniqueId(), rel: "and", items: [] };
+  if (!chartSetting.sort) chartSetting.sort = { items: [] };
 
   /*  */
-  if (chartSetting.datasource)
-    populateDatasourceFields()
-})
+  if (chartSetting.datasource) populateDatasourceFields();
+});
 </script>
 <style lang="scss" scoped>
 .design-container {
-  background: #f4f6f9;
+  background: var(--et-bg-page);
   height: 100%;
 
   .left-aside {
-    border-right: 1px solid #e9e9e9;
-    background-color: #fff;
+    border-right: 1px solid var(--et-border-color-light);
+    background-color: var(--et-bg-container);
 
     .left-container {
-      font-size: 12px;
-      background: #fff;
-      padding-bottom: 35px;
+      font-size: var(--et-font-size-12);
+      background: var(--et-bg-container);
+      padding-bottom: var(--et-size-35);
 
       .icon {
-        color: #999;
+        color: var(--et-text-tertiary);
       }
 
       .data-source {
-        padding: 10px 10px 0 20px;
-        border-bottom: 1px solid #f3f3f3;
+        padding: var(--et-space-10) var(--et-space-10) 0 var(--et-space-20);
+        border-bottom: 1px solid var(--et-border-color-light);
 
         .data-source-setting {
           display: flex;
           justify-content: space-between;
           box-sizing: border-box;
-          font-size: 14px;
+          font-size: var(--et-font-size-14);
           font-weight: 600;
-          line-height: 30px;
+          line-height: var(--et-line-height-30);
 
           .choose-data {
-            color: var(--el-color-primary);
+            color: var(--et-color-primary);
             cursor: pointer;
           }
         }
 
         .data-source-title {
-          font-size: 12px;
+          font-size: var(--et-font-size-12);
           overflow: auto;
-          padding: 5px 0;
+          padding: var(--et-space-5) 0;
           display: flex;
           align-items: center;
 
           .data-source-name {
-            margin-left: 10px;
+            margin-left: var(--et-space-10);
             cursor: pointer;
           }
         }
       }
 
       .fields-container {
-        padding: 10px 10px 0 20px;
+        padding: var(--et-space-10) var(--et-space-10) 0 var(--et-space-20);
 
         .field-title {
           display: flex;
           justify-content: space-between;
           box-sizing: border-box;
-          font-size: 14px;
+          font-size: var(--et-font-size-14);
           font-weight: 600;
-          line-height: 30px;
+          line-height: var(--et-line-height-30);
 
           .field-operation {
             float: right;
             cursor: pointer;
-            padding-right: 15px;
+            padding-right: var(--et-space-15);
           }
         }
 
+        .field-list {
+          overflow-y: auto;
+        }
+
         .field-wrapper {
-          border: 1px solid #edeff5;
-          border-radius: 5px;
-          padding: 0px 0px 0px 8px;
-          line-height: 30px;
-          margin: 5px 0;
+          border: 1px solid var(--et-border-color-light);
+          border-radius: var(--et-radius-5);
+          padding: 0 0 0 var(--et-space-8);
+          line-height: var(--et-line-height-30);
+          margin: var(--et-space-5) 0;
           display: flex !important;
           align-items: center;
           justify-content: space-between;
           cursor: move;
 
           .field-name {
-            border-radius: 5px;
-            line-height: 30px;
+            border-radius: var(--et-radius-5);
+            line-height: var(--et-line-height-30);
             display: flex !important;
             align-items: center;
             justify-content: space-between;
             flex-wrap: nowrap;
 
             .name {
-              max-width: 110px;
+              max-width: var(--et-size-110);
               display: inline-block;
               white-space: nowrap;
               overflow: hidden;
@@ -479,15 +556,15 @@ onMounted(() => {
           }
 
           &:hover {
-            border: 1px solid var(--el-color-primary);
-            background: var(--el-bg-color);
+            border: 1px solid var(--et-color-primary);
+            background: var(--et-bg-hover);
 
             .icon {
-              color: var(--el-color-primary);
+              color: var(--et-color-primary);
             }
 
             .name {
-              color: var(--el-color-primary);
+              color: var(--et-color-primary);
             }
           }
 
@@ -501,7 +578,7 @@ onMounted(() => {
               }
 
               &:hover {
-                color: var(--el-color-primary);
+                color: var(--et-color-primary);
                 cursor: pointer;
               }
             }
@@ -514,31 +591,31 @@ onMounted(() => {
   .center-echarts {
     display: flex;
     flex-direction: column;
-    padding: 10px;
+    padding: var(--et-space-10);
 
     .green-line {
-      background-color: #e6f8f9 !important;
-      border-color: #00b899 !important;
+      background-color: var(--et-bg-success-soft) !important;
+      border-color: var(--et-color-success) !important;
     }
 
     .center-box {
       flex: 0 0 auto;
-      border: 1px dashed #d9d9d9;
-      background-color: #fff;
-      margin-bottom: 8px;
+      border: 1px dashed var(--et-border-color);
+      background-color: var(--et-bg-container);
+      margin-bottom: var(--et-space-8);
       display: flex;
 
       .el-dropdown {
         cursor: pointer;
-        margin-right: 8px;
+        margin-right: var(--et-space-8);
 
         .builder-filter-icon {
           display: flex;
           align-items: center;
 
           img {
-            width: 16px;
-            height: 16px;
+            width: var(--et-space-16);
+            height: var(--et-space-16);
           }
         }
       }
@@ -548,9 +625,9 @@ onMounted(() => {
       }
 
       .title {
-        padding: 0 10px;
-        line-height: 34px;
-        width: 91px;
+        padding: 0 var(--et-space-10);
+        line-height: var(--et-line-height-34);
+        width: var(--et-size-91);
       }
 
       .drag-target-container {
@@ -568,33 +645,33 @@ onMounted(() => {
         }
 
         .quota-item {
-          background-color: #45cb7f;
-          color: #fff;
-          line-height: 16px;
+          background-color: var(--et-color-success);
+          color: var(--et-text-on-primary);
+          line-height: var(--et-line-height-16);
 
           .vs-icon {
-            color: #45cb7f;
+            color: var(--et-color-success);
           }
         }
 
         .display-item {
-          color: #fff;
-          background-color: var(--el-color-primary);
+          color: var(--et-text-on-primary);
+          background-color: var(--et-color-primary);
 
           .vs-icon {
-            color: var(--el-color-primary);
+            color: var(--et-color-primary);
           }
 
           .el-icon-arrow-down {
-            color: #fff;
+            color: var(--et-text-on-primary);
           }
         }
 
         .filter-item {
-          background-color: var(--el-bg-color);
+          background-color: var(--et-bg-hover);
 
           .vs-icon {
-            color: #fff;
+            color: var(--et-text-on-primary);
           }
         }
 
@@ -602,7 +679,7 @@ onMounted(() => {
           display: flex;
 
           .close-icon {
-            background-color: #5e6d82;
+            background-color: var(--et-text-secondary);
           }
 
           &:hover {
@@ -612,10 +689,10 @@ onMounted(() => {
           }
 
           .filter-label {
-            color: #5e6d82;
+            color: var(--et-text-secondary);
             display: inline-block;
             vertical-align: text-bottom;
-            font-size: 14px;
+            font-size: var(--et-font-size-14);
 
             .label {
               display: inline-block;
@@ -627,137 +704,55 @@ onMounted(() => {
           width: 100%;
           height: 100%;
           display: block;
-          min-height: 34px;
+          min-height: var(--et-line-height-34);
           display: flex;
           flex-wrap: wrap;
         }
 
         .style-red {
-          background-color: #fdeeee;
-          color: #eb5050 !important;
+          background-color: var(--et-bg-danger-soft);
+          color: var(--et-color-danger) !important;
         }
 
         .layer-item {
-          background-color: var(--el-bg-color);
-          color: var(--el-color-primary);
-          border: 1px solid var(--el-bg-color);
+          background-color: var(--et-bg-hover);
+          color: var(--et-color-primary);
+          border: 1px solid var(--et-bg-hover);
           cursor: move !important;
 
           .layer-text {
             position: absolute;
-            right: 24px;
-            top: 5px;
+            right: var(--et-space-24);
+            top: var(--et-space-5);
           }
 
           .chart-type {
             position: absolute;
             box-sizing: border-box;
-            width: 14px;
+            width: var(--et-space-14);
             text-align: center;
             border: none;
-            border-radius: 5px;
-            right: 8px;
+            border-radius: var(--et-radius-5);
+            right: var(--et-space-8);
             top: 50%;
             transform: translateY(-50%);
-            height: 14px;
+            height: var(--et-space-14);
 
             .icon {
-              width: 14px;
-              height: 14px;
+              width: var(--et-space-14);
+              height: var(--et-space-14);
               background-repeat: no-repeat;
               background-size: cover;
               box-sizing: border-box;
               display: inline-block;
               opacity: 1; //0.5;
             }
-
-            .line {
-              background-image: url("../../../assets/images/charts/Line.svg");
-            }
-
-            .linearea {
-              background-image: url("../../../assets/images/charts/LineArea.svg");
-            }
-
-            .horizontalbar {
-              background-image: url("../../../assets/images/charts/HorizontalBar.svg");
-            }
-
-            .verticalbar {
-              background-image: url("../../../assets/images/charts/VerticalBar.svg");
-            }
-
-            .pie {
-              background-image: url("../../../assets/images/charts/Pie1.svg");
-            }
-
-            .index {
-              background-image: url("../../../assets/images/charts/Index.svg");
-            }
-
-            .double {
-              background-image: url("../../../assets/images/charts/Double.svg");
-            }
-
-            .funnel {
-              background-image: url("../../../assets/images/charts/Funnel.svg");
-            }
-
-            .radar {
-              background-image: url("../../../assets/images/charts/Radar.svg");
-            }
-
-            .fittext {
-              background-image: url("../../../assets/images/charts/FitText.svg");
-            }
-
-            .gauge {
-              background-image: url("../../../assets/images/charts/gauge.svg");
-            }
-
-            .map {
-              background-image: url("../../../assets/images/charts/map.svg");
-            }
-
-            .scatter {
-              background-image: url("../../../assets/images/charts/scatter.svg");
-            }
-
-            .bubble {
-              background-image: url("../../../assets/images/charts/bubble.svg");
-            }
-
-            .detailtable {
-              background-image: url("../../../assets/images/charts/detailtable.svg");
-            }
-
-            .treemap {
-              background-image: url("../../../assets/images/charts/treemap.svg");
-            }
-
-            .wordcloud {
-              background-image: url("../../../assets/images/charts/wordcloud.svg");
-            }
-
-            .heatmap {
-              background-image: url("../../../assets/images/charts/heatmap.svg");
-            }
-          }
-        }
-
-        .layer-chevron-right {
-          padding: 9px 4px 0px 0px;
-          margin-left: -5px;
-
-          .vs-icon {
-            font-size: 16px;
-            color: #ccc;
           }
         }
 
         .active {
-          background: var(--el-color-primary);
-          color: #fff;
+          background: var(--et-color-primary);
+          color: var(--et-text-on-primary);
 
           .icon {
             filter: brightness(100);
@@ -766,14 +761,14 @@ onMounted(() => {
 
         .add-layer-item {
           cursor: pointer !important;
-          margin: 5px;
-          border-radius: 5px;
-          padding: 4px;
+          margin: var(--et-space-5);
+          border-radius: var(--et-radius-5);
+          padding: var(--et-space-4);
           position: relative;
-          height: 25px;
+          height: var(--et-size-25);
 
           &:hover {
-            background-color: var(--el-bg-color);
+            background-color: var(--et-bg-hover);
           }
         }
       }
@@ -786,7 +781,7 @@ onMounted(() => {
     }
 
     .chart-main {
-      background-color: #fff;
+      background-color: var(--et-bg-container);
       position: relative;
       flex: 1 1 auto;
       overflow: hidden;
@@ -794,17 +789,17 @@ onMounted(() => {
   }
 
   .echarts-config {
-    border-left: 1px solid #e9e9e9;
+    border-left: 1px solid var(--et-border-color-light);
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0 10px;
-    background: #fff;
+    padding: 0 var(--et-space-10);
+    background: var(--et-bg-container);
 
     :deep(.el-collapse-item__header) {
-      line-height: 32px;
-      height: 32px;
-      min-height: 32px;
+      line-height: var(--et-line-height-32);
+      height: var(--et-size-32);
+      min-height: var(--et-size-32);
     }
 
     :deep(.el-collapse-item__content) {
@@ -812,19 +807,19 @@ onMounted(() => {
     }
 
     .config-box {
-      padding-bottom: 11px;
+      padding-bottom: var(--et-space-11);
 
       .box-head {
-        font-size: 13px;
-        line-height: 28px;
-        padding: 0 5px 0 0;
+        font-size: var(--et-font-size-13);
+        line-height: var(--et-space-28);
+        padding: 0 var(--et-space-5) 0 0;
         font-weight: 700;
         cursor: pointer;
-        margin-top: 10px;
+        margin-top: var(--et-space-10);
       }
 
       .box-body {
-        margin-bottom: 15px;
+        margin-bottom: var(--et-space-15);
       }
 
       .chart-type-body {
@@ -833,18 +828,18 @@ onMounted(() => {
         justify-content: flex-start;
 
         .chart-type {
-          margin: 8px;
+          margin: var(--et-space-8);
           cursor: pointer;
           box-sizing: border-box;
-          width: 34px;
-          padding: 5px 0 3px 0;
+          width: var(--et-line-height-34);
+          padding: var(--et-space-5) 0 var(--et-space-3) 0;
           text-align: center;
           border: none;
-          border-radius: 5px;
+          border-radius: var(--et-radius-5);
 
           .icon {
-            width: 24px;
-            height: 24px;
+            width: var(--et-size-24);
+            height: var(--et-size-24);
             background-repeat: no-repeat;
             background-size: cover;
             box-sizing: border-box;
@@ -863,7 +858,7 @@ onMounted(() => {
 
         .active {
           //background-color: var(--el-bg-color);
-          background-color: var(--el-color-primary);
+          background-color: var(--et-color-primary);
 
           .icon {
             opacity: 1;
@@ -912,7 +907,31 @@ onMounted(() => {
         display: flex;
         align-items: center;
       }
+
+      .take-input {
+        width: var(--et-size-60);
+        margin: 0 var(--et-space-5);
+      }
+
+      .take-label {
+        font-weight: 400;
+      }
     }
   }
+}
+
+.center-echarts-main {
+  min-width: var(--et-size-460);
+}
+
+.chart-type-tooltip {
+  margin: var(--et-space-8);
+  width: var(--et-size-120);
+  height: var(--et-size-60);
+}
+
+.chart-type-tooltip-title {
+  margin-bottom: var(--et-space-6);
+  font-weight: 600;
 }
 </style>

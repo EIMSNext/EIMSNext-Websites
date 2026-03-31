@@ -33,7 +33,6 @@ export async function getPrevNodes(
   const nodes: INodeForm[] = [];
 
   let prevNode: IFlowNodeData | undefined = flowNode;
-  // console.log("prev node init ", prevNode, flowData);
   do {
     prevNode = getPrevNode(flowData, prevNode);
 
@@ -78,7 +77,6 @@ export async function getPrevNodes(
     }
   } while (prevNode);
 
-  // console.log("nodes", nodes);
   return nodes;
 }
 function getPrevNode(
@@ -89,7 +87,6 @@ function getPrevNode(
 
   var prevId = flowNode.prevId;
   if (prevId) {
-    // console.log("prev Id", prevId);
     return getFlowNodeById(flowData, prevId);
   } else {
     return undefined;

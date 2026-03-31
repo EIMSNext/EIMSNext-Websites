@@ -1,0 +1,13 @@
+@use "../../common/index" as *;
+
+.#{$prefix}-card {
+  .el-card__header {
+    padding-top: var(--et-space-8);
+    padding-bottom: var(--et-space-8);
+  }
+
+  .el-card__body {
+    padding-top: var(--et-space-5);
+    padding-bottom: var(--et-space-5);
+  }
+}

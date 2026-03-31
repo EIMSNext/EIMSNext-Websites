@@ -208,7 +208,6 @@ export function toODataQuery<T>(
         let subFilter: any = {};
         subFilter[x.field.field] = {};
         subFilter[x.field.field][op] = x.value?.value;
-        // console.log("subFilter 111", subFilter);
         subFilters.push(subFilter);
       }
     });
@@ -225,7 +224,6 @@ export function toODataQuery<T>(
     let subFilter: any = {};
     subFilter[filter.field.field] = {};
     subFilter[filter.field.field][op] = filter.value?.value;
-    // console.log("subFilter 222", subFilter);
     oFilter = subFilter;
   }
 

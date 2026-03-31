@@ -8,14 +8,9 @@ export const getPrintConfig = (isTablePrint: boolean) => {
     popTitle: "&nbsp;",
     noStyles: true,
     extraCss: "",
-    beforeOpenCallback() {
-      // console.log("打开之前");
-    },
-    openCallback() {
-      // console.log("执行了打印");
-    },
+    beforeOpenCallback() {},
+    openCallback() {},
     closeCallback() {
-      // console.log("关闭了打印工具");
       this.showPrintDiv = false;
     },
   };

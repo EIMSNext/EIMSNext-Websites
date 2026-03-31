@@ -1,6 +1,14 @@
 <template>
-  <el-drawer :model-value="modelValue" :append-to-body="appendToBody" direction="btt" :with-header="false"
-    :destroy-on-close="true" :close-on-click-modal="false" size="100%" :show-close="false">
+  <el-drawer
+    :model-value="modelValue"
+    :append-to-body="appendToBody"
+    direction="btt"
+    :with-header="false"
+    :destroy-on-close="true"
+    :close-on-click-modal="false"
+    size="100%"
+    :show-close="false"
+  >
     <div class="top-nav-bar">
       <div class="nav-left">
         <slot name="top-left">
@@ -24,7 +32,6 @@
 </template>
 
 <script setup lang="ts">
-
 defineOptions({
   name: "EtDrawer",
 });
@@ -32,15 +39,14 @@ defineOptions({
 const props = defineProps<{
   modelValue: boolean;
   appendToBody?: boolean;
-  closing?: () => Promise<boolean>
+  closing?: () => Promise<boolean>;
 }>();
 
 const emit = defineEmits(["update:modelValue", "close"]);
 
 async function close() {
   let allow = true;
-  if (props.closing)
-    allow = await props.closing()
+  if (props.closing) allow = await props.closing();
 
   if (allow) {
     emit("update:modelValue", false);
@@ -50,20 +56,20 @@ async function close() {
 </script>
 <style lang="scss" scoped>
 .top-nav-bar {
-  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.1);
+  background: var(--et-bg-container);
   display: flex;
-  font-size: 16px;
-  height: 60px;
+  font-size: var(--et-font-size-16);
+  height: var(--et-size-60);
   justify-content: space-between;
   left: 0;
-  line-height: 30px;
-  padding: 0 10px;
+  line-height: var(--et-line-height-30);
+  padding: 0 var(--et-space-10);
   position: fixed;
   right: 0;
   top: 0;
-  z-index: 100;
-  border-bottom: 1px solid var(--fc-bg-color-2);
-  box-shadow: unset;
+  z-index: var(--et-z-dropdown);
+  border-bottom: 1px solid var(--et-border-color-light);
+  box-shadow: var(--et-shadow-sm);
 
   .nav-center,
   .nav-left,
@@ -76,27 +82,28 @@ async function close() {
       align-items: center;
       display: flex;
       position: relative;
-      padding: 0px;
+      padding: var(--et-space-0);
       border: none;
+      color: var(--et-text-primary);
 
       .back-icon {
         cursor: pointer;
-        font-size: 32px;
-        margin-right: 8px;
+        font-size: var(--et-font-size-32);
+        margin-right: var(--et-space-8);
         vertical-align: middle;
-        width: 32px;
+        width: var(--et-size-32);
       }
     }
   }
 
   .nav-center {
     bottom: 0;
-    font-size: 18px;
+    font-size: var(--et-font-size-18);
     left: 50%;
     position: absolute;
     top: 0;
     transform: translateX(-50%);
-    z-index: 1;
+    z-index: var(--et-z-base);
   }
 }
 
@@ -105,6 +112,6 @@ async function close() {
   left: 0;
   position: absolute;
   right: 0;
-  top: 60px;
+  top: var(--et-size-60);
 }
 </style>

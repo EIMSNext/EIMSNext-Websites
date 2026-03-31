@@ -5,6 +5,8 @@ import { generateThemeColors, applyTheme, toggleDarkMode } from "@/utils/theme";
 type SettingsValue = boolean | string;
 
 export const useSettingsStore = defineStore("setting", () => {
+  // 消息中心
+  const messageCenterVisible = ref(false);
   // 基本设置
   const settingsVisible = ref(false);
   // 标签
@@ -52,6 +54,7 @@ export const useSettingsStore = defineStore("setting", () => {
   }
 
   return {
+    messageCenterVisible,
     settingsVisible,
     tagsView,
     fixedHeader,
@@ -60,6 +63,6 @@ export const useSettingsStore = defineStore("setting", () => {
     watermarkEnabled,
     changeSetting,
     changeTheme,
-    changeThemeColor
+    changeThemeColor,
   };
 });

@@ -25,42 +25,10 @@
 /** 全局SCSS变量 */
 
 :root {
-  --et-bg-color-primary: #f2f3f8;
-  --et-menu-background: var(--el-menu-bg-color);
-  --et-menu-text: var(--el-menu-text-color);
-  --et-menu-active-text: var(--el-menu-active-color);
-  --et-menu-hover: var(--el-menu-hover-bg-color);
-  // --et-color-text: #141e31;
-  // --et-color-text-tertiary: #838892;
-  --et-color-primary: #409eff;
-  --et-color-text: #141e31;
-  --et-color-text-secondary: #525967;
-  --et-color-text-tertiary: #838892;
-  --et-color-warning: #f0a800;
-  --et-color-info: #2f7deb;
-  --et-color-info-bg: #eaf2fd;
-  --et-color-error: #eb5050;
-  --et-color-error-bg: #fdeeee;
-  --et-color-border: #dcdfe6;
-  --et-color-bg-primary: #e6f8f5;
-  --et-color-bg-secondary: #f0f2f5;
-  --et-color-bg-tertiary: #f0f2f5;
-
   // 修复表格 fixed 列被选中后由于透明色导致叠字的 bug
   .el-table {
     --el-table-current-row-bg-color: rgb(235 243 250);
   }
-}
-
-/** 暗黑主题 */
-html.dark {
-  --et-bg-color-primary: var(--el-bg-color-overlay);
-  --et-menu-background: var(--el-bg-color-overlay);
-  --et-menu-text: #fff;
-  --et-menu-active-text: var(--el-menu-active-color);
-  --et-menu-hover: rgb(0 0 0 / 20%);
-  --et-color-text: #fff;
-  --et-color-text-tertiary: #838892;
 }
 
 $menu-background: var(--et-menu-background); // 菜单背景色
@@ -68,8 +36,8 @@ $menu-text: var(--et-menu-text); // 菜单文字颜色
 $menu-active-text: var(--et-menu-active-text); // 菜单激活文字颜色
 $menu-hover: var(--et-menu-hover); // 菜单悬停背景色
 
-$sidebar-width: 210px; // 侧边栏宽度
-$sidebar-width-collapsed: 45px; // 侧边栏收缩宽度
-$navbar-height: 50px; // 导航栏高度
-$tags-view-height: 45px; // TagsView 高度
-$formdata-toolbar-height: 110px; //formdata 列表工具栏高度
+$sidebar-width: var(--et-size-210); // 侧边栏宽度
+$sidebar-width-collapsed: var(--et-size-45); // 侧边栏收缩宽度
+$navbar-height: var(--et-size-50); // 导航栏高度
+$tags-view-height: var(--et-size-45); // TagsView 高度
+$formdata-toolbar-height: var(--et-size-110); //formdata 列表工具栏高度

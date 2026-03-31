@@ -24,7 +24,7 @@
             <el-form ref="loginFormRef" :model="loginData" :rules="loginRules">
               <div class="login-content">
                 <div class="login-form">
-                  <div class="login-form-item" style="margin-top: 0;">
+                  <div class="login-form-item first-item">
                     <el-input ref="username" v-model="loginData.username" :placeholder="t('login.username')"
                       name="username" size="large" />
                   </div>
@@ -127,7 +127,6 @@ async function handleLoginSubmit() {
           await userStore.initialize(true);
 
           const { path, queryParams } = parseRedirect();
-          // console.log("login ", path, queryParams)
           router.push({ path: path, query: queryParams });
         })
         .finally(() => {
@@ -177,12 +176,12 @@ function checkCapslock(event: KeyboardEvent) {
 
 <style lang="scss" scoped>
 .logo {
-  height: 36px;
+  height: var(--et-size-36);
 }
 
 .login {
   align-items: center;
-  background: #f5f6f8;
+  background: var(--et-bg-muted);
   bottom: 0;
   display: flex;
   justify-content: center;
@@ -192,25 +191,25 @@ function checkCapslock(event: KeyboardEvent) {
   top: 0;
 
   .brand-logo {
-    left: 60px;
+    left: var(--et-size-60);
     position: absolute;
-    top: 40px;
+    top: var(--et-size-40);
     z-index: 9;
-    height: 24px;
+    height: var(--et-size-24);
     padding: 0;
   }
 
   .lang-switch {
     align-items: center;
-    color: var(--et-color-text-tertiary);
+    color: var(--et-text-tertiary);
     cursor: pointer;
     display: inline-flex;
-    font-size: 14px;
+    font-size: var(--et-font-size-14);
     justify-content: center;
-    line-height: 18px;
+    line-height: var(--et-line-height-18);
     position: absolute;
-    right: 24px;
-    top: 24px;
+    right: var(--et-space-24);
+    top: var(--et-space-24);
   }
 
   .banner {
@@ -238,30 +237,34 @@ function checkCapslock(event: KeyboardEvent) {
     position: relative;
 
     .content {
-      width: 320px;
+      width: var(--et-size-320);
 
       .login-title {
-        font-size: 32px;
+        font-size: var(--et-font-size-32);
         font-weight: 500;
-        line-height: 48px;
+        line-height: var(--et-line-height-48);
       }
 
       .login-register {
-        font-size: 14px;
-        line-height: 20px;
-        margin: 10px 0 40px;
+        font-size: var(--et-font-size-14);
+        line-height: var(--et-line-height-20);
+        margin: var(--et-space-10) 0 var(--et-space-40);
       }
 
       .login-form>.login-form-item {
-        margin-top: 16px;
-        height: 40px;
+        margin-top: var(--et-space-16);
+        height: var(--et-size-40);
+      }
+
+      .login-form > .login-form-item.first-item {
+        margin-top: 0;
       }
 
       .login-options {
         align-items: center;
         display: flex;
         flex-wrap: wrap;
-        margin-top: 12px;
+        margin-top: var(--et-space-12);
 
         .forget-password {
           flex: auto;
@@ -270,7 +273,7 @@ function checkCapslock(event: KeyboardEvent) {
       }
 
       .login-btn {
-        margin-top: 28px;
+        margin-top: var(--et-space-28);
         width: 100%;
       }
     }

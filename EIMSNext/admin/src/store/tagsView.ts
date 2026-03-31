@@ -1,7 +1,7 @@
 export const useTagsViewStore = defineStore("tagsView", () => {
   const visitedViews = ref<TagView[]>([]);
   const cachedViews = ref<string[]>([]);
-  const lastRouteType = ref(''); // 添加lastRouteType变量，用于跟踪路由类型
+  const lastRouteType = ref(""); // 添加lastRouteType变量，用于跟踪路由类型
   const router = useRouter();
   const route = useRoute();
 
@@ -9,47 +9,49 @@ export const useTagsViewStore = defineStore("tagsView", () => {
    * 添加已访问视图到已访问视图列表中
    */
   function addVisitedView(view: TagView) {
-    // console.log("tags view", view);
     // 如果已经存在于已访问的视图列表中，则不再添加
     if (visitedViews.value.some((v) => v.path === view.path)) {
       return;
     }
     // 处理全局路由的name属性，提取基础名称
-    const baseName = view.name?.includes('-') ? view.name.split('-')[0] : view.name;
+    const baseName = view.name?.includes("-") ? view.name.split("-")[0] : view.name;
     // 如果视图是固定的（affix），则在已访问的视图列表的第一个不固定页签之前添加
     if (view.affix) {
       if (baseName == "mytasks") {
         visitedViews.value.splice(0, 0, view);
       } else if (baseName == "mystarted") {
         let index = visitedViews.value.findIndex((x) => {
-          const xBaseName = x.name?.includes('-') ? x.name.split('-')[0] : x.name;
+          const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
           return xBaseName == "mytasks";
         });
         visitedViews.value.splice(index + 1, 0, view);
       } else if (baseName == "myapproved") {
         let index = visitedViews.value.findIndex((x) => {
-          const xBaseName = x.name?.includes('-') ? x.name.split('-')[0] : x.name;
+          const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
           return xBaseName == "mystarted";
         });
-        if (index == -1) index = visitedViews.value.findIndex((x) => {
-          const xBaseName = x.name?.includes('-') ? x.name.split('-')[0] : x.name;
-          return xBaseName == "mytasks";
-        });
+        if (index == -1)
+          index = visitedViews.value.findIndex((x) => {
+            const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
+            return xBaseName == "mytasks";
+          });
 
         visitedViews.value.splice(index + 1, 0, view);
       } else if (baseName == "cctome") {
         let index = visitedViews.value.findIndex((x) => {
-          const xBaseName = x.name?.includes('-') ? x.name.split('-')[0] : x.name;
+          const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
           return xBaseName == "myapproved";
         });
-        if (index == -1) index = visitedViews.value.findIndex((x) => {
-          const xBaseName = x.name?.includes('-') ? x.name.split('-')[0] : x.name;
-          return xBaseName == "mystarted";
-        });
-        if (index == -1) index = visitedViews.value.findIndex((x) => {
-          const xBaseName = x.name?.includes('-') ? x.name.split('-')[0] : x.name;
-          return xBaseName == "mytasks";
-        });
+        if (index == -1)
+          index = visitedViews.value.findIndex((x) => {
+            const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
+            return xBaseName == "mystarted";
+          });
+        if (index == -1)
+          index = visitedViews.value.findIndex((x) => {
+            const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
+            return xBaseName == "mytasks";
+          });
 
         visitedViews.value.splice(index + 1, 0, view);
       } else {
@@ -139,8 +141,8 @@ export const useTagsViewStore = defineStore("tagsView", () => {
 
   function addView(view: TagView) {
     // 判断当前路由类型：app（应用任务页面）或global（全局任务页面）
-    const currentRouteType = view.path.startsWith('/app/') ? 'app' : 'global';
-    
+    const currentRouteType = view.path.startsWith("/app/") ? "app" : "global";
+
     // 如果这是第一次访问或路由类型发生变化，清除之前的所有非固定标签和缓存
     if (lastRouteType.value && lastRouteType.value !== currentRouteType) {
       // 清除所有非固定标签
@@ -149,13 +151,13 @@ export const useTagsViewStore = defineStore("tagsView", () => {
       // 清除所有缓存视图
       cachedViews.value = [];
     }
-    
+
     // 添加新视图
     addVisitedView(view);
     addCachedView(view);
-    
+
     // 更新上一次的路由类型
-    lastRouteType.value = currentRouteType;    
+    lastRouteType.value = currentRouteType;
   }
 
   function delView(view: TagView) {
@@ -225,7 +227,6 @@ export const useTagsViewStore = defineStore("tagsView", () => {
       const affixTags = visitedViews.value.filter((tag) => tag?.affix);
       visitedViews.value = affixTags;
       cachedViews.value = [];
-      // console.log("vis", visitedViews);
       resolve({
         visitedViews: [...visitedViews.value],
         cachedViews: [...cachedViews.value],

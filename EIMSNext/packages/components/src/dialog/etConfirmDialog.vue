@@ -1,12 +1,24 @@
 <template>
-  <el-dialog class="et-confirm-dialog" ref="ori" :model-value="modelValue" v-bind="attrs" :show-close="false"
-    :append-to-body="true" :destroy-on-close="true" @close="cancel">
+  <el-dialog
+    class="et-confirm-dialog"
+    ref="ori"
+    :model-value="modelValue"
+    v-bind="attrs"
+    :show-close="false"
+    :append-to-body="true"
+    :destroy-on-close="true"
+    @close="cancel"
+  >
     <div class="confirm-content">
-      <el-icon class="msg-icon" :class="{
-        error: icon == MessageIcon.Error,
-        warning: icon == MessageIcon.Warning,
-        info: icon == MessageIcon.Info || icon == MessageIcon.Question,
-      }" :color="iconColor">
+      <el-icon
+        class="msg-icon"
+        :class="{
+          error: icon == MessageIcon.Error,
+          warning: icon == MessageIcon.Warning,
+          info: icon == MessageIcon.Info || icon == MessageIcon.Question,
+        }"
+        :color="iconColor"
+      >
         <InfoFilled v-if="icon == MessageIcon.Info" />
         <QuestionFilled v-if="icon == MessageIcon.Question" />
         <WarningFilled v-if="icon == MessageIcon.Warning" />
@@ -42,7 +54,7 @@
   </el-dialog>
 </template>
 <script lang="ts" setup>
-import "./style/index.less";
+import "./style/index.scss";
 import { computed, onMounted, ref, useAttrs } from "vue";
 import { MessageIcon } from "./type";
 //下面的导入对于函数式调用是必须的
@@ -54,7 +66,7 @@ import {
   CircleCloseFilled,
 } from "@element-plus/icons-vue";
 import { useLocale } from "element-plus";
-const { t } = useLocale()
+const { t } = useLocale();
 
 const attrs = useAttrs();
 // const ori = ref(null);
@@ -80,10 +92,12 @@ const props = withDefaults(
     icon: MessageIcon.Question,
     showCancel: true,
     showNoSave: true,
-  }
+  },
 );
 
-const titleRef = computed(() => props.title || t("common.message.editConfirm_Title"));
+const titleRef = computed(
+  () => props.title || t("common.message.editConfirm_Title"),
+);
 const cancelTextRef = computed(() => t(props.cancelText ?? "common.cancel"));
 const okTextRef = computed(() => t(props.okText ?? "common.ok"));
 const noSaveTextRef = computed(() => t(props.noSaveText ?? "common.noSave"));

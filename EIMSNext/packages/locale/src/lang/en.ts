@@ -84,6 +84,11 @@ export default {
     untitledForm: "Untitled Form",
     untitledDashboard: "Untitled Dashboard",
     untitledChart: "Untitled Chart",
+    data_created: "When data is submitted",
+    data_updated: "When data is updated",
+    data_removed: "When data is deleted",
+    wfstatus_updated: "When workflow status changes",
+    wftodo_updated: "When workflow task changes",
   },
   workflow: {
     flowStatus: {
@@ -169,6 +174,22 @@ export default {
     fieldConflict_MsgContent:
       "If you use this field, there will be a conflict between field and subfield configurations. This operation will clear certain configurations for value assigning and cannot be undone.",
   },
+  dash: {
+    chart: {
+      vbar: "Column Chart",
+      hbar: "Bar Chart",
+      line: "Line Chart",
+      pie: "Pie Chart",
+    },
+    limitation: {
+      dimension: "{0} dimension(s)",
+      metric: "{0} metric(s)",
+      dimensionRange: "{0}-{1}dimension(s)",
+      metricRange: "{0}-{1}metric(s)",
+      moreDimensions: "{0} or more dimension(s)",
+      moreMetrics: "{0} or more metric(s)",
+    },
+  },
   // 菜单国际化
   route: {
     workspace: "Workspace",
@@ -202,8 +223,8 @@ export default {
   navbar: {
     workspace: "Workspace",
     logout: "Logout",
-    document: "Document",
-    gitee: "Gitee",
+    homepage: "Project Home",
+    source: "Source Code",
     profile: "User Profile",
   },
   sizeSelect: {
@@ -221,14 +242,10 @@ export default {
     },
   },
   settings: {
-    project: "Project Settings",
+    uisetting: "UI Settings",
     theme: "Theme",
-    interface: "Interface",
-    navigation: "Navigation",
     themeColor: "Theme Color",
     tagsView: "Tags View",
-    fixedHeader: "Fixed Header",
-    sidebarLogo: "Sidebar Logo",
     watermark: "Watermark",
   },
   condition: {

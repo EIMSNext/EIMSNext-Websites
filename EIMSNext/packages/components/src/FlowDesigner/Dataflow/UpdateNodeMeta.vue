@@ -1,52 +1,128 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('dataflow.editFrom')" :required="true"></MetaItemHeader>
+    <MetaItemHeader
+      :label="t('dataflow.editFrom')"
+      :required="true"
+    ></MetaItemHeader>
     <div class="mode-container">
-      <el-select v-model="mode" size="default" style="width: 300px; margin-right: 5px" @change="modeChanged">
-        <el-option :label="t('dataflow.recordInForm')" :value="UpdateMode.Form" />
-        <el-option :label="t('dataflow.recordInNode')" :value="UpdateMode.Node" />
+      <el-select
+        v-model="mode"
+        size="default"
+        class="mode-select"
+        @change="modeChanged"
+      >
+        <el-option
+          :label="t('dataflow.recordInForm')"
+          :value="UpdateMode.Form"
+        />
+        <el-option
+          :label="t('dataflow.recordInNode')"
+          :value="UpdateMode.Node"
+        />
       </el-select>
-      <FormSelect v-if="mode == UpdateMode.Form" v-model="formItem" :appId="appId" @change="formChanged"></FormSelect>
-      <el-select v-if="mode == UpdateMode.Node" v-model="activeData.metadata.updateMeta!.nodeId" size="default"
-        @change="nodeChanged">
-        <el-option v-for="node in nodes" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId" />
+      <FormSelect
+        v-if="mode == UpdateMode.Form"
+        v-model="formItem"
+        :appId="appId"
+        @change="formChanged"
+      ></FormSelect>
+      <el-select
+        v-if="mode == UpdateMode.Node"
+        v-model="activeData.metadata.updateMeta!.nodeId"
+        size="default"
+        @change="nodeChanged"
+      >
+        <el-option
+          v-for="node in nodes"
+          :key="node.nodeId"
+          :label="node.nodeName"
+          :value="node.nodeId"
+        />
       </el-select>
     </div>
-    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.dataCondition')" :required="true"></MetaItemHeader>
-    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition"
-      @remove="onCondClear">
+    <MetaItemHeader
+      class="mt-[8px]"
+      :label="t('dataflow.dataCondition')"
+      :required="true"
+    ></MetaItemHeader>
+    <ConditionList
+      v-model="condList"
+      :formId="formId"
+      :nodeId="nodeId"
+      :nodes="nodes"
+      @change="onCondition"
+      @remove="onCondClear"
+    >
     </ConditionList>
     <div>
-      <el-checkbox v-model="activeData.metadata.updateMeta!.insertIfNoData"
-        :label="t('dataflow.createIfNoMatched_Tips')" @change="insertIfNoDataChanged" />
+      <el-checkbox
+        v-model="activeData.metadata.updateMeta!.insertIfNoData"
+        :label="t('dataflow.createIfNoMatched_Tips')"
+        @change="insertIfNoDataChanged"
+      />
     </div>
-    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.setFieldValue')" :required="true"></MetaItemHeader>
+    <MetaItemHeader
+      class="mt-[8px]"
+      :label="t('dataflow.setFieldValue')"
+      :required="true"
+    ></MetaItemHeader>
     <div v-if="activeData.metadata.updateMeta!.insertIfNoData">
-      <el-radio-group :model-value="showEditPanel" size="large" @change="showEditPanelChanged">
+      <el-radio-group
+        :model-value="showEditPanel"
+        size="large"
+        @change="showEditPanelChanged"
+      >
         <el-radio-button :label="t('dataflow.editRecord')" value="1" />
         <el-radio-button :label="t('dataflow.addRecord')" value="0" />
       </el-radio-group>
     </div>
-    <div v-if="
-      !activeData.metadata.updateMeta!.insertIfNoData || showEditPanel == '1'
-    ">
-      <FormFieldList v-if="nodes.length > 0" v-model="formFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
-        :show-all="false" :fieldSelecting="fieldSelecting" :fieldValueChanging="fieldValueChanging"
-        @change="fieldChanged">
+    <div
+      v-if="
+        !activeData.metadata.updateMeta!.insertIfNoData || showEditPanel == '1'
+      "
+    >
+      <FormFieldList
+        v-if="nodes.length > 0"
+        v-model="formFieldList"
+        :node-id="nodeId"
+        :formId="formId"
+        :nodes="nodes"
+        :show-all="false"
+        :fieldSelecting="fieldSelecting"
+        :fieldValueChanging="fieldValueChanging"
+        @change="fieldChanged"
+      >
       </FormFieldList>
-      <div v-if="subCondNeeded" class="mt-[8px]" style="background-color: #f5f6f8; padding: 10px">
+      <div v-if="subCondNeeded" class="sub-cond-panel mt-[8px]">
         <div class="mb-[8px]">
           {{ t("dataflow.subCondition_Tips") }}
         </div>
-        <ConditionList v-model="subCondList" :formId="formId" :nodeId="nodeId" :nodes="nodes" :maxLevel="1"
-          :field-build-setting="subCondBuildSetting" @change="onSubCondition" @remove="onSubCondClear"></ConditionList>
+        <ConditionList
+          v-model="subCondList"
+          :formId="formId"
+          :nodeId="nodeId"
+          :nodes="nodes"
+          :maxLevel="1"
+          :field-build-setting="subCondBuildSetting"
+          @change="onSubCondition"
+          @remove="onSubCondClear"
+        ></ConditionList>
       </div>
     </div>
-    <div v-if="
-      activeData.metadata.updateMeta!.insertIfNoData && showEditPanel == '0'
-    ">
-      <FormFieldList v-if="nodes.length > 0" v-model="insertFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
-        :show-all="true" @change="insertFieldChanged"></FormFieldList>
+    <div
+      v-if="
+        activeData.metadata.updateMeta!.insertIfNoData && showEditPanel == '0'
+      "
+    >
+      <FormFieldList
+        v-if="nodes.length > 0"
+        v-model="insertFieldList"
+        :node-id="nodeId"
+        :formId="formId"
+        :nodes="nodes"
+        :show-all="true"
+        @change="insertFieldChanged"
+      ></FormFieldList>
     </div>
   </template>
 </template>
@@ -123,7 +199,6 @@ const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 const subCondNeeded = ref(false);
 const showEditPanel = ref("1");
-// console.log("showEditPanel", showEditPanel);
 
 const modeChanged = (mode: UpdateMode) => {
   formId.value = "";
@@ -141,7 +216,7 @@ const modeChanged = (mode: UpdateMode) => {
 const nodeChanged = () => {
   if (activeData.value.metadata.updateMeta!.nodeId) {
     var node = nodes.value.find(
-      (x) => x.nodeId == activeData.value.metadata.updateMeta!.nodeId
+      (x) => x.nodeId == activeData.value.metadata.updateMeta!.nodeId,
     );
     if (node) {
       formId.value = node.form?.id ?? "";
@@ -152,7 +227,6 @@ const nodeChanged = () => {
 };
 
 const formChanged = async (form: IFormItem) => {
-  //  console.log("formChanged", form);
   formId.value = form.id;
   formItem.value.id = formId.value;
   formFieldList.value.items = [];
@@ -181,46 +255,55 @@ const onCondition = (list: IConditionList) => {
   activeData.value.metadata.updateMeta!.condition = list;
 };
 const onCondClear = () => {
-  condList.value.items = []
+  condList.value.items = [];
   activeData.value.metadata.updateMeta!.condition = condList.value;
-}
+};
 
 const onSubCondition = (list: IConditionList) => {
   activeData.value.metadata.updateMeta!.subCondition = list;
 };
-const onSubCondClear = () => { }
+const onSubCondClear = () => {};
 {
-  subCondList.value.items = []
+  subCondList.value.items = [];
   activeData.value.metadata.updateMeta!.subCondition = subCondList.value;
 }
 const fieldSelecting = async (field: IFormFieldItem) => {
   let allowed = true;
-  let fieldLimit = subCondBuildSetting.value.fieldLimit
+  let fieldLimit = subCondBuildSetting.value.fieldLimit;
   if (subCondNeeded.value && fieldLimit) {
     if (field.field.isSubField) {
-      let mainField = splitSubField(field.field.field)[0]
+      let mainField = splitSubField(field.field.field)[0];
       if (mainField != fieldLimit.limitField) {
-        let confirm = await EtConfirm.showDialog(t("dataflow.fieldConflict_MsgContent"), {
-          title: t("dataflow.fieldConflict_MsgTitle"),
-          icon: MessageIcon.Warning
-        });
+        let confirm = await EtConfirm.showDialog(
+          t("dataflow.fieldConflict_MsgContent"),
+          {
+            title: t("dataflow.fieldConflict_MsgTitle"),
+            icon: MessageIcon.Warning,
+          },
+        );
         if (confirm == ConfirmResult.Yes) {
           if (fieldLimit.limitType == FieldLimitType.MultiResult) {
-            // console.log("sub1111", mainField, formFieldList.value.items)
-            formFieldList.value.items = formFieldList.value.items.filter(x => x.value.type != FieldValueType.Field || !x.value.fieldValue || x.value.fieldValue.singleResultNode)
+            formFieldList.value.items = formFieldList.value.items.filter(
+              (x) =>
+                x.value.type != FieldValueType.Field ||
+                !x.value.fieldValue ||
+                x.value.fieldValue.singleResultNode,
+            );
+          } else {
+            formFieldList.value.items = formFieldList.value.items.filter(
+              (x) => !x.field.isSubField || x.field.field.startsWith(mainField),
+            );
           }
-          else {
-            // console.log("sub222", mainField, formFieldList.value.items)
-            formFieldList.value.items = formFieldList.value.items.filter(x => !x.field.isSubField || x.field.field.startsWith(mainField))
-          }
-          activeData.value.metadata.updateMeta!.formFieldList = formFieldList.value;
+          activeData.value.metadata.updateMeta!.formFieldList =
+            formFieldList.value;
 
           subCondList.value.items = [];
           activeData.value.metadata.updateMeta!.subCondition = undefined;
 
-          updateSubCondList(formFieldList.value)
+          updateSubCondList(formFieldList.value);
+        } else {
+          allowed = false;
         }
-        else { allowed = false }
       }
     }
   }
@@ -230,35 +313,42 @@ const fieldSelecting = async (field: IFormFieldItem) => {
 const fieldValueChanging = async (
   field: IFormFieldDef,
   oldVal?: IFormFieldDef,
-  newVal?: IFormFieldDef
+  newVal?: IFormFieldDef,
 ) => {
-  // console.log("new-old", newVal, oldVal)
   if (!newVal || !newVal.field) return true;
 
   let allowed = true;
 
   if (field.isSubField) {
-
-  }
-  else {
+  } else {
     if (!newVal.singleResultNode || newVal.isSubField) {
-      if ((subCondBuildSetting.value.fieldLimit && subCondBuildSetting.value.fieldLimit.limitField != "master")
-        || formFieldList.value.items.findIndex(x => x.field.isSubField) > -1) {
-        let confirm = await EtConfirm.showDialog(t("dataflow.fieldConflict_MsgContent"), {
-          title: t("dataflow.fieldConflict_MsgTitle"),
-          icon: MessageIcon.Warning
-        });
+      if (
+        (subCondBuildSetting.value.fieldLimit &&
+          subCondBuildSetting.value.fieldLimit.limitField != "master") ||
+        formFieldList.value.items.findIndex((x) => x.field.isSubField) > -1
+      ) {
+        let confirm = await EtConfirm.showDialog(
+          t("dataflow.fieldConflict_MsgContent"),
+          {
+            title: t("dataflow.fieldConflict_MsgTitle"),
+            icon: MessageIcon.Warning,
+          },
+        );
 
         if (confirm == ConfirmResult.Yes) {
-          formFieldList.value.items = formFieldList.value.items.filter(x => !x.field.isSubField)
-          activeData.value.metadata.updateMeta!.formFieldList = formFieldList.value;
+          formFieldList.value.items = formFieldList.value.items.filter(
+            (x) => !x.field.isSubField,
+          );
+          activeData.value.metadata.updateMeta!.formFieldList =
+            formFieldList.value;
 
           subCondList.value.items = [];
           activeData.value.metadata.updateMeta!.subCondition = undefined;
 
-          updateSubCondList(formFieldList.value)
+          updateSubCondList(formFieldList.value);
+        } else {
+          allowed = false;
         }
-        else { allowed = false }
       }
     }
   }
@@ -267,8 +357,6 @@ const fieldValueChanging = async (
 };
 
 const fieldChanged = (fields: IFormFieldList) => {
-  // console.log("fieldChanged", fields.items);
-
   updateSubCondList(fields);
   activeData.value.metadata.updateMeta!.formFieldList = fields;
 };
@@ -279,24 +367,32 @@ const getSubFieldMap = (fields: IFormFieldList) => {
       x.field.isSubField ||
       (x.value.type == FieldValueType.Field &&
         x.value.fieldValue &&
-        (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField))
+        (!x.value.fieldValue.singleResultNode ||
+          x.value.fieldValue.isSubField)),
   );
 
   if (mappedField) {
     let limitField = mappedField.field.isSubField
       ? splitSubField(mappedField.field.field)[0]
       : "master";
-    return { limitField, limitType: mappedField.value.fieldValue == undefined ? FieldLimitType.None : (mappedField.value.fieldValue?.isSubField ? FieldLimitType.SubField : FieldLimitType.MultiResult) }
+    return {
+      limitField,
+      limitType:
+        mappedField.value.fieldValue == undefined
+          ? FieldLimitType.None
+          : mappedField.value.fieldValue?.isSubField
+            ? FieldLimitType.SubField
+            : FieldLimitType.MultiResult,
+    };
   }
 
-  return undefined
+  return undefined;
 };
 const updateSubCondList = (fields: IFormFieldList) => {
   let mappedField = getSubFieldMap(fields);
-  // console.log("mapped", mappedField, fields)
   if (mappedField) {
     subCondNeeded.value = true;
-    subCondBuildSetting.value.fieldLimit = mappedField
+    subCondBuildSetting.value.fieldLimit = mappedField;
   } else {
     subCondNeeded.value = false;
     subCondBuildSetting.value.fieldLimit = undefined;
@@ -316,7 +412,7 @@ const insertIfNoDataChanged = () => {
     insertFieldList.value.items = mergeFieldList(
       formDef.value,
       activeData.value.metadata.updateMeta!.insertFieldList.items,
-      true
+      true,
     );
   }
 };
@@ -347,7 +443,7 @@ const init = () => {
       formFieldList.value.items = mergeFieldList(
         formDef.value,
         activeData.value.metadata.updateMeta!.formFieldList.items,
-        false
+        false,
       );
 
       updateSubCondList(formFieldList.value);
@@ -355,7 +451,7 @@ const init = () => {
       insertFieldList.value.items = mergeFieldList(
         formDef.value,
         activeData.value.metadata.updateMeta!.insertFieldList.items,
-        true
+        true,
       );
     }
 
@@ -364,98 +460,19 @@ const init = () => {
 };
 
 init();
-
-// watch(
-//   flowContextRef,
-//   async (newValue: IFlowContext) => {
-//     console.log("activeData", newValue.activeData);
-//     // activeData.value = cloneDeep(newValue.activeData);
-//     activeData.value = newValue.activeData;
-//     nodes.value = await getPrevNodes(newValue.flowData, activeData.value);
-
-//     mode.value = activeData.value.metadata.updateMeta!.updateMode;
-//     nodeId.value = activeData.value.id;
-//     formId.value = activeData.value.metadata.updateMeta!.formId;
-//     formItem.value = { id: formId.value };
-
-//     let formDef = await formStore.get(formId.value);
-//     if (formDef) {
-//       formFieldList.value.items = mergeFieldList(
-//         formDef,
-//         activeData.value.metadata.updateMeta!.formFieldList.items,
-//         false
-//       );
-
-//       //TODO: 将来进一步区分需要主字段条件还是子表单字段条件
-//       subCondNeeded.value = formFieldList.value.items.findIndex((x) =>x.field.isSubField || (x.value.type== FieldValueType.Field && (x.value.fieldValue && (!x.value.fieldValue.singleResultNode||x.value.fieldValue.isSubField)) ) ) > -1;
-
-//       insertFieldList.value.items = mergeFieldList(
-//         formDef,
-//         activeData.value.metadata.updateMeta!.insertFieldList.items,
-//         true
-//       );
-//     }
-
-//     condList.value = { id: uniqueId(), rel: "and", items: [] };
-//     subCondList.value = { id: uniqueId(), rel: "and", items: [] };
-
-//     if (activeData.value.metadata.updateMeta!.condition) {
-//       condList.value = activeData.value.metadata.updateMeta!.condition;
-//     }
-
-//     if (activeData.value.metadata.updateMeta!.subCondition) {
-//       subCondList.value = activeData.value.metadata.updateMeta!.subCondition;
-//     }
-//   },
-//   { immediate: true }
-// );
-
-//TODO: 将来需要使用mount + save方法防止页面频繁刷新
-// onBeforeMount(async () => {
-//   console.log("onBeforeMount", flowContextRef.activeData);
-//   activeData.value = cloneDeep(flowContextRef.activeData);
-//   nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
-
-//   mode.value = activeData.value.metadata.updateMeta!.updateMode;
-//   nodeId.value = activeData.value.id;
-//   formId.value = activeData.value.metadata.updateMeta!.formId;
-//   formItem.value = { id: formId.value };
-
-//   let formDef = await formStore.get(formId.value);
-//   if (formDef) {
-//     formFieldList.value.items = mergeFieldList(
-//       formDef,
-//       activeData.value.metadata.updateMeta!.formFieldList.items,
-//       false
-//     );
-
-//     subCondNeeded.value = formFieldList.value.items.findIndex((x) => x.field.isSubField) > -1;
-
-//     insertFieldList.value.items = mergeFieldList(
-//       formDef,
-//       activeData.value.metadata.updateMeta!.insertFieldList.items,
-//       true
-//     );
-//   }
-
-//   condList.value = { id: uniqueId(), rel: "and", items: [] };
-//   subCondList.value = { id: uniqueId(), rel: "and", items: [] };
-
-//   if (activeData.value.metadata.updateMeta!.condition) {
-//     condList.value = activeData.value.metadata.updateMeta!.condition;
-//   }
-
-//   if (activeData.value.metadata.updateMeta!.subCondition) {
-//     subCondList.value = activeData.value.metadata.updateMeta!.subCondition;
-//   }
-// });
-// onBeforeUnmount(() => {
-//   console.log("onBeforeUnmount");
-//   flowContextRef.activeData = activeData.value;
-// });
 </script>
 <style lang="scss" scoped>
 .mode-container {
   display: flex;
+}
+
+.mode-select {
+  width: var(--et-size-300);
+  margin-right: var(--et-space-5);
+}
+
+.sub-cond-panel {
+  background-color: var(--et-bg-muted);
+  padding: var(--et-space-10);
 }
 </style>

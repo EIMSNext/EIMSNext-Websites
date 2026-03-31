@@ -2,7 +2,7 @@
   <div class="branch-item">
     <SvgLine />
     <div class="branch-item-panel">
-      <div class="branch-item-condition" style="min-height: 40px" />
+      <div class="branch-item-condition branch-item-condition-spacer" />
       <ConditionNode
         :branch-item-datas="pNodeDatas"
         :branch-item-data="nodeData"
@@ -58,7 +58,10 @@
           :node-data="item"
         />
         <BranchNode
-          v-if="item.nodeType == FlowNodeType.Branch || item.nodeType == FlowNodeType.Branch2"
+          v-if="
+            item.nodeType == FlowNodeType.Branch ||
+            item.nodeType == FlowNodeType.Branch2
+          "
           :p-node-datas="nodeData.childNodes!"
           :node-data="item"
         />
@@ -92,3 +95,9 @@ const props = defineProps<{
   dataIndex: number;
 }>();
 </script>
+
+<style scoped>
+.branch-item-condition-spacer {
+  min-height: var(--et-size-40);
+}
+</style>
