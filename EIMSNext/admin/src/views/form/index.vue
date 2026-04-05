@@ -1,157 +1,55 @@
 <template>
   <div class="formdata-container">
-    <et-dialog
-      v-model="showAddDialog"
-      class="formdatadialog"
-      :title="formDef?.name"
-      :show-footer="false"
-      :destroy-on-close="true"
-      width="800px"
-      :close-on-click-modal="false"
-    >
+    <et-dialog v-model="showAddDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
+      :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
-        <AddFormData
-          :formId="formId"
-          :isView="false"
-          :fieldPerms="fieldPerms"
-          @save="onDataSaved"
-          @submit="onDataSaved"
-        ></AddFormData>
+        <AddFormData :formId="formId" :isView="false" :fieldPerms="fieldPerms" @save="onDataSaved"
+          @submit="onDataSaved"></AddFormData>
       </div>
     </et-dialog>
-    <EtConfirmDialog
-      v-model="showDeleteConfirmDialog"
-      :title="t('common.message.deleteConfirm_Title')"
-      :icon="MessageIcon.Warning"
-      :showNoSave="false"
-      @ok="execDelete"
-    >
+    <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')"
+      :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
       <div>{{ t("common.message.deleteConfirm_Content", [checkedDatas.length]) }}</div>
     </EtConfirmDialog>
-    <et-dialog
-      v-model="showDetailsDialog"
-      class="formdatadialog"
-      :title="formDef?.name"
-      :show-footer="false"
-      :destroy-on-close="true"
-      width="800px"
-      :close-on-click-modal="false"
-    >
+    <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
+      :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
-        <FormDataView
-          :formId="formId"
-          :dataId="selectedData!.id"
-          :dataPerms="dataPerms"
-          :fieldPerms="fieldPerms"
-          @ok="handleViewOk"
-        ></FormDataView>
+        <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms"
+          @ok="handleViewOk"></FormDataView>
       </div>
     </et-dialog>
-    <el-popover
-      :visible="showFilter"
-      :virtual-ref="filterBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataFilter
-        :model-value="condList"
-        :formId="formId"
-        @ok="setFilter"
-        @cancel="showFilter = false"
-      ></DataFilter>
+    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataFilter :model-value="condList" :formId="formId" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
     </el-popover>
-    <el-popover
-      :visible="showSort"
-      :virtual-ref="sortBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataSort
-        :model-value="sortList"
-        :formId="formId"
-        @ok="setSort"
-        @cancel="showSort = false"
-      ></DataSort>
+    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataSort :model-value="sortList" :formId="formId" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
-    <el-popover
-      :visible="showField"
-      :virtual-ref="fieldBtnRef"
-      :show-arrow="false"
-      :offset="0"
-      placement="bottom-end"
-      width="500"
-      :teleported="false"
-      trigger="click"
-      :destroy-on-close="true"
-    >
-      <DataField
-        :model-value="fieldList"
-        :formId="formId"
-        @ok="setField"
-        @cancel="showField = false"
-      ></DataField>
+    <el-popover :visible="showField" :virtual-ref="fieldBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
+      <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
-    <et-toolbar
-      :left-group="leftBars"
-      :right-group="rightBars"
-      @command="toolbarHandler"
-    ></et-toolbar>
+    <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
     <div class="data-list data-list-full-height">
-      <el-table
-        ref="tableRef"
-        :data="flattedData"
-        :span-method="idBasedSpanMethod"
-        class="data-table-full"
-        show-overflow-tooltip
-        :tooltip-formatter="tableToolFormatter"
-        :row-class-name="rowClassName"
-        :fit="true"
-        @selection-change="selectionChanged"
-        @row-click="showDetails"
-      >
+      <el-table ref="tableRef" :data="flattedData" :span-method="idBasedSpanMethod" class="data-table-full"
+        show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" :fit="true"
+        @selection-change="selectionChanged" @row-click="showDetails">
         <el-table-column type="selection" width="40" :selectable="selectable" />
         <template v-for="col in columns">
           <template v-if="col.children">
-            <el-table-column
-              :label="col.title"
-              :fieldSetting="col"
-              show-overflow-tooltip
-              :resizable="true"
-            >
+            <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip :resizable="true">
               <template v-if="col.children" v-for="sub in col.children">
-                <el-table-column
-                  :prop="sub.field"
-                  :formatter="formatter"
-                  :label="sub.title"
-                  :width="sub.width"
-                  :resizable="true"
-                  :dangerouslyUseHTMLString="true"
-                ></el-table-column>
+                <el-table-column :prop="sub.field" :formatter="formatter" :label="sub.title" :width="sub.width"
+                  :resizable="true" :dangerouslyUseHTMLString="true"></el-table-column>
               </template>
             </el-table-column>
           </template>
           <template v-else>
-            <el-table-column
-              :prop="col.field"
-              :label="col.title"
-              :width="col.width"
-              show-overflow-tooltip
-              :resizable="true"
-            >
+            <el-table-column :prop="col.field" :label="col.title" :width="col.width" show-overflow-tooltip
+              :resizable="true">
               <template #default="scope">
-                <div
-                  v-html="formatter(scope.row, { property: col.field }, scope.row[col.field])"
-                ></div>
+                <div v-html="formatter(scope.row, { property: col.field }, scope.row[col.field])"></div>
               </template>
             </el-table-column>
           </template>
@@ -235,6 +133,7 @@ const leftBars = ref<ToolbarItem[]>([
       class: "auth-gropu-filter",
       command: "authgrp",
       visible: false,
+      showDynamicText: true,
       onCommand: (cmd) => {
         curAuthGrp.value = authGrps.value.find((x) => x.id == cmd);
         fieldPerms.value = curAuthGrp.value?.fieldPerms;

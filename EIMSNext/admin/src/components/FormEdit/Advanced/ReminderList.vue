@@ -58,7 +58,6 @@ import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
-import { Dictionary } from "@eimsnext/utils";
 
 defineOptions({
   name: "ReminderList",

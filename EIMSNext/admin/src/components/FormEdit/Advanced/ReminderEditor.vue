@@ -2,55 +2,67 @@
   <div class="api-config-pane">
     <div class="config-content">
       <div class="config-pane">
-        <!-- <div class="pane-label">服务器地址</div>
-                <div class="pane-row">
-                    <el-input v-model="hook.url" class="pane-row-stretch" autocomplete="new-password" />
-                    <el-button type="primary" class="btn-test">服务器连接测试</el-button>
+        <div class="config-editor">
+          <el-space direction="vertical" alignment="left" :size="20" style="width: 100%;">
+            <div class="notify-mode">
+              <div class="label mode-label">提醒类型</div>
+              <el-select class="notify-select">
+                <el-option value="create" label="新数据提交时提醒"></el-option>
+                <el-option value="modity" label="新数据提交时提醒"></el-option>
+              </el-select>
+              <div class="tip">提示：被提醒人若不在相关权限组中，收到提醒时无法查看数据。</div>
+              <div class="modify-fields">
+                <div class="modify-fields-select">
+                  <el-select class="notify-select">
+                    <el-option value="create" label="任意字段修改后提醒"></el-option>
+                    <el-option value="modity" label="指定字段修改后提醒"></el-option>
+                  </el-select>
+                  <el-button type="primary" style="margin-left: var(--et-space-12);">提醒字段设置</el-button>
                 </div>
-                <div class="pane-label">Secret</div>
-                <div class="pane-row">
-                    <el-input v-model="hook.secret" class="pane-row-stretch" autocomplete="new-password" />
-                    <el-button type="primary" class="btn-test">生成Secret</el-button>
-                </div>
-                <div class="pane-label">推送事件</div>
-                <div class="pane-row">
-                    <div class="triggers-container">
-                        <div class="push-event-title"><span>数据事件</span><span
-                                class="push-event-title-desc">表单数据发生变更时，推送变更后的数据</span>
-                            <el-button size="small" class="btn-sample">查看样例</el-button>
-                        </div>
-                        <div class="push-event-triggers">
-                            <el-checkbox :modelValue="dataCreated"
-                                @change="(val) => triggerChanged(WebHookTrigger.Data_Created, val)">有新数据提交时</el-checkbox>
-                            <el-checkbox :modelValue="dataUpdated"
-                                @change="(val) => triggerChanged(WebHookTrigger.Data_Updated, val)">有数据被修改时</el-checkbox>
-                            <el-checkbox :modelValue="dataRemoved"
-                                @change="(val) => triggerChanged(WebHookTrigger.Data_Removed, val)">有数据被删除时</el-checkbox>
-
-                        </div>
-                        <div class="push-event-title"><span>流程事件</span><span
-                                class="push-event-title-desc">流程状态/待办发生变更时，推送变更后的数据</span><el-button size="small"
-                                class="btn-sample">查看样例</el-button>
-                        </div>
-                        <div class="push-event-triggers">
-                            <el-checkbox :modelValue="wfStatusUpdated"
-                                @change="(val) => triggerChanged(WebHookTrigger.WfStatus_Updated, val)">流程状态变更时</el-checkbox>
-                            <el-checkbox :modelValue="wfTodoUpdated"
-                                @change="(val) => triggerChanged(WebHookTrigger.WfTodo_Updated, val)">流程待办变更时</el-checkbox>
-                        </div>
-                    </div>
-                </div> -->
+              </div>
+              <div class="tip">提示：如果设置了多个提醒字段，任意一个字段被修改就会触发提醒</div>
+            </div>
+            <div class="notify-filter">
+              <div class="label">提醒条件</div>
+              <el-select class="notify-select">
+                <el-option value="create" label="任意数据"></el-option>
+                <el-option value="modity" label="满足条件的数据"></el-option>
+              </el-select>
+              <condition-list v-model="filter" :form-id="formDef.id" :max-level="1"></condition-list>
+            </div>
+            <div class="notify-notifier">
+              <div class="label">被提醒人</div>
+              <selected-tags v-model="notifier" class="notify-margin" />
+            </div>
+            <div class="notify-msg">
+              <div class="label">提醒文字</div>
+              <div class="content notify-margin">
+                <el-input />
+              </div>
+            </div>
+            <div class="notify-chanel">
+              <div class="label">提醒方式</div>
+              <div class="channel-item">
+                <el-checkbox-group>
+                  <el-checkbox value="1">站内消息</el-checkbox>
+                  <el-checkbox value="2">邮箱消息</el-checkbox>
+                  <!-- <el-checkbox value="3">微信提醒</el-checkbox> -->
+                </el-checkbox-group>
+              </div>
+            </div>
+          </el-space>
+        </div>
       </div>
       <div class="btn-pane"><el-button type="primary" @click="save">保存</el-button></div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { FormDef, Webhook, WebhookRequest, WebHookTrigger } from "@eimsnext/models";
+import { FormDef, Webhook, WebHookTrigger } from "@eimsnext/models";
 import { FlagEnum } from "@eimsnext/utils";
-import { webhookService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { cloneDeep } from "lodash-es";
+import { ConditionList, IConditionList, ISelectedTag, SelectedTags } from "@eimsnext/components";
 const { t } = useI18n();
 
 defineOptions({
@@ -63,14 +75,9 @@ const props = defineProps<{
 }>();
 
 const hook = ref<Webhook>(cloneDeep(props.modelValue) || {});
+const filter = ref<IConditionList>({ id: "", rel: "and" })
+const notifier = ref<ISelectedTag[]>([])
 
-const dataCreated = computed(() => FlagEnum.has(triggers.value, WebHookTrigger.Data_Created));
-const dataUpdated = computed(() => FlagEnum.has(triggers.value, WebHookTrigger.Data_Updated));
-const dataRemoved = computed(() => FlagEnum.has(triggers.value, WebHookTrigger.Data_Removed));
-const wfStatusUpdated = computed(() =>
-  FlagEnum.has(triggers.value, WebHookTrigger.WfStatus_Updated)
-);
-const wfTodoUpdated = computed(() => FlagEnum.has(triggers.value, WebHookTrigger.WfTodo_Updated));
 
 const emit = defineEmits(["update:modelValue", "saved"]);
 const triggers = ref(hook.value.triggers || WebHookTrigger.NotSet);
@@ -138,52 +145,47 @@ const save = async () => {
       right: 0;
       top: 0;
 
-      .pane-label {
-        color: var(--et-text-secondary);
-        line-height: var(--et-line-height-20);
-        margin-top: var(--et-space-20);
-      }
+      .config-editor {
+        bottom: 0px;
+        left: 0;
+        overflow: auto;
+        padding: 20px;
+        position: absolute;
+        right: 0;
+        top: 0;
 
-      .pane-row {
-        align-items: center;
-        display: flex;
-        margin-top: var(--et-space-8);
-
-        .pane-row-stretch {
-          flex: 1 1 auto;
-          min-width: 0;
+        .label {
+          color: rgba(19, 29, 46, 0.78);
         }
 
-        .btn-test {
-          width: var(--et-size-150);
-          min-width: var(--et-size-150);
-          margin-left: var(--et-space-20);
+        .mode-label {
+          margin-top: 0;
         }
 
-        .triggers-container {
-          display: inline-block;
-          max-width: 100%;
+        .notify-select,
+        .notify-datetime {
+          margin: 6px 0;
+          width: 280px;
+        }
 
-          .push-event-title {
-            margin-bottom: var(--et-space-8);
+        .notify-margin {
+          margin: 6px 0;
+        }
 
-            .push-event-title-desc {
-              font-size: var(--et-font-size-12);
-              color: var(--et-text-secondary);
-              margin: 0 var(--et-space-8);
-            }
+        .tip {
+          color: rgba(19, 29, 46, 0.66);
+          font-size: 12px;
+        }
 
-            .btn-sample {
-              color: var(--et-color-primary);
-              border: none;
-              margin-left: var(--et-space-5);
-            }
-          }
+        .fx-notify-config-pane .config-body .config-pane .config-editor .config-notify-mode .modify-fields .modify-fields-select {
+          display: -webkit-box;
+          display: -ms-flexbox;
+          display: flex;
+        }
 
-          .push-event-triggers {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: var(--et-space-12);
+        .notify-chanel {
+          .channel-item {
+            margin-bottom: 12px;
           }
         }
       }

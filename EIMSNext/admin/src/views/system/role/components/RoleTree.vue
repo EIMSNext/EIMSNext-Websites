@@ -1,73 +1,34 @@
 <!-- 部门树 -->
 <template>
-  <AddEditRoleGroup
-    v-if="showAddEditGroupDialog"
-    :edit="editMode"
-    :p-group="currentGroup"
-    @cancel="showAddEditGroupDialog = false"
-    @ok="handleGroupSaved"
-  ></AddEditRoleGroup>
-  <AddEditRole
-    v-if="showAddEditRoleDialog"
-    :edit="editMode"
-    :p-group="currentGroup!"
-    :p-role="selectedRole"
-    @cancel="showAddEditRoleDialog = false"
-    @ok="handleRoleSaved"
-  ></AddEditRole>
-  <et-confirm-dialog
-    v-model="showDeleteDialog"
-    title="确认要删除吗?"
-    :showNoSave="false"
-    okText="确认"
-    @cancel="showDeleteDialog = false"
-    @ok="handleDeleteConfirm"
-  >
+  <AddEditRoleGroup v-if="showAddEditGroupDialog" :edit="editMode" :p-group="currentGroup"
+    @cancel="showAddEditGroupDialog = false" @ok="handleGroupSaved"></AddEditRoleGroup>
+  <AddEditRole v-if="showAddEditRoleDialog" :edit="editMode" :p-group="currentGroup!" :p-role="selectedRole"
+    @cancel="showAddEditRoleDialog = false" @ok="handleRoleSaved"></AddEditRole>
+  <et-confirm-dialog v-model="showDeleteDialog" title="确认要删除吗?" :showNoSave="false" okText="确认"
+    @cancel="showDeleteDialog = false" @ok="handleDeleteConfirm">
     确认删除已选中的数据项?
   </et-confirm-dialog>
   <el-card shadow="never" class="role-card">
     <div class="form-action">
-      <el-input
-        v-model="keyword"
-        class="search-input"
-        prefix-icon="Search"
-        clearable
-        placeholder="请输入"
-      />
+      <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
       <el-button @click="handleAddGroupClick">
         <et-icon icon="el-plus"></et-icon>
       </el-button>
     </div>
-    <el-tree
-      ref="roleTreeRef"
-      class="role-tree mt-2"
-      :data="roleList"
-      :props="{ children: 'children', label: 'label', disabled: '' }"
-      :expand-on-click-node="false"
-      :filter-node-method="handleFilter"
-      default-expand-all
-      @node-click="handleNodeClick"
-    >
+    <el-tree ref="roleTreeRef" class="role-tree mt-2" :data="roleList"
+      :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false"
+      :filter-node-method="handleFilter" default-expand-all @node-click="handleNodeClick">
       <template #default="{ node, data }">
         <div class="node-data" :title="data.label">
           <div class="node-wrapper">
             <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
-              <et-icon
-                v-if="data.type == DataItemType.Group"
-                icon="el-Plus"
-                class="action-item"
-                @click="handleAddRoleClick(data)"
-              />
+              <et-icon v-if="data.type == DataItemType.Group" icon="el-Plus" class="action-item"
+                @click="handleAddRoleClick(data)" />
               <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
-              <et-icon
-                icon="el-Delete"
-                v-if="node.level > 0"
-                class="action-item"
-                :disabled="data.children && data.children.length > 0"
-                @click="handleDeleteClick(data)"
-              />
+              <et-icon icon="el-Delete" v-if="node.level > 0" class="action-item"
+                :disabled="data.children && data.children.length > 0" @click="handleDeleteClick(data)" />
             </div>
           </div>
         </div>
@@ -225,6 +186,7 @@ const handleDeleteConfirm = async () => {
   // 调整节点内容样式
   :deep(.el-tree-node__content) {
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   // 调整树容器样式
@@ -235,11 +197,6 @@ const handleDeleteConfirm = async () => {
 
   // 调整树节点展开图标样式
   :deep(.el-tree-node__expand-icon) {
-    flex-shrink: 0;
-  }
-
-  // 调整树节点内容样式
-  :deep(.el-tree-node__content) {
     flex-shrink: 0;
   }
 }

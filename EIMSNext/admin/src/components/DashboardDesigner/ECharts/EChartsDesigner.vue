@@ -648,19 +648,11 @@ onMounted(() => {
           background-color: var(--et-color-success);
           color: var(--et-text-on-primary);
           line-height: var(--et-line-height-16);
-
-          .vs-icon {
-            color: var(--et-color-success);
-          }
         }
 
         .display-item {
           color: var(--et-text-on-primary);
           background-color: var(--et-color-primary);
-
-          .vs-icon {
-            color: var(--et-color-primary);
-          }
 
           .el-icon-arrow-down {
             color: var(--et-text-on-primary);
@@ -669,10 +661,6 @@ onMounted(() => {
 
         .filter-item {
           background-color: var(--et-bg-hover);
-
-          .vs-icon {
-            color: var(--et-text-on-primary);
-          }
         }
 
         .filter-item.item {
