@@ -267,6 +267,7 @@ onBeforeUnmount(() => {
 .print-design-container {
   height: 100%;
   display: flex;
+  padding: 0 var(--et-space-5);
 
   .field-container {
     width: var(--et-size-300);
@@ -274,6 +275,7 @@ onBeforeUnmount(() => {
 
     .field-panel {
       height: 100%;
+      padding: 0 var(--et-space-15) 0 var(--et-space-12);
     }
   }
 
@@ -286,5 +288,16 @@ onBeforeUnmount(() => {
 .drop-active {
   background-color: var(--et-bg-primary-soft);
   border: 2px dashed var(--et-color-primary) !important;
+}
+</style>
+<style lang="scss">
+.print-design-container .field-container {
+  .el-tabs__nav.is-top {
+    float: none;
+
+    .el-tabs__item {
+      flex: auto;
+    }
+  }
 }
 </style>
