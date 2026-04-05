@@ -4,7 +4,7 @@
       <div class="left"></div>
       <div class="right">
         <el-button>打印模板设置</el-button>
-        <el-button>预览</el-button>
+        <el-button @click="preview">预览</el-button>
         <el-button @click="save">保存</el-button>
       </div>
     </div>
@@ -91,7 +91,7 @@ import { useFormStore } from "@eimsnext/store";
 import { FieldDef, FieldType, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
 import { DataItemType, ITreeNode } from "@eimsnext/components";
 import Draggable from "vuedraggable";
-import { printTemplateService } from "@eimsnext/services";
+import { customPrintService, PrintPreviewRequest, printTemplateService } from "@eimsnext/services";
 import { IPrintMetadata } from "./type";
 
 defineOptions({
@@ -147,7 +147,21 @@ const populateFields = () => {
     });
   }
 };
+const preview = async () => {
+  let req: PrintPreviewRequest = {
+    content: JSON.stringify(workbookApi.save()),
+    printType: currentPrintDef.value.printType,
+  }
 
+  let printResult = await customPrintService.preview(req);
+
+  if (printResult && printResult.downloadUrl) {
+    window.open(printResult.downloadUrl, "_blank")
+  }
+  else {
+    ElMessage.error(printResult?.message || "打印失败")
+  }
+}
 const save = () => {
   let req: PrintTemplateRequest = {
     id: currentPrintDef.value.id,
