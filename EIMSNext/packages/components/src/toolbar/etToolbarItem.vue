@@ -1,40 +1,20 @@
 <template>
   <template v-if="item.config.visible">
     <template v-if="item.type == 'dropdown'">
-      <el-dropdown
-        trigger="click"
-        :disabled="item.config.disabled"
-        class="toolbar-dropdown"
-        :class="item.config.class"
-        :style="item.config.style"
-        @command="
+      <el-dropdown trigger="click" :disabled="item.config.disabled" class="toolbar-item toolbar-dropdown"
+        :class="item.config.class" :style="item.config.style" @command="
           (cmd: string, e: MouseEvent) =>
             handleSubItemCommand(item, cmd, e, item.config.onCommand)
-        "
-      >
+        ">
         <span class="el-dropdown-link">
-          <et-icon
-            v-if="item.config.icon"
-            :icon="item.config.icon"
-            class="dropdown-icon"
-          />
-          <span>{{ getDropdwnText(item) }}</span
-          ><et-icon icon="el-arrow-down" class="el-icon--right" />
+          <et-icon v-if="item.config.icon" :icon="item.config.icon" class="dropdown-icon" />
+          <span>{{ getDropdwnText(item) }}</span><et-icon icon="el-arrow-down" class="el-icon--right" />
         </span>
         <template #dropdown>
           <el-dropdown-menu v-if="item.config.menuItems">
-            <template
-              v-for="menuItem in item.config.menuItems"
-              :key="'m-' + menuItem.command"
-            >
-              <el-dropdown-item
-                v-if="menuItem.visible"
-                :command="menuItem.command"
-                :divided="menuItem.divided"
-                :disabled="menuItem.disabled"
-                :class="menuItem.class"
-                :style="menuItem.style"
-              >
+            <template v-for="menuItem in item.config.menuItems" :key="'m-' + menuItem.command">
+              <el-dropdown-item v-if="menuItem.visible" :command="menuItem.command" :divided="menuItem.divided"
+                :disabled="menuItem.disabled" :class="menuItem.class" :style="menuItem.style">
                 {{ t(menuItem.text) }}
               </el-dropdown-item>
             </template>
@@ -43,51 +23,27 @@
       </el-dropdown>
     </template>
     <template v-else-if="item.type == 'devider'">
-      <el-divider
-        direction="vertical"
-        :class="item.config.class"
-        :style="item.config.style"
-      />
+      <el-divider direction="vertical" :class="item.config.class" :style="item.config.style" />
     </template>
     <template v-else>
-      <template v-if="item.config.tooltip"
-        ><el-tooltip placement="top" :content="item.config.tooltip">
-          <el-button
-            :type="item.config.type"
-            :disabled="item.config.disabled"
-            :class="item.config.class"
-            :style="item.config.style"
-            @click="
+      <template v-if="item.config.tooltip"><el-tooltip placement="top" :content="item.config.tooltip">
+          <el-button :type="item.config.type" :disabled="item.config.disabled" class="toolbar-item"
+            :class="item.config.class" :style="item.config.style" @click="
               handleCommand(item.config.command, $event, item.config.onCommand)
-            "
-          >
-            <et-icon
-              v-if="item.config.icon"
-              :icon="item.config.icon"
-              :style="getIconStyle(item)"
-            />
+              ">
+            <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
             <span>{{ t(item.config.text) }}</span>
           </el-button>
         </el-tooltip>
       </template>
       <template v-else>
-        <el-button
-          :type="item.config.type"
-          :disabled="item.config.disabled"
-          :class="item.config.class"
-          :style="item.config.style"
-          @click="
+        <el-button :type="item.config.type" :disabled="item.config.disabled" class="toolbar-item"
+          :class="item.config.class" :style="item.config.style" @click="
             handleCommand(item.config.command, $event, item.config.onCommand)
-          "
-        >
-          <et-icon
-            v-if="item.config.icon"
-            :icon="item.config.icon"
-            :style="getIconStyle(item)"
-          />
+            ">
+          <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
           <span>{{ t(item.config.text) }}</span>
-        </el-button></template
-      >
+        </el-button></template>
     </template>
   </template>
 </template>
@@ -115,7 +71,7 @@ const getIconStyle = (item: ToolbarItem) => {
 };
 const emit = defineEmits(["command"]);
 const getDropdwnText = (item: ToolbarItem) => {
-  if (item.config.menuItems && item.config.menuItems.length > 0) {
+  if (item.config.showDynamicText && item.config.menuItems && item.config.menuItems.length > 0) {
     let checkedItem = item.config.menuItems.find((x) => x.checked);
     if (checkedItem) return t(checkedItem.text);
   }
@@ -146,6 +102,7 @@ const handleCommand = (cmd: string, e: MouseEvent, callback: any) => {
 .toolbar-dropdown {
   background-color: var(--el-bg-color-overlay);
   box-sizing: border-box;
+  padding: var(--et-space-3);
 }
 
 .el-dropdown-link {

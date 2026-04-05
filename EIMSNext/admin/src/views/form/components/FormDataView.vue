@@ -88,47 +88,47 @@ const leftBars = ref<ToolbarItem[]>([
       disabled: false,
     },
   },
-  {
-    type: "button",
-    config: {
-      text: "common.print",
-      command: "print",
-      visible: true,
-      icon: "el-printer",
-      disabled: false,
-    },
-  },
+  // {
+  //   type: "button",
+  //   config: {
+  //     text: "common.print",
+  //     command: "systemprint",
+  //     visible: true,
+  //     icon: "el-printer",
+  //     disabled: false,
+  //   },
+  // },
 ]);
 
 const updatePrintToolbar = () => {
   const printIndex = leftBars.value.findIndex((item) => item.config.command == "print");
-  if (printIndex < 0) return;
+  if (printIndex > -1) return;
 
-  const currentItem = leftBars.value[printIndex];
+
   const baseConfig = {
     text: "common.print",
-    command: "print",
+    command: "systemprint",
     visible: true,
     icon: "el-printer",
-    disabled: currentItem.config.disabled,
+    disabled: false,
   };
 
   if (!customPrintTemplates.value.length) {
-    leftBars.value[printIndex] = {
+    leftBars.value.push({
       type: "button",
       config: baseConfig,
-    };
+    });
     return;
   }
 
-  leftBars.value[printIndex] = {
+  leftBars.value.push({
     type: "dropdown",
     config: {
       ...baseConfig,
       menuItems: [
         {
-          text: "common.print",
-          command: "print",
+          text: "common.systemprint",
+          command: "systemprint",
           visible: true,
         },
         ...customPrintTemplates.value.map((print) => ({
@@ -138,7 +138,7 @@ const updatePrintToolbar = () => {
         })),
       ],
     },
-  };
+  });
 };
 
 const loadPrintTemplates = async (formId: string) => {
@@ -148,9 +148,11 @@ const loadPrintTemplates = async (formId: string) => {
 };
 
 const openCustomPrintPreview = (print: any) => {
-  pdfPreviewUrl.value = print.downloadUrl;
-  pdfPreviewTitle.value = print.fileName;
-  showPdfPreview.value = true;
+  // pdfPreviewUrl.value = print.downloadUrl;
+  // pdfPreviewTitle.value = print.fileName;
+  // showPdfPreview.value = true;
+  //打开新的标签显示PDF
+  window.open(print.downloadUrl, "_blank")
 };
 
 const toolbarHandler = async (cmd: string, e: MouseEvent) => {
@@ -159,8 +161,8 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
     let req: PrintRequest = { dataIds: [props.dataId], templateId: templateId }
     let printResult = await customPrintService.print(req);
 
-    if (printResult && printResult.code == 0) {
-      openCustomPrintPreview(printResult.value);
+    if (printResult && printResult.downloadUrl) {
+      openCustomPrintPreview(printResult);
     }
     else {
       ElMessage.error(printResult?.message || "打印失败")
@@ -181,7 +183,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
     case "delete":
       showDeleteConfirmDialog.value = true;
       break;
-    case "print":
+    case "systemprint":
       printTrigger.value?.click();
       break;
   }
