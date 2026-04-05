@@ -11,29 +11,15 @@
     <div class="print-design-container">
       <el-tabs v-model="activeTab" class="field-container">
         <el-tab-pane label="表单字段" name="form" class="field-panel">
-          <el-tree
-            ref="formFieldsTreeRef"
-            class="mt-2"
-            :data="formFieldNodes"
-            item-key="id"
-            :props="{ children: 'children', label: 'label', disabled: '' }"
-            :expand-on-click-node="false"
-          >
+          <el-tree ref="formFieldsTreeRef" class="mt-2" :data="formFieldNodes" item-key="id"
+            :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false">
             <template #default="{ node, data }">
-              <Draggable
-                :list="[data]"
-                :sort="false"
-                ghost-class="ghost"
-                @start="onStart"
-                :group="{ name: 'fields', pull: 'clone', put: false }"
-                item-key="id"
-              >
+              <Draggable :list="[data]" :sort="false" ghost-class="ghost" @start="onStart"
+                :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
                 <template #item="{ element }">
                   <div class="node-data" :title="data.label">
                     <div class="node-wrapper">
-                      <el-icon class="node-icon">
-                        <UserFilled />
-                      </el-icon>
+                      <et-icon size="16px" icon="el-copyDocument" class="node-icon"></et-icon>
                       <span class="node-label">{{ data.label }}</span>
                     </div>
                   </div>
@@ -102,7 +88,7 @@ import { FUniver } from "@univerjs/core/facade";
 //@ts-expect-error
 import { FWorkbook, FWorksheet, FRange } from "@univerjs/sheets/facade";
 import { useFormStore } from "@eimsnext/store";
-import { FieldDef, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
+import { FieldDef, FieldType, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
 import { DataItemType, ITreeNode } from "@eimsnext/components";
 import Draggable from "vuedraggable";
 import { printTemplateService } from "@eimsnext/services";
@@ -138,6 +124,7 @@ const populateFields = () => {
         id: x.field,
         value: x.field,
         label: x.title,
+        fullLabel: x.title,
         type: DataItemType.Field,
         data: x,
       };
@@ -148,6 +135,7 @@ const populateFields = () => {
             id: `${node.id}-${y.field}`,
             value: `${node.id}>${y.field}`,
             label: y.title,
+            fullLabel: `${node.label}.${y.title}`,
             type: DataItemType.Field,
             data: y,
           };
@@ -178,7 +166,12 @@ const save = () => {
 
 const onStart = (e: any) => {
   e.preventDefault();
-  draggingNode.value = e.item._underlying_vm_;
+  let vm = e.item._underlying_vm_;
+  if (vm.data.type == FieldType.TableForm) {
+    e.cancel = true
+  }
+  else
+    draggingNode.value = vm
 };
 
 const initSheet = (data = {}) => {
@@ -239,7 +232,7 @@ const initSheet = (data = {}) => {
     if (draggingNode.value) {
       const cell: FRange = params.worksheet.getRange(params.row, params.column);
       if (cell) {
-        cell.setValue(`\${${draggingNode.value.label}}`);
+        cell.setValue(`\${${draggingNode.value.fullLabel}}`);
         //字段打印设置
         let printMeata: IPrintMetadata = {
           dataType: "field",
@@ -276,6 +269,64 @@ onBeforeUnmount(() => {
     .field-panel {
       height: 100%;
       padding: 0 var(--et-space-15) 0 var(--et-space-12);
+    }
+
+    :deep(.el-tree-node__content) {
+      height: var(--et-line-height-30);
+      width: 100%;
+      cursor: move;
+
+      >div {
+        width: 100%;
+      }
+    }
+
+    .node-data {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      line-height: var(--et-line-height-30);
+    }
+
+    .node-wrapper {
+      width: 100%;
+      display: flex;
+      align-items: center;
+
+      .node-label {
+        flex: 1;
+        padding-left: var(--et-space-5);
+        font-size: var(--et-font-size-14);
+        white-space: nowrap;
+      }
+
+      .node-action {
+        white-space: nowrap;
+        flex-shrink: 0;
+        margin-left: var(--et-space-10);
+        pointer-events: none;
+        display: none;
+        align-items: center;
+
+        .action-item {
+          margin-right: var(--et-space-5);
+          cursor: pointer;
+
+          &:last-child {
+            margin-right: 0;
+          }
+
+          &:hover {
+            color: var(--et-color-primary);
+          }
+        }
+      }
+
+      &:hover {
+        .node-action {
+          display: flex;
+        }
+      }
     }
   }
 

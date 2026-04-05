@@ -39,6 +39,7 @@ export interface ITreeNode extends IDataItemView {
   checked?: boolean;
   disabled?: boolean;
   readonly?: boolean;
+  fullLabel?: string;
 }
 
 export function findNode(
