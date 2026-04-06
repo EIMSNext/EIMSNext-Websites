@@ -8,7 +8,7 @@ export * from "./dfExecLogService";
 export * from "./corporateService";
 export * from "./departmentService";
 export * from "./employeeService";
-export * from "./formNotificationService";
+export * from "./formNotifyService";
 export * from "./formTemplateService";
 export * from "./formDefService";
 export * from "./auditLoginService";

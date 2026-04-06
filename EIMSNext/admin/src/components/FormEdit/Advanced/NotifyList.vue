@@ -14,7 +14,13 @@
       <div class="main-title"><span>提醒助手</span></div>
     </template>
     <div class="main-content">
-      <ReminderEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" />
+      <NotifyEditor
+        v-if="selectedItem"
+        v-model="selectedItem"
+        :formDef="formDef"
+        :key="editorKey"
+        @saved="onSaved"
+      />
     </div>
   </el-drawer>
   <AdvanceLayout title="提醒助手" desc="设置推送规则，根据规则自动给相关人员发送提醒消息">
@@ -27,21 +33,22 @@
       </div>
       <div>
         <el-space direction="vertical" class="flow-space">
-          <template v-for="hook in webhooks">
-            <et-card class="flow-card" :title="'推送到自定义服务器'">
+          <template v-for="notify in formNotifies" :key="notify.id">
+            <et-card class="flow-card" :title="getNotifyTitle(notify)">
               <template #action>
                 <div class="flow-header">
-                  <el-button @click="edit(hook)">编辑</el-button>
-                  <el-button @click="remove(hook)">删除</el-button>
+                  <el-button @click="edit(notify)">编辑</el-button>
+                  <el-button @click="remove(notify)">删除</el-button>
                   <el-switch
-                    :model-value="!hook.disabled"
-                    @change="toggleDisable(hook)"
+                    :model-value="!notify.disabled"
+                    @change="toggleDisable(notify)"
                   ></el-switch>
                 </div>
               </template>
               <div class="flow-content">
-                <div class="item-line">服务器地址: {{ hook.url }}</div>
-                <div class="item-line">推送事件: {{ hook.triggers }}</div>
+                <div class="item-line">提醒类型: {{ getTriggerModeText(notify.triggerMode) }}</div>
+                <div class="item-line">提醒文字: {{ notify.notifyText || "未设置" }}</div>
+                <div class="item-line">提醒方式: {{ getChannelText(notify.channels) }}</div>
               </div>
             </et-card>
           </template>
@@ -50,17 +57,24 @@
     </div>
   </AdvanceLayout>
 </template>
+
 <script setup lang="ts">
-import ReminderEditor from "./ReminderEditor.vue";
-import { FormDef, WebHookTrigger, Webhook } from "@eimsnext/models";
-import { webhookService } from "@eimsnext/services";
+import NotifyEditor from "./NotifyEditor.vue";
+import {
+  FormDef,
+  FormNotify,
+  FormNotifyRequest,
+  FormNotifyTriggerMode,
+  FormNotifyChannel,
+} from "@eimsnext/models";
+import { formNotifyService } from "@eimsnext/services";
+import { FlagEnum } from "@eimsnext/utils";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
-import { useFormStore } from "@eimsnext/store";
 
 defineOptions({
-  name: "ReminderList",
+  name: "NotifyList",
 });
 
 const props = defineProps<{
@@ -69,67 +83,104 @@ const props = defineProps<{
 
 const showDrawer = ref(false);
 const showDeleteConfirmDialog = ref(false);
-const webhooks = ref<Webhook[]>([]);
-const selectedItem = ref<Webhook>();
-const formStore = useFormStore();
+const formNotifies = ref<FormNotify[]>([]);
+const selectedItem = ref<FormNotify>();
+const editorKey = ref(0);
 
-const loadWebhooks = (formId: string) => {
-  let query = buildQuery({ filter: { formId: formId } });
+const loadFormNotifies = (formId: string) => {
+  const query = buildQuery({ filter: { formId: formId } });
+  formNotifyService.query<FormNotify>(query).then((res) => {
+    formNotifies.value = res || [];
+  });
 };
 
-const addNew = () => {
-  selectedItem.value = {
+const createDefaultFormNotify = (): FormNotify =>
+  ({
     id: "",
     appId: props.formDef.appId,
     formId: props.formDef.id,
-    url: "",
-    secret: "",
-    triggers:
-      WebHookTrigger.Data_Created | WebHookTrigger.Data_Updated | WebHookTrigger.Data_Removed,
+    triggerMode: FormNotifyTriggerMode.DataAdded,
+    changeFields: [],
+    dataFilter: "",
+    notifyText: "",
+    notifiers: "[]",
+    channels: FormNotifyChannel.System,
     disabled: false,
-  };
+  }) as FormNotify;
 
+const addNew = () => {
+  selectedItem.value = createDefaultFormNotify();
+  editorKey.value++;
   showDrawer.value = true;
 };
 
-const edit = (flow: Webhook) => {
-  selectedItem.value = flow;
-
+const edit = (notify: FormNotify) => {
+  selectedItem.value = notify;
+  editorKey.value++;
   showDrawer.value = true;
 };
 
-const remove = (flow: Webhook) => {
-  selectedItem.value = flow;
+const remove = (notify: FormNotify) => {
+  selectedItem.value = notify;
   showDeleteConfirmDialog.value = true;
 };
+
 const execDelete = () => {
-  webhookService.delete<Webhook>(selectedItem.value!.id).then((res) => {
-    loadWebhooks(props.formDef.id);
+  formNotifyService.delete<FormNotify>(selectedItem.value!.id).then(() => {
+    loadFormNotifies(props.formDef.id);
     showDeleteConfirmDialog.value = false;
   });
 };
-const toggleDisable = (hook: Webhook) => {
-  webhookService.patch<Webhook>(hook.id, { id: hook.id, disabled: !hook.disabled }).then((res) => {
-    hook.disabled = !hook.disabled;
+
+const toggleDisable = (notify: FormNotify) => {
+  const request: FormNotifyRequest = {
+    id: notify.id,
+    disabled: !notify.disabled,
+  } as FormNotifyRequest;
+  formNotifyService.patch<FormNotify>(notify.id, request).then(() => {
+    notify.disabled = !notify.disabled;
   });
 };
 
-// const emit = defineEmits(["close"]);
+const onSaved = () => {
+  showDrawer.value = false;
+  loadFormNotifies(props.formDef.id);
+};
 
 function close() {
   showDrawer.value = false;
+  loadFormNotifies(props.formDef.id);
+}
 
-  loadWebhooks(props.formDef.id);
-  // emit("close");
+function getNotifyTitle(notify: FormNotify): string {
+  const modeText = getTriggerModeText(notify.triggerMode);
+  return `${modeText}提醒`;
+}
+
+function getTriggerModeText(mode: FormNotifyTriggerMode): string {
+  const map: Record<number, string> = {
+    [FormNotifyTriggerMode.DataAdded]: "新数据提交",
+    [FormNotifyTriggerMode.DataChanged]: "数据修改",
+    [FormNotifyTriggerMode.CustomScheduled]: "自定义定时",
+    [FormNotifyTriggerMode.TimeFieldScheduled]: "字段定时",
+  };
+  return map[mode] || "未知";
+}
+
+function getChannelText(channels: FormNotifyChannel): string {
+  const parts: string[] = [];
+  if (FlagEnum.has(channels, FormNotifyChannel.System)) parts.push("站内消息");
+  if (FlagEnum.has(channels, FormNotifyChannel.Email)) parts.push("邮箱消息");
+  return parts.length ? parts.join("、") : "未设置";
 }
 
 onBeforeMount(() => {
-  //初始化
   if (props.formDef) {
-    loadWebhooks(props.formDef.id);
+    loadFormNotifies(props.formDef.id);
   }
 });
 </script>
+
 <style lang="scss" scoped>
 .flow-container {
   display: flex;
