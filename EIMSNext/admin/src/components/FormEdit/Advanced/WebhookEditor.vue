@@ -95,6 +95,16 @@ const wfTodoUpdated = computed(() => FlagEnum.has(triggers.value, WebHookTrigger
 
 const emit = defineEmits(["update:modelValue", "saved"]);
 const triggers = ref(hook.value.triggers || WebHookTrigger.NotSet);
+
+function initFromModelValue() {
+  hook.value = cloneDeep(props.modelValue) || {};
+  triggers.value = hook.value.triggers || WebHookTrigger.NotSet;
+}
+
+onMounted(() => {
+  initFromModelValue();
+});
+
 const triggerChanged = (perm: WebHookTrigger, checked: any) => {
   if (checked) {
     triggers.value = FlagEnum.combine(triggers.value, perm);

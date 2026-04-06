@@ -25,10 +25,10 @@ export interface FormNotify extends CorpModelBase {
 }
 
 export enum FormNotifyTriggerMode {
-  DataAdded = 0,
-  DataChanged,
-  CustomScheduled,
-  TimeFieldScheduled,
+  DataAdded = "0",
+  DataChanged = "1",
+  CustomScheduled = "2",
+  TimeFieldScheduled = "3",
 }
 export enum FormNotifyChannel {
   None = 0,
