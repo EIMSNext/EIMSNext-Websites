@@ -1,27 +1,16 @@
 <template>
   <div class="et-field-select-list">
     <div class="field-list-header">
-      <span class="field-header">字段</span>
+      <span class="field-header">全选</span>
       <div class="field-check-col">
-        <el-checkbox
-          :model-value="allChecked"
-          :indeterminate="indeterminate"
-          @change="toggleAll"
-        />
+        <el-checkbox :model-value="allChecked" :indeterminate="indeterminate" @change="toggleAll" />
       </div>
     </div>
 
     <div class="field-list-content">
       <template v-for="item in fieldItems" :key="item.id">
-        <div
-          class="field-item"
-          :class="{ selected: isSelected(item.id) }"
-          @click="toggleField(item.id)"
-        >
-          <div
-            class="field-item-text"
-            :style="{ paddingLeft: `${(item.level || 0) * 16}px` }"
-          >
+        <div class="field-item" :class="{ selected: isSelected(item.id) }" @click="toggleField(item.id)">
+          <div class="field-item-text" :style="{ paddingLeft: `${(item.level || 0) * 16}px` }">
             <span>{{ item.label }}</span>
           </div>
           <div class="field-check-col">
@@ -158,7 +147,7 @@ onMounted(async () => {
   .field-list-header {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
+    padding: var(--et-space-3) var(--et-space-10);
     background: var(--et-bg-page);
     border-bottom: 1px solid var(--et-border-color);
     font-weight: 500;
@@ -168,7 +157,7 @@ onMounted(async () => {
     }
 
     .field-check-col {
-      width: 32px;
+      width: 40px;
       display: flex;
       justify-content: center;
     }
@@ -181,7 +170,7 @@ onMounted(async () => {
     .field-item {
       display: flex;
       align-items: center;
-      padding: 8px 12px;
+      padding: var(--et-space-3) var(--et-space-10);
       border-bottom: 1px solid var(--et-border-color-light);
       cursor: pointer;
       transition: background 0.2s;
@@ -192,6 +181,10 @@ onMounted(async () => {
 
       &.selected {
         background: var(--et-color-primary-light-9);
+
+        &:hover {
+          background: var(--et-bg-page);
+        }
       }
 
       .field-item-text {
@@ -199,7 +192,7 @@ onMounted(async () => {
       }
 
       .field-check-col {
-        width: 32px;
+        width: 40px;
         display: flex;
         justify-content: center;
       }

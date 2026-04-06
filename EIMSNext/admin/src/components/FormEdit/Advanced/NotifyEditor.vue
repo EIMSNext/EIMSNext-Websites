@@ -7,27 +7,48 @@
             <div class="notify-mode">
               <div class="label mode-label">提醒类型</div>
               <el-select v-model="formNotify.triggerMode" class="notify-select">
-                <el-option :value="FormNotifyTriggerMode.DataAdded" label="新数据提交时提醒"></el-option>
-                <el-option :value="FormNotifyTriggerMode.DataChanged" label="数据修改时提醒"></el-option>
+                <el-option
+                  :value="FormNotifyTriggerMode.DataAdded"
+                  label="新数据提交时提醒"
+                ></el-option>
+                <el-option
+                  :value="FormNotifyTriggerMode.DataChanged"
+                  label="数据修改时提醒"
+                ></el-option>
                 <!-- <el-option :value="FormNotifyTriggerMode.CustomScheduled" label="自定义定时提醒"></el-option>
                 <el-option :value="FormNotifyTriggerMode.TimeFieldScheduled" label="字段定时提醒"></el-option> -->
               </el-select>
               <div v-if="formNotify.triggerMode === FormNotifyTriggerMode.DataChanged" class="tip">
-                提示：被提醒人若不在相关权限组中，收到提醒时无法查看数据。</div>
+                提示：被提醒人若不在相关权限组中，收到提醒时无法查看数据。
+              </div>
 
-              <div v-if="formNotify.triggerMode === FormNotifyTriggerMode.DataChanged" class="modify-fields">
+              <div
+                v-if="formNotify.triggerMode === FormNotifyTriggerMode.DataChanged"
+                class="modify-fields"
+              >
                 <div class="modify-fields-select">
                   <el-select v-model="changeMode" class="notify-select">
                     <el-option value="all" label="任意字段修改后提醒"></el-option>
                     <el-option value="specific" label="指定字段修改后提醒"></el-option>
                   </el-select>
-                  <el-button v-if="changeMode === 'specific'" type="primary" style="margin-left: var(--et-space-12)"
-                    @click="showFieldDialog = true">
+                  <el-button
+                    v-if="changeMode === 'specific'"
+                    type="primary"
+                    style="margin-left: var(--et-space-12)"
+                    @click="showFieldDialog = true"
+                  >
                     选择字段 ({{ formNotify.changeFields?.length || 0 }})
                   </el-button>
                 </div>
-                <div v-if="formNotify.triggerMode === FormNotifyTriggerMode.DataChanged && changeMode == 'specific'"
-                  class="tip">提示：如果设置了多个提醒字段，任意一个字段被修改就会触发提醒</div>
+                <div
+                  v-if="
+                    formNotify.triggerMode === FormNotifyTriggerMode.DataChanged &&
+                    changeMode == 'specific'
+                  "
+                  class="tip"
+                >
+                  提示：如果设置了多个提醒字段，任意一个字段被修改就会触发提醒
+                </div>
               </div>
             </div>
 
@@ -37,31 +58,49 @@
                 <el-option value="any" label="任意数据"></el-option>
                 <el-option value="condition" label="满足条件的数据"></el-option>
               </el-select>
-              <condition-list v-if="filterMode === 'condition'" v-model="filter" :form-id="formDef.id"
-                :max-level="1"></condition-list>
+              <condition-list
+                v-if="filterMode === 'condition'"
+                v-model="filter"
+                :form-id="formDef.id"
+                :max-level="1"
+              ></condition-list>
             </div>
 
             <div class="notify-notifier">
               <div class="label">被提醒人</div>
-              <selected-tags v-model="notifier" :editable="true" class="notify-margin" @editTag="editNotifier" />
+              <selected-tags
+                v-model="notifier"
+                :editable="true"
+                class="notify-margin"
+                @editTag="editNotifier"
+              />
             </div>
 
             <div class="notify-msg">
               <div class="label">提醒文字</div>
               <div class="content notify-margin">
-                <el-input v-model="formNotify.notifyText" type="textarea" :rows="3" placeholder="请输入提醒内容" />
+                <el-input
+                  v-model="formNotify.notifyText"
+                  type="textarea"
+                  :rows="3"
+                  placeholder="请输入提醒内容"
+                />
               </div>
             </div>
 
             <div class="notify-chanel">
               <div class="label">提醒方式</div>
               <div class="channel-item">
-                <el-checkbox :model-value="hasChannel(FormNotifyChannel.System)"
-                  @change="toggleChannel(FormNotifyChannel.System, $event)">
+                <el-checkbox
+                  :model-value="hasChannel(FormNotifyChannel.System)"
+                  @change="toggleChannel(FormNotifyChannel.System, $event)"
+                >
                   站内消息
                 </el-checkbox>
-                <el-checkbox :model-value="hasChannel(FormNotifyChannel.Email)"
-                  @change="toggleChannel(FormNotifyChannel.Email, $event)">
+                <el-checkbox
+                  :model-value="hasChannel(FormNotifyChannel.Email)"
+                  @change="toggleChannel(FormNotifyChannel.Email, $event)"
+                >
                   邮箱消息
                 </el-checkbox>
               </div>
@@ -73,18 +112,32 @@
     </div>
   </div>
 
-  <el-dialog v-model="showFieldDialog" title="提醒字段设置" width="600px">
-    <field-select-list v-model="formNotify.changeFields as string[]" :form-id="formDef.id" />
-    <template #footer>
-      <el-button @click="showFieldDialog = false">关闭</el-button>
-    </template>
-  </el-dialog>
+  <et-dialog
+    v-model="showFieldDialog"
+    title="提醒字段设置"
+    width="500px"
+    @ok="confirmFieldSelection"
+  >
+    <div class="dialog-body">
+      <field-select-list
+        v-model="tempChangeFields"
+        :form-id="formDef.id"
+        :showSubFields="false"
+        style="border: none"
+      />
+    </div>
+  </et-dialog>
 
-  <member-select-dialog v-model="showMemberDialog" :tags="notifier" :member-options="{
-    showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
-    cascadedDept: true,
-    showCascade: true,
-  }" @ok="finishSelectNotifier" />
+  <member-select-dialog
+    v-model="showMemberDialog"
+    :tags="notifier"
+    :member-options="{
+      showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
+      cascadedDept: true,
+      showCascade: true,
+    }"
+    @ok="finishSelectNotifier"
+  />
 </template>
 
 <script setup lang="ts">
@@ -129,6 +182,7 @@ const changeMode = ref<"all" | "specific">("all");
 const filterMode = ref<"any" | "condition">("any");
 const showFieldDialog = ref(false);
 const showMemberDialog = ref(false);
+const tempChangeFields = ref<string[]>([]);
 
 function initFromModelValue() {
   formNotify.value = cloneDeep(props.modelValue);
@@ -166,7 +220,21 @@ function initFromModelValue() {
   } else {
     changeMode.value = "all";
   }
+
+  tempChangeFields.value = [...(formNotify.value.changeFields || [])];
 }
+
+function confirmFieldSelection() {
+  formNotify.value.changeFields = [...tempChangeFields.value];
+  showFieldDialog.value = false;
+  emit("update:modelValue", formNotify.value);
+}
+
+watch(showFieldDialog, (val) => {
+  if (val) {
+    tempChangeFields.value = [...(formNotify.value.changeFields || [])];
+  }
+});
 
 onMounted(() => {
   initFromModelValue();
@@ -232,7 +300,7 @@ const save = async () => {
     };
 
     if (formNotify.value.id) {
-      formNotify.value = await formNotifyService.patch<FormNotify>(formNotify.value.id, request);
+      formNotify.value = await formNotifyService.put<FormNotify>(formNotify.value.id, request);
     } else {
       formNotify.value = await formNotifyService.post<FormNotify>(request);
     }
@@ -283,6 +351,7 @@ const save = async () => {
 
         .label {
           color: rgba(19, 29, 46, 0.78);
+          font-size: 600;
         }
 
         .mode-label {
@@ -305,6 +374,7 @@ const save = async () => {
 
         .modify-fields-select {
           display: flex;
+          align-items: center;
         }
 
         .notify-chanel {
@@ -327,5 +397,10 @@ const save = async () => {
       right: 0;
     }
   }
+}
+
+.dialog-body {
+  padding: 0 var(--et-space-20) var(--et-space-10);
+  height: 400px;
 }
 </style>
