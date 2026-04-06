@@ -14,7 +14,7 @@
       <div class="main-title"><span>提醒助手</span></div>
     </template>
     <div class="main-content">
-      <ReminderEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" />
+      <NotifyEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" />
     </div>
   </el-drawer>
   <AdvanceLayout title="提醒助手" desc="设置推送规则，根据规则自动给相关人员发送提醒消息">
@@ -51,7 +51,7 @@
   </AdvanceLayout>
 </template>
 <script setup lang="ts">
-import ReminderEditor from "./ReminderEditor.vue";
+import NotifyEditor from "./NotifyEditor.vue";
 import { FormDef, WebHookTrigger, Webhook } from "@eimsnext/models";
 import { webhookService } from "@eimsnext/services";
 import buildQuery from "odata-query";
@@ -60,7 +60,7 @@ import { MessageIcon } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 
 defineOptions({
-  name: "ReminderList",
+  name: "NotifyList",
 });
 
 const props = defineProps<{

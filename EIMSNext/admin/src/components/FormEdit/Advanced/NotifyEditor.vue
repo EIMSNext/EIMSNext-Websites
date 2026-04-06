@@ -66,7 +66,7 @@ import { ConditionList, IConditionList, ISelectedTag, SelectedTags } from "@eims
 const { t } = useI18n();
 
 defineOptions({
-  name: "ReminderEditor",
+  name: "NotifyEditor",
 });
 
 const props = defineProps<{
