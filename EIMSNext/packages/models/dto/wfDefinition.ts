@@ -27,6 +27,64 @@ export interface WfDefinition extends CorpModelBase {
   sourceId?: string;
   disabled?: boolean;
 }
+
+export enum NotifyChannel {
+  None = "0",
+  System = "1",
+  Email = "2",
+}
+
+export enum WfExpireActionType {
+  AutoNotify = "0",
+  AutoApprove = "1",
+  AutoTransfer = "2",
+  AutoReject = "3",
+  AutoReturn = "4",
+}
+
+export enum TimeUnit {
+  Minute = "0",
+  Hour = "1",
+  Day = "2",
+}
+
+export interface ApprovalCandidate {
+  candidateType: number;
+  candidateId: string;
+  candidateName?: string;
+  cascadedDept?: boolean;
+}
+
+export interface TransferSetting {
+  candidates?: ApprovalCandidate[];
+}
+
+export interface NotifySetting {
+  channels?: NotifyChannel;
+  candidates?: ApprovalCandidate[];
+}
+
+export interface ExpireSetting {
+  actionType?: WfExpireActionType;
+  timeValue?: number;
+  timeUnit?: TimeUnit;
+  notifySetting?: NotifySetting;
+  transferSetting?: TransferSetting;
+}
+
+export interface ApproveSetting {
+  approvalMode?: string | number;
+  candidates?: ApprovalCandidate[];
+  enableCopyto?: boolean;
+  copytoCandidates?: ApprovalCandidate[];
+  notifyChannels?: NotifyChannel;
+  expireSetting?: ExpireSetting;
+}
+
+export interface WfNodeSetting {
+  nodeType?: string | number;
+  approveSetting?: ApproveSetting;
+}
 export enum FlowType {
   Workflow = "0",
   Dataflow = "1",
