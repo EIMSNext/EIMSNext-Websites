@@ -1,5 +1,5 @@
 import { CorpModelBase } from "./modelBase";
-import { NotifyChannel } from "./wfDefinition";
+import { NotifyChannel } from "./formNotify";
 
 export interface SystemMessage extends CorpModelBase {
   notifyId?: string;

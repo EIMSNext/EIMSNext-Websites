@@ -1,4 +1,5 @@
-﻿import { CorpModelBase, IdBase } from "./modelBase";
+﻿import { NotifyChannel } from "./formNotify";
+import { CorpModelBase, IdBase } from "./modelBase";
 
 export interface WfDefinitionRequest extends IdBase {
   appId?: string;
@@ -28,24 +29,18 @@ export interface WfDefinition extends CorpModelBase {
   disabled?: boolean;
 }
 
-export enum NotifyChannel {
-  None = "0",
-  System = "1",
-  Email = "2",
-}
-
 export enum WfExpireActionType {
-  AutoNotify = "0",
-  AutoApprove = "1",
-  AutoTransfer = "2",
-  AutoReject = "3",
-  AutoReturn = "4",
+  AutoNotify = 0,
+  AutoApprove = 1,
+  AutoTransfer = 2,
+  AutoReject = 3,
+  AutoReturn = 4,
 }
 
 export enum TimeUnit {
-  Minute = "0",
-  Hour = "1",
-  Day = "2",
+  Minute = 0,
+  Hour = 1,
+  Day = 2,
 }
 
 export interface ApprovalCandidate {
