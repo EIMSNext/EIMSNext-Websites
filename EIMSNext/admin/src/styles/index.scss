@@ -92,7 +92,7 @@
     height: var(--et-size-24);
     padding: var(--et-space-3);
   }
-  .el-button + .el-button {
+  .toolbar-item + .toolbar-item {
     margin-left: var(--et-space-6);
   }
 }

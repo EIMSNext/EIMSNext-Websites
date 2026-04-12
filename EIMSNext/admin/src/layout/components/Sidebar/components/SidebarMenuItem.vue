@@ -1,49 +1,30 @@
 <template>
   <!-- 删除确认对话框 -->
-  <EtConfirmDialog
-    v-model="showDeleteConfirmDialog"
-    :title="t('admin.deleteFormConfirm_Title', [selectedForm?.name])"
-    :icon="MessageIcon.Warning"
-    :showNoSave="false"
-    @ok="handleDeleteConfirm"
-  >
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('admin.deleteFormConfirm_Title', [selectedForm?.name])"
+    :icon="MessageIcon.Warning" :showNoSave="false" @ok="handleDeleteConfirm">
     <div>{{ t("admin.deleteFormConfirm_Content") }}</div>
   </EtConfirmDialog>
   <div v-if="!item.meta || !item.meta.hidden">
     <!--【叶子节点】显示叶子节点或唯一子节点且父节点未配置始终显示 -->
-    <template
-      v-if="
-        // 判断条件：仅有一个子节点，且父节点未配置始终显示
-        (hasOneShowingChild(item.children, item) &&
-          (!onlyOneChild.children || onlyOneChild.noShowingChildren) &&
-          !item.meta?.alwaysShow) ||
-        // 父节点即使配置了始终显示，但无子节点，也显示为叶子节点
-        (item.meta?.alwaysShow && !item.children)
-      "
-    >
-      <AppLink
-        v-if="onlyOneChild.meta"
-        :to="{
-          path: resolvePath(onlyOneChild.path),
-          query: onlyOneChild.meta.params,
-        }"
-      >
-        <el-menu-item
-          :index="resolvePath(onlyOneChild.path)"
-          :class="{ 'pl-15px': !isSidebarOpened }"
-        >
-          <SidebarMenuItemTitle
-            :icon="onlyOneChild.meta.icon || item.meta?.icon"
-            :title="onlyOneChild.meta.title"
-            :iconColor="item.meta?.iconColor"
-          />
-          <span
-            v-if="
-              isSidebarOpened &&
-              (curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin)
-            "
-            class="more-wrapper"
-          >
+    <template v-if="
+      // 判断条件：仅有一个子节点，且父节点未配置始终显示
+      (hasOneShowingChild(item.children, item) &&
+        (!onlyOneChild.children || onlyOneChild.noShowingChildren) &&
+        !item.meta?.alwaysShow) ||
+      // 父节点即使配置了始终显示，但无子节点，也显示为叶子节点
+      (item.meta?.alwaysShow && !item.children)
+    ">
+      <AppLink v-if="onlyOneChild.meta" :to="{
+        path: resolvePath(onlyOneChild.path),
+        query: onlyOneChild.meta.params,
+      }">
+        <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'pl-15px': !isSidebarOpened }">
+          <SidebarMenuItemTitle :icon="onlyOneChild.meta.icon || item.meta?.icon" :title="onlyOneChild.meta.title"
+            :iconColor="item.meta?.iconColor" />
+          <span v-if="
+            isSidebarOpened &&
+            (curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin)
+          " class="more-wrapper">
             <el-dropdown placement="bottom-start" size="large">
               <et-icon icon="el-More" @click.prevent=""></et-icon>
               <template #dropdown>
@@ -55,10 +36,7 @@
                     {{ t("admin.editNameAndIcon") }}
                   </el-dropdown-item>
                   <el-divider class="sidebar-menu-divider" />
-                  <el-dropdown-item
-                    class="btn-delete"
-                    @click="deleteForm(item.meta?.id, item.meta?.type)"
-                  >
+                  <el-dropdown-item class="btn-delete" @click="deleteForm(item.meta?.id, item.meta?.type)">
                     {{ t("common.delete") }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -72,21 +50,12 @@
     <!--【非叶子节点】显示含多个子节点的父菜单，或始终显示的单子节点 -->
     <el-sub-menu v-else :index="resolvePath(item.path)" teleported>
       <template #title>
-        <SidebarMenuItemTitle
-          v-if="item.meta"
-          :icon="item.meta.icon"
-          :title="item.meta.title"
-          :iconColor="item.meta?.iconColor"
-        />
+        <SidebarMenuItemTitle v-if="item.meta" :icon="item.meta.icon" :title="item.meta.title"
+          :iconColor="item.meta?.iconColor" />
       </template>
 
-      <SidebarMenuItem
-        v-for="child in item.children"
-        :key="child.path"
-        :is-nest="true"
-        :item="child"
-        :base-path="resolvePath(child.path)"
-      />
+      <SidebarMenuItem v-for="child in item.children" :key="child.path" :is-nest="true" :item="child"
+        :base-path="resolvePath(child.path)" />
     </el-sub-menu>
   </div>
 </template>
@@ -240,7 +209,7 @@ async function handleDeleteConfirm() {
     width: $sidebar-width-collapsed;
 
     .el-sub-menu {
-      & > .el-sub-menu__title > span {
+      &>.el-sub-menu__title>span {
         display: inline-block;
         width: 0;
         height: 0;

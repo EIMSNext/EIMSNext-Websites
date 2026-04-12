@@ -7,6 +7,7 @@ export default {
     edit: "Edit",
     delete: "Delete",
     print: "Print",
+    systemprint: "System Print",
     deleteAll: "Delete All",
     reset: "Reset",
     clear: "Clear",

@@ -13,6 +13,8 @@ export interface WfTodo extends CorpModelBase {
   starter?: Operator;
   dataBrief: BriefField[];
   approveNodeStartTime: number;
+  expireTime?: number;
+  expireHandled?: boolean;
 }
 export interface BriefField {
   field: string;

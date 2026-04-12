@@ -2,6 +2,7 @@ export class ODataQueryRequest {
   $filter?: string;
   $expand?: string;
   $select?: string;
+  $orderby?: string;
   $skip: number = 0;
   $top: number = 20;
 }
