@@ -8,7 +8,7 @@
     <div class="message-item-body">
       <div class="message-paragraph">
         {{ message.title || "系统消息" }}
-        <div v-if="message.detail" class="message-detail">{{ message.detail }}</div>
+        <!-- <div v-if="message.detail" class="message-detail">{{ message.detail }}</div> -->
         <a v-if="message.url" class="download-link" :href="message.url" target="_blank">
           查看详情
         </a>

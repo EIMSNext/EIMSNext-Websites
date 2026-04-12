@@ -4,8 +4,11 @@
       <div class="message-center-container">
         <div class="message-center-nav">
           <el-menu :default-active="activeMenu" @select="handleMenuSelect">
-            <el-menu-item index="1">数据提醒</el-menu-item>
-            <el-menu-item index="2">系统消息</el-menu-item>
+            <el-menu-item :index="MessageCategory.DataNotify">数据提醒</el-menu-item>
+            <el-menu-item :index="MessageCategory.FlowNotify">流程提醒</el-menu-item>
+            <el-menu-item :index="MessageCategory.AppNotify">应用消息</el-menu-item>
+            <el-menu-item :index="MessageCategory.SystemNotify">系统消息</el-menu-item>
+            <el-menu-item :index="MessageCategory.SystemNotice">系统公告</el-menu-item>
           </el-menu>
         </div>
         <div class="message-center-content">
@@ -18,19 +21,19 @@
               </div>
             </div>
             <div class="message-list-body">
-              <template v-if="activeMenu === '2'">
-                <message-card
-                  v-for="item in pagedMessages"
-                  :key="item.id"
-                  :message="item"
-                  @read="handleRead"
-                />
+              <template v-if="activeMenu === MessageCategory.DataNotify">
+                <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
+                <el-empty v-if="pagedMessages.length === 0" description="暂无消息" />
+              </template>
+              <template v-if="activeMenu === MessageCategory.FlowNotify">
+                <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
                 <el-empty v-if="pagedMessages.length === 0" description="暂无消息" />
               </template>
               <div class="expire-tip">保存最近六个月的消息记录</div>
             </div>
             <div class="message-list-footer">
-              <simple-pagination v-model:current-page="currentPage" :total="filteredMessages.length" :page-size="pageSize" />
+              <simple-pagination v-model:current-page="currentPage" :total="filteredMessages.length"
+                :page-size="pageSize" />
             </div>
           </div>
         </div>
@@ -43,12 +46,12 @@
 import { computed, ref, watch } from "vue";
 import { useSettingsStore } from "@/store";
 import { systemMessageApiService, systemMessageService, ODataQueryRequest } from "@eimsnext/services";
-import { SystemMessage } from "@eimsnext/models";
+import { MessageCategory, SystemMessage } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const settingsStore = useSettingsStore();
-const activeMenu = ref("2");
+const activeMenu = ref<MessageCategory>(MessageCategory.DataNotify);
 const unreadOnly = ref(false);
 const currentPage = ref(1);
 const pageSize = 10;
@@ -64,7 +67,7 @@ const showMessage = computed({
 });
 
 const filteredMessages = computed(() => {
-  const source = activeMenu.value === "2" ? systemMessages.value : [];
+  const source = systemMessages.value || [];
   return unreadOnly.value ? source.filter((item) => !item.isRead) : source;
 });
 
@@ -75,8 +78,9 @@ const pagedMessages = computed(() => {
 
 const loadSystemMessages = async () => {
   const query = new ODataQueryRequest();
+  query.$filter = `Category eq ${activeMenu.value}`
   query.$orderby = "createTime desc";
-  query.$top = 200;
+  query.$top = 20;
   systemMessages.value = await systemMessageService.query<SystemMessage>(query);
 };
 
@@ -102,8 +106,9 @@ const handleReadAll = async () => {
 };
 
 const handleMenuSelect = (index: string) => {
-  activeMenu.value = index;
+  activeMenu.value = index as MessageCategory;
   currentPage.value = 1;
+  loadSystemMessages()
 };
 
 watch(unreadOnly, () => {
