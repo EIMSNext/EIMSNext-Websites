@@ -13,7 +13,7 @@ export * from "./dto/dfExecLog";
 export * from "./dto/employee";
 export * from "./dto/formData";
 export * from "./dto/formDef";
-export * from "./dto/formNotification";
+export * from "./dto/formNotify";
 export * from "./dto/formTemplate";
 export * from "./dto/auditLogin";
 export * from "./dto/payment";

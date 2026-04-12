@@ -25,12 +25,15 @@ import {
 import { EtFieldPerms } from "./FieldPerms";
 import { UserAvatar } from "./avatar";
 import { SortList, SortItem } from "./SortList";
+import FieldSelectList from "./FieldSelectList";
 
 export {
   applyTheme,
   generateThemeColors,
   toggleDarkMode,
 } from "./theme/runtime";
+
+export { FieldSelectList };
 
 export default [
   SvgIcon,
@@ -67,4 +70,5 @@ export default [
   UserAvatar,
   SortList,
   SortItem,
+  FieldSelectList,
 ];

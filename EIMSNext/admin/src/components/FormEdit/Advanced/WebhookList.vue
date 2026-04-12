@@ -14,7 +14,12 @@
       <div class="main-title"><span>数据推送</span></div>
     </template>
     <div class="main-content">
-      <WebhookEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" />
+      <WebhookEditor
+        v-if="selectedItem"
+        v-model="selectedItem"
+        :formDef="formDef"
+        :key="selectedItem.id"
+      />
     </div>
   </el-drawer>
   <el-drawer v-model="showLog" direction="btt" size="95%" @close="showLog = false">
@@ -82,6 +87,7 @@ const showLog = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const webhooks = ref<Webhook[]>([]);
 const selectedItem = ref<Webhook>();
+const editorKey = ref(0);
 const formStore = useFormStore();
 
 const loadWebhooks = (formId: string) => {
@@ -102,7 +108,7 @@ const addNew = () => {
       WebHookTrigger.Data_Created | WebHookTrigger.Data_Updated | WebHookTrigger.Data_Removed,
     disabled: false,
   };
-
+  editorKey.value++;
   showEditor.value = true;
 };
 
@@ -114,7 +120,7 @@ const viewLog = (hook: Webhook) => {
 
 const edit = (hook: Webhook) => {
   selectedItem.value = hook;
-
+  editorKey.value++;
   showEditor.value = true;
 };
 
