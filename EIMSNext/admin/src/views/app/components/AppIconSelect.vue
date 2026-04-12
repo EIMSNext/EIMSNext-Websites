@@ -1,7 +1,7 @@
 <template>
     <div class="icon-select" style="width: 315px">
-        <el-tabs v-model="activeTab" @tab-click="handleTabClick">
-            <el-tab-pane label="系统图标" name="svg">
+        <!-- <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+            <el-tab-pane label="系统图标" name="svg"> -->
                 <div class="color-bar" aria-label="颜色">
                     <span v-for="c in colorOptions" :key="c.value" class="color-chip" :style="{
                         backgroundColor: c.value,
@@ -19,11 +19,11 @@
                         </div>
                     </div>
                 </el-scrollbar>
-            </el-tab-pane>
+            <!-- </el-tab-pane>
             <el-tab-pane label="自定义图标" name="custom">
                 <div>todo</div>
             </el-tab-pane>
-        </el-tabs>
+        </el-tabs> -->
     </div>
 </template>
 
