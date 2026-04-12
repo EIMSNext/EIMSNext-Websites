@@ -3,7 +3,7 @@
     <div class="page-message-center">
       <div class="message-center-container">
         <div class="message-center-nav">
-          <el-menu default-active="1">
+          <el-menu :default-active="activeMenu" @select="handleMenuSelect">
             <el-menu-item index="1">数据提醒</el-menu-item>
             <el-menu-item index="2">系统消息</el-menu-item>
           </el-menu>
@@ -13,17 +13,24 @@
             <div class="message-list-header">
               <div class="message-filter no-border"></div>
               <div class="read-operation-btn">
-                <el-checkbox>只看未读</el-checkbox>
-                <el-link class="link-text read-link" :underline="false">全部转为已读</el-link>
+                <el-checkbox v-model="unreadOnly">只看未读</el-checkbox>
+                <el-link class="link-text read-link" :underline="false" @click="handleReadAll">全部转为已读</el-link>
               </div>
             </div>
             <div class="message-list-body">
-              <message-card />
-              <message-card />
+              <template v-if="activeMenu === '2'">
+                <message-card
+                  v-for="item in pagedMessages"
+                  :key="item.id"
+                  :message="item"
+                  @read="handleRead"
+                />
+                <el-empty v-if="pagedMessages.length === 0" description="暂无消息" />
+              </template>
               <div class="expire-tip">保存最近六个月的消息记录</div>
             </div>
             <div class="message-list-footer">
-              <simple-pagination :total="30" :current-page="2" />
+              <simple-pagination v-model:current-page="currentPage" :total="filteredMessages.length" :page-size="pageSize" />
             </div>
           </div>
         </div>
@@ -33,11 +40,19 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref, watch } from "vue";
 import { useSettingsStore } from "@/store";
+import { systemMessageApiService, systemMessageService, ODataQueryRequest } from "@eimsnext/services";
+import { SystemMessage } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const settingsStore = useSettingsStore();
+const activeMenu = ref("2");
+const unreadOnly = ref(false);
+const currentPage = ref(1);
+const pageSize = 10;
+const systemMessages = ref<SystemMessage[]>([]);
 
 const showMessage = computed({
   get() {
@@ -47,6 +62,63 @@ const showMessage = computed({
     settingsStore.messageCenterVisible = false;
   },
 });
+
+const filteredMessages = computed(() => {
+  const source = activeMenu.value === "2" ? systemMessages.value : [];
+  return unreadOnly.value ? source.filter((item) => !item.isRead) : source;
+});
+
+const pagedMessages = computed(() => {
+  const start = (currentPage.value - 1) * pageSize;
+  return filteredMessages.value.slice(start, start + pageSize);
+});
+
+const loadSystemMessages = async () => {
+  const query = new ODataQueryRequest();
+  query.$orderby = "createTime desc";
+  query.$top = 200;
+  systemMessages.value = await systemMessageService.query<SystemMessage>(query);
+};
+
+const handleRead = async (id?: string) => {
+  if (!id) return;
+  await systemMessageApiService.read({ id });
+  const target = systemMessages.value.find((item) => item.id === id);
+  if (target) {
+    target.isRead = true;
+  }
+};
+
+const handleReadAll = async () => {
+  const ids = filteredMessages.value.filter((item) => !item.isRead && item.id).map((item) => item.id!);
+  if (ids.length === 0) return;
+
+  await systemMessageApiService.readBatch({ keys: ids });
+  systemMessages.value.forEach((item) => {
+    if (item.id && ids.includes(item.id)) {
+      item.isRead = true;
+    }
+  });
+};
+
+const handleMenuSelect = (index: string) => {
+  activeMenu.value = index;
+  currentPage.value = 1;
+};
+
+watch(unreadOnly, () => {
+  currentPage.value = 1;
+});
+
+watch(
+  () => showMessage.value,
+  async (visible) => {
+    if (visible) {
+      await loadSystemMessages();
+    }
+  },
+  { immediate: true },
+);
 </script>
 <style scoped lang="scss">
 .page-message-center {
