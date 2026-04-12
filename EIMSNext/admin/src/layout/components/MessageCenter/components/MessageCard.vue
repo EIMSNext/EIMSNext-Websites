@@ -1,21 +1,38 @@
 <template>
-  <div class="message-item style-grey">
+  <div class="message-item" :class="{ 'style-grey': message.isRead }">
     <div class="message-item-header">
-      <div class="unread-point has-read"></div>
-      <span class="message-time">2026-03-05 10:46</span>
-      <span class="read-set-btn text-btn">转为已读</span>
+      <div class="unread-point" :class="{ 'has-read': message.isRead }"></div>
+      <span class="message-time">{{ displayTime }}</span>
+      <span v-if="!message.isRead" class="read-set-btn text-btn" @click="emit('read', message.id)">转为已读</span>
     </div>
     <div class="message-item-body">
       <div class="message-paragraph">
-        「未命名表单」导出文件已准备完成。文件下载链接将于24小时后失效，请尽快下载。
-        <a class="download-link" href="https://file.eimnext.com/upload/sample.doc" target="_blank">
-          立即下载
+        {{ message.title || "系统消息" }}
+        <!-- <div v-if="message.detail" class="message-detail">{{ message.detail }}</div> -->
+        <a v-if="message.url" class="download-link" :href="message.url" target="_blank">
+          查看详情
         </a>
       </div>
     </div>
   </div>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { SystemMessage } from "@eimsnext/models";
+import { computed } from "vue";
+import { dateFormat } from "@/utils/common";
+
+interface Props {
+  message: SystemMessage;
+}
+
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+  read: [id?: string];
+}>();
+
+const displayTime = computed(() => dateFormat(props.message.createTime, "YYYY-MM-DD HH:mm:ss"));
+</script>
 <style scoped lang="scss">
 .message-item {
   background: var(--et-bg-container);
@@ -80,6 +97,11 @@
       color: var(--et-text-primary);
       word-break: break-word;
       margin-bottom: 0;
+    }
+
+    .message-detail {
+      margin-top: var(--et-space-8);
+      white-space: pre-wrap;
     }
   }
 }

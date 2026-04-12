@@ -8,7 +8,7 @@ export interface FormNotifyRequest extends IdBase {
   dataFilter?: string;
   notifyText?: string;
   notifiers?: string;
-  channels?: FormNotifyChannel;
+  channels?: NotifyChannel;
   disabled: boolean;
 }
 
@@ -20,7 +20,7 @@ export interface FormNotify extends CorpModelBase {
   dataFilter?: string;
   notifyText?: string;
   notifiers?: string;
-  channels: FormNotifyChannel;
+  channels: NotifyChannel;
   disabled: boolean;
 }
 
@@ -30,7 +30,7 @@ export enum FormNotifyTriggerMode {
   CustomScheduled = "2",
   TimeFieldScheduled = "3",
 }
-export enum FormNotifyChannel {
+export enum NotifyChannel {
   None = 0,
   System = 1,
   Email = 2,

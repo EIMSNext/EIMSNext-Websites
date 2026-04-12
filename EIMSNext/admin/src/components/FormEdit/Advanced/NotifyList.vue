@@ -1,12 +1,6 @@
 <template>
-  <EtConfirmDialog
-    v-model="showDeleteConfirmDialog"
-    title="你确定要删除所选数据吗？"
-    :icon="MessageIcon.Warning"
-    :showNoSave="false"
-    okText="确定"
-    @ok="execDelete"
-  >
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
+    :showNoSave="false" okText="确定" @ok="execDelete">
     <div>数据删除后将不可恢复</div>
   </EtConfirmDialog>
   <el-drawer v-model="showDrawer" direction="btt" size="95%" @close="close">
@@ -14,13 +8,7 @@
       <div class="main-title"><span>提醒助手</span></div>
     </template>
     <div class="main-content">
-      <NotifyEditor
-        v-if="selectedItem"
-        v-model="selectedItem"
-        :formDef="formDef"
-        :key="editorKey"
-        @saved="onSaved"
-      />
+      <NotifyEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" :key="editorKey" @saved="onSaved" />
     </div>
   </el-drawer>
   <AdvanceLayout title="提醒助手" desc="设置推送规则，根据规则自动给相关人员发送提醒消息">
@@ -39,10 +27,7 @@
                 <div class="flow-header">
                   <el-button @click="edit(notify)">编辑</el-button>
                   <el-button @click="remove(notify)">删除</el-button>
-                  <el-switch
-                    :model-value="!notify.disabled"
-                    @change="toggleDisable(notify)"
-                  ></el-switch>
+                  <el-switch :model-value="!notify.disabled" @change="toggleDisable(notify)"></el-switch>
                 </div>
               </template>
               <div class="flow-content">
@@ -65,7 +50,7 @@ import {
   FormNotify,
   FormNotifyRequest,
   FormNotifyTriggerMode,
-  FormNotifyChannel,
+  NotifyChannel,
 } from "@eimsnext/models";
 import { formNotifyService } from "@eimsnext/services";
 import { FlagEnum } from "@eimsnext/utils";
@@ -102,9 +87,9 @@ const createDefaultFormNotify = (): FormNotify =>
     triggerMode: FormNotifyTriggerMode.DataAdded,
     changeFields: [],
     dataFilter: "",
-    notifyText: "",
+    notifyText: "有新数据提交，请及时处理",
     notifiers: "[]",
-    channels: FormNotifyChannel.System,
+    channels: NotifyChannel.System,
     disabled: false,
   }) as FormNotify;
 
@@ -167,10 +152,10 @@ function getTriggerModeText(mode: FormNotifyTriggerMode): string {
   return map[mode] || "未知";
 }
 
-function getChannelText(channels: FormNotifyChannel): string {
+function getChannelText(channels: NotifyChannel): string {
   const parts: string[] = [];
-  if (FlagEnum.has(channels, FormNotifyChannel.System)) parts.push("站内消息");
-  if (FlagEnum.has(channels, FormNotifyChannel.Email)) parts.push("邮箱消息");
+  if (FlagEnum.has(channels, NotifyChannel.System)) parts.push("站内消息");
+  if (FlagEnum.has(channels, NotifyChannel.Email)) parts.push("邮箱消息");
   return parts.length ? parts.join("、") : "未设置";
 }
 

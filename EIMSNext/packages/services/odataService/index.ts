@@ -17,6 +17,7 @@ export * from "./publicSettingService";
 export * from "./printTemplateService";
 export * from "./roleGroupService";
 export * from "./roleService";
+export * from "./systemMessageService";
 export * from "./webhookService";
 export * from "./webPushLogService";
 export * from "./wfDefinitionService";
