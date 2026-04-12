@@ -1,18 +1,10 @@
 <template>
-  <AddEditApp
-    v-if="showAddEditDialog"
-    :edit="isEditMode"
-    :app="currentApp"
-    @cancel="showAddEditDialog = false"
-    @ok="handleSaved"
-  ></AddEditApp>
+  <AddEditApp v-if="showAddEditDialog" :edit="isEditMode" :app="currentApp" @cancel="showAddEditDialog = false"
+    @ok="handleSaved"></AddEditApp>
   <et-card :title="t('admin.myApp')">
     <template #action>
-      <el-button
-        v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
-        icon="plus"
-        @click="createApp"
-      >
+      <el-button v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin" icon="plus"
+        @click="createApp">
         {{ t("admin.newApp") }}
       </el-button>
     </template>
@@ -29,11 +21,10 @@
                     <div class="item-link" @click="gotoApp(app)">
                       <div class="app-wrapper">
                         <div class="app-item-icon">
-                          <et-icon
-                            :icon="getAppIcon(app)"
-                            size="48px"
-                            :color="getAppIconColor()"
-                          ></et-icon>
+                          <div class="app-icon" :style="{ backgroundColor: getAppIconColor(app) }"">
+              <span style=" width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <et-icon :icon="getAppIcon(app)" color="#ffffff" size="28px" /></span>
+                          </div>
                         </div>
                         <div class="app-title">{{ app.name }}</div>
                       </div>
@@ -41,13 +32,10 @@
                     <div class="favorite-icon">
                       <et-icon icon="el-star" size="large"></et-icon>
                     </div>
-                    <div
-                      v-if="
-                        curUser.userType == UserType.CorpOwmer ||
-                        curUser.userType == UserType.CorpAdmin
-                      "
-                      class="setting-icon"
-                    >
+                    <div v-if="
+                      curUser.userType == UserType.CorpOwmer ||
+                      curUser.userType == UserType.CorpAdmin
+                    " class="setting-icon">
                       <el-dropdown placement="bottom-start" size="large">
                         <el-button class="setting-btn">
                           <et-icon icon="el-setting" size="large"></et-icon>
@@ -191,6 +179,16 @@ const handleDeleteClick = async (app: App) => {
               justify-content: center;
               align-items: center;
               height: var(--et-size-72);
+
+              .app-icon {
+                cursor: pointer;
+                display: inline-block;
+                margin: 5px;
+                border-radius: 8px;
+                height: 48px;
+                width: 48px;
+                vertical-align: middle;
+              }
             }
 
             .app-title {
