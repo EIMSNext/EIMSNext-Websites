@@ -6,13 +6,13 @@
 }
 
 ._fc-frame ._fc-upload-btn {
-    border: 1px dashed #c0ccda;
+    border: 1px dashed var(--et-border-color, #c0ccda);
     cursor: pointer;
 }
 
 ._fc-frame._fc-disabled ._fc-upload-btn ,._fc-frame._fc-disabled .el-button {
     cursor: not-allowed !important;
-    color: #999;
+    color: var(--et-text-disabled, #999);
 }
 
 ._fc-frame ._fc-upload-cover {
@@ -22,14 +22,14 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, .6);
+    background: var(--et-overlay-color-strong, rgba(0, 0, 0, .6));
     -webkit-transition: opacity .3s;
     -o-transition: opacity .3s;
     transition: opacity .3s;
 }
 
 ._fc-frame ._fc-upload-cover i {
-    color: #fff;
+    color: var(--et-text-on-primary, #fff);
     font-size: 20px;
     cursor: pointer;
     margin: 0 2px;
@@ -53,13 +53,13 @@
     height: 58px;
     text-align: center;
     line-height: 58px;
-    border: 1px solid #c0ccda;
+    border: 1px solid var(--et-border-color, #c0ccda);
     border-radius: 4px;
     overflow: hidden;
-    background: #fff;
+    background: var(--et-bg-container, #fff);
     position: relative;
-    -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, .1);
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, .1);
+    -webkit-box-shadow: var(--et-shadow-sm, 2px 2px 5px rgba(0, 0, 0, .1));
+    box-shadow: var(--et-shadow-sm, 2px 2px 5px rgba(0, 0, 0, .1));
     margin-right: 4px;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;

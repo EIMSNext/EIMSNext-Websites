@@ -278,7 +278,7 @@ const close = () => {
             padding: var(--et-space-16) 0;
 
             > .row-label {
-              color: rgb(19 29 46 / 78%);
+              color: var(--et-text-primary-soft);
               flex-shrink: 0;
               font-weight: 600;
             }
@@ -315,7 +315,7 @@ const close = () => {
           }
 
           .team-label {
-            background-color: rgb(19 29 46 / 8%);
+            background-color: var(--et-bg-hover);
             border-radius: var(--et-radius-6);
             flex: none;
             font-size: var(--et-font-size-14);
@@ -344,7 +344,7 @@ const close = () => {
 
         .not-bind {
           .item-text {
-            color: rgb(19 29 46 / 47%);
+            color: var(--et-text-tertiary-soft);
           }
         }
       }

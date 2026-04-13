@@ -180,10 +180,11 @@ onMounted(async () => {
       }
 
       &.selected {
-        background: var(--et-color-primary-light-9);
+        background: var(--et-bg-primary-soft);
+        color: var(--et-color-primary);
 
         &:hover {
-          background: var(--et-bg-page);
+          background: var(--et-bg-primary-soft);
         }
       }
 

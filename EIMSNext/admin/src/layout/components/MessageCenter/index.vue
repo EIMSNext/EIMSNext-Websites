@@ -217,7 +217,7 @@ watch(
 
           .expire-tip {
             align-items: center;
-            color: rgb(19 29 46 / 66%);
+            color: var(--et-text-secondary-soft);
             display: flex;
             gap: var(--et-space-16);
             justify-content: space-between;

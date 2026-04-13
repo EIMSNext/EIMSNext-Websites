@@ -1,9 +1,9 @@
 <template>
     <div class="icon-select" style="width: 315px">
         <div class="color-bar" aria-label="颜色">
-            <span v-for="c in colorOptions" :key="c.value" class="color-chip" :style="{
+            <span v-for="c in colorOptions" :key="c.value" class="color-chip" :aria-pressed="selectedColor === c.value" :style="{
                 backgroundColor: c.value,
-                border: selectedColor === c.value ? '2px solid #333' : 'none',
+                border: selectedColor === c.value ? '2px solid var(--et-text-primary)' : 'none',
             }" @click="selectColor(c.value)" />
         </div>
         <el-scrollbar height="300px">
@@ -101,7 +101,7 @@ onMounted(() => {
     }
 
     .color-chip[aria-pressed="true"] {
-        outline: 2px solid #333;
+        outline: 2px solid var(--et-text-primary);
     }
 }
 
