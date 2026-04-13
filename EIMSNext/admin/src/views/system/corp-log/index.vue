@@ -78,7 +78,13 @@
       </div>
 
       <div class="table-container">
-        <el-table v-loading="loading" :data="tableData" show-overflow-tooltip>
+        <el-table
+          v-loading="loading"
+          :data="tableData"
+          show-overflow-tooltip
+          height="100%"
+          class="corp-log-table"
+        >
           <template v-if="activeTab === 'login'">
             <el-table-column label="登录人" min-width="160">
               <template #default="scope">
@@ -331,15 +337,24 @@ onMounted(async () => {
   background: var(--et-bg-page);
   box-sizing: border-box;
   height: calc(100vh - var(--et-size-50));
-  overflow: auto;
+  overflow: hidden;
   padding: var(--et-space-12);
 }
 
 .corp-log-card {
-  min-height: calc(100vh - var(--et-size-74));
+  height: calc(100vh - var(--et-size-74));
+
+  :deep(.el-card__body) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
 }
 
 .corp-log-tabs {
+  flex-shrink: 0;
+
   :deep(.el-tabs__header) {
     margin-bottom: var(--et-space-16);
   }
@@ -353,6 +368,7 @@ onMounted(async () => {
 .filter-panel {
   background: var(--et-bg-page);
   border-radius: var(--et-radius-8);
+  flex-shrink: 0;
   margin-bottom: var(--et-space-16);
   padding: var(--et-space-16);
 }
@@ -399,11 +415,18 @@ onMounted(async () => {
 }
 
 .table-container {
-  min-height: var(--et-size-480);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.corp-log-table {
+  height: 100%;
 }
 
 .pagination-container {
   display: flex;
+  flex-shrink: 0;
   justify-content: flex-end;
   margin-top: var(--et-space-8);
 }

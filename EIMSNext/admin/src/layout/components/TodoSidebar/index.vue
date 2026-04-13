@@ -296,4 +296,10 @@ onBeforeUnmount(() => {
   line-height: var(--et-line-height-40);
   height: var(--et-size-40);
 }
+
+:deep(.el-sub-menu__title:hover),
+:deep(.el-menu-item:hover),
+:deep(.el-menu-item.is-active) {
+  background-color: var(--et-bg-hover) !important;
+}
 </style>
