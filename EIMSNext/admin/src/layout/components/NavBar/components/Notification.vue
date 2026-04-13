@@ -7,27 +7,29 @@
 </template>
 
 <script setup lang="ts">
+import { BADGE_REFRESH_INTERVAL } from "@/utils/badge";
+import { useSettingsStore } from "@/store";
 
-let msgTimer: NodeJS.Timeout | null = null
-const msgCnt = ref(1)
+const settingsStore = useSettingsStore();
+let msgTimer: ReturnType<typeof setInterval> | null = null;
+const msgCnt = computed(() => settingsStore.notificationUnreadCount);
 
-const queryMsgCount = async () => { }
+const queryMsgCount = async () => {
+  await settingsStore.refreshNotificationUnreadCount();
+};
 
 onMounted(() => {
-  queryMsgCount()
+  queryMsgCount();
 
-  // 1分钟 = 60 * 1000 毫秒
   msgTimer = setInterval(() => {
-    queryMsgCount()
-  }, 60 * 1000)
+    queryMsgCount();
+  }, BADGE_REFRESH_INTERVAL);
 });
-
 
 onBeforeUnmount(() => {
   if (msgTimer) {
-    clearInterval(msgTimer)
-    msgTimer = null
+    clearInterval(msgTimer);
+    msgTimer = null;
   }
-})
-
+});
 </script>

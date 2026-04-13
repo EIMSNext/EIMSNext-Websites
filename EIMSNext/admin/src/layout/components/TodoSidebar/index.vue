@@ -19,7 +19,9 @@
         <!-- 我的待办 -->
         <el-sub-menu index="mytasks">
           <template #title>
-            <et-icon icon="icon-mytodo" size="14px" class="step-image" />
+            <el-badge :is-dot="hasCorpTodo" :offset="[0, 8]">
+              <et-icon icon="icon-mytodo" size="14px" class="step-image" />
+            </el-badge>
             <span class="app-menu-text" @click.stop="goToTaskType('mytasks')">
               {{ t("common.wfProcess.mytasks") }}
             </span>
@@ -107,7 +109,9 @@
       >
         <!-- 我的待办 -->
         <el-menu-item index="mytasks" class="pl-15px" @click.stop="goToTaskType('mytasks')">
-          <et-icon icon="icon-mytodo" size="14px" class="step-image" />
+          <el-badge :is-dot="hasCorpTodo" :offset="[0, 8]">
+            <et-icon icon="icon-mytodo" size="14px" class="step-image" />
+          </el-badge>
         </el-menu-item>
 
         <!-- 我发起的 -->
@@ -134,13 +138,14 @@ defineOptions({
   name: "TodoSidebar",
 });
 
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onBeforeUnmount, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useSystemStore } from "@/store";
 import { useAppStore } from "@eimsnext/store";
 import { App } from "@eimsnext/models";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
+import { BADGE_REFRESH_INTERVAL, queryCorpTodoCount } from "@/utils/badge";
 
 const appStore = useAppStore();
 const router = useRouter();
@@ -178,6 +183,9 @@ function toggleSideBar() {
 }
 
 const appsRef = ref<App[]>([]);
+const corpTodoCount = ref(0);
+const hasCorpTodo = computed(() => corpTodoCount.value > 0);
+let corpTodoTimer: ReturnType<typeof setInterval> | null = null;
 
 const selectApp = (app: App, taskType: string) => {
   let routePath = `/mystarted`;
@@ -227,9 +235,25 @@ const goToTaskType = (taskType: string) => {
 
 const handleMenuSelect = () => {};
 
+const loadCorpTodoCount = async () => {
+  corpTodoCount.value = await queryCorpTodoCount();
+};
+
 onMounted(async () => {
   await appStore.load();
   appsRef.value = appStore.items;
+  await loadCorpTodoCount();
+
+  corpTodoTimer = setInterval(() => {
+    loadCorpTodoCount();
+  }, BADGE_REFRESH_INTERVAL);
+});
+
+onBeforeUnmount(() => {
+  if (corpTodoTimer) {
+    clearInterval(corpTodoTimer);
+    corpTodoTimer = null;
+  }
 });
 </script>
 
