@@ -17,23 +17,38 @@
               <div class="message-filter no-border"></div>
               <div class="read-operation-btn">
                 <el-checkbox v-model="unreadOnly">只看未读</el-checkbox>
-                <el-link class="link-text read-link" :underline="false" @click="handleReadAll">全部转为已读</el-link>
+                <el-link class="link-text read-link" :underline="false" @click="handleReadAll">
+                  全部转为已读
+                </el-link>
               </div>
             </div>
             <div class="message-list-body">
               <template v-if="activeMenu === MessageCategory.DataNotify">
-                <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
+                <message-card
+                  v-for="item in pagedMessages"
+                  :key="item.id"
+                  :message="item"
+                  @read="handleRead"
+                />
                 <el-empty v-if="pagedMessages.length === 0" description="暂无消息" />
               </template>
               <template v-if="activeMenu === MessageCategory.FlowNotify">
-                <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
+                <message-card
+                  v-for="item in pagedMessages"
+                  :key="item.id"
+                  :message="item"
+                  @read="handleRead"
+                />
                 <el-empty v-if="pagedMessages.length === 0" description="暂无消息" />
               </template>
               <div class="expire-tip">保存最近六个月的消息记录</div>
             </div>
             <div class="message-list-footer">
-              <simple-pagination v-model:current-page="currentPage" :total="filteredMessages.length"
-                :page-size="pageSize" />
+              <simple-pagination
+                v-model:current-page="currentPage"
+                :total="filteredMessages.length"
+                :page-size="pageSize"
+              />
             </div>
           </div>
         </div>
@@ -45,7 +60,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useSettingsStore } from "@/store";
-import { systemMessageApiService, systemMessageService, ODataQueryRequest } from "@eimsnext/services";
+import {
+  systemMessageApiService,
+  systemMessageService,
+  ODataQueryRequest,
+} from "@eimsnext/services";
 import { MessageCategory, SystemMessage } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -78,10 +97,11 @@ const pagedMessages = computed(() => {
 
 const loadSystemMessages = async () => {
   const query = new ODataQueryRequest();
-  query.$filter = `Category eq ${activeMenu.value}`
+  query.$filter = `Category eq ${activeMenu.value}`;
   query.$orderby = "createTime desc";
   query.$top = 20;
   systemMessages.value = await systemMessageService.query<SystemMessage>(query);
+  await settingsStore.refreshNotificationUnreadCount();
 };
 
 const handleRead = async (id?: string) => {
@@ -91,10 +111,13 @@ const handleRead = async (id?: string) => {
   if (target) {
     target.isRead = true;
   }
+  await settingsStore.refreshNotificationUnreadCount();
 };
 
 const handleReadAll = async () => {
-  const ids = filteredMessages.value.filter((item) => !item.isRead && item.id).map((item) => item.id!);
+  const ids = filteredMessages.value
+    .filter((item) => !item.isRead && item.id)
+    .map((item) => item.id!);
   if (ids.length === 0) return;
 
   await systemMessageApiService.readBatch({ keys: ids });
@@ -103,12 +126,13 @@ const handleReadAll = async () => {
       item.isRead = true;
     }
   });
+  await settingsStore.refreshNotificationUnreadCount();
 };
 
 const handleMenuSelect = (index: string) => {
   activeMenu.value = index as MessageCategory;
   currentPage.value = 1;
-  loadSystemMessages()
+  loadSystemMessages();
 };
 
 watch(unreadOnly, () => {
@@ -122,7 +146,7 @@ watch(
       await loadSystemMessages();
     }
   },
-  { immediate: true },
+  { immediate: true }
 );
 </script>
 <style scoped lang="scss">
@@ -217,7 +241,7 @@ watch(
 
           .expire-tip {
             align-items: center;
-            color: rgb(19 29 46 / 66%);
+            color: var(--et-text-secondary-soft);
             display: flex;
             gap: var(--et-space-16);
             justify-content: space-between;

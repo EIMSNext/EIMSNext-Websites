@@ -63,7 +63,7 @@ export default defineComponent({
     margin-bottom: 0;
     font-size: 15px;
     font-weight: 600;
-    color: #333
+    color: var(--fc-text-color-1)
 }
 
 ._fd-drawer .el-drawer__body {
@@ -72,7 +72,7 @@ export default defineComponent({
 
 ._fd-drawer .el-drawer__close-btn {
     font-size: 14px;
-    color: #909399
+    color: var(--fc-text-color-3)
 }
 
 ._fd-drawer .el-drawer__footer {

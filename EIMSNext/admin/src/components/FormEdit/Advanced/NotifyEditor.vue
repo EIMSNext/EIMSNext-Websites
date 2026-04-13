@@ -326,7 +326,7 @@ const save = async () => {
         top: 0;
 
         .label {
-          color: rgba(19, 29, 46, 0.78);
+          color: var(--et-text-primary-soft);
           font-size: 600;
         }
 
@@ -344,7 +344,7 @@ const save = async () => {
         }
 
         .tip {
-          color: rgba(19, 29, 46, 0.66);
+          color: var(--et-text-secondary-soft);
           font-size: 12px;
         }
 

@@ -21,11 +21,9 @@ import { SystemMessage } from "@eimsnext/models";
 import { computed } from "vue";
 import { dateFormat } from "@/utils/common";
 
-interface Props {
+const props = defineProps<{
   message: SystemMessage;
-}
-
-const props = defineProps<Props>();
+}>();
 
 const emit = defineEmits<{
   read: [id?: string];
@@ -43,11 +41,11 @@ const displayTime = computed(() => dateFormat(props.message.createTime, "YYYY-MM
   padding: var(--et-space-16);
 
   &.style-grey {
-    color: rgb(19 29 46 / 47%);
+    color: var(--et-text-tertiary-soft);
 
     .download-link,
     .message-time {
-      color: rgb(19 29 46 / 47%);
+      color: var(--et-text-tertiary-soft);
     }
   }
 
@@ -74,7 +72,7 @@ const displayTime = computed(() => dateFormat(props.message.createTime, "YYYY-MM
   }
 
   .message-time {
-    color: rgb(19 29 46 / 66%);
+    color: var(--et-text-secondary-soft);
     flex-grow: 1;
   }
 

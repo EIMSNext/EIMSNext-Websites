@@ -231,7 +231,7 @@ export default {
       {
         type: "CheckBoxInput",
         field: "addable",
-        value: true,
+        value: false,
         wrap: { show: false },
       },
       {

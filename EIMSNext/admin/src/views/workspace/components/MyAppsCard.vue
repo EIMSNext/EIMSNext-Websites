@@ -21,10 +21,7 @@
                     <div class="item-link" @click="gotoApp(app)">
                       <div class="app-wrapper">
                         <div class="app-item-icon">
-                          <div class="app-icon" :style="{ backgroundColor: getAppIconColor(app) }"">
-              <span style=" width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                            <et-icon :icon="getAppIcon(app)" color="#ffffff" size="28px" /></span>
-                          </div>
+                          <AppIcon :app="app" />
                         </div>
                         <div class="app-title">{{ app.name }}</div>
                       </div>
@@ -69,7 +66,6 @@ defineOptions({
 import AddEditApp from "@/views/app/components/AddEditApp.vue";
 import { App, UserType } from "@eimsnext/models";
 import { useAppStore, useContextStore, useUserStore } from "@eimsnext/store";
-import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
 import { ConfirmResult, EtConfirm } from "@eimsnext/components";
 const { t } = useI18n();
@@ -179,16 +175,6 @@ const handleDeleteClick = async (app: App) => {
               justify-content: center;
               align-items: center;
               height: var(--et-size-72);
-
-              .app-icon {
-                cursor: pointer;
-                display: inline-block;
-                margin: 5px;
-                border-radius: 8px;
-                height: 48px;
-                width: 48px;
-                vertical-align: middle;
-              }
             }
 
             .app-title {
