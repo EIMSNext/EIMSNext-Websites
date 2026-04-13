@@ -3,7 +3,7 @@
     <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
       :isLedger="isLedger" @close="showFormEditor = false" />
     <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
-    <div class="app-title">
+    <div class="app-title" :style="{ paddingRight: isSidebarOpened ? 'var(--et-space-15)' : 'var(--et-space-6)' }">
       <AppIcon v-if="app" :app="app" iconSize="12px" style="width: 20px;height: 20px;" />
       <span v-if="isSidebarOpened" class="ml-[3px]">{{ app?.name }}</span>
       <el-button class="side-bar-control" @click.stop="toggleSideBar">
