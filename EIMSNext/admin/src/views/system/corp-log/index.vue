@@ -317,18 +317,27 @@ onMounted(async () => {
 .corp-log-container {
   background: var(--et-bg-page);
   box-sizing: border-box;
-  height: calc(100vh - var(--et-size-50));
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
 .corp-log-card {
-  height: calc(100vh - var(--et-size-74));
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 
   :deep(.el-card__body) {
     display: flex;
     flex-direction: column;
+    flex: 1;
     height: 100%;
     min-height: 0;
+    overflow: hidden;
   }
 }
 
@@ -395,12 +404,19 @@ onMounted(async () => {
 }
 
 .table-container {
+  display: flex;
   flex: 1;
   min-height: 0;
   overflow: hidden;
 }
 
 .corp-log-table {
+  flex: 1;
+  min-height: 0;
+}
+
+.corp-log-card :deep(.el-table),
+.corp-log-card :deep(.el-table__inner-wrapper) {
   height: 100%;
 }
 
