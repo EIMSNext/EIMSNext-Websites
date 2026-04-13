@@ -5,43 +5,35 @@
       <!-- 顶部布局顶部 || 左侧布局左侧 -->
       <div class="sys-menu-wrap">
         <el-menu mode="vertical">
-          <AppLink
-            :to="{
-              path: resolveFullPath('department'),
-            }"
-          >
+          <AppLink :to="{
+            path: resolveFullPath('department'),
+          }">
             <el-menu-item index="department">
               <et-icon icon="icon-organization" class="step-image" size="14px" />
               <span class="app-menu-text">内部组织</span>
             </el-menu-item>
           </AppLink>
-          <AppLink
-            :to="{
-              path: resolveFullPath('role'),
-            }"
-          >
+          <AppLink :to="{
+            path: resolveFullPath('role'),
+          }">
             <el-menu-item index="role">
               <et-icon icon="icon-role" class="step-image" size="14px" />
               <span class="app-menu-text">角色</span>
             </el-menu-item>
           </AppLink>
-          <AppLink
-            :to="{
-              path: resolveFullPath('admin'),
-            }"
-          >
+          <AppLink :to="{
+            path: resolveFullPath('admin'),
+          }">
             <el-menu-item index="admin">
               <et-icon icon="icon-admin" class="step-image" size="14px" />
               <span class="app-menu-text">管理员</span>
             </el-menu-item>
           </AppLink>
-          <AppLink
-            :to="{
-              path: resolveFullPath('corp-log'),
-            }"
-          >
+          <AppLink :to="{
+            path: resolveFullPath('corp-log'),
+          }">
             <el-menu-item index="corp-log">
-              <et-icon icon="el-Document" class="step-image" size="14px" />
+              <et-icon icon="icon-admin" class="step-image" size="14px" />
               <span class="app-menu-text">企业日志</span>
             </el-menu-item>
           </AppLink>
@@ -74,7 +66,7 @@ function handleOutsideClick() {
 const wfbasePath = `/system/`;
 const resolveFullPath = (routePath: string) => wfbasePath + routePath;
 
-onBeforeMount(async () => {});
+onBeforeMount(async () => { });
 </script>
 
 <style lang="scss" scoped>

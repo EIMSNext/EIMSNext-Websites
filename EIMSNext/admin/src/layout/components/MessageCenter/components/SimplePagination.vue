@@ -11,13 +11,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-interface Props {
+const props = withDefaults(defineProps<{
   currentPage: number;
   total: number;
   pageSize?: number;
-}
-
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   pageSize: 10,
 });
 
