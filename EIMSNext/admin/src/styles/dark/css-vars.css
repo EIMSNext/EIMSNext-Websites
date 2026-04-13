@@ -4,4 +4,76 @@ html.dark {
     /* 自定义表格选中高亮时当前行的背景颜色 */
     --el-table-current-row-bg-color: var(--el-fill-color-light);
   }
+
+  .el-menu {
+    --el-menu-bg-color: transparent;
+    --el-menu-hover-bg-color: var(--et-bg-hover);
+    --el-menu-text-color: var(--et-text-primary);
+    --el-menu-active-color: var(--et-text-primary);
+  }
+
+  .el-menu-item:hover,
+  .el-menu-item.is-active,
+  .el-sub-menu__title:hover,
+  .el-sub-menu.is-active > .el-sub-menu__title {
+    background-color: var(--et-bg-hover) !important;
+  }
+
+  .el-dropdown__popper.el-popper,
+  .el-select__popper.el-popper,
+  .el-picker__popper.el-popper,
+  .el-cascader__dropdown.el-popper,
+  .el-autocomplete__popper.el-popper,
+  .el-popover.el-popper,
+  .el-tooltip__popper.el-popper,
+  .el-menu--popup-container {
+    background-color: var(--et-bg-container);
+    border-color: var(--et-border-color-light);
+    color: var(--et-text-primary);
+  }
+
+  .el-popper.is-light,
+  .el-popover {
+    background-color: var(--et-bg-container);
+    border-color: var(--et-border-color-light);
+    color: var(--et-text-primary);
+  }
+
+  .el-popper.is-light .el-popper__arrow::before,
+  .el-popover.el-popper .el-popper__arrow::before {
+    background-color: var(--et-bg-container);
+    border-color: var(--et-border-color-light);
+  }
+
+  .el-dropdown-menu {
+    background-color: var(--et-bg-container);
+  }
+
+  .el-dropdown-menu__item,
+  .el-select-dropdown__item,
+  .el-cascader-node,
+  .el-autocomplete-suggestion li {
+    color: var(--et-text-primary);
+  }
+
+  .el-dropdown-menu__item:not(.is-disabled):hover,
+  .el-dropdown-menu__item:focus,
+  .el-select-dropdown__item.hover,
+  .el-select-dropdown__item.is-hovering,
+  .el-cascader-node:not(.is-disabled):hover,
+  .el-autocomplete-suggestion li:hover,
+  .el-menu--popup .el-menu-item:hover,
+  .el-menu--popup .el-sub-menu__title:hover,
+  .el-menu--popup .el-menu-item.is-active,
+  .el-menu--popup .el-sub-menu.is-active > .el-sub-menu__title {
+    background-color: var(--et-bg-hover) !important;
+  }
+
+  .el-select-dropdown__item.is-selected,
+  .el-dropdown-menu__item.is-active,
+  .el-cascader-node.is-selectable.in-checked-path,
+  .el-cascader-node.is-active {
+    background-color: var(--et-bg-hover) !important;
+    color: var(--et-text-primary);
+  }
 }
