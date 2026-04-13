@@ -35,6 +35,16 @@
               <span class="app-menu-text">管理员</span>
             </el-menu-item>
           </AppLink>
+          <AppLink
+            :to="{
+              path: resolveFullPath('corp-log'),
+            }"
+          >
+            <el-menu-item index="corp-log">
+              <et-icon icon="el-Document" class="step-image" size="14px" />
+              <span class="app-menu-text">企业日志</span>
+            </el-menu-item>
+          </AppLink>
         </el-menu>
       </div>
     </div>
