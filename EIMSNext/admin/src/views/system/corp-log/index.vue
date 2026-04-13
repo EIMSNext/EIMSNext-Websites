@@ -14,15 +14,8 @@
           </div>
           <div class="filter-item range-item">
             <div class="filter-label">登录时间</div>
-            <el-date-picker
-              v-model="loginFilters.dateRange"
-              type="daterange"
-              value-format="x"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              range-separator="~"
-              clearable
-            />
+            <el-date-picker v-model="loginFilters.dateRange" type="daterange" value-format="x" start-placeholder="开始日期"
+              end-placeholder="结束日期" range-separator="~" clearable />
           </div>
           <div class="filter-actions">
             <el-button type="primary" @click="handleSearch">查询</el-button>
@@ -38,12 +31,7 @@
             <div class="filter-label">实体类型</div>
             <el-select v-model="actionFilters.entityType" clearable placeholder="全部">
               <el-option label="全部" value="" />
-              <el-option
-                v-for="item in entityTypeOptions"
-                :key="item"
-                :label="item"
-                :value="item"
-              />
+              <el-option v-for="item in entityTypeOptions" :key="item" :label="item" :value="item" />
             </el-select>
           </div>
           <div class="filter-item">
@@ -59,15 +47,8 @@
           </div>
           <div class="filter-item range-item action-range-item">
             <div class="filter-label">操作时间</div>
-            <el-date-picker
-              v-model="actionFilters.dateRange"
-              type="daterange"
-              value-format="x"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              range-separator="~"
-              clearable
-            />
+            <el-date-picker v-model="actionFilters.dateRange" type="daterange" value-format="x" start-placeholder="开始日期"
+              end-placeholder="结束日期" range-separator="~" clearable />
           </div>
           <div class="filter-actions">
             <el-button type="primary" @click="handleSearch">查询</el-button>
@@ -338,7 +319,6 @@ onMounted(async () => {
   box-sizing: border-box;
   height: calc(100vh - var(--et-size-50));
   overflow: hidden;
-  padding: var(--et-space-12);
 }
 
 .corp-log-card {
@@ -432,6 +412,7 @@ onMounted(async () => {
 }
 
 @media (max-width: 1200px) {
+
   .login-grid,
   .action-grid {
     grid-template-columns: 1fr;

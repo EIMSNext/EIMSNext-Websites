@@ -7,27 +7,21 @@
       <el-container class="layout-main-shell">
         <el-aside width="45px" class="main-left-menu">
           <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
-            <AppLink
-              :to="{
-                path: '/workspace',
-              }"
-            >
+            <AppLink :to="{
+              path: '/workspace',
+            }">
               <div class="main-left-menu-item">
-                <et-icon icon="homepage" size="18px" :color="getAppIconColor()"></et-icon>
+                <AppIcon :app="workspaceApp" iconSize="16px" style="width: 24px;height: 24px;" />
               </div>
             </AppLink>
           </el-tooltip>
-          <template
-            v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
-          >
+          <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
             <el-tooltip :content="t('route.system')" placement="right" :hide-after="0">
-              <AppLink
-                :to="{
-                  path: '/system/department',
-                }"
-              >
+              <AppLink :to="{
+                path: '/system/department',
+              }">
                 <div class="main-left-menu-item">
-                  <et-icon icon="icon-settings" size="18px" :color="getAppIconColor()"></et-icon>
+                  <AppIcon :app="systemApp" iconSize="16px" style="width: 24px;height: 24px;" />
                 </div>
               </AppLink>
             </el-tooltip>
@@ -36,17 +30,11 @@
           <template v-for="app in appsRef">
             <template v-if="app.id != 'system'">
               <el-tooltip :content="app.name" placement="right" :hide-after="0">
-                <AppLink
-                  :to="{
-                    path: `/app/${app.id}/mytasks`,
-                  }"
-                >
+                <AppLink :to="{
+                  path: `/app/${app.id}/mytasks`,
+                }">
                   <div class="main-left-menu-item">
-                    <et-icon
-                      :icon="getAppIcon(app)"
-                      size="18px"
-                      :color="getAppIconColor()"
-                    ></et-icon>
+                    <AppIcon :app="app" iconSize="16px" style="width: 24px;height: 24px;" />
                   </div>
                 </AppLink>
               </el-tooltip>
@@ -68,14 +56,16 @@ import { useSystemStore } from "@/store";
 import { useAppStore, useUserStore } from "@eimsnext/store";
 import NavBar from "./components/NavBar/index.vue";
 import defaultSettings from "@/settings";
-import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
-import { UserType } from "@eimsnext/models";
+import { App, UserType } from "@eimsnext/models";
 const { t } = useI18n();
 
 defineOptions({
   name: "Layout",
 });
+
+const workspaceApp: App = { id: "workspace", name: "工作台", icon: "homepage", sortIndex: -2, appMenus: [] }
+const systemApp: App = { id: "system", name: "系统设置", icon: "icon-settings", sortIndex: -1, appMenus: [] }
 
 const systemStore = useSystemStore();
 

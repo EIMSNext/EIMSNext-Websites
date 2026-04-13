@@ -1,21 +1,11 @@
 <template>
   <div>
-    <form-edit
-      v-if="showFormEditor && newForm"
-      v-model="showFormEditor"
-      :form-def="newForm!"
-      :usingFlow="usingWorkflow"
-      :isLedger="isLedger"
-      @close="showFormEditor = false"
-    />
-    <DashboardDesigner
-      v-if="showDshEditor && newDash"
-      v-model="showDshEditor"
-      :dash-def="newDash!"
-    ></DashboardDesigner>
+    <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
+      :isLedger="isLedger" @close="showFormEditor = false" />
+    <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
     <div class="app-title">
-      <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
-      <span v-if="isSidebarOpened" class="ml-[10px]">{{ app?.name }}</span>
+      <AppIcon v-if="app" :app="app" iconSize="12px" style="width: 20px;height: 20px;" />
+      <span v-if="isSidebarOpened" class="ml-[3px]">{{ app?.name }}</span>
       <el-button class="side-bar-control" @click.stop="toggleSideBar">
         <et-icon v-if="isSidebarOpened" icon="el-DArrowLeft" size="14px"></et-icon>
         <et-icon v-else icon="el-DArrowRight" size="14px"></et-icon>
@@ -66,9 +56,7 @@
         </template>
       </el-input>
 
-      <template
-        v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
-      >
+      <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
         <el-dropdown placement="bottom-start" size="large">
           <el-button class="create-button">
             <et-icon icon="el-plus"></et-icon>
@@ -115,7 +103,6 @@ import {
 } from "@eimsnext/models";
 import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
-import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
@@ -245,7 +232,7 @@ const createDashboard = () => {
   });
 };
 
-const createFolder = () => {};
+const createFolder = () => { };
 </script>
 
 <style lang="scss" scoped>
@@ -259,7 +246,7 @@ const createFolder = () => {};
 .app-title {
   display: flex;
   overflow: hidden;
-  padding: var(--et-space-15);
+  padding: var(--et-space-12) var(--et-space-15) var(--et-space-12) var(--et-space-6);
   font-size: var(--et-font-size-16);
   align-items: center;
 }

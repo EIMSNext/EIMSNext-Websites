@@ -21,11 +21,9 @@ import { SystemMessage } from "@eimsnext/models";
 import { computed } from "vue";
 import { dateFormat } from "@/utils/common";
 
-interface Props {
+const props = defineProps<{
   message: SystemMessage;
-}
-
-const props = defineProps<Props>();
+}>();
 
 const emit = defineEmits<{
   read: [id?: string];
