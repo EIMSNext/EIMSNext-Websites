@@ -121,3 +121,31 @@
   padding-top: 15px;
   border-top: 1px solid #ebeef5;
 }
+
+.form-selected-data-display-panel {
+  margin-top: 8px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.form-selected-data-display-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  min-height: 48px;
+}
+
+.form-selected-data-display-label {
+  color: #606266;
+  font-size: 14px;
+}
+
+.form-selected-data-display-value {
+  color: #909399;
+  font-size: 14px;
+  margin-left: 16px;
+  text-align: right;
+  word-break: break-all;
+}

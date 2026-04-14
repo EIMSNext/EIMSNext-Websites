@@ -1,4 +1,4 @@
-import { defineComponent, ref, watch, computed, nextTick, reactive } from "vue";
+import { defineComponent, ref, watch, computed, nextTick } from "vue";
 import { SelectedTags } from "@eimsnext/components";
 import { formDataService } from "@eimsnext/services";
 import "./style.css";
@@ -55,11 +55,15 @@ export default defineComponent({
   setup(props, { emit }) {  
     
     const showDialog = ref(false);
-    // 初始化时检查props.modelValue是否是包含 [object Object] 的字符串
-    let initialValue = props.modelValue ?? [];  
+    
+    // 处理初始值，确保能正确处理各种格式
+    let initialValue = props.modelValue ?? [];
+    
+    // 如果是字符串，尝试解析为数组
     if (typeof initialValue === 'string') {
-      if (initialValue.includes('[object Object]')) {        
-        // 检查是否有选择的字段配置
+      // 检查是否是 [object Object] 格式的字符串
+      if (initialValue.includes('[object Object]')) {
+        // 根据选择的字段配置构建显示数据
         if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
           initialValue = props.selectionProcess.selectedFields.map(field => {
             return {
@@ -70,29 +74,95 @@ export default defineComponent({
         } else {
           initialValue = [{ label: '已选择数据', value: '数据已选择但无法显示详细信息' }];
         }
-      }
-    } else if (Array.isArray(initialValue)) {
-      // 检查数组元素是否包含[object Object]字符串
-      const hasObjectString = initialValue.some(item => {
-        if (typeof item === 'string') {
-          return item.includes('[object Object]');
-        }
-        return false;
-      });
-      if (hasObjectString) {
-        if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-          initialValue = props.selectionProcess.selectedFields.map(field => {
-            return {
-              label: field.label,
-              value: '已选择数据'
-            };
-          });
-        } else {
-          initialValue = [{ label: '已选择数据', value: '数据已选择但无法显示详细信息' }];
+      } else {
+        // 尝试解析 JSON
+        try {
+          const parsed = JSON.parse(initialValue);
+          if (Array.isArray(parsed)) {
+            initialValue = parsed;
+          }
+        } catch (e) {
+          // 解析失败，保持原样
+          console.log('JSON 解析失败:', e);
         }
       }
     }
-    console.log('初始值 after:', initialValue);
+    
+    // 如果初始值是数组，检查是否需要处理
+    if (Array.isArray(initialValue)) {
+      // 检查数组元素
+      const needsProcessing = initialValue.some(item => {
+        if (typeof item === 'string') {
+          return item.includes('[object Object]');
+        }
+        if (typeof item === 'object' && item !== null) {
+          // 检查对象是否缺少 label/value 属性
+          return !('label' in item && 'value' in item);
+        }
+        return false;
+      });
+      
+      if (needsProcessing) {
+        // 根据选择的字段配置构建显示数据
+        if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
+          initialValue = props.selectionProcess.selectedFields.map((field, index) => {
+            const item = initialValue[index];
+            let value = '已选择数据';
+            if (item !== undefined) {
+              if (typeof item === 'object' && item !== null) {
+                // 尝试从对象中提取值
+                if (item.value !== undefined) value = String(item.value);
+                else if (item.label !== undefined) value = String(item.label);
+                else {
+                  const values = Object.values(item);
+                  value = values.length > 0 ? String(values[0]) : '已选择数据';
+                }
+              } else {
+                value = String(item);
+              }
+            }
+            return {
+              label: field.label,
+              value: value.includes('[object Object]') ? '已选择数据' : value
+            };
+          });
+        }
+      } else {
+        // 即使不需要处理，也要确保每个对象都有正确的格式
+        initialValue = initialValue.map(item => {
+          if (typeof item === 'object' && item !== null) {
+            if ('label' in item && 'value' in item) {
+              return {
+                label: item.label,
+                value: String(item.value || "暂无内容")
+              };
+            } else {
+              // 如果对象没有label和value属性，尝试从selectedFields中获取label
+              const fieldIndex = initialValue.indexOf(item);
+              if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields[fieldIndex]) {
+                const field = props.selectionProcess.selectedFields[fieldIndex];
+                return {
+                  label: field.label,
+                  value: String(Object.values(item)[0] || "暂无内容")
+                };
+              } else {
+                return {
+                  label: '未知字段',
+                  value: String(item) === '[object Object]' ? '已选择数据' : String(item)
+                };
+              }
+            }
+          } else {
+            return {
+              label: '未知字段',
+              value: String(item)
+            };
+          }
+        });
+      }
+    }
+    
+    console.log('处理后的初始值:', initialValue);
     const selectedValue = ref(initialValue);
     const formData = ref([]);
     const loading = ref(false);
@@ -115,51 +185,174 @@ export default defineComponent({
       return props.selectionProcess?.selectedFields || [];
     });
 
+    const configuredDisplayFields = computed(() => {
+      return (
+        props.displayFields?.selectedDisplayFields ||
+        props.displayFields?.displayRules ||
+        []
+      );
+    });
+
+    const resolveRecordValue = (record, path) => {
+      if (!record || !path) return "";
+      if (Object.prototype.hasOwnProperty.call(record, path)) {
+        return record[path] ?? "";
+      }
+      if (record.data && Object.prototype.hasOwnProperty.call(record.data, path)) {
+        return record.data[path] ?? "";
+      }
+      if (path.includes(".")) {
+        const pathValue = path.split(".").reduce((acc, key) => {
+          if (acc == null) return undefined;
+          return acc[key];
+        }, record);
+        return pathValue ?? "";
+      }
+      return "";
+    };
+
+    const normalizeDisplayField = (field) => {
+      if (!field) {
+        return null;
+      }
+      if (field.field?.value) {
+        return {
+          label: field.label,
+          value: field.field.value,
+        };
+      }
+      if (field.value) {
+        return {
+          label: field.label,
+          value: field.value,
+        };
+      }
+      return null;
+    };
+
+    const buildDisplayTagsFromForm = () => {
+      const displayRules = configuredDisplayFields.value
+        .map(normalizeDisplayField)
+        .filter(Boolean);
+      const fillRules = props.fillFields?.fillRules || [];
+      const currentForm = props.formCreateInject?.form || {};
+      return displayRules.map((rule) => {
+        const matchedFillRule = fillRules.find(
+          (fillRule) => fillRule?.field?.value === rule.value && fillRule?.targetField
+        );
+        const formValue = matchedFillRule
+          ? currentForm[matchedFillRule.targetField]
+          : "";
+        return {
+          label: rule.label,
+          value: formValue ?? "",
+        };
+      });
+    };
+
     watch(
       () => props.modelValue,
       (newVal) => {
-        
         let processedValue = newVal ?? [];
         
+        // 如果是字符串，尝试解析
         if (typeof processedValue === 'string') {
           if (processedValue.includes('[object Object]')) {
-            // 检查是否有选择的字段配置
             if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-              processedValue = props.selectionProcess.selectedFields.map(field => {
-                return {
-                  label: field.label,
-                  value: '已选择数据'
-                };
-              });
+              processedValue = props.selectionProcess.selectedFields.map(field => ({
+                label: field.label,
+                value: '已选择数据'
+              }));
             } else {
               processedValue = [{ label: '已选择数据', value: '数据已选择但无法显示详细信息' }];
             }
-          }
-        } else if (Array.isArray(processedValue)) {
-          // 检查数组元素是否包含[object Object]字符串
-          const hasObjectString = processedValue.some(item => {
-            if (typeof item === 'string') {
-              return item.includes('[object Object]');
-            }
-            return false;
-          });
-          if (hasObjectString) {
-            if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-              processedValue = props.selectionProcess.selectedFields.map(field => {
-                return {
-                  label: field.label,
-                  value: '已选择数据'
-                };
-              });
-            } else {
-              processedValue = [{ label: '已选择数据', value: '数据已选择但无法显示详细信息' }];
+          } else {
+            // 尝试解析 JSON
+            try {
+              const parsed = JSON.parse(processedValue);
+              if (Array.isArray(parsed)) {
+                processedValue = parsed;
+              }
+            } catch (e) {
+              console.log('JSON 解析失败:', e);
             }
           }
         }
         
+        // 如果是数组，检查是否需要处理
+        if (Array.isArray(processedValue)) {
+         
+          const needsProcessing = processedValue.some(item => {
+            if (typeof item === 'string') {
+              return item.includes('[object Object]');
+            }
+            if (typeof item === 'object' && item !== null) {
+              return !('label' in item && 'value' in item);
+            }
+            return false;
+          });
+          
+          if (needsProcessing) {
+            if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
+              processedValue = props.selectionProcess.selectedFields.map((field, index) => {
+                const item = processedValue[index];
+                let value = '已选择数据';
+                if (item !== undefined) {
+                  if (typeof item === 'object' && item !== null) {
+                    if (item.value !== undefined) value = String(item.value);
+                    else if (item.label !== undefined) value = String(item.label);
+                    else {
+                      const values = Object.values(item);
+                      value = values.length > 0 ? String(values[0]) : '已选择数据';
+                    }
+                  } else {
+                    value = String(item);
+                  }
+                }
+                return {
+                  label: field.label,
+                  value: value.includes('[object Object]') ? '已选择数据' : value
+                };
+              });
+            }
+          } else {
+            // 即使不需要处理，也要确保每个对象都有正确的格式
+            processedValue = processedValue.map(item => {
+              if (typeof item === 'object' && item !== null) {
+                if ('label' in item && 'value' in item) {
+                  return {
+                    label: item.label,
+                    value: String(item.value || "暂无内容")
+                  };
+                } else {
+                  // 如果对象没有label和value属性，尝试从selectedFields中获取label
+                  const fieldIndex = processedValue.indexOf(item);
+                  if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields[fieldIndex]) {
+                    const field = props.selectionProcess.selectedFields[fieldIndex];
+                    return {
+                      label: field.label,
+                      value: String(Object.values(item)[0] || "暂无内容")
+                    };
+                  } else {
+                    return {
+                      label: '未知字段',
+                      value: String(item) === '[object Object]' ? '已选择数据' : String(item)
+                    };
+                  }
+                }
+              } else {
+                return {
+                  label: '未知字段',
+                  value: String(item)
+                };
+              }
+            });
+          }
+        }
+        
         selectedValue.value = processedValue;
-        console.log('selectedValue.value:', selectedValue.value);
       },
+      { immediate: true }
     );
 
     const fetchFormData = async (page = 1, size = pageSize.value) => {
@@ -240,19 +433,21 @@ export default defineComponent({
         let selectedData = [];
         
         // 检查是否有显示字段配置
-        const displayRules = props.displayFields?.displayRules || [];
+        const displayRules = configuredDisplayFields.value
+          .map(normalizeDisplayField)
+          .filter(Boolean);
         if (displayRules.length > 0) {
             selectedData = displayRules.map(rule => {
                 return {
                     label: rule.label,
-                    value: selectedRecord.value[rule.field.value] || ""
+                    value: resolveRecordValue(selectedRecord.value, rule.value)
                 };
             });
         } else {
             selectedData = selectedFields.value.map(field => {
                 return {
                     label: field.label,
-                    value: selectedRecord.value[field.value] || ""
+                    value: resolveRecordValue(selectedRecord.value, field.value)
                 };
             });
         }
@@ -384,125 +579,145 @@ export default defineComponent({
       const { disabled, preview, ...attrs } = props;
       const editable = !(disabled || isPreviewMode.value);
       
-      let tags = selectedValue.value || [];
+      let displayTags = selectedValue.value || [];
       
       const tagHeight = "60px";
-
-      // 直接检查 tags 是否是包含 [object Object] 的字符串
-      if (typeof tags === 'string' && tags.includes('[object Object]')) {
-        // 尝试从字符串中提取有意义的信息
-        // 检查是否有选择的字段配置
-        if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-          tags = props.selectionProcess.selectedFields.map(field => {
-            return {
-              label: field.label,
-              value: '已选择数据'
-            };
-          });
-        } else {
-          tags = [{ label: '已选择数据', value: '数据已选择但无法显示详细信息' }];
-        }
-      }
-      // 简化数据处理逻辑，确保能正确处理各种数据格式
-      let displayTags = [];
       
-      try {
-        // 首先尝试将 tags 转换为字符串，然后解析为 JSON
-        let processedTags = tags;
+      // 在预览模式下，优先使用 selectedValue 中的数据
+      if (isPreviewMode.value && Array.isArray(selectedValue.value) && selectedValue.value.length > 0) {
+        displayTags = selectedValue.value.map(tag => {
+          if (typeof tag === 'object' && tag !== null) {
+            return {
+              label: tag.label || '未知字段',
+              value: String(tag.value || "暂无内容")
+            };
+          } else {
+            return {
+              label: '未知字段',
+              value: String(tag)
+            };
+          }
+        });
+      } else {
+        // 非预览模式，尝试从表单中获取值来显示
+        const fallbackDisplayTags = buildDisplayTagsFromForm().filter(
+          (tag) => tag.label
+        );
         
-        // 如果 tags 是字符串，尝试解析
-        if (typeof tags === 'string') {
-          try {
-            processedTags = JSON.parse(tags);
-          } catch (e) {
-            // 解析失败，检查是否是 "[object Object]" 格式
-            if (tags.includes('[object Object]')) {
-              // 尝试从字符串中提取有意义的信息
+        if (fallbackDisplayTags.length > 0) {
+          displayTags = fallbackDisplayTags.map((tag) => ({
+            label: tag.label,
+            value: tag.value === "" ? "暂无内容" : String(tag.value),
+          }));
+        } else {
+          // 如果没有从表单获取到数据，再尝试处理 selectedValue
+          // 确保 displayTags 是数组
+          if (!Array.isArray(displayTags)) {
+            displayTags = [];
+          }
+          
+          // 直接使用 selectedValue 的数据
+          if (Array.isArray(displayTags) && displayTags.length > 0) {
+            // 确保每个标签都有正确的格式
+            displayTags = displayTags.map(tag => {
+              if (typeof tag === 'object' && tag !== null) {
+                return {
+                  label: tag.label || '未知字段',
+                  value: String(tag.value || "暂无内容")
+                };
+              } else {
+                return {
+                  label: '未知字段',
+                  value: String(tag)
+                };
+              }
+            });
+          } else {
+            // 如果 selectedValue 是空的，尝试直接从 props.modelValue 处理
+            let rawValue = props.modelValue;
+            
+            // 处理各种数据格式
+            if (typeof rawValue === 'string' && rawValue.includes('[object Object]')) {
               if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-                processedTags = props.selectionProcess.selectedFields.map(field => {
+                displayTags = props.selectionProcess.selectedFields.map(field => ({
+                  label: field.label,
+                  value: '已选择数据'
+                }));
+              }
+            } else if (Array.isArray(rawValue) && rawValue.length > 0) {
+              // 检查数组元素
+              const needsProcessing = rawValue.some(item => {
+                if (typeof item === 'string') {
+                  return item.includes('[object Object]');
+                }
+                if (typeof item === 'object' && item !== null) {
+                  return !('label' in item && 'value' in item);
+                }
+                return false;
+              });
+              
+              if (needsProcessing && props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
+                displayTags = props.selectionProcess.selectedFields.map((field, index) => {
+                  const item = rawValue[index];
+                  let value = '已选择数据';
+                  if (item !== undefined) {
+                    if (typeof item === 'object' && item !== null) {
+                      if (item.value !== undefined) value = String(item.value);
+                      else if (item.label !== undefined) value = String(item.label);
+                      else {
+                        const values = Object.values(item);
+                        value = values.length > 0 ? String(values[0]) : '已选择数据';
+                      }
+                    } else {
+                      value = String(item);
+                    }
+                  }
                   return {
                     label: field.label,
-                    value: '[已选择数据]'
+                    value: value.includes('[object Object]') ? '已选择数据' : value
                   };
                 });
-              } else {
-                processedTags = [{ label: '已选择数据', value: '数据已选择但无法显示详细信息' }];
+              } else if (!needsProcessing) {
+                // 如果不需要处理，直接使用原始数据，但确保格式正确
+                displayTags = rawValue.map(item => {
+                  if (typeof item === 'object' && item !== null) {
+                    if ('label' in item && 'value' in item) {
+                      return {
+                        label: item.label,
+                        value: String(item.value || "暂无内容")
+                      };
+                    } else {
+                      // 如果对象没有label和value属性，尝试从selectedFields中获取label
+                      const fieldIndex = rawValue.indexOf(item);
+                      if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields[fieldIndex]) {
+                        const field = props.selectionProcess.selectedFields[fieldIndex];
+                        return {
+                          label: field.label,
+                          value: String(Object.values(item)[0] || "暂无内容")
+                        };
+                      } else {
+                        return {
+                          label: '未知字段',
+                          value: String(item) === '[object Object]' ? '已选择数据' : String(item)
+                        };
+                      }
+                    }
+                  } else {
+                    return {
+                      label: '未知字段',
+                      value: String(item)
+                    };
+                  }
+                });
               }
-            } else {
-              // 保持原样
             }
           }
-        }
-        
-        // 处理数组类型
-        if (Array.isArray(processedTags)) {
-          displayTags = processedTags.map(tag => {
-            // 如果是对象且有 label 和 value 属性，直接使用
-            if (typeof tag === 'object' && tag !== null && 'label' in tag && 'value' in tag) {
-              return tag;
-            }
-            // 否则，尝试转换为字符串
-            return { label: '未知字段', value: String(tag) };
-          });
-        } else if (typeof processedTags === 'object' && processedTags !== null) {
-          // 处理对象类型
-          displayTags = Object.entries(processedTags).map(([key, value]) => {
-            return { label: key, value: String(value) };
-          });
-        } else {
-          // 处理其他类型
-          displayTags = [{ label: '未知字段', value: String(processedTags) }];
-        }
-      } catch (e) {
-        // 处理任何错误，确保组件不会崩溃
-        console.error('处理数据时出错:', e);
-        // 检查是否是 "[object Object]" 格式
-        if (typeof tags === 'string' && tags.includes('[object Object]')) {
-          displayTags = [];
-        } else {
-          displayTags = [{ label: '未知字段', value: String(tags) }];
+          
+          // 过滤掉无效的标签
+          displayTags = displayTags.filter(tag => tag && typeof tag === 'object' && 'label' in tag);
         }
       }
       
-      // 确保 displayTags 是数组
-      if (!Array.isArray(displayTags)) {
-        displayTags = [{ label: '未知字段', value: String(displayTags) }];
-      }
-      
-      // 确保数组中的每个元素都有 label 和 value 属性
-      displayTags = displayTags.map(tag => {
-        if (typeof tag === 'object' && tag !== null) {
-          let value = tag.value;
-          // 处理对象类型的value
-          if (typeof value === 'object' && value !== null) {
-            // 尝试将对象转换为字符串
-            try {
-              value = JSON.stringify(value);
-            } catch (e) {
-              value = String(value);
-            }
-          } else if (value !== undefined) {
-            value = String(value);
-            // 处理包含[object Object]的字符串
-            if (value.includes('[object Object]')) {
-              value = '已选择数据';
-            }
-          } else {
-            value = '';
-          }
-          return {
-            label: tag.label || '未知字段',
-            value: value
-          };
-        }
-        // 处理字符串类型的tag
-        const tagStr = String(tag);
-        if (tagStr.includes('[object Object]')) {
-          return { label: '已选择数据', value: '数据已选择但无法显示详细信息' };
-        }
-        return { label: '未知字段', value: tagStr };
-      });
-
       return (
         <div style={{ width: "100%" }}>
           {/* 编辑状态显示按钮 */}
@@ -516,30 +731,23 @@ export default defineComponent({
               onEditTag={handleEditTag}
             ></SelectedTags>
           )}
-          
-          {/* 只读状态显示 */}
-          {!editable && (
-            <>
-              <div class="_fc-form-selected-data" style={{ height: tagHeight, display: 'flex', alignItems: 'center', padding: '0 12px', border: '1px solid #dcdfe6', borderRadius: '4px', backgroundColor: '#f5f7fa' }}>
-                已选择数据
-              </div>
-              
-              {/* 显示选择的数据，每一个字段名+字段值占一行 */}
-              <div class="form-selected-data-display" style={{ marginTop: "8px" }}>
-                {props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0 ? (
-                  props.selectionProcess.selectedFields.map((field, index) => (
-                    <div key={index} style={{ marginBottom: "4px", display: "flex" }}>
-                      <span style={{ marginRight: "8px", color: "#909399" }}>{field.label}:</span>
-                      <span style={{ color: "#303133" }}>已选择数据</span>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{ marginBottom: "4px" }}>
-                    <span style={{ color: "#303133" }}>数据已选择但无法显示详细信息</span>
-                  </div>
-                )}
-              </div>
-            </>
+
+          {displayTags.length > 0 && (
+            <div class="form-selected-data-display-panel">
+              {displayTags.map((tag, index) => (
+                <div
+                  key={index}
+                  class="form-selected-data-display-row"
+                  style={{
+                    borderBottom:
+                      index === displayTags.length - 1 ? "none" : "1px solid #ebeef5",
+                  }}
+                >
+                  <span class="form-selected-data-display-label">{tag.label}</span>
+                  <span class="form-selected-data-display-value">{tag.value || "暂无内容"}</span>
+                </div>
+              ))}
+            </div>
           )}
           
           {/* 没有选择数据时显示空状态 */}

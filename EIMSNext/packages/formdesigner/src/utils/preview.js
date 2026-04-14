@@ -66,6 +66,8 @@ export default function renderPreview(_, ctx) {
       "imageupload",
       "fcdepartmentselect",
       "fcemployeeselect",
+      "fcformselecteddata",
+      "formselecteddata",
     ].indexOf(ctx.trueType.toLowerCase()) > -1
   ) {
     if (ctx.trueType.toLowerCase() === "fcupload") {
