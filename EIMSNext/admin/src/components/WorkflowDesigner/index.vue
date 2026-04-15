@@ -43,8 +43,9 @@
 
     <et-dialog
       :modelValue="showVersionDialog"
+      class="version-manage-dialog"
       title="管理已有版本"
-      width="720px"
+      width="760px"
       :showNoSave="false"
       :showCancel="false"
       okText="关闭"
@@ -57,14 +58,19 @@
           :key="item.id"
           class="version-row"
         >
-          <div class="version-row-title">
-            <span>流程版本(V{{ item.version }})</span>
-            <el-tag v-if="item.isCurrent" size="small" type="success">启用中</el-tag>
-            <el-tag v-else-if="!item.released" size="small" type="warning">设计中</el-tag>
-            <el-tag v-else size="small" type="info">历史</el-tag>
+          <div class="version-row-main">
+            <div class="version-row-title">
+              <span class="version-name">流程版本(V{{ item.version }})</span>
+              <el-tag v-if="item.isCurrent" size="small" effect="plain" type="success">启用中</el-tag>
+              <el-tag v-else-if="!item.released" size="small" effect="plain" type="warning">设计中</el-tag>
+              <el-tag v-else size="small" effect="plain" type="info">历史</el-tag>
+            </div>
+            <div class="version-row-meta">
+              <span v-if="item.updateTime">最近更新：{{ formatTime(item.updateTime) }}</span>
+            </div>
           </div>
           <div class="version-row-actions">
-            <el-button link type="primary" @click="activateVersion(item)">启用流程</el-button>
+            <el-button v-if="!item.isCurrent" link type="primary" @click="activateVersion(item)">启用流程</el-button>
             <el-button link type="primary" @click="selectVersion(item, true)">编辑</el-button>
             <el-button
               v-if="!item.released && !item.isCurrent"
@@ -96,6 +102,11 @@ import { wfDefinitionService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
+
+const formatTime = (value?: number) => {
+  if (!value) return "";
+  return new Date(value).toLocaleString();
+};
 
 defineOptions({
   name: "WorkflowDesigner",
@@ -311,27 +322,83 @@ defineExpose({
 
 .version-dialog-body {
   margin: var(--et-space-20);
-  max-height: 480px;
+  max-height: 500px;
   overflow: auto;
+  padding-right: var(--et-space-6);
 }
 
 .version-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--et-space-16);
+  padding: var(--et-space-18) var(--et-space-16);
   border-radius: var(--et-space-8);
-  background: var(--et-fill-color-blank);
+  background: #f8fafc;
+  border: 1px solid #edf1f6;
 }
 
 .version-row + .version-row {
   margin-top: var(--et-space-12);
 }
 
+.version-row-main,
 .version-row-title,
 .version-row-actions {
   display: flex;
   align-items: center;
   gap: var(--et-space-10);
+}
+
+.version-row-main {
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--et-space-6);
+}
+
+.version-name {
+  color: #1f2a37;
+  font-size: var(--et-font-size-16);
+  font-weight: 600;
+}
+
+.version-row-meta {
+  color: #8a94a6;
+  font-size: var(--et-font-size-12);
+  line-height: var(--et-line-height-20);
+}
+
+.version-row-actions {
+  flex-shrink: 0;
+  gap: var(--et-space-16);
+}
+
+@media (max-width: 900px) {
+  .version-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--et-space-14);
+  }
+
+  .version-row-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--et-space-12);
+  }
+}
+
+:deep(.version-manage-dialog .el-dialog__header) {
+  padding: var(--et-space-20) var(--et-space-24) var(--et-space-16);
+  border-bottom: 1px solid var(--et-border-color-light);
+}
+
+:deep(.version-manage-dialog .el-dialog__body) {
+  padding: 0;
+}
+
+:deep(.version-manage-dialog .el-dialog__footer) {
+  padding: var(--et-space-8) var(--et-space-24) var(--et-space-20);
 }
 </style>
