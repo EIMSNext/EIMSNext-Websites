@@ -78,11 +78,10 @@ const save = () => {
     name: currentWfDef.value.name,
     flowType: currentWfDef.value.flowType,
     externalId: currentWfDef.value.externalId,
-    version: currentWfDef.value.version,
-    isCurrent: currentWfDef.value.isCurrent,
     content: JSON.stringify(flowData.value),
     eventSource: currentWfDef.value.eventSource,
     sourceId: currentWfDef.value.sourceId,
+    disabled: currentWfDef.value.disabled,
   };
   if (req.id)
     wfDefinitionService.put<WfDefinition>(req.id, req).then((res) => (currentWfDef.value = res));

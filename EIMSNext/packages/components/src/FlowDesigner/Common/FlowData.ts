@@ -67,6 +67,7 @@ export interface IFlowContext {
   eventSource?: EventSourceType;
   sourceId?: string;
   flowData: IFlowData;
+  structureReadonly?: boolean;
 }
 export function createFlowNode(
   nodeType: FlowNodeType,

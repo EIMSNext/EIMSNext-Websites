@@ -8,6 +8,14 @@ export class WfDefinitionService extends ODataServiceBase<
   protected modelName(): string {
     return "WfDefinition";
   }
+
+  createVersion(id: string): Promise<WfDefinition> {
+    return this.http().api.post<WfDefinition>(`/WfDefinition/CreateVersion`, { id });
+  }
+
+  activate(id: string): Promise<WfDefinition> {
+    return this.http().api.post<WfDefinition>(`/WfDefinition/Activate`, { id });
+  }
 }
 
 const wfDefinitionService = new WfDefinitionService();
