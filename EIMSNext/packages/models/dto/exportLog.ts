@@ -3,6 +3,7 @@ import { CorpModelBase } from "./modelBase";
 export enum ExportType {
   AuditLogin = 0,
   AuditLog = 1,
+  FormData = 2,
 }
 
 export enum ExportFormat {
@@ -45,6 +46,14 @@ export interface AuditLogExportRequest {
   operatorName?: string;
   startTime?: number;
   endTime?: number;
+}
+
+export interface FormDataExportRequest {
+  format: ExportFormat;
+  columns: ExportColumn[];
+  formId: string;
+  filter?: any;
+  authGroupId?: string;
 }
 
 export interface ExportResponse {

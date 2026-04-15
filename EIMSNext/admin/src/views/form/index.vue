@@ -1,5 +1,26 @@
 <template>
   <div class="formdata-container">
+    <el-dialog v-model="showExportDialog" title="导出表单数据" width="520px">
+      <el-form label-width="90px">
+        <el-form-item label="导出格式">
+          <el-radio-group v-model="exportFormat">
+            <el-radio :value="ExportFormat.Csv">CSV</el-radio>
+            <el-radio :value="ExportFormat.Excel">Excel</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="导出列">
+          <el-checkbox-group v-model="selectedExportColumnKeys" class="export-column-group">
+            <el-checkbox v-for="column in exportColumns" :key="column.key" :value="column.key">
+              {{ column.header }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showExportDialog = false">取消</el-button>
+        <el-button type="primary" :loading="exporting" @click="submitExport">确定</el-button>
+      </template>
+    </el-dialog>
     <et-dialog v-model="showAddDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
       :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
@@ -61,7 +82,7 @@
 </template>
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
-import { useFormStore, useUserStore, useContextStore } from "@eimsnext/store";
+import { useFormStore, useUserStore } from "@eimsnext/store";
 import {
   FormDef,
   FormData,
@@ -69,9 +90,14 @@ import {
   SystemField,
   FlowStatus,
   FieldType,
+  ExportColumn,
+  ExportColumnType,
+  ExportFormat,
+  getCreateBy,
   getCreateTime,
+  getFlowStatus,
+  getUpdateTime,
   AuthGroup,
-  CurrentUser,
   UserType,
   IFieldPerm,
   DataPerms,
@@ -95,7 +121,6 @@ import {
 } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
-import dayjs from "dayjs";
 import { dateFormat, getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
 import Pagination from "../../components/Pagination/index.vue";
 import { useI18n } from "vue-i18n";
@@ -105,6 +130,8 @@ const tableRef = ref<TableInstance>();
 const displayItemCount = 3; //最多显示3条明细
 const showAddDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
+const showExportDialog = ref(false);
+const exporting = ref(false);
 const columns = ref<ITableColumn[]>([]);
 const route = useRoute();
 const formStore = useFormStore();
@@ -223,6 +250,19 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
+      text: "导出",
+      class: "data-filter",
+      command: "download",
+      visible: true,
+      icon: "el-download",
+      onCommand: () => {
+        openExportDialog();
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
       text: "common.refresh",
       class: "data-filter",
       command: "refresh",
@@ -244,6 +284,44 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
         }
       }
       break;
+  }
+};
+
+const openExportDialog = () => {
+  selectedExportColumnKeys.value = exportColumns.value.map((item) => item.key);
+  exportFormat.value = ExportFormat.Csv;
+  showExportDialog.value = true;
+};
+
+const submitExport = async () => {
+  const selectedColumns = exportColumns.value.filter((item) =>
+    selectedExportColumnKeys.value.includes(item.key)
+  );
+
+  if (selectedColumns.length === 0) {
+    ElMessage.warning("请至少选择一列");
+    return;
+  }
+
+  exporting.value = true;
+  try {
+    const result = await formDataService.export({
+      format: exportFormat.value,
+      columns: selectedColumns,
+      formId,
+      filter: queryParams.value.filter,
+      authGroupId: curAuthGrp.value?.id,
+    });
+
+    showExportDialog.value = false;
+    ElMessage.success(
+      result.message ||
+        (result.isDuplicate
+          ? "已存在相同导出任务，稍后请在消息中心或导出历史查看"
+          : "已创建导出任务")
+    );
+  } finally {
+    exporting.value = false;
   }
 };
 
@@ -309,6 +387,10 @@ const pageSize = ref(20);
 const selectedData = ref<FormData>();
 const showDetailsDialog = ref(false);
 const checkedDatas = ref<any[]>([]);
+const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
+const selectedExportColumnKeys = ref<string[]>([]);
+
+const exportColumns = computed<ExportColumn[]>(() => buildExportColumns());
 
 const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
@@ -488,6 +570,89 @@ const getFlowStatusName = (status: FlowStatus) => {
   let st = flowStatusArray().find((x) => x.id == status);
   return st ? t(st.i18n) : "";
 };
+
+const buildExportColumns = (): ExportColumn[] => {
+  const selectedFields = fieldList.value.length > 0 ? fieldList.value : getAllExportFields();
+
+  return selectedFields.map((field) => ({
+    key: field.field,
+    header: field.label,
+    type: toExportColumnType(field.type),
+  }));
+};
+
+const getAllExportFields = (): IFormFieldDef[] => {
+  const result: IFormFieldDef[] = [];
+  const items = formDef.value?.content?.items || [];
+
+  if (formDef.value?.usingWorkflow) {
+    const flowStatusField = getFlowStatus("流程状态");
+    result.push({
+      formId,
+      field: flowStatusField.field,
+      label: flowStatusField.title,
+      type: flowStatusField.type,
+    });
+  }
+
+  items.forEach((item) => {
+    if (item.type === FieldType.TableForm && item.columns?.length) {
+      item.columns.forEach((sub) => {
+        result.push({
+          formId,
+          field: `${item.field}>${sub.field}`,
+          label: `${item.title}.${sub.title}`,
+          type: sub.type,
+          isSubField: true,
+        });
+      });
+      return;
+    }
+
+    result.push({
+      formId,
+      field: item.field,
+      label: item.title,
+      type: item.type,
+      isSubField: false,
+    });
+  });
+
+  const createByField = getCreateBy("提交人");
+  result.push({
+    formId,
+    field: createByField.field,
+    label: createByField.title,
+    type: createByField.type,
+  });
+  const createTimeField = getCreateTime("提交时间");
+  result.push({
+    formId,
+    field: createTimeField.field,
+    label: createTimeField.title,
+    type: createTimeField.type,
+  });
+  const updateTimeField = getUpdateTime("更新时间");
+  result.push({
+    formId,
+    field: updateTimeField.field,
+    label: updateTimeField.title,
+    type: updateTimeField.type,
+  });
+
+  return result;
+};
+
+const toExportColumnType = (type: FieldType) => {
+  if (type === FieldType.Number) {
+    return ExportColumnType.Number;
+  }
+  if (type === FieldType.TimeStamp) {
+    return ExportColumnType.Date;
+  }
+
+  return ExportColumnType.String;
+};
 const tableToolFormatter = (data: TableTooltipData<FormData>) => {
   return formatter(data.row, data.column, data.cellValue);
 };
@@ -625,6 +790,14 @@ const idBasedSpanMethod = (data: {
   line-height: var(--et-line-height-32);
   padding: 0 var(--et-space-8);
   margin-right: var(--et-space-10);
+}
+
+.export-column-group {
+  display: grid;
+  gap: var(--et-space-8);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-height: 280px;
+  overflow: auto;
 }
 
 :deep(.table-image-thumb) {
