@@ -1,30 +1,22 @@
 <template>
-  <el-drawer v-model="settingsVisible" size="300" :title="t('settings.project')">
-    <el-divider>{{ t("settings.theme") }}</el-divider>
-
-    <div class="flex-center">
-      <el-switch v-model="isDark" active-icon="Moon" inactive-icon="Sunny" @change="changeTheme" />
+  <el-drawer v-model="settingsVisible" header-class="uisetting-header" size="300" :title="t('settings.uisetting')">
+    <div class="py-1 flex-x-between">
+      <span>{{ t("settings.theme") }}</span>
+      <el-switch v-model="isDark" @change="changeTheme" />
     </div>
 
-    <el-divider>{{ t("settings.interface") }}</el-divider>
-
     <div class="py-1 flex-x-between">
-      <span class="text-xs">{{ t("settings.themeColor") }}</span>
+      <span>{{ t("settings.themeColor") }}</span>
       <ThemeColorPicker v-model="settingsStore.themeColor" @update:model-value="changeThemeColor" />
     </div>
 
     <div class="py-1 flex-x-between">
-      <span class="text-xs">{{ t("settings.tagsView") }}</span>
+      <span>{{ t("settings.tagsView") }}</span>
       <el-switch v-model="settingsStore.tagsView" />
     </div>
 
     <div class="py-1 flex-x-between">
-      <span class="text-xs">{{ t("settings.fixedHeader") }}</span>
-      <el-switch v-model="settingsStore.fixedHeader" />
-    </div>
-
-    <div class="py-1 flex-x-between">
-      <span class="text-xs">{{ t("settings.watermark") }}</span>
+      <span>{{ t("settings.watermark") }}</span>
       <el-switch v-model="settingsStore.watermarkEnabled" />
     </div>
   </el-drawer>
@@ -33,14 +25,11 @@
 <script setup lang="ts">
 import { Themes } from "@/enums/Themes";
 
-import { useSettingsStore, usePermissionStore, useSystemStore } from "@/store";
+import { useSettingsStore } from "@/store";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
 
-const route = useRoute();
-const appStore = useSystemStore();
 const settingsStore = useSettingsStore();
-const permissionStore = usePermissionStore();
 const isDark = ref<boolean>(settingsStore.theme === Themes.DARK);
 
 const settingsVisible = computed({
@@ -74,3 +63,9 @@ const changeTheme = (val: any) => {
 </script>
 
 <style lang="scss" scoped></style>
+<style lang="scss">
+.uisetting-header {
+  margin-bottom: 0 !important;
+  font-weight: 600;
+}
+</style>

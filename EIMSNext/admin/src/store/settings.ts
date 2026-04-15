@@ -1,10 +1,14 @@
 import defaultSettings from "@/settings";
 import { Themes } from "@/enums/Themes";
 import { generateThemeColors, applyTheme, toggleDarkMode } from "@/utils/theme";
+import { queryUnreadSystemMessageCount } from "@/utils/badge";
 
 type SettingsValue = boolean | string;
 
 export const useSettingsStore = defineStore("setting", () => {
+  // 消息中心
+  const messageCenterVisible = ref(false);
+  const notificationUnreadCount = ref(0);
   // 基本设置
   const settingsVisible = ref(false);
   // 标签
@@ -51,7 +55,13 @@ export const useSettingsStore = defineStore("setting", () => {
     themeColor.value = color;
   }
 
+  async function refreshNotificationUnreadCount() {
+    notificationUnreadCount.value = await queryUnreadSystemMessageCount();
+  }
+
   return {
+    messageCenterVisible,
+    notificationUnreadCount,
     settingsVisible,
     tagsView,
     fixedHeader,
@@ -60,6 +70,7 @@ export const useSettingsStore = defineStore("setting", () => {
     watermarkEnabled,
     changeSetting,
     changeTheme,
-    changeThemeColor
+    changeThemeColor,
+    refreshNotificationUnreadCount,
   };
 });

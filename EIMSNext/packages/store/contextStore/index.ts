@@ -3,11 +3,13 @@ import { store } from "../setup";
 import { ref } from "vue";
 import { useAppStoreHook } from "../genericStore/appStore";
 import { useFormStoreHook } from "../genericStore/formStore";
-import { appService } from "@eimsnext/services";
+import { corporateService } from "@eimsnext/services";
+import { Corporate } from "@eimsnext/models";
 
 export const useContextStore = defineStore("context", () => {
   //state
   const corpId = ref<string>("");
+  const corpName = ref<string>("");
   const appId = ref<string>("");
   const appChanged = ref<number>(new Date().getTime());
   const appStore = useAppStoreHook();
@@ -16,7 +18,7 @@ export const useContextStore = defineStore("context", () => {
   //actions
   const setCorpId = (
     id: string,
-    foreceReload: boolean = false
+    foreceReload: boolean = false,
   ): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
       let needReload = false;
@@ -25,12 +27,26 @@ export const useContextStore = defineStore("context", () => {
         needReload = true;
       }
       if (needReload || foreceReload) {
-        appStore
-          .load("", false)
-          .then(() => {
-            updateAppChanged();
-            resolve();
-          })
+        Promise.all([
+          corporateService
+            .get<Corporate>(corpId.value)
+            .then((corp) => {
+              corpName.value = corp.name;
+            })
+            .catch((error) => {
+              reject(error);
+            }),
+          ,
+          appStore
+            .load("", false)
+            .then(() => {
+              updateAppChanged();
+            })
+            .catch((error) => {
+              reject(error);
+            }),
+        ])
+          .then(() => resolve())
           .catch((error) => {
             reject(error);
           });
@@ -46,7 +62,7 @@ export const useContextStore = defineStore("context", () => {
 
   const setAppId = (
     id: string,
-    foreceReload: boolean = false
+    foreceReload: boolean = false,
   ): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
       let needReload = false;
@@ -86,12 +102,14 @@ export const useContextStore = defineStore("context", () => {
 
   const clearAll = () => {
     corpId.value = "";
+    corpName.value = "";
     appId.value = "";
     updateAppChanged();
   };
 
   return {
     corpId,
+    corpName,
     setCorpId,
     clearCorpId,
     appId,

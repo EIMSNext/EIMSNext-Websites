@@ -1,7 +1,7 @@
-﻿import { ODataServiceBase } from "../interface";
+﻿import { ReadonlyODataServiceBase } from "../interface";
 import { AuditLog } from "@eimsnext/models";
 
-export class AuditLogService extends ODataServiceBase<AuditLog, AuditLog> {
+export class AuditLogService extends ReadonlyODataServiceBase< AuditLog> {
     protected modelName(): string {
         return "AuditLog";
     }

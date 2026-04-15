@@ -1,20 +1,34 @@
 <template>
   <div class="field-item">
     <div class="field-name">
-      <el-input :value="field.label" :title="field.label" size="default"></el-input>
+      <el-input
+        :value="field.label"
+        :title="field.label"
+        size="default"
+      ></el-input>
     </div>
     <div class="field-op">=</div>
-    <FormFieldValue :fieldDef="field" v-model="value" :nodes="nodes" :fieldSetting="fieldSetting"
-      :fieldValueChanging="fieldValueChanging" @change="onInput">
+    <FormFieldValue
+      :fieldDef="field"
+      v-model="value"
+      :nodes="nodes"
+      :fieldSetting="fieldSetting"
+      :fieldValueChanging="fieldValueChanging"
+      @change="onInput"
+    >
     </FormFieldValue>
-    <div v-if="removable" class="ml-[5px]" style="align-content: center">
+    <div v-if="removable" class="remove-action">
       <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
-import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "../NodeFieldList/type";
+import {
+  FieldBuildRule,
+  IFieldBuildSetting,
+  INodeForm,
+} from "../NodeFieldList/type";
 import { IFormFieldItem, FieldValueType, IFormFieldList } from "./type";
 import { useLocale } from "element-plus";
 import { IFormFieldDef } from "@/FieldSelect/type";
@@ -30,7 +44,11 @@ const props = defineProps<{
   nodes: INodeForm[];
   fieldSetting: IFieldBuildSetting;
   removable?: boolean;
-  fieldValueChanging?: (field: IFormFieldDef, oldVal?: IFormFieldDef, newVal?: IFormFieldDef) => Promise<boolean>;
+  fieldValueChanging?: (
+    field: IFormFieldDef,
+    oldVal?: IFormFieldDef,
+    newVal?: IFormFieldDef,
+  ) => Promise<boolean>;
 }>();
 
 const field = ref(props.modelValue.field);
@@ -46,29 +64,15 @@ const onInput = () => {
   emitChange();
 };
 
-// watch(() => props.fieldItems, (newVal) => {
-//   console.log("field mapping1111", newVal)
-//   let mapping: Record<string, IFormFieldDef> = {}
-//   newVal.items.forEach(x => {
-//     if (x.value.type == FieldValueType.Field && x.value.fieldValue && x.value.fieldValue.isSubField) {
-//       if (x.field.isSubField && !mapping[x.field.field]) {
-//         mapping[x.field.field] = x.value.fieldValue
-//       }
-//       else if (!mapping["master"]) {
-//         mapping["master"] = x.value.fieldValue
-//       }
-//     }
-//   })
-//   console.log("field mapping", mapping)
-//   fieldSetting.value.fieldMapping = mapping
-// })
-
 const emitChange = () => {
   let newModel = { field: field.value, value: value.value };
-  if (value.value.type == FieldValueType.Custom && (field.value.type == FieldType.Department1 ||
-    field.value.type == FieldType.Employee1) && Array.isArray(value.value.value)
+  if (
+    value.value.type == FieldValueType.Custom &&
+    (field.value.type == FieldType.Department1 ||
+      field.value.type == FieldType.Employee1) &&
+    Array.isArray(value.value.value)
   ) {
-    newModel.value = value.value.value[0]
+    newModel.value = value.value.value[0];
   }
   emit("update:modelValue", newModel);
   emit("change", newModel);
@@ -76,20 +80,25 @@ const emitChange = () => {
 </script>
 <style lang="scss" scoped>
 .field-item {
-  border: 1px dashed #eee;
-  background: #fcfcfc;
-  padding: 10px;
-  border-radius: 3px;
+  border: 1px dashed var(--et-border-color-light);
+  background: var(--et-bg-container);
+  padding: var(--et-space-10);
+  border-radius: var(--et-radius-3);
   display: flex;
 
   .field-name {
-    margin-right: 5px;
-    width: 120px;
+    margin-right: var(--et-space-5);
+    width: var(--et-size-120);
   }
 
   .field-op {
-    margin-right: 5px;
+    margin-right: var(--et-space-5);
     align-content: center;
   }
+}
+
+.remove-action {
+  margin-left: var(--et-space-5);
+  align-content: center;
 }
 </style>

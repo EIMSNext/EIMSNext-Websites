@@ -8,12 +8,11 @@
     @cancel="showDeleteDialog = false" @ok="handleDeleteConfirm">
     确认删除已选中的数据项?
   </et-confirm-dialog>
-  <el-card shadow="never"
-    style="border: none; height: 100%; display: flex; flex-direction: column; overflow: hidden; min-width: 300px; padding: 0;">
+  <el-card shadow="never" class="role-card">
     <div class="form-action">
       <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
       <el-button @click="handleAddGroupClick">
-        <et-icon icon="el-plus"> </et-icon>
+        <et-icon icon="el-plus"></et-icon>
       </el-button>
     </div>
     <el-tree ref="roleTreeRef" class="role-tree mt-2" :data="roleList"
@@ -54,13 +53,13 @@ const props = defineProps({
 const roleList = ref<ITreeNode[]>(); // 部门列表
 const roleTreeRef = ref<TreeInstance>(); // 部门树
 const keyword = ref(); // 部门名称
-const currentGroup = ref<RoleGroup>()
+const currentGroup = ref<RoleGroup>();
 const selectedRole = ref<Role>();
 const showAddEditRoleDialog = ref(false);
-const showAddEditGroupDialog = ref(false)
+const showAddEditGroupDialog = ref(false);
 const editMode = ref(false);
 const showDeleteDialog = ref(false);
-const toDeleteNode = ref<ITreeNode>()
+const toDeleteNode = ref<ITreeNode>();
 
 const emit = defineEmits(["role-click"]);
 
@@ -69,18 +68,21 @@ watch(keyword, (val) => {
 });
 
 onBeforeMount(() => {
-  loadData()
+  loadData();
 });
 
 const loadData = () => {
   let roleGroups: RoleGroup[] = [];
-  let roles: Role[] = []
+  let roles: Role[] = [];
   Promise.all([
-    roleGroupService.query<RoleGroup>().then(data => { roleGroups = data }),
-    roleService.query<Role>().then(data => { roles = data })
-  ]
-  ).then(() => roleList.value = buildRoleTree(roleGroups, roles))
-}
+    roleGroupService.query<RoleGroup>().then((data) => {
+      roleGroups = data;
+    }),
+    roleService.query<Role>().then((data) => {
+      roles = data;
+    }),
+  ]).then(() => (roleList.value = buildRoleTree(roleGroups, roles)));
+};
 
 /**
  * 部门筛选
@@ -96,11 +98,10 @@ const handleFilter = (value: string, data: any) => {
 const handleNodeClick = (data: ITreeNode) => {
   if (data.type == DataItemType.Role) {
     selectedRole.value = data.data;
-    currentGroup.value = roleList.value!.find(x => x.id == selectedRole.value?.roleGroupId)?.data
+    currentGroup.value = roleList.value!.find((x) => x.id == selectedRole.value?.roleGroupId)?.data;
     emit("role-click", data.data);
-  }
-  else {
-    currentGroup.value = data.data
+  } else {
+    currentGroup.value = data.data;
   }
 };
 
@@ -118,32 +119,30 @@ const handleEditClick = (data: ITreeNode) => {
 
   if (data.type == DataItemType.Role) {
     selectedRole.value = data.data;
-    currentGroup.value = roleList.value!.find(x => x.id == selectedRole.value?.roleGroupId)?.data
+    currentGroup.value = roleList.value!.find((x) => x.id == selectedRole.value?.roleGroupId)?.data;
     showAddEditRoleDialog.value = true;
-  }
-  else {
-    currentGroup.value = data.data
-    showAddEditGroupDialog.value = true
+  } else {
+    currentGroup.value = data.data;
+    showAddEditGroupDialog.value = true;
   }
 };
 const handleGroupSaved = (data: RoleGroup) => {
   showAddEditGroupDialog.value = false;
-  loadData()
+  loadData();
 };
 const handleRoleSaved = (data: Role) => {
   showAddEditRoleDialog.value = false;
-  loadData()
+  loadData();
 };
 const handleDeleteClick = (data: ITreeNode) => {
-  toDeleteNode.value = data
+  toDeleteNode.value = data;
 
   if (toDeleteNode.value.data) showDeleteDialog.value = true;
 };
 const handleDeleteConfirm = async () => {
   if (toDeleteNode.value!.type == DataItemType.Role) {
     await roleService.delete(toDeleteNode.value?.id!);
-  }
-  else {
+  } else {
     await roleGroupService.delete(toDeleteNode.value?.id!);
   }
 
@@ -155,9 +154,19 @@ const handleDeleteConfirm = async () => {
 <style scoped lang="scss">
 .form-action {
   display: flex;
-  margin-bottom: 5px;
-  padding: 10px;
+  margin-bottom: var(--et-space-5);
+  padding: var(--et-space-10);
   box-sizing: border-box;
+}
+
+.role-card {
+  border: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: var(--et-size-300);
+  padding: var(--et-space-0);
 }
 
 // 角色树样式
@@ -177,6 +186,7 @@ const handleDeleteConfirm = async () => {
   // 调整节点内容样式
   :deep(.el-tree-node__content) {
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   // 调整树容器样式
@@ -187,11 +197,6 @@ const handleDeleteConfirm = async () => {
 
   // 调整树节点展开图标样式
   :deep(.el-tree-node__expand-icon) {
-    flex-shrink: 0;
-  }
-
-  // 调整树节点内容样式
-  :deep(.el-tree-node__content) {
     flex-shrink: 0;
   }
 }
@@ -210,20 +215,20 @@ const handleDeleteConfirm = async () => {
 
   .node-label {
     flex: 1;
-    padding-left: 5px;
+    padding-left: var(--et-space-5);
     white-space: nowrap;
   }
 
   .node-action {
     white-space: nowrap;
     flex-shrink: 0;
-    margin-left: 10px;
+    margin-left: var(--et-space-10);
     pointer-events: none;
-    display: none;    
-      align-items: center;
+    display: none;
+    align-items: center;
 
     .action-item {
-      margin-right: 5px;
+      margin-right: var(--et-space-5);
       cursor: pointer;
 
       &:last-child {
@@ -231,7 +236,7 @@ const handleDeleteConfirm = async () => {
       }
 
       &:hover {
-        color: #409eff;
+        color: var(--et-color-primary);
       }
     }
   }

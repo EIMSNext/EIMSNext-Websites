@@ -3,7 +3,7 @@ import { accessToken, http } from "@eimsnext/utils";
 import { CurrentUser, UserType } from "@eimsnext/models";
 import { useStorage } from "@vueuse/core";
 import { store } from "../setup";
-import { authService, systemService, LoginModel } from "@eimsnext/services";
+import { authService, systemService, LoginRequest } from "@eimsnext/services";
 import { useAppStoreHook } from "../genericStore/appStore";
 import { useFormStoreHook } from "../genericStore/formStore";
 import { useDeptStoreHook } from "../genericStore/deptStore";
@@ -53,8 +53,8 @@ export const useUserStore = defineStore("currentuser", () => {
     currentUser.value.empName = empName;
   };
 
-  const login = (loginModel: LoginModel) => {
-    return authService.login(loginModel);
+  const login = (request: LoginRequest) => {
+    return authService.login(request);
   };
 
   // const switchCorp = () => { }

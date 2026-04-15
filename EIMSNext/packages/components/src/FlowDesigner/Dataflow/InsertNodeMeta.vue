@@ -1,15 +1,38 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('dataflow.targetForm')" :required="true"></MetaItemHeader>
-    <FormSelect v-model="formItem" :appId="appId" @change="formChanged"></FormSelect>
-    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.setFieldValue')" :required="true"></MetaItemHeader>
-    <FormFieldList v-if="nodes.length > 0" v-model="formFieldList" :node-id="nodeId" :formId="formId" :nodes="nodes"
-      :show-all="true" @change="fieldChanged"></FormFieldList>
+    <MetaItemHeader
+      :label="t('dataflow.targetForm')"
+      :required="true"
+    ></MetaItemHeader>
+    <FormSelect
+      v-model="formItem"
+      :appId="appId"
+      @change="formChanged"
+    ></FormSelect>
+    <MetaItemHeader
+      class="mt-[8px]"
+      :label="t('dataflow.setFieldValue')"
+      :required="true"
+    ></MetaItemHeader>
+    <FormFieldList
+      v-if="nodes.length > 0"
+      v-model="formFieldList"
+      :node-id="nodeId"
+      :formId="formId"
+      :nodes="nodes"
+      :show-all="true"
+      @change="fieldChanged"
+    ></FormFieldList>
   </template>
 </template>
 <script lang="ts" setup>
 import { inject, nextTick, reactive, ref, watch } from "vue";
-import { FlowNodeType, IFlowContext, IFlowNodeData, createFlowNode } from "../Common/FlowData";
+import {
+  FlowNodeType,
+  IFlowContext,
+  IFlowNodeData,
+  createFlowNode,
+} from "../Common/FlowData";
 import { FormDef } from "@eimsnext/models";
 import { useContextStore, useFormStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
@@ -42,7 +65,6 @@ const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 
 const formChanged = async (form: IFormItem) => {
-  // console.log("formChanged", form);
   formId.value = form.id;
   formItem.value.id = formId.value;
 
@@ -53,9 +75,6 @@ const formChanged = async (form: IFormItem) => {
   activeData.value.metadata.insertMeta!.formFieldList = formFieldList.value;
 };
 const fieldChanged = (fields: IFormFieldList) => {
-  // console.log("fieldChanged", fields);
-  // formFieldList.value.items = fields.items;
-
   activeData.value.metadata.insertMeta!.formFieldList = fields;
 };
 
@@ -73,7 +92,7 @@ const init = () => {
       formFieldList.value.items = mergeFieldList(
         formDef,
         activeData.value.metadata.insertMeta!.formFieldList.items,
-        true
+        true,
       );
 
     ready.value = true;
@@ -81,27 +100,4 @@ const init = () => {
 };
 
 init();
-
-// watch(
-//   flowContextRef,
-//   async (newValue: IFlowContext) => {
-//     // console.log("activeData", newValue.activeData);
-//     activeData.value = newValue.activeData;
-//     nodes.value = await getPrevNodes(newValue.flowData, activeData.value);
-
-//     nodeId.value = activeData.value.id;
-//     formId.value = activeData.value.metadata.insertMeta!.formId;
-//     formItem.value = { id: formId.value };
-
-//     let formDef = await formStore.get(formId.value);
-//     if (formDef)
-//       formFieldList.value.items = mergeFieldList(
-//         formDef,
-//         activeData.value.metadata.insertMeta!.formFieldList.items,
-//         true
-//       );
-
-//   },
-//   { immediate: true }
-// );
 </script>

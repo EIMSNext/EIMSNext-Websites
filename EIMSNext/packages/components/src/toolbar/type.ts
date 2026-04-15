@@ -14,6 +14,7 @@ export interface IToolbarItemConfig {
   disabled?: boolean;
   class?: string;
   style?: string;
+  showDynamicText?: boolean;
   menuItems?: IToolbarItemDropdownItem[];
   onCommand?: (...args: any[]) => void;
 }

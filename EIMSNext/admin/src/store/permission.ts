@@ -34,14 +34,12 @@ export const usePermissionStore = defineStore("permission", () => {
   const { appId, appChanged } = storeToRefs(contextStore);
 
   watch([appChanged], async ([newVal]) => {
-    // console.log("appChanged", newVal);
     await generateAppMenus();
   });
 
   const generateAppMenus = async () => {
     appMenus.value = [];
     let menus: RouteRecordRaw[] = [];
-    // console.log("perm app id", appId.value);
     if (appId.value) {
       let app = await appStore.get(appId.value);
       if (app) {

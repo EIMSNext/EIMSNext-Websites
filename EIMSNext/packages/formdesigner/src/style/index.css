@@ -1,60 +1,60 @@
 :root {
     --fc-drag-empty: "拖拽左侧列表中的组件到此处";
     --fc-child-empty: "点击右下角 \e789  按钮添加一列";
-    --fc-text-color-1: #262626; /*主要文字色*/
-    --fc-text-color-2: #666666; /*次要文字色*/
-    --fc-text-color-3: #AAAAAA; /*辅助文字色*/
-    --fc-bg-color-1: #FFFFFF; /*主要背景色*/
-    --fc-bg-color-2: #F5F5F5; /*次要背景色*/
-    --fc-bg-color-3: #ECECEC; /*辅助背景色*/
-    --fc-line-color-1: #DDDDDD; /*设计区虚线*/
-    --fc-line-color-2: #D9D9D9; /*按钮边框*/
-    --fc-line-color-3: #ECECEC; /*分割线色*/
-    --fc-style-color-1: #2E73FF; /*主色*/
-    --fc-style-bg-color-1: rgba(46, 115, 255, 0.05); /*主色背景色*/
-    --fc-style-color-2: #00C050; /*次要主色*/
-    --fc-style-bg-color-2: rgba(0, 192, 80, 0.05); /*次要背景色*/
-    --fc-style-color-3: #FF2E2E; /*警告色*/
-    --fc-style-bg-color-3: rgba(255, 46, 46, 0.05); /*警告背景色*/
-    --fc-style-color-4: #4EFDB7;
-    --fc-style-bg-color-4: rgba(78, 253, 183, 0.05);
+    --fc-text-color-1: var(--et-text-primary, #262626); /*主要文字色*/
+    --fc-text-color-2: var(--et-text-secondary, #666666); /*次要文字色*/
+    --fc-text-color-3: var(--et-text-disabled, #AAAAAA); /*辅助文字色*/
+    --fc-bg-color-1: var(--et-bg-container, #FFFFFF); /*主要背景色*/
+    --fc-bg-color-2: var(--et-bg-page, #F5F5F5); /*次要背景色*/
+    --fc-bg-color-3: var(--et-bg-muted, #ECECEC); /*辅助背景色*/
+    --fc-line-color-1: var(--et-border-color, #DDDDDD); /*设计区虚线*/
+    --fc-line-color-2: var(--et-border-color, #D9D9D9); /*按钮边框*/
+    --fc-line-color-3: var(--et-border-color-light, #ECECEC); /*分割线色*/
+    --fc-style-color-1: var(--et-color-primary, #2E73FF); /*主色*/
+    --fc-style-bg-color-1: var(--et-bg-primary-soft, rgba(46, 115, 255, 0.05)); /*主色背景色*/
+    --fc-style-color-2: var(--et-color-success, #00C050); /*次要主色*/
+    --fc-style-bg-color-2: var(--et-bg-success-soft, rgba(0, 192, 80, 0.05)); /*次要背景色*/
+    --fc-style-color-3: var(--et-color-danger, #FF2E2E); /*警告色*/
+    --fc-style-bg-color-3: var(--et-bg-danger-soft, rgba(255, 46, 46, 0.05)); /*警告背景色*/
+    --fc-style-color-4: var(--et-color-info, #4EFDB7);
+    --fc-style-bg-color-4: var(--et-bg-info-soft, rgba(78, 253, 183, 0.05));
 }
 
 html.dark {
-    --fc-text-color-1: #E5EAF3; /*主要文字色*/
-    --fc-text-color-2: #CFD3DC; /*次要文字色*/
-    --fc-text-color-3: #6C6E72; /*辅助文字色*/
-    --fc-bg-color-1: #0A0A0A; /*主要背景色*/
-    --fc-bg-color-2: #191919; /*次要背景色*/
-    --fc-bg-color-3: #2B2B2C; /*辅助背景色*/
-    --fc-line-color-1: #393A3C; /*设计区虚线*/
-    --fc-line-color-2: #636466; /*按钮边框*/
-    --fc-line-color-3: #2B2B2C; /*分割线色*/
+    --fc-text-color-1: var(--et-text-primary, #E5EAF3); /*主要文字色*/
+    --fc-text-color-2: var(--et-text-secondary, #CFD3DC); /*次要文字色*/
+    --fc-text-color-3: var(--et-text-disabled, #6C6E72); /*辅助文字色*/
+    --fc-bg-color-1: var(--et-bg-container, #0A0A0A); /*主要背景色*/
+    --fc-bg-color-2: var(--et-bg-page, #191919); /*次要背景色*/
+    --fc-bg-color-3: var(--et-bg-muted, #2B2B2C); /*辅助背景色*/
+    --fc-line-color-1: var(--et-border-color, #393A3C); /*设计区虚线*/
+    --fc-line-color-2: var(--et-border-color-light, #636466); /*按钮边框*/
+    --fc-line-color-3: var(--et-border-color-light, #2B2B2C); /*分割线色*/
 }
 
 ._fc-designer, ._fd-config-dialog {
-    --el-color-primary: #2E73FF;
-    --el-color-primary-light-3: #6699FF;
-    --el-color-primary-light-5: #99BBFF;
-    --el-color-primary-light-7: #CCDFFF;
-    --el-color-primary-light-8: #E0EBFF;
-    --el-color-primary-light-9: #CCDFFF;
-    --el-color-primary-dark-2: #265FCC;
-    --el-color-success: #00C050;
-    --el-color-success-light-3: #4DDB82;
-    --el-color-success-light-5: #80E6A3;
-    --el-color-success-light-7: #B3F1C5;
-    --el-color-success-light-8: #CCF6D5;
-    --el-color-success-light-9: #E6FAE6;
-    --el-color-success-dark-2: #00A046;
-    --el-color-danger: #FF2E2E;
-    --el-color-danger-light-3: #FF6666;
-    --el-color-danger-light-5: #FF9999;
-    --el-color-danger-light-7: #FFCCCC;
-    --el-color-danger-light-8: #FFD9D9;
-    --el-color-danger-light-9: #FFE6E6;
-    --el-color-danger-dark-2: #CC2626;
-    --el-menu-hover-bg-color: var(--el-color-primary-light-9);
+    --el-color-primary: var(--et-color-primary, #2E73FF);
+    --el-color-primary-light-3: var(--el-color-primary-light-3, #6699FF);
+    --el-color-primary-light-5: var(--el-color-primary-light-5, #99BBFF);
+    --el-color-primary-light-7: var(--el-color-primary-light-7, #CCDFFF);
+    --el-color-primary-light-8: var(--el-color-primary-light-8, #E0EBFF);
+    --el-color-primary-light-9: var(--el-color-primary-light-9, #CCDFFF);
+    --el-color-primary-dark-2: var(--el-color-primary-dark-2, #265FCC);
+    --el-color-success: var(--et-color-success, #00C050);
+    --el-color-success-light-3: var(--el-color-success-light-3, #4DDB82);
+    --el-color-success-light-5: var(--el-color-success-light-5, #80E6A3);
+    --el-color-success-light-7: var(--el-color-success-light-7, #B3F1C5);
+    --el-color-success-light-8: var(--el-color-success-light-8, #CCF6D5);
+    --el-color-success-light-9: var(--el-color-success-light-9, #E6FAE6);
+    --el-color-success-dark-2: var(--el-color-success-dark-2, #00A046);
+    --el-color-danger: var(--et-color-danger, #FF2E2E);
+    --el-color-danger-light-3: var(--el-color-danger-light-3, #FF6666);
+    --el-color-danger-light-5: var(--el-color-danger-light-5, #FF9999);
+    --el-color-danger-light-7: var(--el-color-danger-light-7, #FFCCCC);
+    --el-color-danger-light-8: var(--el-color-danger-light-8, #FFD9D9);
+    --el-color-danger-light-9: var(--el-color-danger-light-9, #FFE6E6);
+    --el-color-danger-dark-2: var(--el-color-danger-dark-2, #CC2626);
+    --el-menu-hover-bg-color: var(--et-menu-hover, var(--el-color-primary-light-9));
 }
 
 ._fc-designer .el-button--primary, ._fd-config-dialog .el-button--primary {
@@ -283,7 +283,7 @@ html.dark {
     height: 30px;
     overflow: hidden;
     transition: all .3s ease;
-    border: 1px dashed #000;
+    border: 1px dashed var(--fc-line-color-1);
     border-radius: 4px;
     padding-bottom: 0;
 }
@@ -364,7 +364,7 @@ html.dark {
 ._fc-l .el-tree-node__label {
     padding: 3px;
     font-weight: 400;
-    color: #333;
+    color: var(--fc-text-color-1);
 }
 
 ._fc-l .el-tree-node__content {
@@ -373,7 +373,7 @@ html.dark {
 }
 
 ._fc-l .el-tree-node__content > .el-tree-node__expand-icon {
-    color: #333;
+    color: var(--fc-text-color-1);
 }
 
 ._fc-l .el-tree-node__expand-icon.is-leaf {
@@ -500,6 +500,7 @@ html.dark {
 
 ._fc-l-group.is-template ._fc-l-item:hover {
     background: var(--fc-style-color-1);
+    color: var(--et-text-on-primary, #fff);
 }
 
 ._fc-l-title {
@@ -610,7 +611,7 @@ html.dark {
 }
 
 ._fc-m-tools ._fd-m-extend {
-    color: #666;
+    color: var(--fc-text-color-2);
     border-color: var(--fc-line-color-1);
     background-color: var(--fc-bg-color-3);
     border-radius: 5px;
@@ -629,7 +630,7 @@ html.dark {
 }
 
 ._fc-m-tools ._fd-input-btn .icon-check {
-    color: #67c23a;
+    color: var(--fc-style-color-2);
     font-size: 18px;
 }
 
@@ -674,7 +675,7 @@ html.dark {
 
 ._fc-m-drag.mobile, ._fc-m-drag.pad {
     border-radius: 25px;
-    border: 10px solid #000;
+    border: 10px solid var(--fc-line-color-2);
 }
 
 ._fc-m-drag {
@@ -695,7 +696,7 @@ html.dark {
     right: 0;
     padding: 12px;
     background: var(--fc-bg-color-1);
-    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: var(--et-shadow-md, 0 2px 10px 0 rgba(0, 0, 0, 0.05));
     text-align: center;
     margin: 20px;
     z-index: 99;
@@ -786,14 +787,14 @@ html.dark {
 .cm-fc-field, .cm-fc-id {
     display: inline-block;
     background-color: var(--fc-style-color-1);
-    color: #fff;
+    color: var(--et-text-on-primary, #fff);
     padding: 0 8px;
     border-radius: 5px;
     line-height: 1.5em;
 }
 
 .cm-fc-id {
-    background-color: #df2121;
+    background-color: var(--fc-style-color-3);
 }
 
 .CodeMirror-widget + .CodeMirror-widget {
@@ -903,8 +904,8 @@ html.dark {
     border-radius: 8px;
     padding: 9px 13px;
     background-color: var(--fc-bg-color-1);
-    border-color: #fff;
-    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+    border-color: var(--fc-line-color-2);
+    box-shadow: var(--et-shadow-overlay, 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05));
 }
 
 ._fc-message-tip > .el-icon {
@@ -990,7 +991,7 @@ html.dark {
 
 ._fd-preview-mobile > div {
     border-radius: 24px;
-    border: 6px solid #000;
+    border: 6px solid var(--fc-line-color-2);
     box-sizing: border-box;
     width: 350px;
     overflow: scroll;

@@ -1,7 +1,14 @@
 <template>
-  <et-dialog v-model="showDialog" width="400px" :title="title" :append-to-body="true" :destroy-on-close="true"
-    @cancel="cancel" @ok="save">
-    <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px" style="padding: 12px 20px">
+  <et-dialog
+    v-model="showDialog"
+    width="400px"
+    :title="title"
+    :append-to-body="true"
+    :destroy-on-close="true"
+    @cancel="cancel"
+    @ok="save"
+  >
+    <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
       <el-form-item label="角色组">
         <el-input :model-value="pGroup.name" readonly />
       </el-form-item>
@@ -27,7 +34,7 @@ const props = withDefaults(
   defineProps<{
     edit: boolean;
     pGroup: RoleGroup;
-    pRole?: Role
+    pRole?: Role;
   }>(),
   {
     edit: false,
@@ -36,7 +43,13 @@ const props = withDefaults(
 
 const showDialog = ref(true);
 const title = props.edit ? "修改角色信息" : "添加";
-const formData = ref<Role>({ id: "", name: "", roleGroupId: props.pGroup.id, description: "", sortValue: -1 });
+const formData = ref<Role>({
+  id: "",
+  name: "",
+  roleGroupId: props.pGroup.id,
+  description: "",
+  sortValue: -1,
+});
 const formRef = ref<FormInstance>();
 if (props.edit) formData.value = props.pRole!;
 else {
@@ -52,7 +65,7 @@ const cancel = () => {
 };
 const save = async () => {
   if (!formRef.value) return;
-  
+
   await formRef.value.validate(async (valid: boolean) => {
     if (valid) {
       const newRole: RoleRequest = {
@@ -74,3 +87,9 @@ const save = async () => {
   });
 };
 </script>
+
+<style lang="scss" scoped>
+.dialog-form {
+  padding: var(--et-space-12) var(--et-space-20);
+}
+</style>

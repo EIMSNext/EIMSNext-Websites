@@ -171,7 +171,7 @@ export default defineComponent({
 ._fd-tree-opt ._fd-tree-opt-btn {
     height: 19px;
     width: 18px;
-    color: #fff;
+    color: var(--et-text-on-primary, #fff);
     text-align: center;
     line-height: 20px;
     padding-bottom: 1px;

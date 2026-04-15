@@ -7,6 +7,7 @@ export default {
     addNew: "新增",
     edit: "编辑",
     print: "打印",
+    systemprint: "系统打印",
     delete: "删除",
     deleteAll: "删除全部",
     reset: "重置",
@@ -52,6 +53,7 @@ export default {
     value_Field: "字段值",
     value_Empty: "空值",
     value_Custom: "自定义",
+    orderby_Unset: "未设置",
     orderby_Asc: "升序",
     orderby_Desc: "降序",
     meetCondition: "满足以下",
@@ -82,8 +84,21 @@ export default {
     untitledForm: "未命名表单",
     untitledDashboard: "未命名仪表盘",
     untitledChart: "未命名统计表",
+    data_created: "有新数据提交时",
+    data_updated: "有数据被修改时",
+    data_removed: "有数据被删除时",
+    wfstatus_updated: "流程状态变更时",
+    wftodo_updated: "流程待办变更时",
   },
   workflow: {
+    flowStatus: {
+      draft: "草稿",
+      approving: "审批中",
+      approved: "已审批",
+      rejected: "已驳回",
+      discarded: "已废弃",
+      suspended: "已挂起",
+    },
     startNode: "发起流程",
     endNode: "结束",
     branchNode: "并行分支",
@@ -158,6 +173,22 @@ export default {
     fieldConflict_MsgContent:
       "使用该字段后，主字段和子字段的配置冲突。此操作会清除部分已设置的字段赋值，无法还原",
   },
+  dash: {
+    chart: {
+      vbar: "柱状图",
+      hbar: "条形图",
+      line: "折线图",
+      pie: "饼图",
+    },
+    limitation: {
+      dimension: "{0}个维度",
+      metric: "{0}个指标",
+      dimensionRange: "{0}-{1}个维度",
+      metricRange: "{0}-{1}个指标",
+      moreDimensions: "{0}个或多个维度",
+      moreMetrics: "{0}或多个个指标",
+    },
+  },
   // 菜单国际化
   route: {
     workspace: "工作台",
@@ -190,10 +221,10 @@ export default {
   // 导航栏国际化
   navbar: {
     workspace: "工作台",
-    logout: "注销登出",
-    document: "项目文档",
-    gitee: "项目地址",
-    profile: "个人中心",
+    logout: "退出",
+    homepage: "项目官网",
+    source: "源码地址",
+    profile: "个人设置",
   },
   sizeSelect: {
     tooltip: "布局大小",
@@ -210,14 +241,10 @@ export default {
     },
   },
   settings: {
-    project: "项目配置",
-    theme: "主题设置",
-    interface: "界面设置",
-    navigation: "导航设置",
+    uisetting: "页面设置",
+    theme: "暗黑模式",
     themeColor: "主题颜色",
-    tagsView: "开启 Tags-View",
-    fixedHeader: "固定 Header",
-    sidebarLogo: "侧边栏 Logo",
+    tagsView: "标签视图",
     watermark: "开启水印",
   },
   condition: {

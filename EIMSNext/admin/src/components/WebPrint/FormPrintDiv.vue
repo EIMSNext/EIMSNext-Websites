@@ -147,6 +147,7 @@ const getFieldValues = () => {
 const getValue = (el: FieldDef, vObj: any): string => {
     const dType = getObjectType(vObj);
     let dValue = "";
+    if (!vObj) return dValue
 
     switch (dType) {
         case "Array":
@@ -307,7 +308,7 @@ const generateHtml = () => {
         if (ignoreFields.includes(el.field)) return;
 
         // 子表单（table类型）
-        if (el.type === "table") {
+        if (el.type === FieldType.TableForm) {
             if (tableRendering) {
                 tableRendering = false;
                 tableStr += "</tbody></table>";

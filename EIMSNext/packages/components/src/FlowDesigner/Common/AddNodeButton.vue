@@ -1,41 +1,76 @@
 <template>
-  <el-popover ref="popoverRef" :show-arrow="false" placement="right" width="200" trigger="click">
-    <el-button :disabled="!canPaste" icon="el-plus" style="width: 100%" @click.stop="pasteNode">
+  <el-popover
+    ref="popoverRef"
+    :show-arrow="false"
+    placement="right"
+    width="200"
+    trigger="click"
+  >
+    <el-button
+      :disabled="!canPaste"
+      icon="el-plus"
+      class="popover-action-button"
+      @click.stop="pasteNode"
+    >
       {{ t("workflow.pasteNode") }}
     </el-button>
     <template v-if="flowContext.flowType == FlowType.Workflow">
-      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Approve)">
+      <el-button
+        icon="el-plus"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Approve)"
+      >
         {{ t("workflow.taskNode") }}
       </el-button>
-      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.CopyTo)">
+      <el-button
+        icon="el-plus"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.CopyTo)"
+      >
         {{ t("workflow.ccNode") }}
       </el-button>
-      <el-button icon="el-copy-document" style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Branch)">
+      <el-button
+        icon="el-copy-document"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Branch)"
+      >
         {{ t("workflow.branchNode") }}
       </el-button>
     </template>
     <template v-if="flowContext.flowType == FlowType.Dataflow">
-      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.QueryOne)">
+      <el-button
+        icon="el-plus"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.QueryOne)"
+      >
         {{ t("workflow.queryOneNode") }}
       </el-button>
-      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.QueryMany)">
+      <el-button
+        icon="el-plus"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.QueryMany)"
+      >
         {{ t("workflow.queryManyNode") }}
       </el-button>
-      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Insert)">
+      <el-button
+        icon="el-plus"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Insert)"
+      >
         {{ t("workflow.insertDataNode") }}
       </el-button>
-      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Update)">
+      <el-button
+        icon="el-plus"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Update)"
+      >
         {{ t("workflow.updateDataNode") }}
       </el-button>
-      <el-button icon="el-plus" style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Delete)">
+      <el-button
+        icon="el-plus"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Delete)"
+      >
         {{ t("workflow.deleteDataNode") }}
       </el-button>
       <!-- <el-button
@@ -52,8 +87,11 @@
       >
         {{ t("workflow.pluginNode") }}
       </el-button> -->
-      <el-button icon="el-copy-document" style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Branch2)">
+      <el-button
+        icon="el-copy-document"
+        class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Branch2)"
+      >
         {{ t("workflow.branch2Node") }}
       </el-button>
     </template>
@@ -112,7 +150,7 @@ watch(
       canPaste.value = false;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const pasteNode = () => {
@@ -130,7 +168,7 @@ const addNode = (nodeType: FlowNodeType) => {
 function addNewNode(
   pNodeDatas: IFlowNodeData[],
   curNodeData: IFlowNodeData,
-  newNodeData: IFlowNodeData
+  newNodeData: IFlowNodeData,
 ) {
   let index = 0;
   if (
@@ -155,3 +193,14 @@ function addNewNode(
   popoverRef.value.hide();
 }
 </script>
+
+<style scoped>
+.popover-action-button {
+  width: 100%;
+}
+
+.popover-action-button-spaced {
+  margin-left: var(--et-space-0);
+  margin-top: var(--et-space-10);
+}
+</style>

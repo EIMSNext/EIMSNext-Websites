@@ -1,3 +1,4 @@
+import "./theme/index.scss";
 import { SvgIcon, EtIcon } from "./icon";
 import { EtUpload } from "./upload";
 import { EtDialog, EtConfirmDialog } from "./dialog";
@@ -23,6 +24,16 @@ import {
 } from "./FlowDesigner";
 import { EtFieldPerms } from "./FieldPerms";
 import { UserAvatar } from "./avatar";
+import { SortList, SortItem } from "./SortList";
+import FieldSelectList from "./FieldSelectList";
+
+export {
+  applyTheme,
+  generateThemeColors,
+  toggleDarkMode,
+} from "./theme/runtime";
+
+export { FieldSelectList };
 
 export default [
   SvgIcon,
@@ -57,4 +68,7 @@ export default [
   DataflowMetaEditor,
   EtFieldPerms,
   UserAvatar,
+  SortList,
+  SortItem,
+  FieldSelectList,
 ];

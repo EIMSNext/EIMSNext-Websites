@@ -296,7 +296,7 @@ export default defineComponent({
 
 ._fd-field-popper .el-tree-node__content {
     padding: 2px 0;
-    color: #333;
+    color: var(--fc-text-color-1);
 }
 
 ._fd-field-popper .el-select-dropdown__list > .el-select-dropdown__item {

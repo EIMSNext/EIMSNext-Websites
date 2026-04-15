@@ -1,7 +1,7 @@
-﻿import { ODataServiceBase } from "../interface";
-import { WebPushLog, WebPushLogRequest } from "@eimsnext/models";
+﻿import { ReadonlyODataServiceBase } from "../interface";
+import { WebPushLog } from "@eimsnext/models";
 
-export class WebPushLogService extends ODataServiceBase<WebPushLog, WebPushLogRequest> {
+export class WebPushLogService extends ReadonlyODataServiceBase<WebPushLog> {
     protected modelName(): string {
         return "WebPushLog";
     }

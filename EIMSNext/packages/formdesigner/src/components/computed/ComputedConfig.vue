@@ -766,13 +766,13 @@ export default defineComponent({
 }
 
 ._fd-comp-node.disabled ._fd-comp-id {
-  background-color: #999;
+  background-color: var(--fc-text-color-3);
 }
 
 ._fd-comp-id {
   height: 20px;
   width: 20px;
-  color: #fff;
+  color: var(--et-text-on-primary, #fff);
   background-color: var(--fc-style-color-1);
   text-align: center;
   font-weight: 500;

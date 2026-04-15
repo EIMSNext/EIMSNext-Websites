@@ -1,20 +1,60 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('dataflow.deleteFrom')" :required="true"></MetaItemHeader>
+    <MetaItemHeader
+      :label="t('dataflow.deleteFrom')"
+      :required="true"
+    ></MetaItemHeader>
     <div class="mode-container">
-      <el-select v-model="mode" size="default" style="width: 300px; margin-right: 5px" @change="modeChanged">
-        <el-option :label="t('dataflow.recordInForm')" :value="UpdateMode.Form" />
-        <el-option :label="t('dataflow.recordInNode')" :value="UpdateMode.Node" />
+      <el-select
+        v-model="mode"
+        size="default"
+        class="mode-select"
+        @change="modeChanged"
+      >
+        <el-option
+          :label="t('dataflow.recordInForm')"
+          :value="UpdateMode.Form"
+        />
+        <el-option
+          :label="t('dataflow.recordInNode')"
+          :value="UpdateMode.Node"
+        />
       </el-select>
-      <FormSelect v-if="mode == UpdateMode.Form" v-model="formItem" :appId="appId" @change="formChanged"></FormSelect>
-      <el-select v-if="mode == UpdateMode.Node" v-model="activeData.metadata.deleteMeta!.nodeId" size="default"
-        :placeholder="t('dataflow.selectNode')" @change="nodeChanged">
-        <el-option v-for="node in nodes" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId" />
+      <FormSelect
+        v-if="mode == UpdateMode.Form"
+        v-model="formItem"
+        :appId="appId"
+        @change="formChanged"
+      ></FormSelect>
+      <el-select
+        v-if="mode == UpdateMode.Node"
+        v-model="activeData.metadata.deleteMeta!.nodeId"
+        size="default"
+        :placeholder="t('dataflow.selectNode')"
+        @change="nodeChanged"
+      >
+        <el-option
+          v-for="node in nodes"
+          :key="node.nodeId"
+          :label="node.nodeName"
+          :value="node.nodeId"
+        />
       </el-select>
     </div>
-    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.dataCondition')" :required="true"></MetaItemHeader>
-    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes"
-      :fieldBuildRule="FieldBuildRule.SingleResultOnly" @change="onCondition"></ConditionList>
+    <MetaItemHeader
+      class="mt-[8px]"
+      :label="t('dataflow.dataCondition')"
+      :required="true"
+    ></MetaItemHeader>
+    <ConditionList
+      v-model="condList"
+      :formId="formId"
+      :nodeId="nodeId"
+      :nodes="nodes"
+      :fieldBuildRule="FieldBuildRule.SingleResultOnly"
+      @change="onCondition"
+      @remove="onCondClear"
+    ></ConditionList>
   </template>
 </template>
 <script lang="ts" setup>
@@ -69,7 +109,7 @@ const modeChanged = (mode: UpdateMode) => {
 const nodeChanged = () => {
   if (activeData.value.metadata.deleteMeta!.nodeId) {
     var node = nodes.value.find(
-      (x) => x.nodeId == activeData.value.metadata.deleteMeta!.nodeId
+      (x) => x.nodeId == activeData.value.metadata.deleteMeta!.nodeId,
     );
     if (node) {
       formId.value = node.form?.id ?? "";
@@ -80,7 +120,6 @@ const nodeChanged = () => {
 };
 
 const formChanged = async (form: IFormItem) => {
-  // console.log("formChanged", form);
   formId.value = form.id;
   formItem.value.id = formId.value;
   condList.value = { id: uniqueId(), rel: "and", items: [] };
@@ -90,6 +129,11 @@ const formChanged = async (form: IFormItem) => {
 };
 const onCondition = (list: IConditionList) => {
   activeData.value.metadata.deleteMeta!.condition = list;
+};
+
+const onCondClear = () => {
+  condList.value.items = [];
+  activeData.value.metadata.deleteMeta!.condition = condList.value;
 };
 
 const init = () => {
@@ -111,29 +155,14 @@ const init = () => {
 };
 
 init();
-
-// watch(
-//   flowContextRef,
-//   async (newValue: IFlowContext) => {
-//     // console.log("activeData", newValue.activeData);
-//     activeData.value = newValue.activeData;
-//     nodes.value = await getPrevNodes(newValue.flowData, activeData.value);
-
-//     mode.value = activeData.value.metadata.deleteMeta!.deleteMode;
-//     nodeId.value = activeData.value.id;
-//     formId.value = activeData.value.metadata.deleteMeta!.formId;
-//     formItem.value = { id: formId.value };
-
-//     condList.value = { id: uniqueId(), rel: "and", items: [] };
-//     if (activeData.value.metadata.deleteMeta!.condition) {
-//       condList.value = activeData.value.metadata.deleteMeta!.condition;
-//     }
-//   },
-//   { immediate: true }
-// );
 </script>
 <style lang="scss" scoped>
 .mode-container {
   display: flex;
+}
+
+.mode-select {
+  width: var(--et-size-300);
+  margin-right: var(--et-space-5);
 }
 </style>

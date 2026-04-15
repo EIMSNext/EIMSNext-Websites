@@ -28,17 +28,14 @@ export function buildFormFieldList(
   formId: string,
   fields: FieldDef[],
   existingFields: IFormFieldItem[],
-  mergeAll: boolean
+  mergeAll: boolean,
 ): IFormFieldItem[] {
   const items: IFormFieldItem[] = [];
-  // console.log("buildFormFieldList", formId, fields, existingFields);
   fields.forEach((x: FieldDef) => {
-    // console.log("x", x, x.type == FieldType.TableForm, x.type, FieldType.TableForm);
     if (x.type == FieldType.TableForm && x.columns && x.columns.length > 0) {
       x.columns.forEach((sub: FieldDef) => {
         let fieldDef = toFormFieldDef(formId, sub, x);
         let e = existingFields.find((f) => f.field.field == fieldDef.field);
-        // console.log("e", e);
         if (e) {
           items.push(e);
         } else {
@@ -53,7 +50,6 @@ export function buildFormFieldList(
     } else {
       let fieldDef = toFormFieldDef(formId, x);
       let e = existingFields.find((f) => f.field.field == fieldDef.field);
-      // console.log("e", e);
       if (e) {
         items.push(e);
       } else {
@@ -73,14 +69,14 @@ export function buildFormFieldList(
 export function mergeFieldList(
   form: FormDef,
   existingFields: IFormFieldItem[],
-  mergeAll: boolean
+  mergeAll: boolean,
 ) {
   if (form && form.content && form.content.items) {
     return buildFormFieldList(
       form.id,
       form.content.items,
       existingFields,
-      mergeAll
+      mergeAll,
     );
   } else return existingFields;
 }

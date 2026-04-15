@@ -88,9 +88,9 @@
   bottom: -15px;
   right: 30px;
   border-radius: 15px;
-  border: 1px dashed #d9d9d9;
+  border: 1px dashed var(--et-border-color, #d9d9d9);
   padding: 3px 8px;
-  background-color: #ffffff;
+  background-color: var(--et-bg-container, #ffffff);
   transform: scale(1.1);
 }
 
@@ -107,7 +107,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eee;
+  background: var(--et-bg-hover, #eee);
   border-radius: 15px;
   font-weight: 700;
 }
@@ -120,7 +120,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  border: 1px dashed #d9d9d9;
+  border: 1px dashed var(--et-border-color, #d9d9d9);
   border-radius: 5px;
   margin-bottom: 25px;
   padding: 5px 5px 25px;
@@ -141,8 +141,8 @@
   left: 5px;
   width: 9px;
   height: 9px;
-  border-left: 2px solid #999;
-  border-top: 2px solid #999;
+  border-left: 2px solid var(--et-text-tertiary, #999);
+  border-top: 2px solid var(--et-text-tertiary, #999);
 }
 ._fc-m-group-arrow::before {
   transform: rotate(45deg);
@@ -167,7 +167,7 @@
   left: 50%;
   width: 60%;
   height: 2px;
-  background-color: #409eff;
+  background-color: var(--et-color-primary, #409eff);
   transform: translate(-50%, -50%);
 }
 
@@ -179,14 +179,14 @@
   display: none;
 }
 ._fc-m-group-plus-minus._fc-m-group-minus::after {
-  background-color: #f56c6c;
+  background-color: var(--et-color-danger, #f56c6c);
 }
 
 ._fc-m-group-add {
   cursor: pointer;
   width: 25px;
   height: 25px;
-  border: 1px solid rgb(64 158 255 / 50%);
+  border: 1px solid var(--et-color-primary-outline, rgb(64 158 255 / 50%));
   border-radius: 15px;
   transform: scale(1.1);
 }

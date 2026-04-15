@@ -1,33 +1,75 @@
 <template>
-  <MetaItemHeader :label="t('dataflow.triggeringForm')" :required="true"></MetaItemHeader>
-  <div class="ml-[8px]">
-    <el-input v-model="formName" readonly size="default" style="width: 100%" />
+  <MetaItemHeader
+    :label="t('dataflow.triggeringForm')"
+    :required="true"
+  ></MetaItemHeader>
+  <div class="section-indent">
+    <el-input
+      v-model="formName"
+      readonly
+      size="default"
+      class="full-width-input"
+    />
   </div>
-  <MetaItemHeader class="mt-[8px]" :label="t('dataflow.trigger')" :required="true"></MetaItemHeader>
+  <MetaItemHeader
+    class="mt-[8px]"
+    :label="t('dataflow.trigger')"
+    :required="true"
+  ></MetaItemHeader>
   <div class="trigger-header ml-[8px]">
-    <el-popover popper-class="data-triggers" placement="bottom" :show-arrow="false" width="200" trigger="click">
+    <el-popover
+      popper-class="data-triggers"
+      placement="bottom"
+      :show-arrow="false"
+      width="200"
+      trigger="click"
+    >
       <div class="trigger-header">
         <!-- <div class="trigger-desc">{{ t("表单事件") }}</div> -->
-        <div class="add-trigger" :class="{ notAllow: triggerBySubmit }" @click="addTrigger(EventType.Submitted)">
+        <div
+          class="add-trigger"
+          :class="{ notAllow: triggerBySubmit }"
+          @click="addTrigger(EventType.Submitted)"
+        >
           {{ t("dataflow.addedRecord") }}
         </div>
         <template v-if="!usingFlow">
-          <div class="add-trigger" :class="{ notAllow: triggerByUpdate }" @click="addTrigger(EventType.Modified)">
+          <div
+            class="add-trigger"
+            :class="{ notAllow: triggerByUpdate }"
+            @click="addTrigger(EventType.Modified)"
+          >
             {{ t("dataflow.updatedRecord") }}
           </div>
-          <div class="add-trigger" :class="{ notAllow: triggerByDelete }" @click="addTrigger(EventType.Removed)">
+          <div
+            class="add-trigger"
+            :class="{ notAllow: triggerByDelete }"
+            @click="addTrigger(EventType.Removed)"
+          >
             {{ t("dataflow.deletedRecord") }}
           </div>
         </template>
         <template v-if="usingFlow">
           <!-- <div class="trigger-desc">{{ t("审批事件") }}</div> -->
-          <div class="add-trigger" :class="{ notAllow: triggerByApproved }" @click="addTrigger(EventType.Approved)">
+          <div
+            class="add-trigger"
+            :class="{ notAllow: triggerByApproved }"
+            @click="addTrigger(EventType.Approved)"
+          >
             {{ t("dataflow.wfApproved") }}
           </div>
-          <div class="add-trigger" :class="{ notAllow: triggerByRejected }" @click="addTrigger(EventType.Rejected)">
+          <div
+            class="add-trigger"
+            :class="{ notAllow: triggerByRejected }"
+            @click="addTrigger(EventType.Rejected)"
+          >
             {{ t("dataflow.wfRejected") }}
           </div>
-          <div class="add-trigger" :class="{ notAllow: triggerByApproving }" @click="addTrigger(EventType.Approving)">
+          <div
+            class="add-trigger"
+            :class="{ notAllow: triggerByApproving }"
+            @click="addTrigger(EventType.Approving)"
+          >
             {{ t("dataflow.wfNextNode") }}
           </div>
         </template>
@@ -41,37 +83,67 @@
     <div class="item-triggers">
       <template v-for="(item, index) in triggerList">
         <div class="show-triggers">
-          <div class="color-838892">{{ index == 0 ? t("dataflow.when") : t("dataflow.or") }}</div>
+          <div class="color-838892">
+            {{ index == 0 ? t("dataflow.when") : t("dataflow.or") }}
+          </div>
           <template v-if="item.id == EventType.Approving">
-            <div style="flex-grow: 1; margin-left: 8px; display: flex">
+            <div class="trigger-approving-content">
               <div>{{ t("dataflow.wfNextNode") }}</div>
-              <div style="flex: 1; margin: 0 5px; display: flex">
-                <el-select v-model="wfNodeId" :placeholder="t('dataflow.selectNode')" size="default" style="flex: 1"
-                  @change="onNodeInput">
-                  <el-option v-for="item in nodeList" :key="item.id" :label="item.label" :value="item.id" />
+              <div class="trigger-node-select-wrap">
+                <el-select
+                  v-model="wfNodeId"
+                  :placeholder="t('dataflow.selectNode')"
+                  size="default"
+                  class="trigger-node-select"
+                  @change="onNodeInput"
+                >
+                  <el-option
+                    v-for="item in nodeList"
+                    :key="item.id"
+                    :label="item.label"
+                    :value="item.id"
+                  />
                 </el-select>
               </div>
-              <el-select v-model="nodeAction" size="default" style="width: 100px; margin-right: 5px"
-                @change="onActionInput">
-                <el-option v-for="item in actionList" :key="item.id" :label="item.label" :value="item.id" />
+              <el-select
+                v-model="nodeAction"
+                size="default"
+                class="trigger-action-select"
+                @change="onActionInput"
+              >
+                <el-option
+                  v-for="item in actionList"
+                  :key="item.id"
+                  :label="item.label"
+                  :value="item.id"
+                />
               </el-select>
             </div>
           </template>
           <template v-else>
-            <div style="flex-grow: 1; margin-left: 8px">
+            <div class="trigger-label">
               {{ t(item.title) }}
             </div>
           </template>
 
-          <div class="ml-[8px]" @click="delTrigger(item.id)">
+          <div class="trigger-delete" @click="delTrigger(item.id)">
             <et-icon icon="el-delete" class="btn-delete-trigger"></et-icon>
           </div>
         </div>
       </template>
     </div>
   </div>
-  <MetaItemHeader class="mt-[12px]" :label="t('dataflow.triggerCondition')" :required="true"></MetaItemHeader>
-  <ConditionList v-model="condList" :formId="flowContext!.formId" @change="onCondInput"></ConditionList>
+  <MetaItemHeader
+    class="mt-[12px]"
+    :label="t('dataflow.triggerCondition')"
+    :required="true"
+  ></MetaItemHeader>
+  <ConditionList
+    v-model="condList"
+    :formId="flowContext!.formId"
+    @change="onCondInput"
+    @remove="onCondClear"
+  ></ConditionList>
 </template>
 <script lang="ts" setup>
 import {
@@ -122,7 +194,11 @@ const wfNodeId = ref("");
 const nodeAction = ref("submit");
 const nodeList = ref<IListItem[]>([]);
 const actionList = ref<IListItem[]>([
-  { id: "submit", label: t("dataflow.wfAction_Submit"), type: DataItemType.Unknown },
+  {
+    id: "submit",
+    label: t("dataflow.wfAction_Submit"),
+    type: DataItemType.Unknown,
+  },
   // { id: "return", label: t("dataflow.wfAction_Return") },
 ]);
 
@@ -130,25 +206,22 @@ const triggerBySubmit = computed(() => {
   return FlagEnum.has(selectedTriggers.value, EventType.Submitted);
 });
 const triggerByUpdate = computed(() => {
-  return FlagEnum.has(selectedTriggers.value, EventType.Modified)
+  return FlagEnum.has(selectedTriggers.value, EventType.Modified);
 });
 const triggerByDelete = computed(() => {
-  return FlagEnum.has(selectedTriggers.value, EventType.Removed)
+  return FlagEnum.has(selectedTriggers.value, EventType.Removed);
 });
 const triggerByApproving = computed(() => {
-  return FlagEnum.has(selectedTriggers.value, EventType.Approving)
+  return FlagEnum.has(selectedTriggers.value, EventType.Approving);
 });
 const triggerByApproved = computed(() => {
-  return FlagEnum.has(selectedTriggers.value, EventType.Approved)
+  return FlagEnum.has(selectedTriggers.value, EventType.Approved);
 });
 const triggerByRejected = computed(() => {
-  // console.log("com trigger");
-  return FlagEnum.has(selectedTriggers.value, EventType.Rejected)
+  return FlagEnum.has(selectedTriggers.value, EventType.Rejected);
 });
 
 const triggerList = computed(() => {
-  // console.log("com triggerList");
-
   const tList: any[] = [];
 
   if (triggerBySubmit.value)
@@ -164,13 +237,11 @@ const triggerList = computed(() => {
   if (triggerByRejected.value)
     tList.push({ id: EventType.Rejected, title: t("dataflow.wfRejected") });
 
-  // console.log("trigger list", tList);
   return tList;
 });
 
 const addTrigger = (t: EventType) => {
   selectedTriggers.value = FlagEnum.add(selectedTriggers.value, t);
-  // console.log("triggers", selectedTriggers.value);
 
   activeData.value.metadata.triggerMeta!.eventType = selectedTriggers.value;
 };
@@ -182,7 +253,10 @@ const delTrigger = (t: EventType) => {
 const onCondInput = (list: IConditionList) => {
   activeData.value.metadata.triggerMeta!.condition = list;
 };
-
+const onCondClear = () => {
+  condList.value.items = [];
+  activeData.value.metadata.queryManyMeta!.condition = condList.value;
+};
 const onNodeInput = (val: string) => {
   activeData.value.metadata.triggerMeta!.wfNodeId = val;
 };
@@ -221,39 +295,44 @@ onBeforeMount(() => {
     }
   });
 });
-
-// watch(
-//   flowContextRef,
-//   (newValue: IFlowContext) => {
-//     // console.log("activeData", newValue.activeData.metadata);
-//     activeData.value = newValue.activeData;
-//     selectedTriggers.value = activeData.value.metadata.triggerMeta!.eventType ?? 0;
-//     condList.value = activeData.value.metadata.triggerMeta!.condition;
-//     wfNodeId.value = activeData.value.metadata.triggerMeta!.wfNodeId;
-//     nodeAction.value = activeData.value.metadata.triggerMeta!.nodeAction;
-
-//     formStore.get(newValue.formId).then((form) => {
-//       formRef.value = form;
-//       if (form) {
-//         formName.value = form.name;
-//         usingFlow.value = form.usingWorkflow;
-//       } else {
-//         formName.value = t("未知表单");
-//       }
-
-//       if (usingFlow.value) {
-//         let query = buildQuery({ filter: { ExternalId: newValue.formId, iscurrent: true } });
-//         wfDefinitionService.query<WfDefinition>(query).then((res) => {
-//           if (res && res.length > 0) {
-//             wfFlowData.value = JSON.parse(res[0].content);
-//             if (wfFlowData.value) {
-//               nodeList.value = buildWfNodeListItems(wfFlowData.value);
-//             }
-//           }
-//         });
-//       }
-//     });
-//   },
-//   { immediate: true }
-// );
 </script>
+
+<style lang="scss" scoped>
+.section-indent {
+  margin-left: var(--et-space-8);
+}
+
+.full-width-input {
+  width: 100%;
+}
+
+.trigger-approving-content {
+  flex-grow: 1;
+  margin-left: var(--et-space-8);
+  display: flex;
+}
+
+.trigger-node-select-wrap {
+  flex: 1;
+  margin: 0 var(--et-space-5);
+  display: flex;
+}
+
+.trigger-node-select {
+  flex: 1;
+}
+
+.trigger-action-select {
+  width: var(--et-size-100);
+  margin-right: var(--et-space-5);
+}
+
+.trigger-label {
+  flex-grow: 1;
+  margin-left: var(--et-space-8);
+}
+
+.trigger-delete {
+  margin-left: var(--et-space-8);
+}
+</style>

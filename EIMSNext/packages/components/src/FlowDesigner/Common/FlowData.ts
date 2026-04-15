@@ -358,6 +358,8 @@ export interface ApproveMeta {
   approvalCandidates: IApprovalCandidate[];
   enableCopyto?: boolean;
   copytoCandidates?: IApprovalCandidate[];
+  notifyChannels?: NotifyChannel;
+  expireSetting?: IExpireSetting;
 }
 export interface CopytoMeta {
   approvalCandidates: IApprovalCandidate[];
@@ -368,6 +370,43 @@ export interface IApprovalCandidate {
   candidateId: string;
   candidateName: string;
   cascadedDept?: boolean;
+}
+
+export enum NotifyChannel {
+  None = 0,
+  System = 1,
+  Email = 2,
+}
+
+export enum WfExpireActionType {
+  AutoNotify = 0,
+  AutoApprove = 1,
+  AutoTransfer = 2,
+  AutoReject = 3,
+  AutoReturn = 4,
+}
+
+export enum TimeUnit {
+  Minute = 0,
+  Hour = 1,
+  Day = 2,
+}
+
+export interface INotifySetting {
+  channels?: NotifyChannel;
+  candidates?: IApprovalCandidate[];
+}
+
+export interface ITransferSetting {
+  candidates?: IApprovalCandidate[];
+}
+
+export interface IExpireSetting {
+  actionType?: WfExpireActionType;
+  timeValue?: number;
+  timeUnit?: TimeUnit;
+  notifySetting?: INotifySetting;
+  transferSetting?: ITransferSetting;
 }
 
 export function createWorkflowData(t: Translator): IFlowData {

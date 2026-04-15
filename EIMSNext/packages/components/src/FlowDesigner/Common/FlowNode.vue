@@ -1,23 +1,50 @@
 <template>
   <div class="flow-node-wrapper">
-    <el-popover ref="popoverRef" width="60" popper-class="node-action-popover" trigger="hover" placement="top-end"
-      :show-arrow="false" :disabled="!allowCopy && !allowDelete">
+    <el-popover
+      ref="popoverRef"
+      width="60"
+      popper-class="node-action-popover"
+      trigger="hover"
+      placement="top-end"
+      :show-arrow="false"
+      :disabled="!allowCopy && !allowDelete"
+    >
       <div class="node-actions">
-        <div v-if="allowCopy" class="copy-btn" @click.stop="
-          copyClick(nodeData.nodeType === FlowNodeType.Condition ? branchItemData! : nodeData)
-          ">
+        <div
+          v-if="allowCopy"
+          class="copy-btn"
+          @click.stop="
+            copyClick(
+              nodeData.nodeType === FlowNodeType.Condition
+                ? branchItemData!
+                : nodeData,
+            )
+          "
+        >
           <et-icon icon="el-CopyDocument" />
         </div>
         <div v-if="allowCopy && allowDelete" class="action-split" />
-        <div v-if="allowDelete" class="delete-btn" @click.stop="delClick(nodeData)">
+        <div
+          v-if="allowDelete"
+          class="delete-btn"
+          @click.stop="delClick(nodeData)"
+        >
           <et-icon icon="el-Delete" />
         </div>
       </div>
       <template #reference>
         <slot>
-          <div class="flow-node" :class="[{ active: isActived }]" @click.stop="nodeClick(nodeData)">
+          <div
+            class="flow-node"
+            :class="[{ active: isActived }]"
+            @click.stop="nodeClick(nodeData)"
+          >
             <div class="flow-node-title initiator">
-              <et-icon :icon="'el-' + iconName" class="node-icon" :color="iconColor" />
+              <et-icon
+                :icon="'el-' + iconName"
+                class="node-icon"
+                :color="iconColor"
+              />
               <span class="node-title-text">
                 {{ nodeData.name }}
               </span>
@@ -29,7 +56,11 @@
         </slot>
       </template>
     </el-popover>
-    <AddNodeButton v-if="showAddButton" :p-node-datas="pNodeDatas" :node-data="nodeData" />
+    <AddNodeButton
+      v-if="showAddButton"
+      :p-node-datas="pNodeDatas"
+      :node-data="nodeData"
+    />
 
     <div class="flow-connector" />
     <et-icon v-if="!isStart" icon="el-CaretBottom" class="arrow-down" />
@@ -39,7 +70,12 @@
 <script lang="ts" setup>
 import { computed, inject, nextTick, reactive, ref, watch } from "vue";
 import AddNodeButton from "./AddNodeButton.vue";
-import { IFlowNodeData, IFlowContext, FlowNodeType, IFlowNodeMetaData } from "./FlowData";
+import {
+  IFlowNodeData,
+  IFlowContext,
+  FlowNodeType,
+  IFlowNodeMetaData,
+} from "./FlowData";
 
 defineOptions({
   name: "FlowNode",
@@ -57,16 +93,16 @@ const props = withDefaults(
     allowDelete?: boolean;
     branchItemData?: IFlowNodeData;
     branchItemDatas?: IFlowNodeData[];
-    contentFun?: (metadata: IFlowNodeMetaData) => string
+    contentFun?: (metadata: IFlowNodeMetaData) => string;
   }>(),
   {
     iconName: "Stamp",
-    iconColor: "#4588ed",
+    iconColor: "var(--et-color-secondary)",
     isStarted: false,
     showAddButton: true,
     allowCopy: true,
     allowDelete: true,
-  }
+  },
 );
 
 const isActived = ref(false);
@@ -79,14 +115,15 @@ watch(
   (newValue: IFlowContext) => {
     isActived.value = newValue.activeData.id === props.nodeData.id;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const content = computed(() => {
-  if (flowContext && props.contentFun) return props.contentFun(props.nodeData.metadata)
+  if (flowContext && props.contentFun)
+    return props.contentFun(props.nodeData.metadata);
 
   return props.nodeData.notes || props.nodeData.name;
-})
+});
 
 const copyClick = (data: IFlowNodeData) => {
   popoverRef.value.hide();

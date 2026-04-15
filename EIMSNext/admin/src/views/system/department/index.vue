@@ -19,11 +19,22 @@
       <!-- 用户列表 -->
       <div class="emp-list-col">
         <el-card shadow="never" class="emp-list-card">
-          <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+          <et-toolbar
+            :left-group="leftBars"
+            :right-group="rightBars"
+            @command="toolbarHandler"
+          ></et-toolbar>
           <div class="table-container">
-            <el-table ref="tableRef" v-loading="loading" :data="dataRef" show-overflow-tooltip
-              :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName"
-              @selection-change="selectionChanged" @row-click="edit">
+            <el-table
+              ref="tableRef"
+              v-loading="loading"
+              :data="dataRef"
+              show-overflow-tooltip
+              :tooltip-formatter="tableToolFormatter"
+              :row-class-name="rowClassName"
+              @selection-change="selectionChanged"
+              @row-click="edit"
+            >
               <el-table-column type="selection" width="40" />
               <el-table-column label="姓名" width="150" prop="empName" />
               <el-table-column label="编码" width="150" prop="code" />
@@ -46,15 +57,48 @@
         </el-card>
       </div>
     </div>
-    <AddEditEmp v-if="showAddEditDialog" :edit="editMode" :emp="selectedEmp" @cancel="showAddEditDialog = false"
-      @ok="handleSaved" />
-    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
-      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
+    <AddEditEmp
+      v-if="showAddEditDialog"
+      :edit="editMode"
+      :emp="selectedEmp"
+      @cancel="showAddEditDialog = false"
+      @ok="handleSaved"
+    />
+    <el-popover
+      :visible="showFilter"
+      :virtual-ref="filterBtnRef"
+      :show-arrow="false"
+      :offset="0"
+      placement="bottom-end"
+      width="500"
+      :teleported="false"
+      trigger="click"
+      :destroy-on-close="true"
+    >
+      <DataFilter
+        :model-value="condList"
+        formId="employee"
+        @ok="setFilter"
+        @cancel="showFilter = false"
+      ></DataFilter>
     </el-popover>
-    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
-      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
+    <el-popover
+      :visible="showSort"
+      :virtual-ref="sortBtnRef"
+      :show-arrow="false"
+      :offset="0"
+      placement="bottom-end"
+      width="500"
+      :teleported="false"
+      trigger="click"
+      :destroy-on-close="true"
+    >
+      <DataSort
+        :model-value="sortList"
+        formId="employee"
+        @ok="setSort"
+        @cancel="showSort = false"
+      ></DataSort>
     </el-popover>
   </div>
 </template>
@@ -64,7 +108,14 @@ import { ODataQuery } from "@/utils/query";
 import { DataPerms, Department, Employee, FieldType } from "@eimsnext/models";
 import { SortDirection, employeeService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, EtConfirm, ConfirmResult } from "@eimsnext/components";
+import {
+  ToolbarItem,
+  IConditionList,
+  toODataQuery,
+  IFieldSortList,
+  EtConfirm,
+  ConfirmResult,
+} from "@eimsnext/components";
 import { TableInstance, TableTooltipData } from "element-plus";
 
 defineOptions({
@@ -121,14 +172,19 @@ const leftBars = ref<ToolbarItem[]>([
       disabled: true,
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
-          var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
+          var confirm = await EtConfirm.showDialog(
+            `你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`,
+            { title: "你确定要删除所选数据吗？" }
+          );
           if (confirm == ConfirmResult.Yes) {
-            await employeeService.delete("batch", { keys: checkedDatas.value.map((x) => x.id) }).then(() => {
-              handleQuery();
-            });
+            await employeeService
+              .delete("batch", { keys: checkedDatas.value.map((x) => x.id) })
+              .then(() => {
+                handleQuery();
+              });
           }
         }
-      }
+      },
     },
   },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-upload" } },
@@ -194,7 +250,6 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
   showFilter.value = false;
-  // console.log("condList", filter);
 
   updateQueryParams();
   handleQuery();
@@ -203,7 +258,6 @@ const setFilter = (filter: IConditionList) => {
 const setSort = (sort: IFieldSortList) => {
   sortList.value = sort;
   showSort.value = false;
-  // console.log("sortList", sort);
 
   updateQueryParams();
   handleQuery();
@@ -226,8 +280,6 @@ const updateQueryParams = () => {
     preFilter
   );
   queryParams.value.expand = "department";
-
-  // console.log("queryParams list", queryParams.value);
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -260,7 +312,6 @@ const handleDeptChanged = (dept?: Department) => {
   updateQueryParams();
   handleQuery();
 };
-// 查询
 const handleQuery = () => {
   loading.value = true;
 
@@ -286,12 +337,10 @@ const loadData = () => {
     .query<Employee>(query)
     .then((res: Employee[]) => {
       dataRef.value = res;
-      // console.log("data.....", dataRef.value);
     })
     .finally(() => (loading.value = false));
 };
 
-// 选中项发生变化
 const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
   leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
@@ -348,19 +397,19 @@ onMounted(() => {
   height: 100vh;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0 8px;
+  padding: 0 var(--et-space-8);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  min-width: 700px; // 设置整个页面的最小宽度
+  min-width: var(--et-size-700); // 设置整个页面的最小宽度
 }
 
 // 主行样式
 .main-row {
   flex: 1;
   display: flex;
-  min-width: 660px; // 确保主行内容不会被压缩
-  gap: 20px; // 替代el-row的gutter
+  min-width: var(--et-size-660); // 确保主行内容不会被压缩
+  gap: var(--et-space-20); // 替代el-row的gutter
 }
 
 // 部门树列样式
@@ -369,8 +418,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 300px; // 设置最小宽度
-  max-width: 500px; // 设置最大宽度，防止挤占员工列表
+  min-width: var(--et-size-300); // 设置最小宽度
+  max-width: var(--et-size-500); // 设置最大宽度，防止挤占员工列表
   flex-shrink: 0; // 防止被压缩
   max-height: 100%; // 确保不超过父容器高度
 }
@@ -380,16 +429,16 @@ onMounted(() => {
   flex: 1;
   overflow-y: auto;
   overflow-x: auto;
-  margin-top: 10px;
-  background-color: #fff;
+  margin-top: var(--et-space-10);
+  background-color: var(--et-bg-container);
   min-height: 0;
   width: 100%;
-  max-height: calc(100vh - 180px); // 设置最大高度，确保出现滚动条
+  max-height: calc(100vh - var(--et-size-180)); // 设置最大高度，确保出现滚动条
   display: flex;
   flex-direction: column;
 
   // 确保内部元素能够触发横向滚动且不产生额外滚动条
-  >* {
+  > * {
     min-width: 100%;
     max-height: 100%; // 限制内部元素高度
     overflow: hidden; // 防止内部元素产生滚动条
@@ -402,7 +451,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 360px; // 设置最小宽度
+  min-width: var(--et-size-360); // 设置最小宽度
   flex: 1; // 允许在有空间时扩展
 }
 
@@ -424,37 +473,37 @@ onMounted(() => {
 
 // 分页容器样式
 .pagination-container {
-  margin-top: 16px;
+  margin-top: var(--et-space-16);
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 0 10px 10px;
+  padding: 0 var(--et-space-10) var(--et-space-10);
   box-sizing: border-box;
   //横向外层容器内居中显示
   position: absolute;
   left: 30%;
   transform: translateX(-10%);
-  bottom: 0px;
+  bottom: var(--et-space-0);
 }
 
 // 原始样式保留
 .org-menu {
-  color: #838892;
-  font-size: 14px;
-  height: 28px;
-  line-height: 28px;
+  color: var(--et-text-tertiary);
+  font-size: var(--et-font-size-14);
+  height: var(--et-space-28);
+  line-height: var(--et-space-28);
 
   &:not(:first-child) {
-    margin-top: 10px;
+    margin-top: var(--et-space-10);
   }
 }
 
 .menu-items {
-  margin: 0 20px;
-  font-size: 14px;
+  margin: 0 var(--et-space-20);
+  font-size: var(--et-font-size-14);
 }
 
 :deep(.data-filter) {
-  margin-left: 0px;
+  margin-left: var(--et-space-0);
 }
 </style>

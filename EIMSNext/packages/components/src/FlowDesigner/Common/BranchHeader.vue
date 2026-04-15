@@ -5,7 +5,7 @@
     :show-add-button="false"
     class="branch-header"
   >
-    <div class="flow-node" style="transform: rotateZ(45deg); width: 36px; height: 36px">
+    <div class="flow-node branch-header-node">
       <et-icon class="icon-branch-header" icon="branch-node" size="24px" />
     </div>
   </FlowNode>
@@ -26,7 +26,13 @@ const props = defineProps<{
 </script>
 <style lang="scss" scoped>
 .branch-header {
-  padding-top: 4px;
-  height: 80px;
+  padding-top: var(--et-space-4);
+  height: var(--et-size-80);
+}
+
+.branch-header-node {
+  transform: rotateZ(45deg);
+  width: var(--et-size-36);
+  height: var(--et-size-36);
 }
 </style>

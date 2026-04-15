@@ -1,0 +1,25 @@
+:root {
+  --et-text-primary: #141e31;
+  --et-text-secondary: #525967;
+  --et-text-tertiary: #838892;
+  --et-text-disabled: #b4b9c2;
+  --et-text-primary-soft: rgb(20 30 49 / 78%);
+  --et-text-secondary-soft: rgb(20 30 49 / 66%);
+  --et-text-tertiary-soft: rgb(20 30 49 / 47%);
+
+  --et-bg-page: #f2f3f8;
+  --et-bg-container: #ffffff;
+  --et-bg-elevated: #ffffff;
+  --et-bg-muted: #f0f2f5;
+  --et-bg-hover: #f5f7fa;
+
+  --et-border-color: #dcdfe6;
+  --et-border-color-light: #eeeeee;
+  --et-border-color-strong: #d7d9dc;
+  --et-border-color-focus: var(--et-color-primary);
+
+  --et-menu-background: var(--el-menu-bg-color, var(--et-bg-container));
+  --et-menu-text: var(--el-menu-text-color, var(--et-text-primary));
+  --et-menu-active-text: var(--el-menu-active-color, var(--et-color-primary));
+  --et-menu-hover: var(--el-menu-hover-bg-color, var(--et-bg-primary-soft));
+}

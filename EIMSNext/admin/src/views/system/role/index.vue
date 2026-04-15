@@ -9,7 +9,11 @@
       <!-- 用户列表 -->
       <div class="emp-list-col">
         <el-card shadow="never" class="emp-list-card">
-          <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+          <et-toolbar
+            :left-group="leftBars"
+            :right-group="rightBars"
+            @command="toolbarHandler"
+          ></et-toolbar>
 
           <div class="table-container">
             <el-table v-loading="loading" :data="dataRef" @selection-change="handleSelectionChange">
@@ -35,16 +39,48 @@
         </el-card>
       </div>
     </div>
-    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
-      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataFilter :model-value="condList" formId="employee" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
+    <el-popover
+      :visible="showFilter"
+      :virtual-ref="filterBtnRef"
+      :show-arrow="false"
+      :offset="0"
+      placement="bottom-end"
+      width="500"
+      :teleported="false"
+      trigger="click"
+      :destroy-on-close="true"
+    >
+      <DataFilter
+        :model-value="condList"
+        formId="employee"
+        @ok="setFilter"
+        @cancel="showFilter = false"
+      ></DataFilter>
     </el-popover>
-    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
-      width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataSort :model-value="sortList" formId="employee" @ok="setSort" @cancel="showSort = false"></DataSort>
+    <el-popover
+      :visible="showSort"
+      :virtual-ref="sortBtnRef"
+      :show-arrow="false"
+      :offset="0"
+      placement="bottom-end"
+      width="500"
+      :teleported="false"
+      trigger="click"
+      :destroy-on-close="true"
+    >
+      <DataSort
+        :model-value="sortList"
+        formId="employee"
+        @ok="setSort"
+        @cancel="showSort = false"
+      ></DataSort>
     </el-popover>
-    <member-select-dialog v-model="showMemberDialog" :member-options="{ showTabs: MemberTabs.Employee }"
-      destroy-on-close @ok="finishSelect" />
+    <member-select-dialog
+      v-model="showMemberDialog"
+      :member-options="{ showTabs: MemberTabs.Employee }"
+      destroy-on-close
+      @ok="finishSelect"
+    />
   </div>
 </template>
 
@@ -53,7 +89,16 @@ import { ODataQuery } from "@/utils/query";
 import { DataPerms, Department, Employee, FieldType, Role } from "@eimsnext/models";
 import { SortDirection, employeeService, roleService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { ToolbarItem, IConditionList, toODataQuery, IFieldSortList, ISelectedTag, EtConfirm, MemberTabs, ConfirmResult } from "@eimsnext/components";
+import {
+  ToolbarItem,
+  IConditionList,
+  toODataQuery,
+  IFieldSortList,
+  ISelectedTag,
+  EtConfirm,
+  MemberTabs,
+  ConfirmResult,
+} from "@eimsnext/components";
 
 defineOptions({
   name: "RoleManager",
@@ -105,15 +150,22 @@ const leftBars = ref<ToolbarItem[]>([
       disabled: true,
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
-          var confirm = await EtConfirm.showDialog(`你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`, { title: "你确定要删除所选数据吗？" })
+          var confirm = await EtConfirm.showDialog(
+            `你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`,
+            { title: "你确定要删除所选数据吗？" }
+          );
           if (confirm == ConfirmResult.Yes) {
-            await roleService.removeEmps(roleId.value, checkedDatas.value.map(x => x.id))
+            await roleService
+              .removeEmps(
+                roleId.value,
+                checkedDatas.value.map((x) => x.id)
+              )
               .then(() => {
-                handleQuery()
-              })
+                handleQuery();
+              });
           }
         }
-      }
+      },
     },
   },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-upload" } },
@@ -177,9 +229,13 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
 };
 
 const finishSelect = (tags: ISelectedTag[]) => {
-  //   console.log("sel tags", tags);
   if (tags.length > 0) {
-    roleService.addEmps(roleId.value, tags.map(x => x.id)).then(() => handleQuery())
+    roleService
+      .addEmps(
+        roleId.value,
+        tags.map((x) => x.id)
+      )
+      .then(() => handleQuery());
   }
 
   showMemberDialog.value = false;
@@ -188,7 +244,6 @@ const finishSelect = (tags: ISelectedTag[]) => {
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
   showFilter.value = false;
-  // console.log("condList", filter);
 
   updateQueryParams();
   handleQuery();
@@ -197,7 +252,6 @@ const setFilter = (filter: IConditionList) => {
 const setSort = (sort: IFieldSortList) => {
   sortList.value = sort;
   showSort.value = false;
-  // console.log("sortList", sort);
 
   updateQueryParams();
   handleQuery();
@@ -220,8 +274,6 @@ const updateQueryParams = () => {
     preFilter
   );
   queryParams.value.expand = "department";
-
-  // console.log("queryParams filter", queryParams.value.filter);
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -247,12 +299,11 @@ const handleRoleQuery = (role?: Role) => {
   updateQueryParams();
   handleQuery();
 };
-// 查询
 const handleQuery = () => {
   if (!roleId.value) {
     totalRef.value = 0;
-    dataRef.value = []
-    return
+    dataRef.value = [];
+    return;
   }
   loading.value = true;
 
@@ -279,7 +330,6 @@ const loadData = () => {
     .finally(() => (loading.value = false));
 };
 
-// 选中项发生变化
 const handleSelectionChange = (selection: any[]) => {
   checkedDatas.value = selection;
   leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
@@ -307,19 +357,19 @@ onMounted(() => {
   height: 100vh;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0 8px;
+  padding: 0 var(--et-space-8);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  min-width: 700px; // 设置整个页面的最小宽度
+  min-width: var(--et-size-700); // 设置整个页面的最小宽度
 }
 
 // 主行样式
 .main-row {
   flex: 1;
   display: flex;
-  min-width: 660px; // 确保主行内容不会被压缩
-  gap: 20px; // 替代el-row的gutter
+  min-width: var(--et-size-660); // 确保主行内容不会被压缩
+  gap: var(--et-space-20); // 替代el-row的gutter
 }
 
 // 角色树列样式
@@ -328,8 +378,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 300px; // 设置最小宽度
-  max-width: 500px; // 设置最大宽度，防止挤占员工列表
+  min-width: var(--et-size-300); // 设置最小宽度
+  max-width: var(--et-size-500); // 设置最大宽度，防止挤占员工列表
   flex-shrink: 0; // 防止被压缩
   max-height: 100%; // 确保不超过父容器高度
 }
@@ -340,7 +390,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 360px; // 设置最小宽度
+  min-width: var(--et-size-360); // 设置最小宽度
   flex: 1; // 允许在有空间时扩展
 }
 
@@ -362,20 +412,20 @@ onMounted(() => {
 
 // 分页容器样式
 .pagination-container {
-  margin-top: 16px;
+  margin-top: var(--et-space-16);
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 0 10px 10px;
+  padding: 0 var(--et-space-10) var(--et-space-10);
   box-sizing: border-box;
   //横向外层容器内居中显示
   position: absolute;
   left: 30%;
   transform: translateX(-10%);
-  bottom: 0px;
+  bottom: var(--et-space-0);
 }
 
 :deep(.data-filter) {
-  margin-left: 0px;
+  margin-left: var(--et-space-0);
 }
 </style>

@@ -1,0 +1,202 @@
+@use "../../common/index" as *;
+
+.member-select-dialog {
+  width: var(--et-size-750);
+
+  :deep(.el-dialog__footer) {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: var(--et-space-12) !important;
+    flex-direction: row !important;
+
+    .el-button {
+      margin: var(--et-space-0) !important;
+    }
+  }
+
+  .dialog-body {
+    padding: var(--et-space-12) var(--et-space-20);
+  }
+
+  .member-select {
+    width: 100%;
+    height: var(--et-size-480);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .search-input {
+      width: 100%;
+      margin-top: var(--et-space-10);
+      margin-bottom: -1px;
+    }
+
+    .search-result {
+      border: 1px solid var(--et-border-color-light);
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .result-container {
+      padding: 0 var(--et-space-12);
+      border-bottom: 1px solid var(--et-border-color-light);
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+
+      .el-tabs__nav-wrap::after {
+        height: 0;
+      }
+
+      .el-tabs__header.is-top {
+        margin: var(--et-space-0);
+
+        .el-tabs__nav.is-top {
+          float: left;
+
+          .el-tabs__item {
+            flex: none;
+          }
+        }
+      }
+
+      .el-tabs {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .el-tabs__content {
+        flex: 1;
+        margin-top: var(--et-space-0) !important;
+        overflow: hidden;
+      }
+
+      .el-tab-pane {
+        height: 100%;
+        display: flex;
+        overflow: hidden;
+      }
+
+      .el-collapse {
+        border-top: none;
+        border-bottom: none;
+      }
+    }
+
+    .filter-items {
+      display: flex;
+      flex: none;
+      flex-direction: column;
+
+      .filter-item {
+        border-radius: var(--et-radius-4);
+        color: var(--et-text-primary);
+        cursor: pointer;
+        font-size: var(--et-font-size-14);
+        height: var(--et-size-30);
+        line-height: var(--et-line-height-30);
+        padding-left: var(--et-space-12);
+        margin: var(--et-space-5) var(--et-space-8) 0 0;
+
+        &:hover,
+        &.active {
+          background: var(--et-bg-primary-soft);
+          color: var(--et-color-primary);
+        }
+      }
+    }
+
+    .dept-tree {
+      flex: 1;
+      overflow-y: auto;
+
+      .node-data {
+        width: 100%;
+
+        .node-wrapper {
+          display: flex;
+          align-items: center;
+
+          .node-icon {
+            width: var(--et-size-20);
+            height: var(--et-size-20);
+          }
+
+          .node-label {
+            padding-left: var(--et-space-5);
+            flex: 1 1 auto;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .node-action {
+            margin: 0 var(--et-space-5);
+            flex: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+.dept-select {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+
+  .dept-tree {
+    margin-top: var(--et-space-12);
+    height: calc(100% - var(--et-space-12));
+  }
+
+  .options-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.emp-select {
+  height: 100%;
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+
+  .left-panel {
+    width: 50%;
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid var(--et-border-color-light);
+    box-sizing: border-box;
+
+    .dept-tree {
+      height: calc(100% - var(--et-size-36));
+      margin-top: var(--et-space-0);
+      box-sizing: border-box;
+      margin-right: var(--et-space-8);
+    }
+  }
+
+  .right-panel {
+    width: 50%;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+}
+
+.full-height-list {
+  padding-top: var(--et-space-0);
+  height: 100%;
+}
+
+.borderless-list {
+  border: none;
+}

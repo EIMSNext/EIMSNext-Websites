@@ -64,3 +64,13 @@ export enum FieldType {
   Department1 = "department1",
   Department2 = "department2",
 }
+
+export const SortableFieldTypes = [
+  FieldType.Input,
+  FieldType.Number,
+  FieldType.TimeStamp,
+  FieldType.Radio,
+  FieldType.Select1,
+  FieldType.Employee1,
+  FieldType.Department1,
+];

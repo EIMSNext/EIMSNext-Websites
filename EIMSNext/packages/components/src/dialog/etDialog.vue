@@ -1,5 +1,11 @@
 <template>
-  <el-dialog class="et-dialog" :model-value="modelValue" v-bind="attrs" ref="ori" @close="cancel">
+  <el-dialog
+    class="et-dialog"
+    :model-value="modelValue"
+    v-bind="attrs"
+    ref="ori"
+    @close="cancel"
+  >
     <slot></slot>
     <slot name="header"></slot>
     <slot name="footer" v-if="showFooter">
@@ -18,7 +24,7 @@
   </el-dialog>
 </template>
 <script lang="ts" setup>
-import "./style/index.less";
+import "./style/index.scss";
 import { ref, useAttrs } from "vue";
 
 const attrs = useAttrs();
@@ -39,7 +45,7 @@ const props = withDefaults(
     cancelText: "取消",
     okText: "确定",
     showFooter: true,
-  }
+  },
 );
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);

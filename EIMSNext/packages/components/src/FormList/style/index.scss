@@ -1,0 +1,46 @@
+@use "../../common/index" as *;
+
+.form-list {
+  border: none;
+  border-radius: var(--et-radius-4);
+  padding: var(--et-space-0);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .form-list-wrapper {
+    list-style: none;
+    padding: var(--et-space-0);
+    margin: var(--et-space-0);
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(100% - var(--et-size-36));
+
+    .list-item {
+      padding: 0 var(--et-space-8);
+      line-height: var(--et-line-height-32);
+      transition: background-color var(--et-duration-normal);
+
+      &:hover,
+      &.active {
+        background-color: var(--el-fill-color-light, var(--et-bg-hover));
+      }
+
+      .item-wrapper {
+        display: flex;
+        justify-content: space-between;
+
+        .item-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .item-label {
+          font-weight: 500;
+          color: var(--et-text-secondary);
+        }
+      }
+    }
+  }
+}

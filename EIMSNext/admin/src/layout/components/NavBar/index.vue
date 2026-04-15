@@ -9,25 +9,24 @@
   </div>
 </template>
 
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <style lang="scss" scoped>
 .navbar {
   display: flex;
   justify-content: space-between;
   height: $navbar-height;
-  background: var(--el-bg-color);
+  background: var(--et-bg-container);
 
   &__left {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    min-width: 40px;
-    height: 50px;
-    line-height: 50px;
-    color: var(--et-color-text);
+    min-width: var(--et-size-40);
+    height: var(--et-size-50);
+    line-height: var(--et-size-50);
+    color: var(--et-text-primary);
     cursor: pointer;
   }
 }

@@ -1,0 +1,40 @@
+$prefix: "et";
+
+.no-padding {
+  padding: var(--et-space-0);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.flex-x-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-y-center {
+  display: flex;
+  align-items: center;
+}
+
+.btn-info {
+  background-color: transparent;
+  color: var(--et-text-tertiary);
+
+  &:hover {
+    background-color: var(--et-bg-info-soft) !important;
+    color: var(--et-color-info) !important;
+  }
+}
+
+.btn-delete {
+  background-color: transparent;
+  color: var(--et-text-tertiary);
+
+  &:hover {
+    background-color: var(--et-bg-danger-soft) !important;
+    color: var(--et-color-danger) !important;
+  }
+}

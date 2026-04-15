@@ -15,8 +15,7 @@
       :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
         <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms"
-          @ok="handleViewOk">
-        </FormDataView>
+          @ok="handleViewOk"></FormDataView>
       </div>
     </et-dialog>
     <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
@@ -32,8 +31,8 @@
       <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
     <et-toolbar :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
-    <div class="data-list" style="height: 100%">
-      <el-table ref="tableRef" :data="flattedData" :span-method="idBasedSpanMethod" style="width: 100%; height: 100%"
+    <div class="data-list data-list-full-height">
+      <el-table ref="tableRef" :data="flattedData" :span-method="idBasedSpanMethod" class="data-table-full"
         show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" :fit="true"
         @selection-change="selectionChanged" @row-click="showDetails">
         <el-table-column type="selection" width="40" :selectable="selectable" />
@@ -49,7 +48,6 @@
           <template v-else>
             <el-table-column :prop="col.field" :label="col.title" :width="col.width" show-overflow-tooltip
               :resizable="true">
-              <!-- 使用slot-scope方式渲染，支持HTML -->
               <template #default="scope">
                 <div v-html="formatter(scope.row, { property: col.field }, scope.row[col.field])"></div>
               </template>
@@ -79,7 +77,12 @@ import {
   DataPerms,
 } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
-import { IDynamicFindOptions, SortDirection, authGroupService, formDataService } from "@eimsnext/services";
+import {
+  IDynamicFindOptions,
+  SortDirection,
+  authGroupService,
+  formDataService,
+} from "@eimsnext/services";
 import {
   MessageIcon,
   ToolbarItem,
@@ -88,6 +91,7 @@ import {
   IFieldSortList,
   IFormFieldDef,
   IToolbarItemDropdownItem,
+  flowStatusArray,
 } from "@eimsnext/components";
 import { TableTooltipData } from "element-plus";
 import type { TableInstance } from "element-plus";
@@ -109,15 +113,17 @@ const formDef = ref<FormDef>();
 const filterBtnRef = ref();
 const sortBtnRef = ref();
 const fieldBtnRef = ref();
-const authGrps = ref<AuthGroup[]>([])
-const curAuthGrp = ref<AuthGroup>()
-const fieldPerms = ref<IFieldPerm[]>()
-const userStore = useUserStore()
-const { currentUser } = userStore
+const authGrps = ref<AuthGroup[]>([]);
+const curAuthGrp = ref<AuthGroup>();
+const fieldPerms = ref<IFieldPerm[]>();
+const userStore = useUserStore();
+const { currentUser } = userStore;
 
-const dataPerms = computed(() => getAuthGroupDataPerms(curAuthGrp.value))
-const canAdd = computed(() => hasDataPerm(currentUser.userType, DataPerms.AddNew, dataPerms.value))
-const canRemove = computed(() => hasDataPerm(currentUser.userType, DataPerms.Remove, dataPerms.value))
+const dataPerms = computed(() => getAuthGroupDataPerms(curAuthGrp.value));
+const canAdd = computed(() => hasDataPerm(currentUser.userType, DataPerms.AddNew, dataPerms.value));
+const canRemove = computed(() =>
+  hasDataPerm(currentUser.userType, DataPerms.Remove, dataPerms.value)
+);
 
 const leftBars = ref<ToolbarItem[]>([
   {
@@ -127,16 +133,21 @@ const leftBars = ref<ToolbarItem[]>([
       class: "auth-gropu-filter",
       command: "authgrp",
       visible: false,
+      showDynamicText: true,
       onCommand: (cmd) => {
-        curAuthGrp.value = authGrps.value.find(x => x.id == cmd);
+        curAuthGrp.value = authGrps.value.find((x) => x.id == cmd);
         fieldPerms.value = curAuthGrp.value?.fieldPerms;
 
         initChildrenField(formDef.value!.content?.items!, []);
-        columns.value = buildColumns(formDef.value!.content?.items!, formDef.value!.usingWorkflow, []);
+        columns.value = buildColumns(
+          formDef.value!.content?.items!,
+          formDef.value!.usingWorkflow,
+          []
+        );
         updateQueryParams();
         handleQuery();
-      }
-    }
+      },
+    },
   },
   {
     type: "button",
@@ -240,23 +251,26 @@ formStore.get(formId).then(async (form: FormDef | undefined) => {
   if (form) {
     formDef.value = form;
     if (userStore.currentUser.userType == UserType.Employee) {
-      await authGroupService.query<AuthGroup>(`$filter=appid eq '${form.appId}' AND formid eq '${form.id}'`).then(res => {
-        authGrps.value = res;
-        if (res.length > 0) {
-          curAuthGrp.value = res[0]
-          fieldPerms.value = curAuthGrp.value.fieldPerms;
+      await authGroupService
+        .query<AuthGroup>(`$filter=appid eq '${form.appId}' AND formid eq '${form.id}'`)
+        .then((res) => {
+          authGrps.value = res;
+          if (res.length > 0) {
+            curAuthGrp.value = res[0];
+            fieldPerms.value = curAuthGrp.value.fieldPerms;
 
-          let menuItems: IToolbarItemDropdownItem[] = res.map(x => { return { text: x.name, command: x.id, visible: true, } })
-          menuItems[0].checked = true
+            let menuItems: IToolbarItemDropdownItem[] = res.map((x) => {
+              return { text: x.name, command: x.id, visible: true };
+            });
+            menuItems[0].checked = true;
 
-          let grpItem = leftBars.value.find((x) => x.config.command == "authgrp")
-          // console.log("grpItem", grpItem)
-          if (grpItem) {
-            grpItem.config.menuItems = menuItems
-            grpItem.config.visible = true
+            let grpItem = leftBars.value.find((x) => x.config.command == "authgrp");
+            if (grpItem) {
+              grpItem.config.menuItems = menuItems;
+              grpItem.config.visible = true;
+            }
           }
-        }
-      });
+        });
     }
     initChildrenField(form.content?.items!, [], fieldPerms.value);
     columns.value = buildColumns(form.content?.items!, form.usingWorkflow, [], fieldPerms.value);
@@ -314,7 +328,6 @@ const execDelete = () => {
 const setFilter = (filter: IConditionList) => {
   condList.value = filter;
   showFilter.value = false;
-  // console.log("condList", filter);
 
   updateQueryParams();
   handleQuery();
@@ -323,14 +336,12 @@ const setFilter = (filter: IConditionList) => {
 const setSort = (sort: IFieldSortList) => {
   sortList.value = sort;
   showSort.value = false;
-  // console.log("sortList", sort);
 
   updateQueryParams();
   handleQuery();
 };
 
 const setField = (fields: IFormFieldDef[]) => {
-  // console.log("fieldList", fields);
   fieldList.value = fields;
   showField.value = false;
   initChildrenField(formDef.value!.content?.items!, fieldList.value);
@@ -339,7 +350,6 @@ const setField = (fields: IFormFieldDef[]) => {
     formDef.value!.usingWorkflow,
     fieldList.value
   );
-  // console.log("columns", columns.value);
   updateQueryParams();
   handleQuery();
 };
@@ -402,60 +412,56 @@ const formatter = (row: any, column: any, cellValue: any) => {
     }
     // 添加对图片字段的处理
     if (colSetting.type == FieldType.ImageUpload) {
-      if (!cellValue) return '';
+      if (!cellValue) return "";
 
       // 处理图片对象数组，提取url属性
       if (Array.isArray(cellValue)) {
         // 过滤出有效的图片对象
-        const validImages = cellValue.filter(item => typeof item === 'object' && item !== null && item.url);
-        if (validImages.length === 0) return '';
+        const validImages = cellValue.filter(
+          (item) => typeof item === "object" && item !== null && item.url
+        );
+        if (validImages.length === 0) return "";
 
-        // 生成图片标签
-        return validImages.map(img => {
-          // 将反斜杠转换为正斜杠
-          const imgUrl = img.url.replace(/\\/g, '/');
-          return `<img src="${imgUrl}" style="width: 40px; height: 40px; border-radius: 4px; margin-right: 4px; object-fit: cover; cursor: pointer;" />`;
-        }).join('');
-      }
-      // 处理单个图片对象
-      else if (typeof cellValue === 'object' && cellValue !== null && cellValue.url) {
-        const imgUrl = cellValue.url.replace(/\\/g, '/');
-        return `<img src="${imgUrl}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" />`;
-      }
-      // 处理图片URL字符串
-      else if (typeof cellValue === 'string') {
-        const imgUrl = cellValue.replace(/\\/g, '/');
-        return `<img src="${imgUrl}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" />`;
+        return validImages
+          .map((img) => {
+            const imgUrl = img.url.replace(/\\/g, "/");
+            return `<img src="${imgUrl}" class="table-image-thumb table-image-thumb-spaced" />`;
+          })
+          .join("");
+      } else if (typeof cellValue === "object" && cellValue !== null && cellValue.url) {
+        const imgUrl = cellValue.url.replace(/\\/g, "/");
+        return `<img src="${imgUrl}" class="table-image-thumb" />`;
+      } else if (typeof cellValue === "string") {
+        const imgUrl = cellValue.replace(/\\/g, "/");
+        return `<img src="${imgUrl}" class="table-image-thumb" />`;
       }
     }
   }
 
-  // 添加对对象和数组的处理
-  if (cellValue && typeof cellValue === 'object') {
-    // 处理单选情况：对象 { label: '选项名称', value: '选项值' }
+  if (cellValue && typeof cellValue === "object") {
     if (cellValue.label) {
       return cellValue.label;
     }
-    // 处理多选情况：数组
     if (Array.isArray(cellValue)) {
-      // 处理对象数组 [{ label: '选项1', value: '1' }, ...]
-      if (cellValue.length > 0 && typeof cellValue[0] === 'object' && cellValue[0] !== null) {
-        return cellValue.map(item => item.label || item.name || '').filter(Boolean).join(', ');
-      }
-      // 处理基本类型数组 [1, 2, 3] 或 ['a', 'b', 'c']
-      else {
-        return cellValue.map(item => String(item)).filter(Boolean).join(', ');
+      if (cellValue.length > 0 && typeof cellValue[0] === "object" && cellValue[0] !== null) {
+        return cellValue
+          .map((item) => item.label || item.name || "")
+          .filter(Boolean)
+          .join(", ");
+      } else {
+        return cellValue
+          .map((item) => String(item))
+          .filter(Boolean)
+          .join(", ");
       }
     }
   }
 
-  // 处理基本类型，直接返回字符串表示
   if (cellValue !== undefined && cellValue !== null) {
     return String(cellValue);
   }
 
-  // 处理undefined或null，显示空字符串
-  return '';
+  return "";
 };
 const getColumnSetting = (field: string) => {
   const findSub = (children: ITableColumn[], field: string) => {
@@ -479,22 +485,8 @@ const getColumnSetting = (field: string) => {
   return findSub(columns.value, field);
 };
 const getFlowStatusName = (status: FlowStatus) => {
-  switch (status) {
-    case FlowStatus.Draft:
-      return "草稿";
-    case FlowStatus.Approving:
-      return "审批中";
-    case FlowStatus.Approved:
-      return "已审批";
-    case FlowStatus.Rejected:
-      return "已驳回";
-    case FlowStatus.Discarded:
-      return "已废弃";
-    case FlowStatus.Suspended:
-      return "已挂起";
-    default:
-      return "";
-  }
+  let st = flowStatusArray().find((x) => x.id == status);
+  return st ? t(st.i18n) : "";
 };
 const tableToolFormatter = (data: TableTooltipData<FormData>) => {
   return formatter(data.row, data.column, data.cellValue);
@@ -518,7 +510,11 @@ const childrenFields = ref<string[]>([]);
 const flattedData = ref<any[]>([]);
 const spanMap = ref<number[]>([]);
 
-const initChildrenField = (fields: FieldDef[], displayFields: IFormFieldDef[], fieldPerms?: IFieldPerm[]) => {
+const initChildrenField = (
+  fields: FieldDef[],
+  displayFields: IFormFieldDef[],
+  fieldPerms?: IFieldPerm[]
+) => {
   childrenFields.value = [];
   fields.forEach((x) => {
     if (x.columns && x.columns.length > 0) childrenFields.value.push(x.field);
@@ -527,17 +523,15 @@ const initChildrenField = (fields: FieldDef[], displayFields: IFormFieldDef[], f
 
 const processData = () => {
   if (dataRef.value) {
-    // 展开嵌套数据
     flattedData.value = [];
     dataRef.value.forEach((item) => {
       var dataItem = { ...item, ...item.data };
       delete dataItem["data"];
 
-      // 处理嵌套的value属性结构
       for (const key in dataItem) {
         if (dataItem.hasOwnProperty(key)) {
           const value = dataItem[key];
-          if (value && typeof value === 'object' && 'label' in value) {
+          if (value && typeof value === "object" && "label" in value) {
             dataItem[key] = value.label;
           }
         }
@@ -550,9 +544,7 @@ const processData = () => {
             (maxItemCount = Math.max(maxItemCount, (dataItem[childField] || []).length))
         );
         maxItemCount = Math.min(maxItemCount, displayItemCount);
-        // console.log("maxItemCount", maxItemCount)
         if (maxItemCount == 0) {
-          //可能没有子表数据
           flattedData.value.push({ ...dataItem });
         } else {
           for (var i = 0; i < maxItemCount; i++) {
@@ -561,7 +553,6 @@ const processData = () => {
             childrenFields.value.forEach((childField) => {
               const children = dataItem[childField] || [];
               let child = children[i] || {};
-              // 动态复制父级所有字段（排除子字段）
               const parentFields = { ...dataItem };
               delete parentFields[childField];
               flat = {
@@ -570,7 +561,6 @@ const processData = () => {
               };
             });
 
-            // console.log("flat", item, flat);
             flattedData.value.push(flat);
           }
         }
@@ -579,7 +569,6 @@ const processData = () => {
       }
     });
 
-    // 计算合并规则
     const mergeField = "id";
     let pos = 0;
     spanMap.value = [];
@@ -619,13 +608,34 @@ const idBasedSpanMethod = (data: {
   width: 100%;
 }
 
+.data-list-full-height {
+  height: 100%;
+}
+
+.data-table-full {
+  width: 100%;
+  height: 100%;
+}
+
 :deep(.data-filter) {
-  margin-left: 0px;
+  margin-left: var(--et-space-0);
 }
 
 :deep(.auth-gropu-filter) {
-  line-height: 32px;
-  padding: 0 8px;
-  margin-right: 10px;
+  line-height: var(--et-line-height-32);
+  padding: 0 var(--et-space-8);
+  margin-right: var(--et-space-10);
+}
+
+:deep(.table-image-thumb) {
+  width: var(--et-size-40);
+  height: var(--et-size-40);
+  border-radius: var(--et-radius-4);
+  object-fit: cover;
+  cursor: pointer;
+}
+
+:deep(.table-image-thumb-spaced) {
+  margin-right: var(--et-space-4);
 }
 </style>

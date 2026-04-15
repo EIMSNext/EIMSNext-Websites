@@ -6,23 +6,34 @@
           <!-- <span v-if="groupLevel == 1">条件组，</span> -->
           {{ t("comp.meetCondition") }}
         </div>
-        <el-select v-model="list.rel" size="small" style="width: 65px; margin-left: 5px; margin-right: 5px">
+        <el-select v-model="list.rel" size="small" class="relation-select">
           <el-option :label="t('comp.rel_And')" value="and" />
           <el-option :label="t('comp.rel_Or')" value="or" />
         </el-select>
         <div>{{ t("comp.conditions") }}</div>
       </div>
-      <div v-if="groupLevel > 1">
-        <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
-      </div>
+      <!-- <div v-if="groupLevel > 1"> -->
+      <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
+      <!-- </div> -->
     </div>
     <div class="btn-add-item">
-      <el-link type="primary" underline="never" class="add-item" @click="addItem">
-        <et-icon icon="el-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
+      <el-link
+        type="primary"
+        underline="never"
+        class="add-item"
+        @click="addItem"
+      >
+        <et-icon icon="el-circle-plus" size="1.2em" class="add-icon"></et-icon>
         {{ t("computed.addCondition") }}
       </el-link>
-      <el-link v-if="groupLevel < maxLevel" type="primary" underline="never" class="add-item" @click="addGroup">
-        <et-icon icon="el-circle-plus" size="1.2em" style="padding-right: 5px"></et-icon>
+      <el-link
+        v-if="groupLevel < maxLevel"
+        type="primary"
+        underline="never"
+        class="add-item"
+        @click="addGroup"
+      >
+        <et-icon icon="el-circle-plus" size="1.2em" class="add-icon"></et-icon>
         {{ t("computed.addGroup") }}
       </el-link>
       <div class="flex-1"></div>
@@ -30,14 +41,29 @@
     <div class="cond-item-wrapper">
       <template v-for="(item, idx) in list.items" :key="item.id">
         <template v-if="item.isGroup">
-          <ConditionList :modelValue="item" :formId="formId" :nodes="nodes" :condType="condType" :maxLevel="maxLevel"
-            :fieldBuildSetting="fieldBuildSettingRef" :valueBuildSetting="valueBuildSettingRef" @change="onInput"
-            @remove="removeGroup(idx)"></ConditionList>
+          <ConditionList
+            :modelValue="item"
+            :formId="formId"
+            :nodes="nodes"
+            :condType="condType"
+            :maxLevel="maxLevel"
+            :fieldBuildSetting="fieldBuildSettingRef"
+            :valueBuildSetting="valueBuildSettingRef"
+            @change="onInput"
+            @remove="removeGroup(idx)"
+          ></ConditionList>
         </template>
         <template v-else>
-          <ConditionItem :modelValue="item" :formId="formId" :nodes="nodes" :condType="condType"
-            :fieldBuildSetting="fieldBuildSettingRef" :valueBuildSetting="valueBuildSettingRef" @change="onInput"
-            @remove="removeItem(idx)"></ConditionItem>
+          <ConditionItem
+            :modelValue="item"
+            :formId="formId"
+            :nodes="nodes"
+            :condType="condType"
+            :fieldBuildSetting="fieldBuildSettingRef"
+            :valueBuildSetting="valueBuildSettingRef"
+            @change="onInput"
+            @remove="removeItem(idx)"
+          ></ConditionItem>
         </template>
       </template>
     </div>
@@ -48,7 +74,11 @@ import { FieldDef, FieldType } from "@eimsnext/models";
 import { useLocale } from "element-plus";
 import { ConditionType, ConditionValueType, IConditionList } from "./type";
 import { uniqueId } from "@eimsnext/utils";
-import { FieldBuildRule, IFieldBuildSetting, INodeForm } from "@/NodeFieldList/type";
+import {
+  FieldBuildRule,
+  IFieldBuildSetting,
+  INodeForm,
+} from "@/NodeFieldList/type";
 import { ref, toRef, watch } from "vue";
 
 const { t } = useLocale();
@@ -71,12 +101,24 @@ const props = withDefaults(
   {
     showTitle: true,
     condType: ConditionType.Form,
-    maxLevel: 3
-  }
+    maxLevel: 3,
+  },
 );
 
-const fieldBuildSettingRef = toRef(props.fieldBuildSetting ?? { version: 0, rule: FieldBuildRule.All, matchType: false })
-const valueBuildSettingRef = toRef(props.fieldBuildSetting ?? { version: 0, rule: FieldBuildRule.All, matchType: true })
+const fieldBuildSettingRef = toRef(
+  props.fieldBuildSetting ?? {
+    version: 0,
+    rule: FieldBuildRule.All,
+    matchType: false,
+  },
+);
+const valueBuildSettingRef = toRef(
+  props.fieldBuildSetting ?? {
+    version: 0,
+    rule: FieldBuildRule.All,
+    matchType: true,
+  },
+);
 const list = toRef(props.modelValue);
 const groupLevel = ref(1);
 
@@ -133,43 +175,55 @@ watch(
     list.value = newModel;
     groupLevel.value = newModel.groupLevel ?? 1;
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 <style lang="scss" scoped>
 .cond-list {
-  border-radius: 6px;
-  border: 1px solid #ddd;
+  border-radius: var(--et-radius-6);
+  border: 1px solid var(--et-border-color);
   display: flex;
   flex-direction: column;
 
   .cond-list-title {
-    height: 36px;
-    background: #f5f5f5;
+    height: var(--et-size-36);
+    background: var(--et-bg-muted);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 17px 0 15px;
+    padding: 0 var(--et-space-17) 0 var(--et-space-15);
 
     .cond-list-label {
-      color: #333;
-      font-size: 14px;
+      color: var(--et-text-primary);
+      font-size: var(--et-font-size-14);
       display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
   }
 
   .cond-item-wrapper {
-    padding: 0 10px 10px 10px;
+    padding: 0 var(--et-space-10) var(--et-space-10) var(--et-space-10);
   }
 
   .btn-add-item {
-    margin: 10px;
+    margin: var(--et-space-10);
     display: flex;
     align-items: center;
 
     .add-item {
-      margin-left: 15px;
+      margin-left: var(--et-space-15);
     }
   }
+}
+
+.relation-select {
+  width: var(--et-size-65);
+  margin-left: var(--et-space-5);
+  margin-right: var(--et-space-5);
+}
+
+.add-icon {
+  padding-right: var(--et-space-5);
 }
 </style>

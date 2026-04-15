@@ -1891,6 +1891,132 @@ export default defineComponent({
             getTitle(rule) {
                 return (rule?.__fc__?.refRule?.__$title?.value || rule.title || '').trim() || (rule.props && rule.props.label) || t('com.' + (rule._menu && rule._menu.name) + '.name') || (rule._menu && rule._menu.label) || rule.type
             },
+            isRuleName(rule, names) {
+                return !!rule && toArray(names).indexOf(rule?._menu?.name || rule?.name || rule?.type) > -1;
+            },
+            isTableFormColumnRule(rule) {
+                return methods.isRuleName(rule, 'tableFormColumn');
+            },
+            isTableFormRule(rule) {
+                return methods.isRuleName(rule, ['tableform', 'nestedTableForm', 'nestedSubTableForm', 'infiniteTableForm']);
+            },
+            isTableFormBlockedRule(rule) {
+                return methods.isRuleName(rule, ['tableform', 'nestedTableForm', 'nestedSubTableForm', 'infiniteTableForm', 'tabs', 'elTabPane']);
+            },
+            getComponentParent(rule) {
+                let ctx = rule?.__fc__?.parent;
+                while (ctx) {
+                    if (ctx.rule && ctx.rule._menu) {
+                        return ctx.rule;
+                    }
+                    ctx = ctx.parent;
+                }
+                return null;
+            },
+            getTableFormColumnChildren(rule) {
+                if (!methods.isTableFormColumnRule(rule)) {
+                    return [];
+                }
+                const dragBox = (rule.children || []).find(item => item.type === 'DragBox');
+                return dragBox ? dragBox.children : [];
+            },
+            getTableFormColumnFirstChild(rule) {
+                const child = methods.getTableFormColumnChildren(rule)[0];
+                return child?.type === 'DragTool' ? child.children[0] : child;
+            },
+            resolveActiveRule(rule) {
+                if (!methods.isTableFormColumnRule(rule)) {
+                    return rule;
+                }
+                return methods.getTableFormColumnFirstChild(rule) || rule;
+            },
+            syncTableFormColumn(rule) {
+                const column = methods.isTableFormColumnRule(rule) ? rule : methods.getComponentParent(rule);
+                if (!methods.isTableFormColumnRule(column)) {
+                    return;
+                }
+                const child = methods.getTableFormColumnFirstChild(column);
+                if (!child) {
+                    return;
+                }
+                column.props.label = methods.getTitle(child);
+                column.props.required = !!child.$required;
+            },
+            findRuleByChildren(children, roots) {
+                let target = null;
+                const each = (list) => {
+                    (list || []).forEach(item => {
+                        if (target || is.String(item)) {
+                            return;
+                        }
+                        if (item.children === children) {
+                            target = item;
+                            return;
+                        }
+                        each(item.children);
+                    });
+                };
+                each(roots || data.dragForm.rule[0].children);
+                return target;
+            },
+            getTableFormColumnContextByChildren(children) {
+                const dragBox = methods.findRuleByChildren(children);
+                const column = dragBox?.__fc__?.parent?.rule;
+                if (!methods.isTableFormColumnRule(column)) {
+                    return null;
+                }
+                const columnWrapper = column.__fc__?.parent?.rule;
+                const tableForm = methods.getComponentParent(columnWrapper);
+                if (!methods.isTableFormRule(tableForm)) {
+                    return null;
+                }
+                return { dragBox, column, columnWrapper, tableForm };
+            },
+            createTableFormColumn(rule) {
+                const columnWrapper = methods.makeRule(data.dragRuleList.tableFormColumn);
+                const columnRule = columnWrapper.children[0];
+                methods.getTableFormColumnChildren(columnRule).push(rule);
+                methods.syncTableFormColumn(columnRule);
+                return columnWrapper;
+            },
+            createTableFormColumns(rules) {
+                return rules.map(rule => methods.createTableFormColumn(rule));
+            },
+            insertTableFormColumnAfter(context, rule) {
+                const columnWrapper = methods.createTableFormColumn(rule);
+                const list = context.tableForm.children || [];
+                const index = list.indexOf(context.columnWrapper);
+                list.splice(index + 1, 0, columnWrapper);
+                return columnWrapper;
+            },
+            insertTableFormColumnsAfter(context, rules) {
+                const columnWrappers = methods.createTableFormColumns(rules);
+                const list = context.tableForm.children || [];
+                const index = list.indexOf(context.columnWrapper);
+                list.splice(index + 1, 0, ...columnWrappers);
+                return columnWrappers;
+            },
+            removeTableFormColumnIfEmpty(column) {
+                if (!methods.isTableFormColumnRule(column)) {
+                    return;
+                }
+                if (methods.getTableFormColumnChildren(column).length > 0) {
+                    return;
+                }
+                const columnWrapper = column.__fc__?.parent?.rule;
+                const tableForm = methods.getComponentParent(columnWrapper);
+                if (!methods.isTableFormRule(tableForm)) {
+                    return;
+                }
+                const list = tableForm.children || [];
+                const index = list.indexOf(columnWrapper);
+                if (index > -1) {
+                    list.splice(index, 1);
+                }
+                if (data.activeRule === column || data.activeRule === columnWrapper) {
+                    methods.clearActiveRule();
+                }
+            },
             baseChange(field, value, _, fapi) {
                 methods.handleChange('', field, value, _, fapi);
             },
@@ -1916,6 +2042,7 @@ export default defineComponent({
                 if (data.activeRule && fapi[data.activeRule._fc_id] === data.activeRule) {
                     methods.unWatchActiveRule();
                     const org = field;
+                    const column = methods.getComponentParent(data.activeRule);
                     data.dragForm.api.sync(data.activeRule);
                     if (field.indexOf('__') !== 0) {
                         if (field === 'formCreateChild') {
@@ -1932,6 +2059,7 @@ export default defineComponent({
                         }
                     }
                     methods.watchActiveRule();
+                    methods.syncTableFormColumn(column);
                     data.activeRule._menu?.watch?.[org]?.({
                         field: org,
                         value: undefined,
@@ -1957,6 +2085,7 @@ export default defineComponent({
                 if (data.activeRule && fapi[data.activeRule._fc_id] === data.activeRule) {
                     methods.unWatchActiveRule();
                     const org = field;
+                    const column = methods.getComponentParent(data.activeRule);
                     if (field.indexOf('__') !== 0) {
                         if (field === 'formCreateChild') {
                             data.activeRule.children[0] = value;
@@ -1980,6 +2109,7 @@ export default defineComponent({
                         }
                     }
                     methods.watchActiveRule();
+                    methods.syncTableFormColumn(column);
                     data.activeRule._menu?.watch?.[org]?.({
                         field: org,
                         value,
@@ -2002,6 +2132,7 @@ export default defineComponent({
                 if (is.String(rule)) {
                     rule = methods.findRule(rule);
                 }
+                rule = methods.resolveActiveRule(rule);
                 if (!rule) {
                     return;
                 }
@@ -2079,6 +2210,7 @@ export default defineComponent({
                 return rule;
             },
             toolActive(rule) {
+                rule = methods.resolveActiveRule(rule);
                 methods.unWatchActiveRule();
                 data.customForm.isShow = false;
                 data.customForm.config = null;
@@ -2224,7 +2356,8 @@ export default defineComponent({
                 // console.log('top dragUnchoose')
                 data.addRule = {
                     children,
-                    oldIndex: evt.oldIndex
+                    oldIndex: evt.oldIndex,
+                    context: methods.getTableFormColumnContextByChildren(children),
                 };
             },
             clickMenu(menu) {
@@ -2326,8 +2459,40 @@ export default defineComponent({
                     });
                 }
                 const firstRule = (rules[0] && rules[0].type === 'DragTool') ? rules[0].children[0] : rules[0];
+                if (methods.isTableFormRule(methods.findRuleByChildren(children)) && methods.isTableFormBlockedRule(firstRule)) {
+                    errorMessage(data.t('struct.notAllow'));
+                    return;
+                }
                 if (update) {
                     methods.mergeRule(firstRule, update);
+                }
+                const columnContext = methods.getTableFormColumnContextByChildren(children);
+                if (columnContext && methods.getTableFormColumnChildren(columnContext.column).length > 0) {
+                    const columnWrappers = methods.insertTableFormColumnsAfter(columnContext, rules);
+                    if (dragRule && dragRule.formOptions) {
+                        methods.mergeOptions(typeof dragRule.formOptions === 'string' ? designerForm.parseJson(dragRule.formOptions) : dragRule.formOptions);
+                    }
+                    methods.handleAddAfter((dragRule && dragRule.template) ? { template: columnWrappers } : { rule: firstRule });
+                    if (firstRule && methods.getConfig('autoActive', true)) {
+                        nextTick(() => {
+                            methods.triggerActive(firstRule);
+                        });
+                    }
+                    return;
+                }
+                if (methods.isTableFormRule(methods.findRuleByChildren(children))) {
+                    const columnWrappers = methods.createTableFormColumns(rules);
+                    children.splice(index, 0, ...columnWrappers);
+                    if (dragRule && dragRule.formOptions) {
+                        methods.mergeOptions(typeof dragRule.formOptions === 'string' ? designerForm.parseJson(dragRule.formOptions) : dragRule.formOptions);
+                    }
+                    methods.handleAddAfter((dragRule && dragRule.template) ? { template: columnWrappers } : { rule: firstRule });
+                    if (firstRule && methods.getConfig('autoActive', true)) {
+                        nextTick(() => {
+                            methods.triggerActive(firstRule);
+                        });
+                    }
+                    return;
                 }
                 children.splice(index, 0, ...rules);
                 if (dragRule && dragRule.formOptions) {
@@ -2465,6 +2630,7 @@ export default defineComponent({
                 // console.log('top dragAdd')
                 const newIndex = evt.newIndex;
                 const menu = evt.item._underlying_vm_ || evt.item.__rule__;
+                const columnContext = methods.getTableFormColumnContextByChildren(children);
                 data.added = true;
                 if (!menu) {
                     return;
@@ -2473,12 +2639,31 @@ export default defineComponent({
                     if (data.addRule) {
                         methods.handleSortBefore();
                         const rule = data.addRule.children.splice(data.addRule.children.indexOf(menu), 1)[0];
+                        if (methods.isTableFormRule(methods.findRuleByChildren(children)) && methods.isTableFormBlockedRule(rule)) {
+                            if (data.addRule.context) {
+                                data.addRule.children.splice(data.addRule.oldIndex, 0, rule);
+                            }
+                            data.addRule = null;
+                            data.added = false;
+                            errorMessage(data.t('struct.notAllow'));
+                            return;
+                        }
                         if (slot) {
                             rule.slot = slot;
                         } else {
                             delete rule.slot;
                         }
-                        children.splice(newIndex, 0, rule);
+                        if (data.addRule.context) {
+                            methods.removeTableFormColumnIfEmpty(data.addRule.context.column);
+                        }
+                        if (columnContext && methods.getTableFormColumnChildren(columnContext.column).length > 0) {
+                            methods.insertTableFormColumnAfter(columnContext, rule);
+                        } else if (methods.isTableFormRule(methods.findRuleByChildren(children))) {
+                            children.splice(newIndex, 0, methods.createTableFormColumn(rule));
+                        } else {
+                            children.splice(newIndex, 0, rule);
+                            methods.syncTableFormColumn(methods.getComponentParent(rule));
+                        }
                         methods.handleSortAfter({ rule: rule });
                     }
                 } else if (menu._field) {
@@ -2697,7 +2882,9 @@ export default defineComponent({
                             delete: ({ self }) => {
                                 const parent = methods.getParent(self).parent;
                                 if (methods.handleRemoveBefore({ parent, rule: parent }) !== false) {
+                                    const column = methods.getComponentParent(parent);
                                     parent.__fc__.rm();
+                                    methods.removeTableFormColumnIfEmpty(column);
                                     vm.emit('delete', parent);
                                     if (data.activeRule === parent) {
                                         methods.clearActiveRule();
@@ -2762,8 +2949,10 @@ export default defineComponent({
                             },
                             delete: ({ self }) => {
                                 if (methods.handleRemoveBefore({ parent: self, rule: self.children[0] }) !== false) {
+                                    const column = methods.getComponentParent(self.children[0]);
                                     vm.emit('delete', self.children[0]);
                                     self.__fc__.rm();
+                                    methods.removeTableFormColumnIfEmpty(column);
                                     if (data.activeRule === self.children[0]) {
                                         methods.clearActiveRule();
                                     }
