@@ -384,11 +384,11 @@ const submitDialog = async () => {
   try {
     if (dialogStep.value === "verify") {
       await validateVerifyForm();
-      const result = await authProfileService.verifyIdentity({
+      const result = (await authProfileService.verifyIdentity({
         type: verifyMethod.value,
         password: verifyMethod.value === "password" ? verifyForm.password : undefined,
         code: verifyMethod.value !== "password" ? verifyForm.code : undefined,
-      });
+      })) as { verifyToken: string };
       verifyToken.value = result.verifyToken;
       dialogStep.value = "action";
       actionForm.code = "";

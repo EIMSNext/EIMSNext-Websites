@@ -66,6 +66,9 @@
       :label="t('dataflow.setFieldValue')"
       :required="true"
     ></MetaItemHeader>
+    <div v-if="formulaErrorMsg" class="formula-error-banner">
+      {{ formulaErrorMsg }}
+    </div>
     <div v-if="activeData.metadata.updateMeta!.insertIfNoData">
       <el-radio-group
         :model-value="showEditPanel"
@@ -127,7 +130,7 @@
   </template>
 </template>
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch } from "vue";
+import { computed, inject, nextTick, reactive, ref } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -160,6 +163,7 @@ import { IFormItem } from "@/FormSelect/type";
 import { IFormFieldDef, splitSubField } from "@/FieldSelect/type";
 import { ConfirmResult, EtConfirm } from "@/dialog/EtConfirm";
 import { MessageIcon } from "@/dialog/type";
+import { validateFormulaFieldList } from "./formula";
 
 const { t } = useLocale();
 
@@ -199,6 +203,15 @@ const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 const subCondNeeded = ref(false);
 const showEditPanel = ref("1");
+const formulaErrorMsg = computed(() => {
+  const result = validateFormulaFieldList(
+    showEditPanel.value == "0"
+      ? insertFieldList.value.items
+      : formFieldList.value.items,
+    t("dataflow.formulaInferenceError"),
+  );
+  return result.valid ? "" : t("dataflow.formulaInferenceError");
+});
 
 const modeChanged = (mode: UpdateMode) => {
   formId.value = "";
@@ -474,5 +487,14 @@ init();
 .sub-cond-panel {
   background-color: var(--et-bg-muted);
   padding: var(--et-space-10);
+}
+
+.formula-error-banner {
+  margin-bottom: var(--et-space-8);
+  padding: var(--et-space-8);
+  color: var(--et-color-danger);
+  background: var(--et-color-danger-light-9);
+  border: 1px solid var(--et-color-danger-light-5);
+  border-radius: var(--et-radius-2);
 }
 </style>

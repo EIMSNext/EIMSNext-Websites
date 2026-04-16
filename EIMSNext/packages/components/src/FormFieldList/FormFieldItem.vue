@@ -1,5 +1,5 @@
 <template>
-  <div class="field-item">
+  <div class="field-item" :class="{ invalid: !!errorMessage }">
     <div class="field-name">
       <el-input
         :value="field.label"
@@ -14,6 +14,7 @@
       :nodes="nodes"
       :fieldSetting="fieldSetting"
       :fieldValueChanging="fieldValueChanging"
+      :sibling-fields="siblingFields"
       @change="onInput"
     >
     </FormFieldValue>
@@ -21,6 +22,7 @@
       <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
     </div>
   </div>
+  <div v-if="errorMessage" class="field-error">{{ errorMessage }}</div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
@@ -44,6 +46,8 @@ const props = defineProps<{
   nodes: INodeForm[];
   fieldSetting: IFieldBuildSetting;
   removable?: boolean;
+  siblingFields?: IFormFieldItem[];
+  errorMessage?: string;
   fieldValueChanging?: (
     field: IFormFieldDef,
     oldVal?: IFormFieldDef,
@@ -95,6 +99,16 @@ const emitChange = () => {
     margin-right: var(--et-space-5);
     align-content: center;
   }
+}
+
+.field-item.invalid {
+  border-color: var(--et-color-danger);
+}
+
+.field-error {
+  color: var(--et-color-danger);
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .remove-action {

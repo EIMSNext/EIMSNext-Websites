@@ -14,6 +14,9 @@
       :label="t('dataflow.setFieldValue')"
       :required="true"
     ></MetaItemHeader>
+    <div v-if="formulaErrorMsg" class="formula-error-banner">
+      {{ formulaErrorMsg }}
+    </div>
     <FormFieldList
       v-if="nodes.length > 0"
       v-model="formFieldList"
@@ -26,7 +29,7 @@
   </template>
 </template>
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch } from "vue";
+import { computed, inject, nextTick, reactive, ref } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -41,6 +44,7 @@ import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { IFormFieldList, mergeFieldList } from "@/FormFieldList/type";
 import { IFormItem } from "@/FormSelect/type";
 import { INodeForm } from "@/NodeFieldList/type";
+import { validateFormulaFieldList } from "./formula";
 
 const { t } = useLocale();
 
@@ -63,6 +67,13 @@ const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const appId = ref(flowContext!.appId);
 const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
+const formulaErrorMsg = computed(() => {
+  const result = validateFormulaFieldList(
+    formFieldList.value.items,
+    t("dataflow.formulaInferenceError"),
+  );
+  return result.valid ? "" : t("dataflow.formulaInferenceError");
+});
 
 const formChanged = async (form: IFormItem) => {
   formId.value = form.id;
@@ -101,3 +112,14 @@ const init = () => {
 
 init();
 </script>
+
+<style scoped lang="scss">
+.formula-error-banner {
+  margin-bottom: var(--et-space-8);
+  padding: var(--et-space-8);
+  color: var(--et-color-danger);
+  background: var(--et-color-danger-light-9);
+  border: 1px solid var(--et-color-danger-light-5);
+  border-radius: var(--et-radius-2);
+}
+</style>

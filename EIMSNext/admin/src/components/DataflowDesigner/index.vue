@@ -24,11 +24,26 @@ import {
   IFlowData,
   createFlowNode,
   createDataflowData,
+  EtConfirm,
+  ConfirmResult,
+  MessageIcon,
 } from "@eimsnext/components";
 import { FlowType, EventSourceType, WfDefinition, WfDefinitionRequest } from "@eimsnext/models";
 import { wfDefinitionService } from "@eimsnext/services";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
+
+enum FormulaFieldValueType {
+  Formula = "formula",
+}
+
+interface IDataflowFormFieldItem {
+  field: { field: string; label: string; isSubField?: boolean };
+  value: {
+    type: string;
+    formulaValue?: { expression?: string; drivingField?: { isSubField?: boolean } };
+  };
+}
 
 defineOptions({
   name: "DataflowDesigner",
@@ -71,7 +86,69 @@ onBeforeMount(() => {
   ready.value = true;
 });
 
-const save = () => {
+const validateFormulaFieldList = (items: IDataflowFormFieldItem[]) => {
+  const errors: { field: string; label: string }[] = [];
+  items.forEach((item) => {
+    if (item.value.type != FormulaFieldValueType.Formula) return;
+    const formula = item.value.formulaValue;
+    if (!formula?.expression?.trim()) {
+      errors.push({ field: item.field.field, label: item.field.label });
+      return;
+    }
+
+    if (item.field.isSubField && !formula.drivingField?.isSubField) {
+      errors.push({ field: item.field.field, label: item.field.label });
+    }
+  });
+
+  return { errors };
+};
+
+const getFormulaValidation = () => {
+  const errors: { nodeId: string; nodeName: string; label: string }[] = [];
+  const allNodes = [flowData.value.startNode, ...flowData.value.nodes];
+
+  allNodes.forEach((node) => {
+    const fieldLists = [];
+    if (node.metadata.insertMeta?.formFieldList) {
+      fieldLists.push(node.metadata.insertMeta.formFieldList);
+    }
+    if (node.metadata.updateMeta?.formFieldList) {
+      fieldLists.push(node.metadata.updateMeta.formFieldList);
+    }
+    if (node.metadata.updateMeta?.insertFieldList) {
+      fieldLists.push(node.metadata.updateMeta.insertFieldList);
+    }
+
+    fieldLists.forEach((fieldList) => {
+      const result = validateFormulaFieldList(fieldList.items);
+      result.errors.forEach((item: { field: string; label: string }) => {
+        errors.push({
+          nodeId: node.id,
+          nodeName: node.name,
+          label: item.label,
+        });
+      });
+    });
+  });
+
+  return errors;
+};
+
+const save = async () => {
+  const formulaErrors = getFormulaValidation();
+  if (formulaErrors.length > 0) {
+    const confirm = await EtConfirm.showDialog(
+      t("dataflow.formulaSaveDisabledContent"),
+      {
+        title: t("dataflow.formulaSaveDisabledTitle"),
+        icon: MessageIcon.Warning,
+      },
+    );
+    if (confirm != ConfirmResult.Yes) return;
+    currentWfDef.value.disabled = true;
+  }
+
   let req: WfDefinitionRequest = {
     id: currentWfDef.value.id,
     appId: currentWfDef.value.appId,

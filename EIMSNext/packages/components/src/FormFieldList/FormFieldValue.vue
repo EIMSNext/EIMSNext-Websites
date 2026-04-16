@@ -125,6 +125,19 @@
           @change="onValueChange"
         ></NodeFieldList>
       </template>
+      <template v-if="fieldValueType == FieldValueType.Formula">
+        <div class="formula-value-panel">
+          <el-button @click="showFormulaEditor = true">
+            {{ formulaButtonText }}
+          </el-button>
+          <FormulaEditorDialog
+            v-model="formulaValue"
+            v-model:visible="showFormulaEditor"
+            :nodes="nodes"
+            @update:modelValue="onFormulaChange"
+          />
+        </div>
+      </template>
     </div>
     <memberSelectDialog
       v-model="showMemberDialog"
@@ -139,7 +152,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { IFormFieldValue, FieldValueType } from "./type";
+import { IFormulaValue, IFormFieldValue, FieldValueType } from "./type";
 import { FieldDef, FieldType } from "@eimsnext/models";
 import {
   FieldBuildRule,
@@ -154,6 +167,8 @@ import { toListItem } from "@/ConditionList/type";
 import { MemberTabs } from "@/memberSelect/type";
 import { ISelectedTag } from "@/selectedTags/type";
 import { DataItemType } from "@/common";
+import FormulaEditorDialog from "@/FlowDesigner/Dataflow/FormulaEditorDialog.vue";
+import { normalizeFormulaValue } from "@/FlowDesigner/Dataflow/formula";
 
 const { t } = useLocale();
 
@@ -170,11 +185,13 @@ const props = defineProps<{
     oldVal?: IFormFieldDef,
     newVal?: IFormFieldDef,
   ) => Promise<boolean>;
+  siblingFields?: any[];
 }>();
 
 const showMemberDialog = ref(false);
 const memberMultiple = ref(false);
 const memberShowTabs = ref(MemberTabs.None);
+const showFormulaEditor = ref(false);
 
 const fieldType = computed(() => props.fieldDef.type);
 const dateType = computed(() =>
@@ -220,6 +237,7 @@ const fieldFieldValue = ref<IFormFieldDef>(
     type: FieldType.None,
   },
 );
+const formulaValue = ref<IFormulaValue | undefined>(props.modelValue.formulaValue);
 
 const fieldValueTypes: IListItem[] = [
   {
@@ -233,11 +251,22 @@ const fieldValueTypes: IListItem[] = [
     type: DataItemType.Unknown,
   },
   {
+    id: FieldValueType.Formula,
+    label: t("dataflow.formula"),
+    type: DataItemType.Unknown,
+  },
+  {
     id: FieldValueType.Empty,
     label: t("comp.value_Empty"),
     type: DataItemType.Unknown,
   },
 ];
+
+const formulaButtonText = computed(() => {
+  const exp = formulaValue.value?.expression?.trim();
+  if (!exp) return t("dataflow.setFormula");
+  return exp.length > 24 ? `${exp.slice(0, 24)}...` : exp;
+});
 
 const emit = defineEmits(["update:modelValue", "change"]);
 const onValueTypeChange = () => {
@@ -253,6 +282,10 @@ const onValueTypeChange = () => {
       fieldType.value == FieldType.Select2)
   ) {
     value.value = [];
+  }
+
+  if (fieldValueType.value != FieldValueType.Formula) {
+    delete props.modelValue.formulaValue;
   }
 
   emitChange();
@@ -308,6 +341,20 @@ const memberSelected = (members: ISelectedTag[]) => {
   emitChange();
 };
 
+const onFormulaChange = (newVal?: IFormulaValue) => {
+  const normalized = normalizeFormulaValue(
+    newVal,
+    props.fieldDef,
+    (props.siblingFields ?? []) as any,
+  );
+  formulaValue.value = normalized;
+  props.modelValue.type = FieldValueType.Formula;
+  props.modelValue.formulaValue = normalized;
+  delete props.modelValue.value;
+  delete props.modelValue.fieldValue;
+  emitChange();
+};
+
 const emitChange = () => {
   emit("update:modelValue", props.modelValue);
   emit("change", props.modelValue);
@@ -331,5 +378,10 @@ const emitChange = () => {
 
 .auto-width-input-number {
   width: auto;
+}
+
+.formula-value-panel {
+  display: flex;
+  align-items: center;
 }
 </style>

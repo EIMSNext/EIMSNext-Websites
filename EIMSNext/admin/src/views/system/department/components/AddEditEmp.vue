@@ -25,7 +25,9 @@
           v-model="formData.departmentId"
           placeholder="请选择所属部门"
           :data="deptList"
-          :props="{ children: 'children', label: 'label', value: 'id', disabled: '' }"
+          :props="{ children: 'children', label: 'label', disabled: 'disabled' }"
+          node-key="id"
+          value-key="id"
           filterable
           check-strictly
           :render-after-expand="false"

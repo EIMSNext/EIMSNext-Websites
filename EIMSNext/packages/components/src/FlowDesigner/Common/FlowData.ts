@@ -1,4 +1,4 @@
-import { cloneDeep, flow } from "lodash";
+import { cloneDeep } from "lodash-es";
 import { uniqueId } from "@eimsnext/utils";
 import { FlowType, EventSourceType } from "@eimsnext/models";
 import { IConditionList } from "@/ConditionList/type";
