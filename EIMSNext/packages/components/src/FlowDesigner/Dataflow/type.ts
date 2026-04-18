@@ -68,6 +68,9 @@ export async function getPrevNodes(
           formId = prevNode.metadata.queryManyMeta?.formId;
           node.singleResult = false;
           break;
+        case FlowNodeType.Plugin:
+          node.singleResult = prevNode.metadata.pluginMeta?.singleResult ?? true;
+          break;
       }
       if (formId) {
         node.form = await formStore.get(formId);

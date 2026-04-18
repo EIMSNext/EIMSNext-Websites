@@ -181,6 +181,8 @@ export default {
     formulaSaveDisabledTitle: "存在不可用公式",
     formulaSaveDisabledContent:
       "存在无法确定数据来源的公式字段，保存后该智能助手将自动禁用。你可以确认保存并禁用，或取消后继续修改。",
+    pluginName: "执行插件",
+    pluginFunction: "插件功能",
   },
   dash: {
     chart: {

@@ -183,6 +183,8 @@ export default {
     formulaSaveDisabledTitle: "Invalid formulas detected",
     formulaSaveDisabledContent:
       "Some formula fields do not have a resolvable data source. Saving will disable this dataflow. Confirm to save as disabled, or cancel and continue editing.",
+    pluginName: "Plugin",
+    pluginFunction: "Function",
   },
   dash: {
     chart: {

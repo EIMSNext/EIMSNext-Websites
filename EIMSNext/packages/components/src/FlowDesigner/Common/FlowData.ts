@@ -256,7 +256,14 @@ export function createFlowNode(
         id: uniqueId(),
         nodeType: FlowNodeType.Plugin,
         name: t("workflow.pluginNode"),
-        metadata: { pluginMeta: { singleResult: true } },
+        metadata: {
+          pluginMeta: {
+            singleResult: true,
+            pluginId: "",
+            functionId: "",
+            fieldSettings: [],
+          },
+        },
       };
     default:
       return {
@@ -481,6 +488,23 @@ export interface PrintMeta {
 }
 export interface PluginMeta {
   singleResult: boolean;
+  pluginId: string;
+  pluginName?: string;
+  pluginVersion?: string;
+  functionId: string;
+  functionName?: string;
+  fieldSettings: PluginFieldSetting[];
+}
+
+export interface PluginFieldSetting {
+  fieldKey: string;
+  fieldName?: string;
+  fieldType: string;
+  value: {
+    type: string;
+    value?: any;
+    fieldValue?: IFormFieldDef;
+  };
 }
 
 export enum EventType {
