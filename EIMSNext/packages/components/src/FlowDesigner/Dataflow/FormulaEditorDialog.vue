@@ -1,6 +1,7 @@
 <template>
   <EtDialog
     v-model="dialogVisible"
+    class="formula-editor-dialog"
     :title="t('dataflow.formulaEditor')"
     width="1100px"
     :destroy-on-close="true"
@@ -236,16 +237,22 @@ watch(
   flex-direction: column;
   gap: var(--et-space-10);
   min-height: 620px;
+  height: 620px;
+  overflow: hidden;
 }
 
 .formula-script {
+  flex: 0 0 200px;
   border: 1px solid var(--et-border-color-light);
+  overflow: hidden;
 }
 
 .formula-bottom {
   display: flex;
   gap: var(--et-space-10);
-  min-height: 280px;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
 .formula-tree-panel {
@@ -253,12 +260,16 @@ watch(
   display: flex;
   flex-direction: column;
   gap: var(--et-space-5);
+  min-width: 0;
+  min-height: 0;
 }
 
 .formula-info-panel {
   flex: 1;
   border: 1px solid var(--et-border-color-light);
   padding: var(--et-space-10);
+  overflow: auto;
+  min-width: 0;
 }
 
 .formula-tree {
@@ -266,5 +277,22 @@ watch(
   padding: var(--et-space-5);
   overflow: auto;
   flex: 1;
+}
+
+.formula-editor-dialog :deep(.el-dialog__body) {
+  padding: var(--et-space-10);
+}
+
+.formula-script :deep(.CodeMirror) {
+  height: 100%;
+  width: 100%;
+}
+
+.formula-script :deep(.CodeMirror-scroll) {
+  overflow: auto !important;
+}
+
+.formula-script :deep(.CodeMirror-wrap pre.CodeMirror-line) {
+  padding-left: 20px;
 }
 </style>

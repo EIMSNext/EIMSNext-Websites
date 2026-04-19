@@ -214,6 +214,10 @@ const formulaErrorMsg = computed(() => {
 });
 
 const ensureUpdateMeta = () => {
+  if (!activeData.value.metadata) {
+    activeData.value.metadata = {};
+  }
+
   if (activeData.value.metadata.updateMeta) {
     return activeData.value.metadata.updateMeta;
   }
