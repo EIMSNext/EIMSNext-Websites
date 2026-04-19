@@ -161,7 +161,7 @@ import {
 } from "../NodeFieldList/type";
 import { useLocale } from "element-plus";
 import { IFormFieldDef } from "@/FieldSelect/type";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { IListItem } from "@/list/type";
 import { toListItem } from "@/ConditionList/type";
 import { MemberTabs } from "@/memberSelect/type";
@@ -238,6 +238,46 @@ const fieldFieldValue = ref<IFormFieldDef>(
   },
 );
 const formulaValue = ref<IFormulaValue | undefined>(props.modelValue.formulaValue);
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    fieldValueType.value = newValue.type;
+    value.value = newValue.value;
+    fieldFieldValue.value =
+      newValue.fieldValue ?? {
+        nodeId: "",
+        formId: "",
+        field: "",
+        label: "",
+        type: FieldType.None,
+      };
+    formulaValue.value = newValue.formulaValue;
+
+    if (
+      !value.value &&
+      fieldValueType.value == FieldValueType.Custom &&
+      (fieldType.value == FieldType.Employee1 ||
+        fieldType.value == FieldType.Employee2 ||
+        fieldType.value == FieldType.Department1 ||
+        fieldType.value == FieldType.Department2 ||
+        fieldType.value == FieldType.CheckBox ||
+        fieldType.value == FieldType.Select2)
+    ) {
+      value.value = [];
+    }
+
+    if (
+      fieldValueType.value == FieldValueType.Custom &&
+      (fieldType.value == FieldType.Employee1 ||
+        fieldType.value == FieldType.Department1) &&
+      !Array.isArray(value.value)
+    ) {
+      value.value = [value.value];
+    }
+  },
+  { deep: true },
+);
 
 const fieldValueTypes: IListItem[] = [
   {
@@ -342,17 +382,36 @@ const memberSelected = (members: ISelectedTag[]) => {
 };
 
 const onFormulaChange = (newVal?: IFormulaValue) => {
+  const oldFormulaValue = props.modelValue.formulaValue;
   const normalized = normalizeFormulaValue(
     newVal,
     props.fieldDef,
     (props.siblingFields ?? []) as any,
   );
-  formulaValue.value = normalized;
-  props.modelValue.type = FieldValueType.Formula;
-  props.modelValue.formulaValue = normalized;
-  delete props.modelValue.value;
-  delete props.modelValue.fieldValue;
-  emitChange();
+
+  const applyFormulaChange = async () => {
+    const allowed =
+      !props.fieldValueChanging ||
+      (await props.fieldValueChanging(
+        props.fieldDef,
+        oldFormulaValue?.drivingField,
+        normalized?.drivingField,
+      ));
+
+    if (!allowed) {
+      formulaValue.value = oldFormulaValue;
+      return;
+    }
+
+    formulaValue.value = normalized;
+    props.modelValue.type = FieldValueType.Formula;
+    props.modelValue.formulaValue = normalized;
+    delete props.modelValue.value;
+    delete props.modelValue.fieldValue;
+    emitChange();
+  };
+
+  void applyFormulaChange();
 };
 
 const emitChange = () => {
