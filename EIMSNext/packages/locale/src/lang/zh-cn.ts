@@ -89,6 +89,7 @@ export default {
     data_removed: "有数据被删除时",
     wfstatus_updated: "流程状态变更时",
     wftodo_updated: "流程待办变更时",
+    currentCorporate: "当前所在企业",
   },
   workflow: {
     flowStatus: {
