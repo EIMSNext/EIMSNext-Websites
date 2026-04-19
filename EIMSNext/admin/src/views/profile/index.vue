@@ -25,11 +25,8 @@
             <div class="panel-row">
               <div class="row-label fixed-label-width">通讯录头像</div>
               <div class="row-content">
-                <user-avatar
-                  size="24px"
-                  :avatar="userStore.currentUser.avatar"
-                  :label="userStore.currentUser.empName"
-                />
+                <user-avatar size="24px" :avatar="userStore.currentUser.avatar"
+                  :label="userStore.currentUser.empName" />
                 <el-link type="primary" underline="never" class="link-btn">修改</el-link>
               </div>
             </div>
@@ -55,17 +52,20 @@
             <div class="panel-row">
               <div class="row-label fixed-label-width">密码</div>
               <div class="row-content">
-                <el-link type="primary" underline="never" class="link-btn" @click="openDialog('change-password')">修改</el-link>
+                <el-link type="primary" underline="never" class="link-btn"
+                  @click="openDialog('change-password')">修改</el-link>
               </div>
             </div>
             <div class="panel-row">
               <div class="row-label fixed-label-width">手机</div>
               <div class="row-content">
                 <span class="content-row">{{ displayPhone }}</span>
-                <el-link type="primary" underline="never" class="link-btn" @click="openDialog(hasPhone ? 'change-phone' : 'bind-phone')">
+                <el-link type="primary" underline="never" class="link-btn"
+                  @click="openDialog(hasPhone ? 'change-phone' : 'bind-phone')">
                   {{ hasPhone ? '修改' : '绑定' }}
                 </el-link>
-                <el-link v-if="canUnbindPhone" type="primary" underline="never" class="link-btn" @click="openDialog('unbind-phone')">
+                <el-link v-if="canUnbindPhone" type="primary" underline="never" class="link-btn"
+                  @click="openDialog('unbind-phone')">
                   解绑
                 </el-link>
               </div>
@@ -74,10 +74,12 @@
               <div class="row-label fixed-label-width">邮箱</div>
               <div class="row-content">
                 <span class="content-row">{{ displayEmail }}</span>
-                <el-link type="primary" underline="never" class="link-btn" @click="openDialog(hasEmail ? 'change-email' : 'bind-email')">
+                <el-link type="primary" underline="never" class="link-btn"
+                  @click="openDialog(hasEmail ? 'change-email' : 'bind-email')">
                   {{ hasEmail ? '修改' : '绑定' }}
                 </el-link>
-                <el-link v-if="canUnbindEmail" type="primary" underline="never" class="link-btn" @click="openDialog('unbind-email')">
+                <el-link v-if="canUnbindEmail" type="primary" underline="never" class="link-btn"
+                  @click="openDialog('unbind-email')">
                   解绑
                 </el-link>
               </div>
@@ -116,7 +118,8 @@
       </div>
     </div>
 
-    <et-dialog v-model="dialogVisible" width="520px" :title="dialogTitle" :append-to-body="true" :destroy-on-close="true" @cancel="closeDialog">
+    <et-dialog v-model="dialogVisible" width="520px" :title="dialogTitle" :append-to-body="true"
+      :destroy-on-close="true" @cancel="closeDialog">
       <div class="security-dialog">
         <template v-if="dialogStep === 'verify'">
           <el-form ref="verifyFormRef" :model="verifyForm" label-position="top">
@@ -124,7 +127,8 @@
               <el-input :model-value="verifyPrimaryValue" disabled />
             </el-form-item>
             <el-form-item :label="verifyInputLabel">
-              <el-input v-if="verifyMethod === 'password'" v-model="verifyForm.password" type="password" show-password />
+              <el-input v-if="verifyMethod === 'password'" v-model="verifyForm.password"
+                :type="verifyMethod === 'password' ? 'password' : 'input'" show-password />
               <el-input v-else v-model="verifyForm.code">
                 <template #append>
                   <el-button link type="primary" @click="sendVerifyCode">发送验证码</el-button>
@@ -133,7 +137,8 @@
             </el-form-item>
           </el-form>
           <div class="verify-switches">
-            <el-link v-for="option in verifyOptions" :key="option.value" type="primary" underline="never" @click="verifyMethod = option.value">
+            <el-link v-for="option in verifyOptions" :key="option.value" type="primary" underline="never"
+              @click="verifyMethod = option.value">
               {{ option.label }}
             </el-link>
           </div>
@@ -183,7 +188,8 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeDialog">取消</el-button>
-          <el-button type="primary" :loading="submitting" @click="submitDialog">{{ dialogStep === 'verify' ? '下一步' : '保存' }}</el-button>
+          <el-button type="primary" :loading="submitting" @click="submitDialog">{{ dialogStep === 'verify' ? '下一步' :
+            '保存' }}</el-button>
         </div>
       </template>
     </et-dialog>
@@ -249,7 +255,7 @@ const verifyOptions = computed(() => {
   if (hasEmail.value) {
     options.push({ value: "email", label: "邮箱验证" });
   }
-  return options;
+  return options.length == 1 ? options : options.filter(x => x.value != verifyMethod.value);
 });
 
 const dialogTitleMap: Record<DialogMode, string> = {
@@ -692,32 +698,32 @@ onUnmounted(() => {
           display: flex;
           font-size: var(--et-font-size-16);
 
-          > .title {
+          >.title {
             flex-shrink: 0;
             font-weight: 600;
             line-height: var(--et-line-height-24);
           }
         }
 
-        > .panel-wrapper.rows-layout {
+        >.panel-wrapper.rows-layout {
           display: flex;
           flex-direction: column;
           padding: var(--et-space-12) var(--et-space-12) 0;
 
-          > .panel-row {
+          >.panel-row {
             align-items: baseline;
             display: flex;
             font-size: var(--et-font-size-14);
             line-height: var(--et-line-height-22);
             padding: var(--et-space-16) 0;
 
-            > .row-label {
+            >.row-label {
               color: var(--et-text-primary-soft);
               flex-shrink: 0;
               font-weight: 600;
             }
 
-            > .row-content {
+            >.row-content {
               flex: auto;
               display: flex;
               align-items: center;
@@ -781,7 +787,8 @@ onUnmounted(() => {
 }
 
 .security-dialog {
-  padding: var(--et-space-4) var(--et-space-12) var(--et-space-12);
+  padding: var(--et-space-12) var(--et-space-20);
+  padding-bottom: 0;
 }
 
 .dialog-tip {
@@ -811,7 +818,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: var(--et-space-12);
-  padding-top: var(--et-space-8);
+  padding: var(--et-space-12) var(--et-space-20);
 }
 
 .unbind-tip {
