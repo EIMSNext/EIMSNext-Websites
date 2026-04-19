@@ -13,6 +13,7 @@ export interface SystemMessage extends CorpModelBase {
   expireTime: number;
   channel?: NotifyChannel;
   category?: MessageCategory;
+  messageType?: MessageType;
 }
 
 export interface SystemMessageReadRequest {
@@ -29,4 +30,11 @@ export enum MessageCategory {
   SystemNotify = "2",
   SystemNotice = "3",
   FlowNotify = "4",
+}
+
+export enum MessageType {
+  FormNotify = "0",
+  WfTodoNotify = "1",
+  WfExpireNotify = "2",
+  ExportNotify = "3",
 }
