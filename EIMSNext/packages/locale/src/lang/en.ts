@@ -90,6 +90,7 @@ export default {
     data_removed: "When data is deleted",
     wfstatus_updated: "When workflow status changes",
     wftodo_updated: "When workflow task changes",
+    currentCorporate: "Current Team",
   },
   workflow: {
     flowStatus: {
@@ -179,7 +180,8 @@ export default {
     formulaEditor: "Formula Editor",
     formulaInfo: "Formula Info",
     formulaExample: "Formula Example",
-    formulaInferenceError: "Unable to determine a stable data source for this formula",
+    formulaInferenceError:
+      "Unable to determine a stable data source for this formula",
     formulaSaveDisabledTitle: "Invalid formulas detected",
     formulaSaveDisabledContent:
       "Some formula fields do not have a resolvable data source. Saving will disable this dataflow. Confirm to save as disabled, or cancel and continue editing.",

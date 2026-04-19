@@ -13,7 +13,7 @@
         <div class="info-container team-name-container">
           <div class="team-current">
             <div :title="contextStore.corpName">
-              <span class="team-prefix">{{ t("当前所在企业") }}：</span>
+              <span class="team-prefix">{{ t("admin.currentCorporate") }}：</span>
               <span class="team-text">{{ contextStore.corpName }}</span>
             </div>
             <div class="team-label">我创建的</div>
@@ -408,6 +408,8 @@ const submitDialog = async () => {
     ElMessage.success("保存成功");
     await refreshCurrentUser();
     closeDialog();
+  } catch (error) {
+    // HTTP错误已在拦截器中通过ElMessage显示，这里不再重复处理
   } finally {
     submitting.value = false;
   }
