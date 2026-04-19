@@ -1,6 +1,6 @@
 <template>
   <div class="middle-center">
-    <el-badge class="middle-center" :offset="[-15, 18]" :is-dot="msgCnt > 0">
+    <el-badge class="middle-center" style="display: flex; width: 100%;" :offset="[-15, 18]" :is-dot="msgCnt > 0">
       <et-icon icon="el-Bell" />
     </el-badge>
   </div>
