@@ -171,6 +171,23 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/system/plugin",
+    component: SysLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/system/plugin/index.vue"),
+        meta: {
+          title: "plugin",
+          icon: "collection",
+          keepAlive: true,
+          requiresAuth: true,
+          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
+        },
+      },
+    ],
+  },
+  {
     path: "/system/:formId",
     component: SysLayout,
     redirect: "/system/$route.params.formId",
