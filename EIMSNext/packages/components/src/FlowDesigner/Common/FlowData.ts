@@ -5,6 +5,7 @@ import { IConditionList } from "@/ConditionList/type";
 import { IFormFieldList } from "@/FormFieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
 import { Translator } from "element-plus";
+import { IFormFieldDef } from "@/FieldSelect/type";
 
 export enum FlowNodeType {
   None = 0,
