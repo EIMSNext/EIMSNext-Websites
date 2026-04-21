@@ -15,8 +15,10 @@ function initHttpConfig(): HttpRequestConfig {
   };
   interceptors.errorHandler = (error: any) => {
     const { config, response } = error;
+    console.log("erro", response, error);
     if (response) {
       const data = (response && response.data) || {};
+
       const { code, msg, message } = data as any;
       const display = message || msg || "系统出错";
       ElMessage.error(display);
