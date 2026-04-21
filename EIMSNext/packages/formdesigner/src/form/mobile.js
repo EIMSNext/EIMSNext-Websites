@@ -2,7 +2,7 @@ import formCreateMobile from '@eimsnext/form-render-vant';
 import fcSelect from '@eimsnext/form-render-elplus';
 import fcTree from '@eimsnext/form-render-elplus';
 import fcUpload from '@eimsnext/form-render-elplus';
-import formulas from '../utils/formulas';
+import { formulas } from '@eimsnext/utils';
 import StepForm from '../components/mobile/stepForm/StepForm.vue';
 import Popup from '../components/mobile/popup/Popup.vue';
 import DataTable from '../components/dataTable/DataTable.vue';

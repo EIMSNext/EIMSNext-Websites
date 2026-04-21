@@ -9,9 +9,31 @@ export default {
   drag: true,
   dragBtn: false,
   mask: false,
+  denyDrag: {
+    item: [
+      "tableform",
+      "nestedTableForm",
+      "nestedSubTableForm",
+      "infiniteTableForm",
+      "tabs",
+      "elTabPane",
+    ],
+  },
+  input: false,
+  validate: false,
   style: false,
   advanced: false,
   variable: false,
+  hiddenBaseField: [
+    "title",
+    "info",
+    "labelConfig",
+    "formCreateWrap>title",
+    "formCreateCol>span",
+    "formCreate_computed>hidden",
+    "formCreate_computed>value",
+    "_control",
+  ],
   rule({ t }) {
     return {
       type: name,

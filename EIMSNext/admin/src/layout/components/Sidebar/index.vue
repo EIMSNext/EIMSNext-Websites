@@ -1,21 +1,11 @@
 <template>
   <div>
-    <form-edit
-      v-if="showFormEditor && newForm"
-      v-model="showFormEditor"
-      :form-def="newForm!"
-      :usingFlow="usingWorkflow"
-      :isLedger="isLedger"
-      @close="showFormEditor = false"
-    />
-    <DashboardDesigner
-      v-if="showDshEditor && newDash"
-      v-model="showDshEditor"
-      :dash-def="newDash!"
-    ></DashboardDesigner>
-    <div class="app-title">
-      <et-icon :icon="getAppIcon(app)" size="16px" :color="getAppIconColor(app)"></et-icon>
-      <span v-if="isSidebarOpened" class="ml-[10px]">{{ app?.name }}</span>
+    <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
+      :isLedger="isLedger" @close="showFormEditor = false" />
+    <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
+    <div class="app-title" :style="{ paddingRight: isSidebarOpened ? 'var(--et-space-15)' : 'var(--et-space-6)' }">
+      <AppIcon v-if="app" :app="app" iconSize="12px" style="width: 20px;height: 20px;" />
+      <span v-if="isSidebarOpened" class="ml-[3px]">{{ app?.name }}</span>
       <el-button class="side-bar-control" @click.stop="toggleSideBar">
         <et-icon v-if="isSidebarOpened" icon="el-DArrowLeft" size="14px"></et-icon>
         <et-icon v-else icon="el-DArrowRight" size="14px"></et-icon>
@@ -25,7 +15,9 @@
       <el-menu mode="vertical">
         <AppLink :to="{ name: 'mytasks', params: { appId: app?.id } }">
           <el-menu-item index="mytodo" :class="{ 'pl-15px': !isSidebarOpened }">
-            <et-icon icon="icon-mytodo" class="step-image" size="14px" />
+            <el-badge :is-dot="hasAppTodo" :offset="[0, 8]">
+              <et-icon icon="icon-mytodo" class="step-image" size="14px" />
+            </el-badge>
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.mytasks") }}
             </span>
@@ -64,9 +56,7 @@
         </template>
       </el-input>
 
-      <template
-        v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
-      >
+      <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
         <el-dropdown placement="bottom-start" size="large">
           <el-button class="create-button">
             <et-icon icon="el-plus"></et-icon>
@@ -113,9 +103,9 @@ import {
 } from "@eimsnext/models";
 import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
-import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
+import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
 const { t } = useI18n();
 
 const newForm = ref<FormDef>();
@@ -138,6 +128,9 @@ const app = ref<App>();
 
 const systemStore = useSystemStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
+const appTodoCount = ref(0);
+const hasAppTodo = computed(() => appTodoCount.value > 0);
+let appTodoTimer: ReturnType<typeof setInterval> | null = null;
 
 // 展开/收缩菜单
 function toggleSideBar() {
@@ -151,6 +144,31 @@ watch(
   },
   { immediate: true }
 );
+
+const loadAppTodoCount = async () => {
+  appTodoCount.value = await queryAppTodoCount(contextStore.appId);
+};
+
+watch(
+  () => contextStore.appId,
+  () => {
+    loadAppTodoCount();
+  },
+  { immediate: true }
+);
+
+onMounted(() => {
+  appTodoTimer = setInterval(() => {
+    loadAppTodoCount();
+  }, BADGE_REFRESH_INTERVAL);
+});
+
+onBeforeUnmount(() => {
+  if (appTodoTimer) {
+    clearInterval(appTodoTimer);
+    appTodoTimer = null;
+  }
+});
 
 const createForm = (usingFlow: boolean, ledger: boolean) => {
   usingWorkflow.value = usingFlow;
@@ -214,7 +232,7 @@ const createDashboard = () => {
   });
 };
 
-const createFolder = () => {};
+const createFolder = () => { };
 </script>
 
 <style lang="scss" scoped>
@@ -228,7 +246,7 @@ const createFolder = () => {};
 .app-title {
   display: flex;
   overflow: hidden;
-  padding: var(--et-space-15);
+  padding: var(--et-space-12) var(--et-space-15) var(--et-space-12) var(--et-space-6);
   font-size: var(--et-font-size-16);
   align-items: center;
 }

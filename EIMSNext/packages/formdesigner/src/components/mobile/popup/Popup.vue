@@ -103,7 +103,7 @@ export default defineComponent({
     position: absolute;
     top: 16px;
     left: 0;
-    color: #333;
+    color: var(--fc-text-color-1);
     width: 100%;
     text-align: center;
     font-size: 16px;

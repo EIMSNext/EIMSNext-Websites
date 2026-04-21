@@ -25,7 +25,9 @@
           v-model="formData.departmentId"
           placeholder="请选择所属部门"
           :data="deptList"
-          :props="{ children: 'children', label: 'label', value: 'id', disabled: '' }"
+          :props="{ children: 'children', label: 'label', disabled: 'disabled' }"
+          node-key="id"
+          value-key="id"
           filterable
           check-strictly
           :render-after-expand="false"
@@ -42,7 +44,7 @@
         </div>
         <div class="footer-right">
           <slot name="footer-right">
-            <el-button @click="saveAndInvite">保存并邀请</el-button>
+            <el-button v-if="showSaveAndInvite" @click="saveAndInvite">保存并邀请</el-button>
             <el-button type="primary" @click="save">保存</el-button>
           </slot>
         </div>
@@ -52,9 +54,9 @@
 </template>
 <script lang="ts" setup>
 import { ITreeNode, buildDeptTree } from "@eimsnext/components";
-import { Department, Employee, EmployeeRequest } from "@eimsnext/models";
+import { Department, Employee, EmployeeRequest, PlatformType } from "@eimsnext/models";
 import { employeeService } from "@eimsnext/services";
-import { useDeptStore } from "@eimsnext/store";
+import { useContextStore, useDeptStore } from "@eimsnext/store";
 
 defineOptions({
   name: "AddEditEmp",
@@ -71,9 +73,11 @@ const props = withDefaults(
 );
 
 const deptStore = useDeptStore();
+const contextStore = useContextStore();
 const deptList = ref<ITreeNode[]>(); // 部门列表
 const showDialog = ref(true);
 const title = props.edit ? "修改员工信息" : "添加新员工";
+const showSaveAndInvite = computed(() => contextStore.corpPlat === PlatformType.Public);
 const formData = ref<Employee>({
   id: "",
   code: "",

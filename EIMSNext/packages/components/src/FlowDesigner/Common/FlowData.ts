@@ -1,10 +1,11 @@
-import { cloneDeep, flow } from "lodash";
+import { cloneDeep } from "lodash-es";
 import { uniqueId } from "@eimsnext/utils";
 import { FlowType, EventSourceType } from "@eimsnext/models";
 import { IConditionList } from "@/ConditionList/type";
 import { IFormFieldList } from "@/FormFieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
 import { Translator } from "element-plus";
+import { IFormFieldDef } from "@/FieldSelect/type";
 
 export enum FlowNodeType {
   None = 0,
@@ -67,6 +68,7 @@ export interface IFlowContext {
   eventSource?: EventSourceType;
   sourceId?: string;
   flowData: IFlowData;
+  structureReadonly?: boolean;
 }
 export function createFlowNode(
   nodeType: FlowNodeType,
@@ -255,7 +257,14 @@ export function createFlowNode(
         id: uniqueId(),
         nodeType: FlowNodeType.Plugin,
         name: t("workflow.pluginNode"),
-        metadata: { pluginMeta: { singleResult: true } },
+        metadata: {
+          pluginMeta: {
+            singleResult: true,
+            pluginId: "",
+            functionId: "",
+            fieldSettings: [],
+          },
+        },
       };
     default:
       return {
@@ -480,6 +489,23 @@ export interface PrintMeta {
 }
 export interface PluginMeta {
   singleResult: boolean;
+  pluginId: string;
+  pluginName?: string;
+  pluginVersion?: string;
+  functionId: string;
+  functionName?: string;
+  fieldSettings: PluginFieldSetting[];
+}
+
+export interface PluginFieldSetting {
+  fieldKey: string;
+  fieldName?: string;
+  fieldType: string;
+  value: {
+    type: string;
+    value?: any;
+    fieldValue?: IFormFieldDef;
+  };
 }
 
 export enum EventType {

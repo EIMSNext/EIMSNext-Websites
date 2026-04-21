@@ -68,7 +68,7 @@
 
 .formdatadialog {
   height: calc(100% - var(--et-size-50));
-  margin: var(--et-space-25) auto;
+  margin: var(--et-space-25) auto !important;
 }
 
 .data-container {

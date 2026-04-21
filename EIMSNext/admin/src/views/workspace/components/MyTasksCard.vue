@@ -3,12 +3,14 @@
     <div class="flow-center-wrapper">
       <div class="my-todo">
         <div class="todo-wrapper" @click="goToMyTasks">
-          <div class="image-wrapper">
-            <et-icon icon="icon-mytodo" size="64px" color="var(--et-color-info)" />
-          </div>
+          <el-badge :is-dot="todoCount > 0" :offset="[-6, 14]">
+            <div class="image-wrapper">
+              <et-icon icon="icon-mytodo" size="64px" color="var(--et-color-info)" />
+            </div>
+          </el-badge>
           <div class="todo-count">
             <div class="todo-count-text">{{ t("common.wfProcess.mytasks") }}</div>
-            <div class="todo-count-number">33</div>
+            <div class="todo-count-number">{{ todoCount }}</div>
           </div>
         </div>
       </div>
@@ -35,14 +37,21 @@
 </template>
 
 <script setup lang="ts">
+import { BADGE_REFRESH_INTERVAL, queryCorpTodoCount } from "@/utils/badge";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 const { t } = useI18n();
 const router = useRouter();
+const todoCount = ref(0);
+let todoTimer: ReturnType<typeof setInterval> | null = null;
 
 defineOptions({
   name: "MyTasksCard",
 });
+
+const loadTodoCount = async () => {
+  todoCount.value = await queryCorpTodoCount();
+};
 
 const goToMyTasks = () => {
   router.push("/mytasks");
@@ -60,6 +69,21 @@ const goToMyApproved = () => {
 const goToMyCced = () => {
   router.push("/cctome");
 };
+
+onMounted(() => {
+  loadTodoCount();
+
+  todoTimer = setInterval(() => {
+    loadTodoCount();
+  }, BADGE_REFRESH_INTERVAL);
+});
+
+onBeforeUnmount(() => {
+  if (todoTimer) {
+    clearInterval(todoTimer);
+    todoTimer = null;
+  }
+});
 </script>
 <style lang="scss" scoped>
 .flow-center-wrapper {

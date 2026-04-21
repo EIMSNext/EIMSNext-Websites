@@ -188,19 +188,19 @@ export default defineComponent({
 }
 
 ._fd-bi-opt .solid {
-    border: 1px solid #000;
+    border: 1px solid var(--fc-text-color-1);
 }
 
 ._fd-bi-opt .dashed {
-    border: 1px dashed #000;
+    border: 1px dashed var(--fc-text-color-1);
 }
 
 ._fd-bi-opt .dotted {
-    border: 1px dotted #000;
+    border: 1px dotted var(--fc-text-color-1);
 }
 
 ._fd-bi-opt .double {
-    border: 1px double #000;
+    border: 1px double var(--fc-text-color-1);
 }
 
 ._fd-border-input ._fd-bil-row {

@@ -1,4 +1,4 @@
-import { CurrentUser } from "@eimsnext/models";
+import { CurrentUser, PluginReloadResult, PluginRuntimeInfo } from "@eimsnext/models";
 import { ServiceBase } from "../interface";
 
 export class SystemService extends ServiceBase {
@@ -19,6 +19,14 @@ export class SystemService extends ServiceBase {
       clientId: clientId,
       secret: secret,
     });
+  }
+
+  getPlugins(): Promise<PluginRuntimeInfo[]> {
+    return this.http().api.get<PluginRuntimeInfo[]>("/system/plugins");
+  }
+
+  reloadPlugin(): Promise<PluginReloadResult> {
+    return this.http().api.post<PluginReloadResult>("/system/reloadplugin", {});
   }
 }
 

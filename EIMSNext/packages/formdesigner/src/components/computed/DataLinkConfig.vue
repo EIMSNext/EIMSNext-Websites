@@ -38,7 +38,7 @@
 import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror/lib/codemirror";
 import { defineComponent, markRaw } from "vue";
-import { formulaInfo, formulaTree } from "../../utils/formulas";
+import { formulaInfo, formulaTree } from "@eimsnext/utils";
 import { addAutoKeyMap, escapeRegExp } from "../../utils";
 import ConditionGroup from "./ConditionGroup.vue";
 import { is, deepCopy } from "@eimsnext/form-render-core";
@@ -619,13 +619,13 @@ export default defineComponent({
 }
 
 ._fd-comp-node.disabled ._fd-comp-id {
-    background-color: #999;
+    background-color: var(--fc-text-color-3);
 }
 
 ._fd-comp-id {
     height: 20px;
     width: 20px;
-    color: #fff;
+    color: var(--et-text-on-primary, #fff);
     background-color: var(--fc-style-color-1);
     text-align: center;
     font-weight: 500;

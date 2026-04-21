@@ -5,6 +5,8 @@ export interface User extends IdBase {}
 export class CurrentUser {
   userId: string = "";
   userName: string = "";
+  phone?: string;
+  email?: string;
   empId?: string;
   empCode?: string;
   empName?: string;

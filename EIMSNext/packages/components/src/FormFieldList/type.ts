@@ -1,4 +1,4 @@
-import { IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
+import { IFormFieldDef, toFormFieldDef } from "../FieldSelect/type";
 import { FieldDef, FieldType, FormDef } from "@eimsnext/models";
 
 export interface IFormFieldList {
@@ -13,11 +13,24 @@ export interface IFormFieldValue {
   type: FieldValueType;
   value?: any;
   fieldValue?: IFormFieldDef;
+  formulaValue?: IFormulaValue;
+}
+
+export interface IFormulaRef {
+  key: string;
+  field: IFormFieldDef;
+}
+
+export interface IFormulaValue {
+  expression: string;
+  refs: IFormulaRef[];
+  drivingField?: IFormFieldDef;
 }
 export enum FieldValueType {
   Custom = "custom",
   Field = "field",
   Empty = "empty",
+  Formula = "formula",
 }
 
 export interface FormFieldListInstance {

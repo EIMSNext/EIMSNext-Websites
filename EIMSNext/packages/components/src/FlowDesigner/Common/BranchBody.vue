@@ -1,6 +1,7 @@
 <template>
   <div class="branch-body">
     <el-popover
+      v-if="!flowContextRef.structureReadonly"
       :show-arrow="false"
       placement="right"
       width="200"
@@ -37,7 +38,11 @@
       />
     </div>
     <div class="branch-foot">
-      <AddNodeButton :p-node-datas="pNodeDatas" :node-data="nodeData" />
+      <AddNodeButton
+        v-if="!flowContextRef.structureReadonly"
+        :p-node-datas="pNodeDatas"
+        :node-data="nodeData"
+      />
     </div>
   </div>
 </template>

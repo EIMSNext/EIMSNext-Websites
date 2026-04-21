@@ -185,7 +185,7 @@ export default defineComponent({
 
 ._fd-drag-tool:hover {
   z-index: 1;
-  background-color: #f7f8fa;
+  background-color: var(--fc-bg-color-2);
 }
 
 ._fd-drag-tool:has(._fd-drag-tool:hover) {
@@ -218,7 +218,7 @@ export default defineComponent({
   z-index: 2;
   min-width: 80px;
   min-height: 36px;
-  background-color: #fff5e8;
+  background-color: var(--fc-style-bg-color-1);
 }
 
 ._fd-drag-tool.active > div > ._fd-drag-btn {
@@ -277,7 +277,7 @@ export default defineComponent({
 }
 
 ._fd-drag-btn .el-dropdown {
-  color: #fff;
+  color: inherit;
 }
 
 ._fd-drag-btn + ._fd-drag-btn {
@@ -312,8 +312,8 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(51, 51, 51, 0.7);
-  color: #ffffff;
+  background: var(--et-overlay-color-strong);
+  color: var(--et-text-on-primary);
   font-size: 14px;
 }
 

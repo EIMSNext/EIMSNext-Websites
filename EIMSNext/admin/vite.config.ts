@@ -87,6 +87,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         "element-plus",
         "pinia",
         "axios",
+        "lodash",
         "@vueuse/core",
         "sortablejs",
         "exceljs",

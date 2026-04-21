@@ -488,7 +488,7 @@ onMounted(() => {
 
 // 原始样式保留
 .org-menu {
-  color: #838892;
+  color: var(--et-text-tertiary);
   font-size: var(--et-font-size-14);
   height: var(--et-space-28);
   line-height: var(--et-space-28);
