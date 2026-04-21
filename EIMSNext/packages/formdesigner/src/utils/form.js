@@ -1,6 +1,6 @@
 import formCreate from '@eimsnext/form-render-elplus';
 import {renderPreview} from './index';
-import formulas from './formulas';
+import { formulas } from '@eimsnext/utils';
 import behaviorAttr from './behavior';
 import easySlotsAttr from './easySlots';
 import useExtendApi from './extendApi';

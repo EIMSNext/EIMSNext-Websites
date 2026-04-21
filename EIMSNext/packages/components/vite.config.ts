@@ -20,6 +20,7 @@ export default defineConfig({
       external: [
         "vue",
         "element-plus",
+        "lodash",
         "@element-plus/icons-vue",
         "@eimsnext/utils",
         "@eimsnext/models",
@@ -34,6 +35,7 @@ export default defineConfig({
         globals: {
           vue: "vue",
           "element-plus": "element-plus",
+          lodash: "lodash",
           "@element-plus/icons-vue": "@element-plus/icons-vue",
           "@eimsnext/utils": "@eimsnext/utils",
           "@eimsnext/models": "@eimsnext/models",

@@ -191,7 +191,7 @@
 import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror/lib/codemirror";
 import { defineComponent, markRaw } from "vue";
-import { formulaInfo, formulaTree } from "../../utils/formulas";
+import { formulaInfo, formulaTree } from "@eimsnext/utils";
 import { addAutoKeyMap, escapeRegExp } from "../../utils";
 import ConditionGroup from "./ConditionGroup.vue";
 import { is, deepCopy } from "@eimsnext/form-render-core";

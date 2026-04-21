@@ -1,4 +1,5 @@
 <template>
+  <template v-if="!flowContextRef.structureReadonly">
   <el-popover
     ref="popoverRef"
     :show-arrow="false"
@@ -103,6 +104,7 @@
       </div>
     </template>
   </el-popover>
+  </template>
 </template>
 <script lang="ts" setup>
 import { inject, reactive, ref, watch } from "vue";

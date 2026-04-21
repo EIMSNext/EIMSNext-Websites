@@ -184,7 +184,9 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       showDeleteConfirmDialog.value = true;
       break;
     case "systemprint":
-      printTrigger.value?.click();
+      setTimeout(() => {
+        nextTick(() => { printTrigger.value?.click(); })
+      }, 300);
       break;
   }
 };

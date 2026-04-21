@@ -42,6 +42,8 @@
         :nodes="nodes"
         :field-setting="fieldSetting"
         :removable="!showAll"
+        :sibling-fields="selectedFields.items"
+        :error-message="errorMap[item.field.field]"
         :fieldValueChanging="fieldValueChanging"
         @change="onInput"
         @remove="onRemove"
@@ -68,6 +70,7 @@ import {
 } from "../NodeFieldList/type";
 import { nextTick, onMounted, ref, toRef, watch } from "vue";
 import { IFormFieldDef, splitSubField } from "@/FieldSelect/type";
+import { normalizeFormulaValue, validateFormulaFieldList } from "@/FlowDesigner/Dataflow/formula";
 const { t } = useLocale();
 
 defineOptions({
@@ -104,6 +107,7 @@ const fieldSetting = ref<IFieldBuildSetting>({
 
 const formStore = useFormStore();
 const formDef = ref<FormDef>();
+const errorMap = ref<Record<string, string>>({});
 
 const emit = defineEmits(["update:modelValue", "change"]);
 
@@ -145,13 +149,28 @@ const onInput = (fieldItem: IFormFieldItem) => {
 const updateFieldSetting = () => {
   let mapping: Record<string, IFormFieldMap> = {};
   selectedFields.value.items.forEach((x) => {
+    if (x.value.type == FieldValueType.Formula && x.value.formulaValue) {
+      x.value.formulaValue = normalizeFormulaValue(
+        x.value.formulaValue,
+        x.field,
+        selectedFields.value.items,
+      );
+    }
+
     if (
-      x.value.type == FieldValueType.Field &&
-      x.value.fieldValue &&
-      (!x.value.fieldValue.singleResultNode || x.value.fieldValue.isSubField)
+      (x.value.type == FieldValueType.Field ||
+        x.value.type == FieldValueType.Formula) &&
+      (x.value.fieldValue || x.value.formulaValue?.drivingField) &&
+      (!(
+        x.value.fieldValue ?? x.value.formulaValue?.drivingField
+      )!.singleResultNode ||
+        (
+          x.value.fieldValue ?? x.value.formulaValue?.drivingField
+        )!.isSubField)
     ) {
-      let mapMainField = x.value.fieldValue.isSubField
-        ? splitSubField(x.value.fieldValue.field)[0]
+      let sourceField = x.value.fieldValue ?? x.value.formulaValue?.drivingField;
+      let mapMainField = sourceField!.isSubField
+        ? splitSubField(sourceField!.field)[0]
         : "master";
       if (x.field.isSubField) {
         let mainField = splitSubField(x.field.field)[0];
@@ -160,9 +179,9 @@ const updateFieldSetting = () => {
             mainField: mainField,
             sourceField: x.field.field,
             mapMainField: mapMainField,
-            mapField: x.value.fieldValue.field,
-            mapNodeId: x.value.fieldValue.nodeId,
-            mapSingleResult: x.value.fieldValue.singleResultNode ?? true,
+            mapField: sourceField!.field,
+            mapNodeId: sourceField!.nodeId,
+            mapSingleResult: sourceField!.singleResultNode ?? true,
             mapCount: 1,
           };
           mapping[mainField] = fieldMap;
@@ -175,9 +194,9 @@ const updateFieldSetting = () => {
             mainField: "master",
             sourceField: x.field.field,
             mapMainField: mapMainField,
-            mapField: x.value.fieldValue.field,
-            mapNodeId: x.value.fieldValue.nodeId,
-            mapSingleResult: x.value.fieldValue.singleResultNode ?? true,
+            mapField: sourceField!.field,
+            mapNodeId: sourceField!.nodeId,
+            mapSingleResult: sourceField!.singleResultNode ?? true,
             mapCount: 1,
           };
           mapping["master"] = fieldMap;
@@ -190,6 +209,15 @@ const updateFieldSetting = () => {
 
   fieldSetting.value.fieldMapping = mapping;
   fieldSetting.value.version += 1;
+
+  const validation = validateFormulaFieldList(
+    selectedFields.value.items,
+    t("dataflow.formulaInferenceError"),
+  );
+  errorMap.value = {};
+  validation.errors.forEach((item) => {
+    errorMap.value[item.field] = item.message;
+  });
 };
 
 const emitChange = () => {

@@ -100,7 +100,7 @@ import "./style/theme.css";
 import "./form/elm.css";
 import "./style/icon.css";
 import "./utils/highlight/style.css";
-import formulas, { formulaInfo, formulaTree } from "./utils/formulas";
+import { formulas, formulaInfo, formulaTree } from "@eimsnext/utils";
 import CheckBoxInput from "./components/CheckBoxInput.vue";
 import DefaultValueConfig from "./components/DefaultValueConfig.vue";
 import { behavior, behaviorRules, behaviorTree } from "./utils/behavior";

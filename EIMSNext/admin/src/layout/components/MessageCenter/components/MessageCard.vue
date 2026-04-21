@@ -9,15 +9,16 @@
       <div class="message-paragraph">
         {{ message.title || "系统消息" }}
         <!-- <div v-if="message.detail" class="message-detail">{{ message.detail }}</div> -->
-        <a v-if="message.url" class="download-link" :href="message.url" target="_blank">
-          查看详情
+        <a v-if="message.url" class="download-link" :href="message.url" target="_blank"
+          @click="emit('read', message.id)">
+          {{ message.messageType == MessageType.ExportNotify ? "下载文件" : "查看详情" }}
         </a>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { SystemMessage } from "@eimsnext/models";
+import { MessageType, SystemMessage } from "@eimsnext/models";
 import { computed } from "vue";
 import { dateFormat } from "@/utils/common";
 

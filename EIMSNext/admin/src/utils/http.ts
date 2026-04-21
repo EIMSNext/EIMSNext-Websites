@@ -1,5 +1,6 @@
 import type { App } from "vue";
 import { type AxiosResponse, AxiosHeaders } from "axios";
+import { ElMessage } from "element-plus";
 import { appSetting, http, HttpInterceptors, type HttpRequestConfig } from "@eimsnext/utils";
 
 function initHttpConfig(): HttpRequestConfig {
@@ -14,11 +15,15 @@ function initHttpConfig(): HttpRequestConfig {
   };
   interceptors.errorHandler = (error: any) => {
     const { config, response } = error;
+    console.log("erro", response, error);
     if (response) {
-      const { code, msg } = response.data;
-      ElMessage.error(msg || "系统出错");
+      const data = (response && response.data) || {};
+
+      const { code, msg, message } = data as any;
+      const display = message || msg || "系统出错";
+      ElMessage.error(display);
     } else {
-      ElMessage.error(error || "系统出错");
+      ElMessage.error(error?.message || error?.msg || "系统出错");
     }
   };
 
@@ -31,7 +36,7 @@ export default {
     //@ts-expect-error
     if (window.appSetting) appSetting.merge(window.appSetting);
     const httpConfig = initHttpConfig();
-    http.setConfig(httpConfig, httpConfig);
+    http.setConfig(httpConfig);
     app.provide("http", http);
   },
 };

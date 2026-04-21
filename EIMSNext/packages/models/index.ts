@@ -30,3 +30,5 @@ export * from "./dto/workflow";
 export * from "./dto/wfApprovalLog";
 export * from "./dto/dashboardDef";
 export * from "./dto/dashboardItemDef";
+export * from "./dto/exportLog";
+export * from "./dto/plugin";

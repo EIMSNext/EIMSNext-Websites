@@ -82,7 +82,6 @@ import formCreate from "@eimsnext/form-render-elplus";
 import { ArrowDown } from "@element-plus/icons-vue";
 import { FormContent } from "@eimsnext/models";
 import "@eimsnext/form-designer/dist/index.css";
-import { cloneDeep } from "lodash";
 
 const TITLE = [
   "生成规则",

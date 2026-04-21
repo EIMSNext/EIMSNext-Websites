@@ -1,13 +1,6 @@
 <template>
-  <FormView
-    v-if="formData"
-    :def="formDef"
-    :data="formData"
-    :isView="true"
-    :actions="actions"
-    @approve="handleApprove"
-    @reject="handleReject"
-  ></FormView>
+  <FormView v-if="formData" :def="formDef" :data="formData" :isView="true" :actions="actions" @approve="handleApprove"
+    @reject="handleReject"></FormView>
 </template>
 <script lang="ts" setup>
 defineOptions({
@@ -54,14 +47,14 @@ const handleApprove = (data: any) => {
     dataId: dataId.value,
     action: ApproveAction.Approve,
     comment: "同意",
-  });
+  }).catch();
 };
 const handleReject = (data: any) => {
   workflowService.approve({
     dataId: dataId.value,
     action: ApproveAction.Reject,
     comment: "不同意",
-  });
+  }).catch();
 };
 
 onMounted(async () => {

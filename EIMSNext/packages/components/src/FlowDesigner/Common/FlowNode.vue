@@ -7,11 +7,11 @@
       trigger="hover"
       placement="top-end"
       :show-arrow="false"
-      :disabled="!allowCopy && !allowDelete"
+      :disabled="flowContextRef.structureReadonly || (!allowCopy && !allowDelete)"
     >
       <div class="node-actions">
         <div
-          v-if="allowCopy"
+          v-if="allowCopy && !flowContextRef.structureReadonly"
           class="copy-btn"
           @click.stop="
             copyClick(
@@ -23,9 +23,9 @@
         >
           <et-icon icon="el-CopyDocument" />
         </div>
-        <div v-if="allowCopy && allowDelete" class="action-split" />
+        <div v-if="allowCopy && allowDelete && !flowContextRef.structureReadonly" class="action-split" />
         <div
-          v-if="allowDelete"
+          v-if="allowDelete && !flowContextRef.structureReadonly"
           class="delete-btn"
           @click.stop="delClick(nodeData)"
         >

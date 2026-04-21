@@ -1,5 +1,31 @@
 <template>
   <div class="corp-log-container">
+    <el-dialog v-model="showExportDialog" title="导出日志" width="520px">
+      <el-form label-width="90px">
+        <el-form-item label="导出格式">
+          <el-radio-group v-model="exportFormat">
+            <el-radio :value="ExportFormat.Csv">CSV</el-radio>
+            <el-radio :value="ExportFormat.Excel">Excel</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="导出列">
+          <el-checkbox-group v-model="selectedExportColumnKeys" class="export-column-group">
+            <el-checkbox
+              v-for="column in currentExportColumns"
+              :key="column.key"
+              :value="column.key"
+            >
+              {{ column.header }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showExportDialog = false">取消</el-button>
+        <el-button type="primary" :loading="exporting" @click="submitExport">确定</el-button>
+      </template>
+    </el-dialog>
+
     <el-card shadow="never" class="corp-log-card">
       <el-tabs v-model="activeTab" class="corp-log-tabs" @tab-change="handleTabChange">
         <el-tab-pane label="登录日志" name="login" />
@@ -20,7 +46,7 @@
           <div class="filter-actions">
             <el-button type="primary" @click="handleSearch">查询</el-button>
             <el-button @click="handleReset">重置</el-button>
-            <el-button disabled>导出</el-button>
+            <el-button @click="openExportDialog">导出</el-button>
           </div>
         </div>
       </div>
@@ -53,7 +79,7 @@
           <div class="filter-actions">
             <el-button type="primary" @click="handleSearch">查询</el-button>
             <el-button @click="handleReset">重置</el-button>
-            <el-button disabled>导出</el-button>
+            <el-button @click="openExportDialog">导出</el-button>
           </div>
         </div>
       </div>
@@ -119,7 +145,16 @@
 <script setup lang="ts">
 import { dateFormat } from "@/utils/common";
 import type { ODataQuery } from "@/utils/query";
-import { AuditLog, AuditLogin } from "@eimsnext/models";
+import {
+  AuditLog,
+  AuditLogExportRequest,
+  AuditLogin,
+  AuditLoginExportRequest,
+  ExportColumn,
+  ExportColumnType,
+  ExportFormat,
+  ExportResponse,
+} from "@eimsnext/models";
 import { auditLogService, auditLoginService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 
@@ -140,6 +175,27 @@ const loginData = ref<AuditLogin[]>([]);
 const actionData = ref<AuditLog[]>([]);
 const actionOptions = ref<string[]>([]);
 const entityTypeOptions = ref<string[]>([]);
+const showExportDialog = ref(false);
+const exporting = ref(false);
+const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
+const selectedExportColumnKeys = ref<string[]>([]);
+
+const loginExportColumns: ExportColumn[] = [
+  { key: "userName", header: "登录人", type: ExportColumnType.String },
+  { key: "createTime", header: "登录时间", type: ExportColumnType.Date },
+  { key: "loginId", header: "登录标识", type: ExportColumnType.String },
+  { key: "failReason", header: "失败原因", type: ExportColumnType.String },
+  { key: "clientIp", header: "IP", type: ExportColumnType.String },
+];
+
+const actionExportColumns: ExportColumn[] = [
+  { key: "operatorName", header: "操作人", type: ExportColumnType.String },
+  { key: "createTime", header: "操作时间", type: ExportColumnType.Date },
+  { key: "action", header: "操作类型", type: ExportColumnType.String },
+  { key: "entityType", header: "实体类型", type: ExportColumnType.String },
+  { key: "detail", header: "操作详情", type: ExportColumnType.String },
+  { key: "clientIp", header: "IP", type: ExportColumnType.String },
+];
 
 const loginFilters = reactive({
   userName: "",
@@ -155,6 +211,10 @@ const actionFilters = reactive({
 
 const tableData = computed(() => {
   return activeTab.value === "login" ? loginData.value : actionData.value;
+});
+
+const currentExportColumns = computed(() => {
+  return activeTab.value === "login" ? loginExportColumns : actionExportColumns;
 });
 
 const queryParams = computed<ODataQuery<any>>(() => {
@@ -308,6 +368,61 @@ const formatDateTime = (value?: number) => {
   return dateFormat(value, "YYYY-MM-DD HH:mm:ss") || "-";
 };
 
+const openExportDialog = () => {
+  selectedExportColumnKeys.value = currentExportColumns.value.map((item) => item.key);
+  exportFormat.value = ExportFormat.Csv;
+  showExportDialog.value = true;
+};
+
+const submitExport = async () => {
+  const columns = currentExportColumns.value.filter((item) =>
+    selectedExportColumnKeys.value.includes(item.key)
+  );
+
+  if (columns.length === 0) {
+    ElMessage.warning("请至少选择一列");
+    return;
+  }
+
+  exporting.value = true;
+
+  try {
+    let result: ExportResponse;
+
+    if (activeTab.value === "login") {
+      const [startTime, endTime] = loginFilters.dateRange;
+      const request: AuditLoginExportRequest = {
+        format: exportFormat.value,
+        columns,
+        userName: loginFilters.userName || undefined,
+        startTime: startTime ? Number(startTime) : undefined,
+        endTime: endTime ? Number(endTime) : undefined,
+      };
+      result = await auditLoginService.export(request);
+    } else {
+      const [startTime, endTime] = actionFilters.dateRange;
+      const request: AuditLogExportRequest = {
+        format: exportFormat.value,
+        columns,
+        entityType: actionFilters.entityType || undefined,
+        action: actionFilters.action || undefined,
+        operatorName: actionFilters.operatorName || undefined,
+        startTime: startTime ? Number(startTime) : undefined,
+        endTime: endTime ? Number(endTime) : undefined,
+      };
+      result = await auditLogService.export(request);
+    }
+
+    showExportDialog.value = false;
+    ElMessage.success(
+      result.message ||
+      (result.isDuplicate ? "已存在相同导出任务，稍后请在消息中心或导出历史查看" : "已创建导出任务")
+    );
+  } finally {
+    exporting.value = false;
+  }
+};
+
 onMounted(async () => {
   await handleQuery();
 });
@@ -401,6 +516,13 @@ onMounted(async () => {
   display: flex;
   gap: var(--et-space-12);
   justify-content: flex-end;
+}
+
+.export-column-group {
+  display: grid;
+  gap: var(--et-space-8);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
 }
 
 .table-container {

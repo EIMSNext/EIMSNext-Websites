@@ -94,6 +94,7 @@ const addNew = (eventSource: EventSourceType) => {
     externalId: "",
     version: 1,
     isCurrent: true,
+    released: false,
     content: "",
     eventSource: eventSource,
     sourceId: props.formDef.id,
