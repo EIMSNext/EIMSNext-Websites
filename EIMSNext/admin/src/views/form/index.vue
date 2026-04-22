@@ -443,6 +443,22 @@ const formatter = (row: any, column: any, cellValue: any) => {
       return cellValue.label;
     }
     if (Array.isArray(cellValue)) {
+      // 处理嵌套数组格式 [[val1], [val2], ...]
+      if (cellValue.length > 0 && Array.isArray(cellValue[0])) {
+        return cellValue
+          .map((item) => {
+            if (Array.isArray(item) && item.length > 0) {
+              const first = item[0];
+              if (typeof first === "object" && first !== null) {
+                return first.label || first.name || String(first);
+              }
+              return String(first ?? "");
+            }
+            return String(item ?? "");
+          })
+          .filter(Boolean)
+          .join(", ");
+      }
       if (cellValue.length > 0 && typeof cellValue[0] === "object" && cellValue[0] !== null) {
         return cellValue
           .map((item) => item.label || item.name || "")
@@ -533,6 +549,15 @@ const processData = () => {
           const value = dataItem[key];
           if (value && typeof value === "object" && "label" in value) {
             dataItem[key] = value.label;
+          }
+          // 处理嵌套数组格式 [[val1], [val2], ...] -> [val1, val2, ...]
+          if (Array.isArray(value) && value.length > 0 && Array.isArray(value[0])) {
+            dataItem[key] = value.map(item => {
+              if (Array.isArray(item) && item.length > 0) {
+                return item[0];
+              }
+              return item;
+            });
           }
         }
       }

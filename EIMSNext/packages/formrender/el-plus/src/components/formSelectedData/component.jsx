@@ -55,115 +55,65 @@ export default defineComponent({
   setup(props, { emit }) {  
     
     const showDialog = ref(false);
-    
-    // 处理初始值，确保能正确处理各种格式
-    let initialValue = props.modelValue ?? [];
-    
-    // 如果是字符串，尝试解析为数组
-    if (typeof initialValue === 'string') {
-      // 检查是否是 [object Object] 格式的字符串
-      if (initialValue.includes('[object Object]')) {
-        // 根据选择的字段配置构建显示数据
-        if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-          initialValue = props.selectionProcess.selectedFields.map(field => {
-            return {
-              label: field.label,
-              value: '已选择数据'
-            };
-          });
-        } else {
-          initialValue = [{ label: '已选择数据', value: '数据已选择但无法显示详细信息' }];
-        }
-      } else {
-        // 尝试解析 JSON
-        try {
-          const parsed = JSON.parse(initialValue);
-          if (Array.isArray(parsed)) {
-            initialValue = parsed;
-          }
-        } catch (e) {
-          // 解析失败，保持原样
-          console.log('JSON 解析失败:', e);
-        }
-      }
-    }
-    
-    // 如果初始值是数组，检查是否需要处理
-    if (Array.isArray(initialValue)) {
-      // 检查数组元素
-      const needsProcessing = initialValue.some(item => {
-        if (typeof item === 'string') {
-          return item.includes('[object Object]');
-        }
-        if (typeof item === 'object' && item !== null) {
-          // 检查对象是否缺少 label/value 属性
-          return !('label' in item && 'value' in item);
-        }
-        return false;
-      });
+
+    // 解析选择数据控件的特殊数据格式
+    // 格式：[[{key: "label"/"value", value: ...}, {key: "value"/"label", value: ...}], ...]
+    const parseSpecialFormat = (val) => {
+      if (!val || !Array.isArray(val)) return [];
       
-      if (needsProcessing) {
-        // 根据选择的字段配置构建显示数据
-        if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-          initialValue = props.selectionProcess.selectedFields.map((field, index) => {
-            const item = initialValue[index];
-            let value = '已选择数据';
-            if (item !== undefined) {
-              if (typeof item === 'object' && item !== null) {
-                // 尝试从对象中提取值
-                if (item.value !== undefined) value = String(item.value);
-                else if (item.label !== undefined) value = String(item.label);
-                else {
-                  const values = Object.values(item);
-                  value = values.length > 0 ? String(values[0]) : '已选择数据';
-                }
-              } else {
-                value = String(item);
-              }
-            }
-            return {
-              label: field.label,
-              value: value.includes('[object Object]') ? '已选择数据' : value
-            };
-          });
-        }
-      } else {
-        // 即使不需要处理，也要确保每个对象都有正确的格式
-        initialValue = initialValue.map(item => {
-          if (typeof item === 'object' && item !== null) {
-            if ('label' in item && 'value' in item) {
-              return {
-                label: item.label,
-                value: String(item.value || "暂无内容")
-              };
-            } else {
-              // 如果对象没有label和value属性，尝试从selectedFields中获取label
-              const fieldIndex = initialValue.indexOf(item);
-              if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields[fieldIndex]) {
-                const field = props.selectionProcess.selectedFields[fieldIndex];
-                return {
-                  label: field.label,
-                  value: String(Object.values(item)[0] || "暂无内容")
-                };
-              } else {
-                return {
-                  label: '未知字段',
-                  value: String(item) === '[object Object]' ? '已选择数据' : String(item)
-                };
-              }
-            }
-          } else {
-            return {
-              label: '未知字段',
-              value: String(item)
-            };
+      if (val.length > 0 && Array.isArray(val[0])) {
+        // 特殊格式：每个元素是 [{key: "label"/"value", value: ...}, ...] 的数组
+        return val.map(item => {
+          if (!Array.isArray(item) || item.length < 2) {
+            return { label: '未知字段', value: '' };
           }
+          
+          // 找到 label 和 value 对象
+          const labelObj = item.find(obj => obj && obj.key === 'label');
+          const valueObj = item.find(obj => obj && obj.key === 'value');
+          
+          const label = labelObj?.value ?? '未知字段';
+          // value 可能是数组，取第一个元素
+          const rawValue = valueObj?.value;
+          const displayValue = Array.isArray(rawValue) ? rawValue[0] : (rawValue ?? '');
+          
+          return {
+            label: String(label),
+            value: String(displayValue)
+          };
         });
       }
-    }
-    
-    console.log('处理后的初始值:', initialValue);
-    const selectedValue = ref(initialValue);
+      
+      return [];
+    };
+
+    // 规范化显示值：确保总是 {label, value} 格式的数组
+    const normalizeDisplayValue = (val) => {
+      if (!val || !Array.isArray(val)) return [];
+      
+      // 先尝试解析特殊格式
+      const parsedSpecial = parseSpecialFormat(val);
+      if (parsedSpecial.length > 0) {
+        return parsedSpecial;
+      }
+      
+      // 标准格式：[{label: ..., value: ...}, ...]
+      return val.map((item) => {
+        if (typeof item === 'object' && item !== null && 'label' in item && 'value' in item) {
+          // 处理 value 可能是数组的情况
+          const rawValue = item.value;
+          const displayValue = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+          return { label: item.label, value: String(displayValue ?? "") };
+        }
+        if (typeof item === 'object' && item !== null) {
+          const values = Object.values(item);
+          return { label: '未知字段', value: values.length > 0 ? String(values[0]) : "" };
+        }
+        return { label: '未知字段', value: String(item) };
+      });
+    };
+
+    const selectedValue = ref(normalizeDisplayValue(props.modelValue));
     const formData = ref([]);
     const loading = ref(false);
     const selectedRecord = ref(null);
@@ -230,6 +180,37 @@ export default defineComponent({
       return null;
     };
 
+    // 解析嵌套数组格式的值
+    // 格式1: [["4"]] -> 提取 "4"
+    // 格式2: [[{key: "label", value: ...}, {key: "value", value: ...}]] -> 提取值
+    const parseCellValue = (val) => {
+      if (!val || !Array.isArray(val)) return val ?? "";
+      
+      // 如果是嵌套数组格式 [[...]]
+      if (Array.isArray(val[0])) {
+        // 检查是否是特殊格式 [[{key, value}, ...]]
+        if (val[0]?.length > 0 && typeof val[0][0] === 'object' && 'key' in val[0][0]) {
+          // 选择数据控件的格式
+          return val.map(item => {
+            if (Array.isArray(item)) {
+              const labelObj = item.find(obj => obj && obj.key === 'label');
+              const valueObj = item.find(obj => obj && obj.key === 'value');
+              const label = labelObj?.value ?? '未知';
+              const rawValue = valueObj?.value;
+              const displayValue = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+              return `${label}: ${displayValue ?? ''}`;
+            }
+            return '';
+          }).join(' | ');
+        } else {
+          // 普通嵌套数组 [["4"]] -> "4"
+          return val[0][0] ?? "";
+        }
+      }
+      
+      return val[0] ?? "";
+    };
+
     const buildDisplayTagsFromForm = () => {
       const displayRules = configuredDisplayFields.value
         .map(normalizeDisplayField)
@@ -247,112 +228,17 @@ export default defineComponent({
           label: rule.label,
           value: formValue ?? "",
         };
+        };
       });
     };
 
     watch(
       () => props.modelValue,
       (newVal) => {
-        let processedValue = newVal ?? [];
-        
-        // 如果是字符串，尝试解析
-        if (typeof processedValue === 'string') {
-          if (processedValue.includes('[object Object]')) {
-            if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-              processedValue = props.selectionProcess.selectedFields.map(field => ({
-                label: field.label,
-                value: '已选择数据'
-              }));
-            } else {
-              processedValue = [{ label: '已选择数据', value: '数据已选择但无法显示详细信息' }];
-            }
-          } else {
-            // 尝试解析 JSON
-            try {
-              const parsed = JSON.parse(processedValue);
-              if (Array.isArray(parsed)) {
-                processedValue = parsed;
-              }
-            } catch (e) {
-              console.log('JSON 解析失败:', e);
-            }
-          }
-        }
-        
-        // 如果是数组，检查是否需要处理
-        if (Array.isArray(processedValue)) {
-         
-          const needsProcessing = processedValue.some(item => {
-            if (typeof item === 'string') {
-              return item.includes('[object Object]');
-            }
-            if (typeof item === 'object' && item !== null) {
-              return !('label' in item && 'value' in item);
-            }
-            return false;
-          });
-          
-          if (needsProcessing) {
-            if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-              processedValue = props.selectionProcess.selectedFields.map((field, index) => {
-                const item = processedValue[index];
-                let value = '已选择数据';
-                if (item !== undefined) {
-                  if (typeof item === 'object' && item !== null) {
-                    if (item.value !== undefined) value = String(item.value);
-                    else if (item.label !== undefined) value = String(item.label);
-                    else {
-                      const values = Object.values(item);
-                      value = values.length > 0 ? String(values[0]) : '已选择数据';
-                    }
-                  } else {
-                    value = String(item);
-                  }
-                }
-                return {
-                  label: field.label,
-                  value: value.includes('[object Object]') ? '已选择数据' : value
-                };
-              });
-            }
-          } else {
-            // 即使不需要处理，也要确保每个对象都有正确的格式
-            processedValue = processedValue.map(item => {
-              if (typeof item === 'object' && item !== null) {
-                if ('label' in item && 'value' in item) {
-                  return {
-                    label: item.label,
-                    value: String(item.value || "暂无内容")
-                  };
-                } else {
-                  // 如果对象没有label和value属性，尝试从selectedFields中获取label
-                  const fieldIndex = processedValue.indexOf(item);
-                  if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields[fieldIndex]) {
-                    const field = props.selectionProcess.selectedFields[fieldIndex];
-                    return {
-                      label: field.label,
-                      value: String(Object.values(item)[0] || "暂无内容")
-                    };
-                  } else {
-                    return {
-                      label: '未知字段',
-                      value: String(item) === '[object Object]' ? '已选择数据' : String(item)
-                    };
-                  }
-                }
-              } else {
-                return {
-                  label: '未知字段',
-                  value: String(item)
-                };
-              }
-            });
-          }
-        }
-        
-        selectedValue.value = processedValue;
+        // 直接使用规范化函数处理
+        selectedValue.value = normalizeDisplayValue(newVal);
       },
-      { immediate: true }
+      { immediate: true, deep: true }
     );
 
     const fetchFormData = async (page = 1, size = pageSize.value) => {
@@ -575,148 +461,17 @@ export default defineComponent({
       fetchFormData(1, size);
     };
 
-    return () => {      
+    return () => {
       const { disabled, preview, ...attrs } = props;
       const editable = !(disabled || isPreviewMode.value);
       
-      let displayTags = selectedValue.value || [];
-      
       const tagHeight = "60px";
       
-      // 在预览模式下，优先使用 selectedValue 中的数据
-      if (isPreviewMode.value && Array.isArray(selectedValue.value) && selectedValue.value.length > 0) {
-        displayTags = selectedValue.value.map(tag => {
-          if (typeof tag === 'object' && tag !== null) {
-            return {
-              label: tag.label || '未知字段',
-              value: String(tag.value || "暂无内容")
-            };
-          } else {
-            return {
-              label: '未知字段',
-              value: String(tag)
-            };
-          }
-        });
-      } else {
-        // 非预览模式，尝试从表单中获取值来显示
-        const fallbackDisplayTags = buildDisplayTagsFromForm().filter(
-          (tag) => tag.label
-        );
-        
-        if (fallbackDisplayTags.length > 0) {
-          displayTags = fallbackDisplayTags.map((tag) => ({
-            label: tag.label,
-            value: tag.value === "" ? "暂无内容" : String(tag.value),
-          }));
-        } else {
-          // 如果没有从表单获取到数据，再尝试处理 selectedValue
-          // 确保 displayTags 是数组
-          if (!Array.isArray(displayTags)) {
-            displayTags = [];
-          }
-          
-          // 直接使用 selectedValue 的数据
-          if (Array.isArray(displayTags) && displayTags.length > 0) {
-            // 确保每个标签都有正确的格式
-            displayTags = displayTags.map(tag => {
-              if (typeof tag === 'object' && tag !== null) {
-                return {
-                  label: tag.label || '未知字段',
-                  value: String(tag.value || "暂无内容")
-                };
-              } else {
-                return {
-                  label: '未知字段',
-                  value: String(tag)
-                };
-              }
-            });
-          } else {
-            // 如果 selectedValue 是空的，尝试直接从 props.modelValue 处理
-            let rawValue = props.modelValue;
-            
-            // 处理各种数据格式
-            if (typeof rawValue === 'string' && rawValue.includes('[object Object]')) {
-              if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-                displayTags = props.selectionProcess.selectedFields.map(field => ({
-                  label: field.label,
-                  value: '已选择数据'
-                }));
-              }
-            } else if (Array.isArray(rawValue) && rawValue.length > 0) {
-              // 检查数组元素
-              const needsProcessing = rawValue.some(item => {
-                if (typeof item === 'string') {
-                  return item.includes('[object Object]');
-                }
-                if (typeof item === 'object' && item !== null) {
-                  return !('label' in item && 'value' in item);
-                }
-                return false;
-              });
-              
-              if (needsProcessing && props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields.length > 0) {
-                displayTags = props.selectionProcess.selectedFields.map((field, index) => {
-                  const item = rawValue[index];
-                  let value = '已选择数据';
-                  if (item !== undefined) {
-                    if (typeof item === 'object' && item !== null) {
-                      if (item.value !== undefined) value = String(item.value);
-                      else if (item.label !== undefined) value = String(item.label);
-                      else {
-                        const values = Object.values(item);
-                        value = values.length > 0 ? String(values[0]) : '已选择数据';
-                      }
-                    } else {
-                      value = String(item);
-                    }
-                  }
-                  return {
-                    label: field.label,
-                    value: value.includes('[object Object]') ? '已选择数据' : value
-                  };
-                });
-              } else if (!needsProcessing) {
-                // 如果不需要处理，直接使用原始数据，但确保格式正确
-                displayTags = rawValue.map(item => {
-                  if (typeof item === 'object' && item !== null) {
-                    if ('label' in item && 'value' in item) {
-                      return {
-                        label: item.label,
-                        value: String(item.value || "暂无内容")
-                      };
-                    } else {
-                      // 如果对象没有label和value属性，尝试从selectedFields中获取label
-                      const fieldIndex = rawValue.indexOf(item);
-                      if (props.selectionProcess?.selectedFields && props.selectionProcess.selectedFields[fieldIndex]) {
-                        const field = props.selectionProcess.selectedFields[fieldIndex];
-                        return {
-                          label: field.label,
-                          value: String(Object.values(item)[0] || "暂无内容")
-                        };
-                      } else {
-                        return {
-                          label: '未知字段',
-                          value: String(item) === '[object Object]' ? '已选择数据' : String(item)
-                        };
-                      }
-                    }
-                  } else {
-                    return {
-                      label: '未知字段',
-                      value: String(item)
-                    };
-                  }
-                });
-              }
-            }
-          }
-          
-          // 过滤掉无效的标签
-          displayTags = displayTags.filter(tag => tag && typeof tag === 'object' && 'label' in tag);
-        }
-      }
+      // 直接使用 selectedValue 中的数据（已通过 watch 规范化）
+      const displayTags = (selectedValue.value || []).map(tag => ({
+        label: tag?.label || '未知字段',
+        value: String(tag?.value ?? "暂无内容")
+      }));
       
       return (
         <div style={{ width: "100%" }}>
@@ -816,11 +571,15 @@ export default defineComponent({
                                            }}
                                     />
                                 </td>
-                                {selectedFields.value.map(field => (
+                                {selectedFields.value.map(field => {
+                                    const rawValue = record[field.value];
+                                    const displayValue = parseCellValue(rawValue);
+                                    return (
                                     <td key={field.value} style={{ padding: "10px", border: "1px solid #e6e6e6" }}>
-                                        {record[field.value] || ""}
+                                        {displayValue}
                                     </td>
-                                ))}
+                                    );
+                                })}
                             </tr>
                           ))}
                         </tbody>
