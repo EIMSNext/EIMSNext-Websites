@@ -1,6 +1,6 @@
-import { IFieldLimit } from "@/NodeFieldList/type";
-import { DataItemType } from "@/common";
-import { IListItem } from "@/list/type";
+import { IFieldLimit } from "../NodeFieldList/type";
+import { DataItemType } from "../common";
+import { IListItem } from "../list/type";
 import {
   FieldDef,
   FieldType,

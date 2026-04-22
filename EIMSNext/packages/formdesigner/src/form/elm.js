@@ -24,7 +24,7 @@ import QrCodeBox from '../components/aide/QrCodeBox.vue';
 import Cell from '../components/cell/Cell.vue';
 import './elm.css';
 import '../style/icon.css';
-import formulas from '../utils/formulas';
+import { formulas } from '@eimsnext/utils';
 import renderPreview from '../utils/preview';
 import behaviorAttr from '../utils/behavior';
 import easySlotsAttr from '../utils/easySlots';

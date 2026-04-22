@@ -15,7 +15,8 @@ export class ODataClient {
   get<T = any>(url: string, id: string, data?: any) {
     url = this.formatUrl<T>(url, id);
     if (data) {
-      let qStr = typeof data === "string" ? data : qs.stringify(data);
+      let qStr =
+        typeof data === "string" ? data : qs.stringify(data, { encode: false });
       let qMark = qStr.startsWith("?") ? "" : "?";
       url = `${url}${qMark}${qStr}`;
     }
@@ -27,7 +28,8 @@ export class ODataClient {
     let $count = url.endsWith("$count") ? "" : "$count";
     url = this.formatUrl(url, $count);
     if (data) {
-      let qStr = typeof data === "string" ? data : qs.stringify(data);
+      let qStr =
+        typeof data === "string" ? data : qs.stringify(data, { encode: false });
       // console.log("qStr", qStr);
       data = qStr.startsWith("?") ? qStr.substring(1) : qStr;
     } else {
@@ -48,7 +50,8 @@ export class ODataClient {
 
     url = this.formatUrl(url, "$query");
     if (data) {
-      let qStr = typeof data === "string" ? data : qs.stringify(data);
+      let qStr =
+        typeof data === "string" ? data : qs.stringify(data, { encode: false });
       // console.log("qStr", qStr);
       data = qStr.startsWith("?") ? qStr.substring(1) : qStr;
     } else {

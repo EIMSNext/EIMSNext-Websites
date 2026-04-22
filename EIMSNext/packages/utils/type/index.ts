@@ -46,7 +46,7 @@
 //     return typeof Ctor === "function" && fnToString.call(Ctor) === ObjectFunctionString;
 // }
 
-import { cloneDeep } from "lodash";
+import { cloneDeep } from "lodash-es";
 
 export function is(val: unknown, type: string) {
   return toString.call(val) === `[object ${type}]`;

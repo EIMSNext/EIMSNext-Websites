@@ -89,6 +89,7 @@ export default {
     data_removed: "有数据被删除时",
     wfstatus_updated: "流程状态变更时",
     wftodo_updated: "流程待办变更时",
+    currentCorporate: "当前所在企业",
   },
   workflow: {
     flowStatus: {
@@ -172,6 +173,17 @@ export default {
     fieldConflict_MsgTitle: "确定要使用该字段吗？",
     fieldConflict_MsgContent:
       "使用该字段后，主字段和子字段的配置冲突。此操作会清除部分已设置的字段赋值，无法还原",
+    formula: "公式",
+    setFormula: "设置公式",
+    formulaEditor: "公式编辑器",
+    formulaInfo: "函数说明",
+    formulaExample: "函数示例",
+    formulaInferenceError: "当前公式无法确定稳定的数据来源",
+    formulaSaveDisabledTitle: "存在不可用公式",
+    formulaSaveDisabledContent:
+      "存在无法确定数据来源的公式字段，保存后该智能助手将自动禁用。你可以确认保存并禁用，或取消后继续修改。",
+    pluginName: "执行插件",
+    pluginFunction: "插件功能",
   },
   dash: {
     chart: {

@@ -23,21 +23,25 @@ const totalPage = computed(() => Math.ceil(props.total / props.pageSize));
 
 const emit = defineEmits<{
   "update:currentPage": [page: number];
+  change: [page: number];
 }>();
 
 const handleFirst = () => {
   if (props.currentPage === 1) return;
   emit("update:currentPage", 1);
+  emit("change", 1);
 };
 
 const handlePrev = () => {
   if (props.currentPage === 1) return;
   emit("update:currentPage", props.currentPage - 1);
+  emit("change", props.currentPage - 1);
 };
 
 const handleNext = () => {
   if (props.currentPage === totalPage.value) return;
   emit("update:currentPage", props.currentPage + 1);
+  emit("change", props.currentPage + 1);
 };
 </script>
 

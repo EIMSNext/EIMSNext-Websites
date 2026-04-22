@@ -3,7 +3,7 @@
     <div class="config-content">
       <div class="config-pane">
         <div class="config-editor">
-          <el-space direction="vertical" alignment="left" :size="20" style="width: 100%">
+          <el-space direction="vertical" align="start" :size="20" style="width: 100%">
             <div class="notify-mode">
               <div class="label mode-label">提醒类型</div>
               <el-select v-model="formNotify.triggerMode" class="notify-select" @change="triggerModeChanged">

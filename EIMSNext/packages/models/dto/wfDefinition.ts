@@ -7,8 +7,6 @@ export interface WfDefinitionRequest extends IdBase {
   flowType?: FlowType;
   externalId?: string;
   description?: string;
-  version?: number;
-  isCurrent?: boolean;
   content?: string;
   eventSource?: EventSourceType;
   sourceId?: string;
@@ -23,6 +21,7 @@ export interface WfDefinition extends CorpModelBase {
   description?: string;
   version: number;
   isCurrent: boolean;
+  released: boolean;
   content: string;
   eventSource: EventSourceType;
   sourceId?: string;

@@ -1,5 +1,5 @@
 import { AxiosHeaders } from "axios";
-import {appSetting} from "../appSetting";
+import { appSetting, getAuthUrl } from "../appSetting";
 import { HttpRequest } from "./httpRequest";
 import { ContentType } from "./interface";
 import accessToken from "./token";
@@ -31,5 +31,17 @@ export class AuthClient {
           reject(error);
         });
     });
+  }
+
+  post<T = any>(
+    url: string,
+    data: any,
+    contentType: ContentType = ContentType.JSON,
+    withToken?: true,
+  ) {
+    url = getAuthUrl(url, false);
+    let headers = new AxiosHeaders();
+    headers.setContentType(contentType);
+    return this.httpRequest.post<T>({ url, data, headers, withToken });
   }
 }

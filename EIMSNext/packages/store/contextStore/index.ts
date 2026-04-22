@@ -4,12 +4,13 @@ import { ref } from "vue";
 import { useAppStoreHook } from "../genericStore/appStore";
 import { useFormStoreHook } from "../genericStore/formStore";
 import { corporateService } from "@eimsnext/services";
-import { Corporate } from "@eimsnext/models";
+import { Corporate, PlatformType } from "@eimsnext/models";
 
 export const useContextStore = defineStore("context", () => {
   //state
   const corpId = ref<string>("");
   const corpName = ref<string>("");
+  const corpPlat = ref<PlatformType>(PlatformType.Public);
   const appId = ref<string>("");
   const appChanged = ref<number>(new Date().getTime());
   const appStore = useAppStoreHook();
@@ -32,6 +33,7 @@ export const useContextStore = defineStore("context", () => {
             .get<Corporate>(corpId.value)
             .then((corp) => {
               corpName.value = corp.name;
+              corpPlat.value = corp.platform;
             })
             .catch((error) => {
               reject(error);
@@ -103,6 +105,7 @@ export const useContextStore = defineStore("context", () => {
   const clearAll = () => {
     corpId.value = "";
     corpName.value = "";
+    corpPlat.value = PlatformType.Public;
     appId.value = "";
     updateAppChanged();
   };
@@ -110,6 +113,7 @@ export const useContextStore = defineStore("context", () => {
   return {
     corpId,
     corpName,
+    corpPlat,
     setCorpId,
     clearCorpId,
     appId,

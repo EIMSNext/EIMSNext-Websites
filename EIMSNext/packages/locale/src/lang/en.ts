@@ -90,6 +90,7 @@ export default {
     data_removed: "When data is deleted",
     wfstatus_updated: "When workflow status changes",
     wftodo_updated: "When workflow task changes",
+    currentCorporate: "Current Team",
   },
   workflow: {
     flowStatus: {
@@ -174,6 +175,18 @@ export default {
     fieldConflict_MsgTitle: "Are you sure you want to use this field?",
     fieldConflict_MsgContent:
       "If you use this field, there will be a conflict between field and subfield configurations. This operation will clear certain configurations for value assigning and cannot be undone.",
+    formula: "Formula",
+    setFormula: "Set Formula",
+    formulaEditor: "Formula Editor",
+    formulaInfo: "Formula Info",
+    formulaExample: "Formula Example",
+    formulaInferenceError:
+      "Unable to determine a stable data source for this formula",
+    formulaSaveDisabledTitle: "Invalid formulas detected",
+    formulaSaveDisabledContent:
+      "Some formula fields do not have a resolvable data source. Saving will disable this dataflow. Confirm to save as disabled, or cancel and continue editing.",
+    pluginName: "Plugin",
+    pluginFunction: "Function",
   },
   dash: {
     chart: {

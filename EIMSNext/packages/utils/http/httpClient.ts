@@ -1,5 +1,5 @@
 import { AxiosHeaders } from "axios";
-import {appSetting} from "../appSetting";
+import { appSetting } from "../appSetting";
 import { ApiClient } from "./apiClient";
 import { AuthClient } from "./authClient";
 import { HttpRequest } from "./httpRequest";
@@ -36,8 +36,8 @@ export class HttpClient {
 
     this.auth = new AuthClient(
       new HttpRequest(
-        authConfig ? deepMerge(authConfig, defaultConfig) : defaultConfig
-      )
+        authConfig ? deepMerge(authConfig, defaultConfig) : defaultConfig,
+      ),
     );
 
     let apiCfg = apiConfig
@@ -46,6 +46,7 @@ export class HttpClient {
     this.api = new ApiClient(new HttpRequest(apiCfg));
     this.odata = new ODataClient(new HttpRequest(apiCfg));
     this.upload = new UploadClient(new HttpRequest(apiCfg));
+    this.httpRequest = new HttpRequest(apiCfg);
   }
 }
 
