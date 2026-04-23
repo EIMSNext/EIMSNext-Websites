@@ -184,12 +184,54 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         output: {
           experimentalMinChunkSize: 500 * 1024,
           manualChunks(id) {
+            const normalizedId = id.replace(/\\/g, "/");
+
             if (id.includes("@eimsnext/form-designer")) {
               return "form-designer"; // 单独拆成 vendor-formdesigner.js
             }
 
+            if (id.includes("@univerjs")) {
+              return "univer";
+            }
+
+            if (normalizedId.includes("/node_modules/element-plus/") || normalizedId.includes("/node_modules/@element-plus/")) {
+              return "element-plus";
+            }
+
+            if (normalizedId.includes("/node_modules/vue/") || normalizedId.includes("/node_modules/@vue/") || normalizedId.includes("/node_modules/vue-router/") || normalizedId.includes("/node_modules/pinia/") || normalizedId.includes("/node_modules/vue-i18n/") || normalizedId.includes("/node_modules/@vueuse/")) {
+              return "vue-vendor";
+            }
+
+            if (normalizedId.includes("/node_modules/vant/") || normalizedId.includes("/node_modules/@vant/") || normalizedId.includes("/node_modules/@popperjs/") || normalizedId.includes("/node_modules/@sxzz/")) {
+              return "vant-vendor";
+            }
+
+            if (normalizedId.includes("/node_modules/echarts/") || normalizedId.includes("/node_modules/zrender/") || normalizedId.includes("/node_modules/dayjs/") || normalizedId.includes("/node_modules/axios/") || normalizedId.includes("/node_modules/odata-query/") || normalizedId.includes("/node_modules/qs/") || normalizedId.includes("/node_modules/path-browserify/") || normalizedId.includes("/node_modules/lodash-es/") || normalizedId.includes("/node_modules/lodash/")) {
+              return "app-vendor";
+            }
+
+            if (normalizedId.includes("/node_modules/codemirror/") || normalizedId.includes("/node_modules/codemirror-editor-vue3/") || normalizedId.includes("/node_modules/@wangeditor/") || normalizedId.includes("/node_modules/wangeditor/")) {
+              return "editor-vendor";
+            }
+
+            if (normalizedId.includes("/node_modules/vue-pdf-embed/") || normalizedId.includes("/node_modules/pdfjs-dist/") || normalizedId.includes("/node_modules/exceljs/") || normalizedId.includes("/node_modules/vuedraggable/") || normalizedId.includes("/node_modules/sortablejs/") || normalizedId.includes("/node_modules/vue-grid-layout-v3/")) {
+              return "feature-vendor";
+            }
+
             if (id.includes("node_modules")) {
-              return id.toString().split("node_modules/")[1].split("/")[0];
+              const packagePath = normalizedId.split("node_modules/").pop();
+
+              if (!packagePath)
+                return;
+
+              const packageName = packagePath.startsWith("@")
+                ? packagePath.split("/").slice(0, 2).join("/")
+                : packagePath.split("/")[0];
+
+              return packageName
+                .replace("@", "")
+                .replace(/\//g, "-")
+                .replace(/[^a-zA-Z0-9-_]/g, "_");
             }
           },
           // 用于从入口点创建的块的打包输出格式[name]表示文件名,[hash]表示该文件内容hash值
