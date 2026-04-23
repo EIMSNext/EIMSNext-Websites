@@ -1,9 +1,47 @@
 <template>
   <div class="flow-designer">
+    <el-dialog v-model="showPageSetupDialog" title="打印模板设置" width="560px">
+      <el-form label-width="88px">
+        <el-form-item label="纸张大小">
+          <el-select v-model="pageSettingsDraft.paperSize" class="w-full">
+            <el-option v-for="option in paperSizeOptions" :key="option.value" :label="option.label" :value="option.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="页边距">
+          <div class="page-margin-grid">
+            <div class="page-margin-item">
+              <span class="page-margin-label">上</span>
+              <el-input-number v-model="pageSettingsDraft.margins.top" :min="0" :step="1" :precision="0" controls-position="right" />
+            </div>
+            <div class="page-margin-item">
+              <span class="page-margin-label">右</span>
+              <el-input-number v-model="pageSettingsDraft.margins.right" :min="0" :step="1" :precision="0" controls-position="right" />
+            </div>
+            <div class="page-margin-item">
+              <span class="page-margin-label">下</span>
+              <el-input-number v-model="pageSettingsDraft.margins.bottom" :min="0" :step="1" :precision="0" controls-position="right" />
+            </div>
+            <div class="page-margin-item">
+              <span class="page-margin-label">左</span>
+              <el-input-number v-model="pageSettingsDraft.margins.left" :min="0" :step="1" :precision="0" controls-position="right" />
+            </div>
+          </div>
+          <span class="page-margin-unit">单位：mm</span>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showPageSetupDialog = false">取消</el-button>
+          <el-button type="primary" @click="applyPageSettings">确定</el-button>
+        </div>
+      </template>
+    </el-dialog>
     <div class="flow-actions">
-      <div class="left"></div>
+      <div class="left">
+        <span class="page-setup-summary">{{ pageSetupSummary }}</span>
+      </div>
       <div class="right">
-        <el-button>打印模板设置</el-button>
+        <el-button @click="openPageSetupDialog">打印模板设置</el-button>
         <el-button :loading="previewing" :disabled="!designerReady" @click="preview">预览</el-button>
         <el-button :loading="saving" :disabled="!designerReady" @click="save">保存</el-button>
       </div>
@@ -94,6 +132,144 @@ type LoadedUniverModules = {
   sheetsFacade: { FWorkbook: any; FRange: any };
 };
 
+type PrintMargins = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
+
+type PrintPageSettings = {
+  paperSize: string;
+  margins: PrintMargins;
+};
+
+const paperSizeOptions = [
+  { label: "A3", value: "A3" },
+  { label: "A4", value: "A4" },
+  { label: "A5", value: "A5" },
+  { label: "B5", value: "B5" },
+  { label: "Letter", value: "Letter" },
+  { label: "Legal", value: "Legal" },
+];
+
+const createDefaultMargins = (): PrintMargins => ({
+  top: 15,
+  right: 15,
+  bottom: 15,
+  left: 15,
+});
+
+const createDefaultPageSettings = (): PrintPageSettings => ({
+  paperSize: "A4",
+  margins: createDefaultMargins(),
+});
+
+const DEFAULT_SHEET_ID = "Sheet1";
+
+const createDefaultWorkbookData = () => ({
+  id: DEFAULT_SHEET_ID,
+  name: DEFAULT_SHEET_ID,
+  appVersion: "0.21.0",
+  locale: "zhCN",
+  sheetOrder: [DEFAULT_SHEET_ID],
+  sheets: {
+    [DEFAULT_SHEET_ID]: {
+      id: DEFAULT_SHEET_ID,
+      name: DEFAULT_SHEET_ID,
+      cellData: {},
+      rowData: {},
+      columnData: {},
+      rowHeight: {},
+      columnWidth: {},
+      mergeData: [],
+      pageSetup: buildWorksheetPageSetup(createDefaultPageSettings()),
+    },
+  },
+});
+
+const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
+
+const clonePageSettings = (settings: PrintPageSettings): PrintPageSettings => ({
+  paperSize: settings.paperSize,
+  margins: { ...settings.margins },
+});
+
+const normalizeMarginValue = (value: unknown, fallback: number) => {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return fallback;
+  }
+
+  return value;
+};
+
+const normalizePageSettings = (value: unknown): PrintPageSettings => {
+  const defaults = createDefaultPageSettings();
+  if (!isRecord(value)) {
+    return defaults;
+  }
+
+  const margins = isRecord(value.margins)
+    ? value.margins
+    : value;
+  const rawPaperSize = [value.paperSize, value.pageSize, value.pageFormat].find((item) => typeof item === "string");
+  const paperSize = typeof rawPaperSize === "string" && paperSizeOptions.some((option) => option.value === rawPaperSize)
+    ? rawPaperSize
+    : defaults.paperSize;
+
+  return {
+    paperSize,
+    margins: {
+      top: normalizeMarginValue(margins.topMargin ?? margins.marginTop ?? margins.top, defaults.margins.top),
+      right: normalizeMarginValue(margins.rightMargin ?? margins.marginRight ?? margins.right, defaults.margins.right),
+      bottom: normalizeMarginValue(margins.bottomMargin ?? margins.marginBottom ?? margins.bottom, defaults.margins.bottom),
+      left: normalizeMarginValue(margins.leftMargin ?? margins.marginLeft ?? margins.left, defaults.margins.left),
+    },
+  };
+};
+
+const buildWorksheetPageSetup = (settings: PrintPageSettings) => ({
+  paperSize: settings.paperSize,
+  pageSize: settings.paperSize,
+  pageFormat: settings.paperSize,
+  topMargin: settings.margins.top,
+  rightMargin: settings.margins.right,
+  bottomMargin: settings.margins.bottom,
+  leftMargin: settings.margins.left,
+  marginTop: settings.margins.top,
+  marginRight: settings.margins.right,
+  marginBottom: settings.margins.bottom,
+  marginLeft: settings.margins.left,
+});
+
+const resolveActiveSheet = (workbookData: Record<string, unknown>) => {
+  const sheets = isRecord(workbookData.sheets) ? workbookData.sheets : undefined;
+  if (!sheets) {
+    return undefined;
+  }
+
+  const sheetOrder = Array.isArray(workbookData.sheetOrder) ? workbookData.sheetOrder : undefined;
+  const firstSheetKey = sheetOrder?.find((item): item is string => typeof item === "string" && isRecord(sheets[item]))
+    ?? Object.keys(sheets).find((key) => isRecord(sheets[key]));
+
+  if (!firstSheetKey) {
+    return undefined;
+  }
+
+  const sheet = sheets[firstSheetKey];
+  return isRecord(sheet) ? sheet : undefined;
+};
+
+const applyPageSetupToWorkbookData = (workbookData: Record<string, unknown>, settings: PrintPageSettings) => {
+  const activeSheet = resolveActiveSheet(workbookData);
+  if (!activeSheet) {
+    return workbookData;
+  }
+
+  activeSheet.pageSetup = buildWorksheetPageSetup(settings);
+  return workbookData;
+};
+
 const props = defineProps<{
   formDef: FormDef;
   printDef: PrintTemplate;
@@ -106,26 +282,24 @@ const formStore = useFormStore();
 const formFieldNodes = ref<ITreeNode[]>([]);
 const draggingNode = ref<ITreeNode>();
 const container = ref<HTMLElement | null>(null);
+const showPageSetupDialog = ref(false);
 const loading = ref(false);
 const previewing = ref(false);
 const saving = ref(false);
 const loadError = ref("");
+const pageSettings = ref<PrintPageSettings>(createDefaultPageSettings());
+const pageSettingsDraft = reactive<PrintPageSettings>(createDefaultPageSettings());
 const designerReady = computed(() => !loading.value && !loadError.value && !!workbookApi);
+const pageSetupSummary = computed(() => {
+  const margins = pageSettings.value.margins;
+  return `纸张：${pageSettings.value.paperSize} | 页边距 ${margins.top}/${margins.right}/${margins.bottom}/${margins.left} mm`;
+});
 
 let univerObj: InstanceType<UniverModule["Univer"]> | undefined;
 let univerApi: any;
 let workbookApi: any;
 let loadedModules: LoadedUniverModules | undefined;
 let disposed = false;
-
-const univerStyleImports = [
-  "@univerjs/design/lib/index.css",
-  "@univerjs/ui/lib/index.css",
-  "@univerjs/drawing-ui/lib/index.css",
-  "@univerjs/docs-ui/lib/index.css",
-  "@univerjs/sheets-drawing-ui/lib/index.css",
-  "@univerjs/sheets-ui/lib/index.css",
-];
 
 const hiddenMenuItems: Record<string, { hidden: boolean }> = {
   "sheet.command.add-range-protection-from-toolbar": { hidden: true },
@@ -137,6 +311,65 @@ const hiddenMenuItems: Record<string, { hidden: boolean }> = {
   "ribbon.formulas": { hidden: true },
   "formula-bar": { hidden: true },
 };
+
+const syncPageSettingsDraft = () => {
+  const nextSettings = clonePageSettings(pageSettings.value);
+  pageSettingsDraft.paperSize = nextSettings.paperSize;
+  pageSettingsDraft.margins.top = nextSettings.margins.top;
+  pageSettingsDraft.margins.right = nextSettings.margins.right;
+  pageSettingsDraft.margins.bottom = nextSettings.margins.bottom;
+  pageSettingsDraft.margins.left = nextSettings.margins.left;
+};
+
+const openPageSetupDialog = () => {
+  syncPageSettingsDraft();
+  showPageSetupDialog.value = true;
+};
+
+const applyPageSettings = () => {
+  pageSettings.value = normalizePageSettings(pageSettingsDraft);
+  syncPageSettingsDraft();
+  showPageSetupDialog.value = false;
+};
+
+const disposeDesigner = () => {
+  univerObj?.dispose();
+  univerObj = undefined;
+  univerApi = undefined;
+  workbookApi = undefined;
+
+  if (container.value) {
+    container.value.innerHTML = "";
+  }
+};
+
+const parseTemplateContent = () => {
+  if (!currentPrintDef.value.content) {
+    pageSettings.value = createDefaultPageSettings();
+    syncPageSettingsDraft();
+    return createDefaultWorkbookData();
+  }
+
+  const parsed = JSON.parse(currentPrintDef.value.content);
+  if (!isRecord(parsed)) {
+    throw new Error("打印模板数据格式无效");
+  }
+
+  const workbookData = { ...parsed };
+  const activeSheet = resolveActiveSheet(workbookData);
+  const rawSettings = activeSheet?.pageSetup ?? activeSheet?.printSetup;
+  pageSettings.value = normalizePageSettings(rawSettings);
+  syncPageSettingsDraft();
+
+  return applyPageSetupToWorkbookData(
+    Object.keys(workbookData).length > 0 ? workbookData : createDefaultWorkbookData(),
+    pageSettings.value
+  );
+};
+
+const serializeTemplateContent = () => applyPageSetupToWorkbookData({
+  ...ensureWorkbookApi().save(),
+}, pageSettings.value);
 
 const ensureWorkbookApi = () => {
   if (!workbookApi) {
@@ -192,7 +425,6 @@ const loadUniverModules = async () => {
     import("@univerjs/docs-ui/facade"),
     import("@univerjs/sheets/facade"),
     import("@univerjs/sheets-ui/facade"),
-    ...univerStyleImports.map((path) => import(path)),
   ]);
 
   const [
@@ -362,21 +594,20 @@ const initSheet = async (data: Record<string, unknown>) => {
 };
 
 const initializeDesigner = async () => {
-  const data = currentPrintDef.value.content
-    ? JSON.parse(currentPrintDef.value.content)
-    : { id: "Sheet1", name: "Sheet1" };
-
   loading.value = true;
   loadError.value = "";
 
   try {
+    const data = parseTemplateContent();
     await nextTick();
+    if (disposed) {
+      return;
+    }
+
+    disposeDesigner();
     await initSheet(data as Record<string, unknown>);
   } catch (error) {
-    univerObj?.dispose();
-    univerObj = undefined;
-    univerApi = undefined;
-    workbookApi = undefined;
+    disposeDesigner();
     loadError.value = error instanceof Error ? error.message : "打印设计器初始化失败";
     console.error("[PdfPrintDesigner] init failed", error);
   } finally {
@@ -388,7 +619,7 @@ const preview = async () => {
   try {
     previewing.value = true;
     const req: PrintPreviewRequest = {
-      content: JSON.stringify(ensureWorkbookApi().save()),
+      content: JSON.stringify(serializeTemplateContent()),
       printType: currentPrintDef.value.printType,
     };
 
@@ -414,7 +645,7 @@ const save = async () => {
       name: currentPrintDef.value.name,
       appId: currentPrintDef.value.appId,
       formId: currentPrintDef.value.formId,
-      content: JSON.stringify(ensureWorkbookApi().save()),
+      content: JSON.stringify(serializeTemplateContent()),
       printType: currentPrintDef.value.printType,
     };
 
@@ -441,8 +672,12 @@ const onStart = (e: any) => {
 
 watch(
   () => props.printDef,
-  (value) => {
+  async (value) => {
     currentPrintDef.value = value;
+
+    if (container.value) {
+      await initializeDesigner();
+    }
   }
 );
 
@@ -453,7 +688,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   disposed = true;
-  univerObj?.dispose();
+  disposeDesigner();
 });
 </script>
 
@@ -545,6 +780,40 @@ onBeforeUnmount(() => {
     height: 100%;
     min-height: 0;
   }
+}
+
+.page-setup-summary {
+  color: var(--et-text-secondary);
+  font-size: var(--et-font-size-13);
+  line-height: var(--et-line-height-32);
+}
+
+.page-margin-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--et-space-12);
+}
+
+.page-margin-item {
+  display: flex;
+  align-items: center;
+  gap: var(--et-space-8);
+
+  .el-input-number {
+    width: 100%;
+  }
+}
+
+.page-margin-label,
+.page-margin-unit {
+  color: var(--et-text-secondary);
+  font-size: var(--et-font-size-13);
+}
+
+.page-margin-unit {
+  margin-top: var(--et-space-8);
+  display: inline-block;
 }
 
 .drop-active {
