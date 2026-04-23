@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="login-content">
-      <van-form ref="loginFormRef" @submit="handleLogin">
+      <van-form class="login-form" @submit="handleLogin">
         <van-cell-group inset>
           <van-field
             v-model="loginData.username"
@@ -123,11 +123,16 @@ const handleLogin = async () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 20px;
+  padding: 0 20px 32px;
 }
 
 .login-btn {
   margin-top: 24px;
-  padding: 0 16px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 </style>

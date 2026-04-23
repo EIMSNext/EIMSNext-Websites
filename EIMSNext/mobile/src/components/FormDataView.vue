@@ -1,137 +1,121 @@
 <template>
-  <div class="page-container">
-    <div class="page-header">
-      <div class="header-left" @click="goBack">
-        <van-icon name="arrow-left" />
-      </div>
-      <div class="header-title">{{ isAdd ? '新增' : '详情' }}</div>
-      <div class="header-right">
-        <van-button
-          v-if="!isAdd && canEdit"
-          size="small"
-          type="primary"
-          @click="handleEdit"
-        >
-          编辑
-        </van-button>
-      </div>
-    </div>
-    <div class="page-main">
-      <van-loading v-if="loading" class="form-loading" />
-      <div v-else-if="formDef" class="form-content">
-        <div class="form-title">{{ formDef.name }}</div>
-        <div class="form-data">{{ JSON.stringify(formData) }}</div>
+  <MobilePage :title="isAdd ? '新增数据' : '数据详情'" @back="goBack">
+    <div class="detail-page">
+      <div v-if="loading" class="loading-wrap">加载中...</div>
+      <div v-else class="detail-card mobile-card">
+        <div class="detail-title">{{ formDef?.name }}</div>
+
+        <MobileFormRenderer
+          v-if="renderRule.length > 0"
+          v-model="formData"
+          :rule="renderRule"
+          :option="renderOption"
+        />
+
+        <div v-else class="json-fallback">{{ JSON.stringify(formData, null, 2) }}</div>
       </div>
     </div>
-    <div v-if="isAdd || editing" class="page-footer">
-      <van-button block type="primary" :loading="saving" @click="handleSave">
-        保存
-      </van-button>
-    </div>
-  </div>
+
+    <template #footer>
+      <div v-if="isAdd || editing" class="detail-footer-actions">
+        <van-button block type="primary" :loading="saving" @click="handleSave">保存</van-button>
+      </div>
+    </template>
+  </MobilePage>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { showToast } from 'vant'
-import type { FormDef } from '@eimsnext/models'
-import { formServiceMobile, formDataServiceMobile } from '@/services/mobileService'
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { showToast } from "vant";
+import type { FormDef } from "@eimsnext/models";
+import MobileFormRenderer from "@/components/form/MobileFormRenderer.vue";
+import MobilePage from "@/components/base/MobilePage.vue";
+import { formDataServiceMobile, formServiceMobile } from "@/services/mobileService";
 
-const router = useRouter()
-const route = useRoute()
-const formId = route.params.formId as string
-const dataId = route.params.dataId as string
+const router = useRouter();
+const route = useRoute();
+const formId = route.params.formId as string;
+const dataId = route.params.dataId as string | undefined;
 
-const loading = ref(false)
-const saving = ref(false)
-const editing = ref(false)
+const loading = ref(false);
+const saving = ref(false);
+const editing = ref(true);
+const formDef = ref<FormDef>();
+const formData = ref<Record<string, unknown>>({});
 
-const isAdd = computed(() => !dataId || route.meta.isAdd)
+const isAdd = computed(() => !dataId || Boolean(route.meta.isAdd));
+const renderRule = computed(() => formDef.value?.content?.items || []);
+const renderOption = computed(() => ({
+  submitBtn: false,
+  resetBtn: false,
+  form: { labelPosition: "top" },
+}));
 
-const formDef = ref<FormDef>()
-const formData = ref<Record<string, any>>({})
-const canEdit = ref(true)
-
-const goBack = () => {
-  router.back()
-}
-
-const handleEdit = () => {
-  editing.value = true
-}
+const goBack = () => router.back();
 
 const handleSave = async () => {
-  saving.value = true
+  saving.value = true;
   try {
     if (isAdd.value) {
-      await formDataServiceMobile.post(formId, formData.value)
-    } else {
-      await formDataServiceMobile.put(dataId, formData.value)
+      await formDataServiceMobile.post(formId, formData.value);
+    } else if (dataId) {
+      await formDataServiceMobile.put(dataId, formData.value);
     }
-    showToast('保存成功')
-    router.back()
+    showToast("保存成功");
+    router.back();
   } catch {
-    showToast('保存失败')
+    showToast("保存失败");
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
-
-const loadForm = async () => {
-  loading.value = true
-  try {
-    formDef.value = await formServiceMobile.get(formId)
-  } catch {
-    formDef.value = undefined
-  } finally {
-    loading.value = false
-  }
-}
+};
 
 const loadData = async () => {
-  if (isAdd.value) return
-  loading.value = true
-  try {
-    const data = await formDataServiceMobile.get(dataId)
-    formData.value = data.data || {}
-  } catch {
-    formData.value = {}
-  } finally {
-    loading.value = false
+  loading.value = true;
+  formDef.value = await formServiceMobile.get(formId);
+  if (!isAdd.value && dataId) {
+    const data = await formDataServiceMobile.get(dataId);
+    formData.value = data.data || {};
   }
-}
+  loading.value = false;
+};
 
-onMounted(async () => {
-  await loadForm()
-  if (!isAdd.value) {
-    await loadData()
-  }
-})
+onMounted(() => {
+  void loadData();
+});
 </script>
 
-<style lang="scss" scoped>
-.form-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
+<style scoped lang="scss">
+.detail-page {
+  padding: 12px;
 }
 
-.form-content {
+.loading-wrap {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--mobile-text-tertiary);
+}
+
+.detail-card {
   padding: 16px;
-  background: #fff;
+}
 
-  .form-title {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 12px;
-  }
+.detail-title {
+  margin-bottom: 12px;
+  color: var(--mobile-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
 
-  .form-data {
-    font-size: 12px;
-    color: #666;
-    word-break: break-all;
-  }
+.json-fallback {
+  color: var(--mobile-text-secondary);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.detail-footer-actions {
+  padding: 12px 16px;
 }
 </style>

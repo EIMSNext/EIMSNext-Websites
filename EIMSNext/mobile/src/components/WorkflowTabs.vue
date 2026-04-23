@@ -1,313 +1,214 @@
 <template>
-  <div class="page-container">
-    <div class="page-header">
-      <div class="header-left" @click="goBack">
-        <van-icon name="arrow-left" />
-      </div>
-      <div class="header-title">流程中心</div>
-      <div class="header-right"></div>
+  <MobilePage v-if="!embedded" title="流程中心" @back="goBack">
+    <div class="workflow-page">
+      <InnerWorkflowTabs
+        :active-tab="activeTab"
+        :app-id="appId"
+        @change-tab="handleTabChange"
+        @open-approval="goToApproval"
+        @open-detail="goToDetail"
+      />
     </div>
-    <div class="page-main">
-      <van-tabs v-model:active="activeTab" @change="onTabChange">
-        <van-tab title="待办" name="todo">
-          <div class="todo-list">
-            <van-pull-refresh v-model="refreshing" @refresh="loadTodo">
-              <van-list
-                v-model:loading="loading"
-                :finished="finished"
-                @load="loadMore"
-              >
-                <div
-                  v-for="task in tasks"
-                  :key="task.id"
-                  class="task-item"
-                  @click="goToApproval(task)"
-                >
-                  <div class="task-header">
-                    <div class="task-form-name">{{ task.formName }}</div>
-                    <div class="task-node">{{ task.approveNodeName }}</div>
-                  </div>
-                  <div class="task-content">
-                    <div class="task-creator">{{ task.starter?.label }}</div>
-                    <div class="task-time">{{ task.approveNodeStartTime }}</div>
-                  </div>
-                  <div class="task-brief">
-                    <div
-                      v-for="item in task.dataBrief?.slice(0, 3)"
-                      :key="item.field"
-                      class="brief-item"
-                    >
-                      {{ item.title }}: {{ item.value }}
-                    </div>
-                  </div>
-                </div>
-                <div v-if="tasks.length === 0 && !loading" class="empty-tip">
-                  暂无待办
-                </div>
-              </van-list>
-            </van-pull-refresh>
-          </div>
-        </van-tab>
-        <van-tab title="我发起的" name="started">
-          <div class="todo-list">
-            <van-list
-              v-model:loading="loadingStarted"
-              :finished="finishedStarted"
-              @load="loadStartedMore"
-            >
-              <div
-                v-for="task in startedTasks"
-                :key="task.id"
-                class="task-item"
-                @click="goToDetail(task)"
-              >
-                <div class="task-header">
-                  <div class="task-form-name">{{ task.formName }}</div>
-                </div>
-                <div class="task-content">
-                  <div class="task-time">{{ task.createTime }}</div>
-                </div>
-              </div>
-              <div v-if="startedTasks.length === 0 && !loadingStarted" class="empty-tip">
-                暂无数据
-              </div>
-            </van-list>
-          </div>
-        </van-tab>
-        <van-tab title="我已审批" name="approved">
-          <div class="todo-list">
-            <van-list
-              v-model:loading="loadingApproved"
-              :finished="finishedApproved"
-              @load="loadApprovedMore"
-            >
-              <div
-                v-for="task in approvedTasks"
-                :key="task.id"
-                class="task-item"
-                @click="goToDetail(task)"
-              >
-                <div class="task-header">
-                  <div class="task-form-name">{{ task.formName }}</div>
-                </div>
-                <div class="task-content">
-                  <div class="task-time">{{ (task as any).approveTime }}</div>
-                </div>
-              </div>
-              <div v-if="approvedTasks.length === 0 && !loadingApproved" class="empty-tip">
-                暂无数据
-              </div>
-            </van-list>
-          </div>
-        </van-tab>
-        <van-tab title="抄送我的" name="cced">
-          <div class="todo-list">
-            <van-list
-              v-model:loading="loadingCced"
-              :finished="finishedCced"
-              @load="loadCcedMore"
-            >
-              <div
-                v-for="task in ccedTasks"
-                :key="task.id"
-                class="task-item"
-                @click="goToDetail(task)"
-              >
-                <div class="task-header">
-                  <div class="task-form-name">{{ task.formName }}</div>
-                </div>
-                <div class="task-content">
-                  <div class="task-time">{{ task.createTime }}</div>
-                </div>
-              </div>
-              <div v-if="ccedTasks.length === 0 && !loadingCced" class="empty-tip">
-                暂无数据
-              </div>
-            </van-list>
-          </div>
-        </van-tab>
-      </van-tabs>
-    </div>
+  </MobilePage>
+
+  <div v-else class="workflow-page embedded-workflow">
+    <InnerWorkflowTabs
+      :active-tab="activeTab"
+      :app-id="appId"
+      @change-tab="handleTabChange"
+      @open-approval="goToApproval"
+      @open-detail="goToDetail"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import type { WfTodo } from '@eimsnext/models'
-import { todoServiceMobile, workflowServiceMobile } from '@/services/mobileService'
+import { computed, defineComponent, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import type { WfTodo } from "@eimsnext/models";
+import MobileCard from "@/components/base/MobileCard.vue";
+import MobilePage from "@/components/base/MobilePage.vue";
+import { todoServiceMobile, workflowServiceMobile } from "@/services/mobileService";
 
-const router = useRouter()
-const route = useRoute()
-const appId = route.params.appId as string
-
-const activeTab = ref('todo')
-const refreshing = ref(false)
-const loading = ref(false)
-const loadingStarted = ref(false)
-const loadingApproved = ref(false)
-const loadingCced = ref(false)
-const finished = ref(false)
-const finishedStarted = ref(false)
-const finishedApproved = ref(false)
-const finishedCced = ref(false)
-
-const tasks = ref<WfTodo[]>([])
-const startedTasks = ref<WfTodo[]>([])
-const approvedTasks = ref<WfTodo[]>([])
-const ccedTasks = ref<WfTodo[]>([])
-
-const skip = ref(0)
-const startedSkip = ref(0)
-const approvedSkip = ref(0)
-const ccedSkip = ref(0)
-
-const goBack = () => {
-  router.back()
-}
-
-const goToApproval = (task: WfTodo) => {
-  router.push(`/wftodo/${task.id}`)
-}
-
-const goToDetail = (task: WfTodo) => {
-  router.push(`/app/${task.appId}/form/${task.formId}/${task.id}`)
-}
-
-const onTabChange = () => {
-  if (activeTab.value === 'todo') {
-    loadTodo()
-  } else if (activeTab.value === 'started') {
-    loadStarted()
-  } else if (activeTab.value === 'approved') {
-    loadApproved()
-  } else if (activeTab.value === 'cced') {
-    loadCced()
+const props = withDefaults(
+  defineProps<{
+    embedded?: boolean;
+    appId?: string;
+  }>(),
+  {
+    embedded: false,
+    appId: "",
   }
-}
+);
 
-const loadTodo = async () => {
-  loading.value = true
-  skip.value = 0
-  tasks.value = await todoServiceMobile.query(appId || '', 0)
-  finished.value = true
-  loading.value = false
-  refreshing.value = false
-}
+const router = useRouter();
+const route = useRoute();
+const appId = computed(() => props.appId || (route.params.appId as string) || "");
+const activeTab = ref<string>((route.query.tab as string) || "todo");
 
-const loadMore = async () => {
-  skip.value += 10
-  const more = await todoServiceMobile.query(appId || '', skip.value)
-  tasks.value = [...tasks.value, ...more]
-  if (more.length < 10) finished.value = true
-  loading.value = false
-}
+const goBack = () => router.back();
+const goToApproval = (task: WfTodo) => router.push(`/wftodo/${task.id}`);
+const goToDetail = (task: WfTodo) => router.push(`/app/${task.appId}/form/${task.formId}/${task.dataId}`);
+const handleTabChange = (tab: string) => {
+  activeTab.value = tab;
+};
 
-const loadStarted = async () => {
-  loadingStarted.value = true
-  startedSkip.value = 0
-  startedTasks.value = await workflowServiceMobile.getMyStarted(0)
-  finishedStarted.value = true
-  loadingStarted.value = false
-}
+watch(
+  () => route.query.tab,
+  (value) => {
+    if (typeof value === "string" && value) activeTab.value = value;
+  }
+);
 
-const loadStartedMore = async () => {
-  startedSkip.value += 10
-  const more = await workflowServiceMobile.getMyStarted(startedSkip.value)
-  startedTasks.value = [...startedTasks.value, ...more]
-  if (more.length < 10) finishedStarted.value = true
-  loadingStarted.value = false
-}
+const InnerWorkflowTabs = defineComponent({
+  name: "InnerWorkflowTabs",
+  components: { MobileCard },
+  props: {
+    activeTab: {
+      type: String,
+      required: true,
+    },
+    appId: {
+      type: String,
+      default: "",
+    },
+  },
+  emits: ["change-tab", "open-approval", "open-detail"],
+  setup(innerProps, { emit }) {
+    const currentTab = ref(innerProps.activeTab);
+    const refreshing = ref(false);
+    const loading = ref(false);
+    const list = ref<WfTodo[]>([]);
 
-const loadApproved = async () => {
-  loadingApproved.value = true
-  approvedSkip.value = 0
-  approvedTasks.value = await workflowServiceMobile.getApproved(0)
-  finishedApproved.value = true
-  loadingApproved.value = false
-}
+    watch(
+      () => innerProps.activeTab,
+      (value) => {
+        currentTab.value = value;
+        void load();
+      },
+      { immediate: true }
+    );
 
-const loadApprovedMore = async () => {
-  approvedSkip.value += 10
-  const more = await workflowServiceMobile.getApproved(approvedSkip.value)
-  approvedTasks.value = [...approvedTasks.value, ...more]
-  if (more.length < 10) finishedApproved.value = true
-  loadingApproved.value = false
-}
+    const load = async () => {
+      loading.value = true;
+      if (currentTab.value === "todo") {
+        list.value = await todoServiceMobile.query(innerProps.appId || undefined, 0, 20);
+      } else if (currentTab.value === "started") {
+        list.value = await workflowServiceMobile.getMyStarted(innerProps.appId || undefined, 0, 20);
+      } else if (currentTab.value === "approved") {
+        list.value = await workflowServiceMobile.getApproved(innerProps.appId || undefined, 0, 20);
+      } else {
+        list.value = await workflowServiceMobile.getCced(innerProps.appId || undefined, 0, 20);
+      }
+      loading.value = false;
+      refreshing.value = false;
+    };
 
-const loadCced = async () => {
-  loadingCced.value = true
-  ccedSkip.value = 0
-  ccedTasks.value = await workflowServiceMobile.getCced(0)
-  finishedCced.value = true
-  loadingCced.value = false
-}
+    onMounted(() => {
+      void load();
+    });
 
-const loadCcedMore = async () => {
-  ccedSkip.value += 10
-  const more = await workflowServiceMobile.getCced(ccedSkip.value)
-  ccedTasks.value = [...ccedTasks.value, ...more]
-  if (more.length < 10) finishedCced.value = true
-  loadingCced.value = false
-}
-
-onMounted(() => {
-  loadTodo()
-})
+    return {
+      currentTab,
+      refreshing,
+      loading,
+      list,
+      emit,
+      load,
+      openApproval: (task: WfTodo) => emit("open-approval", task),
+      openDetail: (task: WfTodo) => emit("open-detail", task),
+      switchTab: (name: string) => {
+        currentTab.value = name;
+        emit("change-tab", name);
+      },
+    };
+  },
+  template: `
+    <van-tabs :active="currentTab" @update:active="switchTab">
+      <van-tab title="我的待办" name="todo" />
+      <van-tab title="我发起的" name="started" />
+      <van-tab title="我处理的" name="approved" />
+      <van-tab title="抄送我的" name="cced" />
+    </van-tabs>
+    <div class="workflow-list-wrap">
+      <van-pull-refresh v-model="refreshing" @refresh="load">
+        <div v-if="loading" class="workflow-empty">加载中...</div>
+        <div v-else-if="list.length === 0" class="workflow-empty">暂无数据</div>
+        <div v-else class="workflow-list">
+          <MobileCard
+            v-for="task in list"
+            :key="task.id"
+            class="workflow-card"
+            @click="currentTab === 'todo' ? openApproval(task) : openDetail(task)"
+          >
+            <div class="workflow-card-header">
+              <div class="workflow-form-name">{{ task.formName }}</div>
+              <div class="workflow-time">{{ task.approveNodeStartTime || task.createTime || task.updateTime }}</div>
+            </div>
+            <div class="workflow-node">{{ task.approveNodeName || '流程记录' }}</div>
+            <div class="workflow-starter">发起人：{{ task.starter?.label || '-' }}</div>
+            <div class="workflow-brief">
+              <div v-for="item in task.dataBrief?.slice(0, 2)" :key="item.field">{{ item.title }}：{{ item.value }}</div>
+            </div>
+          </MobileCard>
+        </div>
+      </van-pull-refresh>
+    </div>
+  `,
+});
 </script>
 
-<style lang="scss" scoped>
-.todo-list {
-  min-height: 300px;
+<style scoped lang="scss">
+.workflow-page {
+  height: 100%;
+}
+
+.embedded-workflow {
+  padding-bottom: 16px;
+}
+
+.workflow-list-wrap {
   padding: 12px;
 }
 
-.task-item {
-  padding: 12px;
-  background-color: #fff;
-  border-radius: 8px;
-  margin-bottom: 12px;
-
-  .task-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-
-    .task-form-name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #323233;
-    }
-
-    .task-node {
-      font-size: 12px;
-      color: #969799;
-    }
-  }
-
-  .task-content {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #969799;
-    margin-bottom: 8px;
-  }
-
-  .task-brief {
-    font-size: 12px;
-    color: #646566;
-
-    .brief-item {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
+.workflow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.empty-tip {
+.workflow-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.workflow-form-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--mobile-text-primary);
+}
+
+.workflow-time,
+.workflow-node,
+.workflow-starter,
+.workflow-brief {
+  font-size: 12px;
+  color: var(--mobile-text-secondary);
+}
+
+.workflow-node {
+  margin-bottom: 6px;
+}
+
+.workflow-starter {
+  margin-bottom: 6px;
+}
+
+.workflow-empty {
   padding: 40px 0;
   text-align: center;
-  color: #969799;
+  color: var(--mobile-text-tertiary);
 }
 </style>

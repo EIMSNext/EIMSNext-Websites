@@ -1,206 +1,159 @@
 <template>
-  <div class="page-container">
-    <div class="page-header">
-      <div class="header-left" @click="goBack">
-        <van-icon name="arrow-left" />
+  <MobilePage :title="form?.name || '数据列表'" @back="goBack">
+    <template #right>
+      <van-icon name="plus" @click="goToAdd" />
+    </template>
+
+    <div class="data-page">
+      <div class="table-toolbar mobile-card">
+        <div class="toolbar-tip">左右滑动查看完整字段</div>
       </div>
-      <div class="header-title">{{ form?.name || '数据列表' }}</div>
-      <div class="header-right">
-        <van-icon name="plus" @click="goToAdd" />
-      </div>
-    </div>
-    <div class="page-main">
-      <div class="data-table-wrapper" ref="tableWrapper">
+
+      <div class="data-table-wrapper mobile-card">
         <div class="table-scroll-area">
           <table class="data-table">
             <thead>
               <tr>
-                <th
-                  v-for="col in columns"
-                  :key="col.field"
-                  :style="{ minWidth: (col.width || 100) + 'px' }"
-                >
+                <th v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
                   {{ col.title }}
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="(row, index) in dataList"
-                :key="row.id || index"
-                @click="goToDetail(row)"
-              >
-                <td
-                  v-for="col in columns"
-                  :key="col.field"
-                  :style="{ minWidth: (col.width || 100) + 'px' }"
-                >
+              <tr v-for="row in dataList" :key="row.id" @click="goToDetail(row)">
+                <td v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
                   {{ formatCell(row, col.field) }}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <van-loading v-if="loading" class="table-loading" />
-        <div v-if="!loading && dataList.length === 0" class="empty-tip">
-          暂无数据
-        </div>
+        <div v-if="!loading && dataList.length === 0" class="empty-tip">暂无数据</div>
       </div>
     </div>
-    <div class="page-footer">
-      <van-pagination
-        v-model="currentPage"
-        :total-items="total"
-        :items-per-page="pageSize"
-        @change="onPageChange"
-        mode="simple"
-      />
-    </div>
-  </div>
+
+    <template #footer>
+      <div class="pagination-wrap">
+        <van-pagination v-model="currentPage" :total-items="total" :items-per-page="pageSize" mode="simple" @change="loadData" />
+      </div>
+    </template>
+  </MobilePage>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import type { FormDef, FormData } from '@eimsnext/models'
-import { formServiceMobile, formDataServiceMobile } from '@/services/mobileService'
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import type { FormData, FormDef } from "@eimsnext/models";
+import MobilePage from "@/components/base/MobilePage.vue";
+import { formDataServiceMobile, formServiceMobile } from "@/services/mobileService";
 
-const router = useRouter()
-const route = useRoute()
-const appId = route.params.appId as string
-const formId = route.params.formId as string
+const router = useRouter();
+const route = useRoute();
+const appId = route.params.appId as string;
+const formId = route.params.formId as string;
 
-const loading = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(20)
-const total = ref(0)
+const loading = ref(false);
+const currentPage = ref(1);
+const pageSize = ref(20);
+const total = ref(0);
+const form = ref<FormDef>();
+const dataList = ref<FormData[]>([]);
+const columns = ref<{ field: string; title: string; width: number }[]>([]);
 
-const form = ref<FormDef>()
-const dataList = ref<FormData[]>([])
-const columns = ref<{ field: string; title: string; width?: number }[]>([])
-
-const goBack = () => {
-  router.back()
-}
-
-const goToAdd = () => {
-  router.push(`/app/${appId}/form/${formId}/add`)
-}
-
-const goToDetail = (row: FormData) => {
-  router.push(`/app/${appId}/form/${formId}/${row.id}`)
-}
+const goBack = () => router.back();
+const goToAdd = () => router.push(`/app/${appId}/form/${formId}/add`);
+const goToDetail = (row: FormData) => router.push(`/app/${appId}/form/${formId}/${row.id}`);
 
 const loadForm = async () => {
-  form.value = await formServiceMobile.get(formId)
-  buildColumns()
-}
-
-const buildColumns = () => {
-  if (!form.value?.content?.items) return
-  columns.value = form.value.content.items.map((item) => ({
+  form.value = await formServiceMobile.get(formId);
+  columns.value = (form.value.content?.items || []).map((item) => ({
     field: item.field,
     title: item.title,
-    width: 100
-  }))
-}
+    width: 140,
+  }));
+};
 
 const loadData = async () => {
-  loading.value = true
-  const skip = (currentPage.value - 1) * pageSize.value
-  dataList.value = await formDataServiceMobile.query(formId, skip, pageSize.value)
-  total.value = dataList.value.length
-  loading.value = false
-}
+  loading.value = true;
+  const skip = (currentPage.value - 1) * pageSize.value;
+  const [list, count] = await Promise.all([
+    formDataServiceMobile.query(formId, skip, pageSize.value),
+    formDataServiceMobile.count(formId),
+  ]);
+  dataList.value = list;
+  total.value = count;
+  loading.value = false;
+};
 
-const formatCell = (row: any, field: string) => {
-  const value = row[field]
-  if (value === null || value === undefined) return ''
-  if (typeof value === 'object') {
-    return value.label || value.name || ''
-  }
-  if (Array.isArray(value)) {
-    return value.map((v) => (typeof v === 'object' ? v.label || v.name : v)).join(', ')
-  }
-  return String(value)
-}
-
-const onPageChange = () => {
-  loadData()
-}
+const formatCell = (row: FormData, field: string) => {
+  const value = row.data?.[field];
+  if (value === null || value === undefined) return "";
+  if (Array.isArray(value)) return value.map((item) => item?.label || item?.name || item).join(", ");
+  if (typeof value === "object") return value.label || value.name || JSON.stringify(value);
+  return String(value);
+};
 
 onMounted(() => {
-  loadForm()
-  loadData()
-})
+  void Promise.all([loadForm(), loadData()]);
+});
 </script>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
+.data-page {
+  padding: 12px;
+}
+
+.table-toolbar {
+  margin-bottom: 12px;
+}
+
+.toolbar-tip {
+  color: var(--mobile-text-secondary);
+  font-size: 12px;
+}
+
 .data-table-wrapper {
-  overflow-x: auto;
-  overflow-y: auto;
-  height: 100%;
-  position: relative;
+  overflow: hidden;
+  padding: 0;
 }
 
 .table-scroll-area {
-  min-width: 100%;
   overflow-x: auto;
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #fff;
 
   th,
   td {
-    padding: 10px 12px;
+    border-bottom: 1px solid var(--mobile-border-color);
+    padding: 12px 10px;
     text-align: left;
-    border-bottom: 1px solid #ebedf0;
-    font-size: 13px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
+    font-size: 13px;
   }
 
   th {
-    background-color: #f7f8fa;
-    font-weight: 500;
-    color: #646566;
     position: sticky;
     top: 0;
+    background: var(--mobile-bg-page);
+    color: var(--mobile-text-secondary);
     z-index: 1;
   }
 
-  tbody tr {
-    cursor: pointer;
-    &:active {
-      background-color: #f5f5f5;
-    }
-  }
-
   td {
-    color: #323233;
+    color: var(--mobile-text-primary);
   }
-}
-
-.table-loading {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 }
 
 .empty-tip {
-  padding: 40px 0;
+  padding: 36px 0;
   text-align: center;
-  color: #969799;
+  color: var(--mobile-text-tertiary);
 }
 
-.page-footer {
-  padding: 8px 16px;
-  background-color: #fff;
+.pagination-wrap {
+  padding: 10px 16px;
 }
 </style>

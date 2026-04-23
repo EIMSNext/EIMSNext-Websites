@@ -15,12 +15,12 @@ import {
   workflowService,
 } from "@eimsnext/services";
 import type { LoginRequest } from "@eimsnext/services";
+import { ODataQueryRequest } from "@eimsnext/services";
 
 const buildODataQuery = (filter?: string, skip = 0, top = 20, orderby?: string) => {
-  const query: Record<string, string | number> = {
-    $skip: skip,
-    $top: top,
-  };
+  const query = new ODataQueryRequest();
+  query.$skip = skip;
+  query.$top = top;
 
   if (filter) query.$filter = filter;
   if (orderby) query.$orderby = orderby;
