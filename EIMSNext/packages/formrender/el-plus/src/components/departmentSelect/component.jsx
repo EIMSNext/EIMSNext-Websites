@@ -120,6 +120,9 @@ export default defineComponent({
             ? [selectedValue.value]
             : [];
       const tagHeight = multiple ? "60px" : "35px";
+      const styCls = multiple
+        ? "_fc-org-select"
+        : "_fc-org-select et-deparment1";
       const memberOptions = {
         showTabs: MemberTabs.Department | MemberTabs.CurDept,
         cascadedDept: props.cascadedDept,
@@ -132,7 +135,7 @@ export default defineComponent({
         <div style={{ width: "100%" }}>
           <SelectedTags
             modelValue={tags}
-            class={"_fc-org-select"}
+            class={styCls}
             style={{ height: tagHeight }}
             editable={editable}
             emptyText={placeholder}

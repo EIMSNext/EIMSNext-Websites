@@ -1266,3 +1266,8 @@ html.dark {
   width: 100%;
   text-align: center;
 }
+
+._fc-designer .el-input-number,._fc-designer .el-input  {
+  width: 100%;
+  max-width: 360px;
+}
