@@ -1,5 +1,5 @@
 <template>
-  <div class="mytasks-container">
+  <div ref="listRef" class="mytasks-container" @scroll="handleScroll">
     <et-dialog
       v-model="showDetailsDialog"
       class="formdatadialog"
@@ -12,8 +12,8 @@
         <WfApprovalLogView :approvalLog="selectedTask!"></WfApprovalLogView>
       </div>
     </et-dialog>
-    <el-space direction="vertical" class="task-space">
-      <template v-for="task in dataRef">
+    <el-space v-if="dataRef.length > 0" direction="vertical" class="task-space">
+      <template v-for="task in dataRef" :key="task.id">
         <et-card class="task-card" @click="viewLog(task)">
           <template #header>
             <div class="flex-y-center">
@@ -41,7 +41,10 @@
               </span>
             </div>
             <ul class="flow-brief">
-              <template v-for="item in task.dataBrief.filter((x, i) => i < 3)">
+              <template
+                v-for="(item, index) in task.dataBrief.filter((x, i) => i < 3)"
+                :key="`${task.id}-left-${index}`"
+              >
                 <li class="brief-item">
                   <div class="brief-label">{{ item.title }}</div>
                   <span class="sep">：</span>
@@ -50,7 +53,10 @@
               </template>
             </ul>
             <ul class="flow-brief">
-              <template v-for="item in task.dataBrief.filter((x, i) => i > 2)">
+              <template
+                v-for="(item, index) in task.dataBrief.filter((x, i) => i > 2)"
+                :key="`${task.id}-right-${index}`"
+              >
                 <li class="brief-item">
                   <div class="brief-label">{{ item.title }}</div>
                   <span class="sep">：</span>
@@ -62,6 +68,23 @@
         </et-card>
       </template>
     </el-space>
+
+    <div v-else-if="!isLoading && !loadError" class="list-empty">
+      <el-empty description="暂无审批数据" />
+    </div>
+
+    <div v-if="loadError" class="list-empty">
+      <el-empty description="审批数据加载失败">
+        <el-button type="primary" @click="retryLoad">重试</el-button>
+      </el-empty>
+    </div>
+
+    <div v-if="isLoadingMore" class="list-status">加载中...</div>
+    <div v-else-if="!hasMore && dataRef.length > 0" class="list-status">没有更多了</div>
+
+    <button v-if="showTopButton" class="top-button" type="button" @click="scrollToTop">
+      <et-icon icon="backtop" size="20px" />
+    </button>
   </div>
 </template>
 <script setup lang="ts">
@@ -70,14 +93,15 @@ defineOptions({
 });
 
 import { useRoute } from "vue-router";
-import { ref, reactive, onMounted, watch } from "vue";
-import { useFormStore } from "@eimsnext/store";
-import { ApproveAction, BriefField, WfApprovalLog } from "@eimsnext/models";
+import { nextTick, ref, watch } from "vue";
+import { WfApprovalLog } from "@eimsnext/models";
 import { wfApprovalLogService } from "@eimsnext/services";
-import { ODataQuery } from "@/utils/query";
 import { EtDialog } from "@eimsnext/components";
 import buildQuery from "odata-query";
 import WfApprovalLogView from "./WfApprovalLogView.vue";
+
+const PAGE_SIZE = 20;
+const SCROLL_THRESHOLD = 120;
 
 const props = withDefaults(
   defineProps<{
@@ -88,19 +112,62 @@ const props = withDefaults(
 
 const showDetailsDialog = ref(false);
 const route = useRoute();
-const formStore = useFormStore();
-const totalRef = ref(0);
+const listRef = ref<HTMLElement | null>(null);
 const dataRef = ref<WfApprovalLog[]>([]);
 const selectedTask = ref<WfApprovalLog>();
 const filterRef = ref(props.filter);
+const pageRef = ref(1);
+const hasMore = ref(true);
+const isLoading = ref(false);
+const isLoadingMore = ref(false);
+const showTopButton = ref(false);
+const loadError = ref(false);
+
+const resetScroll = () => {
+  const container = listRef.value;
+  if (!container) {
+    return;
+  }
+
+  container.scrollTop = 0;
+  showTopButton.value = false;
+};
+
+const getSecondPageOffset = () => {
+  const container = listRef.value;
+  if (!container) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const taskCards = container.querySelectorAll<HTMLElement>(".task-card");
+  const secondPageFirstCard = taskCards[PAGE_SIZE];
+  if (!secondPageFirstCard) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const containerRect = container.getBoundingClientRect();
+  const cardRect = secondPageFirstCard.getBoundingClientRect();
+  return cardRect.top - containerRect.top + container.scrollTop;
+};
+
+const updateTopButtonVisibility = () => {
+  const container = listRef.value;
+  if (!container) {
+    showTopButton.value = false;
+    return;
+  }
+
+  const secondPageOffset = getSecondPageOffset();
+  showTopButton.value = Number.isFinite(secondPageOffset)
+    && container.scrollTop >= Math.max(secondPageOffset - SCROLL_THRESHOLD, SCROLL_THRESHOLD);
+};
 
 watch(
   () => props.filter,
   (newFilter) => {
     filterRef.value = { ...newFilter };
     updateFilterWithAppId();
-    loadCount();
-    loadData();
+    loadData(true);
   },
   { deep: true }
 );
@@ -122,29 +189,57 @@ const updateFilterWithAppId = () => {
 
 updateFilterWithAppId();
 
-const queryParams = reactive<ODataQuery<any>>({
-  skip: 0,
-  top: 10,
-});
+const loadData = async (reset = false) => {
+  if (isLoading.value || isLoadingMore.value) {
+    return;
+  }
 
-const loadCount = () => {
-  let query = buildQuery({ filter: filterRef.value });
+  if (!reset && !hasMore.value) {
+    return;
+  }
 
-  wfApprovalLogService.count(query).then((cnt: number) => {
-    totalRef.value = cnt;
+  if (reset) {
+    isLoading.value = true;
+    pageRef.value = 1;
+    hasMore.value = true;
+    loadError.value = false;
+  } else {
+    isLoadingMore.value = true;
+  }
+
+  const currentPage = pageRef.value;
+  const query = buildQuery({
+    filter: filterRef.value,
+    skip: (currentPage - 1) * PAGE_SIZE,
+    top: PAGE_SIZE,
   });
-};
 
-const loadData = () => {
-  let query = buildQuery({ filter: filterRef.value });
-  wfApprovalLogService
-    .query<WfApprovalLog>(query)
-    .then((res: WfApprovalLog[]) => {
-      dataRef.value = res;
-    })
-    .catch((error: any) => {
-      console.error("loadData error:", error);
-    });
+  try {
+    const res = await wfApprovalLogService.query<WfApprovalLog>(query);
+    dataRef.value = reset ? res : [...dataRef.value, ...res];
+    hasMore.value = res.length === PAGE_SIZE;
+    loadError.value = false;
+    if (hasMore.value) {
+      pageRef.value = currentPage + 1;
+    }
+  } catch (error: any) {
+    console.error("loadData error:", error);
+    loadError.value = true;
+    if (reset) {
+      dataRef.value = [];
+      hasMore.value = false;
+    }
+  } finally {
+    isLoading.value = false;
+    isLoadingMore.value = false;
+  }
+
+  await nextTick();
+  const container = listRef.value;
+  updateTopButtonVisibility();
+  if (container && hasMore.value && container.scrollHeight <= container.clientHeight + SCROLL_THRESHOLD) {
+    loadData();
+  }
 };
 
 const viewLog = async (task: WfApprovalLog) => {
@@ -152,24 +247,45 @@ const viewLog = async (task: WfApprovalLog) => {
   showDetailsDialog.value = true;
 };
 
+const handleScroll = () => {
+  const container = listRef.value;
+  if (!container) {
+    return;
+  }
+
+  updateTopButtonVisibility();
+
+  const distanceToBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+  if (distanceToBottom <= SCROLL_THRESHOLD) {
+    loadData();
+  }
+};
+
+const scrollToTop = () => {
+  listRef.value?.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+const retryLoad = () => {
+  loadData(true);
+};
+
 watch(
   () => [route.params.appId, route.query.appId],
   () => {
     updateFilterWithAppId();
-    loadCount();
-    loadData();
+    resetScroll();
+    loadData(true);
   },
   { immediate: true }
 );
-
-onMounted(() => {
-  loadCount();
-  loadData();
-});
 </script>
 <style lang="scss" scoped>
 .mytasks-container {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
 
   .task-space {
     width: 100%;
@@ -267,6 +383,43 @@ onMounted(() => {
         }
       }
     }
+  }
+
+  .list-status {
+    color: var(--et-text-secondary);
+    display: flex;
+    justify-content: center;
+    padding: var(--et-space-12) 0 var(--et-space-20);
+  }
+
+  .list-empty {
+    display: flex;
+    justify-content: center;
+    padding: var(--et-space-48) 0;
+  }
+
+  .top-button {
+    position: sticky;
+    align-self: flex-end;
+    bottom: var(--et-space-20);
+    margin-right: var(--et-space-8);
+    margin-bottom: var(--et-space-20);
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.24);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transition: background-color 0.2s ease;
+  }
+
+  .top-button:hover {
+    background-color: rgba(0, 0, 0, 0.36);
   }
 }
 </style>
