@@ -13,7 +13,7 @@
                     {{ t("common.edit") }}
                   </el-dropdown-item>
                   <el-divider class="sidebar-menu-divider" />
-                  <el-dropdown-item class="btn-delete" @click="deleteMenu(item)">
+                  <el-dropdown-item class="btn-delete" @click="deleteGroup(item)">
                     {{ t("common.delete") }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -54,7 +54,7 @@
   </template>
 
   <router-link v-else custom :to="routeTo" v-slot="{ navigate }">
-    <el-menu-item :index="routeTo.path" :class="{ 'pl-15px': !isSidebarOpened }" @click="navigate">
+    <el-menu-item :index="routeTo.path" :class="{ 'pl-15px': !isSidebarOpened }" @click="() => navigate()">
       <SidebarMenuItemTitle :icon="getFormIcon(item)" :title="item.title" :iconColor="getAppIconColor(item)" />
       <span v-if="canManage" class="more-wrapper" @click.stop>
         <el-dropdown placement="bottom-start" size="large" trigger="click">

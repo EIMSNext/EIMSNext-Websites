@@ -6,25 +6,25 @@
       <div class="sys-menu-wrap">
         <el-menu mode="vertical">
           <router-link custom :to="{ path: resolveFullPath('department') }" v-slot="{ navigate }">
-            <el-menu-item index="department" @click="navigate">
+            <el-menu-item index="department" @click="() => navigate()">
               <et-icon icon="icon-organization" class="step-image" size="14px" />
               <span class="app-menu-text">内部组织</span>
             </el-menu-item>
           </router-link>
           <router-link custom :to="{ path: resolveFullPath('role') }" v-slot="{ navigate }">
-            <el-menu-item index="role" @click="navigate">
+            <el-menu-item index="role" @click="() => navigate()">
               <et-icon icon="icon-role" class="step-image" size="14px" />
               <span class="app-menu-text">角色</span>
             </el-menu-item>
           </router-link>
           <router-link custom :to="{ path: resolveFullPath('admin') }" v-slot="{ navigate }">
-            <el-menu-item index="admin" @click="navigate">
+            <el-menu-item index="admin" @click="() => navigate()">
               <et-icon icon="icon-admin" class="step-image" size="14px" />
               <span class="app-menu-text">管理员</span>
             </el-menu-item>
           </router-link>
           <router-link custom :to="{ path: resolveFullPath('corp-log') }" v-slot="{ navigate }">
-            <el-menu-item index="corp-log" @click="navigate">
+            <el-menu-item index="corp-log" @click="() => navigate()">
               <et-icon icon="icon-admin" class="step-image" size="14px" />
               <span class="app-menu-text">企业日志</span>
             </el-menu-item>

@@ -27,8 +27,8 @@
     </div>
     <div>
       <el-menu mode="vertical">
-        <router-link custom :to="{ name: 'mytasks', params: { appId: app?.id } }" v-slot="{ navigate }">
-          <el-menu-item index="mytodo" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="navigate">
+<router-link custom :to="{ name: 'mytasks', params: { appId: app?.id } }" v-slot="{ navigate }">
+          <el-menu-item index="mytodo" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <el-badge :is-dot="hasAppTodo" :offset="[0, 8]">
               <et-icon icon="icon-mytodo" class="step-image" size="14px" />
             </el-badge>
@@ -37,24 +37,24 @@
             </span>
           </el-menu-item>
         </router-link>
-        <router-link custom :to="{ name: 'mystarted', params: { appId: app?.id } }" v-slot="{ navigate }">
-          <el-menu-item index="mystarted" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="navigate">
+<router-link custom :to="{ name: 'mystarted', params: { appId: app?.id } }" v-slot="{ navigate }">
+          <el-menu-item index="mystarted" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <et-icon icon="icon-mystarted" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.mystarted") }}
             </span>
           </el-menu-item>
         </router-link>
-        <router-link custom :to="{ name: 'myapproved', params: { appId: app?.id } }" v-slot="{ navigate }">
-          <el-menu-item index="myapproved" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="navigate">
+<router-link custom :to="{ name: 'myapproved', params: { appId: app?.id } }" v-slot="{ navigate }">
+          <el-menu-item index="myapproved" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <et-icon icon="icon-myapproved" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.myapproved") }}
             </span>
           </el-menu-item>
         </router-link>
-        <router-link custom :to="{ name: 'cctome', params: { appId: app?.id } }" v-slot="{ navigate }">
-          <el-menu-item index="mycced" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="navigate">
+<router-link custom :to="{ name: 'cctome', params: { appId: app?.id } }" v-slot="{ navigate }">
+          <el-menu-item index="mycced" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <et-icon icon="icon-mycced" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.cctome") }}

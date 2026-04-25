@@ -15,12 +15,12 @@
           role="link"
           tabindex="0"
           draggable="false"
-          @click="navigate"
+          @click="() => navigate()"
           @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"
           @contextmenu.prevent="openContentMenu(tag, $event)"
           @dragstart.prevent
-          @keydown.enter.prevent="navigate"
-          @keydown.space.prevent="navigate"
+          @keydown.enter.prevent="() => navigate()"
+          @keydown.space.prevent="() => navigate()"
         >
           {{ translateRouteTitle(t, tag.title) }}
           <et-icon
