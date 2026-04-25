@@ -48,7 +48,7 @@ export default {
     app.use(vant);
     app.use(EtPlus);
     app.use(formCreate);
-    app.use(FcDesigner);
+    app.component("FcDesigner", FcDesigner);
     app.use(print);
     FcDesigner.setFormula([
       {
