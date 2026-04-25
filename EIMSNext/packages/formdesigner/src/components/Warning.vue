@@ -7,14 +7,12 @@
         <template #content>
             <span v-html="tooltip"></span>
         </template>
-        <template v-if="$slots.default">
-            <span class="_fd-warning-text">
+        <span class="_fd-warning-trigger">
+            <span v-if="$slots.default" class="_fd-warning-text">
                 <slot></slot>
             </span>
-        </template>
-        <template v-else>
-            <i class="fc-icon icon-question"></i>
-        </template>
+            <i v-else class="fc-icon icon-question"></i>
+        </span>
     </el-tooltip>
 </template>
 
@@ -41,5 +39,10 @@ export default defineComponent({
     text-decoration: underline;
     text-decoration-style: dashed;
     cursor: help;
+}
+
+._fd-warning-trigger {
+    align-items: center;
+    display: inline-flex;
 }
 </style>

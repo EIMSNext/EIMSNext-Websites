@@ -39,15 +39,15 @@
           @ok="handleViewOk"></FormDataView>
       </div>
     </et-dialog>
-    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataFilter :model-value="condList" :formId="formId" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
     </el-popover>
-    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataSort :model-value="sortList" :formId="formId" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
-    <el-popover :visible="showField" :virtual-ref="fieldBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+    <el-popover :visible="showField" :virtual-ref="fieldBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
