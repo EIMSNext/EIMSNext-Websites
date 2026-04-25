@@ -409,7 +409,7 @@ watch(
     border: none;
     border-radius: 50%;
     background-color: rgba(0, 0, 0, 0.24);
-    color: #fff;
+    color: var(--et-text-on-primary);
     cursor: pointer;
     display: inline-flex;
     align-items: center;

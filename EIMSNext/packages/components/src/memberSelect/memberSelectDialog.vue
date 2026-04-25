@@ -12,7 +12,7 @@
       <member-select v-model="tagsRef" :options="memberOptions" />
     </div>
     <template #footer-left>
-      <el-button v-if="memberOptions?.showContract" link @click="openLink"
+      <el-button v-if="memberOptions?.showContract" class="contact-link-btn" link @click="openLink"
         >通讯录</el-button
       >
     </template>

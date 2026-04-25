@@ -15,7 +15,7 @@
 
     <!-- 设置面板 -->
     <div v-if="defaultSettings.showSettings" @click="settingStore.settingsVisible = true">
-      <et-icon icon="el-setting" />
+      <et-icon icon="el-setting" size="18" />
     </div>
   </div>
 </template>
@@ -32,7 +32,8 @@ const settingStore = useSettingsStore();
   display: flex;
   align-items: center;
   justify-content: center;
-
+  padding-right: var(--et-space-10);
+  
   & > * {
     display: flex;
     flex-direction: column;

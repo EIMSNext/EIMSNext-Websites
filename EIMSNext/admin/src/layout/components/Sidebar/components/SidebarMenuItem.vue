@@ -1,63 +1,82 @@
 <template>
-  <!-- 删除确认对话框 -->
-  <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('admin.deleteFormConfirm_Title', [selectedForm?.name])"
-    :icon="MessageIcon.Warning" :showNoSave="false" @ok="handleDeleteConfirm">
-    <div>{{ t("admin.deleteFormConfirm_Content") }}</div>
-  </EtConfirmDialog>
-  <div v-if="!item.meta || !item.meta.hidden">
-    <!--【叶子节点】显示叶子节点或唯一子节点且父节点未配置始终显示 -->
-    <template v-if="
-      // 判断条件：仅有一个子节点，且父节点未配置始终显示
-      (hasOneShowingChild(item.children, item) &&
-        (!onlyOneChild.children || onlyOneChild.noShowingChildren) &&
-        !item.meta?.alwaysShow) ||
-      // 父节点即使配置了始终显示，但无子节点，也显示为叶子节点
-      (item.meta?.alwaysShow && !item.children)
-    ">
-      <AppLink v-if="onlyOneChild.meta" :to="{
-        path: resolvePath(onlyOneChild.path),
-        query: onlyOneChild.meta.params,
-      }">
-        <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'pl-15px': !isSidebarOpened }">
-          <SidebarMenuItemTitle :icon="onlyOneChild.meta.icon || item.meta?.icon" :title="onlyOneChild.meta.title"
-            :iconColor="item.meta?.iconColor" />
-          <span v-if="
-            isSidebarOpened &&
-            (curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin)
-          " class="more-wrapper">
-            <el-dropdown placement="bottom-start" size="large">
-              <et-icon icon="el-More" @click.prevent=""></et-icon>
+  <template v-if="item.menuType === FormType.Group">
+    <el-sub-menu :index="groupIndex" teleported>
+      <template #title>
+        <div class="menu-title-row">
+          <SidebarMenuItemTitle :icon="getFormIcon(item)" :title="item.title" :iconColor="getAppIconColor(item)" />
+          <span v-if="canManage" class="more-wrapper" @click.stop>
+            <el-dropdown placement="bottom-start" size="large" trigger="click">
+              <et-icon icon="el-More" @click.prevent="" />
               <template #dropdown>
                 <el-dropdown-menu class="sidebar-menu-dropdown">
-                  <el-dropdown-item @click="editForm(item.meta?.id, item.meta?.type)">
+                  <el-dropdown-item @click="emit('editGroup', item)">
                     {{ t("common.edit") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="editNameAndIcon(item.meta?.id, item.meta?.type)">
-                    {{ t("admin.editNameAndIcon") }}
-                  </el-dropdown-item>
                   <el-divider class="sidebar-menu-divider" />
-                  <el-dropdown-item class="btn-delete" @click="deleteForm(item.meta?.id, item.meta?.type)">
+                  <el-dropdown-item class="btn-delete" @click="deleteMenu(item)">
                     {{ t("common.delete") }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
           </span>
-        </el-menu-item>
-      </AppLink>
-    </template>
-
-    <!--【非叶子节点】显示含多个子节点的父菜单，或始终显示的单子节点 -->
-    <el-sub-menu v-else :index="resolvePath(item.path)" teleported>
-      <template #title>
-        <SidebarMenuItemTitle v-if="item.meta" :icon="item.meta.icon" :title="item.meta.title"
-          :iconColor="item.meta?.iconColor" />
+        </div>
       </template>
 
-      <SidebarMenuItem v-for="child in item.children" :key="child.path" :is-nest="true" :item="child"
-        :base-path="resolvePath(child.path)" />
+      <Draggable
+        :list="item.subMenus"
+        item-key="menuId"
+        tag="div"
+        :data-menu-type="item.menuType"
+        :group="dragGroup"
+        filter=".more-wrapper, .more-wrapper *"
+        :prevent-on-filter="false"
+        ghost-class="menu-drag-ghost"
+        :animation="180"
+        :move="onMove"
+        @change="emit('menusChanged')"
+      >
+        <template #item="{ element }">
+          <div class="menu-drag-item">
+            <SidebarMenuItem
+              :item="element"
+              :app-id="appId"
+              @editForm="emit('editForm', $event)"
+              @editMenu="emit('editMenu', $event)"
+              @editGroup="emit('editGroup', $event)"
+              @deleteMenu="emit('deleteMenu', $event)"
+              @menusChanged="emit('menusChanged')"
+            />
+          </div>
+        </template>
+      </Draggable>
     </el-sub-menu>
-  </div>
+  </template>
+
+  <router-link v-else custom :to="routeTo" v-slot="{ navigate }">
+    <el-menu-item :index="routeTo.path" :class="{ 'pl-15px': !isSidebarOpened }" @click="navigate">
+      <SidebarMenuItemTitle :icon="getFormIcon(item)" :title="item.title" :iconColor="getAppIconColor(item)" />
+      <span v-if="canManage" class="more-wrapper" @click.stop>
+        <el-dropdown placement="bottom-start" size="large" trigger="click">
+          <et-icon icon="el-More" @click.prevent="" />
+          <template #dropdown>
+            <el-dropdown-menu class="sidebar-menu-dropdown">
+              <el-dropdown-item @click="editForm(item.menuId, item.menuType)">
+                {{ t("common.edit") }}
+              </el-dropdown-item>
+              <el-dropdown-item @click="emit('editMenu', item)">
+                {{ t("admin.editNameAndIcon") }}
+              </el-dropdown-item>
+              <el-divider class="sidebar-menu-divider" />
+              <el-dropdown-item class="btn-delete" @click="deleteGroup(item)">
+                {{ t("common.delete") }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </span>
+    </el-menu-item>
+  </router-link>
 </template>
 
 <script setup lang="ts">
@@ -66,162 +85,83 @@ defineOptions({
   inheritAttrs: false,
 });
 
-import path from "path-browserify";
-import { RouteRecordRaw } from "vue-router";
-import { isExternal } from "@/utils";
-import { useContextStore, useFormStore, useUserStore, useAppStore } from "@eimsnext/store";
-import { FormDef, FormType, UserType } from "@eimsnext/models";
-import { MessageIcon } from "@eimsnext/components";
+import { getAppIconColor, getFormIcon } from "@/utils/common";
+import { useUserStore } from "@eimsnext/store";
+import { AppMenu, FormType, UserType } from "@eimsnext/models";
+import { ConfirmResult, EtConfirm } from "@eimsnext/components";
+import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
 import { useSystemStore } from "@/store";
+import Draggable from "vuedraggable";
+
 const { t } = useI18n();
+const props = defineProps<{
+  item: AppMenu;
+  appId: string;
+}>();
 
-const props = defineProps({
-  /**
-   * 当前路由对象
-   */
-  item: {
-    type: Object as PropType<RouteRecordRaw>,
-    required: true,
-  },
-
-  /**
-   * 父级完整路径
-   */
-  basePath: {
-    type: String,
-    required: true,
-  },
-
-  /**
-   * 是否为嵌套路由
-   */
-  isNest: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-const contextStore = useContextStore();
-const appStore = useAppStore();
-const formStore = useFormStore();
-// 可见的唯一子节点
-const onlyOneChild = ref();
-const selectedFormId = ref("");
-const selectedForm = ref<FormDef>();
-const showDeleteConfirmDialog = ref(false);
+const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "menusChanged"]);
 const userStore = useUserStore();
 const curUser = toRef(userStore.currentUser);
-
 const systemStore = useSystemStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
+const canManage = computed(
+  () => curUser.value.userType == UserType.CorpOwmer || curUser.value.userType == UserType.CorpAdmin,
+);
+const dragGroup = { name: "app-menu", pull: true, put: true };
+const groupIndex = computed(() => `group-${props.item.menuId}`);
+const routeTo = computed(() => ({
+  path:
+    props.item.menuType === FormType.Dashboard
+      ? `/app/${props.appId}/dash/${props.item.menuId}`
+      : `/app/${props.appId}/form/${props.item.menuId}`,
+}));
 
-/**
- * 检查是否仅有一个可见子节点
- *
- * @param children 子路由数组
- * @param parent 父级路由
- * @returns 是否仅有一个可见子节点
- */
-function hasOneShowingChild(children: RouteRecordRaw[] = [], parent: RouteRecordRaw) {
-  // 过滤出可见子节点
-  const showingChildren = children.filter((route: RouteRecordRaw) => {
-    if (!route.meta?.hidden) {
-      onlyOneChild.value = route;
-      return true;
-    }
-    return false;
-  });
-
-  // 仅有一个或无子节点
-  if (showingChildren.length === 1) {
-    return true;
-  }
-
-  // 无子节点时，设置父节点为唯一显示节点
-  if (showingChildren.length === 0) {
-    onlyOneChild.value = { ...parent, path: "", noShowingChildren: true };
-    return true;
-  }
-  return false;
-}
-
-/**
- * 获取完整路径，适配外部链接
- *
- * @param routePath 路由路径
- * @returns 绝对路径
- */
-function resolvePath(routePath: string) {
-  if (isExternal(routePath)) return routePath;
-  if (isExternal(props.basePath)) return props.basePath;
-
-  // 拼接父路径和当前路径
-  return path.resolve(props.basePath, routePath);
-}
-/**
- * 编辑表单
- */
-const emit = defineEmits(["editForm"]);
 function editForm(formId?: string, type?: FormType) {
-  if (formId) {
-    emit("editForm", formId, type);
-  }
-}
-async function editNameAndIcon(formId?: string, type?: FormType) {
-  if (formId) {
-    if (type && type == FormType.Form) {
-      let form = await formStore.get(formId);
-      if (form) {
-        selectedFormId.value = formId;
-        selectedForm.value = form;
-      }
-    }
-  }
-}
-async function deleteForm(formId?: string, type?: FormType) {
-  if (formId) {
-    if (type && type == FormType.Form) {
-      let form = await formStore.get(formId);
-      if (form) {
-        selectedFormId.value = formId;
-        selectedForm.value = form;
-        showDeleteConfirmDialog.value = true;
-      }
-    }
+  if (formId && type !== undefined) {
+    emit("editForm", { id: formId, type });
   }
 }
 
-async function handleDeleteConfirm() {
-  if (selectedFormId.value) {
-    await formStore.remove(selectedFormId.value);
-    selectedFormId.value = "";
-    contextStore.setAppChanged();
+async function deleteGroup(menu: AppMenu) {
+  if (menu.menuType === FormType.Group && menu.subMenus && menu.subMenus.length > 0) {
+    ElMessage.warning("当前分组下存在子菜单，不能删除");
+    return;
   }
 
-  showDeleteConfirmDialog.value = false;
+  const message = menu.menuType === FormType.Group ? "分组删除后不可恢复" : t("admin.deleteFormConfirm_Content");
+  const confirm = await EtConfirm.showDialog(
+    message,
+    {
+      title: t("admin.deleteFormConfirm_Title", [menu.title || ""]),
+    },
+    t,
+  );
+
+  if (confirm == ConfirmResult.Yes) {
+    emit("deleteMenu", menu);
+  }
+}
+
+function onMove(evt: any) {
+  const dragged = evt.draggedContext?.element as AppMenu | undefined;
+  if (!dragged) {
+    return true;
+  }
+
+  return dragged.menuType !== FormType.Group;
 }
 </script>
 
 <style lang="scss" scoped>
-.hideSidebar {
-  .el-menu--collapse {
-    width: $sidebar-width-collapsed;
-
-    .el-sub-menu {
-      &>.el-sub-menu__title>span {
-        display: inline-block;
-        width: 0;
-        height: 0;
-        overflow: hidden;
-      }
-    }
-  }
+.menu-title-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
 }
 
-.el-menu-item:hover {
-  background-color: $menu-hover;
-
+.el-menu-item:hover,
+:deep(.el-sub-menu__title:hover) {
   .more-wrapper {
     visibility: visible;
   }
@@ -240,5 +180,13 @@ async function handleDeleteConfirm() {
 
 .sidebar-menu-divider {
   margin: var(--et-space-3) 0;
+}
+
+.menu-drag-ghost {
+  opacity: 0.6;
+}
+
+.menu-drag-item {
+  display: block;
 }
 </style>

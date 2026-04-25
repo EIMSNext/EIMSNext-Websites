@@ -502,8 +502,8 @@ watch(
 }
 
 .pdf-state-panel.is-loading {
-  background: #ffffff;
-  color: #303133;
+  background: var(--et-bg-container);
+  color: var(--et-text-primary);
 }
 
 .pdf-state-panel.is-error {

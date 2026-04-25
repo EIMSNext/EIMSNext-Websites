@@ -1,95 +1,101 @@
 <template>
-    <et-dialog v-model="showDialog" width="500px" :title="title" :append-to-body="true" :destroy-on-close="true"
-        @cancel="cancel" @ok="save">
-        <el-form ref="appRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
-            <el-form-item label="应用名称" prop="name">
-                <el-input v-model="formData.name" placeholder="请输入应用名称" />
-            </el-form-item>
-            <el-form-item label="应用描述" prop="description">
-                <el-input v-model="formData.description" placeholder="请输入应用描述" type="textarea" :rows="5" />
-            </el-form-item>
-            <el-form-item label="应用图标" prop="icon">
-                <el-popover trigger="click" placement="bottom-start" width="340px">
-                    <template #reference>
-                        <et-icon :icon="formData.icon" size="48px" />
-                    </template>
-                    <FormIconSelect @ok="onIconSelected" />
-                </el-popover>
-            </el-form-item>
-        </el-form>
-    </et-dialog>
+  <et-dialog
+    v-model="showDialog"
+    width="500px"
+    :title="title"
+    :append-to-body="true"
+    :destroy-on-close="true"
+    @cancel="cancel"
+    @ok="save"
+  >
+    <el-form ref="menuRef" :model="formData" :rules="rules" label-width="60px" class="dialog-form">
+      <el-form-item label="名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入名称" />
+      </el-form-item>
+      <el-form-item label="图标">
+        <el-popover trigger="click" placement="bottom-start" width="340px">
+          <template #reference>
+            <et-icon
+              :icon="formData.icon"
+              :color="formData.iconColor || '#1296db'"
+              size="28px"
+              style="cursor: pointer"
+            />
+          </template>
+          <FormIconSelect
+            :icon="formData.icon"
+            :icon-color="formData.iconColor"
+            @ok="onIconSelected"
+          />
+        </el-popover>
+      </el-form-item>
+    </el-form>
+  </et-dialog>
 </template>
+
 <script lang="ts" setup>
-import { App, AppRequest } from "@eimsnext/models";
+import { AppMenu, EditAppMenuRequest, FormType } from "@eimsnext/models";
 import { appService } from "@eimsnext/services";
-import { useAppStore } from "@eimsnext/store";
-import FormIconSelect from "./FormIconSelect.vue";
 
 defineOptions({
-    name: "EditFormIcon",
+  name: "EditFormIcon",
 });
 
-const props = withDefaults(
-    defineProps<{
-        edit: boolean;
-        app?: App;
-    }>(),
-    {
-        edit: false,
-    }
-);
-
-const appStore = useAppStore();
-const showDialog = ref(true);
-const title = props.edit ? "修改应用信息" : "添加新应用";
-const formData = ref<App>({ id: "", name: "", sortIndex: 0, appMenus: [], icon: "" });
-if (props.edit) formData.value = props.app!;
-
-const rules = reactive({
-    name: [{ required: true, message: "应用名称不能为空", trigger: "blur" }],
-});
-
-const onIconSelected = (payload: { icon: string; color: string }) => {
-    formData.value.icon = payload.icon;
-    formData.value.iconColor = payload.color;
-};
+const props = defineProps<{
+  appId: string;
+  menu: AppMenu;
+}>();
 
 const emit = defineEmits(["cancel", "ok"]);
-const appRef = ref();
-const cancel = () => {
-    emit("cancel");
+const showDialog = ref(true);
+const menuRef = ref();
+const title = computed(() =>
+  props.menu.menuType === FormType.Dashboard ? "修改仪表盘名称和图标" : "修改表单名称和图标"
+);
+
+const formData = ref({
+  name: props.menu.title || "",
+  icon: props.menu.icon || "icon-formdefault",
+  iconColor: props.menu.iconColor || "#1296db",
+});
+
+const rules = reactive({
+  name: [{ required: true, message: "名称不能为空", trigger: "blur" }],
+});
+
+const onIconSelected = (payload: { icon?: string; iconColor?: string }) => {
+  formData.value.icon = payload.icon || formData.value.icon;
+  formData.value.iconColor = payload.iconColor || formData.value.iconColor;
 };
+
+const cancel = () => {
+  emit("cancel");
+};
+
 const save = async () => {
-    if (!appRef.value) return;
+  if (!menuRef.value) return;
 
-    try {
-        await appRef.value.validate();
-    } catch (error) {
-        return;
-    }
+  try {
+    await menuRef.value.validate();
+  } catch {
+    return;
+  }
 
-    const newApp: AppRequest = {
-        id: formData.value.id,
-        name: formData.value.name,
-        description: formData.value.description,
-        sortIndex: formData.value.sortIndex,
-        icon: formData.value.icon,
-        iconColor: formData.value.iconColor,
-    };
+  const payload: EditAppMenuRequest = {
+    appId: props.appId,
+    menuId: props.menu.menuId,
+    name: formData.value.name,
+    icon: formData.value.icon,
+    iconColor: formData.value.iconColor,
+  };
 
-    if (props.edit) {
-        formData.value = await appService.patch<App>(newApp.id, newApp);
-    } else {
-        formData.value = await appService.post<App>(newApp);
-    }
-
-    appStore.update(formData.value);
-    emit("ok", formData.value);
+  const app = await appService.editMenu(payload);
+  emit("ok", app);
 };
 </script>
 
 <style lang="scss" scoped>
 .dialog-form {
-    padding: var(--et-space-12) var(--et-space-20);
+  padding: var(--et-space-12) var(--et-space-20);
 }
 </style>

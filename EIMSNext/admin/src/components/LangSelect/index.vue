@@ -2,7 +2,7 @@
   <el-dropdown trigger="click" @command="handleLanguageChange">
     <div class="middle-center">
       <div :class="{ 'middle-center': !showLabel }" :style="{ 'display': showLabel ? 'inline-flex' : 'flex' }">
-        <et-icon icon="language" :size="size" />
+        <et-icon icon="language" :size="size || '18'" />
         <span v-if="showLabel" class="ml-[5px]">{{ curLang.label }}</span>
       </div>
     </div>
