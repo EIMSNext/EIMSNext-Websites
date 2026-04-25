@@ -11,7 +11,7 @@ import { ConditionList, ConditionItem, ConditionValue } from "./ConditionList";
 import { FieldSelect } from "./FieldSelect";
 import { FieldSortList, FieldSortItem } from "./FieldSortList";
 import { FormFieldList, FormFieldItem, FormFieldValue } from "./FormFieldList";
-import { FormSelect } from "./FormSelect";
+import { FormSelect, FormSelectById } from "./FormSelect";
 import { FormList } from "./FormList";
 import { NodeFieldList } from "./NodeFieldList";
 import { FormFieldSelect } from "./FormFieldSelect";
@@ -60,6 +60,7 @@ export default [
   FormFieldItem,
   FormFieldValue,
   FormSelect,
+  FormSelectById,
   FormList,
   NodeFieldList,
   FormFieldSelect,

@@ -19,27 +19,29 @@ import { useAppStore } from "@eimsnext/store";
 import { IFormItem, IFormSelectOptions, buildFormListItems } from "./type";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+
 const { t } = useI18n();
 
 defineOptions({
-  name: "FormSelect",
+  name: "FormSelectById",
 });
+
 const props = defineProps<{
-  modelValue: IFormItem;
+  modelValue: string;
   appId: string;
   options?: IFormSelectOptions;
 }>();
 
 const appStore = useAppStore();
 const formList = ref<IFormItem[]>([]);
-
-const value = ref(props.modelValue?.id || "");
+const value = ref(props.modelValue || "");
 
 const emit = defineEmits(["update:modelValue", "change"]);
+
 const onInput = (val: string) => {
-  let formtem = formList.value.find((x) => x.id == val)!;
-  emit("update:modelValue", formtem);
-  emit("change", formtem);
+  const formItem = formList.value.find((x) => x.id == val)!;
+  emit("update:modelValue", val);
+  emit("change", formItem);
 };
 
 watch(
@@ -50,8 +52,9 @@ watch(
         formList.value = buildFormListItems(app!, props.options);
       });
     }
-    if (newModel && newModel != oldModel) {
-      value.value = newModel.id || "";
+
+    if (newModel != oldModel) {
+      value.value = newModel || "";
     }
   },
   { immediate: true },

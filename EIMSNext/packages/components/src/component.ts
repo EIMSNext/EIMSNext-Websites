@@ -22,6 +22,7 @@ export * from "./FormFieldList";
 export * from "./FormFieldList/type";
 export * from "./FieldSelect";
 export * from "./FormSelect/type";
+export * from "./FormSelect";
 export * from "./NodeFieldList";
 export * from "./NodeFieldList/type";
 export * from "./FlowDesigner";
