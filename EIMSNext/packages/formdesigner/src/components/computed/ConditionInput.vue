@@ -1,19 +1,16 @@
 <template>
     <div class="_fd-cdi-input">
         <template v-if="type === 'cascader'">
-            <el-cascader size="default" :props="{checkStrictly: true, emitPath: false}" v-bind="props || {}"
-                         :options="options"
-                         v-model="value"
-                         @change="onInput"></el-cascader>
+            <el-cascader size="default" :props="{ checkStrictly: true, emitPath: false }" v-bind="props || {}"
+                :options="options" v-model="value" @change="onInput"></el-cascader>
         </template>
         <template v-else-if="type === 'number'">
-            <el-input-number size="default" v-bind="props || {}" v-model="value" @change="onInput"></el-input-number>
+            <el-input-number size="default" v-bind="props || {}" v-model="value" align="right"
+                @change="onInput"></el-input-number>
         </template>
         <template v-else-if="type === 'select'">
-            <el-select size="default"
-                       filterable
-                       allow-create
-                       default-first-option v-bind="props || {}" v-model="value" @change="onInput">
+            <el-select size="default" filterable allow-create default-first-option v-bind="props || {}" v-model="value"
+                @change="onInput">
                 <el-option v-for="opt in options" :label="opt.label" :value="opt.value" :key="opt.value"></el-option>
             </el-select>
         </template>
@@ -28,7 +25,7 @@
 </template>
 
 <script>
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'ConditionInput',
@@ -63,7 +60,7 @@ export default defineComponent({
 </script>
 
 <style>
-._fd-cdi-input > div {
+._fd-cdi-input>div {
     width: 100%;
 }
 </style>

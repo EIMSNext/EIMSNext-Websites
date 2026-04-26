@@ -1,49 +1,23 @@
 <template>
   <div class="cond-value">
     <div v-if="nodes && nodes.length > 0" class="value-type">
-      <el-select
-        size="default"
-        default-first-option
-        v-model="condValueType"
-        @change="onValueTypeChange"
-      >
-        <el-option
-          v-for="opt in condValueTypes"
-          :label="opt.label"
-          :value="opt.id"
-          :key="opt.id"
-        ></el-option>
+      <el-select size="default" default-first-option v-model="condValueType" @change="onValueTypeChange">
+        <el-option v-for="opt in condValueTypes" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
       </el-select>
     </div>
     <div class="value-value">
       <template v-if="nodes && condValueType == ConditionValueType.Field">
-        <NodeFieldList
-          v-model="condFieldValue"
-          :nodes="nodes"
-          :field-def="fieldDef"
-          :fieldBuildSetting="fieldBuildSetting"
-          @change="onValueChange"
-        >
+        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="fieldDef"
+          :fieldBuildSetting="fieldBuildSetting" @change="onValueChange">
         </NodeFieldList>
       </template>
       <template v-else>
         <template v-if="dataType == ConditionFieldType.Input">
           <template v-if="fieldDef?.field == SystemField.FlowStatus">
-            <el-select
-              size="default"
-              filterable
-              allow-create
-              default-first-option
-              v-model="value"
-              :multiple="true"
-              @change="onInput"
-            >
-              <el-option
-                v-for="opt in flowStatusArray()"
-                :label="t(opt.i18n)"
-                :value="opt.id"
-                :key="opt.id"
-              ></el-option>
+            <el-select size="default" filterable allow-create default-first-option v-model="value" :multiple="true"
+              @change="onInput">
+              <el-option v-for="opt in flowStatusArray()" :label="t(opt.i18n)" :value="opt.id"
+                :key="opt.id"></el-option>
             </el-select>
           </template>
           <template v-else>
@@ -51,139 +25,63 @@
           </template>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Number">
-          <el-input-number
-            size="default"
-            v-model="value"
-            @change="onInput"
-          ></el-input-number>
+          <el-input-number size="default" v-model="value" align="right" @change="onInput"></el-input-number>
         </template>
         <template v-else-if="dataType == ConditionFieldType.TimeStamp">
-          <el-date-picker
-            size="default"
-            v-model="value"
-            value-format="x"
-            :format="fieldDef?.format"
-            @change="onInput"
-          ></el-date-picker>
+          <el-date-picker size="default" v-model="value" value-format="x" :format="fieldDef?.format"
+            @change="onInput"></el-date-picker>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Radio">
-          <el-select
-            size="default"
-            filterable
-            allow-create
-            default-first-option
-            v-model="value"
-            @change="onInput"
-          >
-            <el-option
-              v-for="opt in toListItem(fieldDef?.options)"
-              :label="opt.label"
-              :value="opt.id"
-              :key="opt.id"
-            ></el-option>
+          <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.CheckBox">
-          <el-select
-            size="default"
-            multiple
-            filterable
-            allow-create
-            default-first-option
-            v-model="value"
-            @change="onInput"
-          >
-            <el-option
-              v-for="opt in toListItem(fieldDef?.options)"
-              :label="opt.label"
-              :value="opt.id"
-              :key="opt.id"
-            ></el-option>
+          <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
+            @change="onInput">
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select1">
-          <el-select
-            size="default"
-            filterable
-            allow-create
-            default-first-option
-            v-model="value"
-            @change="onInput"
-          >
-            <el-option
-              v-for="opt in toListItem(fieldDef?.options)"
-              :label="opt.label"
-              :value="opt.id"
-              :key="opt.id"
-            ></el-option>
+          <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select2">
-          <el-select
-            size="default"
-            multiple
-            filterable
-            allow-create
-            default-first-option
-            v-model="value"
-            @change="onInput"
-          >
-            <el-option
-              v-for="opt in toListItem(fieldDef?.options)"
-              :label="opt.label"
-              :value="opt.id"
-              :key="opt.id"
-            ></el-option>
+          <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
+            @change="onInput">
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Department1">
-          <selected-tags
-            :modelValue="value"
-            :editable="true"
-            :empty-text="t('comp.emptyDept')"
-            @editTag="selectDept(false)"
-          />
+          <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyDept')"
+            @editTag="selectDept(false)" />
         </template>
         <template v-else-if="dataType == ConditionFieldType.Department2">
-          <selected-tags
-            :modelValue="value"
-            :multiple="true"
-            :editable="true"
-            :empty-text="t('comp.emptyDept')"
-            @editTag="selectDept(true)"
-          />
+          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyDept')"
+            @editTag="selectDept(true)" />
         </template>
         <template v-else-if="dataType == ConditionFieldType.Employee1">
-          <selected-tags
-            :modelValue="value"
-            :editable="true"
-            :empty-text="t('comp.emptyEmp')"
-            @editTag="selectEmp(false)"
-          />
+          <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyEmp')"
+            @editTag="selectEmp(false)" />
         </template>
         <template v-else-if="dataType == ConditionFieldType.Employee2">
-          <selected-tags
-            :modelValue="value"
-            :multiple="true"
-            :editable="true"
-            :empty-text="t('comp.emptyEmp')"
-            @editTag="selectEmp(true)"
-          />
+          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyEmp')"
+            @editTag="selectEmp(true)" />
         </template>
         <template v-else>
           <el-input size="default" v-model="value" @blur="onInput"></el-input>
         </template>
       </template>
     </div>
-    <memberSelectDialog
-      v-model="showMemberDialog"
-      :tags="value ?? []"
-      :memberOptions="{
-        showTabs: memberShowTabs,
-        multiple: memberMultiple,
-      }"
-      @ok="memberSelected"
-    >
+    <memberSelectDialog v-model="showMemberDialog" :tags="value ?? []" :memberOptions="{
+      showTabs: memberShowTabs,
+      multiple: memberMultiple,
+    }" @ok="memberSelected">
     </memberSelectDialog>
   </div>
 </template>

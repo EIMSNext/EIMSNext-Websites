@@ -39,7 +39,7 @@
     ></MetaItemHeader>
     <div>
       <el-input-number
-        v-model="activeData.metadata.queryManyMeta!.take"
+        v-model="activeData.metadata.queryManyMeta!.take" align="right"
       ></el-input-number>
       {{ t("dataflow.records") }}
     </div>
