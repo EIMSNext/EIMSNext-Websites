@@ -41,7 +41,7 @@
         <span class="page-setup-summary">{{ pageSetupSummary }}</span>
       </div>
       <div class="right">
-        <el-button @click="openPageSetupDialog">打印模板设置</el-button>
+        <el-button>打印模板设置</el-button>
         <el-button :loading="previewing" :disabled="!designerReady" @click="preview">预览</el-button>
         <el-button :loading="saving" :disabled="!designerReady" @click="save">保存</el-button>
       </div>
@@ -144,6 +144,14 @@ type PrintPageSettings = {
   margins: PrintMargins;
 };
 
+type WorksheetPageSetup = {
+  paperSize: string;
+  topMargin: number;
+  rightMargin: number;
+  bottomMargin: number;
+  leftMargin: number;
+};
+
 const paperSizeOptions = [
   { label: "A3", value: "A3" },
   { label: "A4", value: "A4" },
@@ -166,6 +174,11 @@ const createDefaultPageSettings = (): PrintPageSettings => ({
 });
 
 const DEFAULT_SHEET_ID = "Sheet1";
+const PAGE_SETUP_MENU_ID = "eimsnext.print.page-setup";
+
+const mmToPoint = (millimeter: number) => Number((millimeter * 72 / 25.4).toFixed(4));
+
+const pointToMm = (point: number) => Number((point * 25.4 / 72).toFixed(2));
 
 const createDefaultWorkbookData = () => ({
   id: DEFAULT_SHEET_ID,
@@ -203,43 +216,55 @@ const normalizeMarginValue = (value: unknown, fallback: number) => {
   return value;
 };
 
+const normalizeDraftPageSettings = (value: PrintPageSettings): PrintPageSettings => {
+  const defaults = createDefaultPageSettings();
+  const paperSize = paperSizeOptions.some((option) => option.value === value.paperSize)
+    ? value.paperSize
+    : defaults.paperSize;
+
+  return {
+    paperSize,
+    margins: {
+      top: normalizeMarginValue(value.margins.top, defaults.margins.top),
+      right: normalizeMarginValue(value.margins.right, defaults.margins.right),
+      bottom: normalizeMarginValue(value.margins.bottom, defaults.margins.bottom),
+      left: normalizeMarginValue(value.margins.left, defaults.margins.left),
+    },
+  };
+};
+
 const normalizePageSettings = (value: unknown): PrintPageSettings => {
   const defaults = createDefaultPageSettings();
   if (!isRecord(value)) {
     return defaults;
   }
 
-  const margins = isRecord(value.margins)
-    ? value.margins
-    : value;
-  const rawPaperSize = [value.paperSize, value.pageSize, value.pageFormat].find((item) => typeof item === "string");
-  const paperSize = typeof rawPaperSize === "string" && paperSizeOptions.some((option) => option.value === rawPaperSize)
-    ? rawPaperSize
+  const paperSize = typeof value.paperSize === "string" && paperSizeOptions.some((option) => option.value === value.paperSize)
+    ? value.paperSize
     : defaults.paperSize;
+
+  const resolveMarginMm = (primaryKey: keyof WorksheetPageSetup, fallback: number) => {
+    const normalized = normalizeMarginValue(value[primaryKey], mmToPoint(fallback));
+    return pointToMm(normalized);
+  };
 
   return {
     paperSize,
     margins: {
-      top: normalizeMarginValue(margins.topMargin ?? margins.marginTop ?? margins.top, defaults.margins.top),
-      right: normalizeMarginValue(margins.rightMargin ?? margins.marginRight ?? margins.right, defaults.margins.right),
-      bottom: normalizeMarginValue(margins.bottomMargin ?? margins.marginBottom ?? margins.bottom, defaults.margins.bottom),
-      left: normalizeMarginValue(margins.leftMargin ?? margins.marginLeft ?? margins.left, defaults.margins.left),
+      top: resolveMarginMm("topMargin", defaults.margins.top),
+      right: resolveMarginMm("rightMargin", defaults.margins.right),
+      bottom: resolveMarginMm("bottomMargin", defaults.margins.bottom),
+      left: resolveMarginMm("leftMargin", defaults.margins.left),
     },
   };
 };
 
-const buildWorksheetPageSetup = (settings: PrintPageSettings) => ({
+const buildWorksheetPageSetup = (settings: PrintPageSettings): WorksheetPageSetup => ({
   paperSize: settings.paperSize,
-  pageSize: settings.paperSize,
-  pageFormat: settings.paperSize,
-  topMargin: settings.margins.top,
-  rightMargin: settings.margins.right,
-  bottomMargin: settings.margins.bottom,
-  leftMargin: settings.margins.left,
-  marginTop: settings.margins.top,
-  marginRight: settings.margins.right,
-  marginBottom: settings.margins.bottom,
-  marginLeft: settings.margins.left,
+  topMargin: mmToPoint(settings.margins.top),
+  rightMargin: mmToPoint(settings.margins.right),
+  bottomMargin: mmToPoint(settings.margins.bottom),
+  leftMargin: mmToPoint(settings.margins.left),
 });
 
 const resolveActiveSheet = (workbookData: Record<string, unknown>) => {
@@ -327,9 +352,17 @@ const openPageSetupDialog = () => {
 };
 
 const applyPageSettings = () => {
-  pageSettings.value = normalizePageSettings(pageSettingsDraft);
+  pageSettings.value = normalizeDraftPageSettings(pageSettingsDraft);
   syncPageSettingsDraft();
   showPageSetupDialog.value = false;
+};
+
+const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: any) => {
+  runtimeApi.createMenu({
+    id: PAGE_SETUP_MENU_ID,
+    title: "页面设置",
+    action: openPageSetupDialog,
+  }).appendTo([modules.ui.RibbonPosition.START, modules.ui.RibbonStartGroup.OTHERS]);
 };
 
 const disposeDesigner = () => {
@@ -357,7 +390,7 @@ const parseTemplateContent = () => {
 
   const workbookData = { ...parsed };
   const activeSheet = resolveActiveSheet(workbookData);
-  const rawSettings = activeSheet?.pageSetup ?? activeSheet?.printSetup;
+  const rawSettings = activeSheet?.pageSetup;
   pageSettings.value = normalizePageSettings(rawSettings);
   syncPageSettingsDraft();
 
@@ -547,6 +580,7 @@ const initSheet = async (data: Record<string, unknown>) => {
   univer.registerPlugin(modules.sheetsDrawingUi.UniverSheetsDrawingUIPlugin);
 
   const runtimeApi = modules.coreFacade.FUniver.newAPI(univer);
+  registerPageSetupToolbarMenu(modules, runtimeApi);
   const runtimeWorkbook = runtimeApi.createWorkbook(data);
 
   if (!runtimeApi.Event?.DragOver || !runtimeApi.Event?.Drop) {
@@ -823,6 +857,18 @@ onBeforeUnmount(() => {
 </style>
 
 <style lang="scss">
+.flow-designer {
+  .univer-container {
+    [data-u-comp="defined-name"] {
+      display: none;
+    }
+
+    [data-u-comp="formula-bar"] > div:first-child {
+      display: none;
+    }
+  }
+}
+
 .print-design-container .field-container {
   .el-tabs__nav.is-top {
     float: none;
