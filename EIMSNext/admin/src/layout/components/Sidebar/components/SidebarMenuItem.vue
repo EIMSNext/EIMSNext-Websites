@@ -1,9 +1,9 @@
 <template>
   <template v-if="currentMenuType === FormType.Group">
-    <el-sub-menu :index="groupIndex" teleported>
+    <el-sub-menu :index="groupIndex" teleported ref="subMenuRef" v-model:expanded="expandedKeys">
       <template #title>
         <div class="menu-title-row group-drop-target" @dragover.prevent @drop.stop.prevent="handleGroupDrop">
-          <SidebarMenuItemTitle :icon="getFormIcon(item)" :title="item.title" :iconColor="getAppIconColor(item)" />
+          <SidebarMenuItemTitle :icon="groupIcon" :title="item.title" :iconColor="getAppIconColor(item)" />
           <span v-if="canManage" class="more-wrapper" @click.stop>
             <el-dropdown placement="bottom-start" size="large" trigger="click">
               <et-icon icon="el-More" @click.prevent="" />
@@ -25,14 +25,14 @@
 
       <Draggable v-if="item.subMenus" :list="item.subMenus" item-key="menuId" tag="div" data-menu-type="submenu"
         :group="dragGroup" filter=".more-wrapper, .more-wrapper *" :prevent-on-filter="false" :move="handleSubMenuMove"
-        ghost-class="menu-drag-ghost" :animation="180" @start="handleSubMenuDragStart" @end="handleDragEnd" @change="handleSubMenuChange">
+        ghost-class="menu-drag-ghost" :animation="180" @start="handleSubMenuDragStart" @end="handleDragEnd"
+        @change="handleSubMenuChange">
         <template #item="{ element }">
           <div class="menu-drag-item">
             <SidebarMenuItem :item="element" :app-id="appId" @editForm="emit('editForm', $event)"
               @editMenu="emit('editMenu', $event)" @editGroup="emit('editGroup', $event)"
               @deleteMenu="emit('deleteMenu', $event)" :on-group-drop="onGroupDrop" :can-drop-to-group="canDropToGroup"
-              :on-drag-start="onDragStart"
-              :on-drag-end="onDragEnd" @menusChanged="emit('menusChanged')" />
+              :on-drag-start="onDragStart" :on-drag-end="onDragEnd" @menusChanged="emit('menusChanged')" />
           </div>
         </template>
       </Draggable>
@@ -100,6 +100,9 @@ const canManage = computed(
 );
 const dragGroup = { name: "app-menu", pull: true, put: true };
 const groupIndex = computed(() => `group-${props.item.menuId}`);
+const subMenuRef = ref();
+const expandedKeys = ref<string[]>([]);
+const groupIcon = computed(() => expandedKeys.value.includes(groupIndex.value) ? "el-folder-open" : "el-folder");
 const getMenuType = (menuType: FormType | number | undefined): FormType => {
   if (menuType === undefined) return FormType.Form;
   if (typeof menuType === 'string') return menuType as FormType;
