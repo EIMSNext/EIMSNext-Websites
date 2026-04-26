@@ -10,6 +10,13 @@ import {
 import router from "@/router";
 import { AppMenu, FormType } from "@eimsnext/models";
 import { systemService } from "@eimsnext/services";
+
+const getMenuType = (menuType: FormType | number | undefined): FormType => {
+  if (menuType === undefined) return FormType.Form;
+  if (typeof menuType === 'string') return menuType as FormType;
+  return String(menuType) as FormType;
+};
+
 const modules = import.meta.glob("../../views/**/**.vue");
 const AppLayout = () => import("@/layout/applayout/index.vue");
 
@@ -51,7 +58,8 @@ export const usePermissionStore = defineStore("permission", () => {
   const filterAppMenus = (menus: AppMenu[], perms?: IAppMenuPerm[]): AppMenu[] => {
     return menus
       .map((menu) => {
-        if (menu.menuType === FormType.Group) {
+        const menuType = getMenuType(menu.menuType);
+        if (menuType === FormType.Group) {
           const subMenus = filterAppMenus(menu.subMenus || [], perms);
         return {
           ...menu,
@@ -62,7 +70,8 @@ export const usePermissionStore = defineStore("permission", () => {
         return { ...menu };
       })
       .filter((menu) => {
-        if (menu.menuType === FormType.Group) {
+        const menuType = getMenuType(menu.menuType);
+        if (menuType === FormType.Group) {
           return userStore.isAppAdmin() || (menu.subMenus?.length || 0) > 0;
         }
 

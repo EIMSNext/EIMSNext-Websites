@@ -1,5 +1,5 @@
 <template>
-  <template v-if="item.menuType === FormType.Group">
+  <template v-if="currentMenuType === FormType.Group">
     <el-sub-menu :index="groupIndex" teleported>
       <template #title>
         <div class="menu-title-row">
@@ -23,30 +23,14 @@
         </div>
       </template>
 
-      <Draggable
-        :list="item.subMenus"
-        item-key="menuId"
-        tag="div"
-        :data-menu-type="item.menuType"
-        :group="dragGroup"
-        filter=".more-wrapper, .more-wrapper *"
-        :prevent-on-filter="false"
-        ghost-class="menu-drag-ghost"
-        :animation="180"
-        :move="onMove"
-        @change="emit('menusChanged')"
-      >
+      <Draggable v-if="item.subMenus" :list="item.subMenus" item-key="menuId" tag="div" data-menu-type="submenu"
+        :group="dragGroup" filter=".more-wrapper, .more-wrapper *" :prevent-on-filter="false"
+        ghost-class="menu-drag-ghost" :animation="180" @change="handleSubMenuChange">
         <template #item="{ element }">
           <div class="menu-drag-item">
-            <SidebarMenuItem
-              :item="element"
-              :app-id="appId"
-              @editForm="emit('editForm', $event)"
-              @editMenu="emit('editMenu', $event)"
-              @editGroup="emit('editGroup', $event)"
-              @deleteMenu="emit('deleteMenu', $event)"
-              @menusChanged="emit('menusChanged')"
-            />
+            <SidebarMenuItem :item="element" :app-id="appId" @editForm="emit('editForm', $event)"
+              @editMenu="emit('editMenu', $event)" @editGroup="emit('editGroup', $event)"
+              @deleteMenu="emit('deleteMenu', $event)" @menusChanged="emit('menusChanged')" />
           </div>
         </template>
       </Draggable>
@@ -61,7 +45,7 @@
           <et-icon icon="el-More" @click.prevent="" />
           <template #dropdown>
             <el-dropdown-menu class="sidebar-menu-dropdown">
-              <el-dropdown-item @click="editForm(item.menuId, item.menuType)">
+              <el-dropdown-item @click="editForm(item.menuId, currentMenuType)">
                 {{ t("common.edit") }}
               </el-dropdown-item>
               <el-dropdown-item @click="emit('editMenu', item)">
@@ -110,9 +94,16 @@ const canManage = computed(
 );
 const dragGroup = { name: "app-menu", pull: true, put: true };
 const groupIndex = computed(() => `group-${props.item.menuId}`);
+const getMenuType = (menuType: FormType | number | undefined): FormType => {
+  if (menuType === undefined) return FormType.Form;
+  if (typeof menuType === 'string') return menuType as FormType;
+  return String(menuType) as FormType;
+};
+
+const currentMenuType = computed(() => getMenuType(props.item.menuType));
 const routeTo = computed(() => ({
   path:
-    props.item.menuType === FormType.Dashboard
+    currentMenuType.value === FormType.Dashboard
       ? `/app/${props.appId}/dash/${props.item.menuId}`
       : `/app/${props.appId}/form/${props.item.menuId}`,
 }));
@@ -123,13 +114,18 @@ function editForm(formId?: string, type?: FormType) {
   }
 }
 
+function handleSubMenuChange() {
+  emit("menusChanged");
+}
+
 async function deleteGroup(menu: AppMenu) {
-  if (menu.menuType === FormType.Group && menu.subMenus && menu.subMenus.length > 0) {
+  const menuType = getMenuType(menu.menuType);
+  if (menuType === FormType.Group && menu.subMenus && menu.subMenus.length > 0) {
     ElMessage.warning("当前分组下存在子菜单，不能删除");
     return;
   }
 
-  const message = menu.menuType === FormType.Group ? "分组删除后不可恢复" : t("admin.deleteFormConfirm_Content");
+  const message = menuType === FormType.Group ? "分组删除后不可恢复" : t("admin.deleteFormConfirm_Content");
   const confirm = await EtConfirm.showDialog(
     message,
     {
@@ -143,17 +139,13 @@ async function deleteGroup(menu: AppMenu) {
   }
 }
 
-function onMove(evt: any) {
-  const dragged = evt.draggedContext?.element as AppMenu | undefined;
-  if (!dragged) {
-    return true;
-  }
-
-  return dragged.menuType !== FormType.Group;
-}
 </script>
 
 <style lang="scss" scoped>
+:deep(.el-sub-menu__icon-arrow) {
+  display: none !important;
+}
+
 .menu-title-row {
   width: 100%;
   display: flex;

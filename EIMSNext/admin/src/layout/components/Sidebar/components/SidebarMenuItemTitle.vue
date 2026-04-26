@@ -33,5 +33,11 @@ const isSidebarOpened = computed(() => systemStore.sidebar.opened);
 <style lang="scss" scoped>
 .sub-el-icon {
   color: currentcolor;
+  flex-shrink: 0;
+}
+
+.sub-el-icon :deep(.el-icon) {
+  width: 14px;
+  height: 14px;
 }
 </style>

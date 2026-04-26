@@ -132,6 +132,13 @@ import { appService, dashboardDefService, formDefService } from "@eimsnext/servi
 import { useI18n } from "vue-i18n";
 import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
 import { ElMessage } from "element-plus";
+
+const getMenuType = (menuType: FormType | number | undefined): FormType => {
+  if (menuType === undefined) return FormType.Form;
+  if (typeof menuType === 'string') return menuType as FormType;
+  return String(menuType) as FormType;
+};
+
 const { t } = useI18n();
 
 const newForm = ref<FormDef>();
@@ -299,13 +306,14 @@ const saveMenus = async () => {
 };
 
 const deleteMenu = async (menu: AppMenu) => {
-  if (menu.menuType === FormType.Form) {
+  const menuType = getMenuType(menu.menuType);
+  if (menuType === FormType.Form) {
     formStore.remove(menu.menuId);
     contextStore.setAppChanged();
     return;
   }
 
-  if (menu.menuType === FormType.Dashboard) {
+  if (menuType === FormType.Dashboard) {
     await dashboardDefService.delete(menu.menuId);
     contextStore.setAppChanged();
     return;

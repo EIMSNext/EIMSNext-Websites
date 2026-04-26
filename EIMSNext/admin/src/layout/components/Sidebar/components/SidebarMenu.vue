@@ -22,7 +22,6 @@
       ghost-class="menu-drag-ghost"
       :animation="180"
       @change="emit('menusChanged')"
-      :move="onMove"
     >
       <template #item="{ element }">
         <div class="menu-drag-item">
@@ -61,24 +60,6 @@ const currentRoute = useRoute();
 const systemStore = useSystemStore();
 const dragGroup = { name: "app-menu", pull: true, put: true };
 
-function onMove(evt: any) {
-  const dragged = evt.draggedContext?.element as AppMenu | undefined;
-  const target = evt.to?.dataset?.menuType;
-  const isTargetGroup = target === FormType.Group;
-  if (!dragged) {
-    return true;
-  }
-
-  if (dragged.menuType === FormType.Group) {
-    return !isTargetGroup;
-  }
-
-  return true;
-}
-
-function editForm(formId: string, type: FormType) {
-  emit("editForm", formId, type);
-}
 </script>
 
 <style lang="scss" scoped>
