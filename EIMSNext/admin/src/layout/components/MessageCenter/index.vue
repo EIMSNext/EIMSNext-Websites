@@ -17,7 +17,7 @@
               <div class="message-filter no-border"></div>
               <div class="read-operation-btn">
                 <el-checkbox v-model="unreadOnly">只看未读</el-checkbox>
-                <el-link class="link-text read-link" :underline="false" @click="handleReadAll">
+                <el-link class="link-text read-link" underline="never" @click="handleReadAll">
                   全部转为已读
                 </el-link>
               </div>

@@ -41,9 +41,13 @@ function back() {
   padding: var(--et-size-100);
 
   .pan-back-btn {
-    color: var(--et-text-on-primary);
     background: var(--et-color-success);
     border: none !important;
+    color: var(--et-text-on-primary);
+
+    &:hover {
+      background: var(--et-color-success-light-3);
+    }
   }
 
   .pan-gif {

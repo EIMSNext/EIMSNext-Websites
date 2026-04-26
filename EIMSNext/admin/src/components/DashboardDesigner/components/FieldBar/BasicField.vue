@@ -3,6 +3,7 @@
     <el-popover
       v-model:visible="showTitleInput"
       :virtual-ref="triggerRef"
+      virtual-triggering
       trigger="contextmenu"
       placement="bottom-start"
       :offset="5"

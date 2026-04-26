@@ -7,11 +7,8 @@ import { resolve } from "path";
 export default defineConfig({
   build: {
     target: "modules",
-    //打包文件目录
     outDir: "dist",
-    //压缩
-    minify: true,
-    //css分离
+    minify: "esbuild",
     cssCodeSplit: true,
     emptyOutDir: true,
     sourcemap: false,
@@ -20,13 +17,14 @@ export default defineConfig({
       output: {
         compact: true,
         exports: "named",
+        entryFileNames: "index.js",
       },
     },
     lib: {
       entry: "src/index.ts",
       name: "locale",
-      formats: ["es", "umd"],
-      fileName: (format) => `index.${format}.js`,
+      formats: ["es"],
+      fileName: () => "index.js",
     },
   },
   esbuild: {

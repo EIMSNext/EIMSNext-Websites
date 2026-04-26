@@ -36,7 +36,7 @@ export default {
     //@ts-expect-error
     if (window.appSetting) appSetting.merge(window.appSetting);
     const httpConfig = initHttpConfig();
-    http.setConfig(httpConfig);
+    http.setConfig(httpConfig, httpConfig);
     app.provide("http", http);
   },
 };

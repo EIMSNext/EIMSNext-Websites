@@ -42,6 +42,7 @@
     <el-popover
       :visible="showFilter"
       :virtual-ref="filterBtnRef"
+      virtual-triggering
       :show-arrow="false"
       :offset="0"
       placement="bottom-end"
@@ -60,6 +61,7 @@
     <el-popover
       :visible="showSort"
       :virtual-ref="sortBtnRef"
+      virtual-triggering
       :show-arrow="false"
       :offset="0"
       placement="bottom-end"

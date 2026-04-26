@@ -17,7 +17,7 @@ defineOptions({
   name: "FormDataView",
 });
 
-import { computed, onBeforeMount, ref, watch } from "vue";
+import { computed, defineAsyncComponent, onBeforeMount, ref, watch } from "vue";
 import {
   FormData,
   FormDataRequest,
@@ -35,10 +35,11 @@ import { MessageIcon, ToolbarItem } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 import { hasDataPerm } from "@/utils/common";
 import FormPrintDiv from "@/components/WebPrint/FormPrintDiv.vue";
-import PdfPreview from "@/components/WebPrint/PdfPreview.vue";
 import { getPrintConfig, IPrintData } from "@/components/WebPrint/type";
 import buildQuery from "odata-query";
 const { t } = useI18n();
+
+const PdfPreview = defineAsyncComponent(() => import("@/components/WebPrint/PdfPreview.vue"));
 
 const props = withDefaults(
   defineProps<{

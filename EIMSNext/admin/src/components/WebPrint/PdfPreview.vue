@@ -139,9 +139,11 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
-import VuePdfEmbed from "vue-pdf-embed";
+import VuePdfEmbed, { GlobalWorkerOptions } from "vue-pdf-embed/dist/index.essential.mjs";
 import "vue-pdf-embed/dist/styles/annotationLayer.css";
 import "vue-pdf-embed/dist/styles/textLayer.css";
+
+GlobalWorkerOptions.workerSrc = new URL(/* @vite-ignore */ "pdfjs-dist/legacy/build/pdf.worker.mjs", import.meta.url).toString();
 
 defineOptions({
   name: "PdfPreview",
@@ -500,8 +502,8 @@ watch(
 }
 
 .pdf-state-panel.is-loading {
-  background: #ffffff;
-  color: #303133;
+  background: var(--et-bg-container);
+  color: var(--et-text-primary);
 }
 
 .pdf-state-panel.is-error {

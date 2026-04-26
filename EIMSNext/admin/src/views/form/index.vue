@@ -39,15 +39,15 @@
           @ok="handleViewOk"></FormDataView>
       </div>
     </et-dialog>
-    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+    <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataFilter :model-value="condList" :formId="formId" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
     </el-popover>
-    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+    <el-popover :visible="showSort" :virtual-ref="sortBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataSort :model-value="sortList" :formId="formId" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
-    <el-popover :visible="showField" :virtual-ref="fieldBtnRef" :show-arrow="false" :offset="0" placement="bottom-end"
+    <el-popover :visible="showField" :virtual-ref="fieldBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
@@ -525,6 +525,22 @@ const formatter = (row: any, column: any, cellValue: any) => {
       return cellValue.label;
     }
     if (Array.isArray(cellValue)) {
+      // 处理嵌套数组格式 [[val1], [val2], ...]
+      if (cellValue.length > 0 && Array.isArray(cellValue[0])) {
+        return cellValue
+          .map((item) => {
+            if (Array.isArray(item) && item.length > 0) {
+              const first = item[0];
+              if (typeof first === "object" && first !== null) {
+                return first.label || first.name || String(first);
+              }
+              return String(first ?? "");
+            }
+            return String(item ?? "");
+          })
+          .filter(Boolean)
+          .join(", ");
+      }
       if (cellValue.length > 0 && typeof cellValue[0] === "object" && cellValue[0] !== null) {
         return cellValue
           .map((item) => item.label || item.name || "")
@@ -698,6 +714,15 @@ const processData = () => {
           const value = dataItem[key];
           if (value && typeof value === "object" && "label" in value) {
             dataItem[key] = value.label;
+          }
+          // 处理嵌套数组格式 [[val1], [val2], ...] -> [val1, val2, ...]
+          if (Array.isArray(value) && value.length > 0 && Array.isArray(value[0])) {
+            dataItem[key] = value.map(item => {
+              if (Array.isArray(item) && item.length > 0) {
+                return item[0];
+              }
+              return item;
+            });
           }
         }
       }

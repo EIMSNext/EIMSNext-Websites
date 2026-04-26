@@ -1,6 +1,6 @@
 <template>
   <div class="login">
-    <el-link :underline="false" class="brand-logo" target="_self" href="https://www.eimsnext.com">
+    <el-link underline="never" class="brand-logo" target="_self" href="https://www.eimsnext.com">
       <img class="logo" src="@/assets/logo2.png" alt=""></img>
     </el-link>
     <div class="banner">
@@ -17,7 +17,7 @@
           <div class="account-login">
             <div class="login-title">{{ t("login.loginTitle") }}</div>
             <!-- <div class="login-register"><span>没有账号？</span>
-              <el-link type="primary" :underline="false" href="/register" target="_self">
+              <el-link type="primary" underline="never" href="/register" target="_self">
                 免费注册
               </el-link>
             </div> -->
@@ -39,7 +39,7 @@
                     {{ t("login.rememberMe") }}
                   </el-checkbox>
 
-                  <el-link type="primary" :underline="false" class="forget-password" href="/forget-password"
+                  <el-link type="primary" underline="never" class="forget-password" href="/forget-password"
                     target="_self">
                     {{ t("login.forgetPassword") }}
                   </el-link>

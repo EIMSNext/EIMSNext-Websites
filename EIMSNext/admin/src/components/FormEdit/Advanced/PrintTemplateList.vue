@@ -14,7 +14,7 @@
       <el-input v-model="selectedPrint!.name" class="title-editor" />
     </template>
 
-    <PdfPrintDesigner :form-def="formDef" :print-def="selectedPrint!" />
+    <component :is="PdfPrintDesigner" :form-def="formDef" :print-def="selectedPrint!" />
   </EtDrawer>
   <AdvanceLayout title="打印模板" desc="打印表单时将按照使用中的模板格式打印">
     <div class="flow-container">
@@ -49,11 +49,13 @@
 </template>
 
 <script setup lang="ts">
-import PdfPrintDesigner from "@/components/PrintDesigner/PdfPrintDesigner.vue";
+import { defineAsyncComponent } from "vue";
 import { FormDef, PrintTemplate, PrintTemplateType } from "@eimsnext/models";
 import { MessageIcon } from "@eimsnext/components";
 import { printTemplateService } from "@eimsnext/services";
 import buildQuery from "odata-query";
+
+const PdfPrintDesigner = defineAsyncComponent(() => import("@/components/PrintDesigner/PdfPrintDesigner.vue"));
 
 defineOptions({
   name: "PrintTemplateList",

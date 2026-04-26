@@ -2,6 +2,7 @@
   <el-popover
     :visible="showFilter"
     :virtual-ref="filterBtnRef"
+    virtual-triggering
     :show-arrow="false"
     :offset="5"
     placement="bottom-end"

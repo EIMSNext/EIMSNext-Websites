@@ -1,3 +1,9 @@
+
+.fc-form-item .el-input-number,.fc-form-item .el-input,.fc-form-item .el-select,.fc-form-item .et-deparment1,.fc-form-item .et-employee1 {
+  width: 100%;
+  max-width: 360px;
+}
+
 .form-create .form-create .el-form-item {
   margin-bottom: 22px;
 }

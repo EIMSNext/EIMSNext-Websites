@@ -54,3 +54,32 @@ export interface AppMenu {
   /// </summary>
   subMenus?: AppMenu[];
 }
+
+export interface EditAppMenuRequest {
+  appId: string;
+  menuId: string;
+  name: string;
+  icon?: string;
+  iconColor?: string;
+}
+
+export interface CreateAppGroupRequest {
+  appId: string;
+  name: string;
+}
+
+export interface EditAppGroupRequest {
+  appId: string;
+  menuId: string;
+  name: string;
+}
+
+export interface DeleteAppGroupRequest {
+  appId: string;
+  menuId: string;
+}
+
+export interface SaveAppMenusRequest {
+  appId: string;
+  appMenus: AppMenu[];
+}

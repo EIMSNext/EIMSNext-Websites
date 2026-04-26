@@ -52,7 +52,13 @@ export function getAppIconColor(menu?: any) {
 export function getFormIcon(form?: AppMenu) {
   let icon = "icon-formdefault";
   if (form) {
-    switch (form.menuType) {
+    const menuType = (() => {
+      if (form.menuType === undefined) return FormType.Form;
+      if (typeof form.menuType === 'string') return form.menuType as FormType;
+      return String(form.menuType) as FormType;
+    })();
+    
+    switch (menuType) {
       case FormType.Group: {
         icon = "el-folder";
         break;

@@ -80,11 +80,17 @@ async function close() {
 
     .back-btn {
       align-items: center;
-      display: flex;
-      position: relative;
-      padding: var(--et-space-0);
+      background: transparent;
       border: none;
       color: var(--et-text-primary);
+      display: flex;
+      padding: var(--et-space-0);
+
+      &.el-button:focus,
+      &.el-button:hover {
+        background: var(--et-bg-hover);
+        color: var(--et-text-primary);
+      }
 
       .back-icon {
         cursor: pointer;

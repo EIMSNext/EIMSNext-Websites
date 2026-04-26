@@ -59,9 +59,27 @@
       .el-button {
         margin: var(--et-space-0);
         color: var(--et-text-primary);
+        background-color: var(--et-bg-container);
+        border-color: var(--et-border-color);
+
+        &:hover,
+        &:focus-visible {
+          color: var(--et-text-primary) !important;
+          background-color: var(--et-bg-hover) !important;
+          border-color: var(--et-color-primary) !important;
+        }
 
         &.el-button--primary {
           color: var(--et-text-on-primary) !important;
+          background-color: var(--et-color-primary);
+          border-color: var(--et-color-primary);
+
+          &:hover,
+          &:focus-visible {
+            color: var(--et-text-on-primary) !important;
+            background-color: var(--et-color-primary-hover);
+            border-color: var(--et-color-primary-hover);
+          }
         }
       }
     }
@@ -110,9 +128,26 @@
         width: auto;
         border-color: var(--et-border-color);
         color: var(--et-text-primary);
+        background-color: var(--et-bg-container);
+
+        &:hover,
+        &:focus-visible {
+          color: var(--et-text-primary) !important;
+          background-color: var(--et-bg-hover) !important;
+          border-color: var(--et-color-primary) !important;
+        }
 
         &.el-button--primary {
           color: var(--et-text-on-primary) !important;
+          background-color: var(--et-color-primary);
+          border-color: var(--et-color-primary);
+
+          &:hover,
+          &:focus-visible {
+            color: var(--et-text-on-primary) !important;
+            background-color: var(--et-color-primary-hover);
+            border-color: var(--et-color-primary-hover);
+          }
         }
       }
     }

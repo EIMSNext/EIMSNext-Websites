@@ -8,10 +8,15 @@ import {
   useUserStoreHook,
 } from "@eimsnext/store";
 import router from "@/router";
-import { getAppIcon, getFormIcon, getAppIconColor } from "@/utils/common";
+import { AppMenu, FormType } from "@eimsnext/models";
+import { systemService } from "@eimsnext/services";
 
-import { AppMenu, CurrentUser, FormDef, FormType, UserType } from "@eimsnext/models";
-import { formDefService, systemService } from "@eimsnext/services";
+const getMenuType = (menuType: FormType | number | undefined): FormType => {
+  if (menuType === undefined) return FormType.Form;
+  if (typeof menuType === 'string') return menuType as FormType;
+  return String(menuType) as FormType;
+};
+
 const modules = import.meta.glob("../../views/**/**.vue");
 const AppLayout = () => import("@/layout/applayout/index.vue");
 
@@ -24,7 +29,7 @@ export const usePermissionStore = defineStore("permission", () => {
   // 所有路由，包括静态和动态路由
   const routes = ref<RouteRecordRaw[]>([]);
   // 表单动态菜单
-  const appMenus = ref<RouteRecordRaw[]>([]);
+  const appMenus = ref<AppMenu[]>([]);
   // 路由是否已加载
   const isRoutesLoaded = ref(false);
 
@@ -39,7 +44,6 @@ export const usePermissionStore = defineStore("permission", () => {
 
   const generateAppMenus = async () => {
     appMenus.value = [];
-    let menus: RouteRecordRaw[] = [];
     if (appId.value) {
       let app = await appStore.get(appId.value);
       if (app) {
@@ -47,61 +51,32 @@ export const usePermissionStore = defineStore("permission", () => {
         if (!userStore.isAppAdmin())
           appMenuPerms = await systemService.getAppMenuPerms(appId.value);
 
-        app.appMenus.forEach((x: AppMenu) => {
-          generateAppMenu(appId.value, x, menus, appMenuPerms);
-        });
-
-        appMenus.value = menus;
+        appMenus.value = filterAppMenus(app.appMenus, appMenuPerms);
       }
     }
   };
-  const generateAppMenu = (
-    appId: string,
-    x: AppMenu,
-    menus: RouteRecordRaw[],
-    perms?: IAppMenuPerm[]
-  ) => {
-    let formRoute: RouteRecordRaw;
-
-    if (x.menuType != FormType.Group) {
-      if (hasMenuPerm(x.menuId, perms)) {
-        const ftype = x.menuType == FormType.Dashboard ? "dash" : "form";
-        formRoute = {
-          path: `/app/${appId}/${ftype}/${x.menuId}`,
-          redirect: `/app/${appId}/${ftype}/${x.menuId}`,
-          meta: {
-            id: x.menuId,
-            type: x.menuType,
-            title: x.title,
-            icon: getFormIcon(x),
-            iconColor: getAppIconColor(x),
-            isGroup: false,
-          },
+  const filterAppMenus = (menus: AppMenu[], perms?: IAppMenuPerm[]): AppMenu[] => {
+    return menus
+      .map((menu) => {
+        const menuType = getMenuType(menu.menuType);
+        if (menuType === FormType.Group) {
+          const subMenus = filterAppMenus(menu.subMenus || [], perms);
+        return {
+          ...menu,
+          subMenus,
         };
-        menus.push(formRoute);
       }
-    } else {
-      if (x.menuType == FormType.Group && x.subMenus && x.subMenus.length > 0) {
-        var subMenus = x.subMenus.filter((x) => hasMenuPerm(x.menuId, perms));
-        if (subMenus.length > 0) {
-          formRoute = {
-            path: `#`,
-            redirect: `#`,
-            meta: {
-              id: x.menuId,
-              type: x.menuType,
-              title: x.title,
-              icon: getFormIcon(x),
-              iconColor: getAppIconColor(x),
-              isGroup: true,
-              children: [],
-            },
-          };
-          menus.push(formRoute);
-          subMenus.forEach((s: AppMenu) => generateAppMenu(appId, s, formRoute.children!, perms));
+
+        return { ...menu };
+      })
+      .filter((menu) => {
+        const menuType = getMenuType(menu.menuType);
+        if (menuType === FormType.Group) {
+          return userStore.isAppAdmin() || (menu.subMenus?.length || 0) > 0;
         }
-      }
-    }
+
+        return hasMenuPerm(menu.menuId, perms);
+      });
   };
   const hasMenuPerm = (menuId: string, menuPerms?: IAppMenuPerm[]) => {
     if (userStore.isAppAdmin()) return true;

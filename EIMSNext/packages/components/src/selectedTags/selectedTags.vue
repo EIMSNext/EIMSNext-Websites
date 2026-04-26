@@ -4,9 +4,9 @@
     :class="{ clickable: editable }"
     @click.stop="editTag"
   >
-    <template v-if="modelValue.length > 0">
+    <template v-if="tagsRef.length > 0">
       <el-tag
-        v-for="tag in modelValue.filter((x) => x.type != DataItemType.Unknown)"
+        v-for="tag in tagsRef.filter((x) => x.type != DataItemType.Unknown)"
         :key="tag.id"
         :closable="closable"
         :class="{ 'error-tag': tag.error }"
@@ -41,7 +41,7 @@
 </template>
 <script lang="ts" setup>
 import "./style/index.scss";
-import { toRef } from "vue";
+import { computed } from "vue";
 import { ISelectedTag } from "./type";
 import { useLocale } from "element-plus";
 import { DataItemType } from "@/common";
@@ -64,7 +64,9 @@ const props = withDefaults(
   },
 );
 
-const tagsRef = toRef(props.modelValue ?? []);
+const tagsRef = computed<ISelectedTag[]>(() =>
+  Array.isArray(props.modelValue) ? props.modelValue : [],
+);
 const getTagIcon = (tag: ISelectedTag) => {
   let icon = tag.icon;
   if (!icon) {
@@ -98,10 +100,10 @@ const emit = defineEmits([
   "tagClick",
 ]);
 const removeTag = (tag: ISelectedTag) => {
-  let index = tagsRef.value.indexOf(tag);
-  tagsRef.value.splice(index, 1);
-
-  emit("update:modelValue", tagsRef.value);
+  emit(
+    "update:modelValue",
+    tagsRef.value.filter((item) => item !== tag),
+  );
   emit("tagRemoved", tag);
 };
 const editTag = () => {

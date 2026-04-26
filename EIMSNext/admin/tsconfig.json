@@ -2,11 +2,10 @@
   "compilerOptions": {
     "target": "ES2017",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "lib": ["esnext", "dom"],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     // 严格性和类型检查相关配置

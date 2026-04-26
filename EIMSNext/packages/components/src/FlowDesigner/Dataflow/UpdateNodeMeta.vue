@@ -159,6 +159,7 @@ import {
   IFieldLimit,
   INodeForm,
 } from "@/NodeFieldList/type";
+import FormSelect from "@/FormSelect/FormSelect.vue";
 import { IFormItem } from "@/FormSelect/type";
 import { IFormFieldDef, splitSubField } from "@/FieldSelect/type";
 import { ConfirmResult, EtConfirm } from "@/dialog/EtConfirm";

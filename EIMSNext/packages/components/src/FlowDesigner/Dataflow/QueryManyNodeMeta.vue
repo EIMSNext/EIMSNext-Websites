@@ -56,7 +56,7 @@ import {
 import { uniqueId } from "@eimsnext/utils";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
-
+import FormSelect from "@/FormSelect/FormSelect.vue";
 import { useLocale } from "element-plus";
 import { IConditionList } from "@/ConditionList/type";
 import { IFieldSortList } from "@/FieldSortList/type";

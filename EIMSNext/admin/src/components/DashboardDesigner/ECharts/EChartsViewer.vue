@@ -3,6 +3,7 @@
     <el-popover
       :visible="showSort"
       :virtual-ref="sortRef"
+      virtual-triggering
       :show-arrow="false"
       :offset="0"
       placement="bottom-end"
