@@ -1,16 +1,6 @@
 <template>
-  <el-select
-    v-model="value"
-    size="default"
-    :placeholder="t('dataflow.selectForm')"
-    @change="onInput"
-  >
-    <el-option
-      v-for="item in formList"
-      :key="item.id"
-      :label="item.label"
-      :value="item.id"
-    />
+  <el-select v-model="value" size="default" :placeholder="t('dataflow.selectForm')" @change="onInput">
+    <el-option v-for="item in formList" :key="item.id" :label="item.label" :value="item.id" />
   </el-select>
 </template>
 
@@ -37,9 +27,9 @@ const value = ref(props.modelValue?.id || "");
 
 const emit = defineEmits(["update:modelValue", "change"]);
 const onInput = (val: string) => {
-  let formtem = formList.value.find((x) => x.id == val)!;
-  emit("update:modelValue", formtem);
-  emit("change", formtem);
+  let formitem = formList.value.find((x) => x.id == val)!;
+  emit("update:modelValue", formitem);
+  emit("change", formitem);
 };
 
 watch(

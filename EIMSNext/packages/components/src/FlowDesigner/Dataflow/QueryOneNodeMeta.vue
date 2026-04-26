@@ -1,37 +1,13 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader
-      :label="t('dataflow.targetForm')"
-      :required="true"
-    ></MetaItemHeader>
-    <FormSelect
-      v-model="formItem"
-      :appId="appId"
-      @change="formChanged"
-    ></FormSelect>
-    <MetaItemHeader
-      class="mt-[8px]"
-      :label="t('dataflow.queryCondition')"
-      :required="true"
-    ></MetaItemHeader>
-    <ConditionList
-      v-model="condList"
-      :formId="formId"
-      :nodeId="nodeId"
-      :nodes="nodes"
-      @change="onCondition"
-      @remove="onCondClear"
-    >
+    <MetaItemHeader :label="t('dataflow.targetForm')" :required="true"></MetaItemHeader>
+    <FormSelect v-model="formItem" :appId="appId" @change="formChanged"></FormSelect>
+    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.queryCondition')" :required="true"></MetaItemHeader>
+    <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition"
+      @remove="onCondClear">
     </ConditionList>
-    <MetaItemHeader
-      class="mt-[8px]"
-      :label="t('dataflow.sortRule')"
-    ></MetaItemHeader>
-    <FieldSortList
-      v-model="sortList"
-      :form-id="formId"
-      @change="onSort"
-    ></FieldSortList>
+    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.sortRule')"></MetaItemHeader>
+    <FieldSortList v-model="sortList" :form-id="formId" @change="onSort"></FieldSortList>
   </template>
 </template>
 <script lang="ts" setup>
@@ -46,12 +22,13 @@ import {
 import { uniqueId } from "@eimsnext/utils";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
-
-import { useLocale } from "element-plus";
+import FormSelect from "@/FormSelect/FormSelect.vue";
 import { IConditionList } from "@/ConditionList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
 import { IFormItem } from "@/FormSelect/type";
 import { INodeForm } from "@/NodeFieldList/type";
+
+import { useLocale } from "element-plus";
 const { t } = useLocale();
 
 defineOptions({

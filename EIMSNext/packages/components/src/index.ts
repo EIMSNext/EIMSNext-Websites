@@ -25,7 +25,7 @@ import {
 import { EtFieldPerms } from "./FieldPerms";
 import { UserAvatar } from "./avatar";
 import { SortList, SortItem } from "./SortList";
-import FieldSelectList from "./FieldSelectList";
+import { FieldSelectList } from "./FieldSelectList";
 
 export {
   applyTheme,
@@ -34,8 +34,6 @@ export {
 } from "./theme/runtime";
 export * from "./FlowDesigner";
 export * from "./dialog";
-
-export { FieldSelectList };
 
 export default [
   SvgIcon,

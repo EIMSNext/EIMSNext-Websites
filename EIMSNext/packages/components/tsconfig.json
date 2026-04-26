@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "jsx": "preserve",
     "strict": true,
     "target": "ES2017",
@@ -9,9 +8,8 @@
     "esModuleInterop": true,
     "moduleResolution": "bundler",
     "lib": ["esnext", "dom"],
-    "rootDirs": ["."],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "exclude": ["node_modules"]

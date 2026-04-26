@@ -66,6 +66,7 @@ import {
   UpdateMode,
   createFlowNode,
 } from "../Common/FlowData";
+import FormSelect from "@/FormSelect/FormSelect.vue";
 import { useLocale } from "element-plus";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";

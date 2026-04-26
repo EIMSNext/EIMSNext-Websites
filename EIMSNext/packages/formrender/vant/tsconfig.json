@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "jsx": "preserve",
     "strict": true,
     "target": "ES2017",
@@ -11,9 +10,6 @@
     "lib": [
       "esnext",
       "dom"
-    ],
-    "rootDirs": [
-      "./"
     ],
     "paths": {
       "@/*": [

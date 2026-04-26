@@ -45,6 +45,7 @@ import { IFormFieldList, mergeFieldList } from "@/FormFieldList/type";
 import { IFormItem } from "@/FormSelect/type";
 import { INodeForm } from "@/NodeFieldList/type";
 import { validateFormulaFieldList } from "./formula";
+import FormSelect from "@/FormSelect/FormSelect.vue";
 
 const { t } = useLocale();
 

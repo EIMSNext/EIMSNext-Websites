@@ -18,8 +18,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@eimsnext/*": ["../packages/*"]
-    },
-    "baseUrl": "."
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
   "references": [{ "path": "./tsconfig.node.json" }]
