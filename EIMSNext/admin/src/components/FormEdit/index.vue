@@ -11,34 +11,36 @@
         <el-tab-pane label="表单发布" name="publish" />
       </el-tabs>
     </template>
-    <div v-if="activeName == 'formedit'">
+    <div v-if="loadedTabs.formedit" v-show="activeName == 'formedit'">
       <FormBuilder ref="formBuilder" :locale="locale" :formDef="formDefRef" @save="onSave" />
     </div>
-    <div v-if="usingFlow && activeName == 'workflow'" class="main-content-container">
+    <div v-if="usingFlow && loadedTabs.workflow" v-show="activeName == 'workflow'" class="main-content-container">
       <WorkflowDesigner ref="wfDesigner" :appId="formDef.appId" :formId="formDef.id" />
     </div>
-    <div v-if="activeName == 'advance'" class="main-content-container">
+    <div v-if="loadedTabs.advance" v-show="activeName == 'advance'" class="main-content-container">
       <Advanced :formDef="formDefRef!"></Advanced>
     </div>
-    <div v-if="activeName == 'publish'" class="main-content-container">
+    <div v-if="loadedTabs.publish" v-show="activeName == 'publish'" class="main-content-container">
       <Publish :formDef="formDefRef!"></Publish>
     </div>
   </et-drawer>
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from "vue";
 import { TabPaneName } from "element-plus";
 import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
-import WorkflowDesigner from "../WorkflowDesigner/index.vue";
-import Advanced from "./Advanced/index.vue";
-import Publish from "./Publish/index.vue";
 import { useSystemStore } from "@/store/system";
 import { FormContent, FormDef } from "@eimsnext/models";
 import { useFormStore, useContextStore } from "@eimsnext/store";
 import { ConfirmResult, EtConfirm, MessageIcon } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 import { formDefService } from "@eimsnext/services";
+
+const WorkflowDesigner = defineAsyncComponent(() => import("../WorkflowDesigner/index.vue"));
+const Advanced = defineAsyncComponent(() => import("./Advanced/index.vue"));
+const Publish = defineAsyncComponent(() => import("./Publish/index.vue"));
 const { t } = useI18n();
 
 defineOptions({
@@ -55,13 +57,23 @@ const props = defineProps<{
 const formStore = useFormStore();
 const contextStore = useContextStore();
 const formBuilder = ref<InstanceType<typeof FormBuilder>>();
-const wfDesigner = ref<InstanceType<typeof WorkflowDesigner>>();
+const wfDesigner = ref<{ isDirty: () => boolean; save: () => void }>();
 const systemStore = useSystemStore();
 const locale = computed(() => systemStore.locale);
 
 const formName = ref(props.formDef.name);
 const formDefRef = ref<FormDef>(props.formDef);
 const activeName = ref("formedit");
+const loadedTabs = ref<Record<string, boolean>>({
+  formedit: true,
+  workflow: false,
+  advance: false,
+  publish: false,
+});
+
+watch(activeName, (tabName) => {
+  loadedTabs.value[tabName] = true;
+}, { immediate: true });
 
 const onSave = async (content: FormContent) => {
   let req = {

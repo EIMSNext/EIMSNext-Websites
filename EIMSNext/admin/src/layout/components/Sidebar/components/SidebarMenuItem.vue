@@ -2,7 +2,7 @@
   <template v-if="currentMenuType === FormType.Group">
     <el-sub-menu :index="groupIndex" teleported>
       <template #title>
-        <div class="menu-title-row">
+        <div class="menu-title-row group-drop-target" @dragover.prevent @drop.stop.prevent="handleGroupDrop">
           <SidebarMenuItemTitle :icon="getFormIcon(item)" :title="item.title" :iconColor="getAppIconColor(item)" />
           <span v-if="canManage" class="more-wrapper" @click.stop>
             <el-dropdown placement="bottom-start" size="large" trigger="click">
@@ -24,13 +24,15 @@
       </template>
 
       <Draggable v-if="item.subMenus" :list="item.subMenus" item-key="menuId" tag="div" data-menu-type="submenu"
-        :group="dragGroup" filter=".more-wrapper, .more-wrapper *" :prevent-on-filter="false"
-        ghost-class="menu-drag-ghost" :animation="180" @change="handleSubMenuChange">
+        :group="dragGroup" filter=".more-wrapper, .more-wrapper *" :prevent-on-filter="false" :move="handleSubMenuMove"
+        ghost-class="menu-drag-ghost" :animation="180" @start="handleSubMenuDragStart" @end="handleDragEnd" @change="handleSubMenuChange">
         <template #item="{ element }">
           <div class="menu-drag-item">
             <SidebarMenuItem :item="element" :app-id="appId" @editForm="emit('editForm', $event)"
               @editMenu="emit('editMenu', $event)" @editGroup="emit('editGroup', $event)"
-              @deleteMenu="emit('deleteMenu', $event)" @menusChanged="emit('menusChanged')" />
+              @deleteMenu="emit('deleteMenu', $event)" :on-group-drop="onGroupDrop" :can-drop-to-group="canDropToGroup"
+              :on-drag-start="onDragStart"
+              :on-drag-end="onDragEnd" @menusChanged="emit('menusChanged')" />
           </div>
         </template>
       </Draggable>
@@ -82,6 +84,10 @@ const { t } = useI18n();
 const props = defineProps<{
   item: AppMenu;
   appId: string;
+  onGroupDrop?: (groupMenu: AppMenu) => boolean;
+  canDropToGroup?: (groupMenu: AppMenu | undefined, eventTarget: EventTarget | null) => boolean;
+  onDragStart?: (menu: AppMenu) => void;
+  onDragEnd?: () => void;
 }>();
 
 const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "menusChanged"]);
@@ -116,6 +122,29 @@ function editForm(formId?: string, type?: FormType) {
 
 function handleSubMenuChange() {
   emit("menusChanged");
+}
+
+function handleGroupDrop() {
+  if (props.onGroupDrop?.(props.item)) {
+    props.onDragEnd?.();
+  }
+}
+
+function handleSubMenuDragStart(event: { oldIndex?: number }) {
+  if (event.oldIndex === undefined) return;
+
+  const menu = props.item.subMenus?.[event.oldIndex];
+  if (menu) {
+    props.onDragStart?.(menu);
+  }
+}
+
+function handleSubMenuMove(event: { relatedContext?: { element?: AppMenu }; originalEvent?: { target?: EventTarget | null } }) {
+  return !props.canDropToGroup?.(event.relatedContext?.element, event.originalEvent?.target ?? null);
+}
+
+function handleDragEnd() {
+  props.onDragEnd?.();
 }
 
 async function deleteGroup(menu: AppMenu) {
