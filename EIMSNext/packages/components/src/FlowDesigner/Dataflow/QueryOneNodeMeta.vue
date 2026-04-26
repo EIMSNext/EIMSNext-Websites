@@ -11,7 +11,7 @@
   </template>
 </template>
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch } from "vue";
+import { inject, nextTick, reactive, ref } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -65,7 +65,7 @@ const onCondition = (list: IConditionList) => {
 };
 const onCondClear = () => {
   condList.value.items = [];
-  activeData.value.metadata.queryManyMeta!.condition = condList.value;
+  activeData.value.metadata.queryOneMeta!.condition = condList.value;
 };
 
 const onSort = (list: IFieldSortList) => {

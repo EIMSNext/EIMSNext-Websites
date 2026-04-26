@@ -39,10 +39,16 @@ const props = withDefaults(
 );
 
 const tagsRef = ref<ISelectedTag[]>([]);
+const normalizeTags = (tags: unknown): ISelectedTag[] => {
+  if (!Array.isArray(tags)) {
+    return [];
+  }
+
+  return tags.filter((x) => x.type != DataItemType.Unknown) as ISelectedTag[];
+};
+
 onBeforeMount(() => {
-  tagsRef.value = (props.tags || []).filter(
-    (x) => x.type != DataItemType.Unknown,
-  );
+  tagsRef.value = normalizeTags(props.tags);
 });
 
 const openLink = () => {
@@ -51,9 +57,7 @@ const openLink = () => {
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
 const cancel = () => {
-  tagsRef.value = (props.tags || []).filter(
-    (x) => x.type != DataItemType.Unknown,
-  );
+  tagsRef.value = normalizeTags(props.tags);
   emit("update:modelValue", false);
   emit("cancel");
 };

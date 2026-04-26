@@ -220,6 +220,26 @@ const dataType = computed(() => {
   return getConditionFieldType(props.fieldDef?.type ?? FieldType.None);
 });
 
+const isMemberValueType = computed(
+  () =>
+    dataType.value == ConditionFieldType.Employee1 ||
+    dataType.value == ConditionFieldType.Employee2 ||
+    dataType.value == ConditionFieldType.Department1 ||
+    dataType.value == ConditionFieldType.Department2,
+);
+
+const normalizeSelectedTags = (input: unknown): ISelectedTag[] => {
+  if (Array.isArray(input)) {
+    return input as ISelectedTag[];
+  }
+
+  if (input && typeof input == "object") {
+    return [input as ISelectedTag];
+  }
+
+  return [];
+};
+
 const showMemberDialog = ref(false);
 const memberMultiple = ref(false);
 const memberShowTabs = ref(MemberTabs.None);
@@ -227,14 +247,10 @@ const memberShowTabs = ref(MemberTabs.None);
 const condValueType = toRef(props.modelValue.type);
 const value = toRef<any>(props.modelValue.value);
 if (
-  !value.value &&
   condValueType.value == ConditionValueType.Custom &&
-  (dataType.value == ConditionFieldType.Employee1 ||
-    dataType.value == ConditionFieldType.Employee2 ||
-    dataType.value == ConditionFieldType.Department1 ||
-    dataType.value == ConditionFieldType.Department2)
+  isMemberValueType.value
 ) {
-  value.value = [];
+  value.value = normalizeSelectedTags(value.value);
 }
 const condFieldValue = ref<IFormFieldDef>(
   props.modelValue.fieldValue ?? {
@@ -265,10 +281,7 @@ const onValueTypeChange = () => {
   props.modelValue.type = condValueType.value;
   if (
     condValueType.value == ConditionValueType.Custom &&
-    (dataType.value == ConditionFieldType.Employee1 ||
-      dataType.value == ConditionFieldType.Employee2 ||
-      dataType.value == ConditionFieldType.Department1 ||
-      dataType.value == ConditionFieldType.Department2)
+    isMemberValueType.value
   ) {
     value.value = [];
   }
