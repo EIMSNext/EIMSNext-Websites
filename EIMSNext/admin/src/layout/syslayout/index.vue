@@ -5,38 +5,30 @@
       <!-- 顶部布局顶部 || 左侧布局左侧 -->
       <div class="sys-menu-wrap">
         <el-menu mode="vertical">
-          <AppLink :to="{
-            path: resolveFullPath('department'),
-          }">
-            <el-menu-item index="department">
+          <router-link custom :to="{ path: resolveFullPath('department') }" v-slot="{ navigate }">
+            <el-menu-item index="department" @click="() => navigate()">
               <et-icon icon="icon-organization" class="step-image" size="14px" />
               <span class="app-menu-text">内部组织</span>
             </el-menu-item>
-          </AppLink>
-          <AppLink :to="{
-            path: resolveFullPath('role'),
-          }">
-            <el-menu-item index="role">
+          </router-link>
+          <router-link custom :to="{ path: resolveFullPath('role') }" v-slot="{ navigate }">
+            <el-menu-item index="role" @click="() => navigate()">
               <et-icon icon="icon-role" class="step-image" size="14px" />
               <span class="app-menu-text">角色</span>
             </el-menu-item>
-          </AppLink>
-          <AppLink :to="{
-            path: resolveFullPath('admin'),
-          }">
-            <el-menu-item index="admin">
+          </router-link>
+          <router-link custom :to="{ path: resolveFullPath('admin') }" v-slot="{ navigate }">
+            <el-menu-item index="admin" @click="() => navigate()">
               <et-icon icon="icon-admin" class="step-image" size="14px" />
               <span class="app-menu-text">管理员</span>
             </el-menu-item>
-          </AppLink>
-          <AppLink :to="{
-            path: resolveFullPath('corp-log'),
-          }">
-            <el-menu-item index="corp-log">
+          </router-link>
+          <router-link custom :to="{ path: resolveFullPath('corp-log') }" v-slot="{ navigate }">
+            <el-menu-item index="corp-log" @click="() => navigate()">
               <et-icon icon="icon-admin" class="step-image" size="14px" />
               <span class="app-menu-text">企业日志</span>
             </el-menu-item>
-          </AppLink>
+          </router-link>
         </el-menu>
       </div>
     </div>
@@ -53,15 +45,7 @@
 
 <script setup lang="ts">
 import Layout from "@/layout/index.vue";
-import { useSystemStore } from "@/store";
 import SysMain from "./SysMain/index.vue";
-
-const systemStore = useSystemStore();
-const isOpenSidebar = computed(() => systemStore.sidebar.opened);
-
-function handleOutsideClick() {
-  systemStore.closeSideBar();
-}
 
 const wfbasePath = `/system/`;
 const resolveFullPath = (routePath: string) => wfbasePath + routePath;
@@ -96,21 +80,6 @@ onBeforeMount(async () => { });
     transition: width 0.28s;
   }
 }
-
-// .hideSidebar {
-//     .main-container {
-//         margin-left: $sidebar-width-collapsed;
-//     }
-// }
-
-// .layout-left.hideSidebar {
-//     .sidebar-container {
-//         width: $sidebar-width-collapsed !important;
-//     }
-
-//     .main-container {
-//         margin-left: $sidebar-width-collapsed;
-//     }
 
 .step-image {
   color: var(--et-color-primary);

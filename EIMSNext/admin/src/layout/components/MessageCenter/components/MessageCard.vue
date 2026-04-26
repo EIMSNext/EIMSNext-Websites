@@ -52,6 +52,11 @@ const displayTime = computed(() => dateFormat(props.message.createTime, "YYYY-MM
 
   .download-link {
     color: var(--et-color-primary);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--et-color-primary-hover);
+    }
   }
 
   .message-item-header {
@@ -81,6 +86,10 @@ const displayTime = computed(() => dateFormat(props.message.createTime, "YYYY-MM
     visibility: hidden;
     cursor: pointer;
     color: var(--et-color-primary);
+
+    &:hover {
+      color: var(--et-color-primary-hover);
+    }
   }
 
   &:hover {

@@ -3,7 +3,7 @@
     <!-- 表单选择 -->
     <div class="form-select-item">
       <div class="el-form-item__label"><span>{{ t('props.form') }}</span></div>
-      <form-select v-model="source.formId" :appId="contextStore.appId" :options="{ exclude: [formId] }"
+      <form-select-by-id v-model="source.formId" :appId="contextStore.appId" :options="{ exclude: [formId] }"
         @change="onFormChange" />
     </div>
 

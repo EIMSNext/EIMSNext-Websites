@@ -2,7 +2,8 @@ import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } fro
 import { accessToken } from "@eimsnext/utils";
 import router from "@/router";
 import { usePermissionStore } from "@/store";
-import { useUserStore, useFormStore, useAppStore } from "@eimsnext/store";
+import { useUserStore, useAppStore } from "@eimsnext/store";
+import { AppMenu } from "@eimsnext/models";
 
 export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
@@ -44,7 +45,7 @@ export function setupPermission() {
                   const app = await appStore.get(to.params.appId as string);
                   const menuId = to.params.formId || to.params.dashId;
                   if (menuId) {
-                    const form = app?.appMenus.find((x) => x.menuId == menuId);
+                    const form = findMenu(app?.appMenus || [], menuId as string);
                     if (form?.title) title = form.title;
                   }
                 }
@@ -77,6 +78,23 @@ export function setupPermission() {
 
   // 后置守卫，保证每次路由跳转结束时关闭进度条
   router.afterEach(() => {});
+}
+
+function findMenu(menus: AppMenu[], menuId: string): AppMenu | undefined {
+  for (const menu of menus) {
+    if (menu.menuId === menuId) {
+      return menu;
+    }
+
+    if (menu.subMenus?.length) {
+      const matched = findMenu(menu.subMenus, menuId);
+      if (matched) {
+        return matched;
+      }
+    }
+  }
+
+  return undefined;
 }
 
 // 重定向到登录页

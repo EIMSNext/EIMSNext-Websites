@@ -23,7 +23,6 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    min-width: var(--et-size-40);
     height: var(--et-size-50);
     line-height: var(--et-size-50);
     color: var(--et-text-primary);

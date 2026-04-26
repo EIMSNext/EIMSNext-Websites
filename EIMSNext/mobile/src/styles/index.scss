@@ -1,0 +1,109 @@
+:root {
+  color-scheme: light;
+  --mobile-bg-page: #f5f5f5;
+  --mobile-bg-card: #ffffff;
+  --mobile-bg-header: #ffffff;
+  --mobile-border-color: #ebedf0;
+  --mobile-text-primary: #323233;
+  --mobile-text-secondary: #646566;
+  --mobile-text-tertiary: #969799;
+}
+
+html.dark {
+  color-scheme: dark;
+  --mobile-bg-page: #111827;
+  --mobile-bg-card: #1f2937;
+  --mobile-bg-header: #111827;
+  --mobile-border-color: #374151;
+  --mobile-text-primary: #f3f4f6;
+  --mobile-text-secondary: #d1d5db;
+  --mobile-text-tertiary: #9ca3af;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--mobile-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  color: var(--mobile-text-primary);
+}
+
+#app {
+  height: 100%;
+}
+
+.page-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--mobile-bg-page);
+}
+
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 16px;
+  background-color: var(--mobile-bg-header);
+  border-bottom: 1px solid var(--mobile-border-color);
+
+  .header-left,
+  .header-right {
+    display: flex;
+    align-items: center;
+    min-width: 32px;
+    color: var(--mobile-text-primary);
+  }
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--mobile-text-primary);
+  }
+}
+
+.page-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--mobile-text-primary);
+
+  .van-icon {
+    font-size: 20px;
+  }
+}
+
+.page-main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.page-footer {
+  background-color: var(--mobile-bg-card);
+  border-top: 1px solid var(--mobile-border-color);
+}
+
+.mobile-card {
+  background-color: var(--mobile-bg-card);
+  color: var(--mobile-text-primary);
+}

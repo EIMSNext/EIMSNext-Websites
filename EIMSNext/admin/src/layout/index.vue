@@ -7,36 +7,34 @@
       <el-container class="layout-main-shell">
         <el-aside width="45px" class="main-left-menu">
           <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
-            <AppLink :to="{
-              path: '/workspace',
-            }">
-              <div class="main-left-menu-item">
-                <AppIcon :app="workspaceApp" iconSize="16px" style="width: 24px;height: 24px;" />
+            <router-link custom :to="{ path: '/workspace' }" v-slot="{ navigate }">
+              <div class="main-left-menu-item" @click="navigate">
+                <!-- <AppIcon :app="workspaceApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
+                <et-icon icon="homepage" size="18px" />
               </div>
-            </AppLink>
+            </router-link>
           </el-tooltip>
-          <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
+          <template
+            v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
+          >
             <el-tooltip :content="t('route.system')" placement="right" :hide-after="0">
-              <AppLink :to="{
-                path: '/system/department',
-              }">
-                <div class="main-left-menu-item">
-                  <AppIcon :app="systemApp" iconSize="16px" style="width: 24px;height: 24px;" />
+              <router-link custom :to="{ path: '/system/department' }" v-slot="{ navigate }">
+                <div class="main-left-menu-item" @click="navigate">
+                  <!-- <AppIcon :app="systemApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
+                  <et-icon icon="icon-settings" size="18px" />
                 </div>
-              </AppLink>
+              </router-link>
             </el-tooltip>
           </template>
           <el-divider class="layout-divider" />
           <template v-for="app in appsRef">
             <template v-if="app.id != 'system'">
               <el-tooltip :content="app.name" placement="right" :hide-after="0">
-                <AppLink :to="{
-                  path: `/app/${app.id}/mytasks`,
-                }">
-                  <div class="main-left-menu-item">
-                    <AppIcon :app="app" iconSize="16px" style="width: 24px;height: 24px;" />
+                <router-link custom :to="{ path: `/app/${app.id}/mytasks` }" v-slot="{ navigate }">
+                  <div class="main-left-menu-item" @click="navigate">
+                    <AppIcon :app="app" iconSize="12px" style="width: 22px; height: 22px" />
                   </div>
-                </AppLink>
+                </router-link>
               </el-tooltip>
             </template>
           </template>
@@ -64,8 +62,20 @@ defineOptions({
   name: "Layout",
 });
 
-const workspaceApp: App = { id: "workspace", name: "工作台", icon: "homepage", sortIndex: -2, appMenus: [] }
-const systemApp: App = { id: "system", name: "系统设置", icon: "icon-settings", sortIndex: -1, appMenus: [] }
+const workspaceApp: App = {
+  id: "workspace",
+  name: "工作台",
+  icon: "homepage",
+  sortIndex: -2,
+  appMenus: [],
+};
+const systemApp: App = {
+  id: "system",
+  name: "系统设置",
+  icon: "icon-settings",
+  sortIndex: -1,
+  appMenus: [],
+};
 
 const systemStore = useSystemStore();
 

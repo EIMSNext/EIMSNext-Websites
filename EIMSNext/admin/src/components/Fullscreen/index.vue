@@ -1,6 +1,6 @@
 <template>
   <div @click="toggle">
-    <et-icon :icon="isFullscreen ? 'fullscreen-exit' : 'fullscreen'" />
+    <et-icon :icon="isFullscreen ? 'fullscreen-exit' : 'fullscreen'" size="18" />
   </div>
 </template>
 

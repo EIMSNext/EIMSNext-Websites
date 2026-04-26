@@ -96,7 +96,7 @@ export default defineComponent({
     const handleEmpCancel = () => {
       showDialog.value = false;
     };
- 
+
     return () => {
       const { placeholder, multiple, disabled, preview, ...attrs } = props;
       // 计算最终的禁用状态：禁用属性或查看模式
@@ -113,6 +113,10 @@ export default defineComponent({
             ? [selectedValue.value]
             : [];
       const tagHeight = multiple ? "60px" : "35px";
+      const styCls = multiple
+        ? "_fc-org-select"
+        : "_fc-org-select et-employee1";
+
       const memberOptions = {
         showTabs: MemberTabs.Employee | MemberTabs.CurUser,
         multiple: multiple,
@@ -124,7 +128,7 @@ export default defineComponent({
         <div style={{ width: "100%" }}>
           <SelectedTags
             modelValue={tags}
-            class={"_fc-org-select"}
+            class={styCls}
             style={{ height: tagHeight }}
             editable={editable}
             emptyText={placeholder}

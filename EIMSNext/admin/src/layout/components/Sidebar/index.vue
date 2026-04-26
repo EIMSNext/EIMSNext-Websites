@@ -3,6 +3,20 @@
     <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
       :isLedger="isLedger" @close="showFormEditor = false" />
     <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
+    <EditFormIcon
+      v-if="showMenuEditor && editingMenu"
+      :app-id="contextStore.appId"
+      :menu="editingMenu"
+      @cancel="showMenuEditor = false"
+      @ok="handleAppUpdated"
+    />
+    <EditMenuGroup
+      v-if="showGroupEditor"
+      :app-id="contextStore.appId"
+      :menu="editingGroup"
+      @cancel="closeGroupDialog"
+      @ok="handleAppUpdated"
+    />
     <div class="app-title" :style="{ paddingRight: isSidebarOpened ? 'var(--et-space-15)' : 'var(--et-space-6)' }">
       <AppIcon v-if="app" :app="app" iconSize="12px" style="width: 20px;height: 20px;" />
       <span v-if="isSidebarOpened" class="ml-[3px]">{{ app?.name }}</span>
@@ -13,8 +27,8 @@
     </div>
     <div>
       <el-menu mode="vertical">
-        <AppLink :to="{ name: 'mytasks', params: { appId: app?.id } }">
-          <el-menu-item index="mytodo" :class="{ 'pl-15px': !isSidebarOpened }">
+<router-link custom :to="{ name: 'mytasks', params: { appId: app?.id } }" v-slot="{ navigate }">
+          <el-menu-item index="mytodo" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <el-badge :is-dot="hasAppTodo" :offset="[0, 8]">
               <et-icon icon="icon-mytodo" class="step-image" size="14px" />
             </el-badge>
@@ -22,31 +36,31 @@
               {{ t("common.wfProcess.mytasks") }}
             </span>
           </el-menu-item>
-        </AppLink>
-        <AppLink :to="{ name: 'mystarted', params: { appId: app?.id } }">
-          <el-menu-item index="mystarted" :class="{ 'pl-15px': !isSidebarOpened }">
+        </router-link>
+<router-link custom :to="{ name: 'mystarted', params: { appId: app?.id } }" v-slot="{ navigate }">
+          <el-menu-item index="mystarted" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <et-icon icon="icon-mystarted" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.mystarted") }}
             </span>
           </el-menu-item>
-        </AppLink>
-        <AppLink :to="{ name: 'myapproved', params: { appId: app?.id } }">
-          <el-menu-item index="myapproved" :class="{ 'pl-15px': !isSidebarOpened }">
+        </router-link>
+<router-link custom :to="{ name: 'myapproved', params: { appId: app?.id } }" v-slot="{ navigate }">
+          <el-menu-item index="myapproved" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <et-icon icon="icon-myapproved" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.myapproved") }}
             </span>
           </el-menu-item>
-        </AppLink>
-        <AppLink :to="{ name: 'cctome', params: { appId: app?.id } }">
-          <el-menu-item index="mycced" :class="{ 'pl-15px': !isSidebarOpened }">
+        </router-link>
+<router-link custom :to="{ name: 'cctome', params: { appId: app?.id } }" v-slot="{ navigate }">
+          <el-menu-item index="mycced" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <et-icon icon="icon-mycced" class="step-image" size="14px" />
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.cctome") }}
             </span>
           </el-menu-item>
-        </AppLink>
+        </router-link>
       </el-menu>
     </div>
     <div v-if="isSidebarOpened" class="form-action">
@@ -84,16 +98,27 @@
       </template>
     </div>
     <el-scrollbar>
-      <SidebarMenu :menu-list="appMenus" base-path="" @editForm="editForm" />
+      <SidebarMenu
+        :app-id="contextStore.appId"
+        :menu-list="appMenus"
+        @editForm="editForm"
+        @editMenu="openEditMenu"
+        @editGroup="openEditGroup"
+        @deleteMenu="deleteMenu"
+        @menusChanged="saveMenus"
+      />
     </el-scrollbar>
   </div>
 </template>
 
 <script setup lang="ts">
 import DashboardDesigner from "@/components/DashboardDesigner/index.vue";
+import EditFormIcon from "./components/EditFormIcon.vue";
+import EditMenuGroup from "./components/EditMenuGroup.vue";
 import { usePermissionStore, useSystemStore } from "@/store";
 import {
   App,
+  AppMenu,
   DashboardDef,
   DashboardDefRequest,
   FormDef,
@@ -103,9 +128,17 @@ import {
 } from "@eimsnext/models";
 import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
-import { dashboardDefService, formDefService } from "@eimsnext/services";
+import { appService, dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
+import { ElMessage } from "element-plus";
+
+const getMenuType = (menuType: FormType | number | undefined): FormType => {
+  if (menuType === undefined) return FormType.Form;
+  if (typeof menuType === 'string') return menuType as FormType;
+  return String(menuType) as FormType;
+};
+
 const { t } = useI18n();
 
 const newForm = ref<FormDef>();
@@ -115,6 +148,10 @@ const isLedger = ref(false);
 
 const newDash = ref<DashboardDef>();
 const showDshEditor = ref(false);
+const showMenuEditor = ref(false);
+const editingMenu = ref<AppMenu>();
+const showGroupEditor = ref(false);
+const editingGroup = ref<AppMenu>();
 var permissionStore = usePermissionStore();
 const { appMenus } = storeToRefs(permissionStore);
 
@@ -232,7 +269,68 @@ const createDashboard = () => {
   });
 };
 
-const createFolder = () => { };
+const openEditMenu = (menu: AppMenu) => {
+  editingMenu.value = { ...menu };
+  showMenuEditor.value = true;
+};
+
+const openEditGroup = (menu: AppMenu) => {
+  editingGroup.value = { ...menu };
+  showGroupEditor.value = true;
+};
+
+const closeGroupDialog = () => {
+  showGroupEditor.value = false;
+  editingGroup.value = undefined;
+};
+
+const handleAppUpdated = (updatedApp: App) => {
+  appStore.update(updatedApp);
+  app.value = updatedApp;
+  showMenuEditor.value = false;
+  editingMenu.value = undefined;
+  closeGroupDialog();
+  contextStore.setAppChanged();
+};
+
+const saveMenus = async () => {
+  if (!app.value) {
+    return;
+  }
+
+  const updated = await appService.saveMenus({
+    appId: contextStore.appId,
+    appMenus: JSON.parse(JSON.stringify(appMenus.value)),
+  });
+  handleAppUpdated(updated);
+};
+
+const deleteMenu = async (menu: AppMenu) => {
+  const menuType = getMenuType(menu.menuType);
+  if (menuType === FormType.Form) {
+    formStore.remove(menu.menuId);
+    contextStore.setAppChanged();
+    return;
+  }
+
+  if (menuType === FormType.Dashboard) {
+    await dashboardDefService.delete(menu.menuId);
+    contextStore.setAppChanged();
+    return;
+  }
+
+  try {
+    const updated = await appService.deleteGroup({ appId: contextStore.appId, menuId: menu.menuId });
+    handleAppUpdated(updated);
+  } catch (error: any) {
+    ElMessage.warning(error?.message || "当前分组下存在子菜单，不能删除");
+  }
+};
+
+const createFolder = () => {
+  editingGroup.value = undefined;
+  showGroupEditor.value = true;
+};
 </script>
 
 <style lang="scss" scoped>

@@ -5,12 +5,8 @@ import { resolve } from "path";
 export default defineConfig({
   build: {
     target: "modules",
-    //打包文件目录
     outDir: "dist",
-    //压缩
-    minify: true,
-    //css分离
-    //cssCodeSplit: true,
+    minify: "esbuild",
     emptyOutDir: true,
     sourcemap: false,
     rollupOptions: {
@@ -19,20 +15,14 @@ export default defineConfig({
       output: {
         compact: true,
         exports: "named",
-        // 为不同格式生成相应的全局变量
-        globals: {
-          axios: "axios",
-          qs: "qs",
-          lodash: "lodash",
-          nanoid: "nanoid",
-        },
+        entryFileNames: "index.js",
       },
     },
     lib: {
       entry: "./index.ts",
       name: "utils",
-      formats: ["es", "umd"],
-      fileName: (format) => `index.${format}.js`,
+      formats: ["es"],
+      fileName: () => "index.js",
     },
   },
   esbuild: {

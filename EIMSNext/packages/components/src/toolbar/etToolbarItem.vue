@@ -26,24 +26,22 @@
       <el-divider direction="vertical" :class="item.config.class" :style="item.config.style" />
     </template>
     <template v-else>
-      <template v-if="item.config.tooltip"><el-tooltip placement="top" :content="item.config.tooltip">
-          <el-button :type="item.config.type" :disabled="item.config.disabled" class="toolbar-item"
-            :class="item.config.class" :style="item.config.style" @click="
-              handleCommand(item.config.command, $event, item.config.onCommand)
-              ">
-            <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
-            <span>{{ t(item.config.text) }}</span>
-          </el-button>
-        </el-tooltip>
-      </template>
-      <template v-else>
+      <el-tooltip v-if="item.config.tooltip" placement="top" :content="item.config.tooltip">
         <el-button :type="item.config.type" :disabled="item.config.disabled" class="toolbar-item"
           :class="item.config.class" :style="item.config.style" @click="
             handleCommand(item.config.command, $event, item.config.onCommand)
             ">
           <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
           <span>{{ t(item.config.text) }}</span>
-        </el-button></template>
+        </el-button>
+      </el-tooltip>
+      <el-button v-else :type="item.config.type" :disabled="item.config.disabled" class="toolbar-item"
+        :class="item.config.class" :style="item.config.style" @click="
+          handleCommand(item.config.command, $event, item.config.onCommand)
+          ">
+        <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
+        <span>{{ t(item.config.text) }}</span>
+      </el-button>
     </template>
   </template>
 </template>

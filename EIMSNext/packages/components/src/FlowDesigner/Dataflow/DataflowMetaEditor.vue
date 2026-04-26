@@ -75,6 +75,7 @@ import {
   createFlowNode,
   EventType,
 } from "../Common/FlowData";
+import FormSelect from "@/FormSelect/FormSelect.vue";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import TriggerNodeMeta from "./TriggerNodeMeta.vue";
 import InsertNodeMeta from "./InsertNodeMeta.vue";

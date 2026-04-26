@@ -1,19 +1,15 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "jsx": "preserve",
     "strict": true,
     "target": "es2017",
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "lib": [
       "esnext",
       "dom"
-    ],
-    "rootDirs": [
-      "./"
     ],
     "paths": {
       "@/*": [

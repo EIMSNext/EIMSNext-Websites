@@ -1,3 +1,4 @@
-import FieldSelectList from "./FieldSelectList.vue";
+import fieldSelectList from "./FieldSelectList.vue";
 import { withInstall } from "../utils/install";
-export default withInstall(FieldSelectList);
+const FieldSelectList = withInstall(fieldSelectList);
+export { FieldSelectList };

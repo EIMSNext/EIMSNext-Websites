@@ -631,12 +631,17 @@ onUnmounted(() => {
 
     .back-btn {
       align-items: center;
-      display: flex;
-      position: relative;
-      padding: var(--et-space-0);
-      border: none;
-      width: var(--et-size-40);
       background-color: transparent;
+      border: none;
+      color: var(--et-text-primary);
+      display: flex;
+      padding: var(--et-space-0);
+      position: relative;
+      width: var(--et-size-40);
+
+      &:hover {
+        background: var(--et-bg-hover);
+      }
 
       .back-icon {
         cursor: pointer;

@@ -1,21 +1,71 @@
 <template>
   <div class="flow-designer">
+    <el-dialog v-model="showPageSetupDialog" title="打印模板设置" width="560px">
+      <el-form label-width="88px">
+        <el-form-item label="纸张大小">
+          <el-select v-model="pageSettingsDraft.paperSize" class="w-full">
+            <el-option v-for="option in paperSizeOptions" :key="option.value" :label="option.label" :value="option.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="页边距">
+          <div class="page-margin-grid">
+            <div class="page-margin-item">
+              <span class="page-margin-label">上</span>
+              <el-input-number v-model="pageSettingsDraft.margins.top" :min="0" :step="1" :precision="0" controls-position="right" />
+            </div>
+            <div class="page-margin-item">
+              <span class="page-margin-label">右</span>
+              <el-input-number v-model="pageSettingsDraft.margins.right" :min="0" :step="1" :precision="0" controls-position="right" />
+            </div>
+            <div class="page-margin-item">
+              <span class="page-margin-label">下</span>
+              <el-input-number v-model="pageSettingsDraft.margins.bottom" :min="0" :step="1" :precision="0" controls-position="right" />
+            </div>
+            <div class="page-margin-item">
+              <span class="page-margin-label">左</span>
+              <el-input-number v-model="pageSettingsDraft.margins.left" :min="0" :step="1" :precision="0" controls-position="right" />
+            </div>
+          </div>
+          <span class="page-margin-unit">单位：mm</span>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showPageSetupDialog = false">取消</el-button>
+          <el-button type="primary" @click="applyPageSettings">确定</el-button>
+        </div>
+      </template>
+    </el-dialog>
     <div class="flow-actions">
-      <div class="left"></div>
+      <div class="left">
+        <span class="page-setup-summary">{{ pageSetupSummary }}</span>
+      </div>
       <div class="right">
         <el-button>打印模板设置</el-button>
-        <el-button @click="preview">预览</el-button>
-        <el-button @click="save">保存</el-button>
+        <el-button :loading="previewing" :disabled="!designerReady" @click="preview">预览</el-button>
+        <el-button :loading="saving" :disabled="!designerReady" @click="save">保存</el-button>
       </div>
     </div>
-    <div class="print-design-container">
+    <div class="print-design-container" v-loading="loading">
       <el-tabs v-model="activeTab" class="field-container">
         <el-tab-pane label="表单字段" name="form" class="field-panel">
-          <el-tree ref="formFieldsTreeRef" class="mt-2" :data="formFieldNodes" item-key="id"
-            :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false">
+          <el-tree
+            ref="formFieldsTreeRef"
+            class="mt-2"
+            :data="formFieldNodes"
+            item-key="id"
+            :props="{ children: 'children', label: 'label', disabled: '' }"
+            :expand-on-click-node="false"
+          >
             <template #default="{ node, data }">
-              <Draggable :list="[data]" :sort="false" ghost-class="ghost" @start="onStart"
-                :group="{ name: 'fields', pull: 'clone', put: false }" item-key="id">
+              <Draggable
+                :list="[data]"
+                :sort="false"
+                ghost-class="ghost"
+                @start="onStart"
+                :group="{ name: 'fields', pull: 'clone', put: false }"
+                item-key="id"
+              >
                 <template #item="{ element }">
                   <div class="node-data" :title="data.label">
                     <div class="node-wrapper">
@@ -32,61 +82,18 @@
           <div>system</div>
         </el-tab-pane>
       </el-tabs>
-      <div id="univer-container" class="univer-container" ref="container"></div>
+      <div class="designer-stage">
+        <el-alert v-if="loadError" type="error" :closable="false" show-icon>
+          <template #title>打印设计器加载失败</template>
+          {{ loadError }}
+        </el-alert>
+        <div ref="container" class="univer-container"></div>
+      </div>
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
-import { LocaleType, merge, Univer, UniverInstanceType } from "@univerjs/core";
-import { defaultTheme } from "@univerjs/design";
-import { UniverFormulaEnginePlugin } from "@univerjs/engine-formula";
-import { UniverRenderEnginePlugin } from "@univerjs/engine-render";
-import { UniverUIPlugin } from "@univerjs/ui";
-import { UniverDocsPlugin } from "@univerjs/docs";
-import { UniverDocsUIPlugin } from "@univerjs/docs-ui";
-import { UniverSheetsPlugin } from "@univerjs/sheets";
-import { UniverSheetsUIPlugin } from "@univerjs/sheets-ui";
-import { UniverSheetsFormulaPlugin } from "@univerjs/sheets-formula";
-import { UniverSheetsFormulaUIPlugin } from "@univerjs/sheets-formula-ui";
-import { UniverSheetsNumfmtPlugin } from "@univerjs/sheets-numfmt";
-import { UniverSheetsNumfmtUIPlugin } from "@univerjs/sheets-numfmt-ui";
-
-//@ts-expect-error
-import DesignZhCN from "@univerjs/design/locale/zh-CN";
-//@ts-expect-error
-import UIZhCN from "@univerjs/ui/locale/zh-CN";
-//@ts-expect-error
-import DocsUIZhCN from "@univerjs/docs-ui/locale/zh-CN";
-//@ts-expect-error
-import SheetsZhCN from "@univerjs/sheets/locale/zh-CN";
-//@ts-expect-error
-import SheetsUIZhCN from "@univerjs/sheets-ui/locale/zh-CN";
-//@ts-expect-error
-import SheetsFormulaUIZhCN from "@univerjs/sheets-formula-ui/locale/zh-CN";
-//@ts-expect-error
-import SheetsNumfmtUIZhCN from "@univerjs/sheets-numfmt-ui/locale/zh-CN";
-
-// 这里的 Facade API 是可选的，你可以根据自己的需求来决定是否引入
-import "@univerjs/core/facade";
-import "@univerjs/engine-formula/facade";
-import "@univerjs/ui/facade";
-import "@univerjs/docs-ui/facade";
-import "@univerjs/sheets/facade";
-import "@univerjs/sheets-ui/facade";
-import "@univerjs/sheets-formula/facade";
-import "@univerjs/sheets-numfmt/facade";
-
-import "@univerjs/design/lib/index.css";
-import "@univerjs/ui/lib/index.css";
-import "@univerjs/docs-ui/lib/index.css";
-import "@univerjs/sheets-ui/lib/index.css";
-import "@univerjs/sheets-formula-ui/lib/index.css";
-import "@univerjs/sheets-numfmt-ui/lib/index.css";
-
-//@ts-expect-error
-import { FUniver } from "@univerjs/core/facade";
-//@ts-expect-error
-import { FWorkbook, FWorksheet, FRange } from "@univerjs/sheets/facade";
 import { useFormStore } from "@eimsnext/store";
 import { FieldDef, FieldType, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
 import { DataItemType, ITreeNode } from "@eimsnext/components";
@@ -97,6 +104,196 @@ import { IPrintMetadata } from "./type";
 defineOptions({
   name: "PdfPrintDesigner",
 });
+
+type UniverModule = typeof import("@univerjs/core");
+type UIPluginModule = typeof import("@univerjs/ui");
+
+type LoadedUniverModules = {
+  core: UniverModule;
+  render: typeof import("@univerjs/engine-render");
+  ui: UIPluginModule;
+  docs: typeof import("@univerjs/docs");
+  docsDrawing: typeof import("@univerjs/docs-drawing");
+  docsUi: typeof import("@univerjs/docs-ui");
+  drawing: typeof import("@univerjs/drawing");
+  drawingUi: typeof import("@univerjs/drawing-ui");
+  sheets: typeof import("@univerjs/sheets");
+  sheetsDrawing: typeof import("@univerjs/sheets-drawing");
+  sheetsDrawingUi: typeof import("@univerjs/sheets-drawing-ui");
+  sheetsUi: typeof import("@univerjs/sheets-ui");
+  designLocale: { default: Record<string, unknown> };
+  uiLocale: { default: Record<string, unknown> };
+  drawingUiLocale: { default: Record<string, unknown> };
+  docsUiLocale: { default: Record<string, unknown> };
+  sheetsLocale: { default: Record<string, unknown> };
+  sheetsDrawingUiLocale: { default: Record<string, unknown> };
+  sheetsUiLocale: { default: Record<string, unknown> };
+  coreFacade: { FUniver: any };
+  sheetsFacade: { FWorkbook: any; FRange: any };
+};
+
+type PrintMargins = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
+
+type PrintPageSettings = {
+  paperSize: string;
+  margins: PrintMargins;
+};
+
+type WorksheetPageSetup = {
+  paperSize: string;
+  topMargin: number;
+  rightMargin: number;
+  bottomMargin: number;
+  leftMargin: number;
+};
+
+const paperSizeOptions = [
+  { label: "A3", value: "A3" },
+  { label: "A4", value: "A4" },
+  { label: "A5", value: "A5" },
+  { label: "B5", value: "B5" },
+  { label: "Letter", value: "Letter" },
+  { label: "Legal", value: "Legal" },
+];
+
+const createDefaultMargins = (): PrintMargins => ({
+  top: 15,
+  right: 15,
+  bottom: 15,
+  left: 15,
+});
+
+const createDefaultPageSettings = (): PrintPageSettings => ({
+  paperSize: "A4",
+  margins: createDefaultMargins(),
+});
+
+const DEFAULT_SHEET_ID = "Sheet1";
+const PAGE_SETUP_MENU_ID = "eimsnext.print.page-setup";
+
+const mmToPoint = (millimeter: number) => Number((millimeter * 72 / 25.4).toFixed(4));
+
+const pointToMm = (point: number) => Number((point * 25.4 / 72).toFixed(2));
+
+const createDefaultWorkbookData = () => ({
+  id: DEFAULT_SHEET_ID,
+  name: DEFAULT_SHEET_ID,
+  appVersion: "0.21.0",
+  locale: "zhCN",
+  sheetOrder: [DEFAULT_SHEET_ID],
+  sheets: {
+    [DEFAULT_SHEET_ID]: {
+      id: DEFAULT_SHEET_ID,
+      name: DEFAULT_SHEET_ID,
+      cellData: {},
+      rowData: {},
+      columnData: {},
+      rowHeight: {},
+      columnWidth: {},
+      mergeData: [],
+      pageSetup: buildWorksheetPageSetup(createDefaultPageSettings()),
+    },
+  },
+});
+
+const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
+
+const clonePageSettings = (settings: PrintPageSettings): PrintPageSettings => ({
+  paperSize: settings.paperSize,
+  margins: { ...settings.margins },
+});
+
+const normalizeMarginValue = (value: unknown, fallback: number) => {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return fallback;
+  }
+
+  return value;
+};
+
+const normalizeDraftPageSettings = (value: PrintPageSettings): PrintPageSettings => {
+  const defaults = createDefaultPageSettings();
+  const paperSize = paperSizeOptions.some((option) => option.value === value.paperSize)
+    ? value.paperSize
+    : defaults.paperSize;
+
+  return {
+    paperSize,
+    margins: {
+      top: normalizeMarginValue(value.margins.top, defaults.margins.top),
+      right: normalizeMarginValue(value.margins.right, defaults.margins.right),
+      bottom: normalizeMarginValue(value.margins.bottom, defaults.margins.bottom),
+      left: normalizeMarginValue(value.margins.left, defaults.margins.left),
+    },
+  };
+};
+
+const normalizePageSettings = (value: unknown): PrintPageSettings => {
+  const defaults = createDefaultPageSettings();
+  if (!isRecord(value)) {
+    return defaults;
+  }
+
+  const paperSize = typeof value.paperSize === "string" && paperSizeOptions.some((option) => option.value === value.paperSize)
+    ? value.paperSize
+    : defaults.paperSize;
+
+  const resolveMarginMm = (primaryKey: keyof WorksheetPageSetup, fallback: number) => {
+    const normalized = normalizeMarginValue(value[primaryKey], mmToPoint(fallback));
+    return pointToMm(normalized);
+  };
+
+  return {
+    paperSize,
+    margins: {
+      top: resolveMarginMm("topMargin", defaults.margins.top),
+      right: resolveMarginMm("rightMargin", defaults.margins.right),
+      bottom: resolveMarginMm("bottomMargin", defaults.margins.bottom),
+      left: resolveMarginMm("leftMargin", defaults.margins.left),
+    },
+  };
+};
+
+const buildWorksheetPageSetup = (settings: PrintPageSettings): WorksheetPageSetup => ({
+  paperSize: settings.paperSize,
+  topMargin: mmToPoint(settings.margins.top),
+  rightMargin: mmToPoint(settings.margins.right),
+  bottomMargin: mmToPoint(settings.margins.bottom),
+  leftMargin: mmToPoint(settings.margins.left),
+});
+
+const resolveActiveSheet = (workbookData: Record<string, unknown>) => {
+  const sheets = isRecord(workbookData.sheets) ? workbookData.sheets : undefined;
+  if (!sheets) {
+    return undefined;
+  }
+
+  const sheetOrder = Array.isArray(workbookData.sheetOrder) ? workbookData.sheetOrder : undefined;
+  const firstSheetKey = sheetOrder?.find((item): item is string => typeof item === "string" && isRecord(sheets[item]))
+    ?? Object.keys(sheets).find((key) => isRecord(sheets[key]));
+
+  if (!firstSheetKey) {
+    return undefined;
+  }
+
+  const sheet = sheets[firstSheetKey];
+  return isRecord(sheet) ? sheet : undefined;
+};
+
+const applyPageSetupToWorkbookData = (workbookData: Record<string, unknown>, settings: PrintPageSettings) => {
+  const activeSheet = resolveActiveSheet(workbookData);
+  if (!activeSheet) {
+    return workbookData;
+  }
+
+  activeSheet.pageSetup = buildWorksheetPageSetup(settings);
+  return workbookData;
+};
 
 const props = defineProps<{
   formDef: FormDef;
@@ -109,18 +306,118 @@ const activeTab = ref("form");
 const formStore = useFormStore();
 const formFieldNodes = ref<ITreeNode[]>([]);
 const draggingNode = ref<ITreeNode>();
-
 const container = ref<HTMLElement | null>(null);
-let univerObj: Univer;
-let univerApi: FUniver;
-let workbookApi: FWorkbook;
+const showPageSetupDialog = ref(false);
+const loading = ref(false);
+const previewing = ref(false);
+const saving = ref(false);
+const loadError = ref("");
+const pageSettings = ref<PrintPageSettings>(createDefaultPageSettings());
+const pageSettingsDraft = reactive<PrintPageSettings>(createDefaultPageSettings());
+const designerReady = computed(() => !loading.value && !loadError.value && !!workbookApi);
+const pageSetupSummary = computed(() => {
+  const margins = pageSettings.value.margins;
+  return `纸张：${pageSettings.value.paperSize} | 页边距 ${margins.top}/${margins.right}/${margins.bottom}/${margins.left} mm`;
+});
+
+let univerObj: InstanceType<UniverModule["Univer"]> | undefined;
+let univerApi: any;
+let workbookApi: any;
+let loadedModules: LoadedUniverModules | undefined;
+let disposed = false;
+
+const hiddenMenuItems: Record<string, { hidden: boolean }> = {
+  "sheet.command.add-range-protection-from-toolbar": { hidden: true },
+  "sheet.contextMenu.permission": { hidden: true },
+  "base-ui.operation.toggle-shortcut-panel": { hidden: true },
+  "formula-ui.operation.insert-function": { hidden: true },
+  "formula-ui.operation.more-functions": { hidden: true },
+  "ribbon.data": { hidden: true },
+  "ribbon.formulas": { hidden: true },
+  "formula-bar": { hidden: true },
+};
+
+const syncPageSettingsDraft = () => {
+  const nextSettings = clonePageSettings(pageSettings.value);
+  pageSettingsDraft.paperSize = nextSettings.paperSize;
+  pageSettingsDraft.margins.top = nextSettings.margins.top;
+  pageSettingsDraft.margins.right = nextSettings.margins.right;
+  pageSettingsDraft.margins.bottom = nextSettings.margins.bottom;
+  pageSettingsDraft.margins.left = nextSettings.margins.left;
+};
+
+const openPageSetupDialog = () => {
+  syncPageSettingsDraft();
+  showPageSetupDialog.value = true;
+};
+
+const applyPageSettings = () => {
+  pageSettings.value = normalizeDraftPageSettings(pageSettingsDraft);
+  syncPageSettingsDraft();
+  showPageSetupDialog.value = false;
+};
+
+const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: any) => {
+  runtimeApi.createMenu({
+    id: PAGE_SETUP_MENU_ID,
+    title: "页面设置",
+    action: openPageSetupDialog,
+  }).appendTo([modules.ui.RibbonPosition.START, modules.ui.RibbonStartGroup.OTHERS]);
+};
+
+const disposeDesigner = () => {
+  univerObj?.dispose();
+  univerObj = undefined;
+  univerApi = undefined;
+  workbookApi = undefined;
+
+  if (container.value) {
+    container.value.innerHTML = "";
+  }
+};
+
+const parseTemplateContent = () => {
+  if (!currentPrintDef.value.content) {
+    pageSettings.value = createDefaultPageSettings();
+    syncPageSettingsDraft();
+    return createDefaultWorkbookData();
+  }
+
+  const parsed = JSON.parse(currentPrintDef.value.content);
+  if (!isRecord(parsed)) {
+    throw new Error("打印模板数据格式无效");
+  }
+
+  const workbookData = { ...parsed };
+  const activeSheet = resolveActiveSheet(workbookData);
+  const rawSettings = activeSheet?.pageSetup;
+  pageSettings.value = normalizePageSettings(rawSettings);
+  syncPageSettingsDraft();
+
+  return applyPageSetupToWorkbookData(
+    Object.keys(workbookData).length > 0 ? workbookData : createDefaultWorkbookData(),
+    pageSettings.value
+  );
+};
+
+const serializeTemplateContent = () => applyPageSetupToWorkbookData({
+  ...ensureWorkbookApi().save(),
+}, pageSettings.value);
+
+const ensureWorkbookApi = () => {
+  if (!workbookApi) {
+    throw new Error("打印设计器尚未完成初始化");
+  }
+
+  return workbookApi;
+};
 
 const populateFields = () => {
   formFieldNodes.value = [];
 
   if (props.formDef.content && props.formDef.content.items) {
     props.formDef.content.items.forEach((x: FieldDef) => {
-      let node: ITreeNode = {
+      const node: ITreeNode = {
         id: x.field,
         value: x.field,
         label: x.title,
@@ -128,10 +425,11 @@ const populateFields = () => {
         type: DataItemType.Field,
         data: x,
       };
+
       if (x.columns && x.columns.length > 0) {
         node.children = [];
         x.columns.forEach((y) => {
-          let subNode: ITreeNode = {
+          const subNode: ITreeNode = {
             id: `${node.id}-${y.field}`,
             value: `${node.id}>${y.field}`,
             label: y.title,
@@ -143,133 +441,291 @@ const populateFields = () => {
           node.children?.push(subNode);
         });
       }
+
       formFieldNodes.value.push(node);
     });
   }
 };
-const preview = async () => {
-  let req: PrintPreviewRequest = {
-    content: JSON.stringify(workbookApi.save()),
-    printType: currentPrintDef.value.printType,
+
+const loadUniverModules = async () => {
+  if (loadedModules) {
+    return loadedModules;
   }
 
-  let printResult = await customPrintService.preview(req);
+  await Promise.all([
+    import("@univerjs/core/facade"),
+    import("@univerjs/ui/facade"),
+    import("@univerjs/docs-ui/facade"),
+    import("@univerjs/sheets/facade"),
+    import("@univerjs/sheets-ui/facade"),
+  ]);
 
-  if (printResult && printResult.downloadUrl) {
-    window.open(printResult.downloadUrl, "_blank")
-  }
-  else {
-    ElMessage.error(printResult?.message || "打印失败")
-  }
-}
-const save = () => {
-  let req: PrintTemplateRequest = {
-    id: currentPrintDef.value.id,
-    name: currentPrintDef.value.name,
-    appId: currentPrintDef.value.appId,
-    formId: currentPrintDef.value.formId,
-    content: JSON.stringify(workbookApi.save()),
-    printType: currentPrintDef.value.printType,
+  const [
+    core,
+    render,
+    ui,
+    docs,
+    docsDrawing,
+    docsUi,
+    drawing,
+    drawingUi,
+    sheets,
+    sheetsDrawing,
+    sheetsDrawingUi,
+    sheetsUi,
+    designLocale,
+    uiLocale,
+    drawingUiLocale,
+    docsUiLocale,
+    sheetsLocale,
+    sheetsDrawingUiLocale,
+    sheetsUiLocale,
+    coreFacade,
+    sheetsFacade,
+  ] = await Promise.all([
+    import("@univerjs/core"),
+    import("@univerjs/engine-render"),
+    import("@univerjs/ui"),
+    import("@univerjs/docs"),
+    import("@univerjs/docs-drawing"),
+    import("@univerjs/docs-ui"),
+    import("@univerjs/drawing"),
+    import("@univerjs/drawing-ui"),
+    import("@univerjs/sheets"),
+    import("@univerjs/sheets-drawing"),
+    import("@univerjs/sheets-drawing-ui"),
+    import("@univerjs/sheets-ui"),
+    import("@univerjs/design/locale/zh-CN"),
+    import("@univerjs/ui/locale/zh-CN"),
+    import("@univerjs/drawing-ui/locale/zh-CN"),
+    import("@univerjs/docs-ui/locale/zh-CN"),
+    import("@univerjs/sheets/locale/zh-CN"),
+    import("@univerjs/sheets-drawing-ui/locale/zh-CN"),
+    import("@univerjs/sheets-ui/locale/zh-CN"),
+    import("@univerjs/core/facade"),
+    import("@univerjs/sheets/facade"),
+  ]);
+
+  loadedModules = {
+    core,
+    render,
+    ui,
+    docs,
+    docsDrawing,
+    docsUi,
+    drawing,
+    drawingUi,
+    sheets,
+    sheetsDrawing,
+    sheetsDrawingUi,
+    sheetsUi,
+    designLocale: designLocale as { default: Record<string, unknown> },
+    uiLocale: uiLocale as { default: Record<string, unknown> },
+    drawingUiLocale: drawingUiLocale as { default: Record<string, unknown> },
+    docsUiLocale: docsUiLocale as { default: Record<string, unknown> },
+    sheetsLocale: sheetsLocale as { default: Record<string, unknown> },
+    sheetsDrawingUiLocale: sheetsDrawingUiLocale as { default: Record<string, unknown> },
+    sheetsUiLocale: sheetsUiLocale as { default: Record<string, unknown> },
+    coreFacade: coreFacade as { FUniver: any },
+    sheetsFacade: sheetsFacade as { FWorkbook: any; FRange: any },
   };
-  if (req.id)
-    printTemplateService
-      .put<PrintTemplate>(req.id, req)
-      .then((res) => (currentPrintDef.value = res));
-  else printTemplateService.post<PrintTemplate>(req).then((res) => (currentPrintDef.value = res));
+
+  return loadedModules;
 };
 
-const onStart = (e: any) => {
-  e.preventDefault();
-  let vm = e.item._underlying_vm_;
-  if (vm.data.type == FieldType.TableForm) {
-    e.cancel = true
+const initSheet = async (data: Record<string, unknown>) => {
+  if (!container.value) {
+    throw new Error("未找到打印设计器容器");
   }
-  else
-    draggingNode.value = vm
-};
 
-const initSheet = (data = {}) => {
+  const modules = await loadUniverModules();
+  const { LocaleType, merge, Univer } = modules.core;
+
   const univer = new Univer({
-    theme: defaultTheme,
     locale: LocaleType.ZH_CN,
     locales: {
       [LocaleType.ZH_CN]: merge(
         {},
-        DesignZhCN,
-        UIZhCN,
-        DocsUIZhCN,
-        SheetsZhCN,
-        SheetsUIZhCN,
-        SheetsFormulaUIZhCN,
-        SheetsNumfmtUIZhCN
+        modules.designLocale.default,
+        modules.uiLocale.default,
+        modules.drawingUiLocale.default,
+        modules.docsUiLocale.default,
+        modules.sheetsLocale.default,
+        modules.sheetsDrawingUiLocale.default,
+        modules.sheetsUiLocale.default
       ),
     },
   });
 
-  univer.registerPlugin(UniverRenderEnginePlugin);
-  univer.registerPlugin(UniverFormulaEnginePlugin);
+  univer.registerPlugin(modules.render.UniverRenderEnginePlugin);
+  univer.registerPlugin(modules.ui.UniverUIPlugin, {
+    container: container.value,
+    header: true,
+    toolbar: true,
+    footer: true,
+    contextMenu: true,
+    headerMenu: true,
+    ribbonType: "simple",
+  });
+  univer.registerPlugin(modules.drawing.UniverDrawingPlugin);
+  univer.registerPlugin(modules.drawingUi.UniverDrawingUIPlugin);
+  univer.registerPlugin(modules.docs.UniverDocsPlugin);
+  univer.registerPlugin(modules.docsDrawing.UniverDocsDrawingPlugin);
+  univer.registerPlugin(modules.docsUi.UniverDocsUIPlugin);
+  univer.registerPlugin(modules.sheets.UniverSheetsPlugin);
+  univer.registerPlugin(modules.sheetsDrawing.UniverSheetsDrawingPlugin);
+  univer.registerPlugin(modules.sheetsUi.UniverSheetsUIPlugin, {
+    menu: hiddenMenuItems,
+  });
+  univer.registerPlugin(modules.sheetsDrawingUi.UniverSheetsDrawingUIPlugin);
 
-  univer.registerPlugin(UniverUIPlugin, {
-    container: "univer-container",
+  const runtimeApi = modules.coreFacade.FUniver.newAPI(univer);
+  registerPageSetupToolbarMenu(modules, runtimeApi);
+  const runtimeWorkbook = runtimeApi.createWorkbook(data);
+
+  if (!runtimeApi.Event?.DragOver || !runtimeApi.Event?.Drop) {
+    throw new Error("Univer 0.21 运行时事件接口发生变化，请检查 facade Event 定义");
+  }
+
+  runtimeApi.addEvent(runtimeApi.Event.DragOver, (params: any) => {
+    if (!draggingNode.value) {
+      return;
+    }
+
+    params.dataTransfer.dropEffect = "move";
+    const range = params.worksheet.getRange(params.row, params.column);
+    if (range) {
+      params.worksheet.setActiveRange(range);
+    }
   });
 
-  univer.registerPlugin(UniverDocsPlugin);
-  univer.registerPlugin(UniverDocsUIPlugin);
+  runtimeApi.addEvent(runtimeApi.Event.Drop, (params: any) => {
+    if (!draggingNode.value) {
+      return;
+    }
 
-  univer.registerPlugin(UniverSheetsPlugin);
-  univer.registerPlugin(UniverSheetsUIPlugin, {
-    menu: {
-      "sheet.command.add-range-protection-from-toolbar": { hidden: true },
-      "base-ui.operation.toggle-shortcut-panel": { hidden: true },
-      "sheet.contextMenu.permission": { hidden: true },
-      "formula-ui.operation.insert-function": { hidden: true },
-      "formula-ui.operation.more-functions": { hidden: true },
-    },
+    const cell = params.worksheet.getRange(params.row, params.column);
+    if (cell) {
+      cell.setValue(`\${${draggingNode.value.fullLabel}}`);
+      const printMetadata: IPrintMetadata = {
+        dataType: "field",
+        id: draggingNode.value.value!,
+      };
+
+      if (typeof (cell as any).setCustomMetaData !== "function") {
+        throw new Error("Univer 0.21 运行时未提供 setCustomMetaData，打印字段元数据写入失败");
+      }
+
+      (cell as any).setCustomMetaData(printMetadata);
+    }
+
+    draggingNode.value = undefined;
   });
-  univer.registerPlugin(UniverSheetsFormulaPlugin);
-  univer.registerPlugin(UniverSheetsFormulaUIPlugin);
-  univer.registerPlugin(UniverSheetsNumfmtPlugin);
-  univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
 
   univerObj = univer;
-  univerApi = FUniver.newAPI(univer);
-  workbookApi = univerApi.createWorkbook(data);
-
-  univerApi.addEvent(univerApi.Event.DragOver, (params: any) => {
-    if (draggingNode.value) {
-      params.dataTransfer.dropEffect = "move";
-      const range: FRange = params.worksheet.getRange(params.row, params.column);
-      if (range) params.worksheet.setActiveRange(range);
-    }
-  });
-  univerApi.addEvent(univerApi.Event.Drop, (params: any) => {
-    if (draggingNode.value) {
-      const cell: FRange = params.worksheet.getRange(params.row, params.column);
-      if (cell) {
-        cell.setValue(`\${${draggingNode.value.fullLabel}}`);
-        //字段打印设置
-        let printMeata: IPrintMetadata = {
-          dataType: "field",
-          id: draggingNode.value.value!,
-        };
-        cell.setCustomMetaData(printMeata);
-      }
-      draggingNode.value = undefined;
-    }
-  });
+  univerApi = runtimeApi;
+  workbookApi = runtimeWorkbook;
 };
 
-onMounted(() => {
-  let data = { id: "Sheet1", name: "Sheet1" };
-  if (currentPrintDef.value.content) data = JSON.parse(currentPrintDef.value.content);
+const initializeDesigner = async () => {
+  loading.value = true;
+  loadError.value = "";
 
-  initSheet(data);
+  try {
+    const data = parseTemplateContent();
+    await nextTick();
+    if (disposed) {
+      return;
+    }
+
+    disposeDesigner();
+    await initSheet(data as Record<string, unknown>);
+  } catch (error) {
+    disposeDesigner();
+    loadError.value = error instanceof Error ? error.message : "打印设计器初始化失败";
+    console.error("[PdfPrintDesigner] init failed", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const preview = async () => {
+  try {
+    previewing.value = true;
+    const req: PrintPreviewRequest = {
+      content: JSON.stringify(serializeTemplateContent()),
+      printType: currentPrintDef.value.printType,
+    };
+
+    const printResult = await customPrintService.preview(req);
+    if (printResult?.downloadUrl) {
+      window.open(printResult.downloadUrl, "_blank");
+      return;
+    }
+
+    ElMessage.error(printResult?.message || "打印失败");
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : "打印失败");
+  } finally {
+    previewing.value = false;
+  }
+};
+
+const save = async () => {
+  try {
+    saving.value = true;
+    const req: PrintTemplateRequest = {
+      id: currentPrintDef.value.id,
+      name: currentPrintDef.value.name,
+      appId: currentPrintDef.value.appId,
+      formId: currentPrintDef.value.formId,
+      content: JSON.stringify(serializeTemplateContent()),
+      printType: currentPrintDef.value.printType,
+    };
+
+    currentPrintDef.value = req.id
+      ? await printTemplateService.put<PrintTemplate>(req.id, req)
+      : await printTemplateService.post<PrintTemplate>(req);
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : "保存失败");
+  } finally {
+    saving.value = false;
+  }
+};
+
+const onStart = (e: any) => {
+  e.preventDefault();
+  const vm = e.item._underlying_vm_;
+  if (vm.data.type == FieldType.TableForm) {
+    e.cancel = true;
+    return;
+  }
+
+  draggingNode.value = vm;
+};
+
+watch(
+  () => props.printDef,
+  async (value) => {
+    currentPrintDef.value = value;
+
+    if (container.value) {
+      await initializeDesigner();
+    }
+  }
+);
+
+onMounted(async () => {
   populateFields();
+  await initializeDesigner();
 });
+
 onBeforeUnmount(() => {
-  univerObj?.dispose();
+  disposed = true;
+  disposeDesigner();
 });
 </script>
+
 <style lang="scss" scoped>
 .print-design-container {
   height: 100%;
@@ -290,7 +746,7 @@ onBeforeUnmount(() => {
       width: 100%;
       cursor: move;
 
-      >div {
+      > div {
         width: 100%;
       }
     }
@@ -344,10 +800,54 @@ onBeforeUnmount(() => {
     }
   }
 
+  .designer-stage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--et-space-10);
+    min-width: 0;
+  }
+
   .univer-container {
     width: 100%;
     height: 100%;
+    min-height: 0;
   }
+}
+
+.page-setup-summary {
+  color: var(--et-text-secondary);
+  font-size: var(--et-font-size-13);
+  line-height: var(--et-line-height-32);
+}
+
+.page-margin-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--et-space-12);
+}
+
+.page-margin-item {
+  display: flex;
+  align-items: center;
+  gap: var(--et-space-8);
+
+  .el-input-number {
+    width: 100%;
+  }
+}
+
+.page-margin-label,
+.page-margin-unit {
+  color: var(--et-text-secondary);
+  font-size: var(--et-font-size-13);
+}
+
+.page-margin-unit {
+  margin-top: var(--et-space-8);
+  display: inline-block;
 }
 
 .drop-active {
@@ -355,7 +855,20 @@ onBeforeUnmount(() => {
   border: 2px dashed var(--et-color-primary) !important;
 }
 </style>
+
 <style lang="scss">
+.flow-designer {
+  .univer-container {
+    [data-u-comp="defined-name"] {
+      display: none;
+    }
+
+    [data-u-comp="formula-bar"] > div:first-child {
+      display: none;
+    }
+  }
+}
+
 .print-design-container .field-container {
   .el-tabs__nav.is-top {
     float: none;

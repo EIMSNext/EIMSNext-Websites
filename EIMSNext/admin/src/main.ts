@@ -5,6 +5,12 @@ import "element-plus/dist/index.css";
 import "@/assets/iconfont/iconfont.css";
 import "@eimsnext/components/dist/index.css";
 import "@eimsnext/form-render-elplus/dist/index.css";
+import "@univerjs/design/lib/index.css";
+import "@univerjs/ui/lib/index.css";
+import "@univerjs/drawing-ui/lib/index.css";
+import "@univerjs/docs-ui/lib/index.css";
+import "@univerjs/sheets-drawing-ui/lib/index.css";
+import "@univerjs/sheets-ui/lib/index.css";
 // 本地SVG图标
 import "virtual:svg-icons-register";
 // 样式

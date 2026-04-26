@@ -333,8 +333,8 @@ defineExpose({
   justify-content: space-between;
   padding: var(--et-space-18) var(--et-space-16);
   border-radius: var(--et-space-8);
-  background: #f8fafc;
-  border: 1px solid #edf1f6;
+  background: var(--et-bg-secondary-container);
+  border: 1px solid var(--et-border-color-light);
 }
 
 .version-row + .version-row {
@@ -358,13 +358,13 @@ defineExpose({
 }
 
 .version-name {
-  color: #1f2a37;
+  color: var(--et-text-primary);
   font-size: var(--et-font-size-16);
   font-weight: 600;
 }
 
 .version-row-meta {
-  color: #8a94a6;
+  color: var(--et-text-secondary);
   font-size: var(--et-font-size-12);
   line-height: var(--et-line-height-20);
 }

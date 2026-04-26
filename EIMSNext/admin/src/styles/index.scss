@@ -21,10 +21,13 @@
 .link-text:focus {
   border: none !important;
   color: var(--et-color-secondary) !important;
+  background: transparent !important;
   cursor: pointer;
+  border-radius: var(--et-radius-4);
 
   &:hover {
-    color: var(--et-color-primary-hover);
+    color: var(--et-color-primary-hover) !important;
+    background: var(--et-bg-hover) !important;
   }
 }
 
