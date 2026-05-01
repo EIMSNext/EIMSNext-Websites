@@ -1,39 +1,7 @@
 import type { Injector, UniverInstanceType as UniverInstanceTypeType } from "@univerjs/core";
 import type { IRenderManagerService } from "@univerjs/engine-render";
 import { Plugin, UniverInstanceType } from "@univerjs/core";
-
-export type PrintOrientation = "portrait" | "landscape";
-
-export type PrintMargins = {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-};
-
-export type PrintPageSettings = {
-  paperSize: string;
-  orientation: PrintOrientation;
-  margins: PrintMargins;
-};
-
-export type PrintAreaPluginConfig = {
-  container: HTMLElement;
-  unitId: string;
-  getWorkbook: () => PrintWorkbookLike | undefined;
-  getPageSettings: () => PrintPageSettings;
-};
-
-type PrintWorksheetLike = {
-  getMaxColumns(): number;
-  getMaxRows(): number;
-  getColumnWidth(columnPosition: number): number;
-  getRowHeight(rowPosition: number): number;
-};
-
-type PrintWorkbookLike = {
-  getActiveSheet(): PrintWorksheetLike;
-};
+import type { PrintOrientation, PrintPageSettings, PrintAreaPluginConfig, PrintWorksheetLike, PrintWorkbookLike } from "./types";
 
 type PaperSize = {
   widthMm: number;
