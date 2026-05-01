@@ -7,6 +7,12 @@
             <el-option v-for="option in paperSizeOptions" :key="option.value" :label="option.label" :value="option.value" />
           </el-select>
         </el-form-item>
+        <el-form-item label="纸张方向">
+          <el-radio-group v-model="pageSettingsDraft.orientation">
+            <el-radio-button label="portrait">竖向</el-radio-button>
+            <el-radio-button label="landscape">横向</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="页边距">
           <div class="page-margin-grid">
             <div class="page-margin-item">
@@ -41,7 +47,7 @@
         <span class="page-setup-summary">{{ pageSetupSummary }}</span>
       </div>
       <div class="right">
-        <el-button>打印模板设置</el-button>
+        <el-button @click="openPageSetupDialog">打印模板设置</el-button>
         <el-button :loading="previewing" :disabled="!designerReady" @click="preview">预览</el-button>
         <el-button :loading="saving" :disabled="!designerReady" @click="save">保存</el-button>
       </div>
@@ -99,6 +105,7 @@ import { FieldDef, FieldType, FormDef, PrintTemplate, PrintTemplateRequest } fro
 import { DataItemType, ITreeNode } from "@eimsnext/components";
 import Draggable from "vuedraggable";
 import { customPrintService, PrintPreviewRequest, printTemplateService } from "@eimsnext/services";
+import { EimsPrintAreaPlugin, type PrintOrientation } from "./printAreaPlugin";
 import { IPrintMetadata } from "./type";
 
 defineOptions({
@@ -141,11 +148,13 @@ type PrintMargins = {
 
 type PrintPageSettings = {
   paperSize: string;
+  orientation: PrintOrientation;
   margins: PrintMargins;
 };
 
 type WorksheetPageSetup = {
   paperSize: string;
+  orientation: PrintOrientation;
   topMargin: number;
   rightMargin: number;
   bottomMargin: number;
@@ -170,6 +179,7 @@ const createDefaultMargins = (): PrintMargins => ({
 
 const createDefaultPageSettings = (): PrintPageSettings => ({
   paperSize: "A4",
+  orientation: "portrait",
   margins: createDefaultMargins(),
 });
 
@@ -205,8 +215,13 @@ const isRecord = (value: unknown): value is Record<string, unknown> => !!value &
 
 const clonePageSettings = (settings: PrintPageSettings): PrintPageSettings => ({
   paperSize: settings.paperSize,
+  orientation: settings.orientation,
   margins: { ...settings.margins },
 });
+
+const normalizeOrientation = (value: unknown, fallback: PrintOrientation): PrintOrientation => (
+  value === "landscape" || value === "portrait" ? value : fallback
+);
 
 const normalizeMarginValue = (value: unknown, fallback: number) => {
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
@@ -224,6 +239,7 @@ const normalizeDraftPageSettings = (value: PrintPageSettings): PrintPageSettings
 
   return {
     paperSize,
+    orientation: normalizeOrientation(value.orientation, defaults.orientation),
     margins: {
       top: normalizeMarginValue(value.margins.top, defaults.margins.top),
       right: normalizeMarginValue(value.margins.right, defaults.margins.right),
@@ -250,6 +266,7 @@ const normalizePageSettings = (value: unknown): PrintPageSettings => {
 
   return {
     paperSize,
+    orientation: normalizeOrientation(value.orientation, defaults.orientation),
     margins: {
       top: resolveMarginMm("topMargin", defaults.margins.top),
       right: resolveMarginMm("rightMargin", defaults.margins.right),
@@ -261,6 +278,7 @@ const normalizePageSettings = (value: unknown): PrintPageSettings => {
 
 const buildWorksheetPageSetup = (settings: PrintPageSettings): WorksheetPageSetup => ({
   paperSize: settings.paperSize,
+  orientation: settings.orientation,
   topMargin: mmToPoint(settings.margins.top),
   rightMargin: mmToPoint(settings.margins.right),
   bottomMargin: mmToPoint(settings.margins.bottom),
@@ -317,13 +335,14 @@ const pageSettingsDraft = reactive<PrintPageSettings>(createDefaultPageSettings(
 const designerReady = computed(() => !loading.value && !loadError.value && !!workbookApi);
 const pageSetupSummary = computed(() => {
   const margins = pageSettings.value.margins;
-  return `纸张：${pageSettings.value.paperSize} | 页边距 ${margins.top}/${margins.right}/${margins.bottom}/${margins.left} mm`;
+  return `纸张：${pageSettings.value.paperSize} ${pageSettings.value.orientation === "landscape" ? "横向" : "竖向"} | 页边距 ${margins.top}/${margins.right}/${margins.bottom}/${margins.left} mm`;
 });
 
 let univerObj: InstanceType<UniverModule["Univer"]> | undefined;
 let univerApi: any;
 let workbookApi: any;
 let loadedModules: LoadedUniverModules | undefined;
+let printAreaPlugin: EimsPrintAreaPlugin | undefined;
 let disposed = false;
 
 const hiddenMenuItems: Record<string, { hidden: boolean }> = {
@@ -340,6 +359,7 @@ const hiddenMenuItems: Record<string, { hidden: boolean }> = {
 const syncPageSettingsDraft = () => {
   const nextSettings = clonePageSettings(pageSettings.value);
   pageSettingsDraft.paperSize = nextSettings.paperSize;
+  pageSettingsDraft.orientation = nextSettings.orientation;
   pageSettingsDraft.margins.top = nextSettings.margins.top;
   pageSettingsDraft.margins.right = nextSettings.margins.right;
   pageSettingsDraft.margins.bottom = nextSettings.margins.bottom;
@@ -354,6 +374,7 @@ const openPageSetupDialog = () => {
 const applyPageSettings = () => {
   pageSettings.value = normalizeDraftPageSettings(pageSettingsDraft);
   syncPageSettingsDraft();
+  printAreaPlugin?.refresh();
   showPageSetupDialog.value = false;
 };
 
@@ -366,6 +387,8 @@ const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: 
 };
 
 const disposeDesigner = () => {
+  printAreaPlugin?.dispose();
+  printAreaPlugin = undefined;
   univerObj?.dispose();
   univerObj = undefined;
   univerApi = undefined;
@@ -578,10 +601,17 @@ const initSheet = async (data: Record<string, unknown>) => {
     menu: hiddenMenuItems,
   });
   univer.registerPlugin(modules.sheetsDrawingUi.UniverSheetsDrawingUIPlugin);
+  univer.registerPlugin(EimsPrintAreaPlugin, {
+    container: container.value,
+    unitId: DEFAULT_SHEET_ID,
+    getWorkbook: () => workbookApi,
+    getPageSettings: () => pageSettings.value,
+  });
 
   const runtimeApi = modules.coreFacade.FUniver.newAPI(univer);
   registerPageSetupToolbarMenu(modules, runtimeApi);
   const runtimeWorkbook = runtimeApi.createWorkbook(data);
+  printAreaPlugin = (univer as any).__getInjector?.().get(EimsPrintAreaPlugin);
 
   if (!runtimeApi.Event?.DragOver || !runtimeApi.Event?.Drop) {
     throw new Error("Univer 0.21 运行时事件接口发生变化，请检查 facade Event 定义");
@@ -625,6 +655,7 @@ const initSheet = async (data: Record<string, unknown>) => {
   univerObj = univer;
   univerApi = runtimeApi;
   workbookApi = runtimeWorkbook;
+  printAreaPlugin?.refresh();
 };
 
 const initializeDesigner = async () => {
