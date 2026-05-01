@@ -1,4 +1,5 @@
-import type { IRenderManagerService } from "@univerjs/engine-render";
+import { Inject, Injector, Plugin, UniverInstanceType } from "@univerjs/core";
+import { IRenderManagerService } from "@univerjs/engine-render";
 import type { PrintOrientation, PrintPageSettings, PrintAreaPluginConfig, PrintWorksheetLike, PrintWorkbookLike } from "./types";
 
 type PaperSize = {
@@ -104,17 +105,32 @@ const resolveVisibleRange = (worksheet: PrintWorksheetLike, availableWidth: numb
   };
 };
 
-export class EimsPrintAreaPlugin {
+export class EimsPrintAreaPlugin extends Plugin {
+  static override pluginName = "EimsPrintAreaPlugin";
+
+  static override packageName = "@eimsnext/print-plugins";
+
+  static override version = "0.21.1";
+
+  static override type = UniverInstanceType.UNIVER_SHEET;
+
+  protected readonly _injector: Injector;
   private readonly _config: PrintAreaPluginConfig;
-  private _renderManagerService: IRenderManagerService;
+  private readonly _renderManagerService: IRenderManagerService;
   private readonly _overlay: HTMLDivElement;
   private readonly _frame: HTMLDivElement;
   private readonly _label: HTMLDivElement;
   private _refreshTimer: number | undefined;
 
-  constructor(config: PrintAreaPluginConfig) {
+  constructor(
+    config: PrintAreaPluginConfig,
+    injector: Injector,
+    @Inject(IRenderManagerService) renderManagerService: IRenderManagerService,
+  ) {
+    super();
     this._config = config;
-    this._renderManagerService = config.renderManagerService;
+    this._injector = injector;
+    this._renderManagerService = renderManagerService;
 
     ensureOverlayStyles();
 
@@ -138,18 +154,24 @@ export class EimsPrintAreaPlugin {
 
     this._config.container.appendChild(this._overlay);
 
-    this._renderManagerService.created$.subscribe(() => {
+    this.disposeWithMe(this._renderManagerService.created$.subscribe(() => {
       this.refresh();
-    });
+    }));
 
     if (typeof ResizeObserver !== "undefined") {
       const resizeObserver = new ResizeObserver(() => this.refresh());
       resizeObserver.observe(this._config.container);
+      this.disposeWithMe({
+        dispose: () => resizeObserver.disconnect(),
+      });
     }
 
     if (typeof window !== "undefined") {
       const onResize = () => this.refresh();
       window.addEventListener("resize", onResize);
+      this.disposeWithMe({
+        dispose: () => window.removeEventListener("resize", onResize),
+      });
     }
 
     this.refresh();
@@ -177,6 +199,7 @@ export class EimsPrintAreaPlugin {
     }
 
     this._overlay.remove();
+    super.dispose();
   }
 
   private _renderPrintableArea(): void {

@@ -32,7 +32,7 @@ const baseOptimizeDeps = [
   "element-plus",
   "pinia",
   "axios",
-  "lodash",
+  "lodash-es",
   "@vueuse/core",
   "sortablejs",
   "exceljs",
@@ -262,7 +262,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       alias: {
         "@": pathSrc,
       },
-    },
     },
     css: {
       preprocessorOptions: {

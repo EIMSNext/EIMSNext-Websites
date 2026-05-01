@@ -2,6 +2,7 @@
   "compilerOptions": {
     "jsx": "preserve",
     "strict": true,
+    "experimentalDecorators": true,
     "target": "ES2017",
     "module": "ESNext",
     "skipLibCheck": true,

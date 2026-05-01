@@ -1,3 +1,5 @@
+import type { IRenderManagerService } from "@univerjs/engine-render";
+
 export type PrintOrientation = "portrait" | "landscape";
 
 export type PrintMargins = {
@@ -18,6 +20,7 @@ export type PrintAreaPluginConfig = {
   unitId: string;
   getWorkbook: () => PrintWorkbookLike | undefined;
   getPageSettings: () => PrintPageSettings;
+  renderManagerService?: IRenderManagerService;
 };
 
 export type PrintWorksheetLike = {

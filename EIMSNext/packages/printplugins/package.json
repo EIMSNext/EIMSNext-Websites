@@ -6,12 +6,24 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "keywords": [],
   "files": [
     "dist"
   ],
   "author": "",
   "license": "",
+  "peerDependencies": {
+    "@univerjs/core": "^0.21.1",
+    "@univerjs/engine-render": "^0.21.1"
+  },
   "scripts": {
     "build": "vite build"
   }
