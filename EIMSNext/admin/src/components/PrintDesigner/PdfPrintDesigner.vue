@@ -42,6 +42,11 @@
         </div>
       </template>
     </el-dialog>
+    <PdfPreview
+      v-model="showPrintPreview"
+      :pdf-url="previewPdfUrl"
+      :title="previewPdfTitle"
+    />
     <div class="flow-actions">
       <div class="left">
         <span class="page-setup-summary">{{ pageSetupSummary }}</span>
@@ -107,6 +112,7 @@ import { EimsPrintAreaPlugin, type PrintOrientation } from "@eimsnext/print-plug
 import Draggable from "vuedraggable";
 import { customPrintService, PrintPreviewRequest, printTemplateService } from "@eimsnext/services";
 import { IPrintMetadata } from "./type";
+import PdfPreview from "./PdfPreview.vue";
 
 defineOptions({
   name: "PdfPrintDesigner",
@@ -330,6 +336,9 @@ const loading = ref(false);
 const previewing = ref(false);
 const saving = ref(false);
 const loadError = ref("");
+const showPrintPreview = ref(false);
+const previewPdfUrl = ref("");
+const previewPdfTitle = ref("");
 const pageSettings = ref<PrintPageSettings>(createDefaultPageSettings());
 const pageSettingsDraft = reactive<PrintPageSettings>(createDefaultPageSettings());
 const designerReady = computed(() => !loading.value && !loadError.value && !!workbookApi);
@@ -690,7 +699,9 @@ const preview = async () => {
 
     const printResult = await customPrintService.preview(req);
     if (printResult?.downloadUrl) {
-      window.open(printResult.downloadUrl, "_blank");
+      previewPdfUrl.value = printResult.downloadUrl;
+      previewPdfTitle.value = currentPrintDef.value.name || "打印预览";
+      showPrintPreview.value = true;
       return;
     }
 

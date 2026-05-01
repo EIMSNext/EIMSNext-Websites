@@ -1,2 +1,2 @@
-export * from "./src/types";
-export * from "./src/printAreaPlugin";
+export { EimsPrintAreaPlugin } from "./src/printAreaPlugin";
+export type { PrintAreaPluginConfig, PrintOrientation, PrintPageSettings, PrintWorkbookLike, PrintWorksheetLike } from "./src/types";

@@ -17,7 +17,12 @@ const scssAdditionalData = `
   @use "@/styles/variables.scss" as *;
 `;
 
-const autoImportPackages: Array<"vue" | "@vueuse/core" | "pinia" | "vue-router"> = ["vue", "@vueuse/core", "pinia", "vue-router"];
+const autoImportPackages: Array<"vue" | "@vueuse/core" | "pinia" | "vue-router"> = [
+  "vue",
+  "@vueuse/core",
+  "pinia",
+  "vue-router",
+];
 
 const componentDirs = ["src/components", "src/**/components"];
 
@@ -108,10 +113,7 @@ const elementPlusStyleDeps = [
   "element-plus/es/components/empty/style/css",
 ];
 
-const optimizeDepIncludes = [
-  ...baseOptimizeDeps,
-  ...elementPlusStyleDeps,
-];
+const optimizeDepIncludes = [...baseOptimizeDeps, ...elementPlusStyleDeps];
 
 const workspacePackageAliases: Record<string, string> = {
   "formrender/el-plus": "@eimsnext/form-render-elplus",
@@ -119,6 +121,7 @@ const workspacePackageAliases: Record<string, string> = {
   "formrender/vant": "@eimsnext/form-render-vant",
   formdesigner: "@eimsnext/form-designer",
   formbuilder: "@eimsnext/form-builder",
+  "print-plugins": "@eimsnext/print-plugins",
 };
 
 const packageChunkGroups = [
@@ -205,8 +208,7 @@ const packageChunkGroups = [
 function getPackageName(normalizedId: string) {
   const packagePath = normalizedId.split("node_modules/").pop();
 
-  if (!packagePath)
-    return;
+  if (!packagePath) return;
 
   return packagePath.startsWith("@")
     ? packagePath.split("/").slice(0, 2).join("/")
@@ -216,8 +218,7 @@ function getPackageName(normalizedId: string) {
 function getWorkspacePackageName(normalizedId: string) {
   const match = normalizedId.match(/\/packages\/(.+?)\/dist\//);
 
-  if (!match)
-    return;
+  if (!match) return;
 
   const packagePath = match[1];
 
@@ -232,14 +233,17 @@ function toChunkName(packageName: string) {
 }
 
 function matchesPackageName(packageName: string | undefined, packages: readonly string[]) {
-  if (!packageName)
-    return false;
+  if (!packageName) return false;
 
-  return packages.some(pkg => pkg.endsWith("/") ? packageName.startsWith(pkg) : packageName === pkg);
+  return packages.some((pkg) =>
+    pkg.endsWith("/") ? packageName.startsWith(pkg) : packageName === pkg
+  );
 }
 
 function getGroupedChunkName(packageName: string | undefined) {
-  const group = packageChunkGroups.find(({ packages }) => matchesPackageName(packageName, packages));
+  const group = packageChunkGroups.find(({ packages }) =>
+    matchesPackageName(packageName, packages)
+  );
 
   return group?.chunk;
 }
@@ -258,6 +262,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       alias: {
         "@": pathSrc,
       },
+    },
     },
     css: {
       preprocessorOptions: {
@@ -336,7 +341,10 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       },
       rollupOptions: {
         onwarn(warning, warn) {
-          if (warning.code === "MODULE_LEVEL_DIRECTIVE" && warning.message.includes('"use client"')) {
+          if (
+            warning.code === "MODULE_LEVEL_DIRECTIVE" &&
+            warning.message.includes('"use client"')
+          ) {
             return;
           }
 
@@ -383,15 +391,17 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
                 return "pdf-worker";
               }
 
-              if (normalizedId.includes("/legacy/build/") || normalizedId.includes("/legacy/web/")) {
+              if (
+                normalizedId.includes("/legacy/build/") ||
+                normalizedId.includes("/legacy/web/")
+              ) {
                 return "pdf-vendor";
               }
 
               return;
             }
 
-            if (groupedChunkName)
-              return groupedChunkName;
+            if (groupedChunkName) return groupedChunkName;
 
             return packageName ? toChunkName(packageName) : undefined;
           },

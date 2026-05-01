@@ -3,8 +3,8 @@
     :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
     <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
-  <PdfPreview v-model="showPdfPreview" :title="pdfPreviewTitle" subtitle="Custom print preview"
-    :source="pdfPreviewUrl" />
+  <PdfPreview v-model="showPdfPreview" :title="pdfPreviewTitle"
+    :pdf-url="pdfPreviewUrl" />
   <et-toolbar type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
   <FormView v-if="formDef && formData" :def="formDef.content!" :data="formData" :isView="isView" :actions="actions"
     :fieldPerms="fieldPerms" class="editdata" @draft="saveDraft" @submit="submitData"></FormView>
@@ -39,7 +39,7 @@ import { getPrintConfig, IPrintData } from "@/components/WebPrint/type";
 import buildQuery from "odata-query";
 const { t } = useI18n();
 
-const PdfPreview = defineAsyncComponent(() => import("@/components/WebPrint/PdfPreview.vue"));
+const PdfPreview = defineAsyncComponent(() => import("@/components/PrintDesigner/PdfPreview.vue"));
 
 const props = withDefaults(
   defineProps<{

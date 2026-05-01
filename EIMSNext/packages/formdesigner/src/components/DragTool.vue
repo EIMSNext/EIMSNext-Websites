@@ -1,18 +1,14 @@
 <template>
-  <div
-    class="_fd-drag-tool"
-    @click.stop="active"
-    :class="{
-      active: fcx.active === id,
-      'is-inside': inside,
-      'is-inline': inline,
-    }"
-  >
+  <div class="_fd-drag-tool" @click.stop="active" :class="{
+    active: fcx.active === id,
+    'is-inside': inside,
+    'is-inline': inline,
+  }">
     <div class="_fd-drag-mask" v-if="mask"></div>
     <div class="_fd-drag-hidden" v-if="hidden">
       <i class="fc-icon icon-eye-close"></i> {{ t("props.hide") }}
     </div>
-    <div class="_fd-drag-l" v-if="!hiddenBtn" @click.stop>
+    <!-- <div class="_fd-drag-l" v-if="false" @click.stop>
       <div
         class="_fd-drag-btn"
         v-if="dragBtn !== false"
@@ -21,14 +17,10 @@
       >
         <i class="fc-icon icon-move"></i>
       </div>
-    </div>
+    </div> -->
     <div class="_fd-drag-r" v-if="btns !== false && !hiddenMenu">
       <slot name="handle">
-        <div
-          class="_fd-drag-btn"
-          v-if="actions && actions.length > 0"
-          @click.stop
-        >
+        <div class="_fd-drag-btn" v-if="actions && actions.length > 0" @click.stop>
           <el-dropdown trigger="click" @command="command">
             <i class="fc-icon icon-setting"></i>
             <template #dropdown>
@@ -42,36 +34,24 @@
             </template>
           </el-dropdown>
         </div>
-        <div
-          class="_fd-drag-btn"
-          @click.stop
-          v-if="isCreate && (btns === true || btns.indexOf('create') > -1)"
-          @click="$emit('create')"
-        >
+        <div class="_fd-drag-btn" @click.stop v-if="isCreate && (btns === true || btns.indexOf('create') > -1)"
+          @click="$emit('create')">
           <i class="fc-icon icon-add"></i>
         </div>
-        <div
-          class="_fd-drag-btn"
-          @click.stop
-          v-if="!only && (btns === true || btns.indexOf('copy') > -1)"
-          @click="$emit('copy')"
-        >
+        <div class="_fd-drag-btn" @click.stop v-if="!only && (btns === true || btns.indexOf('copy') > -1)"
+          @click="$emit('copy')">
           <i class="fc-icon icon-copy"></i>
         </div>
-        <div
+        <!-- <div
           class="_fd-drag-btn"
           @click.stop
           v-if="children && (btns === true || btns.indexOf('addChild') > -1)"
           @click="$emit('addChild')"
         >
           <i class="fc-icon icon-add-child"></i>
-        </div>
-        <div
-          class="_fd-drag-btn _fd-drag-danger"
-          @click.stop
-          v-if="btns === true || btns.indexOf('delete') > -1"
-          @click="$emit('delete')"
-        >
+        </div> -->
+        <div class="_fd-drag-btn _fd-drag-danger" @click.stop v-if="btns === true || btns.indexOf('delete') > -1"
+          @click="$emit('delete')">
           <i class="fc-icon icon-delete"></i>
         </div>
       </slot>
@@ -192,17 +172,13 @@ export default defineComponent({
   outline-style: dashed;
 }
 
-._fd-drag-tool:not(.active):hover > div > ._fd-drag-btn {
+._fd-drag-tool:not(.active):hover>div>._fd-drag-btn {
   display: flex !important;
   opacity: 0.7;
 }
 
-._fd-drag-tool:has(
-    ._fd-drag-tool:not(.active):hover,
-    ._fd-drag-tool.active:hover
-  )
-  > div
-  > ._fd-drag-btn {
+._fd-drag-tool:has(._fd-drag-tool:not(.active):hover,
+  ._fd-drag-tool.active:hover)>div>._fd-drag-btn {
   display: none !important;
 }
 
@@ -210,7 +186,7 @@ export default defineComponent({
   padding: 2px;
 }
 
-._fd-drag-tool + ._fd-drag-tool {
+._fd-drag-tool+._fd-drag-tool {
   margin-top: 5px;
 }
 
@@ -221,7 +197,7 @@ export default defineComponent({
   background-color: var(--fc-style-bg-color-1);
 }
 
-._fd-drag-tool.active > div > ._fd-drag-btn {
+._fd-drag-tool.active>div>._fd-drag-btn {
   display: flex;
 }
 
@@ -280,7 +256,7 @@ export default defineComponent({
   color: inherit;
 }
 
-._fd-drag-btn + ._fd-drag-btn {
+._fd-drag-btn+._fd-drag-btn {
   margin-left: 2px;
 }
 

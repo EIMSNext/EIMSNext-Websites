@@ -5,8 +5,7 @@
     "moduleResolution": "bundler",
     "lib": ["esnext", "dom"],
     "paths": {
-      "@/*": ["./src/*"],
-      "@eimsnext/print-plugins": ["../packages/printplugins/dist/index.d.ts"]
+      "@/*": ["./src/*"]
     },
 
     // 严格性和类型检查相关配置

@@ -1357,7 +1357,7 @@ export default defineComponent({
                                 swapThreshold: 0.65,
                                 ghostClass: 'ghost',
                                 animation: 150,
-                                handle: '._fd-drag-btn',
+                                handle: '._fd-drag-tool',
                                 emptyInsertThreshold: 0,
                                 direction: 'auto',
                                 itemKey: 'type',

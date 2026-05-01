@@ -1,6 +1,4 @@
-import type { Injector, UniverInstanceType as UniverInstanceTypeType } from "@univerjs/core";
 import type { IRenderManagerService } from "@univerjs/engine-render";
-import { Plugin, UniverInstanceType } from "@univerjs/core";
 import type { PrintOrientation, PrintPageSettings, PrintAreaPluginConfig, PrintWorksheetLike, PrintWorkbookLike } from "./types";
 
 type PaperSize = {
@@ -106,27 +104,17 @@ const resolveVisibleRange = (worksheet: PrintWorksheetLike, availableWidth: numb
   };
 };
 
-export class EimsPrintAreaPlugin extends Plugin {
-  static override pluginName = "EimsPrintAreaPlugin";
-  static override packageName = "@eimsnext/print-plugins";
-  static override version = "0.21.1";
-  static override type = UniverInstanceType.UNIVER_SHEET as UniverInstanceTypeType;
-
-  protected override _injector: Injector;
-
+export class EimsPrintAreaPlugin {
   private readonly _config: PrintAreaPluginConfig;
-  private readonly _renderManagerService: IRenderManagerService;
+  private _renderManagerService: IRenderManagerService;
   private readonly _overlay: HTMLDivElement;
   private readonly _frame: HTMLDivElement;
   private readonly _label: HTMLDivElement;
   private _refreshTimer: number | undefined;
 
-  constructor(config: PrintAreaPluginConfig, injector: Injector, renderManagerService: IRenderManagerService) {
-    super();
-
+  constructor(config: PrintAreaPluginConfig) {
     this._config = config;
-    this._injector = injector;
-    this._renderManagerService = renderManagerService;
+    this._renderManagerService = config.renderManagerService;
 
     ensureOverlayStyles();
 
@@ -143,35 +131,31 @@ export class EimsPrintAreaPlugin extends Plugin {
     this._overlay.appendChild(this._frame);
   }
 
-  override onRendered(): void {
+  onRendered(): void {
     if (getComputedStyle(this._config.container).position === "static") {
       this._config.container.style.position = "relative";
     }
 
     this._config.container.appendChild(this._overlay);
 
-    this.disposeWithMe(
-      this._renderManagerService.created$.subscribe(() => {
-        this.refresh();
-      })
-    );
+    this._renderManagerService.created$.subscribe(() => {
+      this.refresh();
+    });
 
     if (typeof ResizeObserver !== "undefined") {
       const resizeObserver = new ResizeObserver(() => this.refresh());
       resizeObserver.observe(this._config.container);
-      this.disposeWithMe({ dispose: () => resizeObserver.disconnect() });
     }
 
     if (typeof window !== "undefined") {
       const onResize = () => this.refresh();
       window.addEventListener("resize", onResize);
-      this.disposeWithMe({ dispose: () => window.removeEventListener("resize", onResize) });
     }
 
     this.refresh();
   }
 
-  refresh() {
+  refresh(): void {
     if (typeof window === "undefined") {
       return;
     }
@@ -186,17 +170,16 @@ export class EimsPrintAreaPlugin extends Plugin {
     }, 0);
   }
 
-  override dispose() {
+  dispose(): void {
     if (this._refreshTimer && typeof window !== "undefined") {
       window.clearTimeout(this._refreshTimer);
       this._refreshTimer = undefined;
     }
 
     this._overlay.remove();
-    super.dispose();
   }
 
-  private _renderPrintableArea() {
+  private _renderPrintableArea(): void {
     const workbook = this._config.getWorkbook();
     const worksheet = workbook?.getActiveSheet();
 
