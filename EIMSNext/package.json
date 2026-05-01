@@ -26,6 +26,7 @@
     "build:lang": "cd packages/locale && vite build",
     "build:mod": "cd packages/models && vite build",
     "build:service": "cd packages/services && vite build",
+    "build:printplugins": "cd packages/printplugins && vite build",
     "build:store": "cd packages/store && vite build",
     "build:com": "cd packages/components && vite build",
     "build:core": "cd packages/formrender/core && vite build",
@@ -33,7 +34,7 @@
     "build:vant": "cd packages/formrender/vant && vite build",
     "build:des": "cd packages/formdesigner && vite build",
     "build:bld": "cd packages/formbuilder && vite build",
-    "build:all": "npm run build:utils && npm run build:lang && npm run build:mod && npm run build:service && npm run build:store && npm run build:com && npm run build:core && npm run build:elplus && npm run build:vant && npm run build:des && npm run build:bld"
+    "build:all": "npm run build:utils && npm run build:lang && npm run build:mod && npm run build:service && npm run build:printplugins && npm run build:store && npm run build:com && npm run build:core && npm run build:elplus && npm run build:vant && npm run build:des && npm run build:bld"
   },
   "dependencies": {
     "@eimsnext/components": "workspace:*",
@@ -44,6 +45,7 @@
     "@eimsnext/form-render-vant": "workspace:*",
     "@eimsnext/locale": "workspace:*",
     "@eimsnext/models": "workspace:*",
+    "@eimsnext/print-plugins": "workspace:*",
     "@eimsnext/services": "workspace:*",
     "@eimsnext/store": "workspace:*",
     "@eimsnext/utils": "workspace:*",

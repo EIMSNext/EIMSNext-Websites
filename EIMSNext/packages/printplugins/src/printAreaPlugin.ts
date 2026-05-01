@@ -140,8 +140,8 @@ const resolveVisibleRange = (worksheet: PrintWorksheetLike, availableWidth: numb
 
 export class EimsPrintAreaPlugin extends Plugin {
   static override pluginName = "EimsPrintAreaPlugin";
-  static override packageName = "@eimsnext/admin";
-  static override version = "1.0.0";
+  static override packageName = "@eimsnext/print-plugins";
+  static override version = "0.21.1";
   static override type = UniverInstanceType.UNIVER_SHEET as UniverInstanceTypeType;
 
   protected override _injector: Injector;

@@ -103,9 +103,9 @@
 import { useFormStore } from "@eimsnext/store";
 import { FieldDef, FieldType, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
 import { DataItemType, ITreeNode } from "@eimsnext/components";
+import { EimsPrintAreaPlugin, type PrintOrientation } from "@eimsnext/print-plugins";
 import Draggable from "vuedraggable";
 import { customPrintService, PrintPreviewRequest, printTemplateService } from "@eimsnext/services";
-import { EimsPrintAreaPlugin, type PrintOrientation } from "./printAreaPlugin";
 import { IPrintMetadata } from "./type";
 
 defineOptions({
