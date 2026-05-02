@@ -1,5 +1,4 @@
-import { Inject, Injector, Plugin, UniverInstanceType } from "@univerjs/core";
-import { IRenderManagerService } from "@univerjs/engine-render";
+import type { IRenderManagerService, IRender, Scene, Viewport } from "@univerjs/engine-render";
 import type { PrintOrientation, PrintPageSettings, PrintAreaPluginConfig, PrintWorksheetLike, PrintWorkbookLike } from "./types";
 
 type PaperSize = {
@@ -8,8 +7,11 @@ type PaperSize = {
 };
 
 const OVERLAY_CLASS = "eims-print-area-overlay";
-const FRAME_CLASS = "eims-print-area-frame";
+const GUIDE_CLASS = "eims-print-area-guide";
+const GUIDE_VERTICAL_CLASS = "eims-print-area-guide-vertical";
+const GUIDE_HORIZONTAL_CLASS = "eims-print-area-guide-horizontal";
 const LABEL_CLASS = "eims-print-area-label";
+const INITIAL_REFRESH_RETRY_LIMIT = 12;
 
 const PAPER_SIZE_MAP: Record<string, PaperSize> = {
   A3: { widthMm: 297, heightMm: 420 },
@@ -32,22 +34,31 @@ const ensureOverlayStyles = () => {
   style.textContent = `
 .${OVERLAY_CLASS} {
   position: absolute;
-  inset: 0;
   pointer-events: none;
-  z-index: 6;
+  overflow: hidden;
+  z-index: 999;
 }
 
-.${FRAME_CLASS} {
+.${GUIDE_CLASS} {
   position: absolute;
-  border: 2px dashed #409eff;
-  background: rgba(64, 158, 255, 0.04);
   box-sizing: border-box;
+  z-index: 1000;
+}
+
+.${GUIDE_VERTICAL_CLASS} {
+  width: 0;
+  border-left: 2px dashed #409eff;
+}
+
+.${GUIDE_HORIZONTAL_CLASS} {
+  height: 0;
+  border-top: 2px dashed #409eff;
 }
 
 .${LABEL_CLASS} {
   position: absolute;
-  left: 0;
-  top: -28px;
+  left: 8px;
+  top: 8px;
   padding: 4px 8px;
   border-radius: 999px;
   background: rgba(64, 158, 255, 0.12);
@@ -105,31 +116,32 @@ const resolveVisibleRange = (worksheet: PrintWorksheetLike, availableWidth: numb
   };
 };
 
-export class EimsPrintAreaPlugin extends Plugin {
-  static override pluginName = "EimsPrintAreaPlugin";
-
-  static override packageName = "@eimsnext/print-plugins";
-
-  static override version = "0.21.1";
-
-  static override type = UniverInstanceType.UNIVER_SHEET;
-
-  protected readonly _injector: Injector;
+export class EimsPrintAreaPlugin {
   private readonly _config: PrintAreaPluginConfig;
   private readonly _renderManagerService: IRenderManagerService;
   private readonly _overlay: HTMLDivElement;
-  private readonly _frame: HTMLDivElement;
+  private readonly _verticalGuide: HTMLDivElement;
+  private readonly _horizontalGuide: HTMLDivElement;
   private readonly _label: HTMLDivElement;
-  private _refreshTimer: number | undefined;
+  private _refreshHandle: number | undefined;
+  private _refreshWithTimeout = false;
+  private _mountedContainer: HTMLElement | null = null;
+  private _resizeObserver: ResizeObserver | undefined;
+  private _windowResizeListener: (() => void) | undefined;
+  private _renderCreatedSubscription: { unsubscribe(): void } | undefined;
+  private _viewportScrollSubscription: { unsubscribe(): void } | undefined;
+  private _sceneTransformSubscription: { unsubscribe(): void } | undefined;
+  private _sceneAfterRenderSubscription: { unsubscribe(): void } | undefined;
+  private _boundScene: unknown;
+  private _boundViewport: unknown;
+  private _initialRefreshAttempts = 0;
+  private _initialRefreshSettled = false;
 
   constructor(
     config: PrintAreaPluginConfig,
-    injector: Injector,
-    @Inject(IRenderManagerService) renderManagerService: IRenderManagerService,
+    renderManagerService: IRenderManagerService,
   ) {
-    super();
     this._config = config;
-    this._injector = injector;
     this._renderManagerService = renderManagerService;
 
     ensureOverlayStyles();
@@ -137,41 +149,36 @@ export class EimsPrintAreaPlugin extends Plugin {
     this._overlay = document.createElement("div");
     this._overlay.className = OVERLAY_CLASS;
 
-    this._frame = document.createElement("div");
-    this._frame.className = FRAME_CLASS;
+    this._verticalGuide = document.createElement("div");
+    this._verticalGuide.className = `${GUIDE_CLASS} ${GUIDE_VERTICAL_CLASS}`;
+
+    this._horizontalGuide = document.createElement("div");
+    this._horizontalGuide.className = `${GUIDE_CLASS} ${GUIDE_HORIZONTAL_CLASS}`;
 
     this._label = document.createElement("div");
     this._label.className = LABEL_CLASS;
 
-    this._frame.appendChild(this._label);
-    this._overlay.appendChild(this._frame);
+    this._overlay.appendChild(this._verticalGuide);
+    this._overlay.appendChild(this._horizontalGuide);
+    this._overlay.appendChild(this._label);
   }
 
   onRendered(): void {
-    if (getComputedStyle(this._config.container).position === "static") {
-      this._config.container.style.position = "relative";
-    }
+    this._initialRefreshAttempts = 0;
+    this._initialRefreshSettled = false;
 
-    this._config.container.appendChild(this._overlay);
-
-    this.disposeWithMe(this._renderManagerService.created$.subscribe(() => {
+    this._renderCreatedSubscription = this._renderManagerService.created$.subscribe(() => {
       this.refresh();
-    }));
+    });
 
     if (typeof ResizeObserver !== "undefined") {
-      const resizeObserver = new ResizeObserver(() => this.refresh());
-      resizeObserver.observe(this._config.container);
-      this.disposeWithMe({
-        dispose: () => resizeObserver.disconnect(),
-      });
+      this._resizeObserver = new ResizeObserver(() => this.refresh());
+      this._resizeObserver.observe(this._config.container);
     }
 
     if (typeof window !== "undefined") {
-      const onResize = () => this.refresh();
-      window.addEventListener("resize", onResize);
-      this.disposeWithMe({
-        dispose: () => window.removeEventListener("resize", onResize),
-      });
+      this._windowResizeListener = () => this.refresh();
+      window.addEventListener("resize", this._windowResizeListener);
     }
 
     this.refresh();
@@ -182,24 +189,55 @@ export class EimsPrintAreaPlugin extends Plugin {
       return;
     }
 
-    if (this._refreshTimer) {
-      window.clearTimeout(this._refreshTimer);
+    if (this._refreshHandle) {
+      if (this._refreshWithTimeout) {
+        window.clearTimeout(this._refreshHandle);
+      } else {
+        window.cancelAnimationFrame(this._refreshHandle);
+      }
     }
 
-    this._refreshTimer = window.setTimeout(() => {
-      this._refreshTimer = undefined;
+    if (typeof window.requestAnimationFrame === "function") {
+      this._refreshWithTimeout = false;
+      this._refreshHandle = window.requestAnimationFrame(() => {
+        this._refreshHandle = undefined;
+        this._renderPrintableArea();
+      });
+      return;
+    }
+
+    this._refreshWithTimeout = true;
+    this._refreshHandle = window.setTimeout(() => {
+      this._refreshHandle = undefined;
       this._renderPrintableArea();
     }, 0);
   }
 
   dispose(): void {
-    if (this._refreshTimer && typeof window !== "undefined") {
-      window.clearTimeout(this._refreshTimer);
-      this._refreshTimer = undefined;
+    if (this._refreshHandle && typeof window !== "undefined") {
+      if (this._refreshWithTimeout) {
+        window.clearTimeout(this._refreshHandle);
+      } else {
+        window.cancelAnimationFrame(this._refreshHandle);
+      }
+
+      this._refreshHandle = undefined;
+    }
+
+    this._renderCreatedSubscription?.unsubscribe();
+    this._viewportScrollSubscription?.unsubscribe();
+    this._sceneTransformSubscription?.unsubscribe();
+    this._sceneAfterRenderSubscription?.unsubscribe();
+    this._resizeObserver?.disconnect();
+
+    if (this._windowResizeListener && typeof window !== "undefined") {
+      window.removeEventListener("resize", this._windowResizeListener);
     }
 
     this._overlay.remove();
-    super.dispose();
+    this._mountedContainer = null;
+    this._boundScene = undefined;
+    this._boundViewport = undefined;
   }
 
   private _renderPrintableArea(): void {
@@ -208,6 +246,7 @@ export class EimsPrintAreaPlugin extends Plugin {
 
     if (!workbook || !worksheet) {
       this._overlay.style.display = "none";
+      this._queueInitialRefresh();
       return;
     }
 
@@ -223,28 +262,97 @@ export class EimsPrintAreaPlugin extends Plugin {
 
     if (!scene || !viewport) {
       this._overlay.style.display = "none";
+      this._queueInitialRefresh();
       return;
     }
 
-    const scrollXY = scene.getViewportScrollXY(viewport);
+    if (!this._mountOverlay(render)) {
+      this._overlay.style.display = "none";
+      this._queueInitialRefresh();
+      return;
+    }
+
+    this._bindViewportEvents(scene, viewport);
+
     const { scaleX, scaleY } = scene.getAncestorScale();
+    const scrollXY = scene.getViewportScrollXY(viewport);
 
     const printableRange = resolveVisibleRange(worksheet, availableWidth, availableHeight);
-    const left = -scrollXY.x / scaleX;
-    const top = -scrollXY.y / scaleY;
-    const width = printableRange.width / scaleX;
-    const height = printableRange.height / scaleY;
+    const boundaryX = viewport.left + (printableRange.width - scrollXY.x) / scaleX;
+    const boundaryY = viewport.top + (printableRange.height - scrollXY.y) / scaleY;
+    const viewportWidth = viewport.width ?? 0;
+    const viewportHeight = viewport.height ?? 0;
 
-    if (width <= 0 || height <= 0) {
+    if (printableRange.width <= 0 || printableRange.height <= 0 || viewportWidth <= 0 || viewportHeight <= 0) {
       this._overlay.style.display = "none";
+      this._queueInitialRefresh();
       return;
     }
 
+    this._initialRefreshSettled = true;
     this._overlay.style.display = "block";
-    this._frame.style.left = `${left}px`;
-    this._frame.style.top = `${top}px`;
-    this._frame.style.width = `${width}px`;
-    this._frame.style.height = `${height}px`;
+    this._verticalGuide.style.left = `${boundaryX}px`;
+    this._verticalGuide.style.top = `${viewport.top}px`;
+    this._verticalGuide.style.height = `${viewportHeight}px`;
+    this._horizontalGuide.style.left = `${viewport.left}px`;
+    this._horizontalGuide.style.top = `${boundaryY}px`;
+    this._horizontalGuide.style.width = `${viewportWidth}px`;
+    this._label.style.left = `${Math.min(boundaryX + 8, viewport.left + Math.max(viewportWidth - 180, 8))}px`;
+    this._label.style.top = `${Math.max(viewport.top + 8, 8)}px`;
     this._label.textContent = `可打印区域 ${paperSize} ${orientation === "landscape" ? "横向" : "纵向"}`;
+  }
+
+  private _queueInitialRefresh(): void {
+    if (this._initialRefreshSettled || this._initialRefreshAttempts >= INITIAL_REFRESH_RETRY_LIMIT) {
+      return;
+    }
+
+    this._initialRefreshAttempts += 1;
+    this.refresh();
+  }
+
+  private _mountOverlay(render: IRender): boolean {
+    const canvasElement = render.engine.getCanvasElement();
+    const mountContainer = canvasElement.parentElement;
+
+    if (!mountContainer) {
+      return false;
+    }
+
+    if (getComputedStyle(mountContainer).position === "static") {
+      mountContainer.style.position = "relative";
+    }
+
+    if (this._mountedContainer !== mountContainer) {
+      this._overlay.remove();
+      mountContainer.appendChild(this._overlay);
+      this._mountedContainer = mountContainer;
+    }
+
+    const canvasRect = canvasElement.getBoundingClientRect();
+    const mountRect = mountContainer.getBoundingClientRect();
+
+    this._overlay.style.left = `${canvasRect.left - mountRect.left}px`;
+    this._overlay.style.top = `${canvasRect.top - mountRect.top}px`;
+    this._overlay.style.width = `${canvasRect.width}px`;
+    this._overlay.style.height = `${canvasRect.height}px`;
+
+    return true;
+  }
+
+  private _bindViewportEvents(scene: Scene, viewport: Viewport): void {
+    if (this._boundScene !== scene) {
+      this._sceneTransformSubscription?.unsubscribe();
+      this._sceneAfterRenderSubscription?.unsubscribe();
+      this._sceneTransformSubscription = scene.onTransformChange$.subscribe(() => this.refresh());
+      this._sceneAfterRenderSubscription = scene.afterRender$.subscribe(() => this.refresh());
+      this._boundScene = scene;
+    }
+
+    if (this._boundViewport !== viewport) {
+      this._viewportScrollSubscription?.unsubscribe();
+      this._viewportScrollSubscription = viewport?.onScrollAfter$.subscribe(() => this.refresh());
+      this._boundViewport = viewport;
+    }
   }
 }

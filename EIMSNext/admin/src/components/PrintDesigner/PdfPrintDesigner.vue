@@ -191,6 +191,8 @@ const createDefaultPageSettings = (): PrintPageSettings => ({
 
 const DEFAULT_SHEET_ID = "Sheet1";
 const PAGE_SETUP_MENU_ID = "eimsnext.print.page-setup";
+const DEFAULT_ROW_COUNT = 100;
+const DEFAULT_COLUMN_COUNT = 26;
 
 const mmToPoint = (millimeter: number) => Number((millimeter * 72 / 25.4).toFixed(4));
 
@@ -206,6 +208,8 @@ const createDefaultWorkbookData = () => ({
     [DEFAULT_SHEET_ID]: {
       id: DEFAULT_SHEET_ID,
       name: DEFAULT_SHEET_ID,
+      rowCount: DEFAULT_ROW_COUNT,
+      columnCount: DEFAULT_COLUMN_COUNT,
       cellData: {},
       rowData: {},
       columnData: {},
@@ -610,17 +614,39 @@ const initSheet = async (data: Record<string, unknown>) => {
     menu: hiddenMenuItems,
   });
   univer.registerPlugin(modules.sheetsDrawingUi.UniverSheetsDrawingUIPlugin);
-  univer.registerPlugin(EimsPrintAreaPlugin, {
-    container: container.value,
-    unitId: DEFAULT_SHEET_ID,
-    getWorkbook: () => workbookApi,
-    getPageSettings: () => pageSettings.value,
-  });
 
   const runtimeApi = modules.coreFacade.FUniver.newAPI(univer);
   registerPageSetupToolbarMenu(modules, runtimeApi);
   const runtimeWorkbook = runtimeApi.createWorkbook(data);
-  printAreaPlugin = (univer as any).__getInjector?.().get(EimsPrintAreaPlugin);
+  const renderManagerService = (univer as any).__getInjector?.().get(modules.render.IRenderManagerService);
+  const runtimeUnitId = typeof runtimeWorkbook?.getId === "function"
+    ? runtimeWorkbook.getId()
+    : typeof runtimeWorkbook?.getUnitId === "function"
+      ? runtimeWorkbook.getUnitId()
+      : DEFAULT_SHEET_ID;
+
+  if (!renderManagerService) {
+    throw new Error("Univer 渲染服务未初始化，无法加载打印区域插件");
+  }
+
+  if (!runtimeUnitId) {
+    throw new Error("Univer 工作簿缺少 unitId，无法加载打印区域插件");
+  }
+
+  univerObj = univer;
+  univerApi = runtimeApi;
+  workbookApi = runtimeWorkbook;
+
+  printAreaPlugin = new EimsPrintAreaPlugin({
+    container: container.value,
+    unitId: runtimeUnitId,
+    getWorkbook: () => workbookApi,
+    getPageSettings: () => pageSettings.value,
+  }, renderManagerService);
+  printAreaPlugin.onRendered();
+  requestAnimationFrame(() => {
+    printAreaPlugin?.refresh();
+  });
 
   if (!runtimeApi.Event?.DragOver || !runtimeApi.Event?.Drop) {
     throw new Error("Univer 0.21 运行时事件接口发生变化，请检查 facade Event 定义");
@@ -661,9 +687,6 @@ const initSheet = async (data: Record<string, unknown>) => {
     draggingNode.value = undefined;
   });
 
-  univerObj = univer;
-  univerApi = runtimeApi;
-  workbookApi = runtimeWorkbook;
   printAreaPlugin?.refresh();
 };
 
