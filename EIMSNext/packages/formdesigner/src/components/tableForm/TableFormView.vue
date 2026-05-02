@@ -38,6 +38,46 @@ export default defineComponent({
     box-sizing: border-box;
 }
 
+._fd-tf-wrap > ._fd-tableform-drag {
+    display: inline-flex;
+    align-items: stretch;
+    align-content: flex-start;
+    flex-wrap: nowrap !important;
+    min-width: 100%;
+    min-height: 126px;
+    width: max-content;
+}
+
+._fd-tf-wrap > ._fd-tableform-drag.drag-holder {
+    position: relative;
+    min-width: 100%;
+    min-height: 126px;
+    width: 100%;
+}
+
+._fd-tf-wrap > ._fd-tableform-drag.drag-holder::after {
+    inset: 0;
+}
+
+._fd-tf-wrap > ._fd-tableform-drag > ._fd-drag-item {
+    width: auto;
+    flex: 0 0 auto;
+    max-width: none;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+._fd-tf-wrap > ._fd-tableform-drag > ._fd-drag-item:has( > ._fd-drag-tool > .el-col, > .el-col) {
+    flex: 0 0 auto;
+    max-width: none;
+}
+
+._fd-tf-wrap > ._fd-tableform-drag > ._fd-drag-item > ._fd-drag-tool > .el-col,
+._fd-tf-wrap > ._fd-tableform-drag > ._fd-drag-item > .el-col {
+    flex: 0 0 auto;
+    max-width: none;
+}
+
 ._fd-tf-wrap > ._fd-drag-tool {
     flex-shrink: 0;
     display: flex;

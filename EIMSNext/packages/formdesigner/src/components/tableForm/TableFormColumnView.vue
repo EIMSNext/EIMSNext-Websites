@@ -63,6 +63,17 @@ export default defineComponent({
     box-sizing: border-box;
 }
 
+._fd-tf-con > ._fd-drag-box.drag-holder {
+    min-width: 100%;
+    min-height: 42px;
+}
+
+._fd-tf-con > ._fd-drag-item {
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
 ._fd-tf-con .el-form-item__content {
     display: flex;
     margin-left: 0px !important;
