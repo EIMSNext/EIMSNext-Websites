@@ -302,4 +302,5 @@ export default defineComponent({
 ._fd-drag-hidden .fc-icon {
   margin-right: 5px;
 }
+
 </style>

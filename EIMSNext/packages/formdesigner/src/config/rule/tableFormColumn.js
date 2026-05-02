@@ -6,16 +6,9 @@ export default {
   icon: "icon-cell",
   name,
   aide: true,
-  drag: true,
+  drag: false,
   dragBtn: false,
   mask: false,
-  denyDrag: {
-    item: [
-      "tableform",
-      "tabs",
-      "elTabPane",
-    ],
-  },
   input: false,
   validate: false,
   style: false,
