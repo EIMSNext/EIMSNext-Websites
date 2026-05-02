@@ -1,25 +1,42 @@
 <template>
   <button @click="changLang">Change Lang</button>
-  <form-builder :locale="localeRef.locale" :formName="formName"></form-builder>
+  <form-builder :locale="locale" :formName="formName"></form-builder>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from "vue";
+import { ref,computed } from "vue";
 import { FormBuilder } from "@eimsnext/form-builder";
 import "@eimsnext/form-builder/dist/index.css";
-import ZhCn from "@eimsnext/form-designer";
-import En from "@eimsnext/form-designer";
+// 导入 Element Plus 中英文语言包
+import zhCn_EL from "element-plus/es/locale/lang/zh-cn";
+import en_EL from "element-plus/es/locale/lang/en";
+// 本地语言包
+import { ZhCn as zhCn_App, En as en_App } from "@eimsnext/locale";
 
-const localeRef = reactive({ lang: "zh-CN", locale: ZhCn });
+const locales = {
+  "zh-CN": {
+    ...zhCn_EL,
+    ...zhCn_App,
+  },
+  en: {
+    ...en_EL,
+    ...en_App,
+  },
+};
+const locale = computed(() => {
+  if (language.value == "en") {
+    return locales.en;
+  } else {
+    return locales["zh-CN"];
+  }
+});
+const language = ref("zh-CN");
 const formName = ref("test form");
 const changLang = () => {
-  console.log(localeRef.lang);
-  if (localeRef.lang == "en") {
-    localeRef.lang = "zh-CN";
-    localeRef.locale = ZhCn;
+  if (language.value == "en") {
+    language.value = "zh-CN";
   } else {
-    localeRef.lang = "en";
-    localeRef.locale = En;
+    language.value = "en";
   }
 };
 </script>
