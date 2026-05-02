@@ -64,3 +64,23 @@
 .fc-form-footer {
   margin-top: 12px;
 }
+
+.form-create.is-preview ._fc-read-view.is-empty {
+  display: inline-flex;
+  width: 100%;
+  min-height: 36px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  background-color: var(--el-fill-color-light);
+  border: 1px solid var(--el-border-color-lighter);
+}
+
+.form-create.is-preview .el-input__wrapper,
+.form-create.is-preview .el-textarea__inner,
+.form-create.is-preview .el-select__wrapper,
+.form-create.is-preview .el-input-number,
+.form-create.is-preview .el-date-editor.el-input__wrapper,
+.form-create.is-preview .el-date-editor .el-input__wrapper,
+.form-create.is-preview .el-cascader .el-input__wrapper {
+  background-color: var(--el-fill-color-light);
+}

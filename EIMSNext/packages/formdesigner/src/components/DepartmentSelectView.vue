@@ -1,6 +1,6 @@
 <template>
   <div class="org-select-view">
-    <SelectedTags :modelValue="tags" :style="{ height: multiple ? '60px' : '35px' }" :editable="true"
+    <SelectedTags :modelValue="tags" :style="{ height: '35px' }" :editable="true"
       :emptyText="t('comp.emptyDept')"></SelectedTags>
   </div>
 </template>

@@ -510,6 +510,7 @@ export default defineComponent({
       const displayTags = (selectedValue.value || []).map((tag) => ({
         label: tag?.label || "未知字段",
         value: String(tag?.value ?? "暂无内容"),
+        empty: tag?.value == null || tag?.value === "",
       }));
 
       return (
@@ -542,7 +543,7 @@ export default defineComponent({
                   <span class="form-selected-data-display-label">
                     {tag.label}
                   </span>
-                  <span class="form-selected-data-display-value">
+                  <span class={["form-selected-data-display-value", tag.empty ? "is-empty" : ""]}>
                     {tag.value || "暂无内容"}
                   </span>
                 </div>

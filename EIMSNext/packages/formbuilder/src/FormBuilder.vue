@@ -169,8 +169,6 @@ export default {
           "group",
           "subForm",
           "stepForm",
-          "nestedTableForm",
-          "infiniteTableForm",
           "html",
           "fcSlot",
           "fcRow",

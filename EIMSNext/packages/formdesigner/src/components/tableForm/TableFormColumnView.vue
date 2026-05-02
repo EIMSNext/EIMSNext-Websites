@@ -59,12 +59,18 @@ export default defineComponent({
     display: flex;
     flex: 1;
     width: 100%;
+    padding: 6px;
+    box-sizing: border-box;
 }
 
 ._fd-tf-con .el-form-item__content {
     display: flex;
     margin-left: 0px !important;
     width: 100% !important;
+}
+
+._fd-tf-con > * {
+    width: 100%;
 }
 
 
@@ -96,6 +102,18 @@ export default defineComponent({
 
 ._fd-tf-con .el-input-number, ._fd-tf-con .el-select, ._fd-tf-con .el-slider, ._fd-tf-con .el-cascader, ._fd-tf-con .el-date-editor {
     width: 100%;
+}
+
+._fd-tf-con .el-textarea__inner,
+._fd-tf-con .org-select-view .selected-tags {
+    min-height: 32px !important;
+    height: 32px !important;
+}
+
+._fd-tf-con .el-textarea__inner {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    resize: none;
 }
 
 </style>

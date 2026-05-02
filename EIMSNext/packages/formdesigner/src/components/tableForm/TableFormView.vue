@@ -33,6 +33,9 @@ export default defineComponent({
 ._fd-tf-wrap {
     display: flex;
     overflow: auto;
+    min-height: 130px;
+    padding: 2px;
+    box-sizing: border-box;
 }
 
 ._fd-tf-wrap > ._fd-drag-tool {
@@ -40,6 +43,15 @@ export default defineComponent({
     display: flex;
     margin: 2px;
     height: auto;
+}
+
+._fd-tf-wrap._fd-drop-hover {
+    outline: 1px dashed var(--fc-style-color-1);
+    background: var(--fc-style-bg-color-1);
+}
+
+._fd-tf-wrap .ghost {
+    opacity: 0.55;
 }
 
 </style>

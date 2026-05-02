@@ -14,20 +14,9 @@ export default {
   subForm: "array",
   languageKey: ["add", "delete", "operation", "dataEmpty"],
   event: ["change", "add", "delete", "handleClick"],
-  children: "tableFormColumn",
-  subRender({ t, h, resolveComponent, subRule }) {
-    return [
-      {
-        label: t("props.title"),
-        vnode: h(resolveComponent("el-input"), {
-          size: "small",
-          modelValue: subRule.props.label,
-          "onUpdate:modelValue": (v) => {
-            subRule.props.label = v;
-          },
-        }),
-      },
-    ];
+  drag: true,
+  subRender() {
+    return [];
   },
   loadRule(rule) {
     if (!rule.props) rule.props = {};

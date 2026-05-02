@@ -12,9 +12,6 @@ export default {
   denyDrag: {
     item: [
       "tableform",
-      "nestedTableForm",
-      "nestedSubTableForm",
-      "infiniteTableForm",
       "tabs",
       "elTabPane",
     ],

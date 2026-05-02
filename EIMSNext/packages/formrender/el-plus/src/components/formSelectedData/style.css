@@ -149,3 +149,16 @@
   text-align: right;
   word-break: break-all;
 }
+
+.form-selected-data-display-value.is-empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 120px;
+  min-height: 32px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  background-color: var(--el-fill-color-light);
+  border: 1px solid var(--el-border-color-lighter);
+}

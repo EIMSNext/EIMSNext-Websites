@@ -117,6 +117,13 @@ export default {
         };
     },
     methods: {
+        getColumnLabel(column) {
+            const firstRule = column?.rule?.[0];
+            if (firstRule && !firstRule._tableHandle) {
+                return (firstRule.__$title?.value || firstRule.title || firstRule.props?.label || '').trim() || column.label || '';
+            }
+            return column.label || '';
+        },
         paginateArray() {
             const array = this.modelValue || [];
             const pageSize = this.limit;
@@ -324,11 +331,11 @@ export default {
                         minWidth: 120
                     },
                     renderSlots: {
-                        header() {
+                        header: () => {
                             return h('span', {
                                 class: column.required ? 'is-required' : '',
                                 style: {color: column?.style?.color}
-                            }, column.label)
+                            }, this.getColumnLabel(column))
                         },
                         default: ({$index}) => {
                             const rule = this.rule[0]?.children[$index]?.children[idx];

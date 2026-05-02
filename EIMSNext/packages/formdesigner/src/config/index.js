@@ -43,9 +43,6 @@ import stepFormItem from "./rule/stepFormItem";
 import html from "./rule/html";
 import table from "./rule/table";
 import tableform from "./rule/tableForm";
-import infiniteTableForm from "./rule/infiniteTableForm";
-import nestedTableForm from "./rule/nestedTableForm";
-import nestedSubTableForm from "./rule/nestedSubTableForm";
 import tableFormColumn from "./rule/tableFormColumn";
 import flex from "./rule/flex";
 import cell from "./rule/cell";
@@ -137,9 +134,6 @@ const ruleList = [
   value,
   tableform,
   tableFormColumn,
-  nestedTableForm,
-  nestedSubTableForm,
-  infiniteTableForm,
   slot,
   json,
   formItem,

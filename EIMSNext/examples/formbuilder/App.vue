@@ -7,7 +7,8 @@
 import { reactive, ref } from "vue";
 import { FormBuilder } from "@eimsnext/form-builder";
 import "@eimsnext/form-builder/dist/index.css";
-import { ZhCn, En } from "@eimsnext/form-designer";
+import ZhCn from "@eimsnext/form-designer";
+import En from "@eimsnext/form-designer";
 
 const localeRef = reactive({ lang: "zh-CN", locale: ZhCn });
 const formName = ref("test form");
