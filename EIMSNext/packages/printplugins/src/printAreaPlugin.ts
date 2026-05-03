@@ -36,7 +36,7 @@ const ensureOverlayStyles = () => {
   position: absolute;
   pointer-events: none;
   overflow: hidden;
-  z-index: 1;
+  z-index: 999;
 }
 
 .${GUIDE_CLASS} {

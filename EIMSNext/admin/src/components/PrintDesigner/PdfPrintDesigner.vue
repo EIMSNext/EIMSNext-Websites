@@ -125,6 +125,7 @@ type LoadedUniverModules = {
   core: UniverModule;
   react: any;
   render: typeof import("@univerjs/engine-render");
+  engineFormula: typeof import("@univerjs/engine-formula");
   ui: UIPluginModule;
   docs: typeof import("@univerjs/docs");
   docsDrawing: typeof import("@univerjs/docs-drawing");
@@ -134,6 +135,10 @@ type LoadedUniverModules = {
   sheets: typeof import("@univerjs/sheets");
   sheetsDrawing: typeof import("@univerjs/sheets-drawing");
   sheetsDrawingUi: typeof import("@univerjs/sheets-drawing-ui");
+  sheetsFormula: typeof import("@univerjs/sheets-formula");
+  sheetsFormulaUi: typeof import("@univerjs/sheets-formula-ui");
+  sheetsNumfmt: typeof import("@univerjs/sheets-numfmt");
+  sheetsNumfmtUi: typeof import("@univerjs/sheets-numfmt-ui");
   sheetsUi: typeof import("@univerjs/sheets-ui");
   designLocale: { default: Record<string, unknown> };
   uiLocale: { default: Record<string, unknown> };
@@ -141,6 +146,9 @@ type LoadedUniverModules = {
   docsUiLocale: { default: Record<string, unknown> };
   sheetsLocale: { default: Record<string, unknown> };
   sheetsDrawingUiLocale: { default: Record<string, unknown> };
+  sheetsFormulaLocale: { default: Record<string, unknown> };
+  sheetsFormulaUiLocale: { default: Record<string, unknown> };
+  sheetsNumfmtUiLocale: { default: Record<string, unknown> };
   sheetsUiLocale: { default: Record<string, unknown> };
   coreFacade: { FUniver: any };
   sheetsFacade: { FWorkbook: any; FRange: any };
@@ -366,6 +374,17 @@ const hiddenMenuItems: Record<string, { hidden: boolean }> = {
   "base-ui.operation.toggle-shortcut-panel": { hidden: true },
   "formula-ui.operation.insert-function": { hidden: true },
   "formula-ui.operation.more-functions": { hidden: true },
+  "formula-ui.operation.insert-function.common": { hidden: true },
+  "formula-ui.operation.insert-function.financial": { hidden: true },
+  "formula-ui.operation.insert-function.logical": { hidden: true },
+  "formula-ui.operation.insert-function.text": { hidden: true },
+  "formula-ui.operation.insert-function.date": { hidden: true },
+  "formula-ui.operation.insert-function.lookup": { hidden: true },
+  "formula-ui.operation.insert-function.math": { hidden: true },
+  "formula-ui.operation.insert-function.statistical": { hidden: true },
+  "formula-ui.operation.insert-function.engineering": { hidden: true },
+  "formula-ui.operation.insert-function.information": { hidden: true },
+  "formula-ui.operation.insert-function.database": { hidden: true },
   "ribbon.data": { hidden: true },
   "ribbon.formulas": { hidden: true },
   "formula-bar": { hidden: true },
@@ -435,7 +454,7 @@ const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: 
     title: "页面设置",
     tooltip: "页面设置",
     icon: PAGE_SETUP_MENU_ICON_ID,
-    order: -1,
+    order: 1000,
     action: openPageSetupDialog,
   }).appendTo([modules.ui.RibbonPosition.INSERT, modules.ui.RibbonInsertGroup.MEDIA]);
 };
@@ -535,12 +554,15 @@ const loadUniverModules = async () => {
     import("@univerjs/docs-ui/facade"),
     import("@univerjs/sheets/facade"),
     import("@univerjs/sheets-ui/facade"),
+    import("@univerjs/sheets-formula/facade"),
+    import("@univerjs/sheets-numfmt/facade"),
   ]);
 
   const [
     core,
     react,
     render,
+    engineFormula,
     ui,
     docs,
     docsDrawing,
@@ -550,6 +572,10 @@ const loadUniverModules = async () => {
     sheets,
     sheetsDrawing,
     sheetsDrawingUi,
+    sheetsFormula,
+    sheetsFormulaUi,
+    sheetsNumfmt,
+    sheetsNumfmtUi,
     sheetsUi,
     designLocale,
     uiLocale,
@@ -557,6 +583,9 @@ const loadUniverModules = async () => {
     docsUiLocale,
     sheetsLocale,
     sheetsDrawingUiLocale,
+    sheetsFormulaLocale,
+    sheetsFormulaUiLocale,
+    sheetsNumfmtUiLocale,
     sheetsUiLocale,
     coreFacade,
     sheetsFacade,
@@ -564,6 +593,7 @@ const loadUniverModules = async () => {
     import("@univerjs/core"),
     import("react"),
     import("@univerjs/engine-render"),
+    import("@univerjs/engine-formula"),
     import("@univerjs/ui"),
     import("@univerjs/docs"),
     import("@univerjs/docs-drawing"),
@@ -573,6 +603,10 @@ const loadUniverModules = async () => {
     import("@univerjs/sheets"),
     import("@univerjs/sheets-drawing"),
     import("@univerjs/sheets-drawing-ui"),
+    import("@univerjs/sheets-formula"),
+    import("@univerjs/sheets-formula-ui"),
+    import("@univerjs/sheets-numfmt"),
+    import("@univerjs/sheets-numfmt-ui"),
     import("@univerjs/sheets-ui"),
     import("@univerjs/design/locale/zh-CN"),
     import("@univerjs/ui/locale/zh-CN"),
@@ -580,6 +614,9 @@ const loadUniverModules = async () => {
     import("@univerjs/docs-ui/locale/zh-CN"),
     import("@univerjs/sheets/locale/zh-CN"),
     import("@univerjs/sheets-drawing-ui/locale/zh-CN"),
+    import("@univerjs/sheets-formula/locale/zh-CN"),
+    import("@univerjs/sheets-formula-ui/locale/zh-CN"),
+    import("@univerjs/sheets-numfmt-ui/locale/zh-CN"),
     import("@univerjs/sheets-ui/locale/zh-CN"),
     import("@univerjs/core/facade"),
     import("@univerjs/sheets/facade"),
@@ -589,6 +626,7 @@ const loadUniverModules = async () => {
     core,
     react,
     render,
+    engineFormula,
     ui,
     docs,
     docsDrawing,
@@ -598,6 +636,10 @@ const loadUniverModules = async () => {
     sheets,
     sheetsDrawing,
     sheetsDrawingUi,
+    sheetsFormula,
+    sheetsFormulaUi,
+    sheetsNumfmt,
+    sheetsNumfmtUi,
     sheetsUi,
     designLocale: designLocale as { default: Record<string, unknown> },
     uiLocale: uiLocale as { default: Record<string, unknown> },
@@ -605,6 +647,9 @@ const loadUniverModules = async () => {
     docsUiLocale: docsUiLocale as { default: Record<string, unknown> },
     sheetsLocale: sheetsLocale as { default: Record<string, unknown> },
     sheetsDrawingUiLocale: sheetsDrawingUiLocale as { default: Record<string, unknown> },
+    sheetsFormulaLocale: sheetsFormulaLocale as { default: Record<string, unknown> },
+    sheetsFormulaUiLocale: sheetsFormulaUiLocale as { default: Record<string, unknown> },
+    sheetsNumfmtUiLocale: sheetsNumfmtUiLocale as { default: Record<string, unknown> },
     sheetsUiLocale: sheetsUiLocale as { default: Record<string, unknown> },
     coreFacade: coreFacade as { FUniver: any },
     sheetsFacade: sheetsFacade as { FWorkbook: any; FRange: any },
@@ -632,12 +677,16 @@ const initSheet = async (data: Record<string, unknown>) => {
         modules.docsUiLocale.default,
         modules.sheetsLocale.default,
         modules.sheetsDrawingUiLocale.default,
+        modules.sheetsFormulaLocale.default,
+        modules.sheetsFormulaUiLocale.default,
+        modules.sheetsNumfmtUiLocale.default,
         modules.sheetsUiLocale.default
       ),
     },
   });
 
   univer.registerPlugin(modules.render.UniverRenderEnginePlugin);
+  univer.registerPlugin(modules.engineFormula.UniverFormulaEnginePlugin);
   univer.registerPlugin(modules.ui.UniverUIPlugin, {
     container: container.value,
     header: true,
@@ -654,9 +703,13 @@ const initSheet = async (data: Record<string, unknown>) => {
   univer.registerPlugin(modules.docsUi.UniverDocsUIPlugin);
   univer.registerPlugin(modules.sheets.UniverSheetsPlugin);
   univer.registerPlugin(modules.sheetsDrawing.UniverSheetsDrawingPlugin);
+  univer.registerPlugin(modules.sheetsFormula.UniverSheetsFormulaPlugin);
+  univer.registerPlugin(modules.sheetsNumfmt.UniverSheetsNumfmtPlugin);
   univer.registerPlugin(modules.sheetsUi.UniverSheetsUIPlugin, {
     menu: hiddenMenuItems,
   });
+  univer.registerPlugin(modules.sheetsFormulaUi.UniverSheetsFormulaUIPlugin);
+  univer.registerPlugin(modules.sheetsNumfmtUi.UniverSheetsNumfmtUIPlugin);
   univer.registerPlugin(modules.sheetsDrawingUi.UniverSheetsDrawingUIPlugin);
 
   const runtimeApi = modules.coreFacade.FUniver.newAPI(univer);
