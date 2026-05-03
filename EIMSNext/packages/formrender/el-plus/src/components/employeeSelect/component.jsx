@@ -112,7 +112,7 @@ export default defineComponent({
           : selectedValue.value
             ? [selectedValue.value]
             : [];
-      const tagHeight = multiple ? "60px" : "35px";
+      const tagHeight = multiple ? "60px" : "38px";
       const styCls = multiple
         ? "_fc-org-select"
         : "_fc-org-select et-employee1";

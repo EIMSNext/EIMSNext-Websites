@@ -29,7 +29,7 @@ export default {
       type: name,
       props: {
         label: t("com.tableFormColumn.label"),
-        width: "auto",
+        width: "160px",
       },
       children: [],
     };

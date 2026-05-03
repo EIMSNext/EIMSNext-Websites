@@ -25,7 +25,7 @@ export default defineComponent({
     colStyle() {
       const w = this.width;
       const style = {
-        width: is.Number(w) ? `${w}px` : !w || w === "auto" ? "180px" : w,
+        width: is.Number(w) ? `${w}px` : !w || w === "auto" ? "160px" : w,
       };
       if (this.color) {
         style.color = this.color;

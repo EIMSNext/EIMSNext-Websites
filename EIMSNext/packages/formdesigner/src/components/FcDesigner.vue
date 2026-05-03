@@ -386,10 +386,15 @@
                                             <div><span style="color:#eb5050">*</span><span class="_fc-field-title">{{
                                                 t('form.title')
                                                     }}</span></div>
-                                            <el-tag v-if="activeRule" type="success" effect="plain" disable-transitions>
-                                                {{ t('com.' + (activeRule._menu.name) + '.name') ||
-                                                    activeRule._menu.label }}
-                                            </el-tag> <!-- <TypeSelect></TypeSelect> -->
+                                            <div style="display:flex; align-items:center; gap:8px;">
+                                                <span v-if="isgod && activeRule && activeRule.field" class="_fd-field-code">
+                                                    {{ activeRule.field }}
+                                                </span>
+                                                <el-tag v-if="activeRule" type="success" effect="plain" disable-transitions>
+                                                    {{ t('com.' + (activeRule._menu.name) + '.name') ||
+                                                        activeRule._menu.label }}
+                                                </el-tag>
+                                            </div> <!-- <TypeSelect></TypeSelect> -->
                                         </div>
                                         <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api"
                                             :rule="baseForm.rule" :option="baseForm.options"
@@ -722,6 +727,11 @@ export default defineComponent({
         const fieldReadonly = computed(() => {
             return configRef.value.fieldReadonly !== false;
         })
+        const isgod = computed(() => {
+            const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
+            const search = typeof window !== 'undefined' ? new URL(window.location.href).searchParams : null;
+            return isDev || search?.get('god') === 'cn';
+        });
         const fieldList = computed(() => {
             return configRef.value.fieldList || [];
         });
@@ -3416,6 +3426,7 @@ export default defineComponent({
             t,
             handle,
             inputCheckStatus,
+            isgod,
             fieldReadonly,
             fieldList,
             varList,
@@ -3457,3 +3468,11 @@ export default defineComponent({
     }
 });
 </script>
+
+<style scoped>
+._fd-field-code {
+    color: var(--el-color-danger);
+    font-size: 12px;
+    line-height: 1;
+}
+</style>
