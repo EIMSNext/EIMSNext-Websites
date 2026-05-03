@@ -1,5 +1,8 @@
-
-.fc-form-item .el-input-number,.fc-form-item .el-input,.fc-form-item .el-select,.fc-form-item .et-deparment1,.fc-form-item .et-employee1 {
+.fc-form-item .el-input-number,
+.fc-form-item .el-input,
+.fc-form-item .el-select,
+.fc-form-item .et-deparment1,
+.fc-form-item .et-employee1 {
   width: 100%;
   max-width: 360px;
 }
@@ -65,7 +68,7 @@
   margin-top: 12px;
 }
 
-.form-create.is-preview ._fc-read-view.is-empty {
+.form-create.is-preview ._fc-read-view {
   display: inline-flex;
   width: 100%;
   min-height: 36px;
@@ -73,14 +76,30 @@
   border-radius: 4px;
   background-color: var(--el-fill-color-light);
   border: 1px solid var(--el-border-color-lighter);
+  align-items: center;
+  padding: 0 11px;
+  color: var(--el-text-color-regular);
 }
 
-.form-create.is-preview .el-input__wrapper,
-.form-create.is-preview .el-textarea__inner,
-.form-create.is-preview .el-select__wrapper,
-.form-create.is-preview .el-input-number,
-.form-create.is-preview .el-date-editor.el-input__wrapper,
-.form-create.is-preview .el-date-editor .el-input__wrapper,
-.form-create.is-preview .el-cascader .el-input__wrapper {
-  background-color: var(--el-fill-color-light);
+.form-create.is-preview .fc-divider ._fc-read-view,
+.form-create.is-preview ._fc-table-form-v2 ._fc-read-view {
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.form-create.is-preview ._fc-table-form-v2 td {
+  border-right: 1px solid var(--el-border-color-lighter);
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.form-create.is-preview ._fc-table-form-v2 tr td:first-child {
+  border-left: 1px solid var(--el-border-color-lighter);
+}
+
+.form-create.is-preview ._fc-table-form-v2 tr:first-child td {
+  border-top: 1px solid var(--el-border-color-lighter);
 }

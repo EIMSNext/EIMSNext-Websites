@@ -149,6 +149,5 @@ export default function renderPreview(_, ctx) {
   } else if (typeof val === "boolean") {
     val = val ? "是" : "否";
   }
-  const isEmpty = val == null || val === "";
-  return h("span", { class: ["_fc-read-view", isEmpty ? "is-empty" : ""] }, ["" + (isEmpty ? "" : val)]);
+  return h("span", { class: "_fc-read-view" }, ["" + (val == null ? "" : val)]);
 }

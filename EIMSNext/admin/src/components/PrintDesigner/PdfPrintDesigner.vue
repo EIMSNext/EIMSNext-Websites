@@ -123,6 +123,7 @@ type UIPluginModule = typeof import("@univerjs/ui");
 
 type LoadedUniverModules = {
   core: UniverModule;
+  react: any;
   render: typeof import("@univerjs/engine-render");
   ui: UIPluginModule;
   docs: typeof import("@univerjs/docs");
@@ -191,6 +192,7 @@ const createDefaultPageSettings = (): PrintPageSettings => ({
 
 const DEFAULT_SHEET_ID = "Sheet1";
 const PAGE_SETUP_MENU_ID = "eimsnext.print.page-setup";
+const PAGE_SETUP_MENU_ICON_ID = "eimsnext.print.page-setup.icon";
 const DEFAULT_ROW_COUNT = 100;
 const DEFAULT_COLUMN_COUNT = 26;
 
@@ -367,6 +369,7 @@ const hiddenMenuItems: Record<string, { hidden: boolean }> = {
   "ribbon.data": { hidden: true },
   "ribbon.formulas": { hidden: true },
   "formula-bar": { hidden: true },
+  "sheet.toolbar.text-to-number": { hidden: true },
 };
 
 const syncPageSettingsDraft = () => {
@@ -391,12 +394,50 @@ const applyPageSettings = () => {
   showPageSetupDialog.value = false;
 };
 
+const createPageSetupMenuIcon = (react: any) => {
+  const { createElement } = react;
+
+  return function PageSetupMenuIcon(props: Record<string, unknown>) {
+    return createElement(
+      "span",
+      {
+        ...props,
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "16px",
+          height: "16px",
+          ...(typeof props.style === "object" ? props.style : {}),
+        },
+      },
+      createElement(
+        "svg",
+        {
+          viewBox: "0 0 1024 1024",
+          width: "1em",
+          height: "1em",
+          fill: "currentColor",
+          ariaHidden: "true",
+        },
+        createElement("path", {
+          d: "M256 128a64 64 0 0 0-64 64v160h64V192h512v160h64V192a64 64 0 0 0-64-64H256zm-64 288c-70.688 0-128 57.312-128 128v192h128v160h640V736h128V544c0-70.688-57.312-128-128-128H192zm64 64h512v128H256V480zm-64 0v352h-64V544a64 64 0 0 1 64-64zm640 0h64a64 64 0 0 1 64 64v288h-64V480zm-512 192h384v160H320V672zm448-96a48 48 0 1 0 0-96 48 48 0 0 0 0 96z",
+        })
+      )
+    );
+  };
+};
+
 const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: any) => {
+  runtimeApi.registerComponent(PAGE_SETUP_MENU_ICON_ID, createPageSetupMenuIcon(modules.react));
   runtimeApi.createMenu({
     id: PAGE_SETUP_MENU_ID,
     title: "页面设置",
+    tooltip: "页面设置",
+    icon: PAGE_SETUP_MENU_ICON_ID,
+    order: -1,
     action: openPageSetupDialog,
-  }).appendTo([modules.ui.RibbonPosition.START, modules.ui.RibbonStartGroup.OTHERS]);
+  }).appendTo([modules.ui.RibbonPosition.INSERT, modules.ui.RibbonInsertGroup.MEDIA]);
 };
 
 const disposeDesigner = () => {
@@ -498,6 +539,7 @@ const loadUniverModules = async () => {
 
   const [
     core,
+    react,
     render,
     ui,
     docs,
@@ -520,6 +562,7 @@ const loadUniverModules = async () => {
     sheetsFacade,
   ] = await Promise.all([
     import("@univerjs/core"),
+    import("react"),
     import("@univerjs/engine-render"),
     import("@univerjs/ui"),
     import("@univerjs/docs"),
@@ -544,6 +587,7 @@ const loadUniverModules = async () => {
 
   loadedModules = {
     core,
+    react,
     render,
     ui,
     docs,

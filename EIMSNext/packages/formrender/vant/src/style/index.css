@@ -67,6 +67,19 @@
   display: none;
 }
 
+.form-create-m.is-preview ._fc-read-view {
+  display: inline-flex;
+  width: 100%;
+  min-height: 36px;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: var(--van-fill-color-light, #f5f7fa);
+  border: 1px solid var(--van-border-color, #ebedf0);
+  color: var(--van-text-color, #323233);
+}
+
 ._fc-m-group {
   display: flex;
   align-items: flex-end;
