@@ -10,7 +10,7 @@
         <div class="pane-label">Secret</div>
         <div class="pane-row">
           <el-input v-model="hook.secret" class="pane-row-stretch" autocomplete="new-password" />
-          <el-button type="primary" class="btn-test">生成Secret</el-button>
+          <el-button type="primary" class="btn-test" @click="generateSecret">生成Secret</el-button>
         </div>
         <div class="pane-label">推送事件</div>
         <div class="pane-row">
@@ -72,6 +72,7 @@ import { FlagEnum } from "@eimsnext/utils";
 import { webhookService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { cloneDeep } from "lodash-es";
+import { nanoid } from "nanoid";
 const { t } = useI18n();
 
 defineOptions({
@@ -116,14 +117,11 @@ const triggerChanged = (perm: WebHookTrigger, checked: any) => {
   emit("update:modelValue", hook.value);
 };
 
+const generateSecret = () => {
+  hook.value.secret = nanoid(24);
+};
 const save = async () => {
   if (!hook.value) return;
-
-  // try {
-  //     await appRef.value.validate();
-  // } catch (error) {
-  //     return;
-  // }
 
   const newHook: WebhookRequest = {
     id: hook.value.id,
