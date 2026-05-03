@@ -1,12 +1,6 @@
 <template>
-  <EtConfirmDialog
-    v-model="showDeleteConfirmDialog"
-    title="你确定要删除所选数据吗？"
-    :icon="MessageIcon.Warning"
-    :showNoSave="false"
-    okText="确定"
-    @ok="execDelete"
-  >
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
+    :showNoSave="false" okText="确定" @ok="execDelete">
     <div>数据删除后将不可恢复</div>
   </EtConfirmDialog>
   <el-drawer v-model="showEditor" direction="btt" size="95%" @close="close">
@@ -14,12 +8,7 @@
       <div class="main-title"><span>数据推送</span></div>
     </template>
     <div class="main-content">
-      <WebhookEditor
-        v-if="selectedItem"
-        v-model="selectedItem"
-        :formDef="formDef"
-        :key="selectedItem.id"
-      />
+      <WebhookEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" :key="selectedItem.id" />
     </div>
   </el-drawer>
   <el-drawer v-model="showLog" direction="btt" size="95%" @close="showLog = false">
@@ -36,7 +25,15 @@
         <div class="header-left">
           <el-button type="primary" icon="plus" @click="addNew()">新建数据推送</el-button>
         </div>
-        <div class="header-right"></div>
+        <div class="header-right header-links">
+          <div class="alias-panel" aria-label="text-links">
+            <a class="link" @click="openAliasPanel">设置字段别名</a>
+            <span class="sep">|</span>
+            <a class="link" @click="openFieldMapPanel">字段对照表及JSON样例</a>
+            <span class="sep">|</span>
+            <a class="link" @click="openStructurePanel">表单数据结构</a>
+          </div>
+        </div>
       </div>
       <div>
         <el-space direction="vertical" class="flow-space">
@@ -47,10 +44,7 @@
                   <el-button @click="viewLog(hook)">推送日志</el-button>
                   <el-button @click="edit(hook)">编辑</el-button>
                   <el-button @click="remove(hook)">删除</el-button>
-                  <el-switch
-                    :model-value="!hook.disabled"
-                    @change="toggleDisable(hook)"
-                  ></el-switch>
+                  <el-switch :model-value="!hook.disabled" @change="toggleDisable(hook)"></el-switch>
                 </div>
               </template>
               <div class="flow-content">
@@ -63,11 +57,46 @@
       </div>
     </div>
   </AdvanceLayout>
+
+  <!-- 字段别名设置 Drawer -->
+  <el-drawer v-model="showAlias" direction="btt" size="95%" @close="showAlias = false">
+    <template #header>
+      <div class="main-title"><span>设置字段别名</span></div>
+    </template>
+    <div class="main-content">
+      <WebhookAliasEditor v-model="aliasFields" @save="saveAlias" @cancel="showAlias = false" />
+    </div>
+  </el-drawer>
+
+  <!-- 字段对照表 Drawer（占位） -->
+  <el-drawer v-model="showFieldMap" direction="btt" size="95%" @close="showFieldMap = false">
+    <template #header>
+      <div class="main-title"><span>字段对照表及JSON样例</span></div>
+    </template>
+    <div class="alias-drawer-content" style="padding: 16px 20px;">
+      <p>此处展示字段对照表及示例JSON（占位内容）</p>
+      <pre style="background:#f6f7f9;border:1px solid #e8eaed;padding:12px;overflow:auto;max-height:320px;">{
+      "字段示例": ["field1", "field2", "field3"]
+      }</pre>
+    </div>
+  </el-drawer>
+
+  <!-- 表单数据结构 Drawer（占位） -->
+  <el-drawer v-model="showStructure" direction="btt" size="95%" @close="showStructure = false">
+    <template #header>
+      <div class="main-title"><span>表单数据结构</span></div>
+    </template>
+    <div class="alias-drawer-content" style="padding: 16px 20px;">
+      <p>表单数据结构描述（占位内容）</p>
+    </div>
+  </el-drawer>
 </template>
 <script setup lang="ts">
 import WebhookEditor from "./WebhookEditor.vue";
+import WebhookAliasEditor from "./WebhookAliasEditor.vue";
+import { watch, onBeforeMount } from "vue";
 import WebPushLogView from "./WebPushLogView.vue";
-import { FormDef, WebHookTrigger, Webhook } from "@eimsnext/models";
+import { FieldDef, FormDef, WebHookTrigger, Webhook } from "@eimsnext/models";
 import { webhookService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
@@ -89,6 +118,42 @@ const webhooks = ref<Webhook[]>([]);
 const selectedItem = ref<Webhook>();
 const editorKey = ref(0);
 const formStore = useFormStore();
+
+// New UI state for auxiliary drawers and alias editing
+const showAlias = ref(false);
+const showFieldMap = ref(false);
+const showStructure = ref(false);
+
+type FieldAliasRow = {
+  name: string;
+  id: string;
+  type: string;
+  alias?: string;
+};
+
+const aliasFields = ref<FieldAliasRow[]>([]);
+
+const refreshAliasFromFormDef = () => {
+  const items: any[] = props.formDef?.content?.items ?? [];
+  aliasFields.value = items.map((it: any) => ({
+    name: it.title ?? it.label ?? it.name ?? `字段${aliasFields.value.length + 1}`,
+    id: it.field ?? it.id ?? it.key ?? it.name ?? `_widget_${aliasFields.value.length + 1}`,
+    type: it.type ?? (it.valueType ?? "string"),
+    alias: "",
+  }));
+};
+
+const saveAlias = () => {
+  // 简单保存逻辑：打印并关闭
+  console.log("Saved alias:", aliasFields.value);
+  showAlias.value = false;
+};
+
+const openAliasPanel = () => (showAlias.value = true);
+const openFieldMapPanel = () => (showFieldMap.value = true);
+const openStructurePanel = () => (showStructure.value = true);
+
+// (end of script) no extra close function here
 
 const loadWebhooks = (formId: string) => {
   let query = buildQuery({ filter: { formId: formId } });
@@ -153,7 +218,13 @@ onBeforeMount(() => {
   //初始化
   if (props.formDef) {
     loadWebhooks(props.formDef.id);
+    refreshAliasFromFormDef();
   }
+});
+
+// React to changes in the formDef content items to refresh the alias list
+watch(() => props.formDef?.content?.items, () => {
+  refreshAliasFromFormDef();
 });
 </script>
 <style lang="scss" scoped>
@@ -228,5 +299,42 @@ onBeforeMount(() => {
   position: absolute;
   right: 0;
   top: var(--et-size-60);
+}
+
+/* Header links styling (图1) */
+.header-links {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 8px;
+}
+
+.alias-panel {
+  border-radius: 6px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.alias-panel .link {
+  color: #333;
+  text-decoration: none;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.alias-panel .sep {
+  color: #888;
+  font-weight: 600;
+  padding: 0 6px;
+}
+
+.alias-drawer-footer {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 0;
+  border-top: 1px solid #eef2f5;
+  margin-top: 8px;
 }
 </style>
