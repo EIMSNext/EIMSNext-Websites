@@ -64,7 +64,7 @@
       <div class="main-title"><span>设置字段别名</span></div>
     </template>
     <div class="main-content">
-      <WebhookAliasEditor v-model="aliasFields" @save="saveAlias" @cancel="showAlias = false" />
+      <WebhookAliasEditor :formDef="formDef" @saved="onAliasSaved" />
     </div>
   </el-drawer>
 
@@ -94,14 +94,14 @@
 <script setup lang="ts">
 import WebhookEditor from "./WebhookEditor.vue";
 import WebhookAliasEditor from "./WebhookAliasEditor.vue";
-import { watch, onBeforeMount } from "vue";
+import { onBeforeMount } from "vue";
 import WebPushLogView from "./WebPushLogView.vue";
-import { FieldDef, FormDef, WebHookTrigger, Webhook } from "@eimsnext/models";
+import { WebHookTrigger } from "@eimsnext/models";
+import type { FormDef, Webhook } from "@eimsnext/models";
 import { webhookService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
-import { useFormStore } from "@eimsnext/store";
 
 defineOptions({
   name: "WebhookList",
@@ -117,43 +117,21 @@ const showDeleteConfirmDialog = ref(false);
 const webhooks = ref<Webhook[]>([]);
 const selectedItem = ref<Webhook>();
 const editorKey = ref(0);
-const formStore = useFormStore();
 
-// New UI state for auxiliary drawers and alias editing
+// UI state for auxiliary drawers
 const showAlias = ref(false);
 const showFieldMap = ref(false);
 const showStructure = ref(false);
 
-type FieldAliasRow = {
-  name: string;
-  id: string;
-  type: string;
-  alias?: string;
+const openAliasPanel = () => {
+  showAlias.value = true;
 };
-
-const aliasFields = ref<FieldAliasRow[]>([]);
-
-const refreshAliasFromFormDef = () => {
-  const items: any[] = props.formDef?.content?.items ?? [];
-  aliasFields.value = items.map((it: any) => ({
-    name: it.title ?? it.label ?? it.name ?? `字段${aliasFields.value.length + 1}`,
-    id: it.field ?? it.id ?? it.key ?? it.name ?? `_widget_${aliasFields.value.length + 1}`,
-    type: it.type ?? (it.valueType ?? "string"),
-    alias: "",
-  }));
-};
-
-const saveAlias = () => {
-  // 简单保存逻辑：打印并关闭
-  console.log("Saved alias:", aliasFields.value);
-  showAlias.value = false;
-};
-
-const openAliasPanel = () => (showAlias.value = true);
 const openFieldMapPanel = () => (showFieldMap.value = true);
 const openStructurePanel = () => (showStructure.value = true);
 
-// (end of script) no extra close function here
+const onAliasSaved = () => {
+  showAlias.value = false;
+};
 
 const loadWebhooks = (formId: string) => {
   let query = buildQuery({ filter: { formId: formId } });
@@ -179,7 +157,6 @@ const addNew = () => {
 
 const viewLog = (hook: Webhook) => {
   selectedItem.value = hook;
-
   showLog.value = true;
 };
 
@@ -205,26 +182,15 @@ const toggleDisable = (hook: Webhook) => {
   });
 };
 
-// const emit = defineEmits(["close"]);
-
 function close() {
   showEditor.value = false;
-
   loadWebhooks(props.formDef.id);
-  // emit("close");
 }
 
 onBeforeMount(() => {
-  //初始化
   if (props.formDef) {
     loadWebhooks(props.formDef.id);
-    refreshAliasFromFormDef();
   }
-});
-
-// React to changes in the formDef content items to refresh the alias list
-watch(() => props.formDef?.content?.items, () => {
-  refreshAliasFromFormDef();
 });
 </script>
 <style lang="scss" scoped>
@@ -314,18 +280,17 @@ watch(() => props.formDef?.content?.items, () => {
   padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 14px;
 }
 
 .alias-panel .link {
-  color: #333;
+  color: var(--et-text-primary);
   text-decoration: none;
   font-size: 13px;
   cursor: pointer;
 }
 
 .alias-panel .sep {
-  color: #888;
+  color: var(--et-text-tertiary);
   font-weight: 600;
   padding: 0 6px;
 }
@@ -334,7 +299,7 @@ watch(() => props.formDef?.content?.items, () => {
   display: flex;
   justify-content: center;
   padding: 12px 0 0;
-  border-top: 1px solid #eef2f5;
+  border-top: 1px solid var(--et-border-color);
   margin-top: 8px;
 }
 </style>

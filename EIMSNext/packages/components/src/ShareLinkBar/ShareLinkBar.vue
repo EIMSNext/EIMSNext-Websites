@@ -18,10 +18,11 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import { nextTick, ref } from "vue";
+<script setup lang="ts">
 import { Grid } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 import QRCodeStyling from "qr-code-styling";
+import { nextTick, ref } from "vue";
 
 defineOptions({
   name: "ShareLinkBar",
@@ -46,6 +47,7 @@ const copyLink = async () => {
       document.execCommand("copy");
       document.body.removeChild(input);
     }
+
     ElMessage.success("链接已复制");
   } catch {
     ElMessage.error("复制失败");
@@ -82,25 +84,25 @@ const renderQrCode = async () => {
 
 <style lang="scss" scoped>
 .share-link-bar {
-  display: flex;
   align-items: center;
+  background: var(--el-bg-color);
   border: 1px solid var(--et-border-color);
   border-radius: 6px;
-  overflow: hidden;
-  background: var(--el-bg-color);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  display: flex;
+  overflow: hidden;
 }
 
 .share-link-input {
   flex: 1;
 
   :deep(.el-input__wrapper) {
-    min-height: 36px;
-    box-shadow: none;
+    background: #fff;
     border-radius: 0;
+    box-shadow: none;
+    min-height: 36px;
     padding-left: 10px;
     padding-right: 10px;
-    background: #fff;
   }
 
   :deep(.el-input__inner) {
@@ -110,18 +112,18 @@ const renderQrCode = async () => {
 }
 
 .share-link-actions {
-  display: flex;
   align-items: center;
-  border-left: 1px solid #e5e7eb;
   background: var(--el-bg-color);
+  border-left: 1px solid #e5e7eb;
+  display: flex;
 
   .el-button {
-    height: 36px;
-    margin: 0;
-    padding: 0 10px;
     border-radius: 0;
     color: #4b5563;
     font-size: 13px;
+    height: 36px;
+    margin: 0;
+    padding: 0 10px;
   }
 
   .el-button + .el-button {
@@ -139,14 +141,14 @@ const renderQrCode = async () => {
 }
 
 .share-qrcode-popover {
+  align-items: center;
   display: flex;
   justify-content: center;
-  align-items: center;
   padding: 10px;
 }
 
 .share-qrcode {
-  width: 180px;
   height: 180px;
+  width: 180px;
 }
 </style>

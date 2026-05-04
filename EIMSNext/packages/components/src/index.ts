@@ -26,6 +26,7 @@ import { EtFieldPerms } from "./FieldPerms";
 import { UserAvatar } from "./avatar";
 import { SortList, SortItem } from "./SortList";
 import { FieldSelectList } from "./FieldSelectList";
+import { ShareLinkBar } from "./ShareLinkBar";
 
 export {
   applyTheme,
@@ -72,4 +73,5 @@ export default [
   SortList,
   SortItem,
   FieldSelectList,
+  ShareLinkBar,
 ];
