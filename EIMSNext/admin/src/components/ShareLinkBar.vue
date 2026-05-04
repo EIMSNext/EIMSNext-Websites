@@ -84,7 +84,7 @@ const renderQrCode = async () => {
 .share-link-bar {
   display: flex;
   align-items: center;
-  border: 1px solid var(--el-color-primary);
+  border: 1px solid var(--et-border-color);
   border-radius: 6px;
   overflow: hidden;
   background: var(--el-bg-color);
