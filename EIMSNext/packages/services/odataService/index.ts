@@ -19,6 +19,7 @@ export * from "./roleGroupService";
 export * from "./roleService";
 export * from "./systemMessageService";
 export * from "./webhookService";
+export * from "./webhookAliasService";
 export * from "./webPushLogService";
 export * from "./wfDefinitionService";
 export * from "./wfTodoService";

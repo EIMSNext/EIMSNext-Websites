@@ -33,3 +33,4 @@ export * from "./FormList";
 export * from "./SortList";
 export * from "./SortList/type";
 export * from "./FieldSelectList";
+export * from "./ShareLinkBar";

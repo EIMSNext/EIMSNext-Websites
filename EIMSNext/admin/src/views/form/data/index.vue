@@ -391,7 +391,7 @@ onBeforeMount(async () => {
 }
 
 .shared-form-header-action-btn:focus-visible {
-  outline: 2px solid rgba(0, 184, 169, 0.2);
+  outline: 2px solid var(--et-color-primary-outline);
   outline-offset: 2px;
 }
 
@@ -445,8 +445,8 @@ onBeforeMount(async () => {
 }
 
 .shared-form-tab.active {
-  color: #00b8a9;
-  border-bottom-color: #00c7b4;
+  color: var(--et-color-primary);
+  border-bottom-color: var(--et-color-primary-hover);
   font-weight: 600;
 }
 

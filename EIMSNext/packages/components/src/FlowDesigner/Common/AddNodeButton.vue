@@ -202,7 +202,7 @@ function addNewNode(
 }
 
 .popover-action-button-spaced {
-  margin-left: var(--et-space-0);
+  margin-left: var(--et-space-0) !important;
   margin-top: var(--et-space-10);
 }
 </style>

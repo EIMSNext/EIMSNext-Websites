@@ -49,12 +49,11 @@ import {
 import { useFormStore, useUserStore } from "@eimsnext/store";
 import { customPrintService, formDataService, PrintRequest, printTemplateService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
-import { MessageIcon, ToolbarItem } from "@eimsnext/components";
+import { MessageIcon, ShareLinkBar, ToolbarItem } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 import { hasDataPerm } from "@/utils/common";
 import FormPrintDiv from "@/components/WebPrint/FormPrintDiv.vue";
 import { getPrintConfig, IPrintData } from "@/components/WebPrint/type";
-import ShareLinkBar from "@/components/ShareLinkBar.vue";
 import buildQuery from "odata-query";
 const { t } = useI18n();
 
