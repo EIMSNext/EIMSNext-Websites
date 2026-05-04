@@ -41,13 +41,13 @@
             <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
-              <et-icon icon="el-Plus" class="action-item" @click="handleAddClick(data)" />
-              <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
+              <et-icon icon="el-Plus" class="action-item" @click.stop="handleAddClick(data)" />
+              <et-icon icon="el-Edit" class="action-item" @click.stop="handleEditClick(data)" />
               <et-icon
                 icon="el-Delete"
                 v-if="data.data.parentId"
                 class="action-item"
-                @click="handleDeleteClick(data)"
+                @click.stop="handleDeleteClick(data)"
               />
             </div>
           </div>
@@ -209,7 +209,6 @@ const handleDeleteConfirm = async () => {
     white-space: nowrap;
     flex-shrink: 0;
     margin-left: var(--et-space-10);
-    pointer-events: none;
     display: none;
     align-items: center;
 
