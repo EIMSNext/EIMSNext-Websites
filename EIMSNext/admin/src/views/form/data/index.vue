@@ -8,12 +8,22 @@
             <div class="shared-form-title">{{ formDef?.name || "表单详情" }}</div>
           </div>
           <div class="shared-form-header-actions">
-            <el-button text @click="openCurrentPage">
-              <et-icon icon="el-FullScreen" />
-            </el-button>
-            <el-button text @click="openCurrentPage">
-              <et-icon icon="el-close" />
-            </el-button>
+            <button
+              class="shared-form-header-action-btn"
+              type="button"
+              :title="isFullscreen ? '退出全屏' : '全屏显示'"
+              @click="toggle"
+            >
+              <et-icon :icon="isFullscreen ? 'fullscreen-exit' : 'fullscreen'" size="18" />
+            </button>
+            <button
+              class="shared-form-header-action-btn"
+              type="button"
+              title="关闭"
+              @click="closeCurrentPage"
+            >
+              <et-icon icon="el-close" size="18" />
+            </button>
           </div>
         </div>
         <div class="shared-form-body">
@@ -103,7 +113,6 @@ defineOptions({
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { FullScreen } from "@element-plus/icons-vue";
 import { FormDef, FormData, PrintTemplate, WfApprovalLog } from "@eimsnext/models";
 import {
   customPrintService,
@@ -114,6 +123,7 @@ import {
 } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
 import { ToolbarItem } from "@eimsnext/components";
+import { useTagsViewStore } from "@/store";
 import FormView from "@/components/FormView/index.vue";
 import FormPrintDiv from "@/components/WebPrint/FormPrintDiv.vue";
 import { getPrintConfig, IPrintData } from "@/components/WebPrint/type";
@@ -124,6 +134,8 @@ const PdfPreview = defineAsyncComponent(() => import("@/components/PrintDesigner
 
 const route = useRoute();
 const formStore = useFormStore();
+const tagsViewStore = useTagsViewStore();
+const { isFullscreen, toggle } = useFullscreen();
 const formDef = ref<FormDef>();
 const formData = ref<FormData>();
 const approvalLogs = ref<WfApprovalLog[]>([]);
@@ -244,8 +256,13 @@ const toolbarHandler = async (cmd: string) => {
   }
 };
 
-const openCurrentPage = () => {
-  window.open(window.location.href, "_blank");
+const closeCurrentPage = () => {
+  if (window.opener) {
+    window.close();
+    return;
+  }
+
+  tagsViewStore.closeCurrentView();
 };
 
 watch(
@@ -350,7 +367,32 @@ onBeforeMount(async () => {
 .shared-form-header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
+}
+
+.shared-form-header-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shared-form-header-action-btn:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.shared-form-header-action-btn:focus-visible {
+  outline: 2px solid rgba(0, 184, 169, 0.2);
+  outline-offset: 2px;
 }
 
 .shared-form-main-panel {
