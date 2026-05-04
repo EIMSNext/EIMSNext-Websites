@@ -7,11 +7,11 @@
       trigger="hover"
       placement="top-end"
       :show-arrow="false"
-      :disabled="flowContextRef.structureReadonly || (!allowCopy && !allowDelete)"
+      :disabled="flowContext.structureReadonly || (!allowCopy && !allowDelete)"
     >
       <div class="node-actions">
         <div
-          v-if="allowCopy && !flowContextRef.structureReadonly"
+          v-if="allowCopy && !flowContext.structureReadonly"
           class="copy-btn"
           @click.stop="
             copyClick(
@@ -23,9 +23,9 @@
         >
           <et-icon icon="el-CopyDocument" />
         </div>
-        <div v-if="allowCopy && allowDelete && !flowContextRef.structureReadonly" class="action-split" />
+        <div v-if="allowCopy && allowDelete && !flowContext.structureReadonly" class="action-split" />
         <div
-          v-if="allowDelete && !flowContextRef.structureReadonly"
+          v-if="allowDelete && !flowContext.structureReadonly"
           class="delete-btn"
           @click.stop="delClick(nodeData)"
         >
@@ -68,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, nextTick, reactive, ref, watch } from "vue";
+import { computed, inject, nextTick, ref } from "vue";
 import AddNodeButton from "./AddNodeButton.vue";
 import {
   IFlowNodeData,
@@ -105,22 +105,12 @@ const props = withDefaults(
   },
 );
 
-const isActived = ref(false);
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
+const flowContext = inject<IFlowContext>("flowContext")!;
 const popoverRef = ref();
-
-watch(
-  flowContextRef,
-  (newValue: IFlowContext) => {
-    isActived.value = newValue.activeData.id === props.nodeData.id;
-  },
-  { immediate: true },
-);
+const isActived = computed(() => flowContext.activeData.id === props.nodeData.id);
 
 const content = computed(() => {
-  if (flowContext && props.contentFun)
-    return props.contentFun(props.nodeData.metadata);
+  if (props.contentFun) return props.contentFun(props.nodeData.metadata);
 
   return props.nodeData.notes || props.nodeData.name;
 });
@@ -128,7 +118,7 @@ const content = computed(() => {
 const copyClick = (data: IFlowNodeData) => {
   popoverRef.value.hide();
 
-  if (flowContext) flowContextRef.clonedData = data;
+  flowContext.clonedData = data;
 };
 
 const delClick = (data: IFlowNodeData) => {
@@ -163,7 +153,7 @@ const delClick = (data: IFlowNodeData) => {
 
 const emit = defineEmits(["nodeClick"]);
 const nodeClick = (data: IFlowNodeData) => {
-  if (flowContext) flowContextRef.activeData = data;
+  flowContext.activeData = data;
 
   emit("nodeClick", data);
 };

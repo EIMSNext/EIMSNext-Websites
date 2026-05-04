@@ -130,7 +130,7 @@
   </template>
 </template>
 <script lang="ts" setup>
-import { computed, inject, nextTick, reactive, ref } from "vue";
+import { computed, inject, nextTick, ref } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -195,11 +195,10 @@ const subCondBuildSetting = ref<IFieldBuildSetting>({
   matchType: false,
 });
 
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
+const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 
-const appId = ref(flowContext!.appId);
+const appId = ref(flowContext.appId);
 const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 const subCondNeeded = ref(false);
@@ -467,9 +466,9 @@ const insertIfNoDataChanged = () => {
 
 const init = () => {
   nextTick(async () => {
-    activeData.value = flowContextRef.activeData;
+    activeData.value = flowContext.activeData;
     const updateMeta = ensureUpdateMeta();
-    nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
+    nodes.value = await getPrevNodes(flowContext.flowData, activeData.value);
 
     mode.value = updateMeta.updateMode;
     nodeId.value = activeData.value.id;

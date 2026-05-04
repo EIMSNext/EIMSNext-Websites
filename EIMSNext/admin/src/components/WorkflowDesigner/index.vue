@@ -3,7 +3,7 @@
     <div class="flow-actions">
       <div class="left"></div>
       <div class="right">
-        <el-dropdown trigger="click">
+        <el-dropdown trigger="click" style="margin-right: 12px">
           <el-button>流程版本（V{{ currentWfDef.version }}）</el-button>
           <template #dropdown>
             <el-dropdown-menu>
@@ -35,9 +35,15 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <el-button>预览</el-button>
+        <!-- <el-button>预览</el-button> -->
         <el-button @click="save">保存</el-button>
-        <el-button type="success" @click="activateCurrentVersion">启用</el-button>
+        <el-button
+          type="success"
+          :disabled="currentWfDef.released && currentWfDef.isCurrent"
+          @click="activateCurrentVersion"
+        >
+          启用
+        </el-button>
       </div>
     </div>
     <div class="flow-editor-wrapper">
@@ -151,7 +157,7 @@ const currentWfDef = ref<WfDefinition>({
 });
 
 const flowData = ref<IFlowData>(createWorkflowData(t));
-const flowContext: IFlowContext = {
+const flowContext = reactive<IFlowContext>({
   appId: props.appId,
   formId: props.formId,
   flowType: FlowType.Workflow,
@@ -159,7 +165,7 @@ const flowContext: IFlowContext = {
   activeData: flowData.value.startNode,
   flowData: flowData.value,
   structureReadonly: false,
-};
+});
 provide("flowContext", flowContext);
 
 const applyDefinition = (definition: WfDefinition) => {
@@ -173,7 +179,7 @@ const applyDefinition = (definition: WfDefinition) => {
 
 const loadVersions = async () => {
   const query = buildQuery({
-    filter: { ExternalId: props.formId },
+    filter: { ExternalId: props.formId, flowType: FlowType.Workflow },
     orderBy: "Version desc",
   });
   const res = await wfDefinitionService.query<WfDefinition>(query);

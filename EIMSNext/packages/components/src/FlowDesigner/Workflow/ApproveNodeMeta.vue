@@ -40,7 +40,7 @@
   </template>
 </template>
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch } from "vue";
+import { inject, nextTick, ref } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -64,8 +64,7 @@ defineOptions({
 });
 
 const ready = ref(false);
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
+const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const showMemberDialog = ref(false);
 const selectedCandidateTags = ref<ISelectedTag[]>([]);
@@ -93,7 +92,7 @@ const finishSelect = (tags: ISelectedTag[]) => {
 
 const init = () => {
   nextTick(async () => {
-    activeData.value = flowContextRef.activeData;
+    activeData.value = flowContext.activeData;
 
     //TODO:添加更多动态审批人，比如表单中员工字段
 

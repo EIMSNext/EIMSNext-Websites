@@ -151,7 +151,6 @@ import {
   inject,
   nextTick,
   onBeforeMount,
-  reactive,
   ref,
   watch,
 } from "vue";
@@ -185,9 +184,8 @@ const formRef = ref<FormDef>();
 const formName = ref(t(""));
 const usingFlow = ref(false);
 const selectedTriggers = ref(0);
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
-const activeData = ref<IFlowNodeData>(flowContextRef.activeData);
+const flowContext = inject<IFlowContext>("flowContext")!;
+const activeData = ref<IFlowNodeData>(flowContext.activeData);
 const condList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
 const wfFlowData = ref<IFlowData>();
 const wfNodeId = ref("");
@@ -271,7 +269,7 @@ onBeforeMount(() => {
   wfNodeId.value = activeData.value.metadata.triggerMeta!.wfNodeId;
   nodeAction.value = activeData.value.metadata.triggerMeta!.nodeAction;
 
-  formStore.get(flowContextRef.formId).then((form) => {
+  formStore.get(flowContext.formId).then((form) => {
     formRef.value = form;
     if (form) {
       formName.value = form.name;
@@ -281,8 +279,8 @@ onBeforeMount(() => {
     }
 
     if (usingFlow.value) {
-      let query = buildQuery({
-        filter: { ExternalId: flowContextRef.formId, iscurrent: true },
+        let query = buildQuery({
+        filter: { ExternalId: flowContext.formId, iscurrent: true },
       });
       wfDefinitionService.query<WfDefinition>(query).then((res) => {
         if (res && res.length > 0) {
