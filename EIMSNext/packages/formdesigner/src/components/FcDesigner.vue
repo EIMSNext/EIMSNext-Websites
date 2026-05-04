@@ -151,11 +151,11 @@
                                                         </div>
                                                         <span class="_fc-l-name">{{
                                                             t('com.' + element.name + '.name') || element.label
-                                                            }}</span>
+                                                        }}</span>
                                                     </template>
                                                     <span class="_fc-l-name" v-else>{{
                                                         t('tmp.' + element.name) || element.label
-                                                        }}</span>
+                                                    }}</span>
                                                 </div>
                                             </template>
                                         </fcDraggable>
@@ -175,7 +175,7 @@
                                                     :class="(data.rule._menu && data.rule._menu.icon) || 'icon-cell'"></i>
                                                 <span>{{
                                                     getTitle(data.rule)
-                                                    }}</span>
+                                                }}</span>
                                             </div>
                                             <div class="_fc-tree-more" @click.stop
                                                 v-if="!data.slot && !data.rule._fc_page_tag">
@@ -281,7 +281,7 @@
                                     <div class="_fd-input-btn">
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
-                                        }}: </span>
+                                            }}: </span>
                                         <el-switch :model-value="inputForm.state" inline-prompt
                                             @update:model-value="openInputData" />
                                     </div>
@@ -376,6 +376,12 @@
                                 <template v-if="activeRuleChildren">
                                     <SubList></SubList>
                                 </template> -->
+                                <div v-if="isgod && activeRule" class="_fc-r-name-config" style="margin-bottom: 8px;">
+                                    <div style="margin-bottom: 10px;"><span class="_fc-field-title">
+                                            字段标识
+                                        </span></div>
+                                    <el-input class="_fc-r-name-input" :model-value="activeRule.field"></el-input>
+                                </div>
                                 <div class="_fc-r-config" :style="{ 'grid-template-areas': configFormOrderStyle }">
                                     <div style="grid-area: base;">
                                         <!-- <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
@@ -386,15 +392,7 @@
                                             <div><span style="color:#eb5050">*</span><span class="_fc-field-title">{{
                                                 t('form.title')
                                                     }}</span></div>
-                                            <div style="display:flex; align-items:center; gap:8px;">
-                                                <span v-if="isgod && activeRule && activeRule.field" class="_fd-field-code">
-                                                    {{ activeRule.field }}
-                                                </span>
-                                                <el-tag v-if="activeRule" type="success" effect="plain" disable-transitions>
-                                                    {{ t('com.' + (activeRule._menu.name) + '.name') ||
-                                                        activeRule._menu.label }}
-                                                </el-tag>
-                                            </div> <!-- <TypeSelect></TypeSelect> -->
+                                            <!-- <TypeSelect></TypeSelect> -->
                                         </div>
                                         <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api"
                                             :rule="baseForm.rule" :option="baseForm.options"
@@ -694,7 +692,11 @@ export default defineComponent({
             default: undefined,
         },
         locale: Object,
-        handle: Array
+        handle: Array,
+        isgod: {
+            type: Boolean,
+            default: false,
+        },
     },
     emits: ['active', 'create', 'copy', 'delete', 'drag', 'inputData', 'inputPageData', 'save', 'clear', 'switchForm', 'copyRule', 'pasteRule', 'sortUp', 'sortDown', 'changeDevice', 'previewSubmit', 'previewReset'],
     setup(props) {
@@ -727,11 +729,6 @@ export default defineComponent({
         const fieldReadonly = computed(() => {
             return configRef.value.fieldReadonly !== false;
         })
-        const isgod = computed(() => {
-            const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
-            const search = typeof window !== 'undefined' ? new URL(window.location.href).searchParams : null;
-            return isDev || search?.get('god') === 'cn';
-        });
         const fieldList = computed(() => {
             return configRef.value.fieldList || [];
         });
@@ -3426,7 +3423,6 @@ export default defineComponent({
             t,
             handle,
             inputCheckStatus,
-            isgod,
             fieldReadonly,
             fieldList,
             varList,
