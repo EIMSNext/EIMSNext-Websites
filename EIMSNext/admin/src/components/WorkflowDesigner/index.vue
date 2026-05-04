@@ -4,12 +4,11 @@
       <div class="left"></div>
       <div class="right">
         <el-dropdown trigger="click">
-          <el-button>
-            流程版本（V{{ currentWfDef.version }}）
-          </el-button>
+          <el-button>流程版本（V{{ currentWfDef.version }}）</el-button>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
+                v-if="versions.length > 0"
                 v-for="item in versions"
                 :key="item.id || `draft-${item.version}`"
                 @click="selectVersion(item)"
@@ -21,8 +20,18 @@
                   <el-tag v-else size="small" type="info">历史</el-tag>
                 </div>
               </el-dropdown-item>
-              <el-dropdown-item divided @click="createVersion">添加新版本</el-dropdown-item>
-              <el-dropdown-item @click="showVersionDialog = true">管理已有版本</el-dropdown-item>
+              <el-dropdown-item v-else>
+                <div class="wf-version-item">
+                  <span>流程版本(V1)</span>
+                  <el-tag size="small" type="warning">设计中</el-tag>
+                </div>
+              </el-dropdown-item>
+              <el-dropdown-item divided @click="createVersion" :disabled="versions.length === 0">
+                添加新版本
+              </el-dropdown-item>
+              <el-dropdown-item @click="showVersionDialog = true" :disabled="versions.length === 0">
+                管理已有版本
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -53,16 +62,16 @@
       @ok="showVersionDialog = false"
     >
       <div class="version-dialog-body">
-        <div
-          v-for="item in versions"
-          :key="item.id"
-          class="version-row"
-        >
+        <div v-for="item in versions" :key="item.id" class="version-row">
           <div class="version-row-main">
             <div class="version-row-title">
               <span class="version-name">流程版本(V{{ item.version }})</span>
-              <el-tag v-if="item.isCurrent" size="small" effect="plain" type="success">启用中</el-tag>
-              <el-tag v-else-if="!item.released" size="small" effect="plain" type="warning">设计中</el-tag>
+              <el-tag v-if="item.isCurrent" size="small" effect="plain" type="success">
+                启用中
+              </el-tag>
+              <el-tag v-else-if="!item.released" size="small" effect="plain" type="warning">
+                设计中
+              </el-tag>
               <el-tag v-else size="small" effect="plain" type="info">历史</el-tag>
             </div>
             <div class="version-row-meta">
@@ -70,7 +79,9 @@
             </div>
           </div>
           <div class="version-row-actions">
-            <el-button v-if="!item.isCurrent" link type="primary" @click="activateVersion(item)">启用流程</el-button>
+            <el-button v-if="!item.isCurrent" link type="primary" @click="activateVersion(item)">
+              启用流程
+            </el-button>
             <el-button link type="primary" @click="selectVersion(item, true)">编辑</el-button>
             <el-button
               v-if="!item.released && !item.isCurrent"
@@ -153,9 +164,7 @@ provide("flowContext", flowContext);
 
 const applyDefinition = (definition: WfDefinition) => {
   currentWfDef.value = definition;
-  flowData.value = definition.content
-    ? JSON.parse(definition.content)
-    : createWorkflowData(t);
+  flowData.value = definition.content ? JSON.parse(definition.content) : createWorkflowData(t);
   flowContext.flowData = flowData.value;
   flowContext.activeData = flowData.value.startNode;
   flowContext.structureReadonly = !!definition.released;
@@ -176,9 +185,7 @@ const loadVersions = async () => {
   }
 
   const selected =
-    res.find((x) => x.id === currentWfDef.value.id) ??
-    res.find((x) => x.isCurrent) ??
-    res[0];
+    res.find((x) => x.id === currentWfDef.value.id) ?? res.find((x) => x.isCurrent) ?? res[0];
   applyDefinition(selected);
 };
 
@@ -225,7 +232,7 @@ const confirmUnsavedChange = async () => {
       showNoSave: true,
       okText: "保存并继续",
     },
-    t,
+    t
   );
 
   if (confirm === ConfirmResult.Yes) {
