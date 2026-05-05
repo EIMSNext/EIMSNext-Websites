@@ -7,12 +7,8 @@
           <el-button>流程版本（V{{ currentWfDef.version }}）</el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item
-                v-if="versions.length > 0"
-                v-for="item in versions"
-                :key="item.id || `draft-${item.version}`"
-                @click="selectVersion(item)"
-              >
+              <el-dropdown-item v-if="versions.length > 0" v-for="item in versions"
+                :key="item.id || `draft-${item.version}`" @click="selectVersion(item)">
                 <div class="wf-version-item">
                   <span>流程版本(V{{ item.version }})</span>
                   <el-tag v-if="item.isCurrent" size="small" type="success">启用中</el-tag>
@@ -37,11 +33,8 @@
         </el-dropdown>
         <!-- <el-button>预览</el-button> -->
         <el-button @click="save">保存</el-button>
-        <el-button
-          type="success"
-          :disabled="currentWfDef.released && currentWfDef.isCurrent"
-          @click="activateCurrentVersion"
-        >
+        <el-button type="success" :disabled="currentWfDef.released && currentWfDef.isCurrent"
+          @click="activateCurrentVersion">
           启用
         </el-button>
       </div>
@@ -56,32 +49,21 @@
       </div>
     </div>
 
-    <et-dialog
-      :modelValue="showVersionDialog"
-      class="version-manage-dialog"
-      title="管理已有版本"
-      width="760px"
-      :showNoSave="false"
-      :showCancel="false"
-      okText="关闭"
-      @cancel="showVersionDialog = false"
-      @ok="showVersionDialog = false"
-    >
+    <et-dialog :modelValue="showVersionDialog" class="version-manage-dialog" title="管理已有版本" width="760px"
+      :showNoSave="false" :showCancel="false" okText="关闭" @cancel="showVersionDialog = false"
+      @ok="showVersionDialog = false">
       <div class="version-dialog-body">
         <div v-for="item in versions" :key="item.id" class="version-row">
           <div class="version-row-main">
             <div class="version-row-title">
               <span class="version-name">流程版本(V{{ item.version }})</span>
-              <el-tag v-if="item.isCurrent" size="small" effect="plain" type="success">
-                启用中
-              </el-tag>
-              <el-tag v-else-if="!item.released" size="small" effect="plain" type="warning">
+              <el-tag v-if="!item.released" size="small" effect="plain" type="warning">
                 设计中
               </el-tag>
+              <el-tag v-else-if="item.isCurrent" size="small" effect="plain" type="success">
+                启用中
+              </el-tag>
               <el-tag v-else size="small" effect="plain" type="info">历史</el-tag>
-            </div>
-            <div class="version-row-meta">
-              <span v-if="item.updateTime">最近更新：{{ formatTime(item.updateTime) }}</span>
             </div>
           </div>
           <div class="version-row-actions">
@@ -89,12 +71,7 @@
               启用流程
             </el-button>
             <el-button link type="primary" @click="selectVersion(item, true)">编辑</el-button>
-            <el-button
-              v-if="!item.released && !item.isCurrent"
-              link
-              type="danger"
-              @click="deleteVersion(item)"
-            >
+            <el-button v-if="!item.released && !item.isCurrent" link type="danger" @click="deleteVersion(item)">
               删除
             </el-button>
           </div>
@@ -113,11 +90,13 @@ import {
   MessageIcon,
   createFlowNode,
   createWorkflowData,
+  flowStatusArray,
 } from "@eimsnext/components";
 import { EventSourceType, FlowType, WfDefinition, WfDefinitionRequest } from "@eimsnext/models";
 import { wfDefinitionService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import { useLocale } from "element-plus";
+import { flow } from "lodash-es";
 const { t } = useLocale();
 
 const formatTime = (value?: number) => {
@@ -174,6 +153,7 @@ const applyDefinition = (definition: WfDefinition) => {
   flowContext.flowData = flowData.value;
   flowContext.activeData = flowData.value.startNode;
   flowContext.structureReadonly = !!definition.released;
+  console.log("flow read", flowContext.structureReadonly, definition.released)
   oldFlowDataStr.value = JSON.stringify(flowData.value);
 };
 
@@ -342,24 +322,30 @@ defineExpose({
 
 .version-row {
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: var(--et-space-18) var(--et-space-16);
+  padding: var(--et-space-10);
   border-radius: var(--et-space-8);
   background: var(--et-bg-secondary-container);
   border: 1px solid var(--et-border-color-light);
 }
 
-.version-row + .version-row {
+.version-row+.version-row {
   margin-top: var(--et-space-12);
 }
 
 .version-row-main,
-.version-row-title,
-.version-row-actions {
+.version-row-title {
   display: flex;
   align-items: center;
   gap: var(--et-space-10);
+}
+
+.version-row-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
 }
 
 .version-row-main {
@@ -380,26 +366,6 @@ defineExpose({
   color: var(--et-text-secondary);
   font-size: var(--et-font-size-12);
   line-height: var(--et-line-height-20);
-}
-
-.version-row-actions {
-  flex-shrink: 0;
-  gap: var(--et-space-16);
-}
-
-@media (max-width: 900px) {
-  .version-row {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: var(--et-space-14);
-  }
-
-  .version-row-actions {
-    width: 100%;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: var(--et-space-12);
-  }
 }
 
 :deep(.version-manage-dialog .el-dialog__header) {
