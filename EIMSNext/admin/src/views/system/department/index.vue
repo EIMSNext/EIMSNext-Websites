@@ -20,6 +20,7 @@
       <div class="emp-list-col">
         <el-card shadow="never" class="emp-list-card">
           <et-toolbar
+            class="form-list-toolbar"
             :left-group="leftBars"
             :right-group="rightBars"
             @command="toolbarHandler"
@@ -29,6 +30,7 @@
               ref="tableRef"
               v-loading="loading"
               :data="dataRef"
+              class="data-table-full"
               show-overflow-tooltip
               :tooltip-formatter="tableToolFormatter"
               :row-class-name="rowClassName"
@@ -507,5 +509,43 @@ onMounted(() => {
 
 :deep(.data-filter) {
   margin-left: var(--et-space-0);
+}
+
+:deep(.form-list-toolbar .toolbar-container) {
+  min-height: 42px;
+  margin-bottom: var(--et-space-10);
+  padding: var(--et-space-6) var(--et-space-10);
+  border: 1px solid var(--el-border-color-lighter);
+  border-bottom: 0;
+  background: var(--el-bg-color);
+}
+
+:deep(.form-list-toolbar .left-group),
+:deep(.form-list-toolbar .right-group) {
+  align-items: center;
+  gap: 2px;
+}
+
+:deep(.form-list-toolbar .toolbar-item.el-button),
+:deep(.form-list-toolbar .toolbar-dropdown) {
+  height: 32px;
+  padding: 0 var(--et-space-8);
+  border: 0;
+  box-shadow: none;
+}
+
+:deep(.form-list-toolbar .toolbar-item.el-button:not(.el-button--primary)),
+:deep(.form-list-toolbar .toolbar-dropdown) {
+  background: transparent;
+}
+
+:deep(.form-list-toolbar .toolbar-item.el-button:not(.el-button--primary):not(.is-disabled):hover),
+:deep(.form-list-toolbar .toolbar-dropdown:not(.is-disabled):hover) {
+  background: var(--el-fill-color-light);
+}
+
+:deep(.data-table-full .el-table__header-wrapper th.el-table__cell),
+:deep(.data-table-full .el-table__fixed-header-wrapper th.el-table__cell) {
+  background: var(--el-fill-color-light);
 }
 </style>

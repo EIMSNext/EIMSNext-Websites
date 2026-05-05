@@ -67,7 +67,7 @@ export default {
     availableScope: "Available Scopes",
     allDepts: "All departments",
     allEmps: "All members",
-    selectDataSource: "Select DataSource",
+    dataSelectSource: "Select Data Source",
   },
   admin: {
     myApp: "My Apps",

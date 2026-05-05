@@ -25,10 +25,10 @@
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
               <et-icon v-if="data.type == DataItemType.Group" icon="el-Plus" class="action-item"
-                @click="handleAddRoleClick(data)" />
-              <et-icon icon="el-Edit" class="action-item" @click="handleEditClick(data)" />
+                @click.stop="handleAddRoleClick(data)" />
+              <et-icon icon="el-Edit" class="action-item" @click.stop="handleEditClick(data)" />
               <et-icon icon="el-Delete" v-if="node.level > 0" class="action-item"
-                :disabled="data.children && data.children.length > 0" @click="handleDeleteClick(data)" />
+                :disabled="data.children && data.children.length > 0" @click.stop="handleDeleteClick(data)" />
             </div>
           </div>
         </div>
@@ -223,7 +223,6 @@ const handleDeleteConfirm = async () => {
     white-space: nowrap;
     flex-shrink: 0;
     margin-left: var(--et-space-10);
-    pointer-events: none;
     display: none;
     align-items: center;
 

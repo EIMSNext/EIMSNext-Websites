@@ -43,9 +43,6 @@ import stepFormItem from "./rule/stepFormItem";
 import html from "./rule/html";
 import table from "./rule/table";
 import tableform from "./rule/tableForm";
-import infiniteTableForm from "./rule/infiniteTableForm";
-import nestedTableForm from "./rule/nestedTableForm";
-import nestedSubTableForm from "./rule/nestedSubTableForm";
 import tableFormColumn from "./rule/tableFormColumn";
 import flex from "./rule/flex";
 import cell from "./rule/cell";
@@ -94,7 +91,7 @@ import department1 from "./rule/departmentSelect";
 import department2 from "./rule/departmentSelect2";
 import employee1 from "./rule/employeeSelect";
 import employee2 from "./rule/employeeSelect2";
-import formSelectedData from "./rule/formSelectedData";
+import dataSelect from "./rule/dataSelect";
 
 const ruleList = [
   input,
@@ -126,7 +123,7 @@ const ruleList = [
   department2,
   employee1,
   employee2,
-  formSelectedData,
+  dataSelect,
   editor,
   dataTable,
   id,
@@ -137,9 +134,6 @@ const ruleList = [
   value,
   tableform,
   tableFormColumn,
-  nestedTableForm,
-  nestedSubTableForm,
-  infiniteTableForm,
   slot,
   json,
   formItem,

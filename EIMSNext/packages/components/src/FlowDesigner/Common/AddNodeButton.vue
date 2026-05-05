@@ -1,77 +1,41 @@
 <template>
-  <template v-if="!flowContextRef.structureReadonly">
-  <el-popover
-    ref="popoverRef"
-    :show-arrow="false"
-    placement="right"
-    width="200"
-    trigger="click"
-  >
-    <el-button
-      :disabled="!canPaste"
-      icon="el-plus"
-      class="popover-action-button"
-      @click.stop="pasteNode"
-    >
+  <el-popover ref="popoverRef" :show-arrow="false" placement="right" width="200" trigger="click">
+    <el-button :disabled="!canPaste" icon="el-plus" class="popover-action-button" @click.stop="pasteNode">
       {{ t("workflow.pasteNode") }}
     </el-button>
     <template v-if="flowContext.flowType == FlowType.Workflow">
-      <el-button
-        icon="el-plus"
-        class="popover-action-button popover-action-button-spaced"
-        @click.stop="addNode(FlowNodeType.Approve)"
-      >
+      <el-button icon="el-plus" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Approve)">
         {{ t("workflow.taskNode") }}
       </el-button>
-      <el-button
-        icon="el-plus"
-        class="popover-action-button popover-action-button-spaced"
-        @click.stop="addNode(FlowNodeType.CopyTo)"
-      >
+      <el-button icon="el-plus" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.CopyTo)">
         {{ t("workflow.ccNode") }}
       </el-button>
-      <el-button
-        icon="el-copy-document"
-        class="popover-action-button popover-action-button-spaced"
-        @click.stop="addNode(FlowNodeType.Branch)"
-      >
+      <el-button icon="el-copy-document" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Branch)">
         {{ t("workflow.branchNode") }}
       </el-button>
     </template>
     <template v-if="flowContext.flowType == FlowType.Dataflow">
-      <el-button
-        icon="el-plus"
-        class="popover-action-button popover-action-button-spaced"
-        @click.stop="addNode(FlowNodeType.QueryOne)"
-      >
+      <el-button icon="el-plus" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.QueryOne)">
         {{ t("workflow.queryOneNode") }}
       </el-button>
-      <el-button
-        icon="el-plus"
-        class="popover-action-button popover-action-button-spaced"
-        @click.stop="addNode(FlowNodeType.QueryMany)"
-      >
+      <el-button icon="el-plus" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.QueryMany)">
         {{ t("workflow.queryManyNode") }}
       </el-button>
-      <el-button
-        icon="el-plus"
-        class="popover-action-button popover-action-button-spaced"
-        @click.stop="addNode(FlowNodeType.Insert)"
-      >
+      <el-button icon="el-plus" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Insert)">
         {{ t("workflow.insertDataNode") }}
       </el-button>
-      <el-button
-        icon="el-plus"
-        class="popover-action-button popover-action-button-spaced"
-        @click.stop="addNode(FlowNodeType.Update)"
-      >
+      <el-button icon="el-plus" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Update)">
         {{ t("workflow.updateDataNode") }}
       </el-button>
-      <el-button
-        icon="el-plus"
-        class="popover-action-button popover-action-button-spaced"
-        @click.stop="addNode(FlowNodeType.Delete)"
-      >
+      <el-button icon="el-plus" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Delete)">
         {{ t("workflow.deleteDataNode") }}
       </el-button>
       <!-- <el-button
@@ -88,11 +52,8 @@
       >
         {{ t("workflow.pluginNode") }}
       </el-button> -->
-      <el-button
-        icon="el-copy-document"
-        class="popover-action-button popover-action-button-spaced"
-        @click.stop="addNode(FlowNodeType.Branch2)"
-      >
+      <el-button icon="el-copy-document" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Branch2)">
         {{ t("workflow.branch2Node") }}
       </el-button>
     </template>
@@ -104,10 +65,9 @@
       </div>
     </template>
   </el-popover>
-  </template>
 </template>
 <script lang="ts" setup>
-import { inject, reactive, ref, watch } from "vue";
+import { computed, inject, ref } from "vue";
 import {
   cloneFlowNode,
   FlowNodeType,
@@ -128,35 +88,25 @@ const props = defineProps<{
 }>();
 
 const popoverRef = ref();
-const canPaste = ref(false);
 const flowContext = inject<IFlowContext>("flowContext")!;
-const flowContextRef = reactive<IFlowContext>(flowContext);
-
-watch(
-  flowContextRef,
-  (newValue: IFlowContext) => {
-    if (
-      newValue.clonedData.nodeType === FlowNodeType.Approve ||
-      newValue.clonedData.nodeType === FlowNodeType.Branch ||
-      newValue.clonedData.nodeType === FlowNodeType.CopyTo ||
-      newValue.clonedData.nodeType === FlowNodeType.QueryOne ||
-      newValue.clonedData.nodeType === FlowNodeType.QueryMany ||
-      newValue.clonedData.nodeType === FlowNodeType.Insert ||
-      newValue.clonedData.nodeType === FlowNodeType.Update ||
-      newValue.clonedData.nodeType === FlowNodeType.Delete ||
-      newValue.clonedData.nodeType === FlowNodeType.Print ||
-      newValue.clonedData.nodeType === FlowNodeType.Plugin
-    ) {
-      canPaste.value = true;
-    } else {
-      canPaste.value = false;
-    }
-  },
-  { immediate: true },
-);
+const canPaste = computed(() => {
+  const { nodeType } = flowContext.clonedData;
+  return (
+    nodeType === FlowNodeType.Approve ||
+    nodeType === FlowNodeType.Branch ||
+    nodeType === FlowNodeType.CopyTo ||
+    nodeType === FlowNodeType.QueryOne ||
+    nodeType === FlowNodeType.QueryMany ||
+    nodeType === FlowNodeType.Insert ||
+    nodeType === FlowNodeType.Update ||
+    nodeType === FlowNodeType.Delete ||
+    nodeType === FlowNodeType.Print ||
+    nodeType === FlowNodeType.Plugin
+  );
+});
 
 const pasteNode = () => {
-  if (flowContext && flowContext.clonedData) {
+  if (flowContext.clonedData) {
     const newNodeData = cloneFlowNode(flowContext.clonedData);
     addNewNode(props.pNodeDatas, props.nodeData, newNodeData);
   }
@@ -170,7 +120,7 @@ const addNode = (nodeType: FlowNodeType) => {
 function addNewNode(
   pNodeDatas: IFlowNodeData[],
   curNodeData: IFlowNodeData,
-  newNodeData: IFlowNodeData,
+  newNodeData: IFlowNodeData
 ) {
   let index = 0;
   if (
@@ -202,7 +152,7 @@ function addNewNode(
 }
 
 .popover-action-button-spaced {
-  margin-left: var(--et-space-0);
+  margin-left: var(--et-space-0) !important;
   margin-top: var(--et-space-10);
 }
 </style>

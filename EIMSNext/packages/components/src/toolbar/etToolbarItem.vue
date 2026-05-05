@@ -61,7 +61,7 @@ const props = withDefaults(
   }>(),
   {},
 );
-const item = toRef(props.data);
+const item = toRef(props, "data");
 
 const getIconStyle = (item: ToolbarItem) => {
   if (item.config.text) return { "margin-right": "3px" };

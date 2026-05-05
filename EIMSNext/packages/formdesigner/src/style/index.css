@@ -141,11 +141,9 @@ html.dark {
 ._fd-plain-button {
     border-color: var(--fc-style-color-1);
     color: var(--fc-style-color-1);
-    background-color: #ffffff;
 }
 
 ._fc-designer ._fd-plain-button.el-button--primary.is-plain {
-    --el-button-bg-color: #ffffff;
     --el-button-text-color: var(--fc-style-color-1);
     --el-button-border-color: var(--fc-style-color-1);
 }

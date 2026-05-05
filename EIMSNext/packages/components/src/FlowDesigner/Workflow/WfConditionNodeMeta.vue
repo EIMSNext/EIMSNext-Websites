@@ -3,7 +3,7 @@
   </ConditionList>
 </template>
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch } from "vue";
+import { inject, nextTick, ref } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -22,8 +22,7 @@ defineOptions({
 
 const ready = ref(false)
 const condList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
+const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 
 const onInput = (list: IConditionList) => {
@@ -36,7 +35,7 @@ const onRemove = () => {
 
 const init = () => {
   nextTick(async () => {
-    activeData.value = flowContextRef.activeData;
+    activeData.value = flowContext.activeData;
     condList.value = activeData.value.metadata.conditionMeta!.condition!;
 
     ready.value = true
@@ -46,7 +45,7 @@ const init = () => {
 init()
 
 // watch(
-//   flowContextRef,
+//   () => flowContext.activeData,
 //   (newValue: IFlowContext) => {
 //     activeData.value = newValue.activeData;
 //     condList.value = activeData.value.metadata.conditionMeta!.condition!;

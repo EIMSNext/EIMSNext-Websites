@@ -8,8 +8,6 @@ import Popup from '../components/mobile/popup/Popup.vue';
 import DataTable from '../components/dataTable/DataTable.vue';
 import Table from '../components/table/Table.vue';
 import TableForm from '../components/tableForm/TableForm.vue';
-import InfiniteTableForm from '../components/infiniteTableForm/InfiniteTableForm.vue';
-import NestedTableForm from '../components/nestedTableForm/NestedTableForm.vue';
 import Cell from '../components/cell/Cell.vue';
 import Value from '../components/value/Value.vue';
 import FcCity from '../components/mobile/City.vue';
@@ -112,7 +110,7 @@ export function useAdvanced(formCreate) {
             const type = ctx.type;
             const subForm = ctx.$handle.subForm[ctx.id];
             const readMode = ctx.prop.readMode;
-            if (readMode === false || readMode === 'custom' || !ctx.input || ctx.rule.subForm || (Array.isArray(subForm) ? subForm.length : subForm) || ['fcGroup', 'fcSubForm', 'tableform', 'stepForm', 'nestedTableForm', 'infiniteTableForm', 'upload'].indexOf(ctx.trueType) > -1) {
+            if (readMode === false || readMode === 'custom' || !ctx.input || ctx.rule.subForm || (Array.isArray(subForm) ? subForm.length : subForm) || ['fcGroup', 'fcSubForm', 'tableform', 'stepForm', 'upload'].indexOf(ctx.trueType) > -1) {
                 return ctx.parser.render(_, ctx);
             }
             if (['radio', 'select', 'checkbox'].indexOf(type) > -1) {
@@ -297,8 +295,6 @@ formCreateMobile.component('FcTable', Table);
 formCreateMobile.component('FcCell', Cell);
 formCreateMobile.component('FcInlineForm', InlineForm);
 formCreateMobile.component('TableForm', TableForm);
-formCreateMobile.component('NestedTableForm', NestedTableForm);
-formCreateMobile.component('InfiniteTableForm', InfiniteTableForm);
 formCreateMobile.component('DataTable', DataTable);
 formCreateMobile.component('FcValue', Value);
 formCreateMobile.component('FcCity', FcCity);

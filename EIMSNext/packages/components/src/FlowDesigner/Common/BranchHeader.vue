@@ -1,10 +1,5 @@
 <template>
-  <FlowNode
-    :p-node-datas="pNodeDatas"
-    :node-data="nodeData"
-    :show-add-button="false"
-    class="branch-header"
-  >
+  <FlowNode :p-node-datas="pNodeDatas" :node-data="nodeData" :show-add-button="false" class="branch-header">
     <div class="flow-node branch-header-node">
       <et-icon class="icon-branch-header" icon="branch-node" size="24px" />
     </div>
@@ -31,8 +26,12 @@ const props = defineProps<{
 }
 
 .branch-header-node {
-  transform: rotateZ(45deg);
-  width: var(--et-size-36);
-  height: var(--et-size-36);
+  transform: rotateZ(45deg) !important;
+  width: var(--et-size-36) !important;
+  height: var(--et-size-36) !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 16px 16px 5px !important
 }
 </style>

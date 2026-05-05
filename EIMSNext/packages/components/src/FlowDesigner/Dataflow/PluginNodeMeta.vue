@@ -98,8 +98,7 @@ defineOptions({
 
 const ready = ref(false);
 const plugins = ref<PluginRuntimeInfo[]>([]);
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
+const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const nodes = ref<INodeForm[]>([]);
 const pluginId = ref("");
@@ -113,8 +112,8 @@ const fieldCandidates = computed(() =>
 );
 
 const init = async () => {
-  activeData.value = flowContextRef.activeData;
-  nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
+  activeData.value = flowContext.activeData;
+  nodes.value = await getPrevNodes(flowContext.flowData, activeData.value);
   plugins.value = await systemService.getPlugins();
 
   const pluginMeta = activeData.value.metadata.pluginMeta!;

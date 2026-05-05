@@ -30,6 +30,7 @@
           <el-input-number
             v-model="value"
             size="default"
+            align="right"
             class="auto-width-input-number"
             @change="onInput"
           ></el-input-number>

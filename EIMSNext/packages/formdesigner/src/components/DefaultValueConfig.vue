@@ -11,7 +11,7 @@
     <el-badge v-if="valueMode == 'custom'" type="warning">
       <el-input v-if="activeRule.type == 'input'" v-model="customValue"></el-input>
       <el-input v-if="activeRule.type == 'textarea'" type="textarea" v-model="customValue"></el-input>
-      <el-input-number v-if="activeRule.type == 'number'" v-model="customValue" controls-position="right"
+      <el-input-number v-if="activeRule.type == 'number'" v-model="customValue" align="right" controls-position="right"
         :min="activeRule.props.min" :max="activeRule.props.max"></el-input-number>
       <el-date-picker v-if="activeRule.type == 'timestamp'" v-model="customValue" value-format="x"
         :type="activeRule.props.type" :format="activeRule.props.format"></el-date-picker>
