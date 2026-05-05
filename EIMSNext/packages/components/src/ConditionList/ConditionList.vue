@@ -127,12 +127,13 @@ const groupLevel = ref(1);
 const addItem = () => {
   if (!list.value.items) list.value.items = [];
 
-  list.value.items.push({
+  const newItem = {
     id: uniqueId(),
     field: { formId: props.formId, field: "", label: "", type: FieldType.None },
     op: "empty",
     value: { type: ConditionValueType.Custom, value: null },
-  });
+  };
+  list.value.items.push(newItem);
 };
 const removeItem = (idx: number) => {
   list.value.items!.splice(idx, 1);
@@ -141,13 +142,14 @@ const removeItem = (idx: number) => {
 const addGroup = () => {
   if (!list.value.items) list.value.items = [];
 
-  list.value.items.push({
+  const newGroup = {
     id: uniqueId(),
     rel: "and",
     items: [],
     isGroup: true,
     groupLevel: groupLevel.value + 1,
-  });
+  };
+  list.value.items.push(newGroup);
 };
 const removeGroup = (idx: number) => {
   list.value.items!.splice(idx, 1);

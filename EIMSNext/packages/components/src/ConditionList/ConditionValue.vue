@@ -7,7 +7,7 @@
     </div>
     <div class="value-value">
       <template v-if="nodes && condValueType == ConditionValueType.Field">
-        <NodeFieldList :key="nodeFieldListKey" v-model="condFieldValue" :nodes="nodes" :field-def="fieldDef"
+        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="fieldDef"
           :fieldBuildSetting="fieldBuildSetting" @change="onValueChange">
         </NodeFieldList>
       </template>
@@ -153,18 +153,6 @@ const condFieldValue = ref<IFormFieldDef>(
     type: FieldType.None,
   },
 );
-
-const nodeFieldListKey = computed(() => {
-  const nodeKeys = (props.nodes ?? []).map((x) => x.nodeId).join(",");
-  return [
-    props.fieldDef?.field ?? "",
-    props.fieldDef?.type ?? "",
-    nodeKeys,
-    props.fieldBuildSetting.version,
-    props.fieldBuildSetting.rule,
-    props.fieldBuildSetting.matchType,
-  ].join("|");
-});
 
 const syncFromModelValue = () => {
   condValueType.value = props.modelValue.type;

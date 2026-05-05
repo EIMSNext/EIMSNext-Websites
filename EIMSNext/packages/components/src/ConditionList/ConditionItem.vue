@@ -49,7 +49,6 @@
     </div>
     <div v-if="op != 'empty' && op != 'notempty'" class="cond-detail mt-[10px]">
       <ConditionValue
-        :key="conditionValueKey"
         v-model="value"
         :field-def="field"
         :nodes="nodes"
@@ -107,6 +106,12 @@ const value = ref(
 
 const fieldType = ref<FieldType>(field.value?.type ?? FieldType.Input);
 
+const dataType = computed(() => {
+  return field.value.field
+    ? getConditionFieldType(fieldType.value)
+    : ConditionFieldType.Other;
+});
+
 watch(
   () => props.modelValue,
   (newValue) => {
@@ -127,24 +132,6 @@ watch(
     immediate: true,
   },
 );
-
-const dataType = computed(() => {
-  return field.value.field
-    ? getConditionFieldType(fieldType.value)
-    : ConditionFieldType.Other;
-});
-
-const conditionValueKey = computed(() => {
-  const nodeKeys = (props.nodes ?? []).map((x) => x.nodeId).join(",");
-  return [
-    field.value.field,
-    field.value.type,
-    nodeKeys,
-    props.valueBuildSetting.version,
-    props.valueBuildSetting.rule,
-    props.valueBuildSetting.matchType,
-  ].join("|");
-});
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
 
