@@ -28,7 +28,7 @@ const lineStyle = computed(() => {
   left: calc(50% - 1px);
   height: 100%;
   width: var(--et-space-2);
-  z-index: var(--et-z-base);
+  z-index: -1;
   vector-effect: non-scaling-stroke;
 }
 </style>

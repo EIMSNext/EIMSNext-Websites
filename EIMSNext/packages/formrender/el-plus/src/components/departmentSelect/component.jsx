@@ -119,10 +119,15 @@ export default defineComponent({
           : selectedValue.value
             ? [selectedValue.value]
             : [];
-      const tagHeight = multiple ? "60px" : "35px";
+      const tagHeight = multiple ? "60px" : "38px";
       const styCls = multiple
         ? "_fc-org-select"
         : "_fc-org-select et-deparment1";
+      const wrapClass = [
+        "_fc-org-select-wrap",
+        isPreviewMode.value ? "is-preview" : "",
+        multiple ? "is-multiple" : "",
+      ];
       const memberOptions = {
         showTabs: MemberTabs.Department | MemberTabs.CurDept,
         cascadedDept: props.cascadedDept,
@@ -132,7 +137,7 @@ export default defineComponent({
         showContract: props.showContract,
       };
       return (
-        <div style={{ width: "100%" }}>
+        <div class={wrapClass} style={{ width: "100%" }}>
           <SelectedTags
             modelValue={tags}
             class={styCls}

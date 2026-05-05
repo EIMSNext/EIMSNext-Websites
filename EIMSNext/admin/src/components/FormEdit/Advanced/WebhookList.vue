@@ -1,12 +1,6 @@
 <template>
-  <EtConfirmDialog
-    v-model="showDeleteConfirmDialog"
-    title="你确定要删除所选数据吗？"
-    :icon="MessageIcon.Warning"
-    :showNoSave="false"
-    okText="确定"
-    @ok="execDelete"
-  >
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
+    :showNoSave="false" okText="确定" @ok="execDelete">
     <div>数据删除后将不可恢复</div>
   </EtConfirmDialog>
   <el-drawer v-model="showEditor" direction="btt" size="95%" @close="close">
@@ -14,12 +8,7 @@
       <div class="main-title"><span>数据推送</span></div>
     </template>
     <div class="main-content">
-      <WebhookEditor
-        v-if="selectedItem"
-        v-model="selectedItem"
-        :formDef="formDef"
-        :key="selectedItem.id"
-      />
+      <WebhookEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" :key="selectedItem.id" />
     </div>
   </el-drawer>
   <el-drawer v-model="showLog" direction="btt" size="95%" @close="showLog = false">
@@ -36,7 +25,15 @@
         <div class="header-left">
           <el-button type="primary" icon="plus" @click="addNew()">新建数据推送</el-button>
         </div>
-        <div class="header-right"></div>
+        <div class="header-right header-links">
+          <div class="alias-panel" aria-label="text-links">
+            <a class="link" @click="openAliasPanel">设置字段别名</a>
+            <span class="sep">|</span>
+            <a class="link" @click="openFieldMapPanel">字段对照表及JSON样例</a>
+            <span class="sep">|</span>
+            <a class="link" @click="openStructurePanel">表单数据结构</a>
+          </div>
+        </div>
       </div>
       <div>
         <el-space direction="vertical" class="flow-space">
@@ -47,10 +44,7 @@
                   <el-button @click="viewLog(hook)">推送日志</el-button>
                   <el-button @click="edit(hook)">编辑</el-button>
                   <el-button @click="remove(hook)">删除</el-button>
-                  <el-switch
-                    :model-value="!hook.disabled"
-                    @change="toggleDisable(hook)"
-                  ></el-switch>
+                  <el-switch :model-value="!hook.disabled" @change="toggleDisable(hook)"></el-switch>
                 </div>
               </template>
               <div class="flow-content">
@@ -63,16 +57,51 @@
       </div>
     </div>
   </AdvanceLayout>
+
+  <!-- 字段别名设置 Drawer -->
+  <el-drawer v-model="showAlias" direction="btt" size="95%" @close="showAlias = false">
+    <template #header>
+      <div class="main-title"><span>设置字段别名</span></div>
+    </template>
+    <div class="main-content">
+      <WebhookAliasEditor :formDef="formDef" @saved="onAliasSaved" />
+    </div>
+  </el-drawer>
+
+  <!-- 字段对照表 Drawer（占位） -->
+  <el-drawer v-model="showFieldMap" direction="btt" size="95%" @close="showFieldMap = false">
+    <template #header>
+      <div class="main-title"><span>字段对照表及JSON样例</span></div>
+    </template>
+    <div class="alias-drawer-content" style="padding: 16px 20px;">
+      <p>此处展示字段对照表及示例JSON（占位内容）</p>
+      <pre style="background:#f6f7f9;border:1px solid #e8eaed;padding:12px;overflow:auto;max-height:320px;">{
+      "字段示例": ["field1", "field2", "field3"]
+      }</pre>
+    </div>
+  </el-drawer>
+
+  <!-- 表单数据结构 Drawer（占位） -->
+  <el-drawer v-model="showStructure" direction="btt" size="95%" @close="showStructure = false">
+    <template #header>
+      <div class="main-title"><span>表单数据结构</span></div>
+    </template>
+    <div class="alias-drawer-content" style="padding: 16px 20px;">
+      <p>表单数据结构描述（占位内容）</p>
+    </div>
+  </el-drawer>
 </template>
 <script setup lang="ts">
 import WebhookEditor from "./WebhookEditor.vue";
+import WebhookAliasEditor from "./WebhookAliasEditor.vue";
+import { onBeforeMount } from "vue";
 import WebPushLogView from "./WebPushLogView.vue";
-import { FormDef, WebHookTrigger, Webhook } from "@eimsnext/models";
+import { WebHookTrigger } from "@eimsnext/models";
+import type { FormDef, Webhook } from "@eimsnext/models";
 import { webhookService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
-import { useFormStore } from "@eimsnext/store";
 
 defineOptions({
   name: "WebhookList",
@@ -88,7 +117,21 @@ const showDeleteConfirmDialog = ref(false);
 const webhooks = ref<Webhook[]>([]);
 const selectedItem = ref<Webhook>();
 const editorKey = ref(0);
-const formStore = useFormStore();
+
+// UI state for auxiliary drawers
+const showAlias = ref(false);
+const showFieldMap = ref(false);
+const showStructure = ref(false);
+
+const openAliasPanel = () => {
+  showAlias.value = true;
+};
+const openFieldMapPanel = () => (showFieldMap.value = true);
+const openStructurePanel = () => (showStructure.value = true);
+
+const onAliasSaved = () => {
+  showAlias.value = false;
+};
 
 const loadWebhooks = (formId: string) => {
   let query = buildQuery({ filter: { formId: formId } });
@@ -114,7 +157,6 @@ const addNew = () => {
 
 const viewLog = (hook: Webhook) => {
   selectedItem.value = hook;
-
   showLog.value = true;
 };
 
@@ -140,17 +182,12 @@ const toggleDisable = (hook: Webhook) => {
   });
 };
 
-// const emit = defineEmits(["close"]);
-
 function close() {
   showEditor.value = false;
-
   loadWebhooks(props.formDef.id);
-  // emit("close");
 }
 
 onBeforeMount(() => {
-  //初始化
   if (props.formDef) {
     loadWebhooks(props.formDef.id);
   }
@@ -228,5 +265,41 @@ onBeforeMount(() => {
   position: absolute;
   right: 0;
   top: var(--et-size-60);
+}
+
+/* Header links styling (图1) */
+.header-links {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 8px;
+}
+
+.alias-panel {
+  border-radius: 6px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+}
+
+.alias-panel .link {
+  color: var(--et-text-primary);
+  text-decoration: none;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.alias-panel .sep {
+  color: var(--et-text-tertiary);
+  font-weight: 600;
+  padding: 0 6px;
+}
+
+.alias-drawer-footer {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--et-border-color);
+  margin-top: 8px;
 }
 </style>

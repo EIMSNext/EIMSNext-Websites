@@ -1,7 +1,7 @@
 <template>
   <div class="branch-body">
     <el-popover
-      v-if="!flowContextRef.structureReadonly"
+      v-if="!flowContext.structureReadonly"
       :show-arrow="false"
       placement="right"
       width="200"
@@ -39,7 +39,7 @@
     </div>
     <div class="branch-foot">
       <AddNodeButton
-        v-if="!flowContextRef.structureReadonly"
+        v-if="!flowContext.structureReadonly"
         :p-node-datas="pNodeDatas"
         :node-data="nodeData"
       />
@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch } from "vue";
+import { computed, inject, nextTick } from "vue";
 import AddNodeButton from "./AddNodeButton.vue";
 import BranchItem from "./BranchItem.vue";
 import {
@@ -69,29 +69,15 @@ const props = defineProps<{
   pNodeDatas: IFlowNodeData[];
   nodeData: IFlowNodeData;
 }>();
-const canPaste = ref(false);
 const flowContext = inject<IFlowContext>("flowContext")!;
-const flowContextRef = reactive<IFlowContext>(flowContext);
-// const popoverRef = ref();
-
-watch(
-  flowContextRef,
-  (newValue: IFlowContext) => {
-    if (newValue.clonedData.nodeType === FlowNodeType.BranchItem) {
-      canPaste.value = true;
-    } else {
-      canPaste.value = false;
-    }
-  },
-  { immediate: true },
-);
+const canPaste = computed(() => flowContext.clonedData.nodeType === FlowNodeType.BranchItem);
 
 const addBranchItem = () => {
   const newBranchItem = createFlowNode(FlowNodeType.BranchItem, t);
   addNewNode(props.nodeData.childNodes!, newBranchItem);
 };
 const pasteBranchItem = () => {
-  if (flowContext && flowContext.clonedData) {
+  if (flowContext.clonedData) {
     const newBranchItem = cloneFlowNode(flowContext.clonedData);
     addNewNode(props.nodeData.childNodes!, newBranchItem);
   }
@@ -113,7 +99,7 @@ function addNewNode(pNodeDatas: IFlowNodeData[], newBranchItem: IFlowNodeData) {
 }
 
 .popover-action-button-spaced {
-  margin-left: var(--et-space-0);
+  margin-left: var(--et-space-0) !important;
   margin-top: var(--et-space-10);
 }
 

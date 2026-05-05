@@ -14,15 +14,9 @@
             <div>
               <div class="menu-label">图表</div>
               <div class="menu-group">
-                <el-popover
-                  :visible="hoverMenu && hoverMenuType === DashItemType.Chart"
-                  placement="right-start"
-                  trigger="hover"
-                  fit-content
-                  no-fade
-                  width="auto"
-                  :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Chart }"
-                >
+                <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Chart" placement="right-start"
+                  trigger="hover" fit-content no-fade width="auto"
+                  :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Chart }">
                   <div class="menu-guide">
                     <div class="guide-title">统计表</div>
                     <img src="@/assets/images/dsheditor/guide-chart.svg" />
@@ -30,16 +24,11 @@
                   </div>
                   <template #reference>
                     <div class="menu-line">
-                      <div
-                        class="line-content"
-                        draggable="true"
+                      <div class="line-content" draggable="true"
                         @dragstart="dashItemDragStart($event, DashItemType.Chart)"
                         @drag="(dashItemDrag($event, DashItemType.Chart), (hoverMenu = false))"
-                        @dragend="dashItemDrop($event, openSourceDialog)"
-                        unselectable="on"
-                        @mouseover="setHoverMenu(true, DashItemType.Chart)"
-                        @mouseleave="hoverMenu = false"
-                      >
+                        @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
+                        @mouseover="setHoverMenu(true, DashItemType.Chart)" @mouseleave="hoverMenu = false">
                         <et-icon icon="el-PieChart" class="line-icon" />
                         <div class="line-text">统计表</div>
                       </div>
@@ -171,7 +160,7 @@
               </div>
             </div>
             <div>
-              <!-- <div class="menu-label">工具</div> -->
+              <div class="menu-label">工具</div>
               <div class="menu-group">
                 <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Tool" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
@@ -194,13 +183,13 @@
                     </div>
                   </template>
                 </el-popover> -->
-                <!-- <div class="menu-line">
+                <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-filter"></i></div>
                     <div class="line-text">筛选组件</div>
                   </div>
                 </div>
-                <div class="menu-line">
+                <!--    <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-combine-filter"></i></div>
                     <div class="line-text">快捷筛选</div>
@@ -220,71 +209,27 @@
       </el-aside>
       <el-main class="designer-main">
         <div class="dash-edit-layout custom-scroll" @dragover="gridDragOver">
-          <grid-layout
-            ref="gridRef"
-            v-model:layout="state.layout"
-            :col-num="colNum"
-            :col-width="colWidth"
-            :row-height="rowHeight"
-            :is-draggable="state.draggable"
-            :is-resizable="state.resizable"
-            :is-mirrored="false"
-            :is-bounded="true"
-            :vertical-compact="true"
-            :margin="[10, 10]"
-            :use-css-transforms="true"
-            :responsive="true"
-          >
-            <grid-item
-              v-for="item in state.layout"
-              :ref="(e) => setItemRef(item, e)"
-              :x="item.x"
-              :y="item.y"
-              :w="item.w"
-              :h="item.h"
-              :i="item.i"
-              :key="item.i"
-              @resize="resizeEvent"
-              @resized="resizedEvent"
-              @moved="movedEvent"
-              @container-resized="containerResizedEvent"
-              :minW="getMinWidth(item)"
-              :minH="getMinHeight(item)"
-              :maxW="60"
-              :maxH="getMaxHeight(item)"
-              drag-ignore-from=".no-drag"
-              :class="{ edited: item.inEdit, gridNoTran: item.drag }"
-              :style="{ 'z-index': getZIndex(item) }"
-            >
-              <DashItemCard
-                v-if="state.items[item.i]"
-                :item-def="state.items[item.i]"
-                :height="item.h"
-                :width="item.w"
-                :is-view="false"
-                @hide="handleItemHide(state.items[item.i])"
-                @edit="handleItemEdit(state.items[item.i])"
-                @copy="handleItemCopy(state.items[item.i])"
-                @delete="handleItemDelete(state.items[item.i])"
-              />
+          <grid-layout ref="gridRef" v-model:layout="state.layout" :col-num="colNum" :col-width="colWidth"
+            :row-height="rowHeight" :is-draggable="state.draggable" :is-resizable="state.resizable" :is-mirrored="false"
+            :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true"
+            :responsive="true">
+            <grid-item v-for="item in state.layout" :ref="(e) => setItemRef(item, e)" :x="item.x" :y="item.y"
+              :w="item.w" :h="item.h" :i="item.i" :key="item.i" @resize="resizeEvent" @resized="resizedEvent"
+              @moved="movedEvent" @container-resized="containerResizedEvent" :minW="getMinWidth(item)"
+              :minH="getMinHeight(item)" :maxW="60" :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag"
+              :class="{ edited: item.inEdit, gridNoTran: item.drag }" :style="{ 'z-index': getZIndex(item) }">
+              <DashItemCard v-if="state.items[item.i]" :item-def="state.items[item.i]" :height="item.h" :width="item.w"
+                :is-view="false" @hide="handleItemHide(state.items[item.i])" @edit="handleItemEdit(state.items[item.i])"
+                @copy="handleItemCopy(state.items[item.i])" @delete="handleItemDelete(state.items[item.i])" />
             </grid-item>
           </grid-layout>
         </div>
       </el-main>
     </el-container>
   </EtDrawer>
-  <DataSourceDialog
-    v-model="showDataSourceDialog"
-    :appId="dashDef.appId"
-    :dataSource="dataSource"
-    @cancel="handleSourceCancel"
-    @ok="handleSourceOk"
-  ></DataSourceDialog>
-  <EChartsDesigner
-    v-if="dashItemDefRef"
-    v-model="showChartEditor"
-    :dash-item-def="dashItemDefRef"
-  />
+  <DataSourceDialog v-model="showDataSourceDialog" :appId="dashDef.appId" :dataSource="dataSource"
+    @cancel="handleSourceCancel" @ok="handleSourceOk"></DataSourceDialog>
+  <EChartsDesigner v-if="dashItemDefRef" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
 </template>
 <script setup lang="ts">
 import { EtDrawer } from "@eimsnext/components/src/drawer";
@@ -351,22 +296,22 @@ const resizeEvent = (
   newW: number,
   newHPx: number,
   newWPx: number
-) => {};
+) => { };
 const resizedEvent = (
   i: string | number,
   newH: number,
   newW: number,
   newHPx: number,
   newWPx: number
-) => {};
-const movedEvent = (i: string | number, x: number, y: number) => {};
+) => { };
+const movedEvent = (i: string | number, x: number, y: number) => { };
 const containerResizedEvent = (
   i: string | number,
   newH: number,
   newW: number,
   newHPx: number,
   newWPx: number
-) => {};
+) => { };
 
 const getMinWidth = (item: IGridLayoutItem) => {
   return 6;
@@ -612,7 +557,7 @@ const onSave = async () => {
   contextStore.setAppChanged(); //reload 菜单
 };
 
-const onPreview = () => {};
+const onPreview = () => { };
 
 const emit = defineEmits(["update:modelValue", "close"]);
 const close = () => {
@@ -629,13 +574,13 @@ document.addEventListener(
   false
 );
 
-const handleItemHide = (item: DashboardItemDef) => {};
+const handleItemHide = (item: DashboardItemDef) => { };
 const handleItemEdit = (item: DashboardItemDef) => {
   dashItemDefRef.value = item;
   showChartEditor.value = true;
 };
-const handleItemCopy = (item: DashboardItemDef) => {};
-const handleItemDelete = (item: DashboardItemDef) => {};
+const handleItemCopy = (item: DashboardItemDef) => { };
+const handleItemDelete = (item: DashboardItemDef) => { };
 
 watch(
   () => props.dashDef,

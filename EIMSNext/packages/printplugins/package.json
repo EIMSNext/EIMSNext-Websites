@@ -1,0 +1,22 @@
+{
+  "name": "@eimsnext/print-plugins",
+  "version": "0.21.1",
+  "description": "",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "author": "",
+  "license": "",
+  "peerDependencies": {
+    "@univerjs/core": "^0.21.1",
+    "@univerjs/engine-render": "^0.21.1"
+  },
+  "scripts": {
+    "build": "vite build"
+  }
+}

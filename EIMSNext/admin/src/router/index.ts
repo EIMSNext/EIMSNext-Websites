@@ -234,6 +234,16 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/app/:appId/form/:formId/data/:dataId",
+    component: () => import("@/views/form/data/index.vue"),
+    meta: {
+      title: "form",
+      icon: "collection",
+      keepAlive: true,
+      requiresAuth: true,
+    },
+  },
+  {
     path: "/app/:appId/form/:formId",
     component: AppLayout,
     redirect: "/app/$route.params.appId/form/$route.params.formId",

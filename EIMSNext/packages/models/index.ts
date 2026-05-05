@@ -23,6 +23,7 @@ export * from "./dto/role";
 export * from "./dto/roleGroup";
 export * from "./dto/systemMessage";
 export * from "./dto/webhook";
+export * from "./dto/webhookAlias";
 export * from "./dto/webPushLog";
 export * from "./dto/wfDefinition";
 export * from "./dto/wfTodo";

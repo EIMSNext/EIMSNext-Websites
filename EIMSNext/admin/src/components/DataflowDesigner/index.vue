@@ -60,7 +60,7 @@ const currentWfDef = ref<WfDefinition>(props.flowDef);
 const flowData = ref<IFlowData>(createDataflowData(EventSourceType.Form, t));
 flowData.value.startNode.metadata.triggerMeta!.formId = props.formId;
 
-const flowContext: IFlowContext = {
+const flowContext = reactive<IFlowContext>({
   appId: props.appId,
   eventSource: props.flowDef.eventSource,
   sourceId: props.flowDef.sourceId,
@@ -69,7 +69,7 @@ const flowContext: IFlowContext = {
   clonedData: createFlowNode(FlowNodeType.None, t),
   activeData: flowData.value.startNode,
   flowData: flowData.value,
-};
+});
 
 provide("flowContext", flowContext);
 

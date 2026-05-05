@@ -22,6 +22,7 @@ export interface IFieldBuildSetting {
   version: number;
   rule: FieldBuildRule;
   matchType: boolean;
+  fields?: IFormFieldDef[];
   fieldLimit?: IFieldLimit;
   fieldMapping?: Record<string, IFormFieldMap>;
 }
@@ -116,6 +117,9 @@ export function buildNodeFieldTree(
   fieldDef?: IFormFieldDef,
 ): ITreeNode[] {
   const fieldDataType = getConditionFieldType(fieldDef?.type);
+  const fieldMapping = setting.fieldMapping || {};
+  const hasFieldMapping =
+    setting.fieldMapping != null && setting.fieldMapping != undefined;
 
   const attachChildren = (
     pNode: ITreeNode,
@@ -130,10 +134,10 @@ export function buildNodeFieldTree(
         let shouldHidden = true;
         //1. 左边为子表字段
         if (fieldDef?.isSubField) {
-          if (setting.fieldMapping) {
-            let masterMap = setting.fieldMapping["master"];
+          if (hasFieldMapping) {
+            let masterMap = fieldMapping["master"];
             let mappedField = splitSubField(fieldDef.field)[0];
-            let mapped = setting.fieldMapping[mappedField];
+            let mapped = fieldMapping[mappedField];
 
             let showLv2 = !!(
               masterMap &&
@@ -208,13 +212,13 @@ export function buildNodeFieldTree(
           }
         } else {
           //2. 左边为主表
-          if (setting.fieldMapping) {
+          {
             let mappedField = "master";
-            let mapped = setting.fieldMapping[mappedField];
+            let mapped = fieldMapping[mappedField];
 
             let singleOnly = false;
             let subMap: IFormFieldMap | undefined = undefined;
-            for (const [key, map] of Object.entries(setting.fieldMapping)) {
+            for (const [key, map] of Object.entries(fieldMapping)) {
               if (key != "master") {
                 singleOnly = true;
                 subMap = map;

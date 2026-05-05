@@ -7,6 +7,12 @@
             <el-option v-for="option in paperSizeOptions" :key="option.value" :label="option.label" :value="option.value" />
           </el-select>
         </el-form-item>
+        <el-form-item label="纸张方向">
+          <el-radio-group v-model="pageSettingsDraft.orientation">
+            <el-radio-button label="portrait">竖向</el-radio-button>
+            <el-radio-button label="landscape">横向</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="页边距">
           <div class="page-margin-grid">
             <div class="page-margin-item">
@@ -36,12 +42,17 @@
         </div>
       </template>
     </el-dialog>
+    <PdfPreview
+      v-model="showPrintPreview"
+      :pdf-url="previewPdfUrl"
+      :title="previewPdfTitle"
+    />
     <div class="flow-actions">
       <div class="left">
         <span class="page-setup-summary">{{ pageSetupSummary }}</span>
       </div>
       <div class="right">
-        <el-button>打印模板设置</el-button>
+        <el-button @click="openPageSetupDialog">打印模板设置</el-button>
         <el-button :loading="previewing" :disabled="!designerReady" @click="preview">预览</el-button>
         <el-button :loading="saving" :disabled="!designerReady" @click="save">保存</el-button>
       </div>
@@ -97,9 +108,11 @@
 import { useFormStore } from "@eimsnext/store";
 import { FieldDef, FieldType, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
 import { DataItemType, ITreeNode } from "@eimsnext/components";
+import { EimsPrintAreaPlugin, type PrintOrientation } from "@eimsnext/print-plugins";
 import Draggable from "vuedraggable";
 import { customPrintService, PrintPreviewRequest, printTemplateService } from "@eimsnext/services";
 import { IPrintMetadata } from "./type";
+import PdfPreview from "./PdfPreview.vue";
 
 defineOptions({
   name: "PdfPrintDesigner",
@@ -110,7 +123,9 @@ type UIPluginModule = typeof import("@univerjs/ui");
 
 type LoadedUniverModules = {
   core: UniverModule;
+  react: any;
   render: typeof import("@univerjs/engine-render");
+  engineFormula: typeof import("@univerjs/engine-formula");
   ui: UIPluginModule;
   docs: typeof import("@univerjs/docs");
   docsDrawing: typeof import("@univerjs/docs-drawing");
@@ -120,6 +135,10 @@ type LoadedUniverModules = {
   sheets: typeof import("@univerjs/sheets");
   sheetsDrawing: typeof import("@univerjs/sheets-drawing");
   sheetsDrawingUi: typeof import("@univerjs/sheets-drawing-ui");
+  sheetsFormula: typeof import("@univerjs/sheets-formula");
+  sheetsFormulaUi: typeof import("@univerjs/sheets-formula-ui");
+  sheetsNumfmt: typeof import("@univerjs/sheets-numfmt");
+  sheetsNumfmtUi: typeof import("@univerjs/sheets-numfmt-ui");
   sheetsUi: typeof import("@univerjs/sheets-ui");
   designLocale: { default: Record<string, unknown> };
   uiLocale: { default: Record<string, unknown> };
@@ -127,6 +146,9 @@ type LoadedUniverModules = {
   docsUiLocale: { default: Record<string, unknown> };
   sheetsLocale: { default: Record<string, unknown> };
   sheetsDrawingUiLocale: { default: Record<string, unknown> };
+  sheetsFormulaLocale: { default: Record<string, unknown> };
+  sheetsFormulaUiLocale: { default: Record<string, unknown> };
+  sheetsNumfmtUiLocale: { default: Record<string, unknown> };
   sheetsUiLocale: { default: Record<string, unknown> };
   coreFacade: { FUniver: any };
   sheetsFacade: { FWorkbook: any; FRange: any };
@@ -141,11 +163,13 @@ type PrintMargins = {
 
 type PrintPageSettings = {
   paperSize: string;
+  orientation: PrintOrientation;
   margins: PrintMargins;
 };
 
 type WorksheetPageSetup = {
   paperSize: string;
+  orientation: PrintOrientation;
   topMargin: number;
   rightMargin: number;
   bottomMargin: number;
@@ -170,11 +194,15 @@ const createDefaultMargins = (): PrintMargins => ({
 
 const createDefaultPageSettings = (): PrintPageSettings => ({
   paperSize: "A4",
+  orientation: "portrait",
   margins: createDefaultMargins(),
 });
 
 const DEFAULT_SHEET_ID = "Sheet1";
 const PAGE_SETUP_MENU_ID = "eimsnext.print.page-setup";
+const PAGE_SETUP_MENU_ICON_ID = "eimsnext.print.page-setup.icon";
+const DEFAULT_ROW_COUNT = 100;
+const DEFAULT_COLUMN_COUNT = 26;
 
 const mmToPoint = (millimeter: number) => Number((millimeter * 72 / 25.4).toFixed(4));
 
@@ -190,6 +218,8 @@ const createDefaultWorkbookData = () => ({
     [DEFAULT_SHEET_ID]: {
       id: DEFAULT_SHEET_ID,
       name: DEFAULT_SHEET_ID,
+      rowCount: DEFAULT_ROW_COUNT,
+      columnCount: DEFAULT_COLUMN_COUNT,
       cellData: {},
       rowData: {},
       columnData: {},
@@ -205,8 +235,13 @@ const isRecord = (value: unknown): value is Record<string, unknown> => !!value &
 
 const clonePageSettings = (settings: PrintPageSettings): PrintPageSettings => ({
   paperSize: settings.paperSize,
+  orientation: settings.orientation,
   margins: { ...settings.margins },
 });
+
+const normalizeOrientation = (value: unknown, fallback: PrintOrientation): PrintOrientation => (
+  value === "landscape" || value === "portrait" ? value : fallback
+);
 
 const normalizeMarginValue = (value: unknown, fallback: number) => {
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
@@ -224,6 +259,7 @@ const normalizeDraftPageSettings = (value: PrintPageSettings): PrintPageSettings
 
   return {
     paperSize,
+    orientation: normalizeOrientation(value.orientation, defaults.orientation),
     margins: {
       top: normalizeMarginValue(value.margins.top, defaults.margins.top),
       right: normalizeMarginValue(value.margins.right, defaults.margins.right),
@@ -250,6 +286,7 @@ const normalizePageSettings = (value: unknown): PrintPageSettings => {
 
   return {
     paperSize,
+    orientation: normalizeOrientation(value.orientation, defaults.orientation),
     margins: {
       top: resolveMarginMm("topMargin", defaults.margins.top),
       right: resolveMarginMm("rightMargin", defaults.margins.right),
@@ -261,6 +298,7 @@ const normalizePageSettings = (value: unknown): PrintPageSettings => {
 
 const buildWorksheetPageSetup = (settings: PrintPageSettings): WorksheetPageSetup => ({
   paperSize: settings.paperSize,
+  orientation: settings.orientation,
   topMargin: mmToPoint(settings.margins.top),
   rightMargin: mmToPoint(settings.margins.right),
   bottomMargin: mmToPoint(settings.margins.bottom),
@@ -312,18 +350,22 @@ const loading = ref(false);
 const previewing = ref(false);
 const saving = ref(false);
 const loadError = ref("");
+const showPrintPreview = ref(false);
+const previewPdfUrl = ref("");
+const previewPdfTitle = ref("");
 const pageSettings = ref<PrintPageSettings>(createDefaultPageSettings());
 const pageSettingsDraft = reactive<PrintPageSettings>(createDefaultPageSettings());
 const designerReady = computed(() => !loading.value && !loadError.value && !!workbookApi);
 const pageSetupSummary = computed(() => {
   const margins = pageSettings.value.margins;
-  return `纸张：${pageSettings.value.paperSize} | 页边距 ${margins.top}/${margins.right}/${margins.bottom}/${margins.left} mm`;
+  return `纸张：${pageSettings.value.paperSize} ${pageSettings.value.orientation === "landscape" ? "横向" : "竖向"} | 页边距 ${margins.top}/${margins.right}/${margins.bottom}/${margins.left} mm`;
 });
 
 let univerObj: InstanceType<UniverModule["Univer"]> | undefined;
 let univerApi: any;
 let workbookApi: any;
 let loadedModules: LoadedUniverModules | undefined;
+let printAreaPlugin: EimsPrintAreaPlugin | undefined;
 let disposed = false;
 
 const hiddenMenuItems: Record<string, { hidden: boolean }> = {
@@ -332,14 +374,27 @@ const hiddenMenuItems: Record<string, { hidden: boolean }> = {
   "base-ui.operation.toggle-shortcut-panel": { hidden: true },
   "formula-ui.operation.insert-function": { hidden: true },
   "formula-ui.operation.more-functions": { hidden: true },
+  "formula-ui.operation.insert-function.common": { hidden: true },
+  "formula-ui.operation.insert-function.financial": { hidden: true },
+  "formula-ui.operation.insert-function.logical": { hidden: true },
+  "formula-ui.operation.insert-function.text": { hidden: true },
+  "formula-ui.operation.insert-function.date": { hidden: true },
+  "formula-ui.operation.insert-function.lookup": { hidden: true },
+  "formula-ui.operation.insert-function.math": { hidden: true },
+  "formula-ui.operation.insert-function.statistical": { hidden: true },
+  "formula-ui.operation.insert-function.engineering": { hidden: true },
+  "formula-ui.operation.insert-function.information": { hidden: true },
+  "formula-ui.operation.insert-function.database": { hidden: true },
   "ribbon.data": { hidden: true },
   "ribbon.formulas": { hidden: true },
   "formula-bar": { hidden: true },
+  "sheet.toolbar.text-to-number": { hidden: true },
 };
 
 const syncPageSettingsDraft = () => {
   const nextSettings = clonePageSettings(pageSettings.value);
   pageSettingsDraft.paperSize = nextSettings.paperSize;
+  pageSettingsDraft.orientation = nextSettings.orientation;
   pageSettingsDraft.margins.top = nextSettings.margins.top;
   pageSettingsDraft.margins.right = nextSettings.margins.right;
   pageSettingsDraft.margins.bottom = nextSettings.margins.bottom;
@@ -354,18 +409,59 @@ const openPageSetupDialog = () => {
 const applyPageSettings = () => {
   pageSettings.value = normalizeDraftPageSettings(pageSettingsDraft);
   syncPageSettingsDraft();
+  printAreaPlugin?.refresh();
   showPageSetupDialog.value = false;
 };
 
+const createPageSetupMenuIcon = (react: any) => {
+  const { createElement } = react;
+
+  return function PageSetupMenuIcon(props: Record<string, unknown>) {
+    return createElement(
+      "span",
+      {
+        ...props,
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "16px",
+          height: "16px",
+          ...(typeof props.style === "object" ? props.style : {}),
+        },
+      },
+      createElement(
+        "svg",
+        {
+          viewBox: "0 0 1024 1024",
+          width: "1em",
+          height: "1em",
+          fill: "currentColor",
+          ariaHidden: "true",
+        },
+        createElement("path", {
+          d: "M256 128a64 64 0 0 0-64 64v160h64V192h512v160h64V192a64 64 0 0 0-64-64H256zm-64 288c-70.688 0-128 57.312-128 128v192h128v160h640V736h128V544c0-70.688-57.312-128-128-128H192zm64 64h512v128H256V480zm-64 0v352h-64V544a64 64 0 0 1 64-64zm640 0h64a64 64 0 0 1 64 64v288h-64V480zm-512 192h384v160H320V672zm448-96a48 48 0 1 0 0-96 48 48 0 0 0 0 96z",
+        })
+      )
+    );
+  };
+};
+
 const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: any) => {
+  runtimeApi.registerComponent(PAGE_SETUP_MENU_ICON_ID, createPageSetupMenuIcon(modules.react));
   runtimeApi.createMenu({
     id: PAGE_SETUP_MENU_ID,
     title: "页面设置",
+    tooltip: "页面设置",
+    icon: PAGE_SETUP_MENU_ICON_ID,
+    order: 1000,
     action: openPageSetupDialog,
-  }).appendTo([modules.ui.RibbonPosition.START, modules.ui.RibbonStartGroup.OTHERS]);
+  }).appendTo([modules.ui.RibbonPosition.INSERT, modules.ui.RibbonInsertGroup.MEDIA]);
 };
 
 const disposeDesigner = () => {
+  printAreaPlugin?.dispose();
+  printAreaPlugin = undefined;
   univerObj?.dispose();
   univerObj = undefined;
   univerApi = undefined;
@@ -458,11 +554,15 @@ const loadUniverModules = async () => {
     import("@univerjs/docs-ui/facade"),
     import("@univerjs/sheets/facade"),
     import("@univerjs/sheets-ui/facade"),
+    import("@univerjs/sheets-formula/facade"),
+    import("@univerjs/sheets-numfmt/facade"),
   ]);
 
   const [
     core,
+    react,
     render,
+    engineFormula,
     ui,
     docs,
     docsDrawing,
@@ -472,6 +572,10 @@ const loadUniverModules = async () => {
     sheets,
     sheetsDrawing,
     sheetsDrawingUi,
+    sheetsFormula,
+    sheetsFormulaUi,
+    sheetsNumfmt,
+    sheetsNumfmtUi,
     sheetsUi,
     designLocale,
     uiLocale,
@@ -479,12 +583,17 @@ const loadUniverModules = async () => {
     docsUiLocale,
     sheetsLocale,
     sheetsDrawingUiLocale,
+    sheetsFormulaLocale,
+    sheetsFormulaUiLocale,
+    sheetsNumfmtUiLocale,
     sheetsUiLocale,
     coreFacade,
     sheetsFacade,
   ] = await Promise.all([
     import("@univerjs/core"),
+    import("react"),
     import("@univerjs/engine-render"),
+    import("@univerjs/engine-formula"),
     import("@univerjs/ui"),
     import("@univerjs/docs"),
     import("@univerjs/docs-drawing"),
@@ -494,6 +603,10 @@ const loadUniverModules = async () => {
     import("@univerjs/sheets"),
     import("@univerjs/sheets-drawing"),
     import("@univerjs/sheets-drawing-ui"),
+    import("@univerjs/sheets-formula"),
+    import("@univerjs/sheets-formula-ui"),
+    import("@univerjs/sheets-numfmt"),
+    import("@univerjs/sheets-numfmt-ui"),
     import("@univerjs/sheets-ui"),
     import("@univerjs/design/locale/zh-CN"),
     import("@univerjs/ui/locale/zh-CN"),
@@ -501,6 +614,9 @@ const loadUniverModules = async () => {
     import("@univerjs/docs-ui/locale/zh-CN"),
     import("@univerjs/sheets/locale/zh-CN"),
     import("@univerjs/sheets-drawing-ui/locale/zh-CN"),
+    import("@univerjs/sheets-formula/locale/zh-CN"),
+    import("@univerjs/sheets-formula-ui/locale/zh-CN"),
+    import("@univerjs/sheets-numfmt-ui/locale/zh-CN"),
     import("@univerjs/sheets-ui/locale/zh-CN"),
     import("@univerjs/core/facade"),
     import("@univerjs/sheets/facade"),
@@ -508,7 +624,9 @@ const loadUniverModules = async () => {
 
   loadedModules = {
     core,
+    react,
     render,
+    engineFormula,
     ui,
     docs,
     docsDrawing,
@@ -518,6 +636,10 @@ const loadUniverModules = async () => {
     sheets,
     sheetsDrawing,
     sheetsDrawingUi,
+    sheetsFormula,
+    sheetsFormulaUi,
+    sheetsNumfmt,
+    sheetsNumfmtUi,
     sheetsUi,
     designLocale: designLocale as { default: Record<string, unknown> },
     uiLocale: uiLocale as { default: Record<string, unknown> },
@@ -525,6 +647,9 @@ const loadUniverModules = async () => {
     docsUiLocale: docsUiLocale as { default: Record<string, unknown> },
     sheetsLocale: sheetsLocale as { default: Record<string, unknown> },
     sheetsDrawingUiLocale: sheetsDrawingUiLocale as { default: Record<string, unknown> },
+    sheetsFormulaLocale: sheetsFormulaLocale as { default: Record<string, unknown> },
+    sheetsFormulaUiLocale: sheetsFormulaUiLocale as { default: Record<string, unknown> },
+    sheetsNumfmtUiLocale: sheetsNumfmtUiLocale as { default: Record<string, unknown> },
     sheetsUiLocale: sheetsUiLocale as { default: Record<string, unknown> },
     coreFacade: coreFacade as { FUniver: any },
     sheetsFacade: sheetsFacade as { FWorkbook: any; FRange: any },
@@ -552,12 +677,16 @@ const initSheet = async (data: Record<string, unknown>) => {
         modules.docsUiLocale.default,
         modules.sheetsLocale.default,
         modules.sheetsDrawingUiLocale.default,
+        modules.sheetsFormulaLocale.default,
+        modules.sheetsFormulaUiLocale.default,
+        modules.sheetsNumfmtUiLocale.default,
         modules.sheetsUiLocale.default
       ),
     },
   });
 
   univer.registerPlugin(modules.render.UniverRenderEnginePlugin);
+  univer.registerPlugin(modules.engineFormula.UniverFormulaEnginePlugin);
   univer.registerPlugin(modules.ui.UniverUIPlugin, {
     container: container.value,
     header: true,
@@ -574,14 +703,47 @@ const initSheet = async (data: Record<string, unknown>) => {
   univer.registerPlugin(modules.docsUi.UniverDocsUIPlugin);
   univer.registerPlugin(modules.sheets.UniverSheetsPlugin);
   univer.registerPlugin(modules.sheetsDrawing.UniverSheetsDrawingPlugin);
+  univer.registerPlugin(modules.sheetsFormula.UniverSheetsFormulaPlugin);
+  univer.registerPlugin(modules.sheetsNumfmt.UniverSheetsNumfmtPlugin);
   univer.registerPlugin(modules.sheetsUi.UniverSheetsUIPlugin, {
     menu: hiddenMenuItems,
   });
+  univer.registerPlugin(modules.sheetsFormulaUi.UniverSheetsFormulaUIPlugin);
+  univer.registerPlugin(modules.sheetsNumfmtUi.UniverSheetsNumfmtUIPlugin);
   univer.registerPlugin(modules.sheetsDrawingUi.UniverSheetsDrawingUIPlugin);
 
   const runtimeApi = modules.coreFacade.FUniver.newAPI(univer);
   registerPageSetupToolbarMenu(modules, runtimeApi);
   const runtimeWorkbook = runtimeApi.createWorkbook(data);
+  const renderManagerService = (univer as any).__getInjector?.().get(modules.render.IRenderManagerService);
+  const runtimeUnitId = typeof runtimeWorkbook?.getId === "function"
+    ? runtimeWorkbook.getId()
+    : typeof runtimeWorkbook?.getUnitId === "function"
+      ? runtimeWorkbook.getUnitId()
+      : DEFAULT_SHEET_ID;
+
+  if (!renderManagerService) {
+    throw new Error("Univer 渲染服务未初始化，无法加载打印区域插件");
+  }
+
+  if (!runtimeUnitId) {
+    throw new Error("Univer 工作簿缺少 unitId，无法加载打印区域插件");
+  }
+
+  univerObj = univer;
+  univerApi = runtimeApi;
+  workbookApi = runtimeWorkbook;
+
+  printAreaPlugin = new EimsPrintAreaPlugin({
+    container: container.value,
+    unitId: runtimeUnitId,
+    getWorkbook: () => workbookApi,
+    getPageSettings: () => pageSettings.value,
+  }, renderManagerService);
+  printAreaPlugin.onRendered();
+  requestAnimationFrame(() => {
+    printAreaPlugin?.refresh();
+  });
 
   if (!runtimeApi.Event?.DragOver || !runtimeApi.Event?.Drop) {
     throw new Error("Univer 0.21 运行时事件接口发生变化，请检查 facade Event 定义");
@@ -622,9 +784,7 @@ const initSheet = async (data: Record<string, unknown>) => {
     draggingNode.value = undefined;
   });
 
-  univerObj = univer;
-  univerApi = runtimeApi;
-  workbookApi = runtimeWorkbook;
+  printAreaPlugin?.refresh();
 };
 
 const initializeDesigner = async () => {
@@ -659,7 +819,9 @@ const preview = async () => {
 
     const printResult = await customPrintService.preview(req);
     if (printResult?.downloadUrl) {
-      window.open(printResult.downloadUrl, "_blank");
+      previewPdfUrl.value = printResult.downloadUrl;
+      previewPdfTitle.value = currentPrintDef.value.name || "打印预览";
+      showPrintPreview.value = true;
       return;
     }
 

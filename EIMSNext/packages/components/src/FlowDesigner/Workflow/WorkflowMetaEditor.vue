@@ -44,7 +44,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch } from "vue";
+import { inject, nextTick, ref, watch } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -63,13 +63,12 @@ defineOptions({
 });
 
 const activeTab = ref("node");
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
+const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const nodeType = ref(FlowNodeType.None);
 
 watch(
-  () => flowContextRef.activeData,
+  () => flowContext.activeData,
   (newValue: IFlowNodeData) => {
     nodeType.value = FlowNodeType.None;
     activeData.value = newValue;

@@ -6,19 +6,9 @@ export default {
   icon: "icon-cell",
   name,
   aide: true,
-  drag: true,
+  drag: false,
   dragBtn: false,
   mask: false,
-  denyDrag: {
-    item: [
-      "tableform",
-      "nestedTableForm",
-      "nestedSubTableForm",
-      "infiniteTableForm",
-      "tabs",
-      "elTabPane",
-    ],
-  },
   input: false,
   validate: false,
   style: false,
@@ -39,7 +29,7 @@ export default {
       type: name,
       props: {
         label: t("com.tableFormColumn.label"),
-        width: "auto",
+        width: "160px",
       },
       children: [],
     };

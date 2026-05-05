@@ -58,7 +58,7 @@
   </template>
 </template>
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref, watch } from "vue";
+import { inject, nextTick, ref } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -89,11 +89,10 @@ const formId = ref("");
 const mode = ref(UpdateMode.Form);
 
 const condList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
+const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 
-const appId = ref(flowContext!.appId);
+const appId = ref(flowContext.appId);
 const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 
@@ -139,8 +138,8 @@ const onCondClear = () => {
 
 const init = () => {
   nextTick(async () => {
-    activeData.value = flowContextRef.activeData;
-    nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
+    activeData.value = flowContext.activeData;
+    nodes.value = await getPrevNodes(flowContext.flowData, activeData.value);
 
     mode.value = activeData.value.metadata.deleteMeta!.deleteMode;
     nodeId.value = activeData.value.id;
