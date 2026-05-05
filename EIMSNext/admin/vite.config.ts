@@ -178,7 +178,6 @@ const packageChunkGroups = [
       "qs",
       "path-browserify",
       "lodash-es",
-      "lodash",
       "side-channel",
       "side-channel-list",
       "side-channel-map",

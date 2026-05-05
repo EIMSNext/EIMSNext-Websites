@@ -16,7 +16,7 @@ export default defineConfig({
       external: [
         "vue",
         "element-plus",
-        "lodash",
+        "lodash-es",
         "@element-plus/icons-vue",
         "@eimsnext/utils",
         "@eimsnext/models",
