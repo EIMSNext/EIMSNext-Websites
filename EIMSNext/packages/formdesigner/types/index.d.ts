@@ -777,6 +777,7 @@ export declare const FcDesigner: import("vue").DefineComponent<
     mask?: boolean;
     //多语⾔配置，默认为中⽂
     locale?: Object;
+    isgod?: boolean;
   },
   {},
   {},

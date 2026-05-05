@@ -151,11 +151,11 @@
                                                         </div>
                                                         <span class="_fc-l-name">{{
                                                             t('com.' + element.name + '.name') || element.label
-                                                            }}</span>
+                                                        }}</span>
                                                     </template>
                                                     <span class="_fc-l-name" v-else>{{
                                                         t('tmp.' + element.name) || element.label
-                                                        }}</span>
+                                                    }}</span>
                                                 </div>
                                             </template>
                                         </fcDraggable>
@@ -175,7 +175,7 @@
                                                     :class="(data.rule._menu && data.rule._menu.icon) || 'icon-cell'"></i>
                                                 <span>{{
                                                     getTitle(data.rule)
-                                                    }}</span>
+                                                }}</span>
                                             </div>
                                             <div class="_fc-tree-more" @click.stop
                                                 v-if="!data.slot && !data.rule._fc_page_tag">
@@ -281,7 +281,7 @@
                                     <div class="_fd-input-btn">
                                         <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{
                                             t('props.inputData')
-                                        }}: </span>
+                                            }}: </span>
                                         <el-switch :model-value="inputForm.state" inline-prompt
                                             @update:model-value="openInputData" />
                                     </div>
@@ -376,6 +376,12 @@
                                 <template v-if="activeRuleChildren">
                                     <SubList></SubList>
                                 </template> -->
+                                <div v-if="isgod && activeRule" class="_fc-r-name-config" style="margin-bottom: 8px;">
+                                    <div style="margin-bottom: 10px;"><span class="_fc-field-title">
+                                            字段标识
+                                        </span></div>
+                                    <el-input class="_fc-r-name-input" :model-value="activeRule.field"></el-input>
+                                </div>
                                 <div class="_fc-r-config" :style="{ 'grid-template-areas': configFormOrderStyle }">
                                     <div style="grid-area: base;">
                                         <!-- <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
@@ -386,10 +392,7 @@
                                             <div><span style="color:#eb5050">*</span><span class="_fc-field-title">{{
                                                 t('form.title')
                                                     }}</span></div>
-                                            <el-tag v-if="activeRule" type="success" effect="plain" disable-transitions>
-                                                {{ t('com.' + (activeRule._menu.name) + '.name') ||
-                                                    activeRule._menu.label }}
-                                            </el-tag> <!-- <TypeSelect></TypeSelect> -->
+                                            <!-- <TypeSelect></TypeSelect> -->
                                         </div>
                                         <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api"
                                             :rule="baseForm.rule" :option="baseForm.options"
@@ -689,7 +692,11 @@ export default defineComponent({
             default: undefined,
         },
         locale: Object,
-        handle: Array
+        handle: Array,
+        isgod: {
+            type: Boolean,
+            default: false,
+        },
     },
     emits: ['active', 'create', 'copy', 'delete', 'drag', 'inputData', 'inputPageData', 'save', 'clear', 'switchForm', 'copyRule', 'pasteRule', 'sortUp', 'sortDown', 'changeDevice', 'previewSubmit', 'previewReset'],
     setup(props) {
@@ -928,7 +935,7 @@ export default defineComponent({
                 value: {},
                 options: {
                     form: {
-                        labelPosition: 'left',
+                        labelPosition: 'top',
                     },
                     submitBtn: false,
                     mounted: (fapi) => {
@@ -1335,6 +1342,25 @@ export default defineComponent({
                 data.activeRule.name = 'ref_' + uniqueId();
             },
             makeDrag(group, tag, children, on, slot) {
+                const dragContext = methods.getTableFormContextByChildren(children);
+                const columnContext = methods.getTableFormColumnContextByChildren(children);
+                const tableFormDropType = group === 'tableform-column'
+                    ? 'column'
+                    : (group === 'tableform-root' ? 'root' : (columnContext ? 'column' : (dragContext ? 'root' : null)));
+                const groupName = (group === true || group === 'tableform-root' || group === 'tableform-column') ? 'default' : group;
+                const resolveTargetRule = () => {
+                    const targetRule = methods.findRuleByChildren(children);
+                    if (targetRule) {
+                        targetRule._tableformDropType = targetRule._tableformDropType || tableFormDropType;
+                        return targetRule;
+                    }
+                    return {
+                        children,
+                        _tableformDropType: tableFormDropType,
+                        _config: columnContext?.column?._menu || dragContext?.tableForm?._menu || null,
+                        _menu: columnContext?.column?._menu || dragContext?.tableForm?._menu || null,
+                    };
+                };
                 return {
                     type: 'DragBox',
                     wrap: {
@@ -1344,20 +1370,22 @@ export default defineComponent({
                         show: false
                     },
                     inject: true,
+                    _tableformDropType: tableFormDropType,
                     props: {
                         rule: {
                             props: {
                                 tag: 'el-col',
                                 group: {
-                                    name: group === true ? 'default' : group,
-                                    put(...args) {
-                                        return methods.dragPut(...args);
+                                    name: groupName,
+                                    put(to, ...args) {
+                                        to.el.__rule__ = resolveTargetRule();
+                                        return methods.dragPut(to, ...args);
                                     }
                                 },
                                 swapThreshold: 0.65,
                                 ghostClass: 'ghost',
                                 animation: 150,
-                                handle: '._fd-drag-btn',
+                                handle: '._fd-drag-tool',
                                 emptyInsertThreshold: 0,
                                 direction: 'auto',
                                 itemKey: 'type',
@@ -1605,6 +1633,12 @@ export default defineComponent({
                     ...defForm,
                     ...options.form || {}
                 };
+                if (!options.form.labelPosition) {
+                    options.form.labelPosition = 'top';
+                }
+                if (!options.form.labelWidth) {
+                    options.form.labelWidth = options.form.labelPosition === 'top' ? 'auto' : '125px';
+                }
                 options._event = {
                     onReset: options.onReset || '',
                     onSubmit: options.onSubmit || '',
@@ -1641,6 +1675,15 @@ export default defineComponent({
                         data.formOptions[key] = { ...(data.formOptions[key] || {}), ...options[key] };
                     }
                 });
+                if (!data.formOptions.form) {
+                    data.formOptions.form = {};
+                }
+                if (!data.formOptions.form.labelPosition) {
+                    data.formOptions.form.labelPosition = 'top';
+                }
+                if (!data.formOptions.form.labelWidth) {
+                    data.formOptions.form.labelWidth = data.formOptions.form.labelPosition === 'top' ? 'auto' : '125px';
+                }
                 if (options.style && (!data.formOptions.style || data.formOptions.style.indexOf(options.style) === -1)) {
                     data.formOptions.style = (data.formOptions.style || '') + '\n' + options.style;
                 }
@@ -1898,10 +1941,22 @@ export default defineComponent({
                 return methods.isRuleName(rule, 'tableFormColumn');
             },
             isTableFormRule(rule) {
-                return methods.isRuleName(rule, ['tableform', 'nestedTableForm', 'nestedSubTableForm', 'infiniteTableForm']);
+                return methods.isRuleName(rule, ['tableform']);
+            },
+            isTableFormBlockedMenu(menu) {
+                if (!menu) {
+                    return false;
+                }
+                return ['tableform', 'divider', 'fcRow', 'col', 'fcFlex', 'fcFlex2', 'fcCell', 'tabs', 'elTabPane', 'collapse', 'elCollapseItem', 'fcTable', 'elCard', 'fcInlineForm'].indexOf(menu.name) > -1 || menu.menu === 'layout';
             },
             isTableFormBlockedRule(rule) {
-                return methods.isRuleName(rule, ['tableform', 'nestedTableForm', 'nestedSubTableForm', 'infiniteTableForm', 'tabs', 'elTabPane']);
+                return methods.isTableFormBlockedMenu(rule?._menu || rule?._config || rule);
+            },
+            isTableFormOperationRule(rule) {
+                if (!rule) {
+                    return false;
+                }
+                return !!rule._tableHandle;
             },
             getComponentParent(rule) {
                 let ctx = rule?.__fc__?.parent;
@@ -1918,7 +1973,24 @@ export default defineComponent({
                     return [];
                 }
                 const dragBox = (rule.children || []).find(item => item.type === 'DragBox');
+                return dragBox ? dragBox.children : (rule.children || []);
+            },
+            getTableFormRootChildren(rule) {
+                if (!methods.isTableFormRule(rule)) {
+                    return [];
+                }
+                const dragBox = (rule.children || []).find(item => item.type === 'DragBox');
                 return dragBox ? dragBox.children : [];
+            },
+            getTableFormByRule(rule) {
+                let current = rule;
+                while (current) {
+                    if (methods.isTableFormRule(current)) {
+                        return current;
+                    }
+                    current = methods.getComponentParent(current);
+                }
+                return null;
             },
             getTableFormColumnFirstChild(rule) {
                 const child = methods.getTableFormColumnChildren(rule)[0];
@@ -1930,6 +2002,42 @@ export default defineComponent({
                 }
                 return methods.getTableFormColumnFirstChild(rule) || rule;
             },
+            isInsideTableFormColumn(rule) {
+                if (!rule) {
+                    return false;
+                }
+                return methods.isTableFormColumnRule(methods.getComponentParent(rule));
+            },
+            applyTableFormChildDefaults(rule) {
+                if (!rule || !methods.isInsideTableFormColumn(rule)) {
+                    return;
+                }
+                if (!rule.col) {
+                    rule.col = {};
+                }
+                rule.col.span = 24;
+            },
+            normalizeTableFormChild(rule) {
+                if (!rule || is.String(rule)) {
+                    return rule;
+                }
+                while (rule && rule.type === 'DragTool' && Array.isArray(rule.children) && rule.children[0]) {
+                    rule = rule.children[0];
+                }
+                if (rule && rule.type === 'DragBox') {
+                    const child = Array.isArray(rule.children) ? rule.children[0] : null;
+                    return child ? methods.normalizeTableFormChild(child) : null;
+                }
+                if (!rule) {
+                    return null;
+                }
+                delete rule.wrap;
+                delete rule.col;
+                if (rule.native == null) {
+                    rule.native = true;
+                }
+                return rule;
+            },
             syncTableFormColumn(rule) {
                 const column = methods.isTableFormColumnRule(rule) ? rule : methods.getComponentParent(rule);
                 if (!methods.isTableFormColumnRule(column)) {
@@ -1939,29 +2047,39 @@ export default defineComponent({
                 if (!child) {
                     return;
                 }
-                column.props.label = methods.getTitle(child);
+                if (!methods.isTableFormOperationRule(child)) {
+                    column.props.label = methods.getTitle(child);
+                }
                 column.props.required = !!child.$required;
             },
             findRuleByChildren(children, roots) {
+                if (!children) {
+                    return null;
+                }
                 let target = null;
                 const each = (list) => {
                     (list || []).forEach(item => {
-                        if (target || is.String(item)) {
+                        if (target || !item || is.String(item)) {
                             return;
                         }
                         if (item.children === children) {
                             target = item;
                             return;
                         }
-                        each(item.children);
+                        if (Array.isArray(item.children) && item.children.length) {
+                            each(item.children);
+                        }
                     });
                 };
-                each(roots || data.dragForm.rule[0].children);
+                const defaultRoots = data.dragForm.rule?.[0]?.children || [];
+                each(roots || defaultRoots);
                 return target;
             },
             getTableFormColumnContextByChildren(children) {
-                const dragBox = methods.findRuleByChildren(children);
-                const column = dragBox?.__fc__?.parent?.rule;
+                const target = methods.findRuleByChildren(children);
+                const column = methods.isTableFormColumnRule(target)
+                    ? target
+                    : target?.__fc__?.parent?.rule;
                 if (!methods.isTableFormColumnRule(column)) {
                     return null;
                 }
@@ -1970,12 +2088,31 @@ export default defineComponent({
                 if (!methods.isTableFormRule(tableForm)) {
                     return null;
                 }
-                return { dragBox, column, columnWrapper, tableForm };
+                return { dragBox: target, column, columnWrapper, tableForm };
+            },
+            getTableFormContextByChildren(children) {
+                const dragBox = methods.findRuleByChildren(children);
+                let tableForm = dragBox?.__fc__?.parent?.rule;
+                if (!methods.isTableFormRule(tableForm)) {
+                    tableForm = methods.getComponentParent(tableForm);
+                }
+                if (!tableForm && Array.isArray(children)) {
+                    const columnContext = methods.getTableFormColumnContextByChildren(children);
+                    tableForm = columnContext?.tableForm || null;
+                }
+                if (!methods.isTableFormRule(tableForm)) {
+                    return null;
+                }
+                return { dragBox, tableForm };
             },
             createTableFormColumn(rule) {
                 const columnWrapper = methods.makeRule(data.dragRuleList.tableFormColumn);
                 const columnRule = columnWrapper.children[0];
-                methods.getTableFormColumnChildren(columnRule).push(rule);
+                const tableFormChild = methods.normalizeTableFormChild(rule);
+                if (!tableFormChild) {
+                    return columnWrapper;
+                }
+                methods.getTableFormColumnChildren(columnRule).push(tableFormChild);
                 methods.syncTableFormColumn(columnRule);
                 return columnWrapper;
             },
@@ -2256,6 +2393,9 @@ export default defineComponent({
                         data.propsForm.api.disabled(true, disabledField);
                     });
                 }
+                if (methods.isInsideTableFormColumn(rule)) {
+                    data.baseForm.api.hidden(true, 'formCreateCol>span');
+                }
                 if (!methods.getConfig('showControl', true)) {
                     data.baseForm.api.hidden(true, '_control');
                 }
@@ -2361,7 +2501,11 @@ export default defineComponent({
                 };
             },
             clickMenu(menu) {
-                methods.dragMenu({ menu, children: data.children, index: data.children.length });
+                const activeTableForm = methods.getTableFormByRule(data.activeRule);
+                const targetChildren = activeTableForm
+                    ? methods.getTableFormRootChildren(activeTableForm)
+                    : data.children;
+                methods.dragMenu({ menu, children: targetChildren, index: targetChildren.length });
             },
             clickField(menu, children, index, slot) {
                 const update = { ...menu.update || {} };
@@ -2371,10 +2515,16 @@ export default defineComponent({
                 if (menu.field) {
                     update.field = menu.field;
                 }
+                const activeTableForm = methods.getTableFormByRule(data.activeRule);
+                const targetChildren = children || (activeTableForm
+                    ? methods.getTableFormRootChildren(activeTableForm)
+                    : data.children);
+                const columnContext = methods.getTableFormColumnContextByChildren(targetChildren);
+                const tableFormContext = methods.getTableFormContextByChildren(targetChildren);
                 if (menu.rule) {
                     methods.dragMenu({
                         rule: menu.rule,
-                        children: children || data.children,
+                        children: targetChildren,
                         index: index == null ? data.children.length : index,
                         slot,
                         update
@@ -2382,7 +2532,7 @@ export default defineComponent({
                 } else if (menu.item) {
                     methods.dragMenu({
                         menu: data.dragRuleList[menu.item],
-                        children: children || data.children,
+                        children: targetChildren,
                         index: index == null ? data.children.length : index,
                         slot,
                         update
@@ -2458,15 +2608,18 @@ export default defineComponent({
                         }
                     });
                 }
+                rules.forEach(item => {
+                    methods.applyTableFormChildDefaults(item);
+                });
                 const firstRule = (rules[0] && rules[0].type === 'DragTool') ? rules[0].children[0] : rules[0];
-                if (methods.isTableFormRule(methods.findRuleByChildren(children)) && methods.isTableFormBlockedRule(firstRule)) {
-                    errorMessage(data.t('struct.notAllow'));
+                if (methods.getTableFormContextByChildren(children) && methods.isTableFormBlockedRule(firstRule)) {
                     return;
                 }
                 if (update) {
                     methods.mergeRule(firstRule, update);
                 }
                 const columnContext = methods.getTableFormColumnContextByChildren(children);
+                const tableFormContext = methods.getTableFormContextByChildren(children);
                 if (columnContext && methods.getTableFormColumnChildren(columnContext.column).length > 0) {
                     const columnWrappers = methods.insertTableFormColumnsAfter(columnContext, rules);
                     if (dragRule && dragRule.formOptions) {
@@ -2480,7 +2633,7 @@ export default defineComponent({
                     }
                     return;
                 }
-                if (methods.isTableFormRule(methods.findRuleByChildren(children))) {
+                if (tableFormContext) {
                     const columnWrappers = methods.createTableFormColumns(rules);
                     children.splice(index, 0, ...columnWrappers);
                     if (dragRule && dragRule.formOptions) {
@@ -2587,17 +2740,34 @@ export default defineComponent({
                 return json;
             },
             dragPut(to, from, dragEl) {
-                const toMenu = to.el.__rule__ && (to.el.__rule__._config || to.el.__rule__._menu);
+                const toRule = to.el.__rule__;
+                const toMenu = toRule && (toRule._config || toRule._menu);
+                const toGroup = to?.options?.group?.name;
+                const tableFormDropType = toRule?._tableformDropType || null;
                 if (!toMenu) {
                     return true;
                 }
+                const fromMenu = dragEl?._underlying_vm_?.__fc__
+                    ? (dragEl._underlying_vm_._config || dragEl._underlying_vm_._menu)
+                    : dragEl?._underlying_vm_;
+                const fromKey = fromMenu?.name || 'unknown';
+                const columnContext = methods.getTableFormColumnContextByChildren(toRule?.children);
+                if (tableFormDropType === 'column' || columnContext) {
+                    return false;
+                }
+                if (tableFormDropType === 'root' && methods.isTableFormBlockedMenu(fromMenu)) {
+                    return false;
+                }
+                if (tableFormDropType === 'root' && fromMenu && !methods.checkAllowDrag(fromMenu, toMenu)) {
+                    return false;
+                }
                 const _fc_allow_drag = dragEl._fc_allow_drag || {};
-                if (_fc_allow_drag[toMenu.name] === undefined) {
-                    const fromMenu = dragEl._underlying_vm_.__fc__ ? (dragEl._underlying_vm_._config || dragEl._underlying_vm_._menu) : dragEl._underlying_vm_;
-                    _fc_allow_drag[toMenu.name] = !(fromMenu && toMenu && !methods.checkAllowDrag(fromMenu, toMenu))
+                const allowKey = `${fromKey}=>${toMenu.name}`;
+                if (_fc_allow_drag[allowKey] === undefined) {
+                    _fc_allow_drag[allowKey] = !(fromMenu && toMenu && !methods.checkAllowDrag(fromMenu, toMenu))
                     dragEl._fc_allow_drag = _fc_allow_drag;
                 }
-                return dragEl._fc_allow_drag[toMenu.name];
+                return dragEl._fc_allow_drag[allowKey];
             },
             checkAllowDrag(from, to) {
                 function checkDragCondition(tmp) {
@@ -2631,6 +2801,7 @@ export default defineComponent({
                 const newIndex = evt.newIndex;
                 const menu = evt.item._underlying_vm_ || evt.item.__rule__;
                 const columnContext = methods.getTableFormColumnContextByChildren(children);
+                const tableFormContext = methods.getTableFormContextByChildren(children);
                 data.added = true;
                 if (!menu) {
                     return;
@@ -2639,13 +2810,12 @@ export default defineComponent({
                     if (data.addRule) {
                         methods.handleSortBefore();
                         const rule = data.addRule.children.splice(data.addRule.children.indexOf(menu), 1)[0];
-                        if (methods.isTableFormRule(methods.findRuleByChildren(children)) && methods.isTableFormBlockedRule(rule)) {
+                        if (methods.getTableFormContextByChildren(children) && methods.isTableFormBlockedRule(rule)) {
                             if (data.addRule.context) {
                                 data.addRule.children.splice(data.addRule.oldIndex, 0, rule);
                             }
                             data.addRule = null;
                             data.added = false;
-                            errorMessage(data.t('struct.notAllow'));
                             return;
                         }
                         if (slot) {
@@ -2653,12 +2823,13 @@ export default defineComponent({
                         } else {
                             delete rule.slot;
                         }
+                        methods.applyTableFormChildDefaults(rule);
                         if (data.addRule.context) {
                             methods.removeTableFormColumnIfEmpty(data.addRule.context.column);
                         }
                         if (columnContext && methods.getTableFormColumnChildren(columnContext.column).length > 0) {
                             methods.insertTableFormColumnAfter(columnContext, rule);
-                        } else if (methods.isTableFormRule(methods.findRuleByChildren(children))) {
+                        } else if (tableFormContext) {
                             children.splice(newIndex, 0, methods.createTableFormColumn(rule));
                         } else {
                             children.splice(newIndex, 0, rule);
@@ -2816,7 +2987,10 @@ export default defineComponent({
                                 _drag.slot = k;
                             }
                         } else {
-                            _drag = makeDrag(true, menuName + (isDefault ? '' : ('-slot-' + k)), _rule ? slotChildren[k].map(item => {
+                            const dragGroup = isDefault && menuName === 'tableform'
+                                ? 'tableform-root'
+                                : true;
+                            _drag = makeDrag(dragGroup, menuName + (isDefault ? '' : ('-slot-' + k)), _rule ? slotChildren[k].map(item => {
                                 delete item.slot;
                                 return item;
                             }) : methods.loadRule(slotChildren[k]), k)
@@ -2853,6 +3027,9 @@ export default defineComponent({
 
                 const dragMask = mask.value !== undefined ? mask.value !== false : config.mask !== false;
                 if (config.tool === false) {
+                    return rule;
+                }
+                if (!config.inside && methods.isInsideTableFormColumn(rule)) {
                     return rule;
                 }
                 const toolProps = {
@@ -3287,3 +3464,11 @@ export default defineComponent({
     }
 });
 </script>
+
+<style scoped>
+._fd-field-code {
+    color: var(--el-color-danger);
+    font-size: 12px;
+    line-height: 1;
+}
+</style>

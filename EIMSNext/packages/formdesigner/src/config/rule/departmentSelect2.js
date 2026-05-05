@@ -48,7 +48,6 @@ export default {
                 type: "fcDepartmentSelect",
                 field: "limitScope",
                 title: "",
-                wrap: { class: "_fd-default-value" },
                 props: {
                   multiple: true,
                   cascadedDept: true,

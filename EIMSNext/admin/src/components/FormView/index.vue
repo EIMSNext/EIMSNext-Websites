@@ -177,5 +177,41 @@ const handleReset = () => {
     margin-top: var(--et-space-10);
     padding-right: var(--et-space-20);
   }
+
+  :deep(._fc-table-form-v2) {
+    overflow: auto;
+  }
+
+  :deep(._fc-table-form-v2 .fc-form-row) {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  :deep(._fc-table-form-v2 .fc-form-col) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  :deep(.form-create.is-preview ._fc-table-form-v2 ._fc-read-view) {
+    min-height: 28px;
+    padding: 0 8px;
+  }
+
+  :deep(._fc-table-form-v2 .el-table th.el-table__cell) {
+    background-color: var(--el-fill-color-light);
+  }
+
+  :deep(._fc-table-form-v2 .el-table td.el-table__cell),
+  :deep(._fc-table-form-v2 .el-table th.el-table__cell) {
+    padding: 6px 0;
+  }
+
+  :deep(._fc-table-form-v2 .el-table .cell) {
+    line-height: 18px;
+  }
+
+  :deep(._fc-table-form-v2 .el-scrollbar__wrap) {
+    overflow: auto;
+  }
 }
 </style>

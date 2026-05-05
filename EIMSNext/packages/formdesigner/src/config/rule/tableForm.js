@@ -14,24 +14,36 @@ export default {
   subForm: "array",
   languageKey: ["add", "delete", "operation", "dataEmpty"],
   event: ["change", "add", "delete", "handleClick"],
-  children: "tableFormColumn",
-  subRender({ t, h, resolveComponent, subRule }) {
-    return [
-      {
-        label: t("props.title"),
-        vnode: h(resolveComponent("el-input"), {
-          size: "small",
-          modelValue: subRule.props.label,
-          "onUpdate:modelValue": (v) => {
-            subRule.props.label = v;
-          },
-        }),
-      },
-    ];
+  drag: true,
+  denyDrag: {
+    item: ["tableform", "divider", "fcRow", "col", "fcFlex", "fcFlex2", "fcCell", "tabs", "elTabPane", "collapse", "elCollapseItem", "fcTable", "elCard", "fcInlineForm"],
+    menu: ["layout"],
+  },
+  subRender() {
+    return [];
   },
   loadRule(rule) {
     if (!rule.props) rule.props = {};
     const columns = rule.props.columns || [];
+    const unwrapColumnRule = (item) => {
+      let current = item;
+      while (current && current.type === "DragTool" && Array.isArray(current.children) && current.children[0]) {
+        current = current.children[0];
+      }
+      if (current && current.type === "DragBox") {
+        const child = Array.isArray(current.children) ? current.children[0] : null;
+        return child ? unwrapColumnRule(child) : null;
+      }
+      if (!current) {
+        return null;
+      }
+      delete current.wrap;
+      delete current.col;
+      if (current.native == null) {
+        current.native = true;
+      }
+      return current;
+    };
     rule.children = columns.map((column) => {
       return {
         type: "tableFormColumn",
@@ -45,7 +57,7 @@ export default {
           width: column.style.width || "",
           color: column.style.color || "",
         },
-        children: column.rule || [],
+        children: (column.rule || []).map(unwrapColumnRule).filter(Boolean),
       };
     });
     delete rule.props.columns;

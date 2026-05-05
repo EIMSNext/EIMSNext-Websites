@@ -7,9 +7,10 @@
 <script setup lang="ts">
 import { useFormStore } from "@eimsnext/store";
 import { IFormFieldDef, buildFieldListItems } from "./type";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { IListItem } from "@/list/type";
 import { IFieldLimit } from "@/NodeFieldList/type";
+import { DataItemType } from "@/common";
 
 defineOptions({
   name: "FieldSelect",
@@ -18,12 +19,22 @@ const props = defineProps<{
   modelValue: IFormFieldDef;
   formId: string;
   fieldLimit?: IFieldLimit;
+  fields?: IFormFieldDef[];
 }>();
 
 const formStore = useFormStore();
 const fieldList = ref<IListItem[]>([]);
 
 const value = ref(props.modelValue?.field);
+
+const customFieldList = computed<IListItem[]>(() => {
+  return (props.fields || []).map((field) => ({
+    id: field.field,
+    label: field.label,
+    data: field,
+    type: DataItemType.Field,
+  }));
+});
 
 const emit = defineEmits(["update:modelValue", "change"]);
 const onInput = (val: string) => {
@@ -33,9 +44,14 @@ const onInput = (val: string) => {
 };
 
 watch(
-  () => props.formId,
-  (newFormId, oldFormId) => {
-    if (newFormId && newFormId != oldFormId) {
+  [() => props.formId, () => props.fieldLimit, () => props.fields],
+  ([newFormId]) => {
+    if (customFieldList.value.length > 0) {
+      fieldList.value = customFieldList.value;
+      return;
+    }
+
+    if (newFormId) {
       formStore.get(newFormId).then((form) => {
         if (form?.content?.items) {
           fieldList.value = buildFieldListItems(newFormId, form?.content?.items, form.usingWorkflow, undefined, props.fieldLimit);
@@ -43,6 +59,14 @@ watch(
       });
     }
   },
-  { immediate: true }
+  { immediate: true, deep: true }
+);
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    value.value = newValue?.field;
+  },
+  { immediate: true, deep: true },
 );
 </script>

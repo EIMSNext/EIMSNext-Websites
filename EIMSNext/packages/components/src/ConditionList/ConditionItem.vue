@@ -16,6 +16,7 @@
           class="cond-field"
           v-model="field"
           :formId="formId"
+          :fields="fieldBuildSetting.fields"
           :fieldLimit="fieldBuildSetting.fieldLimit"
           @change="changeField"
         ></FieldSelect>
@@ -74,7 +75,7 @@ import {
   getConditionFieldType,
 } from "@/NodeFieldList/type";
 import { IFormFieldDef } from "@/FieldSelect/type";
-import { computed, ref, toRef } from "vue";
+import { computed, ref, watch } from "vue";
 
 const { t } = useLocale();
 
@@ -99,7 +100,7 @@ const field = ref<IFormFieldDef>(
     type: FieldType.None,
   },
 );
-const op = toRef(props.modelValue.op ?? "empty");
+const op = ref(props.modelValue.op ?? "empty");
 const value = ref(
   props.modelValue.value ?? { type: ConditionValueType.Custom, value: null },
 );
@@ -111,6 +112,27 @@ const dataType = computed(() => {
     ? getConditionFieldType(fieldType.value)
     : ConditionFieldType.Other;
 });
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    field.value =
+      newValue.field ?? {
+        formId: props.formId,
+        field: "",
+        label: "",
+        type: FieldType.None,
+      };
+    op.value = newValue.op ?? "empty";
+    value.value =
+      newValue.value ?? { type: ConditionValueType.Custom, value: null };
+    fieldType.value = field.value?.type ?? FieldType.Input;
+  },
+  {
+    deep: true,
+    immediate: true,
+  },
+);
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
 
@@ -144,6 +166,8 @@ const changeField = (item: IFormFieldDef) => {
     ? getConditionFieldType(item.type)
     : ConditionFieldType.None;
 
+  fieldType.value = item.type;
+
   if (dataType.value != newDataType) {
     value.value.value = null;
     value.value.type = ConditionValueType.Custom;
@@ -151,8 +175,6 @@ const changeField = (item: IFormFieldDef) => {
 
     if (dataOperators[newDataType].indexOf(op.value) == -1)
       op.value = dataOperators[newDataType][0];
-
-    fieldType.value = item.type;
   }
 
   emitChange();

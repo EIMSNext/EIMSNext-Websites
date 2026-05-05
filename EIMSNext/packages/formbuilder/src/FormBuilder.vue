@@ -7,40 +7,19 @@
         <el-button @click="onPreview">预览</el-button>
       </div>
     </div>
-    <fc-designer
-      ref="designer"
-      :locale="locale"
-      :handle="handle"
-      :config="config"
-    >
+    <fc-designer ref="designer" :locale="locale" :handle="handle" :config="config" :isgod="isgod">
       <template #block_fff="scope">
         &lt;template #block_fff="scope"&gt; 自定义内容 &lt;/template&gt;
       </template>
       <template #handle>
         <div v-if="isgod" class="handle">
-          <el-button
-            size="small"
-            class="btn-info builder-action-btn"
-            @click="setJson"
-            >导入JSON
+          <el-button size="small" class="btn-info builder-action-btn" @click="setJson">导入JSON
           </el-button>
-          <el-button
-            size="small"
-            class="btn-info builder-action-btn"
-            @click="setOption"
-            >导入Options
+          <el-button size="small" class="btn-info builder-action-btn" @click="setOption">导入Options
           </el-button>
-          <el-button
-            size="small"
-            class="btn-info builder-action-btn"
-            @click="showJson"
-            >生成JSON
+          <el-button size="small" class="btn-info builder-action-btn" @click="showJson">生成JSON
           </el-button>
-          <el-button
-            size="small"
-            class="btn-info builder-action-btn"
-            @click="showOption"
-            >生成Options
+          <el-button size="small" class="btn-info builder-action-btn" @click="showOption">生成Options
           </el-button>
         </div>
       </template>
@@ -169,8 +148,6 @@ export default {
           "group",
           "subForm",
           "stepForm",
-          "nestedTableForm",
-          "infiniteTableForm",
           "html",
           "fcSlot",
           "fcRow",
@@ -491,7 +468,7 @@ body {
 }
 
 ._fc-t-menu .el-dropdown,
-.handle .el-button + .el-button {
+.handle .el-button+.el-button {
   margin-left: 0;
 }
 

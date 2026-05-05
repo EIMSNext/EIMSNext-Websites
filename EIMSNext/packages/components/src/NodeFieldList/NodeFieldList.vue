@@ -15,16 +15,14 @@
 </template>
 
 <script setup lang="ts">
-import { useFormStore } from "@eimsnext/store";
 import {
-  FieldBuildRule,
   IFieldBuildSetting,
   INodeForm,
   buildNodeFieldTree,
 } from "./type";
 import { FilterNodeMethodFunction, TreeNodeData } from "element-plus";
 import { IFormFieldDef } from "@/FieldSelect/type";
-import { ref, toRef, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { DataItemType, ITreeNode, findNode } from "@/common";
 import { FieldType } from "@eimsnext/models";
 import { useLocale } from "element-plus";
@@ -44,32 +42,29 @@ const props = withDefaults(
 );
 
 const selectProps = { value: "id" };
-const buildSetting = toRef(props.fieldBuildSetting);
-const formStore = useFormStore();
-const nodeList = ref<ITreeNode[]>(
-  buildNodeFieldTree(props.nodes, props.fieldBuildSetting, props.fieldDef),
-);
+const nodeList = ref<ITreeNode[]>([]);
 const defaultExpand = ref<string[]>([]);
-const selectedNode = ref<ITreeNode>();
+const selectedNode = ref<string>();
 
-//TODO: 在弹出框显示时，计算哪个展开更合适
-if (nodeList.value.length == 1) {
-} else {
-  nodeList.value.forEach((x) => {
-    if (x.type == DataItemType.Form) {
-      defaultExpand.value.push(x.id);
-    }
-    if (
-      x.data.nodeId == props.modelValue.nodeId &&
-      x.data.code == props.modelValue.field
-    ) {
-      selectedNode.value = x;
-      return;
-    }
-  });
-}
+const selectedNodeId = computed(() =>
+  props.modelValue?.nodeId && props.modelValue?.field
+    ? `${props.modelValue.nodeId}-${props.modelValue.field}`
+    : undefined,
+);
 
-const calcExpand = () => {};
+const rebuildNodeTree = () => {
+  nodeList.value = buildNodeFieldTree(
+    props.nodes,
+    props.fieldBuildSetting,
+    props.fieldDef,
+  );
+
+  defaultExpand.value = nodeList.value
+    .filter((x) => x.type == DataItemType.Form)
+    .map((x) => x.id);
+
+  selectedNode.value = selectedNodeId.value;
+};
 
 const filterNode: FilterNodeMethodFunction = (
   value: string,
@@ -95,25 +90,19 @@ const onInput = (val: string) => {
 };
 
 watch(
-  () => props.modelValue,
-  (newVal) => {
-    selectedNode.value = findNode(
-      nodeList.value,
-      `${newVal.nodeId}-${newVal.field}`,
-    );
+  () => [props.nodes, props.fieldBuildSetting, props.fieldDef],
+  () => {
+    rebuildNodeTree();
   },
   {
+    deep: true,
     immediate: true,
   },
 );
 watch(
-  () => buildSetting,
-  (newVal) => {
-    nodeList.value = buildNodeFieldTree(
-      props.nodes,
-      props.fieldBuildSetting,
-      props.fieldDef,
-    );
+  () => props.modelValue,
+  () => {
+    selectedNode.value = selectedNodeId.value;
   },
   {
     deep: true,

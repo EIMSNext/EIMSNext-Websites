@@ -244,6 +244,7 @@ watch(
 .formula-script {
   flex: 0 0 200px;
   border: 1px solid var(--et-border-color-light);
+  background: var(--et-bg-container);
   overflow: hidden;
 }
 
@@ -286,6 +287,46 @@ watch(
 .formula-script :deep(.CodeMirror) {
   height: 100%;
   width: 100%;
+  color: var(--et-text-primary);
+  background: var(--et-bg-container);
+}
+
+.formula-script :deep(.CodeMirror-gutters) {
+  color: var(--et-text-secondary);
+  background: var(--et-bg-container);
+  border-right: 1px solid var(--et-border-color-light);
+}
+
+.formula-script :deep(.CodeMirror-linenumber) {
+  color: var(--et-text-secondary);
+}
+
+.formula-script :deep(.CodeMirror-cursor) {
+  border-left-color: var(--et-text-primary);
+}
+
+.formula-script :deep(.CodeMirror-selected) {
+  background: var(--et-fill-color-light);
+}
+
+.formula-script :deep(.cm-string) {
+  color: var(--et-color-success);
+}
+
+.formula-script :deep(.cm-number) {
+  color: var(--et-color-warning);
+}
+
+.formula-script :deep(.cm-keyword) {
+  color: var(--et-color-primary);
+}
+
+.formula-script :deep(.cm-atom),
+.formula-script :deep(.cm-fc-field) {
+  color: var(--et-color-primary);
+  background: var(--et-color-primary-light-9);
+  border-radius: var(--et-radius-2);
+  padding: 0 2px;
 }
 
 .formula-script :deep(.CodeMirror-scroll) {

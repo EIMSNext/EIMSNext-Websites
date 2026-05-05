@@ -21,7 +21,7 @@ export default {
       title: t("com.number.name"),
       info: "",
       $required: false,
-      props: { controls: true, controlsPosition: "right" },
+      props: { controls: true, controlsPosition: "right", align: "right" },
     };
   },
   props(_, { t }) {
@@ -35,7 +35,12 @@ export default {
         field: "controls",
         wrap: { show: false },
       },
-      { type: "inputNumber", field: "step", value: 1, props: { min: 0 } },
+      {
+        type: "inputNumber",
+        field: "step",
+        value: 1,
+        props: { min: 0, align: "right" },
+      },
       // {
       //   type: "CheckBoxInput",
       //   field: "disabled",
@@ -44,10 +49,12 @@ export default {
       {
         type: "inputNumber",
         field: "min",
+        props: { align: "right" },
       },
       {
         type: "inputNumber",
         field: "max",
+        props: { align: "right" },
       },
       {
         type: "inputNumber",

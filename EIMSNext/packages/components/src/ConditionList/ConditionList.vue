@@ -79,7 +79,7 @@ import {
   IFieldBuildSetting,
   INodeForm,
 } from "@/NodeFieldList/type";
-import { ref, toRef, watch } from "vue";
+import { computed, ref, toRef, watch } from "vue";
 
 const { t } = useLocale();
 
@@ -105,19 +105,21 @@ const props = withDefaults(
   },
 );
 
-const fieldBuildSettingRef = toRef(
-  props.fieldBuildSetting ?? {
-    version: 0,
-    rule: FieldBuildRule.All,
-    matchType: false,
-  },
+const fieldBuildSettingRef = computed(
+  () =>
+    props.fieldBuildSetting ?? {
+      version: 0,
+      rule: FieldBuildRule.All,
+      matchType: false,
+    },
 );
-const valueBuildSettingRef = toRef(
-  props.fieldBuildSetting ?? {
-    version: 0,
-    rule: FieldBuildRule.All,
-    matchType: true,
-  },
+const valueBuildSettingRef = computed(
+  () =>
+    props.valueBuildSetting ?? {
+      version: 0,
+      rule: FieldBuildRule.All,
+      matchType: true,
+    },
 );
 const list = toRef(props.modelValue);
 const groupLevel = ref(1);
@@ -125,12 +127,13 @@ const groupLevel = ref(1);
 const addItem = () => {
   if (!list.value.items) list.value.items = [];
 
-  list.value.items.push({
+  const newItem = {
     id: uniqueId(),
     field: { formId: props.formId, field: "", label: "", type: FieldType.None },
     op: "empty",
     value: { type: ConditionValueType.Custom, value: null },
-  });
+  };
+  list.value.items.push(newItem);
 };
 const removeItem = (idx: number) => {
   list.value.items!.splice(idx, 1);
@@ -139,13 +142,14 @@ const removeItem = (idx: number) => {
 const addGroup = () => {
   if (!list.value.items) list.value.items = [];
 
-  list.value.items.push({
+  const newGroup = {
     id: uniqueId(),
     rel: "and",
     items: [],
     isGroup: true,
     groupLevel: groupLevel.value + 1,
-  });
+  };
+  list.value.items.push(newGroup);
 };
 const removeGroup = (idx: number) => {
   list.value.items!.splice(idx, 1);

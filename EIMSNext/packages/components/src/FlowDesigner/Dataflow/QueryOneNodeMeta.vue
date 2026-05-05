@@ -11,7 +11,7 @@
   </template>
 </template>
 <script lang="ts" setup>
-import { inject, nextTick, reactive, ref } from "vue";
+import { inject, nextTick, ref } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -38,11 +38,10 @@ defineOptions({
 const ready = ref(false);
 const condList = ref<IConditionList>({ id: uniqueId(), rel: "and", items: [] });
 const sortList = ref<IFieldSortList>({ items: [] });
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
+const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 
-const appId = ref(flowContext!.appId);
+const appId = ref(flowContext.appId);
 const nodeId = ref("");
 const formId = ref("");
 const formItem = ref<IFormItem>({ id: "" });
@@ -74,8 +73,8 @@ const onSort = (list: IFieldSortList) => {
 
 const init = () => {
   nextTick(async () => {
-    activeData.value = flowContextRef.activeData;
-    nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
+    activeData.value = flowContext.activeData;
+    nodes.value = await getPrevNodes(flowContext.flowData, activeData.value);
 
     nodeId.value = activeData.value.id;
     formId.value = activeData.value.metadata.queryOneMeta!.formId;

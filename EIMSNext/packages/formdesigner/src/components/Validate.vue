@@ -30,7 +30,7 @@
                                 </FnInput>
                             </template>
                             <template v-else>
-                                <el-input-number v-model="item[item.mode]" @change="onInput"></el-input-number>
+                                <el-input-number v-model="item[item.mode]" align="right" @change="onInput"></el-input-number>
                             </template>
                         </el-form-item>
                     </el-col>

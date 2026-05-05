@@ -5,12 +5,12 @@
         <div class="pane-label">服务器地址</div>
         <div class="pane-row">
           <el-input v-model="hook.url" class="pane-row-stretch" autocomplete="new-password" />
-          <el-button type="primary" class="btn-test">服务器连接测试</el-button>
+          <el-button type="primary" class="btn-test" :loading="testing" @click="testConnection">服务器连接测试</el-button>
         </div>
         <div class="pane-label">Secret</div>
         <div class="pane-row">
           <el-input v-model="hook.secret" class="pane-row-stretch" autocomplete="new-password" />
-          <el-button type="primary" class="btn-test">生成Secret</el-button>
+          <el-button type="primary" class="btn-test" @click="generateSecret">生成Secret</el-button>
         </div>
         <div class="pane-label">推送事件</div>
         <div class="pane-row">
@@ -72,6 +72,8 @@ import { FlagEnum } from "@eimsnext/utils";
 import { webhookService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { cloneDeep } from "lodash-es";
+import { nanoid } from "nanoid";
+
 const { t } = useI18n();
 
 defineOptions({
@@ -95,6 +97,7 @@ const wfTodoUpdated = computed(() => FlagEnum.has(triggers.value, WebHookTrigger
 
 const emit = defineEmits(["update:modelValue", "saved"]);
 const triggers = ref(hook.value.triggers || WebHookTrigger.NotSet);
+const testing = ref(false);
 
 function initFromModelValue() {
   hook.value = cloneDeep(props.modelValue) || {};
@@ -116,24 +119,71 @@ const triggerChanged = (perm: WebHookTrigger, checked: any) => {
   emit("update:modelValue", hook.value);
 };
 
+const generateSecret = () => {
+  hook.value.secret = nanoid(24);
+};
+
+const buildWebhookRequest = (): WebhookRequest => ({
+  id: hook.value.id,
+  appId: props.formDef.appId,
+  formId: props.formDef.id,
+  url: hook.value.url,
+  secret: hook.value.secret,
+  triggers: hook.value.triggers,
+  disabled: false,
+});
+
+const resolveRequestErrorMessage = (error: unknown, fallback: string) => {
+  if (error && typeof error === "object") {
+    const response = "response" in error && error.response && typeof error.response === "object"
+      ? error.response as Record<string, any>
+      : undefined;
+    const data = response?.data && typeof response.data === "object"
+      ? response.data as Record<string, any>
+      : undefined;
+
+    if (typeof data?.message === "string" && data.message) {
+      return data.message;
+    }
+
+    if (typeof data?.Message === "string" && data.Message) {
+      return data.Message;
+    }
+
+    if ("message" in error && typeof error.message === "string" && error.message) {
+      return error.message;
+    }
+  }
+
+  return fallback;
+};
+
+const testConnection = async () => {
+  if (!hook.value?.url) {
+    ElMessage.error("请输入服务器地址");
+    return;
+  }
+
+  try {
+    testing.value = true;
+    const result = await webhookService.test<{ success: boolean; message?: string }>(buildWebhookRequest());
+    if (result?.success) {
+      ElMessage.success(result.message || "连接测试成功");
+      return;
+    }
+
+    ElMessage.error(result?.message || "连接测试失败");
+  } catch (error) {
+    ElMessage.error(resolveRequestErrorMessage(error, "连接测试失败"));
+  } finally {
+    testing.value = false;
+  }
+};
+
 const save = async () => {
   if (!hook.value) return;
 
-  // try {
-  //     await appRef.value.validate();
-  // } catch (error) {
-  //     return;
-  // }
-
-  const newHook: WebhookRequest = {
-    id: hook.value.id,
-    appId: props.formDef.appId,
-    formId: props.formDef.id,
-    url: hook.value.url,
-    secret: hook.value.secret,
-    triggers: hook.value.triggers,
-    disabled: false,
-  };
+  const newHook = buildWebhookRequest();
 
   if (hook.value.id) {
     hook.value = await webhookService.patch<Webhook>(hook.value.id, newHook);

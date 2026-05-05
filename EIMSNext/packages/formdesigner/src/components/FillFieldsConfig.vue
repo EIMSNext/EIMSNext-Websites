@@ -1,331 +1,384 @@
 <template>
-    <div class="_fd-fill-fields-config">
-        <el-badge type="warning" is-dot :hidden="!configured">
-            <el-button class="_fd-plain-button" plain @click="visible = true">
-                <slot>
-                    {{ btn || '设置' }}
-                </slot>
-            </el-button>
-        </el-badge>
-        <el-dialog class="_fd-fill-fields-dialog _fd-config-dialog" :title="title || '填充规则设置'" v-model="visible" destroy-on-close :close-on-click-modal="false" append-to-body width="700px">
-            <el-main>
-                <div class="_fd-fill-fields-content">
-                    <div class="_fd-fill-fields-description">
-                        选择数据后，将按以下规则将所选字段的值填充到当前表单字段。
-                    </div>
-                    
-                    <!-- 填充规则列表 -->
-                    <div class="_fd-fill-fields-list">
-                        <div v-for="rule in fillRules" :key="rule.field.value" class="_fd-fill-fields-item">
-                            <div class="_fd-fill-fields-item-field">
-                                <el-input v-model="rule.field.label" :disabled="true" style="width: 200px;"></el-input>
-                            </div>
-                            <div class="_fd-fill-fields-item-text">的值填充到</div>
-                            <div class="_fd-fill-fields-item-select">
-                                <el-select v-model="rule.targetField" placeholder="请选择字段" style="width: 200px;">
-                                    <el-option v-for="field in currentFormFields" :key="field.value" :label="field.label" :value="field.value"></el-option>
-                                </el-select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </el-main>
-            <template #footer>
-                <div>
-                    <el-button @click="visible = false" size="default">{{ t('props.cancel') }}</el-button>
-                    <el-button type="primary" @click="onOk" size="default">{{ t('props.ok') }}</el-button>
-                </div>
-            </template>
-        </el-dialog>
-    </div>
+  <div class="_fd-fill-fields-config">
+    <el-badge type="warning" is-dot :hidden="!config.mappings.length">
+      <el-button class="_fd-plain-button" plain @click="openDialog">
+        <slot>
+          {{ btn || '填充规则设置' }}
+        </slot>
+      </el-button>
+    </el-badge>
+
+    <el-dialog
+      v-model="visible"
+      class="_fd-fill-fields-dialog _fd-config-dialog"
+      :title="title || '填充规则设置'"
+      destroy-on-close
+      :close-on-click-modal="false"
+      append-to-body
+      width="980px"
+    >
+      <div v-if="step === 1" class="fill-step-layout">
+        <div class="fill-step-left">
+          <div class="step-title">1.选择字段</div>
+          <DataSelectFieldPicker
+            v-model="selectedSourceFields"
+            :fields="sourceFields"
+            :show-trigger="false"
+            :default-expanded="true"
+            search-placeholder="搜索"
+          />
+        </div>
+        <div class="fill-step-right">
+          <div class="step-title">2.字段值如何处理</div>
+          <el-select v-model="actionType" class="action-select">
+            <el-option label="填充到新字段" value="new" />
+            <el-option label="填充到已有字段" value="existing" />
+          </el-select>
+          <div class="action-desc">
+            {{ actionType === 'new'
+              ? '自动在表单中添加同类型新字段并构建填充映射'
+              : '将所选字段值填充到表单已有字段中，需要设置对应关系' }}
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="fill-step-two">
+        <div class="mapping-desc">选择数据后，将按以下规则将所选字段的值填充到当前表单字段。</div>
+        <div class="mapping-add-row">
+          <el-button text type="primary" @click="appendEmptyMapping">+ 选择字段</el-button>
+        </div>
+
+        <div class="mapping-list">
+          <div v-for="(mapping, index) in editableMappings" :key="`${mapping.sourceField.field}-${index}`" class="mapping-item">
+            <div class="mapping-source">
+              <el-input :model-value="mapping.sourceField.label" disabled />
+            </div>
+            <div class="mapping-text">的值填充到</div>
+            <div class="mapping-target">
+              <FieldSelect
+                :model-value="toFieldSelectValue(mapping.targetField)"
+                :form-id="designerFormId"
+                @update:model-value="(field) => handleFieldSelect(index, field)"
+              />
+            </div>
+            <el-button text type="danger" @click="removeMapping(index)">删除</el-button>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="handleCancel">取消</el-button>
+          <el-button v-if="step === 2 && canReturnStepOne" @click="step = 1">上一步</el-button>
+          <el-button type="primary" @click="handleConfirm">{{ step === 1 ? '下一步' : '完成' }}</el-button>
+        </div>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
-import { defineComponent, watch, computed, ref } from 'vue';
+import { defineComponent, nextTick } from 'vue';
+import { DataSelectFieldPicker, FieldSelect } from '@eimsnext/components';
+import {
+  buildMappingsFromFields,
+  appendRuleAfterActiveRule,
+  createRuleFromField,
+  getCurrentFormFields,
+  isFieldTypeCompatible,
+  loadSourceFormFields,
+  normalizeFillConfig,
+} from './dataSelectShared';
 
 export default defineComponent({
-    name: 'FillFieldsConfig',
-    emits: ['update:modelValue', 'change'],
-    props: {
-        modelValue: [String, Object, Array],
-        title: String,
-        btn: String,
+  name: 'FillFieldsConfig',
+  components: {
+    DataSelectFieldPicker,
+    FieldSelect,
+  },
+  emits: ['update:modelValue', 'change'],
+  props: {
+    modelValue: [String, Object, Array],
+    title: String,
+    btn: String,
+  },
+  inject: ['designer'],
+  data() {
+    return {
+      visible: false,
+      step: 1,
+      actionType: 'existing',
+      sourceFields: [],
+      currentFormFields: [],
+      selectedSourceFields: [],
+      editableMappings: [],
+      config: normalizeFillConfig(this.modelValue),
+    };
+  },
+  computed: {
+    activeRule() {
+      return this.designer.setupState.activeRule;
     },
-    inject: ['designer'],
-    computed: {
-        t() {
-            return this.designer.setupState.t;
-        },
-        configured() {
-            return !!this.modelValue;
-        },
-        // 获取当前活跃的规则
-        activeRule() {
-            return this.designer.setupState.activeRule;
-        },
-        // 获取选择数据时的显示字段
-        selectedFields() {
-            const selectionProcess = this.activeRule?.props?.selectionProcess || {};
-            return selectionProcess.selectedFields || [];
-        },
-        // 获取当前表单的所有字段（排除本控件）
-        currentFormFields() {
-            
-            const currentField = this.activeRule?.field;
-            
-            const fields = [];
+    selectedForm() {
+      return this.activeRule?.props?.dataSource || '';
+    },
+    designerFormId() {
+      return this.designer.setupState.formId;
+    },
+    canReturnStepOne() {
+      return this.config.mappings.length === 0;
+    },
+  },
+  watch: {
+    modelValue: {
+      handler(value) {
+        this.config = normalizeFillConfig(value);
+      },
+      deep: true,
+    },
+  },
+  methods: {
+    async openDialog() {
+      this.config = normalizeFillConfig(this.modelValue);
+      this.sourceFields = await loadSourceFormFields(this.selectedForm);
+      this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field);
+      this.selectedSourceFields = this.config.mappings.map((item) => item.sourceField);
+      this.editableMappings = normalizeFillConfig(this.config).mappings;
+      this.actionType = 'existing';
+      this.step = this.config.mappings.length > 0 ? 2 : 1;
+      this.visible = true;
+    },
+    isCompatible(sourceField, targetField) {
+      return isFieldTypeCompatible(sourceField, targetField);
+    },
+    appendEmptyMapping() {
+      if (!this.sourceFields.length) return;
+      const sourceField = this.sourceFields.find((field) => !this.editableMappings.find((item) => item.sourceField.field === field.field)) || this.sourceFields[0];
+      const targetField = this.currentFormFields.find((field) => this.isCompatible(sourceField, field)) || { field: '', label: '', type: 'none' };
+      this.editableMappings.push({ sourceField, targetField });
+    },
+    updateMappingTarget(index, fieldName) {
+      const field = this.currentFormFields.find((item) => item.field === fieldName);
+      if (field && this.isCompatible(this.editableMappings[index].sourceField, field)) {
+        this.editableMappings[index].targetField = field;
+      }
+    },
+    handleFieldSelect(index, field) {
+      if (!field) return;
+      const targetField = {
+        field: field.field,
+        label: field.label,
+        type: field.type,
+      };
+      if (this.isCompatible(this.editableMappings[index].sourceField, targetField)) {
+        this.editableMappings[index].targetField = targetField;
+      }
+    },
+    toFieldSelectValue(field) {
+      return {
+        formId: this.designerFormId,
+        field: field?.field || '',
+        label: field?.label || '',
+        type: field?.type || 'none',
+      };
+    },
+    removeMapping(index) {
+      this.editableMappings.splice(index, 1);
+    },
+    handleCancel() {
+      this.visible = false;
+      this.step = 1;
+    },
+    async handleConfirm() {
+      if (this.step === 1) {
+        if (!this.selectedSourceFields.length) {
+          ElMessage.warning('请先选择字段');
+          return;
+        }
 
-            // 获取真正的 designer 实例（在 Vue 3 中，getCurrentInstance() 返回的实例需要通过 proxy 访问方法）
-            const designerInstance = this.designer.proxy || this.designer;
-            
-            // 尝试从 designerInstance.getJson() 获取字段（这是保存时使用的方法）
-            if (fields.length === 0 && designerInstance.getJson) {
-                try {
-                    const json = designerInstance.getJson();
-                    
-                    // 解析 JSON 字符串为对象
-                    let ruleArray;
-                    if (typeof json === 'string') {
-                        try {
-                            ruleArray = JSON.parse(json);
-                        } catch (e) {
-                            console.error('解析 JSON 失败:', e);
-                            ruleArray = [];
-                        }
-                    } else if (Array.isArray(json)) {
-                        ruleArray = json;
-                    } else {
-                        ruleArray = [];
-                    }
-                    
-                    // 递归遍历规则数组，提取字段
-                    const extractFieldsFromJson = (array) => {
-                        array.forEach(item => {
-                            if (item.field && item.title) {
-                                if (item.field !== currentField && item.type !== 'formselecteddata') {
-                                    fields.push({
-                                        label: item.title,
-                                        value: item.field
-                                    });
-                                }
-                            }
-                            if (item.children && Array.isArray(item.children)) {
-                                extractFieldsFromJson(item.children);
-                            }
-                        });
-                    };
-                    
-                    if (Array.isArray(ruleArray)) {
-                        extractFieldsFromJson(ruleArray);
-                    }
-                } catch (e) {
-                    console.error('调用 designer.getJson() 失败:', e);
-                }
+        if (this.actionType === 'new') {
+          const createdTargets = [];
+          let lastInsertedField = '';
+          this.selectedSourceFields.forEach((field) => {
+            const newRule = createRuleFromField(this.designer, field);
+            const insertedRule = appendRuleAfterActiveRule(this.designer, newRule);
+            if (insertedRule) {
+              lastInsertedField = insertedRule.field;
+              createdTargets.push({
+                field: insertedRule.field,
+                label: insertedRule.title,
+                type: insertedRule.type,
+              });
             }
-            
-            // 如果还是没有获取到字段，尝试从 designerInstance.getRule() 获取
-            if (fields.length === 0 && designerInstance.getRule) {
-                try {
-                    const rule = designerInstance.getRule();
-                    
-                    if (Array.isArray(rule)) {
-                        // 递归遍历规则数组，提取字段
-                        const extractFieldsFromRule = (ruleArray) => {
-                            ruleArray.forEach(item => {
-                                if (item.field && item.title) {
-                                      if (item.field !== currentField && item.type !== 'formselecteddata') {
-                                        fields.push({
-                                            label: item.title,
-                                            value: item.field
-                                        });
-                                    }
-                                }
-                                if (item.children && Array.isArray(item.children)) {
-                                    extractFieldsFromRule(item.children);
-                                }
-                            });
-                        };
-                        extractFieldsFromRule(rule);
-                    }
-                } catch (e) {
-                    console.error('调用 designer.getRule() 失败:', e);
-                }
+          });
+          this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field);
+          this.editableMappings = buildMappingsFromFields(this.selectedSourceFields, createdTargets);
+          const nextValue = normalizeFillConfig({ mappings: this.editableMappings.filter((item) => item.targetField?.field) });
+          this.$emit('update:modelValue', nextValue);
+          this.$emit('change', nextValue);
+          await nextTick();
+          this.designer.setupState.updateTree && this.designer.setupState.updateTree();
+          this.designer.setupState.dragForm?.api?.refresh && this.designer.setupState.dragForm.api.refresh();
+          await nextTick();
+          this.designer.setupState.triggerActive && lastInsertedField && this.designer.setupState.triggerActive(lastInsertedField);
+          this.visible = false;
+          this.step = 1;
+          return;
+        } else {
+          const existingMap = new Map(this.config.mappings.map((item) => [item.sourceField.field, item]));
+          this.editableMappings = this.selectedSourceFields.map((field) => {
+            if (existingMap.has(field.field)) {
+              return existingMap.get(field.field);
             }
-            
-            // 尝试从 designerInstance.children 获取字段
-            if (fields.length === 0 && designerInstance.children) {
-                
-                // 递归遍历 children，提取字段
-                const extractFieldsFromChildren = (childrenArray) => {
-                    childrenArray.forEach(item => {
-                        // 检查是否是字段组件
-                        if (item.field && item.title) {
-                            if (item.field !== currentField && item.type !== 'formselecteddata') {
-                                fields.push({
-                                    label: item.title,
-                                    value: item.field
-                                });                                
-                            }
-                        }
-                        // 递归处理子组件
-                        if (item.children && Array.isArray(item.children)) {
-                            extractFieldsFromChildren(item.children);
-                        }
-                    });
-                };
-                
-                if (Array.isArray(designerInstance.children)) {
-                    extractFieldsFromChildren(designerInstance.children);
-                }
-            }
-            return fields;
-        }
-    },
-    data() {
-        return {
-            visible: false,
-            value: this.modelValue,
-            fillRules: []
-        };
-    },
-    watch: {
-        modelValue(n) {
-            this.value = n;
-            // 不在这里直接设置 fillRules，而是在 loadConfig 中处理
-        },
-        visible(v) {
-            if (v) {
-                this.loadConfig();
-            }
-        },
-        selectedFields: {
-            handler(newFields) {
-                // 当选择的字段变化时，更新填充规则
-                // 只有当对话框可见时才更新，避免在加载配置时触发
-                if (this.visible) {
-                    this.updateFillRules(newFields);
-                }
-            },
-            deep: true
-        }
-    },
-    methods: {
-        loadConfig() {
-            if (this.value && this.value.fillRules) {
-                // 先保存现有的填充规则
-                const savedFillRules = this.value.fillRules;
-                // 先将fillRules设置为保存的规则，以便updateFillRules可以使用这些值
-                this.fillRules = savedFillRules;
-                // 然后根据selectedFields的顺序重新构建fillRules
-                this.updateFillRules(this.selectedFields);
-            } else {
-                // 初始化填充规则
-                this.updateFillRules(this.selectedFields);
-            }
-        },
-        updateFillRules(fields) {
-            // 创建一个映射，用于快速查找已有的规则
-            const existingRulesMap = new Map();
-            this.fillRules.forEach(rule => {
-                existingRulesMap.set(rule.field.value, rule);
-            });
-            
-            const newRules = [];
-            
-            // 为每个选中的字段创建填充规则
-            fields.forEach(field => {
-                if (existingRulesMap.has(field.value)) {
-                    // 保留已有的规则
-                    newRules.push(existingRulesMap.get(field.value));
-                } else {
-                    // 创建新的规则
-                    newRules.push({
-                        field: field,
-                        targetField: ''
-                    });
-                }
-            });
-            
-            this.fillRules = newRules;
-        },
-        removeRule(index) {
-            this.fillRules.splice(index, 1);
-        },
-        onOk() {
-            // 保存填充规则时，确保顺序与selectedFields的顺序一致
-            // 使用深拷贝避免响应式系统的影响
-            // 按照selectedFields的顺序重新构建fillRules，确保顺序正确
-            const fillRulesMap = new Map();
-            this.fillRules.forEach(rule => {
-                fillRulesMap.set(rule.field.value, rule);
-            });
-            
-            // 按照selectedFields的顺序重新构建fillRules
-            const orderedFillRules = this.selectedFields.map(field => {
-                return fillRulesMap.get(field.value) || {
-                    field: field,
-                    targetField: ''
-                };
-            });
-            
-            const config = {
-                fillRules: JSON.parse(JSON.stringify(orderedFillRules))
+            return {
+              sourceField: field,
+              targetField: this.currentFormFields.find((item) => this.isCompatible(field, item)) || { field: '', label: '', type: 'none' },
             };
-            this.$emit('update:modelValue', config);
-            this.$emit('change', config);
-            this.visible = false;
-        },
-    }
+          });
+        }
+
+        this.step = 2;
+        return;
+      }
+
+      const nextValue = normalizeFillConfig({ mappings: this.editableMappings.filter((item) => item.targetField?.field) });
+      this.$emit('update:modelValue', nextValue);
+      this.$emit('change', nextValue);
+      this.visible = false;
+      this.step = 1;
+    },
+  },
 });
 </script>
 
-<style>
+<style lang="scss">
 ._fd-fill-fields-config {
+  width: 100%;
+
+  .el-badge,
+  .el-button {
     width: 100%;
+  }
 }
 
-._fd-fill-fields-config .el-badge {
+._fd-fill-fields-dialog {
+  .el-dialog {
+    background: var(--et-bg-container);
+  }
+
+  .el-dialog__body {
+    padding-top: 8px;
+    background: var(--et-bg-container);
+  }
+
+  .el-dialog__header,
+  .el-dialog__footer {
+    background: var(--et-bg-container);
+  }
+
+  .fill-step-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    min-height: 440px;
+  }
+
+  .fill-step-left,
+  .fill-step-right {
+    min-width: 0;
+  }
+
+  .step-title {
+    margin-bottom: 10px;
+    font-size: var(--et-font-size-16, 16px);
+    font-weight: 600;
+    color: var(--et-text-primary);
+  }
+
+  .action-select {
     width: 100%;
-}
+  }
 
-._fd-fill-fields-config .el-button {
-    font-weight: 400;
-    width: 100%;
-}
+  .action-desc,
+  .mapping-desc {
+    margin-top: 14px;
+    color: var(--et-text-secondary);
+    line-height: 1.7;
+  }
 
-._fd-fill-fields-content {
-    padding: 0;
-}
+  .mapping-add-row {
+    margin: 18px 0 16px;
+  }
 
-._fd-fill-fields-description {
-    margin-bottom: 20px;
-    color: #666;
-}
+  .mapping-add-row :deep(.el-button) {
+    color: var(--et-color-primary);
+    background: transparent;
+  }
 
-._fd-fill-fields-list {
-    margin-bottom: 20px;
-}
+  .mapping-add-row :deep(.el-button:hover) {
+    color: var(--et-color-primary);
+    background: var(--et-fill-color-light, var(--el-fill-color-light));
+  }
 
-._fd-fill-fields-item {
-    display: flex;
+  .mapping-item {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto;
+    gap: 12px;
     align-items: center;
-    margin-bottom: 15px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 4px;
-}
+    margin-bottom: 14px;
+  }
 
-._fd-fill-fields-item-field {
-    margin-right: 15px;
-}
+  .mapping-source,
+  .mapping-target {
+    min-width: 0;
+  }
 
-._fd-fill-fields-item-text {
-    margin-right: 15px;
-    color: #666;
+  .mapping-text {
+    color: var(--et-text-primary);
     white-space: nowrap;
-}
+  }
 
-._fd-fill-fields-item-select {
-    margin-right: 10px;
+  .mapping-source :deep(.el-input.is-disabled .el-input__wrapper) {
+    color: var(--et-text-secondary);
+    background: var(--et-bg-muted, var(--el-fill-color-light));
+    box-shadow: 0 0 0 1px var(--et-border-color-light, var(--el-border-color)) inset;
+  }
+
+  .mapping-target :deep(.el-input__wrapper),
+  .mapping-target :deep(.el-select__wrapper) {
+    color: var(--et-text-primary);
+    background: var(--et-bg-container);
+    box-shadow: 0 0 0 1px var(--et-border-color-light, var(--el-border-color)) inset;
+  }
+
+  .dialog-footer :deep(.el-button:not(.el-button--primary):hover) {
+    background: var(--et-fill-color-light, var(--el-fill-color-light));
+    border-color: var(--et-border-color-light, var(--el-border-color));
+    color: var(--et-text-primary);
+  }
+
+  .dialog-footer :deep(.el-button:not(.el-button--primary)) {
+    color: var(--et-text-primary);
+    background: var(--et-bg-container);
+    border-color: var(--et-border-color-light, var(--el-border-color));
+  }
+
+  .dialog-footer :deep(.el-button--primary) {
+    color: #fff;
+    background: var(--et-color-primary);
+    border-color: var(--et-color-primary);
+  }
+
+  .dialog-footer :deep(.el-button--primary:hover) {
+    color: #fff;
+    background: var(--et-color-primary-dark-2, var(--et-color-primary));
+    border-color: var(--et-color-primary-dark-2, var(--et-color-primary));
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
 }
 </style>

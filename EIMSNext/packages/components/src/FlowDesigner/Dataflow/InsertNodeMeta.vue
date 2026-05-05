@@ -29,7 +29,7 @@
   </template>
 </template>
 <script lang="ts" setup>
-import { computed, inject, nextTick, reactive, ref } from "vue";
+import { computed, inject, nextTick, ref } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
@@ -61,11 +61,10 @@ const formFieldList = ref<IFormFieldList>({ items: [] });
 const formStore = useFormStore();
 // const formDef = ref<FormDef>();
 
-const flowContext = inject<IFlowContext>("flowContext");
-const flowContextRef = reactive<IFlowContext>(flowContext!);
+const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 
-const appId = ref(flowContext!.appId);
+const appId = ref(flowContext.appId);
 const formItem = ref<IFormItem>({ id: "" });
 const nodes = ref<INodeForm[]>([]);
 const formulaErrorMsg = computed(() => {
@@ -92,8 +91,8 @@ const fieldChanged = (fields: IFormFieldList) => {
 
 const init = () => {
   nextTick(async () => {
-    activeData.value = flowContextRef.activeData;
-    nodes.value = await getPrevNodes(flowContextRef.flowData, activeData.value);
+    activeData.value = flowContext.activeData;
+    nodes.value = await getPrevNodes(flowContext.flowData, activeData.value);
 
     nodeId.value = activeData.value.id;
     formId.value = activeData.value.metadata.insertMeta!.formId;
