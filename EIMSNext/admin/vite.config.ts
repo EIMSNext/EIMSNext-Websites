@@ -260,6 +260,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     resolve: {
       alias: {
         "@": pathSrc,
+        "opentype.js/dist/opentype.module.js": "opentype.js/dist/opentype.mjs",
       },
     },
     css: {

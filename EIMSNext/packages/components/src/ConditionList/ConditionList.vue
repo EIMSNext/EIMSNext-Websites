@@ -79,7 +79,7 @@ import {
   IFieldBuildSetting,
   INodeForm,
 } from "@/NodeFieldList/type";
-import { ref, toRef, watch } from "vue";
+import { computed, ref, toRef, watch } from "vue";
 
 const { t } = useLocale();
 
@@ -105,19 +105,21 @@ const props = withDefaults(
   },
 );
 
-const fieldBuildSettingRef = toRef(
-  props.fieldBuildSetting ?? {
-    version: 0,
-    rule: FieldBuildRule.All,
-    matchType: false,
-  },
+const fieldBuildSettingRef = computed(
+  () =>
+    props.fieldBuildSetting ?? {
+      version: 0,
+      rule: FieldBuildRule.All,
+      matchType: false,
+    },
 );
-const valueBuildSettingRef = toRef(
-  props.fieldBuildSetting ?? {
-    version: 0,
-    rule: FieldBuildRule.All,
-    matchType: true,
-  },
+const valueBuildSettingRef = computed(
+  () =>
+    props.valueBuildSetting ?? {
+      version: 0,
+      rule: FieldBuildRule.All,
+      matchType: true,
+    },
 );
 const list = toRef(props.modelValue);
 const groupLevel = ref(1);

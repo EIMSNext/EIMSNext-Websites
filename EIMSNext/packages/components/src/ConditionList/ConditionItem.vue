@@ -49,6 +49,7 @@
     </div>
     <div v-if="op != 'empty' && op != 'notempty'" class="cond-detail mt-[10px]">
       <ConditionValue
+        :key="conditionValueKey"
         v-model="value"
         :field-def="field"
         :nodes="nodes"
@@ -74,7 +75,7 @@ import {
   getConditionFieldType,
 } from "@/NodeFieldList/type";
 import { IFormFieldDef } from "@/FieldSelect/type";
-import { computed, ref, toRef } from "vue";
+import { computed, ref, watch } from "vue";
 
 const { t } = useLocale();
 
@@ -99,17 +100,50 @@ const field = ref<IFormFieldDef>(
     type: FieldType.None,
   },
 );
-const op = toRef(props.modelValue.op ?? "empty");
+const op = ref(props.modelValue.op ?? "empty");
 const value = ref(
   props.modelValue.value ?? { type: ConditionValueType.Custom, value: null },
 );
 
 const fieldType = ref<FieldType>(field.value?.type ?? FieldType.Input);
 
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    field.value =
+      newValue.field ?? {
+        formId: props.formId,
+        field: "",
+        label: "",
+        type: FieldType.None,
+      };
+    op.value = newValue.op ?? "empty";
+    value.value =
+      newValue.value ?? { type: ConditionValueType.Custom, value: null };
+    fieldType.value = field.value?.type ?? FieldType.Input;
+  },
+  {
+    deep: true,
+    immediate: true,
+  },
+);
+
 const dataType = computed(() => {
   return field.value.field
     ? getConditionFieldType(fieldType.value)
     : ConditionFieldType.Other;
+});
+
+const conditionValueKey = computed(() => {
+  const nodeKeys = (props.nodes ?? []).map((x) => x.nodeId).join(",");
+  return [
+    field.value.field,
+    field.value.type,
+    nodeKeys,
+    props.valueBuildSetting.version,
+    props.valueBuildSetting.rule,
+    props.valueBuildSetting.matchType,
+  ].join("|");
 });
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
@@ -144,6 +178,8 @@ const changeField = (item: IFormFieldDef) => {
     ? getConditionFieldType(item.type)
     : ConditionFieldType.None;
 
+  fieldType.value = item.type;
+
   if (dataType.value != newDataType) {
     value.value.value = null;
     value.value.type = ConditionValueType.Custom;
@@ -151,8 +187,6 @@ const changeField = (item: IFormFieldDef) => {
 
     if (dataOperators[newDataType].indexOf(op.value) == -1)
       op.value = dataOperators[newDataType][0];
-
-    fieldType.value = item.type;
   }
 
   emitChange();

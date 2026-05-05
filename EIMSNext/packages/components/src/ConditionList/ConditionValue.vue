@@ -7,7 +7,7 @@
     </div>
     <div class="value-value">
       <template v-if="nodes && condValueType == ConditionValueType.Field">
-        <NodeFieldList v-model="condFieldValue" :nodes="nodes" :field-def="fieldDef"
+        <NodeFieldList :key="nodeFieldListKey" v-model="condFieldValue" :nodes="nodes" :field-def="fieldDef"
           :fieldBuildSetting="fieldBuildSetting" @change="onValueChange">
         </NodeFieldList>
       </template>
@@ -96,7 +96,7 @@ import {
   ConditionFieldType,
 } from "@/NodeFieldList/type";
 import { IListItem } from "@/list/type";
-import { computed, ref, toRef } from "vue";
+import { computed, ref, watch } from "vue";
 import memberSelectDialog from "@/memberSelect/memberSelectDialog.vue";
 import { useLocale } from "element-plus";
 import { MemberTabs } from "@/memberSelect/type";
@@ -142,14 +142,8 @@ const showMemberDialog = ref(false);
 const memberMultiple = ref(false);
 const memberShowTabs = ref(MemberTabs.None);
 
-const condValueType = toRef(props.modelValue.type);
-const value = toRef<any>(props.modelValue.value);
-if (
-  condValueType.value == ConditionValueType.Custom &&
-  isMemberValueType.value
-) {
-  value.value = normalizeSelectedTags(value.value);
-}
+const condValueType = ref(props.modelValue.type);
+const value = ref<any>(props.modelValue.value);
 const condFieldValue = ref<IFormFieldDef>(
   props.modelValue.fieldValue ?? {
     nodeId: "",
@@ -157,6 +151,48 @@ const condFieldValue = ref<IFormFieldDef>(
     field: "",
     label: "",
     type: FieldType.None,
+  },
+);
+
+const nodeFieldListKey = computed(() => {
+  const nodeKeys = (props.nodes ?? []).map((x) => x.nodeId).join(",");
+  return [
+    props.fieldDef?.field ?? "",
+    props.fieldDef?.type ?? "",
+    nodeKeys,
+    props.fieldBuildSetting.version,
+    props.fieldBuildSetting.rule,
+    props.fieldBuildSetting.matchType,
+  ].join("|");
+});
+
+const syncFromModelValue = () => {
+  condValueType.value = props.modelValue.type;
+  value.value = props.modelValue.value;
+  condFieldValue.value = props.modelValue.fieldValue ?? {
+    nodeId: "",
+    formId: "",
+    field: "",
+    label: "",
+    type: FieldType.None,
+  };
+
+  if (
+    condValueType.value == ConditionValueType.Custom &&
+    isMemberValueType.value
+  ) {
+    value.value = normalizeSelectedTags(value.value);
+  }
+};
+
+watch(
+  () => props.modelValue,
+  () => {
+    syncFromModelValue();
+  },
+  {
+    deep: true,
+    immediate: true,
   },
 );
 
