@@ -11,6 +11,15 @@
           :fieldBuildSetting="fieldBuildSetting" @change="onValueChange">
         </NodeFieldList>
       </template>
+      <template v-else-if="condValueType == ConditionValueType.Field">
+        <FieldSelect
+          v-model="condFieldValue"
+          :formId="fieldDef?.formId || ''"
+          :fields="fieldBuildSetting.fields"
+          :fieldLimit="fieldBuildSetting.fieldLimit"
+          @change="onValueChange"
+        />
+      </template>
       <template v-else>
         <template v-if="dataType == ConditionFieldType.Input">
           <template v-if="fieldDef?.field == SystemField.FlowStatus">
@@ -89,6 +98,7 @@
 import { ConditionValueType, IConditonValue, toListItem } from "./type";
 import { FieldType, SystemField } from "@eimsnext/models";
 import { IFormFieldDef } from "../FieldSelect/type";
+import { FieldSelect } from "../FieldSelect";
 import {
   IFieldBuildSetting,
   INodeForm,

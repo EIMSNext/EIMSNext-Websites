@@ -1,8 +1,8 @@
 import { uniqueId } from "@eimsnext/form-render-core";
-import { makeTitleRule, localeProps } from "../../utils";
+import { localeProps } from "../../utils";
 
 const label = "选择数据";
-const name = "formselecteddata";
+const name = "dataselect";
 
 export default {
   menu: "subform",
@@ -22,24 +22,34 @@ export default {
       props: {
         placeholder: "选择数据",
         dataSource: "",
+        selectionProcess: {
+          buttonText: "选择数据",
+          tableFields: [],
+        },
+        displayConfig: {
+          fields: [],
+        },
+        fillConfig: {
+          mappings: [],
+        },
       },
     };
   },
   props(_, { t }) {
-    return localeProps(t, name + ".props", [
+    return localeProps(t, `${name}.props`, [
       { type: "GroupLabel", props: { title: "数据源" } },
       {
         type: "FormSelect",
         field: "dataSource",
         title: "选择表单",
         props: {
-          placeholder: "请选择表单"
+          placeholder: "请选择表单",
         },
         control: [
           {
             condition: "empty",
             value: "",
-            rule: []
+            rule: [],
           },
           {
             condition: "notEmpty",
@@ -51,29 +61,29 @@ export default {
                 field: "selectionProcess",
                 title: "",
                 props: {
-                  btn: "设置"
-                }
+                  btn: "设置",
+                },
               },
               { type: "GroupLabel", props: { title: "数据选择后" } },
               {
                 type: "DisplayFieldsConfig",
-                field: "displayFields",
+                field: "displayConfig",
                 title: "",
                 props: {
-                  btn: "设置显示字段"
-                }
+                  btn: "设置显示字段",
+                },
               },
               {
                 type: "FillFieldsConfig",
-                field: "fillFields",
+                field: "fillConfig",
                 title: "",
                 props: {
-                  btn: "填充规则设置"
-                }
-              }
-            ]
-          }
-        ]
+                  btn: "填充规则设置",
+                },
+              },
+            ],
+          },
+        ],
       },
       { type: "GroupLabel", props: { title: t("props.othersetting") } },
       {

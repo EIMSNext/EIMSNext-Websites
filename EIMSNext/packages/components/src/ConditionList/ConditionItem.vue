@@ -16,6 +16,7 @@
           class="cond-field"
           v-model="field"
           :formId="formId"
+          :fields="fieldBuildSetting.fields"
           :fieldLimit="fieldBuildSetting.fieldLimit"
           @change="changeField"
         ></FieldSelect>

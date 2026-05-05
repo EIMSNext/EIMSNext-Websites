@@ -1,0 +1,99 @@
+._fc-form-selected-data-wrap,
+._fc-form-selected-data {
+  width: 100%;
+}
+
+.form-selected-data-dialog {
+  --el-dialog-border-radius: 24px;
+}
+
+.form-selected-data-dialog .el-dialog {
+  max-width: 1820px;
+  margin: 0 auto;
+}
+
+.form-selected-data-dialog .el-dialog__header {
+  padding: 28px 36px 20px;
+  margin-right: 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.form-selected-data-dialog .el-dialog__body {
+  height: calc(100vh - 240px);
+  min-height: 520px;
+  padding: 24px 36px;
+  background: var(--el-fill-color-light);
+}
+
+.form-selected-data-dialog .el-dialog__footer {
+  padding: 18px 36px 28px;
+  border-top: 1px solid var(--el-border-color-lighter);
+  background: var(--el-bg-color);
+}
+
+.form-selected-data-dialog-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--el-text-color-primary);
+}
+
+.form-selected-data-dialog-body {
+  height: 100%;
+}
+
+.form-selected-data-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.form-selected-data-error {
+  margin-bottom: 16px;
+  color: var(--el-color-danger);
+}
+
+.form-selected-data-display-panel {
+  margin-top: 8px;
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 16px;
+  background-color: var(--el-bg-color);
+}
+
+.form-selected-data-display-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  min-height: 48px;
+}
+
+.form-selected-data-display-label {
+  color: var(--el-text-color-regular);
+  font-size: 14px;
+}
+
+.form-selected-data-display-value {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  margin-left: 16px;
+  text-align: right;
+  word-break: break-all;
+}
+
+.form-selected-data-empty {
+  padding: 8px 0;
+  color: var(--el-text-color-secondary);
+}
+
+.form-selected-data-display-value.is-empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 120px;
+  min-height: 32px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  background-color: var(--el-fill-color-light);
+  border: 1px solid var(--el-border-color-lighter);
+}

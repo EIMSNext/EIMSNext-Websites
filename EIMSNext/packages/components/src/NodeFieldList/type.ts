@@ -22,6 +22,7 @@ export interface IFieldBuildSetting {
   version: number;
   rule: FieldBuildRule;
   matchType: boolean;
+  fields?: IFormFieldDef[];
   fieldLimit?: IFieldLimit;
   fieldMapping?: Record<string, IFormFieldMap>;
 }

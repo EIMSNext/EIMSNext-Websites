@@ -91,7 +91,7 @@ import department1 from "./rule/departmentSelect";
 import department2 from "./rule/departmentSelect2";
 import employee1 from "./rule/employeeSelect";
 import employee2 from "./rule/employeeSelect2";
-import formSelectedData from "./rule/formSelectedData";
+import dataSelect from "./rule/dataSelect";
 
 const ruleList = [
   input,
@@ -123,7 +123,7 @@ const ruleList = [
   department2,
   employee1,
   employee2,
-  formSelectedData,
+  dataSelect,
   editor,
   dataTable,
   id,

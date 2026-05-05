@@ -27,6 +27,9 @@ import { UserAvatar } from "./avatar";
 import { SortList, SortItem } from "./SortList";
 import { FieldSelectList } from "./FieldSelectList";
 import { ShareLinkBar } from "./ShareLinkBar";
+import { DataSelectTablePanel } from "./DataSelectTablePanel";
+import { DataSelectFieldPicker } from "./DataSelectFieldPicker";
+import { DataSelectFilter } from "./DataSelectFilter";
 
 export {
   applyTheme,
@@ -74,4 +77,7 @@ export default [
   SortItem,
   FieldSelectList,
   ShareLinkBar,
+  DataSelectTablePanel,
+  DataSelectFieldPicker,
+  DataSelectFilter,
 ];

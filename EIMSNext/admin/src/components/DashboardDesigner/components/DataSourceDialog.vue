@@ -1,7 +1,7 @@
 <template>
   <et-dialog
     :modelValue="modelValue"
-    :title="t('comp.selectDataSource')"
+    :title="t('comp.dataSelectSource')"
     width="450px"
     @cancel="cancel"
     @ok="save"
