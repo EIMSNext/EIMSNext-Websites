@@ -1,50 +1,27 @@
 <template>
   <div class="flow-node-wrapper">
-    <el-popover
-      ref="popoverRef"
-      width="60"
-      popper-class="node-action-popover"
-      trigger="hover"
-      placement="top-end"
-      :show-arrow="false"
-      :disabled="flowContext.structureReadonly || (!allowCopy && !allowDelete)"
-    >
+    <el-popover ref="popoverRef" width="60" popper-class="node-action-popover" trigger="hover" placement="top-end"
+      :show-arrow="false" :disabled="flowContext.structureReadonly || (!allowCopy && !allowDelete)">
       <div class="node-actions">
-        <div
-          v-if="allowCopy && !flowContext.structureReadonly"
-          class="copy-btn"
-          @click.stop="
-            copyClick(
-              nodeData.nodeType === FlowNodeType.Condition
-                ? branchItemData!
-                : nodeData,
-            )
-          "
-        >
+        <div v-if="allowCopy && !flowContext.structureReadonly" class="copy-btn" @click.stop="
+          copyClick(
+            nodeData.nodeType === FlowNodeType.Condition
+              ? branchItemData!
+              : nodeData,
+          )
+          ">
           <et-icon icon="el-CopyDocument" />
         </div>
         <div v-if="allowCopy && allowDelete && !flowContext.structureReadonly" class="action-split" />
-        <div
-          v-if="allowDelete && !flowContext.structureReadonly"
-          class="delete-btn"
-          @click.stop="delClick(nodeData)"
-        >
+        <div v-if="allowDelete && !flowContext.structureReadonly" class="delete-btn" @click.stop="delClick(nodeData)">
           <et-icon icon="el-Delete" />
         </div>
       </div>
       <template #reference>
         <slot>
-          <div
-            class="flow-node"
-            :class="[{ active: isActived }]"
-            @click.stop="nodeClick(nodeData)"
-          >
+          <div class="flow-node" :class="[{ active: isActived }]" @click.stop="nodeClick(nodeData)">
             <div class="flow-node-title initiator">
-              <et-icon
-                :icon="'el-' + iconName"
-                class="node-icon"
-                :color="iconColor"
-              />
+              <et-icon :icon="'el-' + iconName" class="node-icon" :color="iconColor" />
               <span class="node-title-text">
                 {{ nodeData.name }}
               </span>
@@ -56,12 +33,7 @@
         </slot>
       </template>
     </el-popover>
-    <AddNodeButton
-      v-if="showAddButton"
-      :p-node-datas="pNodeDatas"
-      :node-data="nodeData"
-    />
-
+    <AddNodeButton v-if="showAddButton && !flowContext.structureReadonly" :p-node-datas="pNodeDatas" :node-data="nodeData" />
     <div class="flow-connector" />
     <et-icon v-if="!isStart" icon="el-CaretBottom" class="arrow-down" />
   </div>
@@ -108,7 +80,6 @@ const props = withDefaults(
 const flowContext = inject<IFlowContext>("flowContext")!;
 const popoverRef = ref();
 const isActived = computed(() => flowContext.activeData.id === props.nodeData.id);
-
 const content = computed(() => {
   if (props.contentFun) return props.contentFun(props.nodeData.metadata);
 
