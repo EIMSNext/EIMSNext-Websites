@@ -20,6 +20,24 @@ const FIELD_TYPE_RULE_MAP = {
   [FieldType.CheckBox]: "checkbox",
 };
 
+const RULE_TYPE_FIELD_MAP = {
+  input: FieldType.Input,
+  textarea: FieldType.TextArea,
+  number: FieldType.Number,
+  timestamp: FieldType.TimeStamp,
+  department1: FieldType.Department1,
+  department2: FieldType.Department2,
+  employee1: FieldType.Employee1,
+  employee2: FieldType.Employee2,
+  imageupload: FieldType.ImageUpload,
+  fileupload: FieldType.FileUpload,
+  select: FieldType.Select1,
+  select2: FieldType.Select2,
+  radio: FieldType.Radio,
+  checkbox: FieldType.CheckBox,
+  tableform: FieldType.TableForm,
+};
+
 export const getActiveRule = (designer) => designer?.setupState?.activeRule;
 
 export const getCurrentFormRules = (designer) => {
@@ -28,6 +46,16 @@ export const getCurrentFormRules = (designer) => {
     return designerApi.getRule() || [];
   }
   return designer?.setupState?.children || [];
+};
+
+export const getCurrentContextRules = (designer, contextRule) => {
+  const activeRule = contextRule || getActiveRule(designer);
+  const setupState = designer?.setupState;
+  const tableForm = activeRule && setupState?.getTableFormByRule?.(activeRule);
+  if (tableForm) {
+    return setupState.getTableFormRootChildren?.(tableForm) || [];
+  }
+  return getCurrentFormRules(designer);
 };
 
 export const walkRules = (rules, visitor) => {
@@ -40,15 +68,20 @@ export const walkRules = (rules, visitor) => {
   });
 };
 
-export const getCurrentFormFields = (designer, currentField) => {
+export const getCurrentFormFields = (designer, currentField, contextRule) => {
   const fields = [];
-  walkRules(getCurrentFormRules(designer), (rule) => {
+  const formId = designer?.setupState?.formId || "";
+  walkRules(getCurrentContextRules(designer, contextRule), (rule) => {
     if (!rule.field || !rule.title) return;
     if (rule.field === currentField || rule.type === "dataselect") return;
+    const fieldType = RULE_TYPE_FIELD_MAP[rule.type] || rule.type || FieldType.None;
     fields.push({
+      formId,
       field: rule.field,
       label: rule.title,
-      type: rule.type || FieldType.None,
+      type: fieldType,
+      format: rule.props?.format,
+      options: rule.options || rule.props?.options,
     });
   });
   return fields;
@@ -104,41 +137,22 @@ export const buildUniqueFieldName = (designer, preferred) => {
 export const createRuleFromField = (designer, field) => {
   const menuName = FIELD_TYPE_RULE_MAP[field.type] || "input";
   const menu = designer?.setupState?.dragRuleList?.[menuName];
-  const makeRule = designer?.setupState?.makeRule;
-  if (!menu || !makeRule) {
+  if (!menu) {
     return null;
   }
 
-  const rule = makeRule(menu);
-  rule.title = field.label;
-  rule.field = buildUniqueFieldName(designer, field.field);
-  if (!rule.props) {
-    rule.props = {};
-  }
-  if (!rule.props.placeholder && ["input", "textarea", "number", "timestamp"].includes(rule.type)) {
-    rule.props.placeholder = `请输入${field.label}`;
-  }
-  return rule;
-};
-
-export const appendRuleAfterActiveRule = (designer, rule) => {
-  const setupState = designer?.setupState;
-  const activeRule = getActiveRule(designer);
-  if (!setupState || !activeRule || !rule) {
-    return null;
+  const props = {};
+  if (["input", "textarea", "number", "timestamp"].includes(menu.name)) {
+    props.placeholder = `请输入${field.label}`;
   }
 
-  const activeTableForm = setupState.getTableFormByRule?.(activeRule);
-  const targetChildren = activeTableForm
-    ? setupState.getTableFormRootChildren?.(activeTableForm)
-    : setupState.children;
-
-  const index = targetChildren.indexOf(activeRule);
-  const insertIndex = index > -1 ? index + 1 : targetChildren.length;
-  setupState.handleAddBefore && setupState.handleAddBefore();
-  targetChildren.splice(insertIndex, 0, rule);
-  setupState.handleAddAfter && setupState.handleAddAfter({ rule });
-  return rule;
+  return {
+    menu,
+    menuName,
+    title: field.label,
+    field: buildUniqueFieldName(designer, field.field),
+    props,
+  };
 };
 
 export const buildMappingsFromFields = (sourceFields, targetFields) => {

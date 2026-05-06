@@ -39,9 +39,10 @@
             />
             <el-radio
               v-else
-              :model-value="isSelected(field.field)"
-              :label="field.field"
-              @click.stop="toggleField(field)"
+              :model-value="selectedFieldKey"
+              :value="field.field"
+              @change="toggleField(field)"
+              @click.stop=""
             >
               <span />
             </el-radio>
@@ -112,6 +113,10 @@ const filteredFields = computed(() => {
   );
 });
 
+const selectedFieldKey = computed(() => {
+  return props.multiple ? undefined : props.modelValue?.[0]?.field;
+});
+
 const selectedMap = computed(() => {
   const map = new Map<string, IDataSelectField>();
   props.modelValue.forEach((item) => {
@@ -169,9 +174,9 @@ const toggleAll = () => {
 
 <style scoped lang="scss">
 .et-select-data-field-picker {
-  border: 1px solid var(--el-border-color-light);
+  border: 1px solid var(--et-border-color-light);
   border-radius: 12px;
-  background: #fff;
+  background: var(--et-bg-container);
   overflow: hidden;
 
   .picker-trigger {
@@ -180,16 +185,16 @@ const toggleAll = () => {
     justify-content: space-between;
     padding: 12px 16px;
     cursor: pointer;
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    border-bottom: 1px solid var(--et-border-color-light);
   }
 
   .picker-trigger-text {
-    color: var(--el-text-color-primary);
+    color: var(--et-text-primary);
     font-size: 14px;
   }
 
   .picker-panel {
-    background: #fff;
+    background: var(--et-bg-container);
   }
 
   .picker-search {
@@ -207,7 +212,7 @@ const toggleAll = () => {
 
   .picker-select-all {
     gap: 8px;
-    color: #3eb6b3;
+    color: var(--et-color-primary);
   }
 
   .picker-list {
@@ -218,11 +223,11 @@ const toggleAll = () => {
 
   .picker-item {
     &:hover {
-      background: var(--el-fill-color-light);
+      background: var(--et-fill-color-light);
     }
 
     &.selected {
-      background: #f2f7f7;
+      background: var(--et-fill-color-light);
     }
   }
 
@@ -234,7 +239,7 @@ const toggleAll = () => {
   }
 
   .picker-item-label {
-    color: var(--el-text-color-primary);
+    color: var(--et-text-primary);
     font-size: 14px;
     line-height: 20px;
   }
@@ -242,7 +247,7 @@ const toggleAll = () => {
   .picker-empty {
     padding: 24px 12px;
     text-align: center;
-    color: var(--el-text-color-secondary);
+    color: var(--et-text-secondary);
   }
 }
 </style>

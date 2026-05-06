@@ -58,6 +58,7 @@
               <FieldSelect
                 :model-value="toFieldSelectValue(mapping.targetField)"
                 :form-id="designerFormId"
+                :fields="currentFormFields"
                 @update:model-value="(field) => handleFieldSelect(index, field)"
               />
             </div>
@@ -82,7 +83,6 @@ import { defineComponent, nextTick } from 'vue';
 import { DataSelectFieldPicker, FieldSelect } from '@eimsnext/components';
 import {
   buildMappingsFromFields,
-  appendRuleAfterActiveRule,
   createRuleFromField,
   getCurrentFormFields,
   isFieldTypeCompatible,
@@ -141,7 +141,7 @@ export default defineComponent({
     async openDialog() {
       this.config = normalizeFillConfig(this.modelValue);
       this.sourceFields = await loadSourceFormFields(this.selectedForm);
-      this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field);
+      this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field, this.activeRule);
       this.selectedSourceFields = this.config.mappings.map((item) => item.sourceField);
       this.editableMappings = normalizeFillConfig(this.config).mappings;
       this.actionType = 'existing';
@@ -199,10 +199,17 @@ export default defineComponent({
         if (this.actionType === 'new') {
           const createdTargets = [];
           let lastInsertedField = '';
+          let insertAfterRule = this.activeRule;
           this.selectedSourceFields.forEach((field) => {
-            const newRule = createRuleFromField(this.designer, field);
-            const insertedRule = appendRuleAfterActiveRule(this.designer, newRule);
+            const insertConfig = createRuleFromField(this.designer, field);
+            const insertedRule = insertConfig
+              ? this.designer.setupState.insertRule(insertConfig, {
+                  rule: insertAfterRule,
+                  position: 'after',
+                })
+              : null;
             if (insertedRule) {
+              insertAfterRule = insertedRule;
               lastInsertedField = insertedRule.field;
               createdTargets.push({
                 field: insertedRule.field,
@@ -211,7 +218,7 @@ export default defineComponent({
               });
             }
           });
-          this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field);
+          this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field, this.activeRule);
           this.editableMappings = buildMappingsFromFields(this.selectedSourceFields, createdTargets);
           const nextValue = normalizeFillConfig({ mappings: this.editableMappings.filter((item) => item.targetField?.field) });
           this.$emit('update:modelValue', nextValue);
@@ -264,6 +271,7 @@ export default defineComponent({
 ._fd-fill-fields-dialog {
   .el-dialog {
     background: var(--et-bg-container);
+    color: var(--et-text-primary);
   }
 
   .el-dialog__body {
@@ -274,6 +282,17 @@ export default defineComponent({
   .el-dialog__header,
   .el-dialog__footer {
     background: var(--et-bg-container);
+  }
+
+  :deep(.el-select__wrapper),
+  :deep(.el-input__wrapper) {
+    background: var(--et-bg-container);
+    color: var(--et-text-primary);
+    box-shadow: 0 0 0 1px var(--et-border-color-light) inset;
+  }
+
+  :deep(.el-input.is-disabled .el-input__wrapper) {
+    background: var(--et-bg-muted);
   }
 
   .fill-step-layout {
@@ -317,7 +336,7 @@ export default defineComponent({
 
   .mapping-add-row :deep(.el-button:hover) {
     color: var(--et-color-primary);
-    background: var(--et-fill-color-light, var(--el-fill-color-light));
+    background: var(--et-fill-color-light);
   }
 
   .mapping-item {
@@ -340,27 +359,27 @@ export default defineComponent({
 
   .mapping-source :deep(.el-input.is-disabled .el-input__wrapper) {
     color: var(--et-text-secondary);
-    background: var(--et-bg-muted, var(--el-fill-color-light));
-    box-shadow: 0 0 0 1px var(--et-border-color-light, var(--el-border-color)) inset;
+    background: var(--et-bg-muted);
+    box-shadow: 0 0 0 1px var(--et-border-color-light) inset;
   }
 
   .mapping-target :deep(.el-input__wrapper),
   .mapping-target :deep(.el-select__wrapper) {
     color: var(--et-text-primary);
     background: var(--et-bg-container);
-    box-shadow: 0 0 0 1px var(--et-border-color-light, var(--el-border-color)) inset;
+    box-shadow: 0 0 0 1px var(--et-border-color-light) inset;
   }
 
   .dialog-footer :deep(.el-button:not(.el-button--primary):hover) {
-    background: var(--et-fill-color-light, var(--el-fill-color-light));
-    border-color: var(--et-border-color-light, var(--el-border-color));
+    background: var(--et-fill-color-light);
+    border-color: var(--et-border-color-light);
     color: var(--et-text-primary);
   }
 
   .dialog-footer :deep(.el-button:not(.el-button--primary)) {
     color: var(--et-text-primary);
     background: var(--et-bg-container);
-    border-color: var(--et-border-color-light, var(--el-border-color));
+    border-color: var(--et-border-color-light);
   }
 
   .dialog-footer :deep(.el-button--primary) {

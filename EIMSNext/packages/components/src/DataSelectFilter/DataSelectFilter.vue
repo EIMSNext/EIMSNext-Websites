@@ -81,6 +81,22 @@ const onClickOutside = (e: MouseEvent) => {
 <style scoped lang="scss">
 .et-data-select-filter {
   width: 500px;
+  color: var(--et-text-primary);
+  background: var(--et-bg-container);
+
+  :deep(.el-card),
+  :deep(.el-input__wrapper),
+  :deep(.el-select__wrapper),
+  :deep(.el-textarea__inner) {
+    background: var(--et-bg-container);
+    color: var(--et-text-primary);
+  }
+
+  :deep(.el-textarea__inner),
+  :deep(.el-input__wrapper),
+  :deep(.el-select__wrapper) {
+    box-shadow: 0 0 0 1px var(--et-border-color-light) inset;
+  }
 }
 
 .filter-actions {
@@ -88,5 +104,29 @@ const onClickOutside = (e: MouseEvent) => {
   justify-content: flex-end;
   gap: 12px;
   margin-top: 8px;
+
+  :deep(.el-button:not(.el-button--primary)) {
+    color: var(--et-text-primary);
+    background: var(--et-bg-container);
+    border-color: var(--et-border-color-light);
+  }
+
+  :deep(.el-button:not(.el-button--primary):hover) {
+    color: var(--et-text-primary);
+    background: var(--et-fill-color-light);
+    border-color: var(--et-border-color-light);
+  }
+
+  :deep(.el-button--primary) {
+    color: var(--et-text-on-primary);
+    background: var(--et-color-primary);
+    border-color: var(--et-color-primary);
+  }
+
+  :deep(.el-button--primary:hover) {
+    color: var(--et-text-on-primary);
+    background: var(--et-color-primary-hover);
+    border-color: var(--et-color-primary-hover);
+  }
 }
 </style>

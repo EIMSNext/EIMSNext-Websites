@@ -2507,6 +2507,118 @@ export default defineComponent({
                     : data.children;
                 methods.dragMenu({ menu, children: targetChildren, index: targetChildren.length });
             },
+            getInsertContext(context = {}) {
+                const activeRule = context.activeRule || data.activeRule;
+                let children = context.children;
+                let index = context.index;
+                const slot = context.slot;
+                const position = context.position || 'after';
+                const relativeRule = context.rule || activeRule;
+
+                if (!children && relativeRule) {
+                    const column = methods.getComponentParent(relativeRule);
+                    const tableForm = methods.getTableFormByRule(relativeRule);
+                    if (methods.isTableFormColumnRule(column) && methods.isTableFormRule(tableForm)) {
+                        const columnWrapper = column.__fc__?.parent?.rule;
+                        const list = tableForm.children || [];
+                        const ruleIndex = list.indexOf(columnWrapper);
+                        children = list;
+                        if (ruleIndex > -1) {
+                            index = position === 'before' ? ruleIndex : ruleIndex + 1;
+                        }
+                    }
+                }
+
+                if (!children) {
+                    const activeTableForm = methods.getTableFormByRule(activeRule);
+                    children = activeTableForm
+                        ? methods.getTableFormRootChildren(activeTableForm)
+                        : data.children;
+                }
+
+                if (index == null && relativeRule) {
+                    const componentParent = relativeRule._menu?.inside ? relativeRule : relativeRule.__fc__?.parent?.rule;
+                    const list = componentParent?.__fc__?.parent?.rule?.children;
+                    if (Array.isArray(list)) {
+                        children = list;
+                        const ruleIndex = list.indexOf(componentParent);
+                        if (ruleIndex > -1) {
+                            index = position === 'before' ? ruleIndex : ruleIndex + 1;
+                        }
+                    }
+                }
+
+                if (index == null) {
+                    index = children.length;
+                }
+
+                return { children, index, slot, activeRule };
+            },
+            resolveInsertedRule(rules) {
+                const firstRule = rules && rules[0];
+                if (!firstRule) {
+                    return null;
+                }
+                if (methods.isTableFormColumnRule(firstRule)) {
+                    return methods.getTableFormColumnFirstChild(firstRule);
+                }
+                return firstRule.type === 'DragTool' ? firstRule.children[0] : firstRule;
+            },
+            insertRule(config = {}, context = {}) {
+                const insertContext = methods.getInsertContext(context);
+                const menu = config.menu || (config.menuName ? data.dragRuleList[config.menuName] : null) || (config.item ? data.dragRuleList[config.item] : null);
+                if (!config.rule && !menu) {
+                    return null;
+                }
+                const update = { ...(config.update || {}) };
+                if (config.field) {
+                    update.field = config.field;
+                }
+                if (config.title) {
+                    update.title = config.title;
+                }
+                if (config.props) {
+                    update.props = { ...(update.props || {}), ...config.props };
+                }
+
+                const result = {
+                    rule: null,
+                    children: insertContext.children,
+                    index: insertContext.index,
+                };
+                const beforeLength = insertContext.children.length;
+
+                const originalHandleAddAfter = methods.handleAddAfter;
+                methods.handleAddAfter = function(payload) {
+                    originalHandleAddAfter.call(methods, payload);
+                    if (!result.rule) {
+                        const insertedRules = payload?.template || (payload?.rule ? [payload.rule] : []);
+                        result.rule = methods.resolveInsertedRule(insertedRules);
+                    }
+                };
+
+                try {
+                    methods.dragMenu({
+                        rule: config.rule,
+                        menu,
+                        children: insertContext.children,
+                        index: insertContext.index,
+                        slot: config.slot ?? insertContext.slot,
+                        update: Object.keys(update).length ? update : undefined,
+                    });
+                } finally {
+                    methods.handleAddAfter = originalHandleAddAfter;
+                }
+
+                if (!result.rule) {
+                    const afterLength = insertContext.children.length;
+                    if (afterLength > beforeLength) {
+                        const inserted = insertContext.children.slice(insertContext.index, insertContext.index + (afterLength - beforeLength));
+                        result.rule = methods.resolveInsertedRule(inserted);
+                    }
+                }
+                return result.rule;
+            },
             clickField(menu, children, index, slot) {
                 const update = { ...menu.update || {} };
                 if (!update.title) {
