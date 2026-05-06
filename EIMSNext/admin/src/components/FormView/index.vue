@@ -61,13 +61,22 @@
       >
         {{ t(actions.urge.text) }}
       </el-button>
+      <el-button
+        v-for="action in visibleCustomActions"
+        :key="action.key"
+        :type="action.type === 'default' ? undefined : action.type"
+        :disabled="action.disabled"
+        @click="handleCustomAction(action)"
+      >
+        {{ t(action.text) }}
+      </el-button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import formCreate from "@eimsnext/form-render-elplus";
 import { FieldType, FormContent, FormData, IFieldPerm } from "@eimsnext/models";
-import { FormActionSettings } from "./type";
+import { FormActionSettings, FormCustomAction } from "./type";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
 
@@ -92,6 +101,7 @@ const fcInst = ref<any>(null);
 const rules = ref(formCreate.parseJson(props.def.layout!));
 const options = ref(formCreate.parseJson(props.def.options!));
 const dataRef = ref<any>(props.data?.data);
+const visibleCustomActions = computed(() => props.actions?.customActions?.filter((x) => x.visible !== false) || []);
 
 if (props.fieldPerms && props.fieldPerms.length > 0) {
   let layout = formCreate.parseJson(props.def.layout!);
@@ -137,7 +147,7 @@ if (props.fieldPerms && props.fieldPerms.length > 0) {
   rules.value = layout;
 }
 
-const emit = defineEmits(["draft", "submit", "cancel", "approve", "reject", "withdraw", "urge"]);
+const emit = defineEmits(["draft", "submit", "cancel", "approve", "reject", "withdraw", "urge", "action"]);
 const cancel = () => {
   emit("cancel");
 };
@@ -180,6 +190,21 @@ const handleUrge = () => {
 };
 const handleReset = () => {
   fcInst.value.fapi.resetFields();
+};
+const handleCustomAction = (action: FormCustomAction) => {
+  if (action.requiresValidate) {
+    fcInst.value.fapi
+      .validate()
+      .then(() => {
+        const data: any = fcInst.value.fapi.formData();
+        emit("action", action.key, data);
+      })
+      .catch();
+    return;
+  }
+
+  const data: any = fcInst.value.fapi.formData();
+  emit("action", action.key, data);
 };
 </script>
 <style lang="scss" scoped>

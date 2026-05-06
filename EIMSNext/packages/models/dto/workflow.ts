@@ -8,6 +8,38 @@ export interface ApproveRequest {
   action: ApproveAction;
   comment?: string;
   signature?: string;
+  targetNodeId?: string;
+  targetEmployeeId?: string;
+}
+
+export interface ReturnRequest {
+  wfInstanceId?: string;
+  wfNodeId?: string;
+  dataId: string;
+  targetNodeId: string;
+  comment?: string;
+}
+
+export interface TransferRequest {
+  wfInstanceId?: string;
+  wfNodeId?: string;
+  dataId: string;
+  targetEmployeeId: string;
+  comment?: string;
+}
+
+export interface AddSignRequest {
+  wfInstanceId?: string;
+  wfNodeId?: string;
+  dataId: string;
+  targetEmployeeId: string;
+  comment?: string;
+}
+
+export interface ReturnTargetNode {
+  nodeId: string;
+  nodeName: string;
+  round: number;
 }
 
 export interface WithdrawRequest {
@@ -48,4 +80,5 @@ export enum ApproveAction {
   AutoApprove = "6",
   CopyTo = "7",
   Withdraw = "8",
+  Transfer = "9",
 }

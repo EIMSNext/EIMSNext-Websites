@@ -172,6 +172,14 @@ export function createFlowNode(
             approveMode: ApproveMode.OrSign,
             approvalCandidates: [],
             enableCopyto: false,
+            nodeActions: [
+              { actionType: NodeActionType.Submit, enabled: true, text: t("common.wfProcess.submit") },
+              { actionType: NodeActionType.Return, enabled: false, text: t("workflow.nodeActionReturn") },
+              { actionType: NodeActionType.Reject, enabled: false, text: t("common.wfProcess.reject") },
+              { actionType: NodeActionType.Draft, enabled: false, text: t("common.wfProcess.saveDraft") },
+              { actionType: NodeActionType.AddSign, enabled: false, text: t("workflow.nodeActionAddSign"), candidates: [] },
+              { actionType: NodeActionType.Transfer, enabled: false, text: t("workflow.nodeActionTransfer"), candidates: [] },
+            ],
             copytoCandidates: [],
           },
         },
@@ -382,8 +390,25 @@ export interface ApproveMeta {
   approvalCandidates: IApprovalCandidate[];
   enableCopyto?: boolean;
   copytoCandidates?: IApprovalCandidate[];
+  nodeActions?: INodeActionConfig[];
   notifyChannels?: NotifyChannel;
   expireSetting?: IExpireSetting;
+}
+
+export enum NodeActionType {
+  Submit = "submit",
+  Return = "return",
+  Reject = "reject",
+  Draft = "draft",
+  AddSign = "addSign",
+  Transfer = "transfer",
+}
+
+export interface INodeActionConfig {
+  actionType: NodeActionType;
+  enabled?: boolean;
+  text?: string;
+  candidates?: IApprovalCandidate[];
 }
 export interface CopytoMeta {
   approvalCandidates: IApprovalCandidate[];
