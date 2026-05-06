@@ -1,6 +1,6 @@
 <template>
   <FormView v-if="formData" :def="formDef" :data="formData" :isView="true" :actions="actions" @approve="handleApprove"
-    @reject="handleReject"></FormView>
+    @reject="handleReject" @withdraw="handleWithdraw" @urge="handleUrge"></FormView>
 
   <et-dialog v-model="showCommentDialog" title="审批意见" width="500px" :append-to-body="true" :destroy-on-close="true"
     @ok="confirmApproveAction" @cancel="cancelApproveAction">
@@ -13,16 +13,18 @@ defineOptions({
 });
 
 import {
-  FormDef,
   FormData as FormData_2,
   FormContent,
-  FormDataRequest,
   WfTodo,
   ApproveAction,
+  WorkflowActionStatus,
 } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService, workflowService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -34,6 +36,8 @@ const props = withDefaults(
 const actions = ref<FormActionSettings>({
   approve: { text: "common.wfProcess.approve", visible: true },
   reject: { text: "common.wfProcess.reject", visible: true },
+  withdraw: { text: "common.wfProcess.withdraw", visible: false },
+  urge: { text: "common.wfProcess.urge", visible: false },
 });
 const appId = ref("");
 const dataId = ref(props.todo.dataId);
@@ -43,8 +47,9 @@ const formData = ref<FormData_2>();
 const showCommentDialog = ref(false);
 const comment = ref("");
 const pendingAction = ref<ApproveAction>();
+const actionStatus = ref<WorkflowActionStatus>({ canWithdraw: false, canUrge: false });
 
-const emit = defineEmits(["update:modelValue", "cancel", "submit"]);
+const emit = defineEmits(["update:modelValue", "cancel", "submit", "processed"]);
 const cancel = () => {
   emit("update:modelValue", false);
   emit("cancel");
@@ -75,13 +80,42 @@ const confirmApproveAction = async () => {
 
   try {
     await workflowService.approve({
+      wfInstanceId: props.todo.wfInstanceId,
+      wfNodeId: props.todo.approveNodeId,
       dataId: dataId.value,
       action: pendingAction.value,
       comment: comment.value,
     });
     resetCommentDialog();
+    emit("processed");
   }
   catch {
+  }
+};
+
+const handleWithdraw = async () => {
+  try {
+    await ElMessageBox.confirm(t("common.wfProcess.withdrawConfirm"), t("common.wfProcess.withdraw"), {
+      type: "warning",
+    });
+    await workflowService.withdraw({
+      wfInstanceId: props.todo.wfInstanceId,
+      dataId: dataId.value,
+    });
+    emit("processed");
+  }
+  catch {
+  }
+};
+
+const handleUrge = async () => {
+  try {
+    await workflowService.urge({
+      wfInstanceId: props.todo.wfInstanceId,
+      dataId: dataId.value,
+    });
+    ElMessage.success(t("common.wfProcess.urgeSuccess"));
+  } catch {
   }
 };
 
@@ -100,5 +134,13 @@ onMounted(async () => {
   if (data) {
     formData.value = data;
   }
+
+  actionStatus.value = await workflowService.getActionStatus(props.todo.dataId, props.todo.wfInstanceId);
+  actions.value = {
+    approve: { text: "common.wfProcess.approve", visible: true },
+    reject: { text: "common.wfProcess.reject", visible: true },
+    withdraw: { text: "common.wfProcess.withdraw", visible: actionStatus.value.canWithdraw },
+    urge: { text: "common.wfProcess.urge", visible: actionStatus.value.canUrge },
+  };
 });
 </script>

@@ -1,6 +1,12 @@
 import { cloneDeep } from "lodash-es";
 import { uniqueId } from "@eimsnext/utils";
-import { FlowType, EventSourceType } from "@eimsnext/models";
+import {
+  FlowType,
+  EventSourceType,
+  NotifyChannel,
+  WorkflowAutoProcessRule,
+  WorkflowWithdrawRule,
+} from "@eimsnext/models";
 import { IConditionList } from "@/ConditionList/type";
 import { IFormFieldList } from "@/FormFieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
@@ -54,9 +60,18 @@ export interface IFlowData {
   startNode: IFlowNodeData;
   nodes: IFlowNodeData[];
   endNode: IFlowNodeData;
+  workflowMeta?: WorkflowMeta;
   eventSource?: EventSourceType;
   dfCascade?: CascadeMode;
   eventIds?: string[];
+}
+
+export interface WorkflowMeta {
+  description?: string;
+  allowUrge?: boolean;
+  notifyChannels?: NotifyChannel;
+  autoProcessRule?: WorkflowAutoProcessRule;
+  withdrawRule?: WorkflowWithdrawRule;
 }
 
 export interface IFlowContext {
@@ -381,12 +396,6 @@ export interface IApprovalCandidate {
   cascadedDept?: boolean;
 }
 
-export enum NotifyChannel {
-  None = 0,
-  System = 1,
-  Email = 2,
-}
-
 export enum WfExpireActionType {
   AutoNotify = 0,
   AutoApprove = 1,
@@ -432,6 +441,13 @@ export function createWorkflowData(t: Translator): IFlowData {
       nodeType: FlowNodeType.End,
       name: t("workflow.endNode"),
       metadata: {},
+    },
+    workflowMeta: {
+      description: "",
+      allowUrge: false,
+      notifyChannels: NotifyChannel.None,
+      autoProcessRule: WorkflowAutoProcessRule.Disabled,
+      withdrawRule: WorkflowWithdrawRule.Disabled,
     },
     eventSource: EventSourceType.None,
   };

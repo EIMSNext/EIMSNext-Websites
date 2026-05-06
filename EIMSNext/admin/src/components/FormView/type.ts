@@ -3,6 +3,8 @@ export class FormActionSettings {
   submit?: ActionSetting;
   approve?: ActionSetting;
   reject?: ActionSetting;
+  withdraw?: ActionSetting;
+  urge?: ActionSetting;
   reset?: ActionSetting;
 }
 export class ActionSetting {

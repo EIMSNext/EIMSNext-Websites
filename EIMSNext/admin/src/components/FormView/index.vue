@@ -47,6 +47,20 @@
       >
         {{ t(actions.reject.text) }}
       </el-button>
+      <el-button
+        v-if="actions.withdraw && (!actions.withdraw.visible || actions.withdraw.visible)"
+        :disabled="actions.withdraw.disabled"
+        @click="handleWithdraw"
+      >
+        {{ t(actions.withdraw.text) }}
+      </el-button>
+      <el-button
+        v-if="actions.urge && (!actions.urge.visible || actions.urge.visible)"
+        :disabled="actions.urge.disabled"
+        @click="handleUrge"
+      >
+        {{ t(actions.urge.text) }}
+      </el-button>
     </div>
   </div>
 </template>
@@ -123,7 +137,7 @@ if (props.fieldPerms && props.fieldPerms.length > 0) {
   rules.value = layout;
 }
 
-const emit = defineEmits(["draft", "submit", "cancel", "approve", "reject"]);
+const emit = defineEmits(["draft", "submit", "cancel", "approve", "reject", "withdraw", "urge"]);
 const cancel = () => {
   emit("cancel");
 };
@@ -157,6 +171,12 @@ const handleReject = () => {
       emit("reject", data);
     })
     .catch();
+};
+const handleWithdraw = () => {
+  emit("withdraw");
+};
+const handleUrge = () => {
+  emit("urge");
 };
 const handleReset = () => {
   fcInst.value.fapi.resetFields();
