@@ -29,6 +29,12 @@
               <span class="app-menu-text">企业日志</span>
             </el-menu-item>
           </router-link>
+          <router-link custom :to="{ path: resolveFullPath('flow-manage') }" v-slot="{ navigate }">
+            <el-menu-item v-if="curUser.userType == UserType.CorpAdmin" index="flow-manage" @click="() => navigate()">
+              <et-icon icon="tree" class="step-image" size="14px" />
+              <span class="app-menu-text">流程管理</span>
+            </el-menu-item>
+          </router-link>
         </el-menu>
       </div>
     </div>
@@ -45,8 +51,12 @@
 
 <script setup lang="ts">
 import Layout from "@/layout/index.vue";
+import { useUserStore } from "@eimsnext/store";
+import { UserType } from "@eimsnext/models";
 import SysMain from "./SysMain/index.vue";
 
+const userStore = useUserStore();
+const curUser = toRef(userStore.currentUser);
 const wfbasePath = `/system/`;
 const resolveFullPath = (routePath: string) => wfbasePath + routePath;
 

@@ -171,6 +171,23 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/system/flow-manage",
+    component: SysLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/system/flow-manage/index.vue"),
+        meta: {
+          title: "flow-manage",
+          icon: "collection",
+          keepAlive: true,
+          requiresAuth: true,
+          allowedUserTypes: [UserType.CorpAdmin],
+        },
+      },
+    ],
+  },
+  {
     path: "/system/plugin",
     component: SysLayout,
     children: [

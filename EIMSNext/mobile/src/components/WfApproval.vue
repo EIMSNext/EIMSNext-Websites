@@ -96,7 +96,7 @@ const chooseCandidate = (actionType: "addSign" | "transfer") => {
 
 const chooseReturnTarget = async () => {
   if (!task.value) return "";
-  const targets = await todoServiceMobile.getReturnTargets(task.value.dataId, task.value.wfInstanceId);
+  const targets = await todoServiceMobile.getReturnNodes(task.value.dataId, task.value.wfInstanceId);
   if (!targets.length) {
     showToast("没有可回退节点");
     return "";

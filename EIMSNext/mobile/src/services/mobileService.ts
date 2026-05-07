@@ -121,8 +121,8 @@ export const todoServiceMobile = {
   getActionStatus(dataId: string, wfInstanceId?: string) {
     return workflowService.getActionStatus(dataId, wfInstanceId);
   },
-  getReturnTargets(dataId: string, wfInstanceId?: string) {
-    return workflowService.getReturnTargets(dataId, wfInstanceId);
+  getReturnNodes(dataId: string, wfInstanceId?: string) {
+    return workflowService.getReturnNodes(dataId, wfInstanceId);
   },
   async getNodeActions(formId: string, approveNodeId: string): Promise<NodeActionConfig[]> {
     const defs = await wfDefinitionService.query<WfDefinition>(buildODataQuery(`ExternalId eq '${formId}' and flowType eq '0' and isCurrent eq true`, 0, 1));

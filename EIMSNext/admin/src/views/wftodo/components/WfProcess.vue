@@ -72,7 +72,7 @@ const workflowServiceEx = workflowService as typeof workflowService & {
   return: (data: { wfInstanceId?: string; wfNodeId?: string; dataId: string; targetNodeId: string; comment?: string }) => Promise<any>;
   addSign: (data: { wfInstanceId?: string; wfNodeId?: string; dataId: string; targetEmployeeId: string; comment?: string }) => Promise<any>;
   transfer: (data: { wfInstanceId?: string; wfNodeId?: string; dataId: string; targetEmployeeId: string; comment?: string }) => Promise<any>;
-  getReturnTargets: (dataId: string, wfInstanceId?: string) => Promise<Array<{ nodeId: string; nodeName: string; round: number }>>;
+  getReturnNodes: (dataId: string, wfInstanceId?: string) => Promise<Array<{ nodeId: string; nodeName: string; round: number }>>;
 };
 
 const props = withDefaults(
@@ -271,7 +271,7 @@ const handleAction = async (key: string, data: any) => {
       showCommentDialog.value = true;
       break;
     case "return":
-      returnTargets.value = await workflowServiceEx.getReturnTargets(props.todo.dataId, props.todo.wfInstanceId);
+      returnTargets.value = await workflowServiceEx.getReturnNodes(props.todo.dataId, props.todo.wfInstanceId);
       selectedTargetNodeId.value = returnTargets.value[0]?.nodeId || "";
       pendingActionKey.value = "return";
       comment.value = "";
