@@ -1,0 +1,177 @@
+<template>
+  <AdvanceLayout title="数据协作" desc="设置数据标题，编辑方式等">
+    <template #headeractions>
+      <span class="help-link">帮助文档</span>
+    </template>
+    <div class="data-advanced">
+      <div class="config-section">
+        <div class="section-title">数据标题</div>
+        <el-radio-group v-model="mode" class="mode-group">
+          <el-radio value="default">默认标题</el-radio>
+          <el-radio value="custom">自定义标题</el-radio>
+        </el-radio-group>
+
+        <div v-if="mode === 'default'" class="default-tip">
+          默认使用第一个字段作为数据标题
+          <span v-if="defaultFieldLabel">，当前为 {{ defaultFieldLabel }}</span>
+        </div>
+
+        <div v-else class="editor-panel">
+          <FieldBlockCodeEditor
+            v-model="content"
+            :formDef="formDef"
+            :showSubFields="false"
+            :maxBlocks="5"
+            placeholder="输入文字或添加字段，至少需要添加一个字段"
+            @limit="onLimit"
+          />
+        </div>
+
+        <el-button type="primary" class="save-button" @click="save">保存</el-button>
+      </div>
+    </div>
+  </AdvanceLayout>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch } from "vue";
+import AdvanceLayout from "./AdvanceLayout.vue";
+import {
+  FieldBlockCodeEditor,
+  buildFieldBlockFields,
+  getFieldBlockTokens,
+} from "@eimsnext/components";
+import { DataTitleSettings, FormDef, FormSettings } from "@eimsnext/models";
+import { formDefService } from "@eimsnext/services";
+import { useFormStore, useContextStore } from "@eimsnext/store";
+
+defineOptions({
+  name: "DataAdvanced",
+});
+
+const props = defineProps<{
+  formDef: FormDef;
+}>();
+
+const formStore = useFormStore();
+const contextStore = useContextStore();
+
+const mode = ref<"default" | "custom">("default");
+const content = ref("");
+
+const businessFields = computed(() =>
+  buildFieldBlockFields(props.formDef, {
+    showSubFields: false,
+    showSystemFields: false,
+  }),
+);
+
+const defaultFieldLabel = computed(() => businessFields.value[0]?.label || "");
+
+watch(
+  () => props.formDef.formSettings?.advanced?.dataTitle,
+  (dataTitle) => {
+    mode.value = dataTitle?.mode === "custom" ? "custom" : "default";
+    content.value = dataTitle?.content || "";
+  },
+  { immediate: true, deep: true },
+);
+
+function ensureFormSettings() {
+  const formSettings: FormSettings = props.formDef.formSettings
+    ? JSON.parse(JSON.stringify(props.formDef.formSettings))
+    : {};
+
+  formSettings.advanced ??= {};
+  return formSettings;
+}
+
+function validateCustomTitle() {
+  const tokens = getFieldBlockTokens(content.value);
+  if (tokens.length === 0) {
+    ElMessage.error("至少需要添加一个字段");
+    return false;
+  }
+
+  if (tokens.length > 5) {
+    ElMessage.error("最多添加5个字段");
+    return false;
+  }
+
+  return true;
+}
+
+function onLimit() {
+  ElMessage.warning("最多添加5个字段");
+}
+
+async function save() {
+  if (mode.value === "custom" && !validateCustomTitle()) {
+    return;
+  }
+
+  const formSettings = ensureFormSettings();
+  const dataTitle: DataTitleSettings = {
+    mode: mode.value,
+    content: mode.value === "custom" ? content.value : "",
+  };
+  formSettings.advanced!.dataTitle = dataTitle;
+
+  const request = {
+    id: props.formDef.id,
+    appId: props.formDef.appId,
+    name: props.formDef.name,
+    content: props.formDef.content,
+    isLedger: props.formDef.isLedger,
+    usingWorkflow: props.formDef.usingWorkflow,
+    formSettings,
+  };
+
+  try {
+    const resp = await formDefService.patch<FormDef>(props.formDef.id, request);
+    props.formDef.formSettings = resp.formSettings;
+    formStore.update(resp);
+    contextStore.setAppChanged();
+    ElMessage.success("保存成功");
+  } catch {
+    ElMessage.error("保存失败");
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.help-link {
+  color: var(--et-color-primary);
+  cursor: default;
+  font-size: var(--et-font-size-12);
+}
+
+.data-advanced {
+  max-width: 720px;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-space-16);
+}
+
+.section-title {
+  color: var(--et-text-primary);
+  font-size: var(--et-font-size-16);
+  font-weight: 500;
+}
+
+.mode-group {
+  display: flex;
+  gap: var(--et-space-20);
+}
+
+.default-tip {
+  color: var(--et-text-secondary);
+}
+
+.save-button {
+  width: fit-content;
+}
+</style>

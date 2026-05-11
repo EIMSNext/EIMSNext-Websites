@@ -5,6 +5,7 @@ import {
   FormDef,
   FormData,
   SystemField,
+  getDataTitle,
   getCreateBy,
   getCreateTime,
   getFlowStatus,
@@ -92,6 +93,9 @@ export const buildDataSelectFields = (form?: FormDef, includeSystemFields: boole
     const flowField = getFlowStatus("流程状态");
     result.unshift({ field: flowField.field, label: flowField.title, type: flowField.type });
   }
+
+  const dataTitleField = getDataTitle("数据标题");
+  result.unshift({ field: dataTitleField.field, label: dataTitleField.title, type: dataTitleField.type });
 
   const createByField = getCreateBy("提交人");
   const createTimeField = getCreateTime("提交时间");
@@ -320,6 +324,7 @@ export const findDataSelectField = (fields: IDataSelectField[], fieldName: strin
 
 export const isSystemDataSelectField = (field: string) => {
   return [
+    SystemField.DataTitle,
     SystemField.FlowStatus,
     SystemField.CreateBy,
     SystemField.CreateTime,

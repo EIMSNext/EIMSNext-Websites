@@ -30,6 +30,8 @@ import { ShareLinkBar } from "./ShareLinkBar";
 import { DataSelectTablePanel } from "./DataSelectTablePanel";
 import { DataSelectFieldPicker } from "./DataSelectFieldPicker";
 import { DataSelectFilter } from "./DataSelectFilter";
+import { FieldBlockPicker } from "./FieldBlockPicker";
+import { FieldBlockCodeEditor } from "./FieldBlockCodeEditor";
 
 export {
   applyTheme,
@@ -38,6 +40,9 @@ export {
 } from "./theme/runtime";
 export * from "./FlowDesigner";
 export * from "./dialog";
+export * from "./FieldBlockPicker";
+export * from "./FieldBlockCodeEditor";
+export * from "./FieldBlock/shared";
 
 export default [
   SvgIcon,
@@ -80,4 +85,6 @@ export default [
   DataSelectTablePanel,
   DataSelectFieldPicker,
   DataSelectFilter,
+  FieldBlockPicker,
+  FieldBlockCodeEditor,
 ];
