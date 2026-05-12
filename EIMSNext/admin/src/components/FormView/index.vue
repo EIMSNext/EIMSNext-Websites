@@ -1,73 +1,40 @@
 <template>
   <div class="form-wrapper">
     <div class="data-container">
-      <formCreate
-        ref="fcInst"
-        :modelValue="dataRef"
-        :rule="rules"
-        :option="options"
-        :preview="isView"
-      />
+      <formCreate ref="fcInst" :modelValue="dataRef" :rule="rules" :option="options" :preview="isView" />
     </div>
     <div v-if="actions" class="form-actions">
-      <el-button
-        v-if="actions.submit && (!actions.submit.visible || actions.submit.visible)"
-        type="primary"
-        :disabled="actions.submit.disabled"
-        @click="handleSubmit"
-      >
+      <el-button v-if="actions.submit && (!actions.submit.visible || actions.submit.visible)" type="primary"
+        :disabled="actions.submit.disabled" @click="handleSubmit">
         {{ t(actions.submit.text) }}
       </el-button>
-      <el-button
-        v-if="actions.draft && (!actions.draft.visible || actions.draft.visible)"
-        :disabled="actions.draft.disabled"
-        @click="handleDraft"
-      >
+      <el-button v-if="actions.draft && (!actions.draft.visible || actions.draft.visible)"
+        :disabled="actions.draft.disabled" @click="handleDraft">
         {{ t(actions.draft.text) }}
       </el-button>
-      <el-button
-        v-if="actions.reset && (!actions.reset.visible || actions.reset.visible)"
-        :disabled="actions.reset.disabled"
-        @click="handleReset"
-      >
+      <el-button v-if="actions.reset && (!actions.reset.visible || actions.reset.visible)"
+        :disabled="actions.reset.disabled" @click="handleReset">
         {{ t(actions.reset.text) }}
       </el-button>
-      <el-button
-        v-if="actions.approve && (!actions.approve.visible || actions.approve.visible)"
-        type="primary"
-        :disabled="actions.approve.disabled"
-        @click="handleApprove"
-      >
+      <el-button v-if="actions.approve && (!actions.approve.visible || actions.approve.visible)" type="primary"
+        :disabled="actions.approve.disabled" @click="handleApprove">
         {{ t(actions.approve.text) }}
       </el-button>
-      <el-button
-        v-if="actions.reject && (!actions.reject.visible || actions.reject.visible)"
-        :disabled="actions.reject.disabled"
-        @click="handleReject"
-      >
+      <el-button v-if="actions.reject && (!actions.reject.visible || actions.reject.visible)"
+        :disabled="actions.reject.disabled" @click="handleReject">
         {{ t(actions.reject.text) }}
       </el-button>
-      <el-button
-        v-if="actions.withdraw && (!actions.withdraw.visible || actions.withdraw.visible)"
-        :disabled="actions.withdraw.disabled"
-        @click="handleWithdraw"
-      >
+      <el-button v-if="actions.withdraw && (!actions.withdraw.visible || actions.withdraw.visible)"
+        :disabled="actions.withdraw.disabled" @click="handleWithdraw">
         {{ t(actions.withdraw.text) }}
       </el-button>
-      <el-button
-        v-if="actions.urge && (!actions.urge.visible || actions.urge.visible)"
-        :disabled="actions.urge.disabled"
-        @click="handleUrge"
-      >
+      <el-button v-if="actions.urge && (!actions.urge.visible || actions.urge.visible)"
+        :disabled="actions.urge.disabled" @click="handleUrge">
         {{ t(actions.urge.text) }}
       </el-button>
-      <el-button
-        v-for="action in visibleCustomActions"
-        :key="action.key"
-        :type="action.type === 'default' ? undefined : action.type"
-        :disabled="action.disabled"
-        @click="handleCustomAction(action)"
-      >
+      <el-button v-for="action in visibleCustomActions" :key="action.key"
+        :type="action.type === 'default' ? undefined : action.type" :disabled="action.disabled"
+        @click="handleCustomAction(action)">
         {{ t(action.text) }}
       </el-button>
     </div>
@@ -239,7 +206,7 @@ const handleCustomAction = (action: FormCustomAction) => {
 
   :deep(.form-create.is-preview ._fc-table-form-v2 ._fc-read-view) {
     min-height: 28px;
-    padding: 0 8px;
+    padding: 0;
   }
 
   :deep(._fc-table-form-v2 .el-table th.el-table__cell) {

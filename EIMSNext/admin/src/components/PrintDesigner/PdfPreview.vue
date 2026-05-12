@@ -1,30 +1,28 @@
 <template>
   <el-drawer :model-value="modelValue" :size="drawerSize" direction="btt" destroy-on-close :show-close="false"
-    :with-header="false" class="pdf-preview-drawer"
-    @update:model-value="emit('update:modelValue', $event)">
+    :with-header="false" class="pdf-preview-drawer" @update:model-value="emit('update:modelValue', $event)">
     <div class="pdf-preview-header">
       <div class="pdf-preview-title">{{ title }}</div>
-      <div class="pdf-preview-tools">
-        <el-button text class="pdf-preview-tool-btn pdf-preview-tool-action" @click="handleDownload" :disabled="!pdfUrl">
-          <el-icon class="pdf-preview-tool-icon"><Download /></el-icon>
-          <span>下载</span>
-        </el-button>
-        <button type="button" class="pdf-preview-close" aria-label="关闭预览" @click="handleClose">
-          <el-icon><Close /></el-icon>
-        </button>
-      </div>
+      <el-button text class="pdf-preview-tool-btn" @click="handleDownload" :disabled="!pdfUrl">
+        <et-icon icon="el-download" size="18px" />
+        <span style="margin-left: 4px;">下载</span>
+      </el-button>
+      <el-button text class="pdf-preview-close" aria-label="关闭预览" @click="handleClose">
+        <et-icon icon="el-close" size="24px" />
+      </el-button>
     </div>
     <div class="pdf-preview-body">
-      <iframe v-if="pdfUrl" :src="pdfUrl" class="pdf-preview-iframe" />
-      <div v-else class="pdf-preview-empty">
-        <div class="pdf-preview-empty-text">{{ emptyText }}</div>
+      <div class="preview-center">
+        <iframe v-if="pdfUrl" :src="pdfUrl" class="pdf-preview-iframe" />
+        <div v-else class="pdf-preview-empty">
+          <div class="pdf-preview-empty-text">{{ emptyText }}</div>
+        </div>
       </div>
     </div>
   </el-drawer>
 </template>
 
 <script lang="ts" setup>
-import { Close, Download } from "@element-plus/icons-vue";
 
 defineOptions({
   name: "PdfPreview",
@@ -77,88 +75,85 @@ const handleDownload = async () => {
 
 <style lang="scss" scoped>
 .pdf-preview-header {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--et-space-12);
-  min-height: 56px;
-  padding: 0 20px 0 16px;
-  background: #2b2b2b;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-sizing: border-box;
+  background: rgba(0, 0, 0, .6);
+  color: #fff;
+  height: 50px;
+  line-height: 50px;
+  position: relative;
 }
 
 .pdf-preview-title {
-  flex: 1;
-  min-width: 0;
-  font-weight: 600;
-  font-size: 14px;
-  color: #f5f7fa;
+  bottom: 0;
+  display: inline-block;
+  left: 30px;
   overflow: hidden;
+  position: absolute;
+  right: 200px;
   text-overflow: ellipsis;
+  top: 0;
   white-space: nowrap;
 }
 
-.pdf-preview-tools {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
 .pdf-preview-tool-btn {
-  min-width: auto;
-  height: 32px;
-  padding: 0 10px;
-  border: none;
-  color: #f5f7fa;
-  background: transparent;
-}
-
-.pdf-preview-tool-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.pdf-preview-tool-icon {
+  color: inherit;
+  display: block;
   font-size: 15px;
+  height: 50px;
+  outline: none;
+  padding: 0 10px;
+  position: absolute;
+  right: 60px;
+  text-decoration: none;
+  top: 0;
+  transition: all .2s ease;
+
+  &:hover {
+    background-color: #000 !important;
+  }
 }
 
 .pdf-preview-close {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 4px;
-  color: #f5f7fa;
-  background: transparent;
   cursor: pointer;
+  font-size: 20px;
+  height: 50px;
+  position: absolute;
+  right: 10px;
+  text-align: center;
+  top: 0;
+  transition: all .2s ease;
+  width: 50px;
+  color: #fff;
+
+  &:hover {
+    background-color: #000 !important;
+  }
 }
 
-.pdf-preview-close:hover,
-.pdf-preview-tool-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
 
 .pdf-preview-body {
-  height: calc(100% - 56px);
+  bottom: 0;
+  left: 0;
   overflow: hidden;
-  background: #232427;
-  box-sizing: border-box;
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background: #2f3136;
+
+  .preview-center {
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    max-height: 100%;
+    max-width: 80%;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
 }
 
 .pdf-preview-iframe {
   width: 100%;
   height: 100%;
-  margin: 0 auto;
-  border: none;
-  border-radius: 8px;
-  background: #2f3136;
 }
 
 .pdf-preview-empty {
