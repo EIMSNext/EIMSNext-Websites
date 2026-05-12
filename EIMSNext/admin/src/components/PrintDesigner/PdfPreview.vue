@@ -1,17 +1,19 @@
 <template>
-  <el-drawer :model-value="modelValue" :size="drawerSize" direction="btt" destroy-on-close class="pdf-preview-drawer"
+  <el-drawer :model-value="modelValue" :size="drawerSize" direction="btt" destroy-on-close :show-close="false"
+    :with-header="false" class="pdf-preview-drawer"
     @update:model-value="emit('update:modelValue', $event)">
-    <template #header>
-      <div class="pdf-preview-header">
-        <div class="pdf-preview-title">{{ title }}</div>
-        <div class="pdf-preview-tools">
-          <el-button text bg class="pdf-preview-tool-btn pdf-preview-tool-action" @click="handleDownload"
-            :disabled="!pdfUrl">
-            下载
-          </el-button>
-        </div>
+    <div class="pdf-preview-header">
+      <div class="pdf-preview-title">{{ title }}</div>
+      <div class="pdf-preview-tools">
+        <el-button text class="pdf-preview-tool-btn pdf-preview-tool-action" @click="handleDownload" :disabled="!pdfUrl">
+          <el-icon class="pdf-preview-tool-icon"><Download /></el-icon>
+          <span>下载</span>
+        </el-button>
+        <button type="button" class="pdf-preview-close" aria-label="关闭预览" @click="handleClose">
+          <el-icon><Close /></el-icon>
+        </button>
       </div>
-    </template>
+    </div>
     <div class="pdf-preview-body">
       <iframe v-if="pdfUrl" :src="pdfUrl" class="pdf-preview-iframe" />
       <div v-else class="pdf-preview-empty">
@@ -22,6 +24,8 @@
 </template>
 
 <script lang="ts" setup>
+import { Close, Download } from "@element-plus/icons-vue";
+
 defineOptions({
   name: "PdfPreview",
 });
@@ -45,6 +49,10 @@ const emit = defineEmits<{
 
 const drawerSize = "100%";
 const emptyText = "暂无预览内容";
+
+const handleClose = () => {
+  emit("update:modelValue", false);
+};
 
 const handleDownload = async () => {
   if (!props.pdfUrl) return;
@@ -74,10 +82,18 @@ const handleDownload = async () => {
   align-items: center;
   justify-content: space-between;
   gap: var(--et-space-12);
+  min-height: 56px;
+  padding: 0 20px 0 16px;
+  background: #2b2b2b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
 }
 
 .pdf-preview-title {
+  flex: 1;
+  min-width: 0;
   font-weight: 600;
+  font-size: 14px;
   color: #f5f7fa;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -87,22 +103,50 @@ const handleDownload = async () => {
 .pdf-preview-tools {
   display: flex;
   align-items: center;
-  gap: var(--et-space-8);
+  gap: 4px;
   flex-shrink: 0;
 }
 
 .pdf-preview-tool-btn {
-  min-width: 64px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.08);
+  min-width: auto;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  color: #f5f7fa;
+  background: transparent;
 }
 
 .pdf-preview-tool-action {
-  min-width: 64px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pdf-preview-tool-icon {
+  font-size: 15px;
+}
+
+.pdf-preview-close {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  color: #f5f7fa;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pdf-preview-close:hover,
+.pdf-preview-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .pdf-preview-body {
-  height: 100%;
+  height: calc(100% - 56px);
   overflow: hidden;
   background: #232427;
   box-sizing: border-box;
@@ -138,13 +182,6 @@ const handleDownload = async () => {
 .pdf-preview-drawer {
   .el-drawer {
     background: #232427;
-  }
-
-  .el-drawer__header {
-    margin-bottom: 0;
-    padding: 16px 24px;
-    background: #2b2d31;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .el-drawer__body {
