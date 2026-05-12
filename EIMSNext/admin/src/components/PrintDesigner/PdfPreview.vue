@@ -1,22 +1,12 @@
 <template>
-  <el-drawer
-    :model-value="modelValue"
-    :size="drawerSize"
-    destroy-on-close
-    class="pdf-preview-drawer"
-    @update:model-value="emit('update:modelValue', $event)"
-  >
+  <el-drawer :model-value="modelValue" :size="drawerSize" direction="btt" destroy-on-close class="pdf-preview-drawer"
+    @update:model-value="emit('update:modelValue', $event)">
     <template #header>
       <div class="pdf-preview-header">
         <div class="pdf-preview-title">{{ title }}</div>
         <div class="pdf-preview-tools">
-          <el-button
-            text
-            bg
-            class="pdf-preview-tool-btn pdf-preview-tool-action"
-            @click="handleDownload"
-            :disabled="!pdfUrl"
-          >
+          <el-button text bg class="pdf-preview-tool-btn pdf-preview-tool-action" @click="handleDownload"
+            :disabled="!pdfUrl">
             下载
           </el-button>
         </div>
@@ -53,7 +43,7 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
 }>();
 
-const drawerSize = "92%";
+const drawerSize = "100%";
 const emptyText = "暂无预览内容";
 
 const handleDownload = async () => {
@@ -105,7 +95,6 @@ const handleDownload = async () => {
   min-width: 64px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.08);
-  color: #f5f7fa;
 }
 
 .pdf-preview-tool-action {
@@ -115,18 +104,17 @@ const handleDownload = async () => {
 .pdf-preview-body {
   height: 100%;
   overflow: hidden;
-  padding: 24px;
   background: #232427;
+  box-sizing: border-box;
 }
 
 .pdf-preview-iframe {
-  width: 80%;
+  width: 100%;
   height: 100%;
   margin: 0 auto;
   border: none;
   border-radius: 8px;
   background: #2f3136;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.32);
 }
 
 .pdf-preview-empty {

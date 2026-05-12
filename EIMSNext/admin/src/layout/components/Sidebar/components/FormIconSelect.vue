@@ -1,32 +1,19 @@
 <template>
   <div class="icon-select" style="width: 315px">
     <div class="color-bar" aria-label="颜色">
-      <span
-        v-for="c in colorOptions"
-        :key="c.value"
-        class="color-chip"
-        :aria-pressed="selectedColor === c.value"
-        :style="{ backgroundColor: c.value }"
-        @click="selectColor(c.value)"
-      />
+      <span v-for="c in colorOptions" :key="c.value" class="color-chip" :aria-pressed="selectedColor === c.value"
+        :style="{ backgroundColor: c.value }" @click="selectColor(c.value)" />
     </div>
     <el-scrollbar height="300px">
       <div class="icon-grid">
-        <div
-          v-for="icon in sampleIcons"
-          :key="'svg-' + icon"
-          class="icon-tile"
-          @click="selectIcon(icon)"
-        >
-          <span
-            style="
+        <div v-for="icon in sampleIcons" :key="'svg-' + icon" class="icon-tile" @click="selectIcon(icon)">
+          <span style="
               width: 100%;
               height: 100%;
               display: flex;
               align-items: center;
               justify-content: center;
-            "
-          >
+            ">
             <et-icon :icon="icon" :color="iconColor" size="28px" />
           </span>
         </div>
@@ -56,7 +43,7 @@ function loadIcons() {
 
   //load svg
   let svgIcons: string[] = [];
-  const icons = import.meta.glob("../../../../assets/icons/*.svg");
+  const icons = import.meta.glob("../../../../assets/icons/form/*.svg");
   for (const path in icons) {
     const iconName = path.replace(/.*\/(.*)\.svg$/, "$1");
     if (iconName) svgIcons.push(iconName);
