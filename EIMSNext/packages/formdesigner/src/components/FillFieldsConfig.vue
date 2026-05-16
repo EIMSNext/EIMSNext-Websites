@@ -45,7 +45,28 @@
       <div v-else class="fill-step-two">
         <div class="mapping-desc">选择数据后，将按以下规则将所选字段的值填充到当前表单字段。</div>
         <div class="mapping-add-row">
-          <el-button text type="primary" @click="appendEmptyMapping">+ 选择字段</el-button>
+          <el-popover
+            v-model:visible="sourceFieldPickerVisible"
+            trigger="click"
+            placement="bottom-start"
+            :width="200"
+            popper-class="_fd-fill-fields-source-picker"
+          >
+            <template #reference>
+              <el-button text type="primary">+ 选择字段</el-button>
+            </template>
+            <DataSelectFieldPicker
+              v-model="pendingSourceField"
+              :fields="availableSourceFields"
+              :multiple="false"
+              :show-trigger="false"
+              :default-expanded="true"
+              :show-select-all="false"
+              :show-indicator="false"
+              search-placeholder="搜索字段"
+              @change="handleSourceFieldPick"
+            />
+          </el-popover>
         </div>
 
         <div class="mapping-list">
@@ -58,7 +79,7 @@
               <FieldSelect
                 :model-value="toFieldSelectValue(mapping.targetField)"
                 :form-id="designerFormId"
-                :fields="currentFormFields"
+                :fields="getCompatibleFields(mapping.sourceField)"
                 @update:model-value="(field) => handleFieldSelect(index, field)"
               />
             </div>
@@ -108,9 +129,11 @@ export default defineComponent({
       visible: false,
       step: 1,
       actionType: 'existing',
+      sourceFieldPickerVisible: false,
       sourceFields: [],
       currentFormFields: [],
       selectedSourceFields: [],
+      pendingSourceField: [],
       editableMappings: [],
       config: normalizeFillConfig(this.modelValue),
     };
@@ -127,6 +150,10 @@ export default defineComponent({
     },
     canReturnStepOne() {
       return this.config.mappings.length === 0;
+    },
+    availableSourceFields() {
+      const used = new Set(this.editableMappings.map((item) => item.sourceField?.field).filter(Boolean));
+      return this.sourceFields.filter((field) => !used.has(field.field));
     },
   },
   watch: {
@@ -145,17 +172,28 @@ export default defineComponent({
       this.selectedSourceFields = this.config.mappings.map((item) => item.sourceField);
       this.editableMappings = normalizeFillConfig(this.config).mappings;
       this.actionType = 'existing';
+      this.pendingSourceField = [];
+      this.sourceFieldPickerVisible = false;
       this.step = this.config.mappings.length > 0 ? 2 : 1;
       this.visible = true;
     },
     isCompatible(sourceField, targetField) {
       return isFieldTypeCompatible(sourceField, targetField);
     },
-    appendEmptyMapping() {
-      if (!this.sourceFields.length) return;
-      const sourceField = this.sourceFields.find((field) => !this.editableMappings.find((item) => item.sourceField.field === field.field)) || this.sourceFields[0];
+    appendMapping(sourceField) {
+      if (!sourceField) return;
       const targetField = this.currentFormFields.find((field) => this.isCompatible(sourceField, field)) || { field: '', label: '', type: 'none' };
       this.editableMappings.push({ sourceField, targetField });
+    },
+    handleSourceFieldPick(fields) {
+      const sourceField = Array.isArray(fields) ? fields[0] : null;
+      if (!sourceField) return;
+      this.appendMapping(sourceField);
+      this.pendingSourceField = [];
+      this.sourceFieldPickerVisible = false;
+    },
+    getCompatibleFields(sourceField) {
+      return this.currentFormFields.filter((field) => this.isCompatible(sourceField, field));
     },
     updateMappingTarget(index, fieldName) {
       const field = this.currentFormFields.find((item) => item.field === fieldName);
@@ -188,6 +226,8 @@ export default defineComponent({
     handleCancel() {
       this.visible = false;
       this.step = 1;
+      this.pendingSourceField = [];
+      this.sourceFieldPickerVisible = false;
     },
     async handleConfirm() {
       if (this.step === 1) {
@@ -253,6 +293,8 @@ export default defineComponent({
       this.$emit('change', nextValue);
       this.visible = false;
       this.step = 1;
+      this.pendingSourceField = [];
+      this.sourceFieldPickerVisible = false;
     },
   },
 });
@@ -399,5 +441,9 @@ export default defineComponent({
     justify-content: flex-end;
     gap: 12px;
   }
+}
+
+._fd-fill-fields-source-picker {
+  padding: 0 !important;
 }
 </style>
