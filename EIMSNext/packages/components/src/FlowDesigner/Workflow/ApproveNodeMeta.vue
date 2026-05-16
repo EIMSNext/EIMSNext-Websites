@@ -1,48 +1,30 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader
-      :label="t('workflow.approver')"
-      :required="true"
-      :tips="t('workflow.maxApproverTips')"
-    />
-    <el-select
-      v-model="activeData.metadata.approveMeta!.approveMode"
-      class="sub-item approve-mode-select"
-    >
+    <MetaItemHeader :label="t('workflow.approver')" :required="true" :tips="t('workflow.maxApproverTips')" />
+    <el-select v-model="activeData.metadata.approveMeta!.approveMode" class="sub-item approve-mode-select">
       <el-option :label="t('workflow.orSign')" :value="1" />
       <el-option :label="t('workflow.counterSign')" :value="2" />
     </el-select>
-    <selected-tags
-      v-model="selectedCandidateTags"
-      :editable="true"
-      :empty-text="t('comp.emptyMember')"
-      @editTag="editApprover"
-    />
-    <member-select-dialog
-      v-model="showApproverDialog"
-      :tags="selectedCandidateTags"
-      :member-options="memberOptions"
-      destroy-on-close
-      @ok="finishApproverSelect"
-    />
+    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
+      @editTag="editApprover" />
+    <member-select-dialog v-model="showApproverDialog" :tags="selectedCandidateTags" :member-options="memberOptions"
+      destroy-on-close @ok="finishApproverSelect" />
 
     <el-tabs v-model="activeConfigTab" class="node-config-tabs">
-      <el-tab-pane :label="t('workflow.fieldPerms')" name="fieldPerms" />
+      <!-- <el-tab-pane :label="t('workflow.fieldPerms')" name="fieldPerms" /> -->
       <el-tab-pane :label="t('workflow.nodeActions')" name="nodeActions">
         <div class="node-actions-panel">
-          <div v-for="action in nodeActions" :key="action.actionType" class="node-action-item">
-            <div class="node-action-main">
-              <span class="node-action-label">{{ getDefaultActionLabel(action.actionType) }}</span>
-              <div class="node-action-tools">
-                <el-button
-                  v-if="supportsCandidates(action.actionType)"
-                  link
-                  type="primary"
-                  @click="openActionDialog(action.actionType)"
-                >
-                  {{ t('common.edit') }}
-                </el-button>
-                <el-switch v-model="action.enabled" />
+          <div>
+            <div v-for="action in nodeActions" :key="action.actionType" class="node-action-item">
+              <div class="node-action-main">
+                <span class="node-action-label">{{ getDefaultActionLabel(action.actionType) }}</span>
+                <div class="node-action-tools">
+                  <el-button v-if="supportsCandidates(action.actionType)" link type="primary"
+                    @click="openActionDialog(action.actionType)">
+                    {{ t('common.edit') }}
+                  </el-button>
+                  <el-switch v-model="action.enabled" size="small" />
+                </div>
               </div>
             </div>
           </div>
@@ -51,39 +33,20 @@
       <el-tab-pane :label="t('workflow.transitionRules')" name="transitionRules" />
     </el-tabs>
 
-    <et-dialog
-      v-model="showActionDialog"
-      :title="dialogTitle"
-      width="500px"
-      destroy-on-close
-      @ok="confirmActionDialog"
-      @cancel="cancelActionDialog"
-    >
+    <et-dialog v-model="showActionDialog" :title="dialogTitle" width="500px" destroy-on-close @ok="confirmActionDialog"
+      @cancel="cancelActionDialog">
       <div class="action-dialog-body">
         <MetaItemHeader :label="t('workflow.buttonText')" :required="true" />
         <el-input v-model="dialogAction.text" />
 
-        <MetaItemHeader
-          class="candidate-header"
-          :label="dialogCandidateLabel"
-          :required="true"
-        />
-        <selected-tags
-          v-model="dialogCandidateTags"
-          :editable="true"
-          :empty-text="t('comp.emptyMember')"
-          @editTag="showActionMemberDialog = true"
-        />
+        <MetaItemHeader class="candidate-header" :label="dialogCandidateLabel" :required="true" />
+        <selected-tags v-model="dialogCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
+          @editTag="showActionMemberDialog = true" />
       </div>
     </et-dialog>
 
-    <member-select-dialog
-      v-model="showActionMemberDialog"
-      :tags="dialogCandidateTags"
-      :member-options="memberOptions"
-      destroy-on-close
-      @ok="finishActionMemberSelect"
-    />
+    <member-select-dialog v-model="showActionMemberDialog" :tags="dialogCandidateTags" :member-options="memberOptions"
+      destroy-on-close @ok="finishActionMemberSelect" />
   </template>
 </template>
 
@@ -94,7 +57,6 @@ import {
   FlowNodeType,
   IFlowContext,
   IFlowNodeData,
-  IApprovalCandidate,
   NodeActionType,
   INodeActionConfig,
   createFlowNode,
@@ -278,22 +240,23 @@ init();
 
 .node-actions-panel {
   display: flex;
+  border: solid 1px var(--et-border-color);
+  border-radius: var(--et-space-10);
   flex-direction: column;
-  gap: var(--et-space-12);
-  padding-top: var(--et-space-8);
+  padding: var(--et-space-8) var(--et-space-16);
+  margin-top: var(--et-space-12);
 }
 
-.node-action-item {
-  border: 1px solid var(--et-border-color);
-  border-radius: var(--et-border-radius-base);
-  padding: var(--et-space-12);
+.node-action-item:not(:last-child) {
+  border-bottom: 1px solid var(--et-border-color);
 }
+
 
 .node-action-main {
   align-items: center;
   display: flex;
   justify-content: space-between;
-  gap: var(--et-space-12);
+  height: 36px;
 }
 
 .node-action-label {

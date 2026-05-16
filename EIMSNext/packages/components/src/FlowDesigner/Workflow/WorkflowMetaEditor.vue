@@ -47,13 +47,12 @@
                 :placeholder="t('workflow.flowDescriptionPlaceholder')"
                 type="textarea"
                 :rows="4"
-                :readonly="flowContext.structureReadonly"
               />
             </div>
 
             <div class="attr-item has-padding">
               <MetaItemHeader :label="t('workflow.allowStarterUrge')"></MetaItemHeader>
-              <el-switch v-model="workflowMeta.allowUrge" :disabled="flowContext.structureReadonly" />
+              <el-switch v-model="workflowMeta.allowUrge" />
             </div>
 
             <div class="attr-item has-padding">
@@ -61,14 +60,12 @@
               <div class="flow-check-list">
                 <el-checkbox
                   :model-value="hasNotifyChannel(NotifyChannel.Email)"
-                  :disabled="flowContext.structureReadonly"
                   @change="toggleNotifyChannel(NotifyChannel.Email, $event)"
                 >
                   {{ t("workflow.emailReminder") }}
                 </el-checkbox>
                 <el-checkbox
                   :model-value="hasNotifyChannel(NotifyChannel.System)"
-                  :disabled="flowContext.structureReadonly"
                   @change="toggleNotifyChannel(NotifyChannel.System, $event)"
                 >
                   {{ t("workflow.systemReminder") }}
@@ -78,7 +75,7 @@
 
             <div class="attr-item has-padding">
               <MetaItemHeader :label="t('workflow.autoProcess')"></MetaItemHeader>
-              <el-select v-model="workflowMeta.autoProcessRule" :disabled="flowContext.structureReadonly" class="full-width-input">
+              <el-select v-model="workflowMeta.autoProcessRule" class="full-width-input">
                 <el-option :label="t('workflow.autoProcessDisabled')" :value="WorkflowAutoProcessRule.Disabled" />
                 <el-option :label="t('workflow.autoProcessFirstNode')" :value="WorkflowAutoProcessRule.FirstNodeOnly" />
                 <el-option :label="t('workflow.autoProcessContinuous')" :value="WorkflowAutoProcessRule.ContinuousApproval" />
@@ -87,7 +84,7 @@
 
             <div class="attr-item has-padding">
               <MetaItemHeader :label="t('workflow.withdrawRule')"></MetaItemHeader>
-              <el-select v-model="workflowMeta.withdrawRule" :disabled="flowContext.structureReadonly" class="full-width-input">
+              <el-select v-model="workflowMeta.withdrawRule" class="full-width-input">
                 <el-option :label="t('workflow.withdrawDisabled')" :value="WorkflowWithdrawRule.Disabled" />
                 <el-option :label="t('workflow.withdrawStarterOnly')" :value="WorkflowWithdrawRule.StarterOnly" />
                 <el-option :label="t('workflow.withdrawAllNodes')" :value="WorkflowWithdrawRule.AllNodes" />

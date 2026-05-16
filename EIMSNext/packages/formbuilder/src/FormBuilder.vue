@@ -357,13 +357,14 @@ export default {
       this.$refs.designer.setFormId(this.formDef.id);
 
       if (this.formDef.content.layout) {
-        this.oldLayout = JSON.stringify(this.formDef.content.layout);
         this.$refs.designer.setRule(this.formDef.content.layout);
       }
       if (this.formDef.content.options) {
-        this.oldOptions = JSON.stringify(this.formDef.content.options);
         this.$refs.designer.setOptions(this.formDef.content.options);
       }
+
+      this.oldLayout = JSON.stringify(this.$refs.designer.getJson());
+      this.oldOptions = JSON.stringify(this.$refs.designer.getOptionsJson());
     }
   },
 };

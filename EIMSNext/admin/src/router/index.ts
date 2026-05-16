@@ -207,7 +207,7 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/system/:formId",
     component: SysLayout,
-    redirect: "/system/$route.params.formId",
+    redirect: (to) => ({ path: `/system/${to.params.formId}` }),
     children: [
       {
         path: "401",
@@ -224,7 +224,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/app/:appId/dash/:dashId",
     component: AppLayout,
-    redirect: "/app/$route.params.appId/dash/$route.params.dashId",
     children: [
       {
         path: "/app/:appId/dash/:dashId",
@@ -263,7 +262,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/app/:appId/form/:formId",
     component: AppLayout,
-    redirect: "/app/$route.params.appId/form/$route.params.formId",
     children: [
       {
         path: "/app/:appId/form/:formId",
@@ -292,7 +290,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/app/:appId/mytasks",
     component: AppLayout,
-    redirect: "/app/$route.params.appId/mytasks",
     children: [
       {
         path: "/app/:appId/mytasks",
@@ -310,7 +307,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/app/:appId/mystarted",
     component: AppLayout,
-    redirect: "/app/$route.params.appId/mystarted",
     children: [
       {
         path: "/app/:appId/mystarted",
@@ -329,7 +325,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/app/:appId/myapproved",
     component: AppLayout,
-    redirect: "/app/$route.params.appId/myapproved",
     children: [
       {
         path: "/app/:appId/myapproved",
@@ -348,7 +343,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/app/:appId/cctome",
     component: AppLayout,
-    redirect: "/app/$route.params.appId/cctome",
     children: [
       {
         path: "/app/:appId/cctome",

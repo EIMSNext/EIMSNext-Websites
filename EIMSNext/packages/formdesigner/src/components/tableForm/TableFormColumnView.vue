@@ -60,11 +60,12 @@ export default defineComponent({
 }
 
 ._fd-tf-con {
-  display: flex;
+  display: flex;  
+  align-items: center;
   flex: 1;
   width: 100%;
   min-height: 48px;
-  padding: 8px 10px;
+  padding: 2px;
   box-sizing: border-box;
   user-select: none;
 }
