@@ -11,9 +11,8 @@
           <el-radio value="custom">自定义标题</el-radio>
         </el-radio-group>
 
-        <div v-if="mode === 'default'" class="default-tip">
-          默认使用第一个字段作为数据标题
-          <span v-if="defaultFieldLabel">，当前为 {{ defaultFieldLabel }}</span>
+        <div v-if="mode === 'default'" class="default-title-box">
+          {{ defaultFieldLabel || "-" }}
         </div>
 
         <div v-else class="editor-panel">
@@ -22,8 +21,8 @@
             :formDef="formDef"
             :showSubFields="false"
             :maxBlocks="5"
+            :maxRows="3"
             placeholder="输入文字或添加字段，至少需要添加一个字段"
-            @limit="onLimit"
           />
         </div>
 
@@ -101,10 +100,6 @@ function validateCustomTitle() {
   return true;
 }
 
-function onLimit() {
-  ElMessage.warning("最多添加5个字段");
-}
-
 async function save() {
   if (mode.value === "custom" && !validateCustomTitle()) {
     return;
@@ -167,8 +162,20 @@ async function save() {
   gap: var(--et-space-20);
 }
 
-.default-tip {
-  color: var(--et-text-secondary);
+.default-title-box {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  width: 100%;
+  padding: 0 10px;
+  border: 1px solid var(--et-border-color);
+  border-radius: var(--et-size-6);
+  background: var(--et-bg-container);
+  color: var(--et-text-primary);
+}
+
+.editor-panel {
+  width: 100%;
 }
 
 .save-button {

@@ -3,13 +3,19 @@
     v-model:visible="visible"
     trigger="click"
     placement="bottom-start"
-    :width="320"
+    :width="280"
     popper-class="field-block-picker-popper"
   >
     <template #reference>
-      <el-button class="field-picker-trigger" :disabled="disabled">
-        <el-icon><Plus /></el-icon>
-      </el-button>
+      <span class="field-picker-reference">
+        <el-tooltip :content="tooltipContent" placement="top">
+          <span class="field-picker-trigger-wrap">
+            <el-button class="field-picker-trigger" :disabled="disabled">
+              <el-icon class="field-picker-icon"><Plus /></el-icon>
+            </el-button>
+          </span>
+        </el-tooltip>
+      </span>
     </template>
     <div class="field-block-picker">
       <el-input v-model="keyword" placeholder="搜索" clearable>
@@ -35,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { Search, Plus } from "@element-plus/icons-vue";
 import { FormDef } from "@eimsnext/models";
 import {
@@ -55,12 +61,16 @@ const props = withDefaults(
     showSubFields?: boolean;
     showSystemFields?: boolean;
     disabled?: boolean;
+    limitReached?: boolean;
+    maxBlocks?: number;
   }>(),
   {
     fields: () => [],
     showSubFields: true,
     showSystemFields: true,
     disabled: false,
+    limitReached: false,
+    maxBlocks: 5,
   },
 );
 
@@ -70,6 +80,10 @@ const emit = defineEmits<{
 
 const visible = ref(false);
 const keyword = ref("");
+
+const tooltipContent = computed(() =>
+  props.limitReached ? `最多添加${props.maxBlocks}个字段` : "添加字段",
+);
 
 const fieldItems = computed(() =>
   props.fields.length > 0
@@ -94,19 +108,56 @@ const filteredFields = computed(() => {
 
 function selectField(field: FieldBlockField) {
   emit("select", field);
-  visible.value = false;
-  keyword.value = "";
 }
+
+watch(
+  () => props.limitReached,
+  (limitReached) => {
+    if (limitReached) {
+      visible.value = false;
+    }
+  },
+  { immediate: true },
+);
+
+watch(visible, (nextVisible) => {
+  if (!nextVisible) {
+    keyword.value = "";
+  }
+});
 </script>
 
 <style scoped lang="scss">
+.field-picker-reference,
+.field-picker-trigger-wrap {
+  display: inline-flex;
+}
+
 .field-picker-trigger {
-  width: var(--et-size-32);
-  min-width: var(--et-size-32);
-  height: var(--et-size-32);
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
   padding: 0;
-  border-color: var(--et-border-color);
+  border: none;
+  border-left: 1px solid var(--et-border-color-light);
+  border-radius: 0 var(--et-size-6) var(--et-size-6) 0;
   color: var(--et-color-primary);
+  background: var(--et-bg-container);
+  box-shadow: none;
+}
+
+.field-picker-trigger:hover,
+.field-picker-trigger:focus-visible {
+  background: var(--et-fill-color-light);
+  color: var(--et-color-primary);
+}
+
+.field-picker-icon {
+  font-size: 14px;
+}
+
+.field-picker-trigger:disabled {
+  color: var(--et-text-placeholder);
   background: var(--et-bg-container);
 }
 
@@ -131,8 +182,7 @@ function selectField(field: FieldBlockField) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--et-space-10);
-  padding: var(--et-space-10);
+  padding: var(--et-space-5);
   border: none;
   border-top: 1px solid var(--et-border-color-light);
   background: var(--et-bg-container);

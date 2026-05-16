@@ -1,6 +1,6 @@
 <template>
   <div class="field-block-editor" :class="{ focused: isFocused, disabled }">
-    <div class="editor-shell">
+    <div class="editor-shell" :style="shellStyle">
       <div v-if="showPlaceholder" class="editor-placeholder">{{ placeholder }}</div>
       <div ref="editorRef" class="editor-instance"></div>
       <div class="editor-actions">
@@ -10,12 +10,11 @@
           :showSubFields="showSubFields"
           :showSystemFields="showSystemFields"
           :disabled="disabled || tokenCount >= maxBlocks"
+          :limitReached="tokenCount >= maxBlocks"
+          :maxBlocks="maxBlocks"
           @select="insertFieldBlock"
         />
       </div>
-    </div>
-    <div class="editor-footer">
-      <span>已添加 {{ tokenCount }} / {{ maxBlocks }} 个字段</span>
     </div>
   </div>
 </template>
@@ -23,7 +22,7 @@
 <script setup lang="ts">
 import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror/lib/codemirror";
-import { computed, markRaw, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { FormDef } from "@eimsnext/models";
 import { FieldBlockPicker } from "../FieldBlockPicker";
 import {
@@ -46,6 +45,7 @@ const props = withDefaults(
     showSystemFields?: boolean;
     placeholder?: string;
     maxBlocks?: number;
+    maxRows?: number;
     disabled?: boolean;
   }>(),
   {
@@ -55,6 +55,7 @@ const props = withDefaults(
     showSystemFields: true,
     placeholder: "输入文字或添加字段，至少需要添加一个字段",
     maxBlocks: 5,
+    maxRows: 3,
     disabled: false,
   },
 );
@@ -72,6 +73,13 @@ const isFocused = ref(false);
 const isSyncing = ref(false);
 const innerValue = ref(props.modelValue || "");
 const selectedMarker = ref<any>();
+
+const lineHeight = 30;
+
+const shellStyle = computed(() => ({
+  minHeight: `${lineHeight}px`,
+  maxHeight: `${props.maxRows * lineHeight}px`,
+}));
 
 const fieldItems = computed(() =>
   props.fields.length > 0
@@ -162,10 +170,7 @@ function renderFieldBlocks() {
     const label = document.createElement("span");
     label.className = "token-label";
     label.textContent = field?.label || tokenItem.field;
-    const typeTag = document.createElement("span");
-    typeTag.className = "token-type";
-    typeTag.textContent = field?.typeLabel || "字段";
-    span.append(label, typeTag);
+    span.append(label);
     span.title = field?.label || tokenItem.field;
 
     const from = editor.value!.posFromIndex(tokenItem.index);
@@ -196,6 +201,30 @@ function syncValue() {
   emit("update:modelValue", innerValue.value);
   emit("change", innerValue.value);
   renderFieldBlocks();
+  syncEditorHeight();
+}
+
+function syncEditorHeight() {
+  if (!editor.value) return;
+
+  nextTick(() => {
+    const wrapper = editor.value.getWrapperElement?.() as HTMLElement | undefined;
+    const scroller = editor.value.getScrollerElement?.() as HTMLElement | undefined;
+    if (!wrapper || !scroller) return;
+
+    wrapper.style.height = "auto";
+    scroller.style.height = "auto";
+    scroller.style.maxHeight = `${props.maxRows * lineHeight}px`;
+
+    const scrollHeight = Math.max(scroller.scrollHeight, lineHeight);
+    const contentHeight = Math.min(scrollHeight, props.maxRows * lineHeight);
+
+    wrapper.style.height = `${contentHeight}px`;
+    scroller.style.height = `${contentHeight}px`;
+    scroller.style.overflowY = scrollHeight > props.maxRows * lineHeight ? "auto" : "hidden";
+
+    editor.value.refresh?.();
+  });
 }
 
 function removeBlock(direction: "backward" | "forward") {
@@ -298,6 +327,7 @@ function createEditor() {
   });
 
   renderFieldBlocks();
+  syncEditorHeight();
 }
 
 watch(
@@ -318,6 +348,7 @@ watch(
     innerValue.value = value || "";
     renderFieldBlocks();
     isSyncing.value = false;
+    syncEditorHeight();
   },
   { immediate: true },
 );
@@ -326,8 +357,16 @@ watch(
   () => fieldItems.value,
   () => {
     renderFieldBlocks();
+    syncEditorHeight();
   },
   { deep: true },
+);
+
+watch(
+  () => props.maxRows,
+  () => {
+    syncEditorHeight();
+  },
 );
 
 watch(
@@ -356,14 +395,12 @@ defineExpose({
 .field-block-editor {
   display: flex;
   flex-direction: column;
-  gap: var(--et-space-8);
 }
 
 .editor-shell {
   position: relative;
-  min-height: 160px;
   border: 1px solid var(--et-border-color);
-  border-radius: var(--et-size-8);
+  border-radius: var(--et-size-6);
   background: var(--et-bg-container);
   overflow: hidden;
 }
@@ -373,40 +410,54 @@ defineExpose({
 }
 
 .editor-instance {
-  min-height: 160px;
+  min-height: 30px;
 }
 
 .editor-placeholder {
   pointer-events: none;
   position: absolute;
-  left: var(--et-space-12);
-  top: var(--et-space-12);
+  left: 10px;
+  top: 6px;
   color: var(--et-text-placeholder);
   z-index: 1;
+  font-size: var(--et-font-size-14);
+  line-height: 18px;
 }
 
 .editor-actions {
   position: absolute;
-  right: var(--et-space-8);
-  top: var(--et-space-8);
+  right: 0;
+  top: 0;
+  height: 30px;
   z-index: 2;
 }
 
-.editor-footer {
-  color: var(--et-text-tertiary);
-  font-size: var(--et-font-size-12);
-}
-
 .field-block-editor :deep(.CodeMirror) {
-  min-height: 160px;
+  min-height: 30px;
   height: 100%;
-  padding: var(--et-space-10) var(--et-space-40) var(--et-space-10) var(--et-space-10);
+  padding: 4px 34px 4px 10px;
   color: var(--et-text-primary);
   background: var(--et-bg-container);
+  font-size: var(--et-font-size-14);
+  line-height: 22px;
 }
 
 .field-block-editor :deep(.CodeMirror-scroll) {
-  min-height: 160px;
+  min-height: 30px;
+}
+
+.field-block-editor :deep(.CodeMirror-lines) {
+  padding: 0;
+}
+
+.field-block-editor :deep(.CodeMirror pre) {
+  padding: 0;
+  line-height: 22px;
+}
+
+.field-block-editor :deep(.CodeMirror-sizer) {
+  margin-left: 0 !important;
+  min-width: 0 !important;
 }
 
 .field-block-editor :deep(.CodeMirror-cursor) {
@@ -420,12 +471,12 @@ defineExpose({
 .field-block-editor :deep(.cm-field-block-token) {
   display: inline-flex;
   align-items: center;
-  gap: var(--et-space-6);
   height: var(--et-size-24);
+  margin: 1px 4px 1px 0;
   padding: 0 var(--et-space-8);
   border: 1px solid var(--et-border-color);
   border-radius: var(--et-size-4);
-  background: var(--et-bg-page);
+  background: var(--et-fill-color-light);
   color: var(--et-text-primary);
   line-height: var(--et-line-height-24);
 }
@@ -440,15 +491,5 @@ defineExpose({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.field-block-editor :deep(.cm-field-block-token .token-type) {
-  flex-shrink: 0;
-  padding: 0 var(--et-space-8);
-  border-radius: var(--et-size-12);
-  background: var(--et-bg-primary-soft);
-  color: var(--et-color-primary);
-  font-size: var(--et-font-size-12);
-  line-height: var(--et-line-height-20);
 }
 </style>
