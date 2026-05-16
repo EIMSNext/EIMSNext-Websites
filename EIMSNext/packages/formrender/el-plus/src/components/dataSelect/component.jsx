@@ -1,6 +1,7 @@
 import { defineComponent, ref, watch, computed, nextTick } from "vue";
-import { ElButton, ElDialog } from "element-plus";
-import { DataSelectTablePanel, SelectedTags } from "@eimsnext/components";
+import { ElButton, ElDialog, ElIcon } from "element-plus";
+import { Tickets } from "@element-plus/icons-vue";
+import { DataSelectTablePanel } from "@eimsnext/components";
 import { formDataService } from "@eimsnext/services";
 import {
   buildDataSelectDisplayValue,
@@ -228,32 +229,36 @@ export default defineComponent({
     };
 
     const displayRows = computed(() => {
-      return (selectedValue.value || []).map((tag) => ({
-        label: tag.label || "未知字段",
-        value: String(tag.value ?? ""),
-        empty: tag.value == null || tag.value === "",
-      }));
+      const valueMap = new Map((selectedValue.value || []).map((tag) => [tag.label, String(tag.value ?? "")]));
+      return displayFields.value.map((field) => {
+        const value = valueMap.get(field.label) || "";
+        return {
+          label: field.label || "未知字段",
+          value,
+          empty: value === "",
+        };
+      });
     });
 
     return () => {
       const editable = !(props.disabled || isPreviewMode.value);
       const emptyText = props.selectionProcess?.buttonText || props.placeholder || "选择数据";
 
-      return (
-        <div class="_fc-form-selected-data-wrap">
-          {editable && (
-            <SelectedTags
-              modelValue={[]}
-              class="_fc-form-selected-data"
-              style={{ height: "60px" }}
-              editable={editable}
-              emptyText={emptyText}
-              onEditTag={handleEditTag}
-            ></SelectedTags>
-          )}
+        return (
+          <div class="_fc-form-selected-data-wrap">
+            {editable && (
+              <button type="button" class="form-selected-data-trigger" onClick={handleEditTag}>
+                <span class="form-selected-data-trigger-main">
+                  <ElIcon class="form-selected-data-trigger-icon">
+                    <Tickets />
+                  </ElIcon>
+                  <span class="form-selected-data-trigger-text">{emptyText}</span>
+                </span>
+              </button>
+            )}
 
-          {displayRows.value.length > 0 && (
-            <div class="form-selected-data-display-panel">
+            {displayRows.value.length > 0 && (
+              <div class="form-selected-data-display-panel">
               {displayRows.value.map((tag, index) => (
                 <div
                   key={`${tag.label}-${index}`}
@@ -269,9 +274,9 @@ export default defineComponent({
             </div>
           )}
 
-          {displayRows.value.length === 0 && editable && (
-            <div class="form-selected-data-empty">暂无数据</div>
-          )}
+            {displayRows.value.length === 0 && editable && (
+              <div class="form-selected-data-empty">暂无数据</div>
+            )}
 
           <ElDialog
             modelValue={showDialog.value}

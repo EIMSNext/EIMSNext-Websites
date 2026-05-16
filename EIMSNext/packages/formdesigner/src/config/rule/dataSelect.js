@@ -37,11 +37,10 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, `${name}.props`, [
-      { type: "GroupLabel", props: { title: "数据源" } },
       {
         type: "FormSelect",
         field: "dataSource",
-        title: "选择表单",
+        title: "数据源",
         props: {
           placeholder: "请选择表单",
         },

@@ -33,12 +33,12 @@
         >
           <div class="picker-item-main">
             <el-checkbox
-              v-if="multiple"
+              v-if="multiple && showIndicator"
               :model-value="isSelected(field.field)"
               @click.stop="toggleField(field)"
             />
             <el-radio
-              v-else
+              v-else-if="showIndicator"
               :model-value="selectedFieldKey"
               :value="field.field"
               @change="toggleField(field)"
@@ -74,6 +74,7 @@ const props = withDefaults(
     showTrigger?: boolean;
     triggerText?: string;
     defaultExpanded?: boolean;
+    showIndicator?: boolean;
   }>(),
   {
     modelValue: () => [],
@@ -84,6 +85,7 @@ const props = withDefaults(
     showTrigger: false,
     triggerText: "选择字段",
     defaultExpanded: true,
+    showIndicator: true,
   },
 );
 
