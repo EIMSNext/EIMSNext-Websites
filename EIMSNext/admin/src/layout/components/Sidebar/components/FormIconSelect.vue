@@ -1,11 +1,11 @@
 <template>
-  <div class="icon-select" style="width: 315px">
+  <div class="icon-picker" style="width: 315px">
     <div class="color-bar" aria-label="颜色">
       <span v-for="c in colorOptions" :key="c.value" class="color-chip" :aria-pressed="selectedColor === c.value"
         :style="{ backgroundColor: c.value }" @click="selectColor(c.value)" />
     </div>
     <el-scrollbar height="300px">
-      <div class="icon-grid">
+      <div class="icon-list">
         <div v-for="icon in sampleIcons" :key="'svg-' + icon" class="icon-tile" @click="selectIcon(icon)">
           <span style="
               width: 100%;
@@ -46,7 +46,7 @@ function loadIcons() {
   const icons = import.meta.glob("../../../../assets/icons/form/*.svg");
   for (const path in icons) {
     const iconName = path.replace(/.*\/(.*)\.svg$/, "$1");
-    if (iconName) svgIcons.push(iconName);
+    if (iconName) svgIcons.push(`form-${iconName}`);
   }
 
   sampleIcons.value = [...iconfontIcons, ...svgIcons];
@@ -85,7 +85,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.icon-select {
+.icon-picker {
   display: block;
 }
 
@@ -109,7 +109,7 @@ onMounted(() => {
   }
 }
 
-.icon-grid {
+.icon-list {
   background: var(--et-bg-hover);
   border-radius: 3px;
   bottom: 0;
