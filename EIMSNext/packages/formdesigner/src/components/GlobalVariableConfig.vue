@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import { uniqueId, deepCopy } from '@eimsnext/form-render-core';
+import { uniqueId8, deepCopy } from '@eimsnext/form-render-core';
 import {defineComponent} from 'vue';
 import FnEditor from './FnEditor.vue';
 import Warning from './Warning.vue';
@@ -132,7 +132,7 @@ export default defineComponent({
         addCus() {
             const label = this.cusValue && this.cusValue.trim();
             if (label) {
-                const key = 'var_' + uniqueId();
+                const key = 'var_' + uniqueId8();
                 this.value[key] = {
                     label,
                     handle: '',

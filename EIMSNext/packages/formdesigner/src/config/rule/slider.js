@@ -1,4 +1,4 @@
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 import {localeProps} from '../../utils';
 
 const label = '滑块';
@@ -16,7 +16,7 @@ export default {
     rule({t}) {
         return {
             type: name,
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: t('com.slider.name'),
             info: '',
             $required: false,

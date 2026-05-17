@@ -1,4 +1,4 @@
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 import {localeProps} from '../../utils';
 
 const label = '分步表单';
@@ -60,7 +60,7 @@ export default {
     rule() {
         return {
             type: name,
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: '',
             info: '',
             $required: false,

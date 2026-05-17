@@ -1,4 +1,4 @@
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 import { useFormStore } from "@eimsnext/store";
 import { FieldType } from "@eimsnext/models";
 import { buildDataSelectFields, findDataSelectField, normalizeDataSelectField } from "@eimsnext/components";
@@ -122,7 +122,7 @@ export const buildUniqueFieldName = (designer, preferred) => {
     }
   });
 
-  const baseName = preferred || uniqueId();
+  const baseName = preferred || `f_${uniqueId8()}`;
   if (!usedFields.has(baseName)) {
     return baseName;
   }

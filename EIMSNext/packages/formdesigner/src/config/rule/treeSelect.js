@@ -1,4 +1,4 @@
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 import {localeProps, makeTreeOptions, makeTreeOptionsRule} from '../../utils/index';
 
 const label = '树形选择';
@@ -27,7 +27,7 @@ export default {
     rule({t}) {
         return {
             type: name,
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: t('com.elTreeSelect.name'),
             info: '',
             effect: {
@@ -43,7 +43,7 @@ export default {
     },
     watch: {
         multiple({rule}) {
-            rule.key = uniqueId();
+            rule.key = uniqueId8();
         }
     },
     props(_, {t}) {

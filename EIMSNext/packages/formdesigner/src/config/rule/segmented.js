@@ -1,5 +1,5 @@
 import {localeOptions, localeProps} from '../../utils';
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 
 const label = '分段控制器';
 const name = 'elSegmented';
@@ -15,7 +15,7 @@ export default {
     rule() {
         return {
             type: name,
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: '',
             props: {
                 options: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(k => {

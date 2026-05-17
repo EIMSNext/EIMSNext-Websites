@@ -23,7 +23,10 @@
   background: var(--el-bg-color);
   color: var(--el-text-color-primary);
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background-color 0.2s;
   box-sizing: border-box;
 }
 
@@ -100,9 +103,10 @@
 }
 
 .form-selected-data-display-panel {
+  width: 100%;
   margin-top: 12px;
   border: 1px solid var(--el-border-color-lighter);
-  border-radius: 16px;
+  border-radius: 4px;
   background-color: var(--el-fill-color-light);
 }
 
@@ -110,21 +114,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
-  min-height: 48px;
+  padding: 3px 16px;
 }
 
 .form-selected-data-display-label {
   color: var(--el-text-color-regular);
   font-size: 14px;
+  flex: 0 0 auto;
+  max-width: 50%;
 }
 
 .form-selected-data-display-value {
   color: var(--el-text-color-secondary);
   font-size: 14px;
   margin-left: 16px;
-  text-align: right;
+  text-align: left;
   word-break: break-all;
+  flex: auto;
+  max-width: 90%;
 }
 
 .form-selected-data-empty {
@@ -135,7 +142,7 @@
 .form-selected-data-display-value.is-empty {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   min-width: 120px;
   min-height: 32px;
   padding: 0 10px;

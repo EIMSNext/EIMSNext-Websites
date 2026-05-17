@@ -1,4 +1,4 @@
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 import {localeOptions, localeProps} from '../../utils';
 
 const label = '时间';
@@ -19,7 +19,7 @@ export default {
     rule({t}) {
         return {
             type: name,
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: t('com.timePicker.name'),
             info: '',
             $required: false,
@@ -28,7 +28,7 @@ export default {
     },
     watch: {
         isRange({rule}) {
-            rule.key = uniqueId();
+            rule.key = uniqueId8();
         },
         __format({value, rule}) {
             rule.props.format = value;
