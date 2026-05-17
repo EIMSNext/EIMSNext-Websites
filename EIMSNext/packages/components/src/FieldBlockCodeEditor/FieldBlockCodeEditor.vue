@@ -68,9 +68,11 @@ const emit = defineEmits<{
 
 const editorRef = ref<HTMLElement>();
 const editor = ref<any>();
+const inputField = ref<HTMLTextAreaElement | HTMLInputElement>();
 const markers = ref<any[]>([]);
 const isFocused = ref(false);
 const isSyncing = ref(false);
+const isComposing = ref(false);
 const innerValue = ref(props.modelValue || "");
 const selectedMarker = ref<any>();
 
@@ -94,7 +96,10 @@ const tokenCount = computed(() => getFieldBlockTokens(innerValue.value).length);
 const showPlaceholder = computed(() => !innerValue.value && !isFocused.value);
 
 function clearMarkers() {
-  markers.value.forEach((marker) => marker.clear());
+  markers.value.forEach((marker) => {
+    if (!marker?.find?.()) return;
+    marker.clear();
+  });
   markers.value = [];
   selectedMarker.value = undefined;
 }
@@ -194,14 +199,26 @@ function renderFieldBlocks() {
   });
 }
 
-function syncValue() {
+function syncValue(renderBlocks = true) {
   if (!editor.value) return;
 
   innerValue.value = editor.value.getValue();
   emit("update:modelValue", innerValue.value);
   emit("change", innerValue.value);
-  renderFieldBlocks();
+  if (renderBlocks) {
+    renderFieldBlocks();
+  }
   syncEditorHeight();
+}
+
+function handleCompositionStart() {
+  isComposing.value = true;
+}
+
+function handleCompositionEnd() {
+  isComposing.value = false;
+  if (isSyncing.value) return;
+  syncValue();
 }
 
 function syncEditorHeight() {
@@ -308,7 +325,7 @@ function createEditor() {
   });
   editor.value.on("changes", () => {
     if (isSyncing.value) return;
-    syncValue();
+    syncValue(!isComposing.value);
   });
   editor.value.on("cursorActivity", () => {
     const backwardMarker = findMarkerAtCursor("backward");
@@ -325,6 +342,10 @@ function createEditor() {
 
     clearSelectedMarker();
   });
+
+  inputField.value = editor.value.getInputField?.();
+  inputField.value?.addEventListener("compositionstart", handleCompositionStart);
+  inputField.value?.addEventListener("compositionend", handleCompositionEnd);
 
   renderFieldBlocks();
   syncEditorHeight();
@@ -382,6 +403,9 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  inputField.value?.removeEventListener("compositionstart", handleCompositionStart);
+  inputField.value?.removeEventListener("compositionend", handleCompositionEnd);
+  inputField.value = undefined;
   clearMarkers();
   editor.value = undefined;
 });
@@ -426,9 +450,9 @@ defineExpose({
 
 .editor-actions {
   position: absolute;
-  right: 0;
-  top: 0;
-  height: 30px;
+  right: 16px;
+  top: 5px;
+  height: 20px;
   z-index: 2;
 }
 

@@ -34,7 +34,9 @@
           <span class="item-label">{{ item.label }}</span>
           <span class="item-type">{{ getFieldBlockTypeLabel(item.type) }}</span>
         </button>
-        <div v-if="filteredFields.length === 0" class="picker-empty">暂无可选字段</div>
+        <div v-if="filteredFields.length === 0" class="picker-empty">
+          暂无可选字段
+        </div>
       </div>
     </div>
   </el-popover>
@@ -71,7 +73,7 @@ const props = withDefaults(
     disabled: false,
     limitReached: false,
     maxBlocks: 5,
-  },
+  }
 );
 
 const emit = defineEmits<{
@@ -82,7 +84,7 @@ const visible = ref(false);
 const keyword = ref("");
 
 const tooltipContent = computed(() =>
-  props.limitReached ? `最多添加${props.maxBlocks}个字段` : "添加字段",
+  props.limitReached ? `最多添加${props.maxBlocks}个字段` : "添加字段"
 );
 
 const fieldItems = computed(() =>
@@ -91,7 +93,7 @@ const fieldItems = computed(() =>
     : buildFieldBlockFields(props.formDef, {
         showSubFields: props.showSubFields,
         showSystemFields: props.showSystemFields,
-      }),
+      })
 );
 
 const filteredFields = computed(() => {
@@ -117,7 +119,7 @@ watch(
       visible.value = false;
     }
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 watch(visible, (nextVisible) => {
@@ -134,12 +136,10 @@ watch(visible, (nextVisible) => {
 }
 
 .field-picker-trigger {
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   padding: 0;
-  border: none;
-  border-left: 1px solid var(--et-border-color-light);
+  border: 1px solid var(--et-border-color-light);
   border-radius: 0 var(--et-size-6) var(--et-size-6) 0;
   color: var(--et-color-primary);
   background: var(--et-bg-container);

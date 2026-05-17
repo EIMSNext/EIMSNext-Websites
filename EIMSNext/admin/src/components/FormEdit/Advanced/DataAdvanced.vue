@@ -62,7 +62,7 @@ const businessFields = computed(() =>
   buildFieldBlockFields(props.formDef, {
     showSubFields: false,
     showSystemFields: false,
-  }),
+  })
 );
 
 const defaultFieldLabel = computed(() => businessFields.value[0]?.label || "");
@@ -73,7 +73,7 @@ watch(
     mode.value = dataTitle?.mode === "custom" ? "custom" : "default";
     content.value = dataTitle?.content || "";
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 function ensureFormSettings() {
