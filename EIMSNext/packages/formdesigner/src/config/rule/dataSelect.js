@@ -16,7 +16,7 @@ export default {
     return {
       type: name,
       field: `f_${uniqueId8()}`,
-      title: t("com.formselecteddata.name"),
+      title: t("com.dataselect.name"),
       info: "",
       $required: false,
       props: {

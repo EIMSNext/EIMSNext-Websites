@@ -1827,6 +1827,13 @@ export default {
         readonly: "Readonly",
         disabled: "Disabled",
       },
+    }, 
+    dataselect: {
+      name: "Select Data",
+      props: {
+        readonly: "Readonly",
+        disabled: "Disabled",
+      },
     },
     tableform: {
       name: "Sub Form",

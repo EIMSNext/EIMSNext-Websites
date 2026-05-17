@@ -1781,7 +1781,7 @@ export default {
         disabled: "禁用",
       },
     },
-    formselecteddata: {
+    dataselect: {
       name: "选择数据",
       props: {
         readonly: "只读",
