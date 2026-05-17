@@ -48,7 +48,7 @@
       >
         <el-table-column width="68" align="center">
           <template #default="scope">
-            <el-radio :model-value="isSelected(scope.row)" :label="rowKey(scope.row)" @click.stop="selectRow(scope.row)">
+            <el-radio :model-value="selectedRowKey" :value="rowKey(scope.row)" @change="selectRow(scope.row)" @click.stop="">
               <span />
             </el-radio>
           </template>
@@ -180,6 +180,13 @@ const filteredRows = computed(() => {
 
 const rowKey = (row: Record<string, any>) => row?.[props.rowKeyField] ?? JSON.stringify(row);
 
+const selectedRowKey = computed(() => {
+  if (!props.modelValue) {
+    return undefined;
+  }
+  return rowKey(props.modelValue);
+});
+
 const filterFields = computed<IFormFieldDef[]>(() => {
   return props.fields.map((field) => ({
     formId: props.formId,
@@ -191,13 +198,6 @@ const filterFields = computed<IFormFieldDef[]>(() => {
     isSubField: field.field.includes(">"),
   }));
 });
-
-const isSelected = (row: Record<string, any>) => {
-  if (!props.modelValue) {
-    return false;
-  }
-  return rowKey(row) === rowKey(props.modelValue);
-};
 
 const selectRow = (row: Record<string, any>) => {
   emit("update:modelValue", row);
@@ -228,9 +228,9 @@ const emitFilter = (filter: IConditionList) => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--el-border-color-lighter);
+  border: 1px solid var(--et-border-color-light);
   border-radius: 18px;
-  background: var(--el-bg-color);
+  background: var(--et-bg-container);
   overflow: hidden;
 }
 
@@ -240,14 +240,14 @@ const emitFilter = (filter: IConditionList) => {
   justify-content: space-between;
   gap: 16px;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  background: var(--el-bg-color);
+  border-bottom: 1px solid var(--et-border-color-light);
+  background: var(--et-bg-container);
 }
 
 .panel-toolbar-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--el-text-color-primary);
+  color: var(--et-text-primary);
 }
 
 .panel-toolbar-actions {
@@ -261,7 +261,7 @@ const emitFilter = (filter: IConditionList) => {
 }
 
 .panel-filter {
-  color: var(--el-text-color-primary);
+  color: var(--et-text-primary);
 }
 
 .panel-table-wrap {
@@ -278,12 +278,12 @@ const emitFilter = (filter: IConditionList) => {
   display: flex;
   justify-content: flex-end;
   padding: 12px 20px 20px;
-  border-top: 1px solid var(--el-border-color-lighter);
-  background: var(--el-bg-color);
+  border-top: 1px solid var(--et-border-color-light);
+  background: var(--et-bg-container);
 }
 
 :deep(.panel-table .el-table__header-wrapper th.el-table__cell) {
-  background: var(--el-fill-color-light);
+  background: var(--et-fill-color-light);
 }
 
 :deep(.panel-table .el-radio) {

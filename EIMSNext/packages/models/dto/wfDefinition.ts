@@ -66,11 +66,28 @@ export interface ExpireSetting {
   transferSetting?: TransferSetting;
 }
 
+export enum NodeActionType {
+  Submit = "submit",
+  Return = "return",
+  Reject = "reject",
+  Draft = "draft",
+  AddSign = "addSign",
+  Transfer = "transfer",
+}
+
+export interface NodeActionConfig {
+  actionType: NodeActionType;
+  enabled?: boolean;
+  text?: string;
+  candidates?: ApprovalCandidate[];
+}
+
 export interface ApproveSetting {
   approvalMode?: string | number;
   candidates?: ApprovalCandidate[];
   enableCopyto?: boolean;
   copytoCandidates?: ApprovalCandidate[];
+  nodeActions?: NodeActionConfig[];
   notifyChannels?: NotifyChannel;
   expireSetting?: ExpireSetting;
 }

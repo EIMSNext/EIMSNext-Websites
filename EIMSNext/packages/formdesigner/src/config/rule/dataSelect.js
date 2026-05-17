@@ -1,4 +1,4 @@
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 import { localeProps } from "../../utils";
 
 const label = "选择数据";
@@ -15,8 +15,8 @@ export default {
   rule({ t }) {
     return {
       type: name,
-      field: uniqueId(),
-      title: t("com.formselecteddata.name"),
+      field: `f_${uniqueId8()}`,
+      title: t("com.dataselect.name"),
       info: "",
       $required: false,
       props: {
@@ -37,11 +37,10 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, `${name}.props`, [
-      { type: "GroupLabel", props: { title: "数据源" } },
       {
         type: "FormSelect",
         field: "dataSource",
-        title: "选择表单",
+        title: "数据源",
         props: {
           placeholder: "请选择表单",
         },

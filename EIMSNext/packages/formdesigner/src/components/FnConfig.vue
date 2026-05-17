@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { uniqueId, deepExtend, parseFn } from '@eimsnext/form-render-core';
+import { uniqueId8, deepExtend, parseFn } from '@eimsnext/form-render-core';
 import { defineComponent } from 'vue';
 import FnEditor from './FnEditor.vue';
 
@@ -142,7 +142,7 @@ export default defineComponent({
             return on;
         },
         edit(data) {
-            data.key = uniqueId();
+            data.key = uniqueId8();
             this.activeData = data;
             this.eventStr = data.fn || (PREFIX + `function ${data.item.name}(${this.getArgs(data.item)}){}` + SUFFIX);
             this.defActive = data.item.name;

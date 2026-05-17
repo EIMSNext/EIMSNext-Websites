@@ -125,7 +125,7 @@
 </template>
 
 <script>
-import { uniqueId, deepCopy } from '@eimsnext/form-render-core';
+import { uniqueId8, deepCopy } from '@eimsnext/form-render-core';
 import FnEditor from './FnEditor.vue';
 import StructEditor from './StructEditor.vue';
 import {defineComponent} from 'vue';
@@ -286,7 +286,7 @@ export default defineComponent({
         addCus() {
             const label = this.cusValue && this.cusValue.trim();
             if (label) {
-                const key = 'data_' + uniqueId();
+                const key = 'data_' + uniqueId8();
                 this.list[key] = {
                     label,
                     type: this.cus,

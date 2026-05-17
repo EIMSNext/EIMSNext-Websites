@@ -14,7 +14,11 @@ export function setupPermission() {
       if (isLogin) {
         //从链接进来的地址，可能还没有初始化用户信息
         const userStore = useUserStore();
-        await userStore.initialize();
+        try {
+          await userStore.initialize();
+        } catch {
+          console.warn("userStore.initialize failed, continuing with cached data");
+        }
 
         let allowed = true;
         if (to.meta.allowedUserTypes && to.meta.allowedUserTypes.length > 0) {

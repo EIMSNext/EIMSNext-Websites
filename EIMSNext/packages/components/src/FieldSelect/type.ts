@@ -4,6 +4,7 @@ import { IListItem } from "../list/type";
 import {
   FieldDef,
   FieldType,
+  getDataTitle,
   getFlowStatus,
   getCreateBy,
   getCreateTime,
@@ -78,6 +79,19 @@ export function buildFieldListItems(
     !fieldLimit.limitField ||
     fieldLimit.limitField == "master"
   ) {
+    let dataTitle: IFormFieldDef = toFormFieldDef(
+      formId,
+      getDataTitle("数据标题"),
+      undefined,
+      nodeId,
+    );
+    items.push({
+      id: dataTitle.field,
+      label: dataTitle.label,
+      data: dataTitle,
+      type: DataItemType.Field,
+    });
+
     if (usingWf) {
       let status: IFormFieldDef = toFormFieldDef(
         formId,

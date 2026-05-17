@@ -8,7 +8,7 @@ export { default as extend, copy } from './extend';
 export { parseJson, toJson, parseFn } from './json';
 export { $set, $del } from './modify';
 export { default as is, hasProperty } from './type';
-export { default as uniqueId } from './unique';
+export { default as uniqueId, unique8 as uniqueId8 } from './unique';
 export { default as getSlot } from './slot';
 export { default as deepSet } from './deepset';
 export { default as mergeProps, normalMerge, functionalMerge, toArrayMerge } from './mergeprops'

@@ -1,5 +1,5 @@
 import {localeProps} from '../../utils';
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 
 const label = '分组';
 const name = 'subForm';
@@ -52,7 +52,7 @@ export default {
     rule({t}) {
         return {
             type: 'fcRow',
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: t('com.subForm.name'),
             info: '',
             $required: false,

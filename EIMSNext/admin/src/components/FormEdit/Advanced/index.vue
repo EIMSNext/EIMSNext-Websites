@@ -1,6 +1,9 @@
 <template>
   <div class="adv-container">
     <el-tabs v-model="activeName" tabPosition="left" class="adv-tabs" @tab-click="handleClick">
+      <el-tab-pane label="数据协作" name="advanced-data" class="adv-panel">
+        <DataAdvanced :form-def="formDef" />
+      </el-tab-pane>
       <el-tab-pane label="提醒助手" name="notify" class="adv-panel">
         <NotifyList :form-def="formDef"></NotifyList>
       </el-tab-pane>
@@ -17,6 +20,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import DataAdvanced from "./DataAdvanced.vue";
 import NotifyList from "./NotifyList.vue";
 import WebhookList from "./WebhookList.vue";
 import DataflowList from "./DataflowList.vue";
@@ -32,7 +36,7 @@ const props = defineProps<{
   formDef: FormDef;
 }>();
 
-const activeName = ref("notify");
+const activeName = ref("advanced-data");
 
 const handleClick = (_tab: TabsPaneContext, _event: Event) => {};
 </script>

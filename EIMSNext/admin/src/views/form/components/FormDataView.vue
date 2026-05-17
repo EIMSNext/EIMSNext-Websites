@@ -45,9 +45,10 @@ import {
   DataPerms,
   FormDef,
   PrintTemplate,
+  WorkflowActionStatus,
 } from "@eimsnext/models";
 import { useFormStore, useUserStore } from "@eimsnext/store";
-import { customPrintService, formDataService, PrintRequest, printTemplateService } from "@eimsnext/services";
+import { customPrintService, formDataService, PrintRequest, printTemplateService, workflowService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
 import { MessageIcon, ShareLinkBar, ToolbarItem } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
@@ -101,6 +102,7 @@ const shareUrl = computed(() => `${window.location.origin}/#/app/${route.params.
 const inEdit = computed(() => isEditing.value);
 const editDisabled = ref(false);
 const deleteDisabled = ref(false);
+const actionStatus = ref<WorkflowActionStatus>({ canWithdraw: false, canUrge: false });
 
 const leftBars = computed<ToolbarItem[]>(() => {
   const bars: ToolbarItem[] = [
@@ -131,6 +133,24 @@ const leftBars = computed<ToolbarItem[]>(() => {
         command: "cancel",
         visible: inEdit.value,
         icon: "el-close",
+      },
+    },
+    {
+      type: "button",
+      config: {
+        text: "common.wfProcess.withdraw",
+        command: "withdraw",
+        visible: !inEdit.value && actionStatus.value.canWithdraw,
+        icon: "refresh-left",
+      },
+    },
+    {
+      type: "button",
+      config: {
+        text: "common.wfProcess.urge",
+        command: "urge",
+        visible: !inEdit.value && actionStatus.value.canUrge,
+        icon: "promotion",
       },
     },
     {
@@ -234,6 +254,37 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
     case "delete":
       showDeleteConfirmDialog.value = true;
       break;
+    case "withdraw":
+      if (!actionStatus.value.canWithdraw) {
+        break;
+      }
+      try {
+        await ElMessageBox.confirm(t("common.wfProcess.withdrawConfirm"), t("common.wfProcess.withdraw"), {
+          type: "warning",
+        });
+        await workflowService.withdraw({
+          dataId: props.dataId,
+        });
+        const data = await formDataService.get<FormData>(props.dataId);
+        formData.value = data;
+        actionStatus.value = { canWithdraw: false, canUrge: false };
+        editDisabled.value = false;
+        deleteDisabled.value = false;
+      } catch {
+      }
+      break;
+    case "urge":
+      if (!actionStatus.value.canUrge) {
+        break;
+      }
+      try {
+        await workflowService.urge({
+          dataId: props.dataId,
+        });
+        ElMessage.success(t("common.wfProcess.urgeSuccess"));
+      } catch {
+      }
+      break;
     case "systemprint":
       setTimeout(() => {
         nextTick(() => { printTrigger.value?.click(); })
@@ -326,6 +377,9 @@ onBeforeMount(async () => {
     const workflowLocked = !!(formDef.value?.usingWorkflow && formData.value.flowStatus != FlowStatus.Draft);
     editDisabled.value = workflowLocked;
     deleteDisabled.value = workflowLocked;
+
+    const status = await workflowService.getActionStatus(props.dataId);
+    actionStatus.value = status;
   }
 });
 </script>

@@ -34,7 +34,7 @@
 import {defineComponent} from 'vue';
 import ConfigItem from './style/ConfigItem.vue';
 import VNode from './VNode.vue';
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 import fcDraggable from 'vuedraggable/src/vuedraggable';
 
 export default defineComponent({
@@ -65,7 +65,7 @@ export default defineComponent({
             }
             const rule = this.activeRule.children.splice(oldIndex, 1);
             this.activeRule.children.splice(newIndex, 0, rule[0]);
-            this.activeRule.key = uniqueId();
+            this.activeRule.key = uniqueId8();
         },
     }
 

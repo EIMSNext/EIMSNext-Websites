@@ -36,5 +36,6 @@ export enum MessageType {
   FormNotify = "0",
   WfTodoNotify = "1",
   WfExpireNotify = "2",
-  ExportNotify = "3",
+  WfUrgeNotify = "3",
+  ExportNotify = "4",
 }

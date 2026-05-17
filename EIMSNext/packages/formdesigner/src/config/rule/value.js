@@ -1,4 +1,4 @@
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 
 const label = '计算公式';
 const name = 'fcValue';
@@ -19,7 +19,7 @@ export default {
     rule({t}) {
         return {
             type: name,
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: t('com.fcValue.name'),
             info: '',
             props: {},

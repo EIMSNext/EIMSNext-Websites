@@ -1,5 +1,5 @@
 <template>
-  <div class="icon-select" style="width: 315px">
+  <div class="icon-picker" style="width: 315px">
     <!-- <el-tabs v-model="activeTab" @tab-click="handleTabClick">
             <el-tab-pane label="系统图标" name="svg"> -->
     <div class="color-bar" aria-label="颜色">
@@ -13,7 +13,7 @@
       />
     </div>
     <el-scrollbar height="300px">
-      <div class="icon-grid">
+      <div class="icon-list">
         <div
           v-for="icon in sampleIcons"
           :key="'svg-' + icon"
@@ -65,10 +65,10 @@ function loadIcons() {
 
   //load svg
   let svgIcons: string[] = [];
-  const icons = import.meta.glob("../../../assets/icons/*.svg");
+  const icons = import.meta.glob("../../../assets/icons/app/*.svg");
   for (const path in icons) {
     const iconName = path.replace(/.*\/(.*)\.svg$/, "$1");
-    if (iconName) svgIcons.push(iconName);
+    if (iconName) svgIcons.push(`app-${iconName}`);
   }
 
   sampleIcons.value = [...iconfontIcons, ...svgIcons];
@@ -111,7 +111,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.icon-select {
+.icon-picker {
   display: block;
 }
 
@@ -135,7 +135,7 @@ onMounted(() => {
   }
 }
 
-.icon-grid {
+.icon-list {
   background: var(--et-bg-hover);
   border-radius: 3px;
   bottom: 0;

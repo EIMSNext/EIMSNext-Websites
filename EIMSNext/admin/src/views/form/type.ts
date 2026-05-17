@@ -3,6 +3,7 @@ import {
   FieldDef,
   IFieldPerm,
   SystemField,
+  getDataTitle,
   getCreateBy,
   getCreateTime,
   getFlowStatus,
@@ -47,6 +48,18 @@ export function buildColumns(
   });
 
   const columns: ITableColumn[] = [];
+  if (dispalyAll || displayFields.find((d) => d.field == SystemField.DataTitle)) {
+    const dataTitleField = getDataTitle("数据标题");
+    columns.push({
+      field: dataTitleField.field,
+      title: dataTitleField.title,
+      type: dataTitleField.type,
+      width: 180,
+      mergeField: "_id",
+      oriField: SystemField.DataTitle,
+    });
+  }
+
   if (usingWf && (dispalyAll || displayFields.find((d) => d.field == SystemField.FlowStatus))) {
     const statusField = getFlowStatus("流程状态");
     columns.push({

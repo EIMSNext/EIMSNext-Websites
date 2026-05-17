@@ -10,6 +10,7 @@ export interface FormDefRequest extends IdBase {
   content?: FormContent;
   isLedger?: boolean;
   usingWorkflow?: boolean;
+  formSettings?: FormSettings;
 }
 
 export interface FormDef extends CorpModelBase {
@@ -18,6 +19,20 @@ export interface FormDef extends CorpModelBase {
   content?: FormContent;
   isLedger: boolean;
   usingWorkflow: boolean;
+  formSettings?: FormSettings;
+}
+
+export interface FormSettings {
+  advanced?: DataAdvancedSettings;
+}
+
+export interface DataAdvancedSettings {
+  dataTitle?: DataTitleSettings;
+}
+
+export interface DataTitleSettings {
+  mode?: "default" | "custom";
+  content?: string;
 }
 
 export class FormContent {

@@ -1,37 +1,29 @@
 <template>
-  <el-drawer
-    :model-value="modelValue"
-    :size="drawerSize"
-    destroy-on-close
-    class="pdf-preview-drawer"
-    @update:model-value="emit('update:modelValue', $event)"
-  >
-    <template #header>
-      <div class="pdf-preview-header">
-        <div class="pdf-preview-title">{{ title }}</div>
-        <div class="pdf-preview-tools">
-          <el-button
-            text
-            bg
-            class="pdf-preview-tool-btn pdf-preview-tool-action"
-            @click="handleDownload"
-            :disabled="!pdfUrl"
-          >
-            下载
-          </el-button>
-        </div>
-      </div>
-    </template>
+  <el-drawer :model-value="modelValue" :size="drawerSize" direction="btt" destroy-on-close :show-close="false"
+    :with-header="false" class="pdf-preview-drawer" @update:model-value="emit('update:modelValue', $event)">
+    <div class="pdf-preview-header">
+      <div class="pdf-preview-title">{{ title }}</div>
+      <el-button text class="pdf-preview-tool-btn" @click="handleDownload" :disabled="!pdfUrl">
+        <et-icon icon="el-download" size="18px" />
+        <span style="margin-left: 4px;">下载</span>
+      </el-button>
+      <el-button text class="pdf-preview-close" aria-label="关闭预览" @click="handleClose">
+        <et-icon icon="el-close" size="24px" />
+      </el-button>
+    </div>
     <div class="pdf-preview-body">
-      <iframe v-if="pdfUrl" :src="pdfUrl" class="pdf-preview-iframe" />
-      <div v-else class="pdf-preview-empty">
-        <div class="pdf-preview-empty-text">{{ emptyText }}</div>
+      <div class="preview-center">
+        <iframe v-if="pdfUrl" :src="pdfUrl" class="pdf-preview-iframe" />
+        <div v-else class="pdf-preview-empty">
+          <div class="pdf-preview-empty-text">{{ emptyText }}</div>
+        </div>
       </div>
     </div>
   </el-drawer>
 </template>
 
 <script lang="ts" setup>
+
 defineOptions({
   name: "PdfPreview",
 });
@@ -53,8 +45,12 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
 }>();
 
-const drawerSize = "92%";
+const drawerSize = "100%";
 const emptyText = "暂无预览内容";
+
+const handleClose = () => {
+  emit("update:modelValue", false);
+};
 
 const handleDownload = async () => {
   if (!props.pdfUrl) return;
@@ -79,54 +75,85 @@ const handleDownload = async () => {
 
 <style lang="scss" scoped>
 .pdf-preview-header {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--et-space-12);
+  background: rgba(0, 0, 0, .6);
+  color: #fff;
+  height: 50px;
+  line-height: 50px;
+  position: relative;
 }
 
 .pdf-preview-title {
-  font-weight: 600;
-  color: #f5f7fa;
+  bottom: 0;
+  display: inline-block;
+  left: 30px;
   overflow: hidden;
+  position: absolute;
+  right: 200px;
   text-overflow: ellipsis;
+  top: 0;
   white-space: nowrap;
 }
 
-.pdf-preview-tools {
-  display: flex;
-  align-items: center;
-  gap: var(--et-space-8);
-  flex-shrink: 0;
-}
-
 .pdf-preview-tool-btn {
-  min-width: 64px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.08);
-  color: #f5f7fa;
+  color: inherit;
+  display: block;
+  font-size: 15px;
+  height: 50px;
+  outline: none;
+  padding: 0 10px;
+  position: absolute;
+  right: 60px;
+  text-decoration: none;
+  top: 0;
+  transition: all .2s ease;
+
+  &:hover {
+    background-color: #000 !important;
+  }
 }
 
-.pdf-preview-tool-action {
-  min-width: 64px;
+.pdf-preview-close {
+  cursor: pointer;
+  font-size: 20px;
+  height: 50px;
+  position: absolute;
+  right: 10px;
+  text-align: center;
+  top: 0;
+  transition: all .2s ease;
+  width: 50px;
+  color: #fff;
+
+  &:hover {
+    background-color: #000 !important;
+  }
 }
+
 
 .pdf-preview-body {
-  height: 100%;
+  bottom: 0;
+  left: 0;
   overflow: hidden;
-  padding: 24px;
-  background: #232427;
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background: #2f3136;
+
+  .preview-center {
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    max-height: 100%;
+    max-width: 80%;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
 }
 
 .pdf-preview-iframe {
-  width: 80%;
+  width: 100%;
   height: 100%;
-  margin: 0 auto;
-  border: none;
-  border-radius: 8px;
-  background: #2f3136;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.32);
 }
 
 .pdf-preview-empty {
@@ -150,13 +177,6 @@ const handleDownload = async () => {
 .pdf-preview-drawer {
   .el-drawer {
     background: #232427;
-  }
-
-  .el-drawer__header {
-    margin-bottom: 0;
-    padding: 16px 24px;
-    background: #2b2d31;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .el-drawer__body {

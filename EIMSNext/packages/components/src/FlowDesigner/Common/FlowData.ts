@@ -1,6 +1,12 @@
 import { cloneDeep } from "lodash-es";
 import { uniqueId } from "@eimsnext/utils";
-import { FlowType, EventSourceType } from "@eimsnext/models";
+import {
+  FlowType,
+  EventSourceType,
+  NotifyChannel,
+  WorkflowAutoProcessRule,
+  WorkflowWithdrawRule,
+} from "@eimsnext/models";
 import { IConditionList } from "@/ConditionList/type";
 import { IFormFieldList } from "@/FormFieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
@@ -54,9 +60,18 @@ export interface IFlowData {
   startNode: IFlowNodeData;
   nodes: IFlowNodeData[];
   endNode: IFlowNodeData;
+  workflowMeta?: WorkflowMeta;
   eventSource?: EventSourceType;
   dfCascade?: CascadeMode;
   eventIds?: string[];
+}
+
+export interface WorkflowMeta {
+  description?: string;
+  allowUrge?: boolean;
+  notifyChannels?: NotifyChannel;
+  autoProcessRule?: WorkflowAutoProcessRule;
+  withdrawRule?: WorkflowWithdrawRule;
 }
 
 export interface IFlowContext {
@@ -157,6 +172,14 @@ export function createFlowNode(
             approveMode: ApproveMode.OrSign,
             approvalCandidates: [],
             enableCopyto: false,
+            nodeActions: [
+              { actionType: NodeActionType.Submit, enabled: true, text: t("common.wfProcess.submit") },
+              { actionType: NodeActionType.Return, enabled: false, text: t("workflow.nodeActionReturn") },
+              { actionType: NodeActionType.Reject, enabled: false, text: t("common.wfProcess.reject") },
+              { actionType: NodeActionType.Draft, enabled: false, text: t("common.wfProcess.saveDraft") },
+              { actionType: NodeActionType.AddSign, enabled: false, text: t("workflow.nodeActionAddSign"), candidates: [] },
+              { actionType: NodeActionType.Transfer, enabled: false, text: t("workflow.nodeActionTransfer"), candidates: [] },
+            ],
             copytoCandidates: [],
           },
         },
@@ -367,8 +390,25 @@ export interface ApproveMeta {
   approvalCandidates: IApprovalCandidate[];
   enableCopyto?: boolean;
   copytoCandidates?: IApprovalCandidate[];
+  nodeActions?: INodeActionConfig[];
   notifyChannels?: NotifyChannel;
   expireSetting?: IExpireSetting;
+}
+
+export enum NodeActionType {
+  Submit = "submit",
+  Return = "return",
+  Reject = "reject",
+  Draft = "draft",
+  AddSign = "addSign",
+  Transfer = "transfer",
+}
+
+export interface INodeActionConfig {
+  actionType: NodeActionType;
+  enabled?: boolean;
+  text?: string;
+  candidates?: IApprovalCandidate[];
 }
 export interface CopytoMeta {
   approvalCandidates: IApprovalCandidate[];
@@ -379,12 +419,6 @@ export interface IApprovalCandidate {
   candidateId: string;
   candidateName: string;
   cascadedDept?: boolean;
-}
-
-export enum NotifyChannel {
-  None = 0,
-  System = 1,
-  Email = 2,
 }
 
 export enum WfExpireActionType {
@@ -432,6 +466,13 @@ export function createWorkflowData(t: Translator): IFlowData {
       nodeType: FlowNodeType.End,
       name: t("workflow.endNode"),
       metadata: {},
+    },
+    workflowMeta: {
+      description: "",
+      allowUrge: false,
+      notifyChannels: NotifyChannel.None,
+      autoProcessRule: WorkflowAutoProcessRule.Disabled,
+      withdrawRule: WorkflowWithdrawRule.Disabled,
     },
     eventSource: EventSourceType.None,
   };

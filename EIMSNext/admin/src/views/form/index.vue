@@ -93,6 +93,7 @@ import {
   ExportColumn,
   ExportColumnType,
   ExportFormat,
+  getDataTitle,
   getCreateBy,
   getCreateTime,
   getFlowStatus,
@@ -599,6 +600,14 @@ const buildExportColumns = (): ExportColumn[] => {
 const getAllExportFields = (): IFormFieldDef[] => {
   const result: IFormFieldDef[] = [];
   const items = formDef.value?.content?.items || [];
+
+  const dataTitleField = getDataTitle("数据标题");
+  result.push({
+    formId,
+    field: dataTitleField.field,
+    label: dataTitleField.title,
+    type: dataTitleField.type,
+  });
 
   if (formDef.value?.usingWorkflow) {
     const flowStatusField = getFlowStatus("流程状态");

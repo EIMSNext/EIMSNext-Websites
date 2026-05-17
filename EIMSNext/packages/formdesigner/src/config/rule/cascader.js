@@ -1,4 +1,4 @@
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 import {localeOptions, localeProps, makeTreeOptions, makeTreeOptionsRule} from '../../utils/index';
 
 const label = '级联选择器';
@@ -24,7 +24,7 @@ export default {
     rule({t}) {
         return {
             type: name,
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: t('com.cascader.name'),
             info: '',
             effect: {
