@@ -106,10 +106,9 @@ export default defineComponent({
     });
 
     const displayFields = computed(() => {
-      const fields = (props.displayConfig?.fields || [])
+      return (props.displayConfig?.fields || [])
         .map(normalizeDataSelectField)
         .filter(Boolean);
-      return fields.length > 0 ? fields : tableFields.value;
     });
 
     const fillMappings = computed(() => {
@@ -126,7 +125,7 @@ export default defineComponent({
       (newVal) => {
         selectedValue.value = normalizeDisplayTags(newVal);
       },
-      { immediate: true, deep: true },
+      { immediate: true, deep: true }
     );
 
     const fetchFormData = async (page = 1, size = pageSize.value) => {
@@ -166,7 +165,10 @@ export default defineComponent({
 
       const formDataToFill = {};
       fillMappings.value.forEach((mapping) => {
-        formDataToFill[mapping.targetField.field] = resolveDataSelectValue(record, mapping.sourceField.field);
+        formDataToFill[mapping.targetField.field] = resolveDataSelectValue(
+          record,
+          mapping.sourceField.field
+        );
       });
 
       const injectApi = props.formCreateInject.api;
@@ -196,7 +198,10 @@ export default defineComponent({
         return;
       }
 
-      const selectedData = buildDataSelectDisplayValue(selectedRecord.value, displayFields.value);
+      const selectedData = buildDataSelectDisplayValue(
+        selectedRecord.value,
+        displayFields.value
+      );
       await applyMappings(selectedRecord.value);
       selectedValue.value = selectedData;
       emit("update:modelValue", selectedData);
@@ -229,7 +234,12 @@ export default defineComponent({
     };
 
     const displayRows = computed(() => {
-      const valueMap = new Map((selectedValue.value || []).map((tag) => [tag.label, String(tag.value ?? "")]));
+      const valueMap = new Map(
+        (selectedValue.value || []).map((tag) => [
+          tag.label,
+          String(tag.value ?? ""),
+        ])
+      );
       return displayFields.value.map((field) => {
         const value = valueMap.get(field.label) || "";
         return {
@@ -242,41 +252,54 @@ export default defineComponent({
 
     return () => {
       const editable = !(props.disabled || isPreviewMode.value);
-      const emptyText = props.selectionProcess?.buttonText || props.placeholder || "选择数据";
+      const emptyText =
+        props.selectionProcess?.buttonText || props.placeholder || "选择数据";
 
-        return (
-          <div class="_fc-form-selected-data-wrap">
-            {editable && (
-              <button type="button" class="form-selected-data-trigger" onClick={handleEditTag}>
-                <span class="form-selected-data-trigger-main">
-                  <ElIcon class="form-selected-data-trigger-icon">
-                    <Tickets />
-                  </ElIcon>
-                  <span class="form-selected-data-trigger-text">{emptyText}</span>
-                </span>
-              </button>
-            )}
+      return (
+        <div class="_fc-form-selected-data-wrap">
+          {editable && (
+            <button
+              type="button"
+              class="form-selected-data-trigger"
+              onClick={handleEditTag}
+            >
+              <span class="form-selected-data-trigger-main">
+                <ElIcon class="form-selected-data-trigger-icon">
+                  <Tickets />
+                </ElIcon>
+                <span class="form-selected-data-trigger-text">{emptyText}</span>
+              </span>
+            </button>
+          )}
 
-            {displayRows.value.length > 0 && (
-              <div class="form-selected-data-display-panel">
+          {displayRows.value.length > 0 && (
+            <div class="form-selected-data-display-panel">
               {displayRows.value.map((tag, index) => (
                 <div
                   key={`${tag.label}-${index}`}
                   class="form-selected-data-display-row"
-                  style={{ borderBottom: index === displayRows.value.length - 1 ? "none" : undefined }}
+                  style={{
+                    borderBottom:
+                      index === displayRows.value.length - 1
+                        ? "none"
+                        : undefined,
+                  }}
                 >
-                  <span class="form-selected-data-display-label">{tag.label}</span>
-                  <span class={["form-selected-data-display-value", tag.empty ? "is-empty" : ""]}>
-                    {tag.value || "暂无内容"}
+                  <span class="form-selected-data-display-label">
+                    {tag.label}
+                  </span>
+                  <span
+                    class={[
+                      "form-selected-data-display-value",
+                      tag.empty ? "is-empty" : "",
+                    ]}
+                  >
+                    {tag.value || ""}
                   </span>
                 </div>
               ))}
             </div>
           )}
-
-            {displayRows.value.length === 0 && editable && (
-              <div class="form-selected-data-empty">暂无数据</div>
-            )}
 
           <ElDialog
             modelValue={showDialog.value}
@@ -298,7 +321,9 @@ export default defineComponent({
               ),
               default: () => (
                 <div class="form-selected-data-dialog-body">
-                  {error.value && <div class="form-selected-data-error">{error.value}</div>}
+                  {error.value && (
+                    <div class="form-selected-data-error">{error.value}</div>
+                  )}
                   <DataSelectTablePanel
                     formId={props.dataSource}
                     fields={tableFields.value}
@@ -322,8 +347,14 @@ export default defineComponent({
               ),
               footer: () => (
                 <div class="form-selected-data-dialog-footer">
-                  <ElButton onClick={() => (showDialog.value = false)}>取消</ElButton>
-                  <ElButton type="primary" disabled={!selectedRecord.value} onClick={handleConfirm}>
+                  <ElButton onClick={() => (showDialog.value = false)}>
+                    取消
+                  </ElButton>
+                  <ElButton
+                    type="primary"
+                    disabled={!selectedRecord.value}
+                    onClick={handleConfirm}
+                  >
                     确定
                   </ElButton>
                 </div>
