@@ -28,7 +28,7 @@ export const useUserStore = defineStore("currentuser", () => {
         systemService
           .getCurrentUser()
           .then((res) => {
-            Object.assign(currentUser.value, { ...res });
+            currentUser.value = { ...currentUser.value, ...res };
             initialized.value = true;
             resolve(currentUser.value);
           })
@@ -62,6 +62,8 @@ export const useUserStore = defineStore("currentuser", () => {
   const logout = () => {
     return new Promise<void>((resolve, reject) => {
       accessToken.clear();
+      currentUser.value = new CurrentUser();
+      initialized.value = false;
       useFormStoreHook().clear();
       useAppStoreHook().clear();
       useDeptStoreHook().clear();

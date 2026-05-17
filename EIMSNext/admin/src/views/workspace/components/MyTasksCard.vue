@@ -3,11 +3,9 @@
     <div class="flow-center-wrapper">
       <div class="my-todo">
         <div class="todo-wrapper" @click="goToMyTasks">
-          <el-badge :is-dot="todoCount > 0" :offset="[-6, 14]">
-            <div class="image-wrapper">
-              <et-icon icon="icon-mytodo" size="64px" color="var(--et-color-info)" />
-            </div>
-          </el-badge>
+          <div class="image-wrapper">
+            <et-icon icon="icon-mytodo" size="64px" color="var(--et-color-info)" />
+          </div>
           <div class="todo-count">
             <div class="todo-count-text">{{ t("common.wfProcess.mytasks") }}</div>
             <div class="todo-count-number">{{ todoCount }}</div>

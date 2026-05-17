@@ -1,5 +1,5 @@
 import {localeOptions, localeProps} from '../../utils';
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 
 const label = '动态区域';
 const name = 'fcJson';
@@ -16,7 +16,7 @@ export default {
     rule() {
         return {
             type: name,
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             props: {
                 expand: 1,
             },

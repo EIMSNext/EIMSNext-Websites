@@ -1,5 +1,5 @@
 import { localeProps } from "../../utils";
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 
 const label = "面板";
 const name = "elCollapseItem";
@@ -18,7 +18,7 @@ export default {
       type: name,
       props: {
         title: t("com.elCollapseItem.name"),
-        name: uniqueId(),
+        name: uniqueId8(),
       },
       style: {},
       children: [],

@@ -1,4 +1,4 @@
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 import {localeOptions, localeProps} from '../../utils';
 import date from './timestamp';
 
@@ -16,7 +16,7 @@ export default {
     rule({t}) {
         return {
             type: 'datePicker',
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: t('com.dateRange.name'),
             info: '',
             $required: false,

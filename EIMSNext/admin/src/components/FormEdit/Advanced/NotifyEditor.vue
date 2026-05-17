@@ -89,11 +89,14 @@
             <div class="notify-msg">
               <div class="label">提醒文字</div>
               <div class="content notify-margin">
-                <el-input
-                  v-model="formNotify.notifyText"
-                  type="textarea"
-                  :rows="3"
-                  placeholder="请输入提醒内容"
+                <FieldBlockCodeEditor
+                  :modelValue="formNotify.notifyText || ''"
+                  :formDef="formDef"
+                  :showSubFields="false"
+                  :maxBlocks="6"
+                  placeholder="请输入提醒内容或添加字段"
+                  @update:modelValue="updateNotifyText"
+                  @limit="notifyTextLimitReached"
                 />
               </div>
             </div>
@@ -171,6 +174,7 @@ import {
   convertTagToCandidate,
   IApprovalCandidate,
   FieldSelectList,
+  FieldBlockCodeEditor,
 } from "@eimsnext/components";
 import { formNotifyService } from "@eimsnext/services";
 
@@ -300,6 +304,14 @@ function finishSelectNotifier(tags: ISelectedTag[]) {
   emit("update:modelValue", formNotify.value);
 }
 
+function notifyTextLimitReached() {
+  ElMessage.warning("提醒文字最多添加6个字段");
+}
+
+function updateNotifyText(value: string) {
+  formNotify.value.notifyText = value;
+}
+
 watch(
   filter,
   (val) => {
@@ -318,6 +330,13 @@ watch(changeMode, (val) => {
     formNotify.value.changeFields = [];
   }
 });
+
+watch(
+  () => formNotify.value.notifyText,
+  () => {
+    emit("update:modelValue", formNotify.value);
+  }
+);
 
 const save = async () => {
   try {

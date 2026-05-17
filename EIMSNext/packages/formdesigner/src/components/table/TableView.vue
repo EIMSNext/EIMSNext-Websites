@@ -96,7 +96,7 @@
 import DragTool from '../DragTool.vue';
 import DragBox from '../DragBox.vue';
 import {defineComponent} from 'vue';
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 
 export default defineComponent({
     name: 'FcTableView',
@@ -182,7 +182,7 @@ export default defineComponent({
     methods: {
         getUnique(key) {
             if (!this.unique[key]) {
-                this.unique[key] = uniqueId();
+                this.unique[key] = uniqueId8();
             }
             return this.unique[key];
         },

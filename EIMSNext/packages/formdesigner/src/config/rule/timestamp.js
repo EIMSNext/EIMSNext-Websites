@@ -1,4 +1,4 @@
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 import { localeOptions, localeProps } from "../../utils";
 
 const label = "日期";
@@ -38,7 +38,7 @@ export default {
   rule({ t }) {
     return {
       type: name,
-      field: uniqueId(),
+      field: `f_${uniqueId8()}`,
       title: t("com.timestamp.name"),
       info: "",
       $required: false,

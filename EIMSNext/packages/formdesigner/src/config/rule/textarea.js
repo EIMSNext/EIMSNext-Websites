@@ -1,4 +1,4 @@
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 import { localeProps } from "../../utils";
 
 const label = "多行输入框";
@@ -15,7 +15,7 @@ export default {
   rule({ t }) {
     return {
       type: "textarea",
-      field: uniqueId(),
+      field: `f_${uniqueId8()}`,
       title: t("com.textarea.name"),
       info: "",
       $required: false,

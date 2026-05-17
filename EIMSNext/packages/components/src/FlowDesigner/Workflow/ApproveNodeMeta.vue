@@ -1,54 +1,64 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader
-      :label="t('workflow.approver')"
-      :required="true"
-      :tips="t('workflow.maxApproverTips')"
-    >
-    </MetaItemHeader>
-    <el-select
-      v-model="activeData.metadata.approveMeta!.approveMode"
-      class="sub-item approve-mode-select"
-    >
+    <MetaItemHeader :label="t('workflow.approver')" :required="true" :tips="t('workflow.maxApproverTips')" />
+    <el-select v-model="activeData.metadata.approveMeta!.approveMode" class="sub-item approve-mode-select">
       <el-option :label="t('workflow.orSign')" :value="1" />
       <el-option :label="t('workflow.counterSign')" :value="2" />
     </el-select>
-    <selected-tags
-      v-model="selectedCandidateTags"
-      :editable="true"
-      :empty-text="t('comp.emptyMember')"
-      @editTag="editTag"
-    />
-    <!-- <el-checkbox v-model="activeData.metadata.approveMeta!.enableCopyto" label="启用抄送" class="sub-item" /> -->
-    <member-select-dialog
-      v-model="showMemberDialog"
-      :tags="selectedCandidateTags"
-      :member-options="{
-        showTabs:
-          MemberTabs.Department |
-          MemberTabs.Role |
-          MemberTabs.Employee |
-          MemberTabs.Dynamic,
-        dynamicMembers: dynamicMembers,
-        cascadedDept: true,
-        showCascade: true,
-        showContract: true,
-      }"
-      destroy-on-close
-      @ok="finishSelect"
-    />
+    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
+      @editTag="editApprover" />
+    <member-select-dialog v-model="showApproverDialog" :tags="selectedCandidateTags" :member-options="memberOptions"
+      destroy-on-close @ok="finishApproverSelect" />
+
+    <el-tabs v-model="activeConfigTab" class="node-config-tabs">
+      <!-- <el-tab-pane :label="t('workflow.fieldPerms')" name="fieldPerms" /> -->
+      <el-tab-pane :label="t('workflow.nodeActions')" name="nodeActions">
+        <div class="node-actions-panel">
+          <div>
+            <div v-for="action in nodeActions" :key="action.actionType" class="node-action-item">
+              <div class="node-action-main">
+                <span class="node-action-label">{{ getDefaultActionLabel(action.actionType) }}</span>
+                <div class="node-action-tools">
+                  <el-button v-if="supportsCandidates(action.actionType)" link type="primary"
+                    @click="openActionDialog(action.actionType)">
+                    {{ t('common.edit') }}
+                  </el-button>
+                  <el-switch v-model="action.enabled" size="small" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane :label="t('workflow.transitionRules')" name="transitionRules" />
+    </el-tabs>
+
+    <et-dialog v-model="showActionDialog" :title="dialogTitle" width="500px" destroy-on-close @ok="confirmActionDialog"
+      @cancel="cancelActionDialog">
+      <div class="action-dialog-body">
+        <MetaItemHeader :label="t('workflow.buttonText')" :required="true" />
+        <el-input v-model="dialogAction.text" />
+
+        <MetaItemHeader class="candidate-header" :label="dialogCandidateLabel" :required="true" />
+        <selected-tags v-model="dialogCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
+          @editTag="showActionMemberDialog = true" />
+      </div>
+    </et-dialog>
+
+    <member-select-dialog v-model="showActionMemberDialog" :tags="dialogCandidateTags" :member-options="memberOptions"
+      destroy-on-close @ok="finishActionMemberSelect" />
   </template>
 </template>
+
 <script lang="ts" setup>
-import { inject, nextTick, ref } from "vue";
+import { computed, inject, nextTick, ref } from "vue";
+import { ElMessage } from "element-plus";
 import {
   FlowNodeType,
   IFlowContext,
   IFlowNodeData,
-  ApproveMode,
-  CandidateType,
-  IApprovalCandidate,
-  IFlowNodeMetaData,
+  NodeActionType,
+  INodeActionConfig,
   createFlowNode,
 } from "../Common/FlowData";
 import { useLocale } from "element-plus";
@@ -57,6 +67,7 @@ import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { ISelectedTag } from "@/selectedTags/type";
 import { MemberTabs } from "@/component";
 import { DataItemType } from "@/common";
+
 const { t } = useLocale();
 
 defineOptions({
@@ -66,8 +77,15 @@ defineOptions({
 const ready = ref(false);
 const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
-const showMemberDialog = ref(false);
+const showApproverDialog = ref(false);
 const selectedCandidateTags = ref<ISelectedTag[]>([]);
+const activeConfigTab = ref("nodeActions");
+const showActionDialog = ref(false);
+const showActionMemberDialog = ref(false);
+const dialogActionType = ref<NodeActionType>();
+const dialogAction = ref<INodeActionConfig>({ actionType: NodeActionType.AddSign, enabled: false, text: "", candidates: [] });
+const dialogCandidateTags = ref<ISelectedTag[]>([]);
+
 const dynamicMembers = ref<ISelectedTag[]>([
   {
     id: "starter",
@@ -78,33 +96,131 @@ const dynamicMembers = ref<ISelectedTag[]>([
   },
 ]);
 
-const editTag = () => {
-  showMemberDialog.value = true;
+const memberOptions = {
+  showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic,
+  dynamicMembers,
+  cascadedDept: true,
+  showCascade: true,
+  showContract: true,
 };
-const finishSelect = (tags: ISelectedTag[]) => {
-  let candidate: IApprovalCandidate[] = [];
-  tags.forEach((x) => candidate.push(convertTagToCandidate(x)));
-  activeData.value.metadata.approveMeta!.approvalCandidates = candidate;
 
+const nodeActions = computed(() => {
+  if (!activeData.value.metadata.approveMeta) {
+    activeData.value.metadata.approveMeta = createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!;
+  }
+
+  if (!activeData.value.metadata.approveMeta.nodeActions) {
+    activeData.value.metadata.approveMeta.nodeActions = createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!.nodeActions || [];
+  }
+
+  return activeData.value.metadata.approveMeta.nodeActions!;
+});
+
+const dialogTitle = computed(() => {
+  if (!dialogActionType.value) {
+    return t("common.edit");
+  }
+
+  return getDefaultActionLabel(dialogActionType.value);
+});
+
+const dialogCandidateLabel = computed(() => {
+  return dialogActionType.value === NodeActionType.Transfer
+    ? t("workflow.transferCandidates")
+    : t("workflow.addSignCandidates");
+});
+
+const editApprover = () => {
+  showApproverDialog.value = true;
+};
+
+const finishApproverSelect = (tags: ISelectedTag[]) => {
+  activeData.value.metadata.approveMeta!.approvalCandidates = tags.map(convertTagToCandidate);
   selectedCandidateTags.value = tags;
-  showMemberDialog.value = false;
+  showApproverDialog.value = false;
+};
+
+const getDefaultActionLabel = (actionType: NodeActionType) => {
+  switch (actionType) {
+    case NodeActionType.Submit:
+      return t("workflow.nodeActionSubmit");
+    case NodeActionType.Return:
+      return t("workflow.nodeActionReturn");
+    case NodeActionType.Reject:
+      return t("workflow.nodeActionReject");
+    case NodeActionType.Draft:
+      return t("workflow.nodeActionDraft");
+    case NodeActionType.AddSign:
+      return t("workflow.nodeActionAddSign");
+    case NodeActionType.Transfer:
+      return t("workflow.nodeActionTransfer");
+    default:
+      return "";
+  }
+};
+
+const supportsCandidates = (actionType: NodeActionType) => {
+  return actionType === NodeActionType.AddSign || actionType === NodeActionType.Transfer;
+};
+
+const openActionDialog = (actionType: NodeActionType) => {
+  const action = nodeActions.value.find((item) => item.actionType === actionType);
+  if (!action) {
+    return;
+  }
+
+  dialogActionType.value = actionType;
+  dialogAction.value = {
+    actionType: action.actionType,
+    enabled: action.enabled,
+    text: action.text || getDefaultActionLabel(action.actionType),
+    candidates: action.candidates ? [...action.candidates] : [],
+  };
+  dialogCandidateTags.value = (dialogAction.value.candidates || []).map(convertCandidateToTag);
+  showActionDialog.value = true;
+};
+
+const finishActionMemberSelect = (tags: ISelectedTag[]) => {
+  dialogCandidateTags.value = tags;
+  dialogAction.value.candidates = tags.map(convertTagToCandidate);
+  showActionMemberDialog.value = false;
+};
+
+const cancelActionDialog = () => {
+  showActionDialog.value = false;
+  showActionMemberDialog.value = false;
+};
+
+const confirmActionDialog = () => {
+  if (!dialogActionType.value) {
+    return;
+  }
+
+  if (!dialogAction.value.text?.trim()) {
+    dialogAction.value.text = getDefaultActionLabel(dialogActionType.value);
+  }
+
+  if (supportsCandidates(dialogActionType.value) && (!dialogAction.value.candidates || dialogAction.value.candidates.length === 0)) {
+    ElMessage.warning(t("workflow.actionCandidateRequired"));
+    return;
+  }
+
+  const index = nodeActions.value.findIndex((item) => item.actionType === dialogActionType.value);
+  if (index >= 0) {
+    nodeActions.value[index] = {
+      ...nodeActions.value[index],
+      text: dialogAction.value.text,
+      candidates: dialogAction.value.candidates ? [...dialogAction.value.candidates] : [],
+    };
+  }
+
+  cancelActionDialog();
 };
 
 const init = () => {
-  nextTick(async () => {
+  nextTick(() => {
     activeData.value = flowContext.activeData;
-
-    //TODO:添加更多动态审批人，比如表单中员工字段
-
-    selectedCandidateTags.value = [];
-    if (activeData.value.metadata.approveMeta!.approvalCandidates) {
-      let tags: ISelectedTag[] = [];
-      activeData.value.metadata.approveMeta!.approvalCandidates.forEach(
-        (x: IApprovalCandidate) => tags.push(convertCandidateToTag(x)),
-      );
-      selectedCandidateTags.value = tags;
-    }
-
+    selectedCandidateTags.value = (activeData.value.metadata.approveMeta?.approvalCandidates || []).map(convertCandidateToTag);
     ready.value = true;
   });
 };
@@ -116,5 +232,50 @@ init();
 .approve-mode-select {
   width: 100%;
   margin-bottom: var(--et-space-8);
+}
+
+.node-config-tabs {
+  margin-top: var(--et-space-12);
+}
+
+.node-actions-panel {
+  display: flex;
+  border: solid 1px var(--et-border-color);
+  border-radius: var(--et-space-10);
+  flex-direction: column;
+  padding: var(--et-space-8) var(--et-space-16);
+  margin-top: var(--et-space-12);
+}
+
+.node-action-item:not(:last-child) {
+  border-bottom: 1px solid var(--et-border-color);
+}
+
+
+.node-action-main {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  height: 36px;
+}
+
+.node-action-label {
+  color: var(--et-text-primary);
+}
+
+.node-action-tools {
+  align-items: center;
+  display: flex;
+  gap: var(--et-space-8);
+}
+
+.action-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-space-12);
+}
+
+.candidate-header {
+  margin-top: var(--et-space-8);
 }
 </style>

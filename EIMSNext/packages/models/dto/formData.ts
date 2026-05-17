@@ -11,6 +11,7 @@ export interface FormData extends CorpModelBase {
   appId: string;
   formId: string;
   data: any;
+  dataTitle?: string;
   flowStatus: FlowStatus;
 }
 

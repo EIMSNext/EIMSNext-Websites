@@ -1,4 +1,3 @@
-export * from "./authService";
 export * from "./adminGroupService";
 export * from "./appService";
 export * from "./appTemplateService";
@@ -23,7 +22,6 @@ export * from "./webhookAliasService";
 export * from "./webPushLogService";
 export * from "./wfDefinitionService";
 export * from "./wfTodoService";
-export * from "./workflowService";
 export * from "./wfApprovalLogService";
 export * from "./dashboardDefService";
 export * from "./dashboardItemDefService";

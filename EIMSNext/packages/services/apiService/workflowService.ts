@@ -1,0 +1,94 @@
+import {
+  AddSignRequest,
+  ApproveRequest,
+  ChangeApproverRequest,
+  FlowManageQueryRequest,
+  FlowManageTodoQueryResult,
+  ReturnRequest,
+  ReturnTargetNode,
+  StartRequest,
+  TerminateWorkflowRequest,
+  TransferRequest,
+  UrgeRequest,
+  WithdrawRequest,
+  WorkflowActionStatus,
+} from "@eimsnext/models";
+import { ServiceBase } from "../interface";
+
+export class WorkflowService extends ServiceBase {
+  protected modelName(): string {
+    return "Workflow";
+  }
+
+  start(data: StartRequest): Promise<any> {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "Start"), data);
+  }
+
+  approve(data: ApproveRequest) {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "Approve"), data);
+  }
+
+  submit(data: ApproveRequest) {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "Submit"), data);
+  }
+
+  reject(data: ApproveRequest) {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "Reject"), data);
+  }
+
+  return(data: ReturnRequest) {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "Return"), data);
+  }
+
+  addSign(data: AddSignRequest) {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "AddSign"), data);
+  }
+
+  transfer(data: TransferRequest) {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "Transfer"), data);
+  }
+
+  withdraw(data: WithdrawRequest) {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "Withdraw"), data);
+  }
+
+  urge(data: UrgeRequest) {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "Urge"), data);
+  }
+
+  getActionStatus(dataId: string, wfInstanceId?: string) {
+    const query = wfInstanceId
+      ? `?dataId=${encodeURIComponent(dataId)}&wfInstanceId=${encodeURIComponent(wfInstanceId)}`
+      : `?dataId=${encodeURIComponent(dataId)}`;
+    return this.http().api.get<WorkflowActionStatus>(`${this.getUrl(this.modelName(), "ActionStatus")}${query}`);
+  }
+
+  getReturnNodes(dataId: string, wfInstanceId?: string) {
+    const query = wfInstanceId
+      ? `?dataId=${encodeURIComponent(dataId)}&wfInstanceId=${encodeURIComponent(wfInstanceId)}`
+      : `?dataId=${encodeURIComponent(dataId)}`;
+    return this.http().api.get<ReturnTargetNode[]>(`${this.getUrl(this.modelName(), "ReturnNodes")}${query}`);
+  }
+
+  async queryManageTodos(params: FlowManageQueryRequest): Promise<FlowManageTodoQueryResult> {
+    const result = await this.http().api.get<{ data: FlowManageTodoQueryResult }>(this.getUrl(this.modelName(), "ManageTodos"), params);
+    return result.data;
+  }
+
+  terminate(data: TerminateWorkflowRequest): Promise<any> {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "Terminate"), data);
+  }
+
+  changeApprover(data: ChangeApproverRequest): Promise<any> {
+    return this.http().api.post<any>(this.getUrl(this.modelName(), "ChangeApprover"), data);
+  }
+
+  private getUrl<T>(url: string, id?: string) {
+    const idPath = id ? "/" + id : "";
+    url = url.startsWith("/") ? url : "/" + url;
+    return url.startsWith("http") ? url : `${url}${idPath}`;
+  }
+}
+
+const workflowService = new WorkflowService();
+export { workflowService };

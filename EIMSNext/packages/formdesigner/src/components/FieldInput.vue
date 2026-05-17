@@ -1,15 +1,16 @@
 <template>
     <div class="_fd-field-input">
-        <i class="fc-icon icon-group" @click.stop="copy"></i>
+        <i v-if="!simple" class="fc-icon icon-group" @click.stop="copy"></i>
         <el-input
-            v-if="!fieldList.length"
+            v-if="simple || !fieldList.length"
             v-model="value"
+            :class="{ '_fd-field-input-simple': simple }"
             :readonly="fieldReadonly || disabled"
             :disabled="fieldReadonly || disabled"
             @focus="onFocus"
             @blur="onInput"
         >
-            <template #append v-if="!fieldReadonly">
+            <template #append v-if="!simple && !fieldReadonly">
                 <i class="fc-icon icon-auto" @click="makeField"></i>
             </template>
         </el-input>
@@ -34,7 +35,7 @@
 
 <script>
 import {defineComponent, nextTick, onUnmounted} from 'vue';
-import { uniqueId, is, hasProperty, deepCopy } from '@eimsnext/form-render-core';
+import { uniqueId8, is, hasProperty, deepCopy } from '@eimsnext/form-render-core';
 import {copyTextToClipboard, escapeRegExp} from '../utils';
 import errorMessage from '../utils/message';
 
@@ -45,6 +46,7 @@ export default defineComponent({
     props: {
         modelValue: String,
         disabled: Boolean,
+        simple: Boolean,
     },
     computed: {
         fieldList() {
@@ -181,14 +183,10 @@ export default defineComponent({
             if (!field) {
                 errorMessage(this.t('computed.fieldEmpty'));
                 return oldField;
-            } else if (!/^[a-zA-Z]/.test(field)) {
+            } else if (!/^[a-z][a-z0-9_]*$/.test(field)) {
                 errorMessage(this.t('computed.fieldChar'));
                 return oldField;
             } else if (oldField !== field) {
-                const flag = field.indexOf('.') > -1;
-                if (flag) {
-                    field = field.replaceAll('.', '_');
-                }
                 if (this.getSubFieldChildren().filter(v => v.field === field).length > 0) {
                     errorMessage(this.t('computed.fieldExist', {label: field}));
                     return oldField;
@@ -213,9 +211,6 @@ export default defineComponent({
                 //         }
                 //     }
                 // }
-                if (flag) {
-                    return field;
-                }
             }
             this.oldValue = '';
             return field;
@@ -225,7 +220,7 @@ export default defineComponent({
         },
         makeField() {
             this.oldValue = this.value;
-            this.value = uniqueId();
+            this.value = `f_${uniqueId8()}`;
             this.onInput();
         },
         updateRule(node) {
@@ -272,6 +267,10 @@ export default defineComponent({
 ._fd-field-input {
     width: 100%;
     position: relative;
+}
+
+._fd-field-input ._fd-field-input-simple .el-input__wrapper {
+    width: 100%;
 }
 
 ._fd-field-input > .fc-icon {

@@ -1,4 +1,4 @@
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 import {localeOptions, localeProps} from '../../utils';
 import time from './time';
 
@@ -16,7 +16,7 @@ export default {
     rule({t}) {
         return {
             type: 'timePicker',
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: t('com.timeRange.name'),
             info: '',
             $required: false,

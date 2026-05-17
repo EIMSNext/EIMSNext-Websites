@@ -1,5 +1,5 @@
 import { localeProps } from "../../utils";
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 
 const label = "选项卡";
 const name = "elTabPane";
@@ -16,7 +16,7 @@ export default {
       type: name,
       props: {
         label: t("com.elTabPane.name"),
-        name: uniqueId(),
+        name: uniqueId8(),
       },
       children: [],
     };

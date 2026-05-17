@@ -37,6 +37,7 @@ export interface Operator {
 
 export enum SystemField {
   Id = "id",
+  DataTitle = "dataTitle",
   CreateBy = "createBy",
   CreateTime = "createTime",
   UpdateBy = "updateBy",
@@ -47,6 +48,7 @@ export enum SystemField {
 export function isSystemField(field: string) {
   return (
     field === SystemField.Id ||
+    field === SystemField.DataTitle ||
     field === SystemField.CreateBy ||
     field === SystemField.CreateTime ||
     field === SystemField.UpdateBy ||
@@ -58,6 +60,14 @@ export function isSystemField(field: string) {
 export function getIdDef(title: string): FieldDef {
   let field = new FieldDef();
   field.field = SystemField.Id;
+  field.title = title;
+  field.type = FieldType.Input;
+  return field;
+}
+
+export function getDataTitle(title: string): FieldDef {
+  let field = new FieldDef();
+  field.field = SystemField.DataTitle;
   field.title = title;
   field.type = FieldType.Input;
   return field;

@@ -9,7 +9,7 @@
       :destroy-on-close="true"
     >
       <div class="form-container">
-        <WfProcess :todo="selectedTask!" />
+        <WfProcess :todo="selectedTask!" @processed="handleProcessed" />
       </div>
     </et-dialog>
     <el-space v-if="dataRef.length > 0" direction="vertical" class="task-space">
@@ -227,6 +227,12 @@ const loadData = async (reset = false) => {
 const processTodo = async (task: WfTodo) => {
   selectedTask.value = task;
   showProcessDialog.value = true;
+};
+
+const handleProcessed = async () => {
+  showProcessDialog.value = false;
+  selectedTask.value = undefined;
+  await loadData(true);
 };
 
 const handleScroll = () => {

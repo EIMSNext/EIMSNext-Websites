@@ -135,7 +135,7 @@
 <script>
 import {defineComponent} from 'vue';
 import errorMessage from '../../utils/message';
-import { deepCopy, hasProperty, uniqueId } from '@eimsnext/form-render-core';
+import { deepCopy, hasProperty, uniqueId8 } from '@eimsnext/form-render-core';
 import FnEditor from '../FnEditor.vue';
 
 export default defineComponent({
@@ -212,11 +212,11 @@ export default defineComponent({
             return data;
         },
         add(idx) {
-            const item = {format: 'default', filter: [], id: uniqueId()};
+            const item = {format: 'default', filter: [], id: uniqueId8()};
             idx != null ? this.column.splice(idx + 1, 0, item) : this.column.push(item);
         },
         addChild(column) {
-            const item = {p: column, format: 'default', filter: [], id: uniqueId()};
+            const item = {p: column, format: 'default', filter: [], id: uniqueId8()};
             if (!column.children) {
                 column.children = [];
             }
@@ -244,7 +244,7 @@ export default defineComponent({
         fullId(columns, p) {
             columns.map(column => {
                 if (!column.id) {
-                    column.id = uniqueId();
+                    column.id = uniqueId8();
                 }
                 column.p = p;
                 if (column.children) {

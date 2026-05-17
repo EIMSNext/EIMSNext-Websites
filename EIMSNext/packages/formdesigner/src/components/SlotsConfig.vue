@@ -33,7 +33,7 @@
 
 <script>
 import {defineComponent} from 'vue';
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 import ConfigItem from './style/ConfigItem.vue';
 import {uniqueArray} from '../utils';
 
@@ -261,7 +261,7 @@ export default defineComponent({
                 } else {
                     this.designer.setupState.activeRule.$easySlots = easySlots;
                 }
-                this.designer.setupState.activeRule.key = uniqueId();
+                this.designer.setupState.activeRule.key = uniqueId8();
             }
         }
     },
