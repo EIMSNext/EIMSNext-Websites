@@ -38,7 +38,7 @@
 <script>
 import { defineComponent } from 'vue';
 import { DataSelectFieldPicker } from '@eimsnext/components';
-import { loadSourceFormFields, normalizeDisplayConfig, normalizeSelectionProcess } from './dataSelectShared';
+import { loadSourceFormFields, normalizeDisplayConfig } from './dataSelectShared';
 
 export default defineComponent({
   name: 'DisplayFieldsConfig',
@@ -68,8 +68,7 @@ export default defineComponent({
       return this.activeRule?.props?.dataSource || '';
     },
     availableFields() {
-      const selectionFields = normalizeSelectionProcess(this.activeRule?.props?.selectionProcess).tableFields;
-      return selectionFields.length > 0 ? selectionFields : this.sourceFields;
+      return this.sourceFields;
     },
   },
   watch: {

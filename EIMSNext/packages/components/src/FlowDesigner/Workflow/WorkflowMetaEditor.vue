@@ -38,20 +38,80 @@
         </div>
       </el-tab-pane>
       <el-tab-pane :label="t('workflow.flowProps')" name="flow">
-        <div>{{ t("workflow.reminderSetting") }}</div>
+        <div class="flow-node-meta">
+          <div class="attr-content">
+            <div class="attr-item has-padding">
+              <MetaItemHeader :label="t('workflow.flowDescription')"></MetaItemHeader>
+              <el-input
+                v-model="workflowMeta.description"
+                :placeholder="t('workflow.flowDescriptionPlaceholder')"
+                type="textarea"
+                :rows="4"
+              />
+            </div>
+
+            <div class="attr-item has-padding">
+              <MetaItemHeader :label="t('workflow.allowStarterUrge')"></MetaItemHeader>
+              <el-switch v-model="workflowMeta.allowUrge" />
+            </div>
+
+            <div class="attr-item has-padding">
+              <MetaItemHeader :label="t('workflow.flowReminder')"></MetaItemHeader>
+              <div class="flow-check-list">
+                <el-checkbox
+                  :model-value="hasNotifyChannel(NotifyChannel.Email)"
+                  @change="toggleNotifyChannel(NotifyChannel.Email, $event)"
+                >
+                  {{ t("workflow.emailReminder") }}
+                </el-checkbox>
+                <el-checkbox
+                  :model-value="hasNotifyChannel(NotifyChannel.System)"
+                  @change="toggleNotifyChannel(NotifyChannel.System, $event)"
+                >
+                  {{ t("workflow.systemReminder") }}
+                </el-checkbox>
+              </div>
+            </div>
+
+            <div class="attr-item has-padding">
+              <MetaItemHeader :label="t('workflow.autoProcess')"></MetaItemHeader>
+              <el-select v-model="workflowMeta.autoProcessRule" class="full-width-input">
+                <el-option :label="t('workflow.autoProcessDisabled')" :value="WorkflowAutoProcessRule.Disabled" />
+                <el-option :label="t('workflow.autoProcessFirstNode')" :value="WorkflowAutoProcessRule.FirstNodeOnly" />
+                <el-option :label="t('workflow.autoProcessContinuous')" :value="WorkflowAutoProcessRule.ContinuousApproval" />
+              </el-select>
+            </div>
+
+            <div class="attr-item has-padding">
+              <MetaItemHeader :label="t('workflow.withdrawRule')"></MetaItemHeader>
+              <el-select v-model="workflowMeta.withdrawRule" class="full-width-input">
+                <el-option :label="t('workflow.withdrawDisabled')" :value="WorkflowWithdrawRule.Disabled" />
+                <el-option :label="t('workflow.withdrawStarterOnly')" :value="WorkflowWithdrawRule.StarterOnly" />
+                <el-option :label="t('workflow.withdrawAllNodes')" :value="WorkflowWithdrawRule.AllNodes" />
+              </el-select>
+            </div>
+          </div>
+        </div>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 <script lang="ts" setup>
-import { inject, nextTick, ref, watch } from "vue";
+import { computed, inject, nextTick, ref, watch } from "vue";
 import {
   FlowNodeType,
   IFlowContext,
   IFlowNodeData,
+  WorkflowMeta,
   createFlowNode,
 } from "../Common/FlowData";
+import {
+  NotifyChannel,
+  WorkflowAutoProcessRule,
+  WorkflowWithdrawRule,
+} from "@eimsnext/models";
 import { useLocale } from "element-plus";
+import { FlagEnum } from "@eimsnext/utils";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import ApproveNodeMeta from "./ApproveNodeMeta.vue";
 import WfConditionNodeMeta from "./WfConditionNodeMeta.vue";
@@ -66,6 +126,30 @@ const activeTab = ref("node");
 const flowContext = inject<IFlowContext>("flowContext")!;
 const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
 const nodeType = ref(FlowNodeType.None);
+const workflowMeta = computed<WorkflowMeta>(() => {
+  if (!flowContext.flowData.workflowMeta) {
+    flowContext.flowData.workflowMeta = {
+      description: "",
+      allowUrge: false,
+      notifyChannels: NotifyChannel.None,
+      autoProcessRule: WorkflowAutoProcessRule.Disabled,
+      withdrawRule: WorkflowWithdrawRule.Disabled,
+    };
+  }
+
+  return flowContext.flowData.workflowMeta!;
+});
+
+const hasNotifyChannel = (channel: NotifyChannel) =>
+  FlagEnum.has(workflowMeta.value.notifyChannels ?? NotifyChannel.None, channel);
+
+const toggleNotifyChannel = (channel: NotifyChannel, checked: boolean | string | number) => {
+  const isChecked = !!checked;
+  const current = workflowMeta.value.notifyChannels ?? NotifyChannel.None;
+  workflowMeta.value.notifyChannels = isChecked
+    ? FlagEnum.add(current, channel)
+    : FlagEnum.remove(current, channel);
+};
 
 watch(
   () => flowContext.activeData,
@@ -131,6 +215,12 @@ watch(
         padding: var(--et-space-12);
       }
     }
+  }
+
+  .flow-check-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--et-space-10);
   }
 
   .required {

@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import {uniqueId,deepCopy} from '@eimsnext/form-render-core';
+import {uniqueId8,deepCopy} from '@eimsnext/form-render-core';
 import FnEditor from './FnEditor.vue';
 import {defineComponent} from 'vue';
 import {getInjectArg} from '../utils';
@@ -137,7 +137,7 @@ export default defineComponent({
         addCus() {
             const label = this.cusValue && this.cusValue.trim();
             if (label) {
-                const key = 'event_' + uniqueId();
+                const key = 'event_' + uniqueId8();
                 this.event[key] = {
                     label,
                     handle: '',

@@ -45,7 +45,28 @@
       <div v-else class="fill-step-two">
         <div class="mapping-desc">选择数据后，将按以下规则将所选字段的值填充到当前表单字段。</div>
         <div class="mapping-add-row">
-          <el-button text type="primary" @click="appendEmptyMapping">+ 选择字段</el-button>
+          <el-popover
+            v-model:visible="sourceFieldPickerVisible"
+            trigger="click"
+            placement="bottom-start"
+            :width="200"
+            popper-class="_fd-fill-fields-source-picker"
+          >
+            <template #reference>
+              <el-button text type="primary">+ 选择字段</el-button>
+            </template>
+            <DataSelectFieldPicker
+              v-model="pendingSourceField"
+              :fields="availableSourceFields"
+              :multiple="false"
+              :show-trigger="false"
+              :default-expanded="true"
+              :show-select-all="false"
+              :show-indicator="false"
+              search-placeholder="搜索字段"
+              @change="handleSourceFieldPick"
+            />
+          </el-popover>
         </div>
 
         <div class="mapping-list">
@@ -58,6 +79,7 @@
               <FieldSelect
                 :model-value="toFieldSelectValue(mapping.targetField)"
                 :form-id="designerFormId"
+                :fields="getCompatibleFields(mapping.sourceField)"
                 @update:model-value="(field) => handleFieldSelect(index, field)"
               />
             </div>
@@ -82,7 +104,6 @@ import { defineComponent, nextTick } from 'vue';
 import { DataSelectFieldPicker, FieldSelect } from '@eimsnext/components';
 import {
   buildMappingsFromFields,
-  appendRuleAfterActiveRule,
   createRuleFromField,
   getCurrentFormFields,
   isFieldTypeCompatible,
@@ -108,9 +129,11 @@ export default defineComponent({
       visible: false,
       step: 1,
       actionType: 'existing',
+      sourceFieldPickerVisible: false,
       sourceFields: [],
       currentFormFields: [],
       selectedSourceFields: [],
+      pendingSourceField: [],
       editableMappings: [],
       config: normalizeFillConfig(this.modelValue),
     };
@@ -128,6 +151,10 @@ export default defineComponent({
     canReturnStepOne() {
       return this.config.mappings.length === 0;
     },
+    availableSourceFields() {
+      const used = new Set(this.editableMappings.map((item) => item.sourceField?.field).filter(Boolean));
+      return this.sourceFields.filter((field) => !used.has(field.field));
+    },
   },
   watch: {
     modelValue: {
@@ -141,21 +168,32 @@ export default defineComponent({
     async openDialog() {
       this.config = normalizeFillConfig(this.modelValue);
       this.sourceFields = await loadSourceFormFields(this.selectedForm);
-      this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field);
+      this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field, this.activeRule);
       this.selectedSourceFields = this.config.mappings.map((item) => item.sourceField);
       this.editableMappings = normalizeFillConfig(this.config).mappings;
       this.actionType = 'existing';
+      this.pendingSourceField = [];
+      this.sourceFieldPickerVisible = false;
       this.step = this.config.mappings.length > 0 ? 2 : 1;
       this.visible = true;
     },
     isCompatible(sourceField, targetField) {
       return isFieldTypeCompatible(sourceField, targetField);
     },
-    appendEmptyMapping() {
-      if (!this.sourceFields.length) return;
-      const sourceField = this.sourceFields.find((field) => !this.editableMappings.find((item) => item.sourceField.field === field.field)) || this.sourceFields[0];
+    appendMapping(sourceField) {
+      if (!sourceField) return;
       const targetField = this.currentFormFields.find((field) => this.isCompatible(sourceField, field)) || { field: '', label: '', type: 'none' };
       this.editableMappings.push({ sourceField, targetField });
+    },
+    handleSourceFieldPick(fields) {
+      const sourceField = Array.isArray(fields) ? fields[0] : null;
+      if (!sourceField) return;
+      this.appendMapping(sourceField);
+      this.pendingSourceField = [];
+      this.sourceFieldPickerVisible = false;
+    },
+    getCompatibleFields(sourceField) {
+      return this.currentFormFields.filter((field) => this.isCompatible(sourceField, field));
     },
     updateMappingTarget(index, fieldName) {
       const field = this.currentFormFields.find((item) => item.field === fieldName);
@@ -188,6 +226,8 @@ export default defineComponent({
     handleCancel() {
       this.visible = false;
       this.step = 1;
+      this.pendingSourceField = [];
+      this.sourceFieldPickerVisible = false;
     },
     async handleConfirm() {
       if (this.step === 1) {
@@ -199,10 +239,17 @@ export default defineComponent({
         if (this.actionType === 'new') {
           const createdTargets = [];
           let lastInsertedField = '';
+          let insertAfterRule = this.activeRule;
           this.selectedSourceFields.forEach((field) => {
-            const newRule = createRuleFromField(this.designer, field);
-            const insertedRule = appendRuleAfterActiveRule(this.designer, newRule);
+            const insertConfig = createRuleFromField(this.designer, field);
+            const insertedRule = insertConfig
+              ? this.designer.setupState.insertRule(insertConfig, {
+                  rule: insertAfterRule,
+                  position: 'after',
+                })
+              : null;
             if (insertedRule) {
+              insertAfterRule = insertedRule;
               lastInsertedField = insertedRule.field;
               createdTargets.push({
                 field: insertedRule.field,
@@ -211,7 +258,7 @@ export default defineComponent({
               });
             }
           });
-          this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field);
+          this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field, this.activeRule);
           this.editableMappings = buildMappingsFromFields(this.selectedSourceFields, createdTargets);
           const nextValue = normalizeFillConfig({ mappings: this.editableMappings.filter((item) => item.targetField?.field) });
           this.$emit('update:modelValue', nextValue);
@@ -246,6 +293,8 @@ export default defineComponent({
       this.$emit('change', nextValue);
       this.visible = false;
       this.step = 1;
+      this.pendingSourceField = [];
+      this.sourceFieldPickerVisible = false;
     },
   },
 });
@@ -264,6 +313,7 @@ export default defineComponent({
 ._fd-fill-fields-dialog {
   .el-dialog {
     background: var(--et-bg-container);
+    color: var(--et-text-primary);
   }
 
   .el-dialog__body {
@@ -274,6 +324,17 @@ export default defineComponent({
   .el-dialog__header,
   .el-dialog__footer {
     background: var(--et-bg-container);
+  }
+
+  :deep(.el-select__wrapper),
+  :deep(.el-input__wrapper) {
+    background: var(--et-bg-container);
+    color: var(--et-text-primary);
+    box-shadow: 0 0 0 1px var(--et-border-color-light) inset;
+  }
+
+  :deep(.el-input.is-disabled .el-input__wrapper) {
+    background: var(--et-bg-muted);
   }
 
   .fill-step-layout {
@@ -317,7 +378,7 @@ export default defineComponent({
 
   .mapping-add-row :deep(.el-button:hover) {
     color: var(--et-color-primary);
-    background: var(--et-fill-color-light, var(--el-fill-color-light));
+    background: var(--et-fill-color-light);
   }
 
   .mapping-item {
@@ -340,27 +401,27 @@ export default defineComponent({
 
   .mapping-source :deep(.el-input.is-disabled .el-input__wrapper) {
     color: var(--et-text-secondary);
-    background: var(--et-bg-muted, var(--el-fill-color-light));
-    box-shadow: 0 0 0 1px var(--et-border-color-light, var(--el-border-color)) inset;
+    background: var(--et-bg-muted);
+    box-shadow: 0 0 0 1px var(--et-border-color-light) inset;
   }
 
   .mapping-target :deep(.el-input__wrapper),
   .mapping-target :deep(.el-select__wrapper) {
     color: var(--et-text-primary);
     background: var(--et-bg-container);
-    box-shadow: 0 0 0 1px var(--et-border-color-light, var(--el-border-color)) inset;
+    box-shadow: 0 0 0 1px var(--et-border-color-light) inset;
   }
 
   .dialog-footer :deep(.el-button:not(.el-button--primary):hover) {
-    background: var(--et-fill-color-light, var(--el-fill-color-light));
-    border-color: var(--et-border-color-light, var(--el-border-color));
+    background: var(--et-fill-color-light);
+    border-color: var(--et-border-color-light);
     color: var(--et-text-primary);
   }
 
   .dialog-footer :deep(.el-button:not(.el-button--primary)) {
     color: var(--et-text-primary);
     background: var(--et-bg-container);
-    border-color: var(--et-border-color-light, var(--el-border-color));
+    border-color: var(--et-border-color-light);
   }
 
   .dialog-footer :deep(.el-button--primary) {
@@ -380,5 +441,9 @@ export default defineComponent({
     justify-content: flex-end;
     gap: 12px;
   }
+}
+
+._fd-fill-fields-source-picker {
+  padding: 0 !important;
 }
 </style>

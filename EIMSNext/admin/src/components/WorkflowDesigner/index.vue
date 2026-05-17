@@ -92,7 +92,7 @@ import {
   createWorkflowData,
   flowStatusArray,
 } from "@eimsnext/components";
-import { EventSourceType, FlowType, WfDefinition, WfDefinitionRequest } from "@eimsnext/models";
+import { EventSourceType, FlowType, NotifyChannel, WfDefinition, WfDefinitionRequest, WorkflowAutoProcessRule, WorkflowWithdrawRule } from "@eimsnext/models";
 import { wfDefinitionService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import { useLocale } from "element-plus";
@@ -150,6 +150,17 @@ provide("flowContext", flowContext);
 const applyDefinition = (definition: WfDefinition) => {
   currentWfDef.value = definition;
   flowData.value = definition.content ? JSON.parse(definition.content) : createWorkflowData(t);
+
+  if (!flowData.value.workflowMeta) {
+    flowData.value.workflowMeta = {
+      description: "",
+      allowUrge: false,
+      notifyChannels: NotifyChannel.None,
+      autoProcessRule: WorkflowAutoProcessRule.Disabled,
+      withdrawRule: WorkflowWithdrawRule.Disabled,
+    };
+  }
+
   flowContext.flowData = flowData.value;
   flowContext.activeData = flowData.value.startNode;
   flowContext.structureReadonly = !!definition.released;

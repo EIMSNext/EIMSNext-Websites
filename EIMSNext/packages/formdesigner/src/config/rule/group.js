@@ -1,5 +1,5 @@
 import {localeProps} from '../../utils';
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 
 const label = '子表单';
 const name = 'group';
@@ -31,7 +31,7 @@ export default {
     rule({t}) {
         return {
             type: 'fcRow',
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: t('com.group.name'),
             info: '',
             $required: false,

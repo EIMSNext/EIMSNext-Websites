@@ -92,7 +92,7 @@
 </template>
 
 <script>
-import { uniqueId, deepCopy, toLine } from '@eimsnext/form-render-core';
+import { uniqueId8, deepCopy, toLine } from '@eimsnext/form-render-core';
 import {defineComponent, markRaw} from 'vue';
 import {getInjectArg} from '../utils';
 import StyleConfig from './style/StyleConfig.vue';
@@ -165,7 +165,7 @@ export default defineComponent({
         addCus() {
             const label = this.cusValue && this.cusValue.trim();
             if (label) {
-                const key = 'cls_' + uniqueId();
+                const key = 'cls_' + uniqueId8();
                 this.value[key] = {
                     label,
                     style: {},

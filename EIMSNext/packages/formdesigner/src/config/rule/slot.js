@@ -1,5 +1,5 @@
 import {localeProps} from '../../utils';
-import {uniqueId} from '@eimsnext/form-render-core';
+import {uniqueId8} from '@eimsnext/form-render-core';
 
 const label = '插槽区域';
 const name = 'fcSlot';
@@ -16,13 +16,13 @@ export default {
     rule() {
         return {
             type: name,
-            field: uniqueId(),
+            field: `f_${uniqueId8()}`,
             title: '',
             native: false,
             $required: false,
             readMode: 'custom',
             props: {
-                name: 'block_' + uniqueId()
+                name: 'block_' + uniqueId8()
             },
         };
     },

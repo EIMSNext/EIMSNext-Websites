@@ -1,4 +1,4 @@
-import { uniqueId } from "@eimsnext/form-render-core";
+import { uniqueId8 } from "@eimsnext/form-render-core";
 import { localeOptions, localeProps } from "../../utils";
 
 const label = "子表单";
@@ -84,7 +84,7 @@ export default {
   rule({ t }) {
     return {
       type: "tableform",
-      field: uniqueId(),
+      field: `f_${uniqueId8()}`,
       title: t("com.tableform.name"),
       info: "",
       props: {

@@ -9,7 +9,7 @@
       :destroy-on-close="true"
     >
       <div class="form-container">
-        <WfApprovalLogView :approvalLog="selectedTask!"></WfApprovalLogView>
+        <WfApprovalLogView :approvalLog="selectedTask!" @submit="handleProcessed"></WfApprovalLogView>
       </div>
     </et-dialog>
     <el-space v-if="dataRef.length > 0" direction="vertical" class="task-space">
@@ -245,6 +245,12 @@ const loadData = async (reset = false) => {
 const viewLog = async (task: WfApprovalLog) => {
   selectedTask.value = task;
   showDetailsDialog.value = true;
+};
+
+const handleProcessed = async () => {
+  showDetailsDialog.value = false;
+  selectedTask.value = undefined;
+  await loadData(true);
 };
 
 const handleScroll = () => {

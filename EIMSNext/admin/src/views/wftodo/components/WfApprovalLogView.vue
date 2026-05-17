@@ -5,6 +5,8 @@
     :data="formData"
     :isView="true"
     :actions="actions"
+    @withdraw="handleWithdraw"
+    @urge="handleUrge"
   ></FormView>
 </template>
 <script lang="ts" setup>
@@ -13,17 +15,17 @@ defineOptions({
 });
 
 import {
-  FormDef,
   FormData,
   FormContent,
-  FormDataRequest,
-  WfTodo,
-  ApproveAction,
   WfApprovalLog,
+  WorkflowActionStatus,
 } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService, workflowService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -38,11 +40,31 @@ const dataId = ref(props.approvalLog.dataId);
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());
 const formData = ref<FormData>();
+const actionStatus = ref<WorkflowActionStatus>({ canWithdraw: false, canUrge: false });
 
 const emit = defineEmits(["update:modelValue", "cancel", "submit"]);
 const cancel = () => {
   emit("update:modelValue", false);
   emit("cancel");
+};
+
+const handleWithdraw = async () => {
+  try {
+    await ElMessageBox.confirm(t("common.wfProcess.withdrawConfirm"), t("common.wfProcess.withdraw"), {
+      type: "warning",
+    });
+    await workflowService.withdraw({ dataId: dataId.value });
+    emit("submit");
+  } catch {
+  }
+};
+
+const handleUrge = async () => {
+  try {
+    await workflowService.urge({ dataId: dataId.value });
+    ElMessage.success(t("common.wfProcess.urgeSuccess"));
+  } catch {
+  }
 };
 
 onMounted(async () => {
@@ -56,5 +78,11 @@ onMounted(async () => {
   if (data) {
     formData.value = data;
   }
+
+  actionStatus.value = await workflowService.getActionStatus(props.approvalLog.dataId);
+  actions.value = {
+    withdraw: { text: "common.wfProcess.withdraw", visible: actionStatus.value.canWithdraw },
+    urge: { text: "common.wfProcess.urge", visible: actionStatus.value.canUrge },
+  };
 });
 </script>
