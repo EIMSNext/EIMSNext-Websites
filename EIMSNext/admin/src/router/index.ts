@@ -25,6 +25,18 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   {
+    name: "appstore",
+    path: "/appstore",
+    component: () => import("@/views/appstore/index.vue"),
+    meta: { hidden: true },
+  },
+  {
+    name: "appstore-detail",
+    path: "/appstore/:id",
+    component: () => import("@/views/appstore/detail.vue"),
+    meta: { hidden: true },
+  },
+  {
     name: "workspace",
     path: "/workspace",
     component: () => import("@/views/workspace/index.vue"),

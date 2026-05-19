@@ -12,13 +12,13 @@ import { useRoute } from "vue-router";
 import ToDoLayout from "@/layout/todolayout/index.vue";
 import WfApprovalLogs from "@/views/wftodo/components/WfApprovalLogs.vue";
 import { useAppStore } from "@eimsnext/store";
-import { App } from "@eimsnext/models";
+import { AppDef } from "@eimsnext/models";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 
 const route = useRoute();
 const appStore = useAppStore();
 
-const selectedApp = ref<App | null>(null);
+const selectedApp = ref<AppDef | null>(null);
 const filter = ref({ nodeType: 2 });
 
 // 监听路由参数变化

@@ -1,5 +1,5 @@
 import {
-  App,
+  AppDef,
   AppMenu,
   AuthGroup,
   AuthGroupType,
@@ -35,7 +35,7 @@ export function hasDataPerm(userType: UserType, needPerm: DataPerms, dataPerms?:
   );
 }
 
-export function getAppIcon(app?: App) {
+export function getAppIcon(app?: AppDef) {
   let icon = "icon-appdefault";
   if (app && app.icon && app.icon != "default") icon = app.icon;
 

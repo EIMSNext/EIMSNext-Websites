@@ -6,11 +6,11 @@
     </div>
 </template>
 <script setup lang="ts">
-import { App } from "@eimsnext/models";
+import { AppDef } from "@eimsnext/models";
 import { getAppIcon, getAppIconColor } from '@/utils/common';
 
 const props = withDefaults(defineProps<{
-    app: App,
+    app: AppDef,
     iconSize?: string
 }>(), {
     iconSize: '28px'

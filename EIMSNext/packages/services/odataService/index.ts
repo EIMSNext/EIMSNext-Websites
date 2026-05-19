@@ -1,6 +1,5 @@
 export * from "./adminGroupService";
-export * from "./appService";
-export * from "./appTemplateService";
+export * from "./appDefService";
 export * from "./auditLogService";
 export * from "./authGroupService";
 export * from "./dfExecLogService";
@@ -8,7 +7,6 @@ export * from "./corporateService";
 export * from "./departmentService";
 export * from "./employeeService";
 export * from "./formNotifyService";
-export * from "./formTemplateService";
 export * from "./formDefService";
 export * from "./auditLoginService";
 export * from "./paymentService";

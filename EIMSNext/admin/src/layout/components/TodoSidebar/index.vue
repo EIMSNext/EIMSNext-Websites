@@ -142,7 +142,7 @@ import { ref, computed, onBeforeUnmount, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useSystemStore } from "@/store";
 import { useAppStore } from "@eimsnext/store";
-import { App } from "@eimsnext/models";
+import { AppDef } from "@eimsnext/models";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
 import { BADGE_REFRESH_INTERVAL, queryCorpTodoCount } from "@/utils/badge";
@@ -182,12 +182,12 @@ function toggleSideBar() {
   systemStore.toggleSidebar();
 }
 
-const appsRef = ref<App[]>([]);
+const appsRef = ref<AppDef[]>([]);
 const corpTodoCount = ref(0);
 const hasCorpTodo = computed(() => corpTodoCount.value > 0);
 let corpTodoTimer: ReturnType<typeof setInterval> | null = null;
 
-const selectApp = (app: App, taskType: string) => {
+const selectApp = (app: AppDef, taskType: string) => {
   let routePath = `/mystarted`;
   switch (taskType) {
     case "mytasks":

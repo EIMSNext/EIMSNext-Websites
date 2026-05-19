@@ -1,5 +1,9 @@
 <template>
   <div class="navbar__right">
+    <router-link class="appstore-entry" to="/appstore">
+      <et-icon icon="el-Grid" size="18" />
+      <span>应用中心</span>
+    </router-link>
     <!-- 非手机设备（窄屏）才显示 -->
     <!-- <template> -->
     <!-- 全屏 -->
@@ -49,6 +53,11 @@ const settingStore = useSettingsStore();
       background: var(--et-bg-hover);
     }
   }
+}
+
+.appstore-entry {
+  gap: var(--et-space-4);
+  text-decoration: none;
 }
 
 :deep(.el-divider--horizontal) {

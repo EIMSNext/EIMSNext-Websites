@@ -1,4 +1,4 @@
-import { App } from "./app";
+import { AppDef as App } from "./appDef";
 import { IdBase } from "./modelBase";
 export interface User extends IdBase {}
 

@@ -35,7 +35,7 @@
 
 <script lang="ts" setup>
 import { AppMenu, EditAppMenuRequest, FormType } from "@eimsnext/models";
-import { appService } from "@eimsnext/services";
+import { appDefService } from "@eimsnext/services";
 
 defineOptions({
   name: "EditFormIcon",
@@ -89,7 +89,7 @@ const save = async () => {
     iconColor: formData.value.iconColor,
   };
 
-  const app = await appService.editMenu(payload);
+  const app = await appDefService.editMenu(payload);
   emit("ok", app);
 };
 </script>

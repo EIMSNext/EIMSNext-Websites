@@ -17,8 +17,8 @@
 </template>
 
 <script lang="ts" setup>
-import { App, AppMenu, CreateAppGroupRequest, EditAppGroupRequest } from "@eimsnext/models";
-import { appService } from "@eimsnext/services";
+import { AppDef, AppMenu, CreateAppGroupRequest, EditAppGroupRequest } from "@eimsnext/models";
+import { appDefService } from "@eimsnext/services";
 
 defineOptions({
   name: "EditMenuGroup",
@@ -55,20 +55,20 @@ const save = async () => {
     return;
   }
 
-  let app: App;
+  let app: AppDef;
   if (isEdit.value) {
     const payload: EditAppGroupRequest = {
       appId: props.appId,
       menuId: props.menu!.menuId,
       name: formData.value.name,
     };
-    app = await appService.editGroup(payload);
+    app = await appDefService.editGroup(payload);
   } else {
     const payload: CreateAppGroupRequest = {
       appId: props.appId,
       name: formData.value.name,
     };
-    app = await appService.createGroup(payload);
+    app = await appDefService.createGroup(payload);
   }
 
   emit("ok", app);

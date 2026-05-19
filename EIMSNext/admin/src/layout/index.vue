@@ -55,21 +55,21 @@ import { useAppStore, useUserStore } from "@eimsnext/store";
 import NavBar from "./components/NavBar/index.vue";
 import defaultSettings from "@/settings";
 import { useI18n } from "vue-i18n";
-import { App, UserType } from "@eimsnext/models";
+import { AppDef, UserType } from "@eimsnext/models";
 const { t } = useI18n();
 
 defineOptions({
   name: "Layout",
 });
 
-const workspaceApp: App = {
+const workspaceApp: AppDef = {
   id: "workspace",
   name: "工作台",
   icon: "homepage",
   sortIndex: -2,
   appMenus: [],
 };
-const systemApp: App = {
+const systemApp: AppDef = {
   id: "system",
   name: "系统设置",
   icon: "icon-settings",

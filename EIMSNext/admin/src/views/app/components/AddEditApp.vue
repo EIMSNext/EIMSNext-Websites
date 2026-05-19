@@ -23,8 +23,8 @@
   </et-dialog>
 </template>
 <script lang="ts" setup>
-import { App, AppRequest } from "@eimsnext/models";
-import { appService } from "@eimsnext/services";
+import { AppDef, AppDefRequest } from "@eimsnext/models";
+import { appDefService } from "@eimsnext/services";
 import { useAppStore } from "@eimsnext/store";
 import AppIconSelect from "./AppIconSelect.vue";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
@@ -36,7 +36,7 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     edit: boolean;
-    app?: App;
+    app?: AppDef;
   }>(),
   {
     edit: false,
@@ -46,7 +46,7 @@ const props = withDefaults(
 const appStore = useAppStore();
 const showDialog = ref(true);
 const title = props.edit ? "修改应用信息" : "添加新应用";
-const formData = ref<App>({ id: "", name: "", sortIndex: 0, appMenus: [], icon: "" });
+const formData = ref<AppDef>({ id: "", name: "", sortIndex: 0, appMenus: [], icon: "" });
 if (props.edit) formData.value = props.app!;
 const appIcon = ref(getAppIcon(formData.value))
 const appIconColor = ref(getAppIconColor(formData.value))
@@ -74,7 +74,7 @@ const save = async () => {
     return;
   }
 
-  const newApp: AppRequest = {
+  const newApp: AppDefRequest = {
     id: formData.value.id,
     name: formData.value.name,
     description: formData.value.description,
@@ -84,9 +84,9 @@ const save = async () => {
   };
 
   if (props.edit) {
-    formData.value = await appService.patch<App>(newApp.id, newApp);
+    formData.value = await appDefService.patch<AppDef>(newApp.id, newApp);
   } else {
-    formData.value = await appService.post<App>(newApp);
+    formData.value = await appDefService.post<AppDef>(newApp);
   }
 
   appStore.update(formData.value);

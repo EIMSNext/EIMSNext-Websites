@@ -117,7 +117,7 @@ import EditFormIcon from "./components/EditFormIcon.vue";
 import EditMenuGroup from "./components/EditMenuGroup.vue";
 import { usePermissionStore, useSystemStore } from "@/store";
 import {
-  App,
+  AppDef,
   AppMenu,
   DashboardDef,
   DashboardDefRequest,
@@ -128,7 +128,7 @@ import {
 } from "@eimsnext/models";
 import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
-import { appService, dashboardDefService, formDefService } from "@eimsnext/services";
+import { appDefService, dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
 import { ElMessage } from "element-plus";
@@ -161,7 +161,7 @@ const contextStore = useContextStore();
 const userStore = useUserStore();
 const curUser = toRef(userStore.currentUser);
 const appId = toRef(contextStore.appId);
-const app = ref<App>();
+const app = ref<AppDef>();
 
 const systemStore = useSystemStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
@@ -284,7 +284,7 @@ const closeGroupDialog = () => {
   editingGroup.value = undefined;
 };
 
-const handleAppUpdated = (updatedApp: App) => {
+const handleAppUpdated = (updatedApp: AppDef) => {
   appStore.update(updatedApp);
   app.value = updatedApp;
   showMenuEditor.value = false;
@@ -298,7 +298,7 @@ const saveMenus = async () => {
     return;
   }
 
-  const updated = await appService.saveMenus({
+  const updated = await appDefService.saveMenus({
     appId: contextStore.appId,
     appMenus: JSON.parse(JSON.stringify(appMenus.value)),
   });
@@ -320,7 +320,7 @@ const deleteMenu = async (menu: AppMenu) => {
   }
 
   try {
-    const updated = await appService.deleteGroup({ appId: contextStore.appId, menuId: menu.menuId });
+    const updated = await appDefService.deleteGroup({ appId: contextStore.appId, menuId: menu.menuId });
     handleAppUpdated(updated);
   } catch (error: any) {
     ElMessage.warning(error?.message || "当前分组下存在子菜单，不能删除");

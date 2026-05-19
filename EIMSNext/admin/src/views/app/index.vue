@@ -47,7 +47,7 @@ import Layout from "@/layout/index.vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore, useFormStore, useContextStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
-import { App, FormDef, FormDefRequest, FormType } from "@eimsnext/models";
+import { AppDef, FormDef, FormDefRequest, FormType } from "@eimsnext/models";
 import { formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -63,7 +63,7 @@ const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
 
-const app = ref<App>();
+const app = ref<AppDef>();
 
 onBeforeMount(async () => {
   await contextStore.setAppId(appId);

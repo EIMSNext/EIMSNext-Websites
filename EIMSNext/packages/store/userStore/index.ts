@@ -4,7 +4,7 @@ import { CurrentUser, UserType } from "@eimsnext/models";
 import { useStorage } from "@vueuse/core";
 import { store } from "../setup";
 import { authService, systemService, LoginRequest } from "@eimsnext/services";
-import { useAppStoreHook } from "../genericStore/appStore";
+import { useAppStoreHook } from "../genericStore/appDefStore";
 import { useFormStoreHook } from "../genericStore/formStore";
 import { useDeptStoreHook } from "../genericStore/deptStore";
 import { useContextStoreHook } from "../contextStore";
