@@ -16,12 +16,12 @@
 
     <component :is="PdfPrintDesigner" :form-def="formDef" :print-def="selectedPrint!" />
   </EtDrawer>
-  <AdvanceLayout title="打印模板" desc="打印表单时将按照使用中的模板格式打印">
+  <AdvanceLayout title="打印定义" desc="打印表单时将按照使用中的模板格式打印">
     <div class="flow-container">
       <div class="panel-header">
         <div class="header-left">
-          <el-button type="primary" icon="plus" @click="addNew(PrintTemplateType.Pdf)">
-            新建打印模板
+          <el-button type="primary" icon="plus" @click="addNew(PrintDefType.Pdf)">
+            新建打印定义
           </el-button>
         </div>
         <div class="header-right"></div>
@@ -50,15 +50,15 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent } from "vue";
-import { FormDef, PrintTemplate, PrintTemplateType } from "@eimsnext/models";
+import { FormDef, PrintDef, PrintDefType } from "@eimsnext/models";
 import { MessageIcon } from "@eimsnext/components";
-import { printTemplateService } from "@eimsnext/services";
+import { printDefService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 
 const PdfPrintDesigner = defineAsyncComponent(() => import("@/components/PrintDesigner/PdfPrintDesigner.vue"));
 
 defineOptions({
-  name: "PrintTemplateList",
+  name: "PrintDefList",
 });
 
 const props = defineProps<{
@@ -67,20 +67,20 @@ const props = defineProps<{
 
 const showDrawer = ref(false);
 const showDeleteConfirmDialog = ref(false);
-const prints = ref<PrintTemplate[]>([]);
-const selectedPrint = ref<PrintTemplate>();
+const prints = ref<PrintDef[]>([]);
+const selectedPrint = ref<PrintDef>();
 
 const loadPrints = (formId: string) => {
   let query = buildQuery({ filter: { formId: formId } });
-  printTemplateService.query<PrintTemplate>(query).then((res) => {
+  printDefService.query<PrintDef>(query).then((res) => {
     prints.value = res;
   });
 };
 
-const addNew = (printType: PrintTemplateType) => {
+const addNew = (printType: PrintDefType) => {
   selectedPrint.value = {
     id: "",
-    name: "未命名打印模板",
+    name: "未命名打印定义",
     appId: props.formDef.appId,
     formId: props.formDef.id,
     content: "",
@@ -90,34 +90,30 @@ const addNew = (printType: PrintTemplateType) => {
   showDrawer.value = true;
 };
 
-const edit = (print: PrintTemplate) => {
+const edit = (print: PrintDef) => {
   selectedPrint.value = print;
 
   showDrawer.value = true;
 };
 
-const remove = (print: PrintTemplate) => {
+const remove = (print: PrintDef) => {
   selectedPrint.value = print;
   showDeleteConfirmDialog.value = true;
 };
 const execDelete = () => {
-  printTemplateService.delete<PrintTemplate>(selectedPrint.value!.id).then((res) => {
+  printDefService.delete<PrintDef>(selectedPrint.value!.id).then((res) => {
     loadPrints(props.formDef.id);
     showDeleteConfirmDialog.value = false;
   });
 };
 
-// const emit = defineEmits(["close"]);
-
 function close() {
   showDrawer.value = false;
 
   loadPrints(props.formDef.id);
-  // emit("close");
 }
 
 onBeforeMount(() => {
-  //初始化
   if (props.formDef) {
     loadPrints(props.formDef.id);
   }

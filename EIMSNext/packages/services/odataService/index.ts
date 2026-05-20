@@ -11,7 +11,7 @@ export * from "./formDefService";
 export * from "./auditLoginService";
 export * from "./paymentService";
 export * from "./publicSettingService";
-export * from "./printTemplateService";
+export * from "./printDefService";
 export * from "./roleGroupService";
 export * from "./roleService";
 export * from "./systemMessageService";

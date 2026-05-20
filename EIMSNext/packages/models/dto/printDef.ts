@@ -1,21 +1,21 @@
 import { CorpModelBase, IdBase } from "./modelBase";
 
-export interface PrintTemplateRequest extends IdBase {
+export interface PrintDefRequest extends IdBase {
   appId?: string;
   formId?: string;
   name?: string;
   content?: string;
-  printType?: PrintTemplateType;
+  printType?: PrintDefType;
 }
 
-export interface PrintTemplate extends CorpModelBase {
+export interface PrintDef extends CorpModelBase {
   appId: string;
   formId: string;
   name: string;
   content?: string;
-  printType: PrintTemplateType;
+  printType: PrintDefType;
 }
 
-export enum PrintTemplateType {
+export enum PrintDefType {
   Pdf = "pdf",
 }

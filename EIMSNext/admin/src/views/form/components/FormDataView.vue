@@ -44,11 +44,11 @@ import {
   IFieldPerm,
   DataPerms,
   FormDef,
-  PrintTemplate,
+  PrintDef,
   WorkflowActionStatus,
 } from "@eimsnext/models";
 import { useFormStore, useUserStore } from "@eimsnext/store";
-import { customPrintService, formDataService, PrintRequest, printTemplateService, workflowService } from "@eimsnext/services";
+import { customPrintService, formDataService, PrintRequest, printDefService, workflowService } from "@eimsnext/services";
 import { FormActionSettings } from "@/components/FormView/type";
 import { MessageIcon, ShareLinkBar, ToolbarItem } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
@@ -93,7 +93,7 @@ const printConfig = ref(getPrintConfig(false));
 
 const formPrintData = ref();
 const printTrigger = ref<HTMLElement | null>(null);
-const customPrintTemplates = ref<PrintTemplate[]>([]);
+const customPrintTemplates = ref<PrintDef[]>([]);
 const showPdfPreview = ref(false);
 const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
@@ -203,9 +203,9 @@ const leftBars = computed<ToolbarItem[]>(() => {
   return bars;
 });
 
-const loadPrintTemplates = async (formId: string) => {
+const loadPrintDefs = async (formId: string) => {
   const query = buildQuery({ filter: { formId } });
-  customPrintTemplates.value = await printTemplateService.query<PrintTemplate>(query);
+  customPrintTemplates.value = await printDefService.query<PrintDef>(query);
 };
 
 const openCustomPrintPreview = (print: any) => {
@@ -216,8 +216,8 @@ const openCustomPrintPreview = (print: any) => {
 
 const toolbarHandler = async (cmd: string, e: MouseEvent) => {
   if (cmd.startsWith("custom-print:")) {
-    const templateId = cmd.replace("custom-print:", "");
-    let req: PrintRequest = { dataIds: [props.dataId], templateId: templateId }
+    const printId = cmd.replace("custom-print:", "");
+    let req: PrintRequest = { dataIds: [props.dataId], printId }
     let printResult = await customPrintService.print(req);
 
     if (printResult && printResult.downloadUrl) {

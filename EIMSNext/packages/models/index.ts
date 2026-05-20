@@ -16,7 +16,7 @@ export * from "./dto/formNotify";
 export * from "./dto/appProfile";
 export * from "./dto/auditLogin";
 export * from "./dto/payment";
-export * from "./dto/printTemplate";
+export * from "./dto/printDef";
 export * from "./dto/publicSetting";
 export * from "./dto/role";
 export * from "./dto/roleGroup";

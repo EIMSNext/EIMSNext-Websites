@@ -113,12 +113,12 @@ defineOptions({
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { FormDef, FormData, PrintTemplate, WfApprovalLog } from "@eimsnext/models";
+import { FormDef, FormData, PrintDef, WfApprovalLog } from "@eimsnext/models";
 import {
   customPrintService,
   formDataService,
   PrintRequest,
-  printTemplateService,
+  printDefService,
   wfApprovalLogService,
 } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
@@ -139,7 +139,7 @@ const { isFullscreen, toggle } = useFullscreen();
 const formDef = ref<FormDef>();
 const formData = ref<FormData>();
 const approvalLogs = ref<WfApprovalLog[]>([]);
-const customPrintTemplates = ref<PrintTemplate[]>([]);
+const customPrintTemplates = ref<PrintDef[]>([]);
 const loading = ref(false);
 const printConfig = ref(getPrintConfig(false));
 const formPrintData = ref<IPrintData>();
@@ -209,9 +209,9 @@ const toolbarItems = computed<ToolbarItem[]>(() => {
   return bars;
 });
 
-const loadPrintTemplates = async (formId: string) => {
+const loadPrintDefs = async (formId: string) => {
   const query = buildQuery({ filter: { formId } });
-  customPrintTemplates.value = await printTemplateService.query<PrintTemplate>(query);
+  customPrintTemplates.value = await printDefService.query<PrintDef>(query);
 };
 
 const openCustomPrintPreview = (print: any) => {
@@ -231,8 +231,8 @@ const generatePrintData = () => {
 
 const toolbarHandler = async (cmd: string) => {
   if (cmd.startsWith("custom-print:")) {
-    const templateId = cmd.replace("custom-print:", "");
-    const req: PrintRequest = { dataIds: [route.params.dataId.toString()], templateId };
+    const printId = cmd.replace("custom-print:", "");
+    const req: PrintRequest = { dataIds: [route.params.dataId.toString()], printId };
     const printResult = await customPrintService.print(req);
 
     if (printResult?.downloadUrl) {

@@ -106,11 +106,11 @@
 
 <script setup lang="ts">
 import { useFormStore } from "@eimsnext/store";
-import { FieldDef, FieldType, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
+import { FieldDef, FieldType, FormDef, PrintDef, PrintDefRequest } from "@eimsnext/models";
 import { DataItemType, ITreeNode } from "@eimsnext/components";
 import { EimsPrintAreaPlugin, type PrintOrientation } from "@eimsnext/print-plugins";
 import Draggable from "vuedraggable";
-import { customPrintService, PrintPreviewRequest, printTemplateService } from "@eimsnext/services";
+import { customPrintService, PrintPreviewRequest, printDefService } from "@eimsnext/services";
 import { IPrintMetadata } from "./type";
 import PdfPreview from "./PdfPreview.vue";
 
@@ -335,10 +335,10 @@ const applyPageSetupToWorkbookData = (workbookData: Record<string, unknown>, set
 
 const props = defineProps<{
   formDef: FormDef;
-  printDef: PrintTemplate;
+  printDef: PrintDef;
 }>();
 
-const currentPrintDef = ref<PrintTemplate>(props.printDef);
+const currentPrintDef = ref<PrintDef>(props.printDef);
 
 const activeTab = ref("form");
 const formStore = useFormStore();
@@ -836,7 +836,7 @@ const preview = async () => {
 const save = async () => {
   try {
     saving.value = true;
-    const req: PrintTemplateRequest = {
+    const req: PrintDefRequest = {
       id: currentPrintDef.value.id,
       name: currentPrintDef.value.name,
       appId: currentPrintDef.value.appId,
@@ -846,8 +846,8 @@ const save = async () => {
     };
 
     currentPrintDef.value = req.id
-      ? await printTemplateService.put<PrintTemplate>(req.id, req)
-      : await printTemplateService.post<PrintTemplate>(req);
+      ? await printDefService.put<PrintDef>(req.id, req)
+      : await printDefService.post<PrintDef>(req);
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : "保存失败");
   } finally {
