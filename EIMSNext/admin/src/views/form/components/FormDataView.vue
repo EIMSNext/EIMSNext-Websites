@@ -368,7 +368,7 @@ onBeforeMount(async () => {
   let form = await formStore.get(props.formId);
   if (form) {
     formDef.value = form;
-    await loadPrintTemplates(form.id);
+    await loadPrintDefs(form.id);
   }
 
   let data = await formDataService.get<FormData>(props.dataId);

@@ -1,0 +1,160 @@
+<template>
+  <div class="plugin-manage-page">
+    <section class="page-hero">
+      <div>
+        <div class="page-kicker">开放平台</div>
+        <h1 class="page-title">已安装插件</h1>
+        <div class="page-subtitle">统一管理企业内已安装插件的启用状态、版本和卸载操作。</div>
+      </div>
+      <el-button type="primary" plain @click="loadInstalls">刷新列表</el-button>
+    </section>
+
+    <section class="table-shell">
+      <el-table v-loading="loading" :data="items" style="width: 100%">
+        <el-table-column label="插件" min-width="340">
+          <template #default="scope">
+            <div class="plugin-cell">
+              <img v-if="scope.row.icon" class="plugin-icon" :src="scope.row.icon" :alt="scope.row.name" />
+              <div>
+                <div class="plugin-name">{{ scope.row.name }}</div>
+                <div class="plugin-summary">{{ scope.row.summary }}</div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="version" label="版本" width="120" />
+        <el-table-column prop="status" label="状态" width="130" />
+        <el-table-column label="启用" width="140">
+          <template #default="scope">
+            <el-switch :model-value="scope.row.enabled" @change="(value) => toggleEnabled(scope.row.id, value as boolean)" />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="140">
+          <template #default="scope">
+            <el-button link type="danger" @click="removeInstall(scope.row.id)">卸载</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </section>
+  </div>
+</template>
+
+<script setup lang="ts">
+import type { PluginInstall } from "@eimsnext/models";
+import { pluginStoreService } from "@eimsnext/services";
+
+defineOptions({ name: "OpenPlatformPluginManagePage" });
+
+const loading = ref(false);
+const items = ref<PluginInstall[]>([]);
+
+async function loadInstalls() {
+  loading.value = true;
+  try {
+    items.value = await pluginStoreService.getInstalls();
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function toggleEnabled(id: string, enabled: boolean) {
+  if (enabled) {
+    await pluginStoreService.enableInstall(id);
+  } else {
+    await pluginStoreService.disableInstall(id);
+  }
+  await loadInstalls();
+}
+
+async function removeInstall(id: string) {
+  await pluginStoreService.deleteInstall(id);
+  await loadInstalls();
+}
+
+onMounted(loadInstalls);
+</script>
+
+<style scoped lang="scss">
+.plugin-manage-page {
+  min-height: 100%;
+}
+
+.page-hero,
+.table-shell {
+  border: 1px solid color-mix(in srgb, var(--et-border-color-light) 78%, transparent);
+  background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
+}
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 28px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 82%, #dbeafe 18%), color-mix(in srgb, var(--et-bg-container) 88%, #eff6ff 12%));
+}
+
+.page-kicker {
+  color: var(--et-color-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.page-title {
+  margin: 8px 0 0;
+  font-size: 32px;
+}
+
+.page-subtitle {
+  margin-top: 8px;
+  color: var(--et-text-secondary);
+}
+
+.table-shell {
+  margin-top: 24px;
+  padding: 18px;
+  border-radius: 30px;
+}
+
+.plugin-cell {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.plugin-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.plugin-name {
+  font-weight: 700;
+}
+
+.plugin-summary {
+  color: var(--et-text-secondary);
+  margin-top: 4px;
+}
+
+:global(html.dark) .page-hero,
+:global(html.dark) .table-shell {
+  background: rgba(15, 23, 42, 0.82);
+  box-shadow: 0 24px 54px rgba(2, 6, 23, 0.42);
+}
+
+@media (max-width: 960px) {
+  .page-hero {
+    padding: 20px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-title {
+    font-size: 26px;
+  }
+}
+</style>

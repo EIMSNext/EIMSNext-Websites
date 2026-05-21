@@ -1,8 +1,8 @@
 <template>
-  <div v-if="profile" class="appstore-detail">
-    <section class="detail-hero" :style="heroStyle">
+  <div v-if="profile" class="pluginstore-detail">
+    <section class="detail-hero">
       <div class="detail-hero-main">
-        <router-link class="back-link" to="/appstore">
+        <router-link class="back-link" to="/open-platform/pluginstore">
           <et-icon icon="el-ArrowLeft" size="16" />
           <span>返回市场</span>
         </router-link>
@@ -14,20 +14,23 @@
               <h1 class="detail-title">{{ profile.name }}</h1>
               <span v-if="profile.isOfficial" class="status-badge official">官方</span>
               <span v-else-if="profile.isHot" class="status-badge hot">热门</span>
+              <span v-if="profile.installed" class="status-badge installed">已安装</span>
             </div>
             <div class="detail-subtitle">{{ profile.summary }}</div>
             <div class="detail-tags">
               <span v-for="tag in profile.tags || []" :key="tag" class="detail-tag">{{ tag }}</span>
             </div>
+            <div class="detail-install-meta">安装量 {{ profile.installCount || 0 }}</div>
           </div>
         </div>
       </div>
 
       <div class="detail-hero-side">
-        <div class="hero-side-title">安装模板</div>
-        <div class="hero-side-text">安装后自动进入工作台，可继续配置表单、权限和流程。</div>
+        <div class="hero-side-title">快速操作</div>
+        <div class="hero-side-text">查看帮助文档、安装插件，并在已安装插件中统一管理启停状态。</div>
         <div class="action-row">
-          <el-button type="success" size="large" @click="install">安装模板</el-button>
+          <el-button v-if="profile.helpDocUrl" plain @click="openLink(profile.helpDocUrl)">使用说明</el-button>
+          <el-button type="primary" size="large" @click="install">{{ profile.installed ? "重新安装" : "安装插件" }}</el-button>
         </div>
       </div>
     </section>
@@ -36,6 +39,7 @@
       <div class="detail-main-card">
         <div class="visual-panel">
           <img v-if="activeImage" class="hero-image" :src="activeImage" :alt="profile.name" />
+          <div v-else class="hero-image placeholder">{{ profile.name }}</div>
           <div v-if="galleryImages.length > 1" class="thumb-row">
             <button v-for="image in galleryImages" :key="image" class="thumb" :class="{ active: image === activeImage }" @click="activeImage = image">
               <img :src="image" :alt="profile.name" />
@@ -44,27 +48,55 @@
         </div>
 
         <div class="content-panel">
-          <div class="panel-title">模板介绍</div>
+          <div class="panel-head">
+            <div class="panel-title with-bar">插件介绍</div>
+          </div>
           <p class="panel-text">{{ profile.description || profile.summary }}</p>
+        </div>
+
+        <div class="content-panel">
+          <div class="panel-head">
+            <div class="panel-title with-bar">插件函数</div>
+            <div class="panel-meta">{{ (profile.functions || []).length }} 个函数</div>
+          </div>
+
+          <div v-if="profile.functions?.length" class="function-grid">
+            <div v-for="fn in profile.functions" :key="fn.id || fn.name" class="function-card">
+              <div class="function-name">{{ fn.name }}</div>
+              <div class="function-desc">{{ fn.description || '暂无说明' }}</div>
+              <div class="function-fields">
+                <span v-for="field in fn.inputFields || []" :key="field.key" class="function-field-tag">
+                  {{ field.name }}
+                </span>
+                <span v-if="!(fn.inputFields || []).length" class="function-field-tag muted">无输入字段</span>
+              </div>
+            </div>
+          </div>
+
+          <el-empty v-else description="暂无函数清单" />
         </div>
       </div>
 
       <aside class="detail-aside">
         <div class="meta-card">
-          <div class="meta-label">作者</div>
-          <div class="meta-value">{{ profile.author || 'EIMSNext' }}</div>
+          <div class="meta-label">工具类型</div>
+          <div class="meta-value">{{ profile.category || '-' }}</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">业务场景</div>
+          <div class="meta-value">{{ profile.scenario || '-' }}</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">开发者</div>
+          <div class="meta-value">{{ profile.developerName || 'EIMSNext' }}</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">版本</div>
+          <div class="meta-value">{{ profile.version }}</div>
         </div>
         <div class="meta-card">
           <div class="meta-label">安装量</div>
           <div class="meta-value">{{ profile.installCount || 0 }}</div>
-        </div>
-        <div class="meta-card">
-          <div class="meta-label">场景</div>
-          <div class="meta-value">{{ profile.category || '-' }}</div>
-        </div>
-        <div class="meta-card">
-          <div class="meta-label">行业</div>
-          <div class="meta-value">{{ profile.industry || '-' }}</div>
         </div>
       </aside>
     </section>
@@ -72,19 +104,14 @@
 </template>
 
 <script setup lang="ts">
-import type { AppProfile } from "@eimsnext/models";
-import { appProfileService } from "@eimsnext/services";
-import { useAppDefStore, useContextStore } from "@eimsnext/store";
-import { accessToken } from "@eimsnext/utils";
-import { useRoute, useRouter } from "vue-router";
+import type { PluginProfile } from "@eimsnext/models";
+import { pluginStoreService } from "@eimsnext/services";
+import { useRoute } from "vue-router";
 
-defineOptions({ name: "AppStoreDetailPage" });
+defineOptions({ name: "PluginStoreDetailPage" });
 
 const route = useRoute();
-const router = useRouter();
-const appDefStore = useAppDefStore();
-const contextStore = useContextStore();
-const profile = ref<AppProfile>();
+const profile = ref<PluginProfile>();
 const activeImage = ref("");
 
 const galleryImages = computed(() => {
@@ -94,40 +121,32 @@ const galleryImages = computed(() => {
   return Array.from(new Set(images));
 });
 
-const heroStyle = computed(() => ({
-  background: profile.value?.themeColor
-    ? `linear-gradient(135deg, color-mix(in srgb, ${profile.value.themeColor} 22%, white), color-mix(in srgb, ${profile.value.themeColor} 44%, #fde68a))`
-    : undefined,
-}));
-
 async function loadDetail() {
   const id = route.params.id as string;
-  profile.value = await appProfileService.get(id);
+  profile.value = await pluginStoreService.get(id);
   activeImage.value = galleryImages.value[0] || "";
 }
 
 async function install() {
   const id = route.params.id as string;
-  if (!accessToken.isLoggedIn()) {
-    router.push(`/login?redirect=${encodeURIComponent(route.fullPath)}`);
-    return;
-  }
+  await pluginStoreService.install(id);
+  await loadDetail();
+}
 
-  const result = await appProfileService.install(id);
-  await appDefStore.load("", false);
-  await contextStore.setAppId(result.appId, false);
-  router.push("/workspace");
+function openLink(url?: string) {
+  if (!url) return;
+  window.open(url, "_blank");
 }
 
 onMounted(loadDetail);
 </script>
 
 <style scoped lang="scss">
-.appstore-detail {
+.pluginstore-detail {
   min-height: 100%;
   padding: 24px;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, #f59e0b 16%, transparent) 0, transparent 32%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-primary) 16%, transparent) 0, transparent 32%),
     linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 72%, var(--et-bg-container) 28%) 100%);
 }
 
@@ -144,6 +163,7 @@ onMounted(loadDetail);
   gap: 24px;
   padding: 28px;
   border-radius: 30px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 80%, #dbeafe 20%), color-mix(in srgb, var(--et-bg-container) 84%, #eff6ff 16%));
 }
 
 .back-link {
@@ -168,6 +188,10 @@ onMounted(loadDetail);
   border-radius: 20px;
   object-fit: cover;
   box-shadow: 0 16px 28px rgba(15, 23, 42, 0.12);
+}
+
+.title-copy {
+  min-width: 0;
 }
 
 .title-topline {
@@ -200,6 +224,7 @@ onMounted(loadDetail);
 
 .status-badge.official { background: #2563eb; color: #fff; }
 .status-badge.hot { background: #f97316; color: #fff; }
+.status-badge.installed { background: #0f766e; color: #fff; }
 
 .detail-tags {
   display: flex;
@@ -213,13 +238,19 @@ onMounted(loadDetail);
   color: var(--et-text-secondary);
 }
 
+.detail-install-meta {
+  margin-top: 14px;
+  color: var(--et-text-tertiary);
+  font-size: 13px;
+}
+
 .detail-hero-side {
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 24px;
-  border-radius: 24px;
-  background: color-mix(in srgb, var(--et-bg-container) 90%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--et-bg-container) 92%, transparent);
 }
 
 .hero-side-title {
@@ -249,7 +280,7 @@ onMounted(loadDetail);
 
 .detail-main-card {
   padding: 24px;
-  border-radius: 30px;
+  border-radius: 18px;
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
 }
 
@@ -259,6 +290,15 @@ onMounted(loadDetail);
   border-radius: 24px;
   object-fit: cover;
   border: 1px solid var(--et-border-color-light);
+}
+
+.hero-image.placeholder {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #bfdbfe, #dbeafe);
+  color: #1e3a8a;
+  font-size: 32px;
+  font-weight: 700;
 }
 
 .thumb-row {
@@ -277,7 +317,7 @@ onMounted(loadDetail);
 }
 
 .thumb.active {
-  border-color: #f59e0b;
+  border-color: var(--et-color-primary);
 }
 
 .thumb img {
@@ -287,19 +327,91 @@ onMounted(loadDetail);
   border-radius: 12px;
 }
 
-.content-panel {
+.content-panel + .content-panel {
   margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid color-mix(in srgb, var(--et-border-color-light) 72%, transparent);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .panel-title {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
 }
 
+.panel-title.with-bar {
+  position: relative;
+  padding-left: 12px;
+}
+
+.panel-title.with-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 3px;
+  bottom: 3px;
+  width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #14b8a6, #0ea5e9);
+}
+
+.panel-meta,
 .panel-text {
-  margin-top: 14px;
   color: var(--et-text-secondary);
+}
+
+.panel-text {
   line-height: 1.8;
+}
+
+.function-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.function-card {
+  padding: 16px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--et-fill-color-light) 58%, transparent);
+  border: 1px solid color-mix(in srgb, var(--et-border-color-light) 78%, transparent);
+}
+
+.function-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.function-desc {
+  min-height: 48px;
+  margin-top: 10px;
+  color: var(--et-text-secondary);
+  line-height: 1.7;
+}
+
+.function-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.function-field-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
+  font-size: 12px;
+}
+
+.function-field-tag.muted {
+  color: var(--et-text-tertiary);
 }
 
 .detail-aside {
@@ -309,8 +421,8 @@ onMounted(loadDetail);
 }
 
 .meta-card {
-  padding: 20px;
-  border-radius: 24px;
+  padding: 18px;
+  border-radius: 16px;
   background: color-mix(in srgb, var(--et-bg-container) 96%, transparent);
 }
 
@@ -320,13 +432,13 @@ onMounted(loadDetail);
 }
 
 .meta-value {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
 }
 
-:global(html.dark) .appstore-detail {
+:global(html.dark) .pluginstore-detail {
   background:
-    radial-gradient(circle at top left, rgba(245, 158, 11, 0.14) 0, transparent 32%),
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.18) 0, transparent 32%),
     linear-gradient(180deg, #09111f 0%, #0b1424 100%);
 }
 
@@ -336,10 +448,20 @@ onMounted(loadDetail);
   box-shadow: 0 24px 54px rgba(2, 6, 23, 0.42);
 }
 
+:global(html.dark) .detail-hero {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(20, 35, 64, 0.92));
+}
+
 :global(html.dark) .detail-hero-side,
 :global(html.dark) .detail-main-card,
-:global(html.dark) .meta-card {
+:global(html.dark) .meta-card,
+:global(html.dark) .function-card {
   background: rgba(15, 23, 42, 0.82);
+}
+
+:global(html.dark) .hero-image.placeholder {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(30, 64, 175, 0.65));
+  color: #dbeafe;
 }
 
 @media (max-width: 1100px) {
@@ -350,7 +472,7 @@ onMounted(loadDetail);
 }
 
 @media (max-width: 960px) {
-  .appstore-detail {
+  .pluginstore-detail {
     padding: 16px;
   }
 

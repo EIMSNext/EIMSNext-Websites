@@ -5,6 +5,7 @@ import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-rou
 export const AppLayout = () => import("@/layout/applayout/index.vue");
 export const SysLayout = () => import("@/layout/syslayout/index.vue");
 export const TodoLayout = () => import("@/layout/todolayout/index.vue");
+export const OpenPlatformLayout = () => import("@/layout/openplatform/index.vue");
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
@@ -29,6 +30,18 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/appstore",
     component: () => import("@/views/appstore/index.vue"),
     meta: { hidden: true },
+  },
+  {
+    name: "pluginstore",
+    path: "/pluginstore",
+    component: () => import("@/views/pluginstore/index.vue"),
+    meta: { hidden: true, requiresAuth: true },
+  },
+  {
+    name: "pluginstore-detail",
+    path: "/pluginstore/:id",
+    component: () => import("@/views/pluginstore/detail.vue"),
+    meta: { hidden: true, requiresAuth: true },
   },
   {
     name: "appstore-detail",
@@ -213,6 +226,61 @@ export const constantRoutes: RouteRecordRaw[] = [
           requiresAuth: true,
           allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
         },
+      },
+    ],
+  },
+  {
+    path: "/open-platform/pluginstore",
+    component: OpenPlatformLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/pluginstore/index.vue"),
+        meta: { title: "pluginstore", keepAlive: true, requiresAuth: true },
+      },
+    ],
+  },
+  {
+    path: "/open-platform/plugin-manage",
+    component: OpenPlatformLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/open-platform/plugin-manage/index.vue"),
+        meta: { title: "plugin-manage", keepAlive: true, requiresAuth: true },
+      },
+    ],
+  },
+  {
+    path: "/open-platform/api-key",
+    component: OpenPlatformLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/open-platform/api-key/index.vue"),
+        meta: { title: "api-key", keepAlive: true, requiresAuth: true },
+      },
+    ],
+  },
+  {
+    path: "/open-platform/api-log",
+    component: OpenPlatformLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/open-platform/api-log/index.vue"),
+        meta: { title: "api-log", keepAlive: true, requiresAuth: true },
+      },
+    ],
+  },
+  {
+    path: "/open-platform/docs",
+    component: OpenPlatformLayout,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/open-platform/docs/index.vue"),
+        meta: { title: "open-platform-docs", keepAlive: true, requiresAuth: true },
       },
     ],
   },

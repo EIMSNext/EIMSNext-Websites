@@ -299,7 +299,7 @@ onBeforeMount(async () => {
 
     if (form) {
       formDef.value = form;
-      await loadPrintTemplates(form.id);
+      await loadPrintDefs(form.id);
     }
 
     if (data) {
