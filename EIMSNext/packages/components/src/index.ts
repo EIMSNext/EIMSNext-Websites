@@ -43,6 +43,7 @@ export * from "./dialog";
 export * from "./FieldBlockPicker";
 export * from "./FieldBlockCodeEditor";
 export * from "./FieldBlock/shared";
+export { default as fieldIcons } from "./fieldIcons";
 
 export default [
   SvgIcon,
