@@ -62,7 +62,7 @@ import {
   createFlowNode,
 } from "../Common/FlowData";
 import { useLocale } from "element-plus";
-import { convertCandidateToTag, convertTagToCandidate } from "./type";
+import { convertCandidateToTags, convertTagsToCandidates } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { ISelectedTag } from "@/selectedTags/type";
 import { MemberTabs } from "@/component";
@@ -112,7 +112,7 @@ const createStarterTag = (): ISelectedTag => ({
   type: DataItemType.Dynamic,
   data: {
     dynamicCategory: "starter",
-    supportsManager: false,
+    baseLabel: t("workflow.starter"),
   },
 });
 
@@ -138,7 +138,6 @@ const createFieldTag = (
     data: {
       fieldType: field.type,
       dynamicCategory: isEmployeeField ? "employeeField" : "departmentField",
-      supportsManager: true,
       baseLabel: field.title,
     },
   };
@@ -187,7 +186,7 @@ const editApprover = () => {
 };
 
 const finishApproverSelect = (tags: ISelectedTag[]) => {
-  activeData.value.metadata.approveMeta!.approvalCandidates = tags.map(convertTagToCandidate);
+  activeData.value.metadata.approveMeta!.approvalCandidates = convertTagsToCandidates(tags);
   selectedCandidateTags.value = tags;
   showApproverDialog.value = false;
 };
@@ -228,13 +227,13 @@ const openActionDialog = (actionType: NodeActionType) => {
     text: action.text || getDefaultActionLabel(action.actionType),
     candidates: action.candidates ? [...action.candidates] : [],
   };
-  dialogCandidateTags.value = (dialogAction.value.candidates || []).map(convertCandidateToTag);
+  dialogCandidateTags.value = (dialogAction.value.candidates || []).flatMap(convertCandidateToTags);
   showActionDialog.value = true;
 };
 
 const finishActionMemberSelect = (tags: ISelectedTag[]) => {
   dialogCandidateTags.value = tags;
-  dialogAction.value.candidates = tags.map(convertTagToCandidate);
+  dialogAction.value.candidates = convertTagsToCandidates(tags);
   showActionMemberDialog.value = false;
 };
 
@@ -272,7 +271,7 @@ const confirmActionDialog = () => {
 const init = () => {
   nextTick(() => {
     activeData.value = flowContext.activeData;
-    selectedCandidateTags.value = (activeData.value.metadata.approveMeta?.approvalCandidates || []).map(convertCandidateToTag);
+    selectedCandidateTags.value = (activeData.value.metadata.approveMeta?.approvalCandidates || []).flatMap(convertCandidateToTags);
     ready.value = true;
   });
   loadDynamicMembers();

@@ -257,3 +257,85 @@ html.dark {
 .borderless-list {
   border: none;
 }
+
+.dynamic-member-panel {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.dynamic-member-groups {
+  width: 120px;
+  flex: none;
+  padding: var(--et-space-10) var(--et-space-8);
+  border-right: 1px solid var(--et-border-color-light);
+}
+
+.dynamic-member-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.dynamic-member-items {
+  flex: 1;
+  min-width: 0;
+  padding: var(--et-space-10) var(--et-space-12);
+
+  &.manager-mode {
+    flex: 0 0 240px;
+    border-right: 1px solid var(--et-border-color-light);
+  }
+}
+
+.dynamic-member-managers {
+  flex: 1;
+  min-width: 0;
+  padding: var(--et-space-16) var(--et-space-16) var(--et-space-12);
+}
+
+.dynamic-member-group,
+.dynamic-member-item,
+.dynamic-manager-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 0 var(--et-space-12);
+  border-radius: var(--et-radius-6);
+  color: var(--et-text-primary);
+}
+
+.dynamic-member-group,
+.dynamic-member-item {
+  cursor: pointer;
+}
+
+.dynamic-member-group + .dynamic-member-group,
+.dynamic-member-item + .dynamic-member-item,
+.dynamic-manager-option + .dynamic-manager-option {
+  margin-top: var(--et-space-4);
+}
+
+.dynamic-member-group:hover,
+.dynamic-member-item:hover,
+.dynamic-manager-option:hover {
+  background: var(--et-bg-page);
+}
+
+.dynamic-member-group.active,
+.dynamic-member-item.active {
+  background: var(--et-bg-primary-soft);
+  color: var(--et-color-primary);
+}
+
+.dynamic-manager-title {
+  margin-bottom: var(--et-space-10);
+  color: var(--et-text-secondary);
+}
+
+.dynamic-member-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

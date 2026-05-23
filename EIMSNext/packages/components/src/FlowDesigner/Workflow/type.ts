@@ -33,6 +33,17 @@ export function convertTagToCandidate(tag: ISelectedTag): IApprovalCandidate {
     managerLevels,
   };
 }
+
+function getManagerLevelLabel(level: number): string {
+  if (level === 1) {
+    return "直接部门主管";
+  }
+  if (level === 2) {
+    return "上级部门主管";
+  }
+  return `${level}级部门主管`;
+}
+
 export function convertCandidateToTag(
   candidate: IApprovalCandidate
 ): ISelectedTag {
@@ -49,6 +60,60 @@ export function convertCandidateToTag(
     managerLevels,
     cascadedDept: candidate.cascadedDept,
   };
+}
+
+export function convertCandidateToTags(
+  candidate: IApprovalCandidate,
+): ISelectedTag[] {
+  const baseTag = convertCandidateToTag(candidate);
+  const managerLevels = normalizeManagerLevels(candidate.managerLevels);
+  if (!managerLevels) {
+    return [baseTag];
+  }
+
+  const baseLabel = candidate.candidateName.split(" | ")[0];
+  return managerLevels.map((level) => ({
+    ...baseTag,
+    id: buildCandidateTagId(candidate.candidateType, candidate.candidateId, [level]),
+    label: `${baseLabel} | ${getManagerLevelLabel(level)}`,
+    managerLevels: [level],
+    data: {
+      ...(baseTag.data || {}),
+      baseLabel,
+    },
+  }));
+}
+
+export function convertTagsToCandidates(tags: ISelectedTag[]): IApprovalCandidate[] {
+  const candidates: IApprovalCandidate[] = [];
+  const managerCandidateMap = new Map<string, IApprovalCandidate>();
+
+  tags.forEach((tag) => {
+    const managerLevels = normalizeManagerLevels(tag.managerLevels);
+    if (!managerLevels) {
+      candidates.push(convertTagToCandidate(tag));
+      return;
+    }
+
+    const key = `${tag.type}:${tag.sourceId || tag.id}`;
+    const existing = managerCandidateMap.get(key);
+    if (existing) {
+      existing.managerLevels = normalizeManagerLevels([
+        ...(existing.managerLevels || []),
+        ...managerLevels,
+      ]);
+      return;
+    }
+
+    const candidate = convertTagToCandidate({
+      ...tag,
+      label: tag.data?.baseLabel || tag.label.split(" | ")[0],
+      managerLevels,
+    });
+    managerCandidateMap.set(key, candidate);
+  });
+
+  return [...candidates, ...managerCandidateMap.values()];
 }
 export function convertItemTypeToCandidateType(tagType: DataItemType): CandidateType {
   let candidateType = CandidateType.Unknown;

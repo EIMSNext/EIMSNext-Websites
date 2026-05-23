@@ -12,9 +12,9 @@
   .el-tag {
     border-radius: var(--et-radius-4);
     padding: 0 var(--et-space-8);
-    background-color: transparent !important;
-    color: var(--et-text-tertiary);
-    border: 1px solid var(--et-border-color) !important;
+    background-color: var(--et-fill-color-light) !important;
+    color: var(--et-text-primary);
+    border: 1px solid transparent !important;
 
     &.error-tag {
       background-color: var(--et-bg-danger-soft) !important;
@@ -37,7 +37,7 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       padding-right: var(--et-space-2);
-      color: var(--et-text-tertiary) !important;
+      color: var(--et-text-primary) !important;
 
       &.has-error {
         color: var(--et-color-danger) !important;
@@ -45,10 +45,10 @@
     }
 
     .el-tag__close {
-      color: var(--et-text-tertiary) !important;
+      color: var(--et-text-primary) !important;
 
       &:hover {
-        color: var(--et-text-secondary) !important;
+        color: var(--et-text-primary) !important;
         background-color: transparent !important;
       }
     }

@@ -196,18 +196,55 @@
             label="动态负责人"
             :name="MemberTabs.Dynamic"
           >
-            <div class="dept-select">
-              <et-list
-                v-model="selectedDyMembers"
-                :data="options.dynamicMembers"
-                :selectable="true"
-                :multiple="options.multiple"
-                :showCount="false"
-                class="borderless-list"
-                @item-check="dymChecked"
-                @all-check="dymCheckAll"
-              >
-              </et-list>
+            <div class="dynamic-member-panel">
+              <div class="dynamic-member-groups">
+                <div
+                  v-for="group in dynamicGroups"
+                  :key="group.id"
+                  class="dynamic-member-group"
+                  :class="{ active: group.id === selectedDynamicGroupId }"
+                  @click="selectDynamicGroup(group.id)"
+                >
+                  <span class="dynamic-member-item-label">{{ group.label }}</span>
+                </div>
+              </div>
+              <div class="dynamic-member-content">
+                <div class="dynamic-member-items" :class="{ 'manager-mode': isManagerGroup }">
+                  <div
+                    v-for="item in currentDynamicItems"
+                    :key="item.id"
+                  class="dynamic-member-item"
+                    :class="{ active: item.id === selectedDynamicMemberId && isManagerGroup }"
+                    @click="selectDynamicItem(item)"
+                  >
+                    <span class="dynamic-member-item-label">{{ getDynamicItemLabelByGroup(item) }}</span>
+                    <el-checkbox
+                      v-if="!isManagerGroup"
+                      :model-value="isDynamicItemChecked(item)"
+                      @click.stop=""
+                      @change="(checked: boolean) => dymChecked(item, checked)"
+                    />
+                  </div>
+                </div>
+                <div v-if="isManagerGroup" class="dynamic-member-managers">
+                  <template v-if="selectedDynamicItem">
+                    <div class="dynamic-manager-title">
+                      {{ `${selectedDynamicItem.label}的主管级别：` }}
+                    </div>
+                    <div
+                      v-for="level in dynamicManagerLevels"
+                      :key="level"
+                      class="dynamic-manager-option"
+                    >
+                      <span>{{ getManagerLevelLabel(level) }}</span>
+                      <el-checkbox
+                        :model-value="selectedDynamicManagerLevels.includes(level)"
+                        @change="(checked: boolean) => toggleManagerLevel(level, checked)"
+                      />
+                    </div>
+                  </template>
+                </div>
+              </div>
             </div>
           </el-tab-pane>
           <el-tab-pane
@@ -360,16 +397,16 @@ const curDeptTree = ref<TreeInstance>();
 const curDeptData = ref<ITreeNode[]>();
 const singleDeptId = ref<string>("");
 const curEmpData = ref<IListItem[]>([]);
-const selectedDyMembers = ref<string[]>([]);
 const selectedDynamicGroupId = ref<string>("");
 const selectedDynamicMemberId = ref<string>("");
+const dynamicGroupOrder = ["starter", "employeeField", "departmentField", "manager"];
+
+const isManagerGroup = computed(() => selectedDynamicGroupId.value === "manager");
 
 const dynamicGroups = computed<IDynamicMemberGroup[]>(() => {
   const groups: IDynamicMemberGroup[] = [];
   const groupMap = new Map<string, IDynamicMemberGroup>();
-  const members = (options.dynamicMembers || []).filter((item) =>
-    item.label.includes(keyword.value || ""),
-  );
+  const members = options.dynamicMembers || [];
 
   const registerGroup = (id: string, label: string) => {
     if (!groupMap.has(id)) {
@@ -386,26 +423,40 @@ const dynamicGroups = computed<IDynamicMemberGroup[]>(() => {
   };
 
   members.forEach((item) => {
-    const category = item.data?.dynamicCategory || "starter";
+    const category = getDynamicCategory(item);
     if (category === "employeeField") {
       registerGroup("employeeField", t("workflow.formEmployeeField")).items.push(item);
     } else if (category === "departmentField") {
       registerGroup("departmentField", t("workflow.formDepartmentField")).items.push(item);
-    } else if (category === "manager") {
-      registerGroup("manager", t("workflow.departmentManager")).items.push(item);
     } else {
       registerGroup("starter", t("workflow.starter")).items.push(item);
     }
   });
 
+  if (members.length > 0) {
+    registerGroup("manager", t("workflow.departmentManager")).items = managerSourceItems.value;
+  }
+
+  groups.sort(
+    (a, b) => dynamicGroupOrder.indexOf(a.id) - dynamicGroupOrder.indexOf(b.id),
+  );
+
   return groups;
+});
+
+const managerSourceItems = computed<ISelectedTag[]>(() => {
+  return (options.dynamicMembers || []).filter((item) =>
+    getDynamicItemLabel(item).includes(keyword.value || ""),
+  );
 });
 
 const currentDynamicItems = computed<ISelectedTag[]>(() => {
   const activeGroup = dynamicGroups.value.find(
     (item) => item.id === selectedDynamicGroupId.value,
   );
-  return activeGroup?.items || [];
+  return (activeGroup?.items || []).filter((item) =>
+    getDynamicItemLabel(item).includes(keyword.value || ""),
+  );
 });
 
 const selectedDynamicItem = computed<ISelectedTag | undefined>(() => {
@@ -426,8 +477,9 @@ const selectedDynamicManagerLevels = computed<number[]>(() => {
     return [];
   }
 
-  const tag = findDynamicTag(item);
-  return tag?.managerLevels || [];
+  return dynamicManagerLevels.value.filter((level) =>
+    !!findDynamicManagerTag(item, level),
+  );
 });
 
 const normalizeManagerLevels = (levels?: number[]) => {
@@ -436,11 +488,6 @@ const normalizeManagerLevels = (levels?: number[]) => {
   }
 
   return [...new Set(levels.filter((x) => x > 0))].sort((a, b) => a - b);
-};
-
-const buildManagerLevelText = (levels?: number[]) => {
-  const normalized = normalizeManagerLevels(levels);
-  return normalized.map((level) => getManagerLevelLabel(level)).join("、");
 };
 
 const buildDynamicTagId = (item: ISelectedTag, managerLevels?: number[]) => {
@@ -452,18 +499,61 @@ const buildDynamicTagId = (item: ISelectedTag, managerLevels?: number[]) => {
 };
 
 const buildDynamicTagLabel = (item: ISelectedTag, managerLevels?: number[]) => {
-  const levelText = buildManagerLevelText(managerLevels);
-  return levelText ? `${item.label}(${levelText})` : item.label;
+  const normalized = normalizeManagerLevels(managerLevels);
+  if (normalized.length === 0) {
+    return getDynamicItemLabel(item);
+  }
+
+  return `${getDynamicItemLabel(item)} | ${getManagerLevelLabel(normalized[0])}`;
 };
 
-const supportsManager = (item: ISelectedTag) => {
-  return !!item.data?.supportsManager;
+const getDynamicItemLabelByGroup = (item: ISelectedTag) => {
+  if (isManagerGroup.value) {
+    return getDynamicItemLabel(item);
+  }
+
+  const category = getDynamicCategory(item);
+  if (category === "starter") {
+    return t("workflow.starter");
+  }
+
+  if (category === "employeeField") {
+    return item.data?.fieldType?.toString().endsWith("2") ? "成员多选" : "成员单选";
+  }
+
+  if (category === "departmentField") {
+    return item.data?.fieldType?.toString().endsWith("2") ? "部门多选" : "部门单选";
+  }
+
+  return getDynamicItemLabel(item);
+};
+
+const getDynamicCategory = (item: ISelectedTag) => {
+  return item.data?.dynamicCategory || "starter";
+};
+
+const getDynamicItemLabel = (item: ISelectedTag) => {
+  return item.data?.baseLabel || item.label;
 };
 
 const findDynamicTag = (item: ISelectedTag) => {
   const sourceId = item.sourceId || item.id;
   return tagsRef.value.find(
-    (tag) => tag.type === item.type && (tag.sourceId || tag.id) === sourceId,
+    (tag) =>
+      tag.type === item.type
+      && (tag.sourceId || tag.id) === sourceId
+      && (!tag.managerLevels || tag.managerLevels.length === 0),
+  );
+};
+
+const findDynamicManagerTag = (item: ISelectedTag, level: number) => {
+  const sourceId = item.sourceId || item.id;
+  return tagsRef.value.find(
+    (tag) =>
+      tag.type === item.type
+      && (tag.sourceId || tag.id) === sourceId
+      && tag.managerLevels?.length === 1
+      && tag.managerLevels[0] === level,
   );
 };
 
@@ -472,16 +562,6 @@ const isDynamicItemChecked = (item: ISelectedTag) => {
 };
 
 const syncDynamicSelection = () => {
-  selectedDyMembers.value = tagsRef.value
-    .filter(
-      (tag) =>
-        (tag.type === DataItemType.Dynamic || tag.type === DataItemType.Field) &&
-        !!options.dynamicMembers?.find(
-          (item) => item.type === tag.type && (item.sourceId || item.id) === (tag.sourceId || tag.id),
-        ),
-    )
-    .map((tag) => buildDynamicTagId(tag, tag.managerLevels));
-
   if (!selectedDynamicGroupId.value || !dynamicGroups.value.find((item) => item.id === selectedDynamicGroupId.value)) {
     selectedDynamicGroupId.value = dynamicGroups.value[0]?.id || "";
   }
@@ -502,9 +582,7 @@ const selectDynamicItem = (item: ISelectedTag) => {
 
 const upsertDynamicTag = (item: ISelectedTag, checked: boolean, managerLevels?: number[]) => {
   const sourceId = item.sourceId || item.id;
-  const normalizedLevels = supportsManager(item)
-    ? normalizeManagerLevels(managerLevels)
-    : [];
+  const normalizedLevels = normalizeManagerLevels(managerLevels);
   const label = buildDynamicTagLabel(item, normalizedLevels);
   const nextTag: ISelectedTag = {
     ...item,
@@ -512,11 +590,13 @@ const upsertDynamicTag = (item: ISelectedTag, checked: boolean, managerLevels?: 
     sourceId,
     label,
     managerLevels: normalizedLevels,
+    data: {
+      ...item.data,
+      baseLabel: getDynamicItemLabel(item),
+    },
   };
 
-  const remainTags = tagsRef.value.filter(
-    (tag) => !(tag.type === item.type && (tag.sourceId || tag.id) === sourceId),
-  );
+  const remainTags = tagsRef.value.filter((tag) => tag.id !== nextTag.id);
 
   if (!checked) {
     tagsRef.value = remainTags;
@@ -534,15 +614,11 @@ const upsertDynamicTag = (item: ISelectedTag, checked: boolean, managerLevels?: 
 
 const toggleManagerLevel = (level: number, checked: boolean) => {
   const item = selectedDynamicItem.value;
-  if (!item || !supportsManager(item)) {
+  if (!item) {
     return;
   }
 
-  const currentLevels = selectedDynamicManagerLevels.value;
-  const nextLevels = checked
-    ? [...currentLevels, level]
-    : currentLevels.filter((itemLevel) => itemLevel !== level);
-  upsertDynamicTag(item, checked || isDynamicItemChecked(item), nextLevels);
+  upsertDynamicTag(item, checked, [level]);
 };
 
 const getManagerLevelLabel = (level: number) => {
@@ -975,7 +1051,7 @@ const removeTag = (tag: ISelectedTag) => {
     tag.type == DataItemType.Dynamic ||
     tag.type == DataItemType.Field
   ) {
-    selectedDyMembers.value = selectedDyMembers.value?.filter((x) => x != tag.id);
+    syncDynamicSelection();
   }
 };
 
@@ -1187,57 +1263,4 @@ const getNodeIconColor = (node: ITreeNode) => {
   cursor: pointer;
 }
 
-.dynamic-member-panel {
-  display: grid;
-  grid-template-columns: 140px 1fr 320px;
-  min-height: 320px;
-  border: 1px solid var(--et-border-color);
-  border-radius: var(--et-radius-6);
-}
-
-.dynamic-member-groups,
-.dynamic-member-items,
-.dynamic-member-managers {
-  padding: var(--et-space-8);
-}
-
-.dynamic-member-groups,
-.dynamic-member-items {
-  border-right: 1px solid var(--et-border-color);
-}
-
-.dynamic-member-group,
-.dynamic-member-item,
-.dynamic-manager-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 36px;
-  padding: 0 var(--et-space-10);
-  border-radius: var(--et-radius-6);
-  cursor: pointer;
-}
-
-.dynamic-member-group.active,
-.dynamic-member-item.active {
-  background: var(--et-bg-primary-soft);
-  color: var(--et-color-primary);
-}
-
-.dynamic-member-group:hover,
-.dynamic-member-item:hover,
-.dynamic-manager-option:hover {
-  background: var(--et-bg-page);
-}
-
-.dynamic-manager-title {
-  margin-bottom: var(--et-space-10);
-  color: var(--et-text-secondary);
-}
-
-.dynamic-member-item-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 </style>

@@ -170,8 +170,8 @@ import {
   SelectedTags,
   MemberTabs,
   MemberSelectDialog,
-  convertCandidateToTag,
-  convertTagToCandidate,
+  convertCandidateToTags,
+  convertTagsToCandidates,
   IApprovalCandidate,
   FieldSelectList,
   FieldBlockCodeEditor,
@@ -217,7 +217,7 @@ function initFromModelValue() {
   if (formNotify.value.notifiers) {
     try {
       const candidates: IApprovalCandidate[] = JSON.parse(formNotify.value.notifiers);
-      notifier.value = candidates.map((c) => convertCandidateToTag(c));
+      notifier.value = candidates.flatMap((c) => convertCandidateToTags(c));
     } catch {
       notifier.value = [];
     }
@@ -296,8 +296,7 @@ function editNotifier() {
 }
 
 function finishSelectNotifier(tags: ISelectedTag[]) {
-  const candidates: IApprovalCandidate[] = [];
-  tags.forEach((x) => candidates.push(convertTagToCandidate(x)));
+  const candidates: IApprovalCandidate[] = convertTagsToCandidates(tags);
   formNotify.value.notifiers = JSON.stringify(candidates);
   notifier.value = tags;
   showMemberDialog.value = false;

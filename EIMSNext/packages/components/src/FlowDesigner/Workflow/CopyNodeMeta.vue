@@ -40,7 +40,7 @@ import {
   createFlowNode,
 } from "../Common/FlowData";
 import { useLocale } from "element-plus";
-import { convertCandidateToTag, convertTagToCandidate } from "./type";
+import { convertCandidateToTags, convertTagsToCandidates } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { ISelectedTag } from "@/selectedTags/type";
 import { MemberTabs } from "@/component";
@@ -60,9 +60,7 @@ const editTag = () => {
   showMemberDialog.value = true;
 };
 const finishSelect = (tags: ISelectedTag[]) => {
-  let candidate: IApprovalCandidate[] = [];
-  tags.forEach((x) => candidate.push(convertTagToCandidate(x)));
-  activeData.value.metadata.copytoMeta!.approvalCandidates = candidate;
+  activeData.value.metadata.copytoMeta!.approvalCandidates = convertTagsToCandidates(tags);
 
   selectedCandidateTags.value = tags;
   showMemberDialog.value = false;
@@ -76,7 +74,7 @@ const init = () => {
     if (activeData.value.metadata.copytoMeta!.approvalCandidates) {
       let tags: ISelectedTag[] = [];
       activeData.value.metadata.copytoMeta!.approvalCandidates.forEach(
-        (x: IApprovalCandidate) => tags.push(convertCandidateToTag(x)),
+        (x: IApprovalCandidate) => tags.push(...convertCandidateToTags(x)),
       );
       selectedCandidateTags.value = tags;
     }
