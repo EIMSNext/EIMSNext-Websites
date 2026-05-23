@@ -90,7 +90,16 @@
                 <el-switch />
               </div>
             </div>
-
+            <div class="panel-row bind-info-row">
+              <div class="row-label fixed-label-width">账号绑定</div>
+              <div class="row-content">
+                <div class="social-icon">
+                  <et-icon icon="wechat" size="24px" color="green" />
+                  <span class="item-text">微信</span>
+                  <el-link type="primary" underline="never" class="link-btn">解绑</el-link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <el-divider class="section-divider" />

@@ -49,6 +49,16 @@
                   @click.prevent="handleLoginSubmit">
                   {{ t("login.login") }}
                 </el-button>
+                <div class="integration-login">
+                  <div class="integration-title">第三方登录</div>
+                  <div class="integration-list">
+                    <button v-for="item in integrationItems" :key="item.type" type="button"
+                      class="integration-item" :class="item.className" @click="handleIntegrationLogin(item.type)">
+                      <span class="integration-short">{{ item.shortLabel }}</span>
+                      <span class="integration-name">{{ item.label }}</span>
+                    </button>
+                  </div>
+                </div>
                 <!-- <div class="footer">
                 <div class="switch-btn">验证码登录</div>
               </div> -->
@@ -73,7 +83,10 @@ import {
   useUserStore,
 } from "@eimsnext/store";
 import { LoginRequest } from "@eimsnext/services";
+import { authService } from "@eimsnext/services";
 import { useLocale } from "element-plus";
+import { integrationLoginItems, type IntegrationLoginType } from "@/constants/integrationLogin";
+import { createIntegrationState, getLoginRedirect } from "@/utils/integrationLogin";
 
 const { t } = useLocale();
 
@@ -86,6 +99,7 @@ const loginFormRef = ref<FormInstance>();
 const isDark = ref(settingsStore.theme === Themes.DARK); // 是否暗黑模式
 const loading = ref(false); // 按钮 loading 状态
 const isCapslock = ref(false); // 是否大写锁定
+const integrationItems = integrationLoginItems;
 
 const loginData = ref<LoginRequest>({
   username: "admin@eimsnext.com",
@@ -135,6 +149,22 @@ async function handleLoginSubmit() {
         });
     }
   });
+}
+
+async function handleIntegrationLogin(type: IntegrationLoginType) {
+  try {
+    const redirect = getLoginRedirect(route.query.redirect);
+    const state = createIntegrationState(type, redirect);
+    const result = await authService.getIntegrationAuthorizationUrl(type, state);
+    const authorizationUrl = result.authorizationUrl;
+    if (!authorizationUrl) {
+      throw new Error("该集成登录未启用或配置不完整");
+    }
+
+    window.location.href = authorizationUrl;
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : "第三方登录发起失败");
+  }
 }
 
 /**
@@ -278,7 +308,73 @@ function checkCapslock(event: KeyboardEvent) {
         width: 100%;
       }
 
+      .integration-login {
+        margin-top: var(--et-space-28);
+      }
 
+      .integration-title {
+        color: var(--et-text-secondary);
+        font-size: var(--et-font-size-13);
+        line-height: var(--et-line-height-20);
+        margin-bottom: var(--et-space-12);
+      }
+
+      .integration-list {
+        display: grid;
+        gap: var(--et-space-12);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .integration-item {
+        align-items: center;
+        background: var(--et-bg-container);
+        border: 1px solid var(--et-border-color);
+        border-radius: var(--et-size-12);
+        color: inherit;
+        cursor: pointer;
+        display: flex;
+        gap: var(--et-space-10);
+        padding: var(--et-space-12);
+        text-align: left;
+        transition: all 0.2s ease;
+      }
+
+      .integration-item:hover {
+        border-color: var(--el-color-primary);
+        transform: translateY(-1px);
+      }
+
+      .integration-short {
+        align-items: center;
+        border-radius: 50%;
+        color: #fff;
+        display: inline-flex;
+        font-size: var(--et-font-size-14);
+        font-weight: 600;
+        height: var(--et-size-32);
+        justify-content: center;
+        width: var(--et-size-32);
+      }
+
+      .integration-name {
+        font-size: var(--et-font-size-14);
+      }
+
+      .integration-item.wechat .integration-short {
+        background: #2aae67;
+      }
+
+      .integration-item.wxwork .integration-short {
+        background: #3875f6;
+      }
+
+      .integration-item.feishu .integration-short {
+        background: #00c2b8;
+      }
+
+      .integration-item.dingding .integration-short {
+        background: #1677ff;
+      }
     }
   }
 }
