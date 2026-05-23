@@ -289,8 +289,8 @@
 </template>
 <script lang="ts" setup>
 import "./style/index.scss";
-import { ref, reactive, watch, onBeforeMount, toRef } from "vue";
-import { TreeInstance } from "element-plus";
+import { computed, ref, watch, onBeforeMount, toRef } from "vue";
+import { TreeInstance, useLocale } from "element-plus";
 import {
   DataItemType,
   deptToTreeNode,
@@ -308,7 +308,12 @@ import {
   roleService,
 } from "@eimsnext/services";
 import { IListItem } from "../list/type";
-import { IMemberLimit, IMemberSelectOptions, MemberTabs } from "./type";
+import {
+  IDynamicMemberGroup,
+  IMemberLimit,
+  IMemberSelectOptions,
+  MemberTabs,
+} from "./type";
 import { deepMerge, FlagEnum } from "@eimsnext/utils";
 
 defineOptions({
@@ -333,6 +338,7 @@ const options = deepMerge<IMemberSelectOptions>(
   props.options || {},
 );
 
+const { t } = useLocale();
 const orgCascade = ref(options.cascadedDept ?? false);
 const userStore = useUserStore();
 const defaultProps = { children: "children", label: "label" };
@@ -354,13 +360,207 @@ const curDeptTree = ref<TreeInstance>();
 const curDeptData = ref<ITreeNode[]>();
 const singleDeptId = ref<string>("");
 const curEmpData = ref<IListItem[]>([]);
-const selectedDyMembers = ref<string[]>();
+const selectedDyMembers = ref<string[]>([]);
+const selectedDynamicGroupId = ref<string>("");
+const selectedDynamicMemberId = ref<string>("");
+
+const dynamicGroups = computed<IDynamicMemberGroup[]>(() => {
+  const groups: IDynamicMemberGroup[] = [];
+  const groupMap = new Map<string, IDynamicMemberGroup>();
+  const members = (options.dynamicMembers || []).filter((item) =>
+    item.label.includes(keyword.value || ""),
+  );
+
+  const registerGroup = (id: string, label: string) => {
+    if (!groupMap.has(id)) {
+      const group: IDynamicMemberGroup = {
+        id,
+        label,
+        type: DataItemType.Group,
+        items: [],
+      };
+      groupMap.set(id, group);
+      groups.push(group);
+    }
+    return groupMap.get(id)!;
+  };
+
+  members.forEach((item) => {
+    const category = item.data?.dynamicCategory || "starter";
+    if (category === "employeeField") {
+      registerGroup("employeeField", t("workflow.formEmployeeField")).items.push(item);
+    } else if (category === "departmentField") {
+      registerGroup("departmentField", t("workflow.formDepartmentField")).items.push(item);
+    } else if (category === "manager") {
+      registerGroup("manager", t("workflow.departmentManager")).items.push(item);
+    } else {
+      registerGroup("starter", t("workflow.starter")).items.push(item);
+    }
+  });
+
+  return groups;
+});
+
+const currentDynamicItems = computed<ISelectedTag[]>(() => {
+  const activeGroup = dynamicGroups.value.find(
+    (item) => item.id === selectedDynamicGroupId.value,
+  );
+  return activeGroup?.items || [];
+});
+
+const selectedDynamicItem = computed<ISelectedTag | undefined>(() => {
+  return currentDynamicItems.value.find(
+    (item) => item.id === selectedDynamicMemberId.value,
+  );
+});
+
+const dynamicManagerLevels = computed<number[]>(() => {
+  return options.dynamicManagerLevels && options.dynamicManagerLevels.length > 0
+    ? options.dynamicManagerLevels
+    : [1, 2, 3, 4, 5];
+});
+
+const selectedDynamicManagerLevels = computed<number[]>(() => {
+  const item = selectedDynamicItem.value;
+  if (!item) {
+    return [];
+  }
+
+  const tag = findDynamicTag(item);
+  return tag?.managerLevels || [];
+});
+
+const normalizeManagerLevels = (levels?: number[]) => {
+  if (!levels || levels.length === 0) {
+    return [];
+  }
+
+  return [...new Set(levels.filter((x) => x > 0))].sort((a, b) => a - b);
+};
+
+const buildManagerLevelText = (levels?: number[]) => {
+  const normalized = normalizeManagerLevels(levels);
+  return normalized.map((level) => getManagerLevelLabel(level)).join("、");
+};
+
+const buildDynamicTagId = (item: ISelectedTag, managerLevels?: number[]) => {
+  const sourceId = item.sourceId || item.id;
+  const normalized = normalizeManagerLevels(managerLevels);
+  return normalized.length > 0
+    ? `${item.type}:${sourceId}|m:${normalized.join(",")}`
+    : `${item.type}:${sourceId}`;
+};
+
+const buildDynamicTagLabel = (item: ISelectedTag, managerLevels?: number[]) => {
+  const levelText = buildManagerLevelText(managerLevels);
+  return levelText ? `${item.label}(${levelText})` : item.label;
+};
+
+const supportsManager = (item: ISelectedTag) => {
+  return !!item.data?.supportsManager;
+};
+
+const findDynamicTag = (item: ISelectedTag) => {
+  const sourceId = item.sourceId || item.id;
+  return tagsRef.value.find(
+    (tag) => tag.type === item.type && (tag.sourceId || tag.id) === sourceId,
+  );
+};
+
+const isDynamicItemChecked = (item: ISelectedTag) => {
+  return !!findDynamicTag(item);
+};
+
+const syncDynamicSelection = () => {
+  selectedDyMembers.value = tagsRef.value
+    .filter(
+      (tag) =>
+        (tag.type === DataItemType.Dynamic || tag.type === DataItemType.Field) &&
+        !!options.dynamicMembers?.find(
+          (item) => item.type === tag.type && (item.sourceId || item.id) === (tag.sourceId || tag.id),
+        ),
+    )
+    .map((tag) => buildDynamicTagId(tag, tag.managerLevels));
+
+  if (!selectedDynamicGroupId.value || !dynamicGroups.value.find((item) => item.id === selectedDynamicGroupId.value)) {
+    selectedDynamicGroupId.value = dynamicGroups.value[0]?.id || "";
+  }
+
+  if (!selectedDynamicMemberId.value || !currentDynamicItems.value.find((item) => item.id === selectedDynamicMemberId.value)) {
+    selectedDynamicMemberId.value = currentDynamicItems.value[0]?.id || "";
+  }
+};
+
+const selectDynamicGroup = (groupId: string) => {
+  selectedDynamicGroupId.value = groupId;
+  selectedDynamicMemberId.value = currentDynamicItems.value[0]?.id || "";
+};
+
+const selectDynamicItem = (item: ISelectedTag) => {
+  selectedDynamicMemberId.value = item.id;
+};
+
+const upsertDynamicTag = (item: ISelectedTag, checked: boolean, managerLevels?: number[]) => {
+  const sourceId = item.sourceId || item.id;
+  const normalizedLevels = supportsManager(item)
+    ? normalizeManagerLevels(managerLevels)
+    : [];
+  const label = buildDynamicTagLabel(item, normalizedLevels);
+  const nextTag: ISelectedTag = {
+    ...item,
+    id: buildDynamicTagId(item, normalizedLevels),
+    sourceId,
+    label,
+    managerLevels: normalizedLevels,
+  };
+
+  const remainTags = tagsRef.value.filter(
+    (tag) => !(tag.type === item.type && (tag.sourceId || tag.id) === sourceId),
+  );
+
+  if (!checked) {
+    tagsRef.value = remainTags;
+  } else if (options.multiple) {
+    tagsRef.value = [...remainTags, nextTag];
+  } else {
+    const nonDynamicTags = remainTags.filter(
+      (tag) => tag.type !== DataItemType.Dynamic && tag.type !== DataItemType.Field,
+    );
+    tagsRef.value = [...nonDynamicTags, nextTag];
+  }
+
+  emit("update:modelValue", tagsRef.value);
+};
+
+const toggleManagerLevel = (level: number, checked: boolean) => {
+  const item = selectedDynamicItem.value;
+  if (!item || !supportsManager(item)) {
+    return;
+  }
+
+  const currentLevels = selectedDynamicManagerLevels.value;
+  const nextLevels = checked
+    ? [...currentLevels, level]
+    : currentLevels.filter((itemLevel) => itemLevel !== level);
+  upsertDynamicTag(item, checked || isDynamicItemChecked(item), nextLevels);
+};
+
+const getManagerLevelLabel = (level: number) => {
+  if (level === 1) {
+    return t("workflow.directManager");
+  }
+  if (level === 2) {
+    return t("workflow.higherLevelManager");
+  }
+  return t("workflow.nthLevelManager", { 0: level });
+};
 
 watch([keyword], ([newKeyword], [oldKeyword]) => {
   if (newKeyword != oldKeyword) {
     deptTree.value!.filter(newKeyword);
     roleTree.value!.filter(newKeyword);
     empDeptTree.value!.filter(newKeyword);
+    syncDynamicSelection();
   }
 });
 
@@ -520,10 +720,14 @@ onBeforeMount(() => {
     if (props.modelValue[0].type == DataItemType.Department)
       singleDeptId.value = props.modelValue[0].id;
   }
+
+  syncDynamicSelection();
 });
 
 // 手动设置选中节点
 const setSelectedNodes = () => {
+  syncDynamicSelection();
+
   // 确保树数据已加载
   if (!deptData.value || !roleData.value) return;
 
@@ -737,75 +941,13 @@ const curEmpCheckAll = (checked: boolean) => {
 };
 
 const dymChecked = (data: IListItem, checked: boolean) => {
-  if (options.multiple) {
-    if (checked) {
-      let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == DataItemType.Dynamic,
-      );
-      if (index == undefined || index == -1) {
-        tagsRef.value.push({
-          id: data.id,
-          value: data.value,
-          label: data.label,
-          type: DataItemType.Dynamic,
-          data: data.data,
-        });
-      }
-    } else {
-      tagsRef.value = tagsRef.value.filter(
-        (x) => x.type !== DataItemType.Dynamic || x.id !== data.id,
-      );
-    }
-
-    emit("update:modelValue", tagsRef.value);
-  } else {
-    if (checked) {
-      // 直接创建新数组
-      const nonDynamics = tagsRef.value.filter(
-        (x) => x.type != DataItemType.Dynamic,
-      );
-      tagsRef.value = [
-        ...nonDynamics,
-        {
-          id: data.id,
-          value: data.value,
-          label: data.label,
-          type: DataItemType.Dynamic,
-          data: data.data,
-        },
-      ];
-    } else {
-      tagsRef.value = tagsRef.value.filter(
-        (x) => x.type !== DataItemType.Dynamic || x.id !== data.id,
-      );
-    }
-    emit("update:modelValue", tagsRef.value);
-  }
+  const item = data as ISelectedTag;
+  upsertDynamicTag(item, checked, selectedDynamicManagerLevels.value);
 };
 const dymCheckAll = (checked: boolean) => {
-  if (checked) {
-    //全新增
-    options.dynamicMembers!.forEach((data) => {
-      let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == DataItemType.Dynamic,
-      );
-      if (index == undefined || index == -1) {
-        tagsRef.value.push({
-          id: data.id,
-          label: data.label,
-          type: DataItemType.Dynamic,
-          data: data.data,
-          icon: data.icon,
-        });
-      }
-    });
-  } else {
-    tagsRef.value = tagsRef.value.filter(
-      (x) => x.type !== DataItemType.Dynamic,
-    );
-  }
-
-  emit("update:modelValue", tagsRef.value);
+  currentDynamicItems.value.forEach((item) => {
+    upsertDynamicTag(item, checked, checked ? selectedDynamicManagerLevels.value : []);
+  });
 };
 
 const roleFilter = (value: string, data: any) => {
@@ -829,10 +971,11 @@ const removeTag = (tag: ISelectedTag) => {
     if (roleTree.value) roleTree.value.setChecked(tag.id, false, false);
   } else if (tag.type == DataItemType.Employee) {
     selectedEmps.value = selectedEmps.value?.filter((x) => x != tag.id);
-  } else if (tag.type == DataItemType.Dynamic) {
-    selectedDyMembers.value = selectedDyMembers.value?.filter(
-      (x) => x != tag.id,
-    );
+  } else if (
+    tag.type == DataItemType.Dynamic ||
+    tag.type == DataItemType.Field
+  ) {
+    selectedDyMembers.value = selectedDyMembers.value?.filter((x) => x != tag.id);
   }
 };
 
@@ -1042,5 +1185,59 @@ const getNodeIconColor = (node: ITreeNode) => {
 
 .custom-list-item {
   cursor: pointer;
+}
+
+.dynamic-member-panel {
+  display: grid;
+  grid-template-columns: 140px 1fr 320px;
+  min-height: 320px;
+  border: 1px solid var(--et-border-color);
+  border-radius: var(--et-radius-6);
+}
+
+.dynamic-member-groups,
+.dynamic-member-items,
+.dynamic-member-managers {
+  padding: var(--et-space-8);
+}
+
+.dynamic-member-groups,
+.dynamic-member-items {
+  border-right: 1px solid var(--et-border-color);
+}
+
+.dynamic-member-group,
+.dynamic-member-item,
+.dynamic-manager-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 0 var(--et-space-10);
+  border-radius: var(--et-radius-6);
+  cursor: pointer;
+}
+
+.dynamic-member-group.active,
+.dynamic-member-item.active {
+  background: var(--et-bg-primary-soft);
+  color: var(--et-color-primary);
+}
+
+.dynamic-member-group:hover,
+.dynamic-member-item:hover,
+.dynamic-manager-option:hover {
+  background: var(--et-bg-page);
+}
+
+.dynamic-manager-title {
+  margin-bottom: var(--et-space-10);
+  color: var(--et-text-secondary);
+}
+
+.dynamic-member-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

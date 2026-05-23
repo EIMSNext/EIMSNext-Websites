@@ -47,6 +47,7 @@ export interface ApprovalCandidate {
   candidateId: string;
   candidateName?: string;
   cascadedDept?: boolean;
+  managerLevels?: number[];
 }
 
 export interface TransferSetting {

@@ -166,6 +166,12 @@ export default {
     addSignCandidates: "加签候选人",
     transferCandidates: "转交候选人",
     actionCandidateRequired: "请选择候选人",
+    formEmployeeField: "成员字段",
+    formDepartmentField: "部门字段",
+    departmentManager: "主管审批",
+    directManager: "直接部门主管",
+    higherLevelManager: "上级部门主管",
+    nthLevelManager: "{0}级部门主管",
   },
   dataflow: {
     formTrigger: "表单触发",
