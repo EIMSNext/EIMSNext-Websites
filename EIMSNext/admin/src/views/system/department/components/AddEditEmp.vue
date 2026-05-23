@@ -54,7 +54,7 @@
 </template>
 <script lang="ts" setup>
 import { ITreeNode, buildDeptTree } from "@eimsnext/components";
-import { Department, Employee, EmployeeRequest, PlatformType } from "@eimsnext/models";
+import { Department, Employee, EmployeeRequest, EmployeeStatus, PlatformType } from "@eimsnext/models";
 import { employeeService } from "@eimsnext/services";
 import { useContextStore, useDeptStore } from "@eimsnext/store";
 
@@ -83,9 +83,9 @@ const formData = ref<Employee>({
   code: "",
   empName: "",
   departmentId: "",
-  status: 1,
+  status: EmployeeStatus.Active,
   isManager: false,
-  approved: false,
+  userBound: true,
 });
 if (props.edit) formData.value = props.emp!;
 

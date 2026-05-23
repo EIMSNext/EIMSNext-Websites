@@ -1,8 +1,12 @@
 import { IdBase, ModelBase } from "./modelBase";
 
-export interface CorporateRequest extends IdBase {}
+export interface CorporateRequest extends IdBase {
+  name?: string;
+  description?: string;
+}
 
 export interface Corporate extends ModelBase {
+  code?: string;
   name: string;
   description: string;
   platform: PlatformType;

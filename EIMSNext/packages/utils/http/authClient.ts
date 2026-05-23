@@ -33,6 +33,10 @@ export class AuthClient {
     });
   }
 
+  get<T = any>(url: string, params?: any, withToken?: boolean) {
+    return this.httpRequest.get<T>({ url: getAuthUrl(url), params, withToken, headers: new AxiosHeaders() });
+  }
+
   post<T = any>(
     url: string,
     data: any,

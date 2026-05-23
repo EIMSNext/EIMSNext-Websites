@@ -79,22 +79,27 @@ export const useUserStore = defineStore("currentuser", () => {
   const isInitialized = () => initialized.value;
 
   const initialize = async (force: boolean = false): Promise<any> => {
-    if (force || !initialized.value) {
-      await get(false);
+      if (force || !initialized.value) {
+        await get(false);
 
-      let promises = [];
-      if (currentUser.value.corpId) {
+        let promises = [];
+        if (currentUser.value.corpId) {
         useAppStoreHook().clear();
         useFormStoreHook().clear();
         useDeptStoreHook().clear();
         promises.push(
           useContextStoreHook().setCorpId(currentUser.value.corpId, true),
         );
-        promises.push(useDeptStoreHook().load("", false));
-      }
+          promises.push(useDeptStoreHook().load("", false));
+        } else {
+          useAppStoreHook().clear();
+          useFormStoreHook().clear();
+          useDeptStoreHook().clear();
+          useContextStoreHook().clearAll();
+        }
 
-      return Promise.all(promises);
-    }
+        return Promise.all(promises);
+      }
     return Promise.resolve();
   };
 

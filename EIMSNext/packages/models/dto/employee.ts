@@ -21,6 +21,12 @@ export interface Employee extends CorpModelBase {
   status: number;
   departmentId: string;
   isManager: boolean;
-  approved: boolean;
+  userBound: boolean;
   department?: Department;
+}
+
+export enum EmployeeStatus {
+  Active = 0,
+  Inactive = 1,
+  PendingReview = 2,
 }

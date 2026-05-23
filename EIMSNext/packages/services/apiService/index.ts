@@ -8,3 +8,4 @@ export * from "./appProfileService";
 export * from "./pluginStoreService";
 export * from "./customPrintService";
 export * from "./workflowService";
+export * from "./corpOnboardingService";

@@ -9,6 +9,7 @@
           <el-radio-group v-model="empStatus" @change="handleStatusChanged">
             <el-radio :label="0">在职员工</el-radio>
             <el-radio :label="1">离职员工</el-radio>
+            <el-radio :label="2">待审批</el-radio>
           </el-radio-group>
         </div>
         <div class="org-menu">部门</div>
@@ -43,6 +44,12 @@
               <el-table-column label="工作电话" width="150" prop="workPhone" />
               <el-table-column label="工作邮箱" width="150" prop="workEmail" />
               <el-table-column label="部门" prop="department.name" />
+              <el-table-column v-if="isPendingMode" label="操作" fixed="right" width="160">
+                <template #default="scope">
+                  <el-button link type="primary" @click.stop="reviewSingle(scope.row, true)">同意</el-button>
+                  <el-button link type="danger" @click.stop="reviewSingle(scope.row, false)">拒绝</el-button>
+                </template>
+              </el-table-column>
               <!-- <el-table-column label="操作" fixed="right" width="150">
                 <template #default="scope">
                   <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
@@ -56,6 +63,30 @@
           <div class="pagination-container">
             <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
           </div>
+        </el-card>
+      </div>
+      <div v-if="isPendingMode" class="pending-detail-col">
+        <el-card shadow="never" class="pending-detail-card">
+          <template v-if="selectedEmp">
+            <div class="detail-title">加入申请</div>
+            <div class="detail-item">
+              <span class="detail-label">员工姓名</span>
+              <span>{{ selectedEmp.empName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">员工编码</span>
+              <span>{{ selectedEmp.code || "-" }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">手机号</span>
+              <span>{{ selectedEmp.workPhone || "-" }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">邮箱</span>
+              <span>{{ selectedEmp.workEmail || "-" }}</span>
+            </div>
+          </template>
+          <el-empty v-else description="请选择待审批员工" />
         </el-card>
       </div>
     </div>
@@ -110,7 +141,10 @@
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
 import { DataPerms, Department, Employee, FieldType } from "@eimsnext/models";
-import { SortDirection, employeeService } from "@eimsnext/services";
+import {
+  SortDirection,
+  employeeService,
+} from "@eimsnext/services";
 import buildQuery from "odata-query";
 import {
   ToolbarItem,
@@ -120,7 +154,7 @@ import {
   EtConfirm,
   ConfirmResult,
 } from "@eimsnext/components";
-import { TableInstance, TableTooltipData } from "element-plus";
+import { ElMessage, TableInstance, TableTooltipData } from "element-plus";
 
 defineOptions({
   name: "DeptManager",
@@ -149,6 +183,8 @@ const sortBtnRef = ref();
 const checkedDatas = ref<any[]>([]);
 const pageNum = ref(1);
 const pageSize = ref(20);
+
+const isPendingMode = computed(() => empStatus.value === 2);
 
 const leftBars = ref<ToolbarItem[]>([
   {
@@ -188,6 +224,34 @@ const leftBars = ref<ToolbarItem[]>([
               });
           }
         }
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "批量同意",
+      type: "primary",
+      command: "approve",
+      visible: false,
+      icon: "el-select",
+      disabled: true,
+      onCommand: async () => {
+        await reviewSelected(true);
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "批量拒绝",
+      type: "danger",
+      command: "reject",
+      visible: false,
+      icon: "el-close",
+      disabled: true,
+      onCommand: async () => {
+        await reviewSelected(false);
       },
     },
   },
@@ -316,12 +380,6 @@ const handleDeptChanged = (dept?: Department) => {
   updateQueryParams();
   handleQuery();
 };
-const handleQuery = () => {
-  loading.value = true;
-
-  loadCount();
-  loadData();
-};
 const rowClassName = (row: any) => {
   return "pointer";
 };
@@ -341,14 +399,32 @@ const loadData = () => {
     .query<Employee>(query)
     .then((res: Employee[]) => {
       dataRef.value = res;
+      if (isPendingMode.value) {
+        selectedEmp.value = res[0];
+      }
     })
     .finally(() => (loading.value = false));
 };
 
+const handleQuery = async () => {
+  loading.value = true;
+  try {
+    checkedDatas.value = [];
+    loadCount();
+    loadData();
+  } finally {
+    loading.value = false;
+  }
+};
+
 const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
-  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
-    checkedDatas.value.length == 0;
+  const hasSelection = checkedDatas.value.length > 0;
+  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled = !hasSelection;
+  const approveBar = leftBars.value.find((x) => x.config.command == "approve");
+  const rejectBar = leftBars.value.find((x) => x.config.command == "reject");
+  if (approveBar) approveBar.config.disabled = !hasSelection;
+  if (rejectBar) rejectBar.config.disabled = !hasSelection;
 };
 const tableToolFormatter = (data: TableTooltipData<FormData>) => {
   return `${data.cellValue}`;
@@ -358,10 +434,57 @@ const edit = (row: Employee, column: any) => {
   if (column.type == "selection") {
     tableRef.value?.toggleRowSelection(row);
   } else {
+    if (isPendingMode.value) {
+      selectedEmp.value = row;
+      return;
+    }
     editMode.value = true;
     selectedEmp.value = row;
     showAddEditDialog.value = true;
   }
+};
+
+const reviewSingle = async (row: Employee, approved: boolean) => {
+  const confirm = await EtConfirm.showDialog(
+    approved
+      ? `确认同意【${row.empName}】的加入申请吗？`
+      : `确认拒绝【${row.empName}】的加入申请吗？`,
+    { title: approved ? "同意加入申请" : "拒绝加入申请" }
+  );
+  if (confirm != ConfirmResult.Yes) {
+    return;
+  }
+
+  await employeeService.reviewJoinCorporate({ employeeIds: [row.id], approved });
+  ElMessage.success(approved ? "已同意加入申请" : "已拒绝加入申请");
+  await handleQuery();
+};
+
+const reviewSelected = async (approved: boolean) => {
+  const employeeIds = checkedDatas.value.map((x) => x.id).filter((x): x is string => !!x);
+
+  if (!employeeIds.length) {
+    ElMessage.warning("请选择待审批员工");
+    return;
+  }
+
+  const confirm = await EtConfirm.showDialog(
+    approved
+      ? `确认同意选中的 ${employeeIds.length} 条加入申请吗？`
+      : `确认拒绝选中的 ${employeeIds.length} 条加入申请吗？`,
+    { title: approved ? "批量同意加入申请" : "批量拒绝加入申请" }
+  );
+  if (confirm != ConfirmResult.Yes) {
+    return;
+  }
+
+  await employeeService.reviewJoinCorporate({
+    employeeIds,
+    approved,
+  });
+
+  ElMessage.success(approved ? "已批量同意加入申请" : "已批量拒绝加入申请");
+  await handleQuery();
 };
 
 // 重置密码
@@ -389,6 +512,14 @@ const handleSaved = (data: Employee) => {
   showAddEditDialog.value = false;
   handleQuery();
 };
+
+watch(isPendingMode, () => {
+  leftBars.value.find((x) => x.config.command == "add")!.config.visible = !isPendingMode.value;
+  leftBars.value.find((x) => x.config.command == "delete")!.config.visible = !isPendingMode.value;
+  leftBars.value.find((x) => x.config.command == "approve")!.config.visible = isPendingMode.value;
+  leftBars.value.find((x) => x.config.command == "reject")!.config.visible = isPendingMode.value;
+  selectedEmp.value = undefined;
+});
 
 onMounted(() => {
   updateQueryParams();
@@ -459,6 +590,17 @@ onMounted(() => {
   flex: 1; // 允许在有空间时扩展
 }
 
+.pending-detail-col {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pending-detail-card {
+  height: 100%;
+}
+
 // 员工列表卡片样式
 .emp-list-card {
   height: 100%;
@@ -505,6 +647,24 @@ onMounted(() => {
 .menu-items {
   margin: 0 var(--et-space-20);
   font-size: var(--et-font-size-14);
+}
+
+.detail-title {
+  margin-bottom: var(--et-space-16);
+  font-size: var(--et-font-size-16);
+  font-weight: 600;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--et-space-12);
+  margin-bottom: var(--et-space-12);
+}
+
+.detail-label {
+  color: var(--et-text-tertiary);
+  flex-shrink: 0;
 }
 
 :deep(.data-filter) {

@@ -56,6 +56,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true, requiresAuth: true },
   },
   {
+    name: "corp-onboarding",
+    path: "/corp-onboarding",
+    component: () => import("@/views/corp-onboarding/index.vue"),
+    meta: { hidden: true, requiresAuth: true },
+  },
+  {
     path: "/mytasks",
     component: TodoLayout,
     children: [

@@ -491,7 +491,7 @@ onBeforeMount(() => {
         empName: userStore.currentUser.empName!,
         status: 0,
         departmentId: userStore.currentUser.deptId!,
-        approved: true,
+        userBound: true,
         isManager: false,
       };
       curEmpData.value = [employeeToListItem(emp)];
