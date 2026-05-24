@@ -177,19 +177,4 @@ onBeforeMount(() => {
   }
 }
 
-.main-title {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 600;
-  font-size: var(--et-font-size-16);
-}
-
-.main-content {
-  bottom: 0;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: var(--et-size-60);
-}
 </style>

@@ -54,7 +54,7 @@ const menuGroups = [
 .open-shell {
   display: grid;
   grid-template-columns: 220px 1fr;
-  gap: 24px;
+  gap: 16px;
   min-height: calc(100vh - var(--et-size-50));
   background:
     radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-primary) 14%, transparent) 0, transparent 30%),
@@ -64,32 +64,36 @@ const menuGroups = [
 .open-sidebar {
   padding: 12px 10px;
   margin: 18px 0 18px 18px;
-  border-radius: 20px;
+  border-radius: 10px;
   background: color-mix(in srgb, var(--et-bg-container) 96%, transparent);
   border: 1px solid color-mix(in srgb, var(--et-border-color-light) 78%, transparent);
   box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
 }
 
-.menu-group + .menu-group {
+.menu-group {
+  margin-top: 14px;
+}
+
+.menu-group+.menu-group {
   margin-top: 14px;
   padding-top: 14px;
-  border-top: 1px solid var(--et-border-color-light);
+  border-top: 1px solid var(--et-border-color);
 }
 
 .group-title {
   padding: 0 10px 6px;
   color: var(--et-text-secondary);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .open-menu-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 10px 20px;
   margin-bottom: 4px;
-  border-radius: 12px;
+  border-radius: 4px;
   cursor: pointer;
   color: var(--et-text-primary);
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
@@ -108,7 +112,7 @@ const menuGroups = [
 
 .open-content {
   min-width: 0;
-  padding: 18px 18px 18px 0;
+  padding: 18px 0 18px 0;
   margin-right: 18px;
 }
 

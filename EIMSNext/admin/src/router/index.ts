@@ -38,12 +38,6 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true, requiresAuth: true },
   },
   {
-    name: "pluginstore-detail",
-    path: "/pluginstore/:id",
-    component: () => import("@/views/pluginstore/detail.vue"),
-    meta: { hidden: true, requiresAuth: true },
-  },
-  {
     name: "workspace",
     path: "/workspace",
     component: () => import("@/views/workspace/index.vue"),

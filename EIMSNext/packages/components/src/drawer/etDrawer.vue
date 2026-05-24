@@ -1,14 +1,6 @@
 <template>
-  <el-drawer
-    :model-value="modelValue"
-    :append-to-body="appendToBody"
-    direction="btt"
-    :with-header="false"
-    :destroy-on-close="true"
-    :close-on-click-modal="false"
-    size="100%"
-    :show-close="false"
-  >
+  <el-drawer :model-value="modelValue" :append-to-body="appendToBody" direction="btt" :with-header="false"
+    :destroy-on-close="true" :close-on-click-modal="false" size="100%" :show-close="false">
     <div class="top-nav-bar">
       <div class="nav-left">
         <slot name="top-left">
@@ -111,13 +103,5 @@ async function close() {
     transform: translateX(-50%);
     z-index: var(--et-z-base);
   }
-}
-
-.main-content {
-  bottom: 0;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: var(--et-size-60);
 }
 </style>

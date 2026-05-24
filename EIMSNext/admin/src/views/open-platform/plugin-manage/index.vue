@@ -1,15 +1,7 @@
 <template>
   <div class="plugin-manage-page">
-    <section class="page-hero">
-      <div>
-        <div class="page-kicker">开放平台</div>
-        <h1 class="page-title">已安装插件</h1>
-        <div class="page-subtitle">统一管理企业内已安装插件的启用状态、版本和卸载操作。</div>
-      </div>
-      <el-button type="primary" plain @click="loadInstalls">刷新列表</el-button>
-    </section>
-
     <section class="table-shell">
+      <div class="table-header">已安装插件</div>
       <el-table v-loading="loading" :data="items" style="width: 100%">
         <el-table-column label="插件" min-width="340">
           <template #default="scope">
@@ -26,7 +18,8 @@
         <el-table-column prop="status" label="状态" width="130" />
         <el-table-column label="启用" width="140">
           <template #default="scope">
-            <el-switch :model-value="scope.row.enabled" @change="(value) => toggleEnabled(scope.row.id, value as boolean)" />
+            <el-switch :model-value="scope.row.enabled"
+              @change="(value) => toggleEnabled(scope.row.id, value as boolean)" />
           </template>
         </el-table-column>
         <el-table-column label="操作" width="140">
@@ -79,6 +72,18 @@ onMounted(loadInstalls);
   min-height: 100%;
 }
 
+.table-header {
+  align-items: center;
+  border-bottom: 1px solid var(--et-border-color);
+  display: flex;
+  height: 40px;
+  justify-content: space-between;
+  padding: 0 var(--et-size-10);
+  width: 100%;
+  font-weight: 600;
+  font-size: 16px;
+}
+
 .page-hero,
 .table-shell {
   border: 1px solid color-mix(in srgb, var(--et-border-color-light) 78%, transparent);
@@ -91,8 +96,8 @@ onMounted(loadInstalls);
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 26px 28px;
-  border-radius: 30px;
+  padding: 28px;
+  border-radius: 10px;
   background: linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 82%, #dbeafe 18%), color-mix(in srgb, var(--et-bg-container) 88%, #eff6ff 12%));
 }
 
@@ -113,9 +118,8 @@ onMounted(loadInstalls);
 }
 
 .table-shell {
-  margin-top: 24px;
   padding: 18px;
-  border-radius: 30px;
+  border-radius: 10px;
 }
 
 .plugin-cell {

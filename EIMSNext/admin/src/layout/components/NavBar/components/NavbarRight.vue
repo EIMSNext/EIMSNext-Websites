@@ -1,9 +1,10 @@
 <template>
   <div class="navbar__right">
-    <router-link class="appstore-entry" to="/appstore">
-      <et-icon icon="el-Grid" size="18" />
-      <span>应用中心</span>
-    </router-link>
+    <div class="appstore-trigger" @click="settingStore.appStoreVisible = true">
+      <div class="appstore-entry">
+        <et-icon icon="icon-appdefault" size="18" /><span>应用中心</span>
+      </div>
+    </div>
     <!-- 非手机设备（窄屏）才显示 -->
     <!-- <template> -->
     <!-- 全屏 -->
@@ -22,11 +23,13 @@
       <et-icon icon="el-setting" size="18" />
     </div>
   </div>
+  <AppStoreDrawer />
 </template>
 <script setup lang="ts">
 import defaultSettings from "@/settings";
 import { useSettingsStore } from "@/store";
 import UserProfile from "./UserProfile.vue";
+import AppStoreDrawer from "@/views/appstore/components/AppStoreDrawer.vue";
 
 const settingStore = useSettingsStore();
 </script>
@@ -37,8 +40,8 @@ const settingStore = useSettingsStore();
   align-items: center;
   justify-content: center;
   padding-right: var(--et-space-10);
-  
-  & > * {
+
+  &>* {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -55,9 +58,18 @@ const settingStore = useSettingsStore();
   }
 }
 
+.navbar__right .appstore-trigger {
+  flex-shrink: 0;
+  padding: 0 12px;
+}
+
 .appstore-entry {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   gap: var(--et-space-4);
-  text-decoration: none;
+  white-space: nowrap;
+  line-height: normal;
 }
 
 :deep(.el-divider--horizontal) {

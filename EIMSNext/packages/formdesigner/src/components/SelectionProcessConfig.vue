@@ -8,35 +8,18 @@
       </el-button>
     </el-badge>
 
-    <el-drawer
-      v-model="visible"
-      direction="btt"
-      size="95%"
-      :destroy-on-close="true"
-      append-to-body
-      class="_fd-selection-process-drawer"
-    >
+    <el-drawer v-model="visible" direction="btt" size="95%" :destroy-on-close="true" append-to-body
+      class="elt-drawer _fd-selection-process-drawer">
       <template #header>
         <div class="drawer-title">{{ title || '数据选择过程' }}</div>
       </template>
 
       <div class="drawer-body">
         <div class="drawer-left">
-          <DataSelectTablePanel
-            :form-id="selectedForm"
-            :fields="tableFields"
-            :rows="rows"
-            :loading="loading"
-            :total="total"
-            :page="page"
-            :page-size="pageSize"
-            :filter="filterConfig"
-            :model-value="selectedRow"
-            @update:model-value="selectedRow = $event"
-            @pageChange="handlePageChange"
-            @pageSizeChange="handlePageSizeChange"
-            @filter="handleFilter"
-          />
+          <DataSelectTablePanel :form-id="selectedForm" :fields="tableFields" :rows="rows" :loading="loading"
+            :total="total" :page="page" :page-size="pageSize" :filter="filterConfig" :model-value="selectedRow"
+            @update:model-value="selectedRow = $event" @pageChange="handlePageChange"
+            @pageSizeChange="handlePageSizeChange" @filter="handleFilter" />
         </div>
         <div class="drawer-right">
           <div class="config-block">
@@ -45,13 +28,8 @@
           </div>
           <div class="config-block">
             <div class="config-label">选择数据时的显示字段</div>
-            <DataSelectFieldPicker
-              v-model="config.tableFields"
-              :fields="sourceFields"
-              :show-trigger="true"
-              :default-expanded="false"
-              :trigger-text="fieldTriggerText"
-            />
+            <DataSelectFieldPicker v-model="config.tableFields" :fields="sourceFields" :show-trigger="true"
+              :default-expanded="false" :trigger-text="fieldTriggerText" />
           </div>
         </div>
       </div>
@@ -230,7 +208,7 @@ export default defineComponent({
     overflow: auto;
   }
 
-  .config-block + .config-block {
+  .config-block+.config-block {
     margin-top: 22px;
   }
 

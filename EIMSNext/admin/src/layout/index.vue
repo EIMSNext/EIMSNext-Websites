@@ -111,6 +111,7 @@ const classObj = computed(() => ({
 
 .layout-main {
   padding: var(--et-space-0);
+  overflow: hidden;
 }
 
 .main-left-menu {

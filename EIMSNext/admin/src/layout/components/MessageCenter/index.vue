@@ -1,5 +1,5 @@
 <template>
-  <el-drawer v-model="showMessage" header-class="msgcenter-header" title="消息中心" size="70%">
+  <el-drawer v-model="showMessage" class="elt-drawer" header-class="msgcenter-header" title="消息中心" size="70%">
     <div class="page-message-center">
       <div class="message-center-container">
         <div class="message-center-nav">
@@ -284,11 +284,7 @@ watch(
 </style>
 <style>
 .msgcenter-header {
-  margin-bottom: 0 !important;
   font-size: var(--et-font-size-20);
   font-weight: 700;
-  height: var(--et-size-60);
-  padding: 0 var(--et-space-20);
-  border-bottom: 1px solid var(--et-border-color);
 }
 </style>

@@ -12,8 +12,3 @@
 defineOptions({ name: "OpenPlatformMain" });
 </script>
 
-<style scoped lang="scss">
-.open-main {
-  min-height: calc(100vh - var(--et-size-50));
-}
-</style>

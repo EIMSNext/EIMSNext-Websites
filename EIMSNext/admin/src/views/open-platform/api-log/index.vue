@@ -16,8 +16,8 @@ defineOptions({ name: "OpenPlatformApiLogPage" });
 .placeholder-page { min-height: 100%; }
 
 .placeholder-card {
-  padding: 32px;
-  border-radius: 30px;
+  padding: 28px;
+  border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--et-border-color-light) 78%, transparent);
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
   box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
