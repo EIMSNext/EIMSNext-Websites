@@ -4,7 +4,7 @@
       <div class="detail-hero-main">
         <router-link class="back-link" to="/open-platform/pluginstore">
           <et-icon icon="el-ArrowLeft" size="16" />
-          <span>返回市场</span>
+          <span>返回列表</span>
         </router-link>
 
         <div class="title-row">

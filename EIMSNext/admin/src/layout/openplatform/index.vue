@@ -32,7 +32,7 @@ const menuGroups = [
   {
     title: "资源管理",
     items: [
-      { path: "/open-platform/pluginstore", label: "开放市场", icon: "el-Shop" },
+      { path: "/open-platform/pluginstore", label: "插件中心", icon: "el-Shop" },
       { path: "/open-platform/plugin-manage", label: "插件管理", icon: "icon-settings" },
     ],
   },
