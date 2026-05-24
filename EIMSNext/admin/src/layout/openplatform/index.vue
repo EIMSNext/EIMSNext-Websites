@@ -54,6 +54,7 @@ const menuGroups = [
 .open-shell {
   display: grid;
   grid-template-columns: 220px 1fr;
+  gap: 24px;
   min-height: calc(100vh - var(--et-size-50));
   background:
     radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-primary) 14%, transparent) 0, transparent 30%),
@@ -108,6 +109,7 @@ const menuGroups = [
 .open-content {
   min-width: 0;
   padding: 18px 18px 18px 0;
+  margin-right: 18px;
 }
 
 :global(html.dark) .open-shell {
@@ -132,6 +134,7 @@ const menuGroups = [
 
   .open-content {
     padding: 16px;
+    margin-right: 0;
   }
 }
 </style>

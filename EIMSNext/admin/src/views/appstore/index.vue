@@ -2,7 +2,6 @@
   <div class="appstore-page">
     <section class="market-hero">
       <div class="hero-copy">
-        <span class="hero-kicker">场景模板</span>
         <h1 class="hero-title">应用市场</h1>
         <p class="hero-subtitle">参考业务场景和行业分类快速选择模板，安装后即可进入工作台继续配置。</p>
         <div class="hero-stats">
@@ -193,7 +192,7 @@ onMounted(loadProfiles);
 <style scoped lang="scss">
 .appstore-page {
   min-height: 100%;
-  padding: 24px;
+  padding: 20px;
   background:
     radial-gradient(circle at top left, color-mix(in srgb, #f59e0b 16%, transparent) 0, transparent 34%),
     linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 70%, var(--et-bg-container) 30%) 100%);
@@ -211,9 +210,9 @@ onMounted(loadProfiles);
 .market-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 420px);
-  gap: 24px;
-  padding: 28px;
-  border-radius: 30px;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 20px;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 78%, #fef3c7 22%), color-mix(in srgb, var(--et-bg-container) 82%, #fde68a 18%));
 }
@@ -246,7 +245,7 @@ onMounted(loadProfiles);
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
 .hero-stat {
@@ -273,8 +272,8 @@ onMounted(loadProfiles);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 24px;
-  border-radius: 24px;
+  padding: 20px;
+  border-radius: 20px;
   background: color-mix(in srgb, var(--et-bg-container) 92%, transparent);
 }
 
@@ -293,16 +292,16 @@ onMounted(loadProfiles);
 .market-layout {
   display: grid;
   grid-template-columns: 160px minmax(0, 1fr);
-  gap: 24px;
-  margin-top: 24px;
+  gap: 20px;
+  margin-top: 20px;
   align-items: start;
 }
 
 .market-sidebar {
   position: sticky;
-  top: 24px;
-  padding: 18px 14px;
-  border-radius: 26px;
+  top: 20px;
+  padding: 20px;
+  border-radius: 20px;
   background: color-mix(in srgb, var(--et-bg-container) 96%, transparent);
 }
 
@@ -325,7 +324,7 @@ onMounted(loadProfiles);
   margin-bottom: 4px;
   padding: 11px 12px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 8px;
   background: transparent;
   color: var(--et-text-primary);
   text-align: left;
@@ -345,8 +344,8 @@ onMounted(loadProfiles);
 }
 
 .market-content {
-  padding: 24px;
-  border-radius: 30px;
+  padding: 20px;
+  border-radius: 20px;
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
 }
 
