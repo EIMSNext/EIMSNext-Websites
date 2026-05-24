@@ -101,7 +101,7 @@ const galleryImages = computed(() => {
 
 const heroStyle = computed(() => ({
   background: profile.value?.themeColor
-    ? `linear-gradient(135deg, color-mix(in srgb, ${profile.value.themeColor} 22%, white), color-mix(in srgb, ${profile.value.themeColor} 44%, #fde68a))`
+    ? `linear-gradient(135deg, color-mix(in srgb, ${profile.value.themeColor} 22%, white), color-mix(in srgb, ${profile.value.themeColor} 44%, color-mix(in srgb, var(--et-color-warning) 28%, white)))`
     : undefined,
 }));
 
@@ -199,8 +199,8 @@ async function install() {
   font-size: 12px;
 }
 
-.status-badge.official { background: #2563eb; color: #fff; }
-.status-badge.hot { background: #f97316; color: #fff; }
+.status-badge.official { background: var(--et-color-primary); color: var(--et-text-on-primary); }
+.status-badge.hot { background: var(--et-color-warning); color: var(--et-text-on-primary); }
 
 .detail-tags {
   display: flex;
@@ -278,7 +278,7 @@ async function install() {
 }
 
 .thumb.active {
-  border-color: #f59e0b;
+  border-color: var(--et-color-warning);
 }
 
 .thumb img {

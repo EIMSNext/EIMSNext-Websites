@@ -173,7 +173,7 @@ function coverImage(item: AppProfile) {
 function coverStyle(item: AppProfile) {
   return {
     background: item.themeColor
-      ? `linear-gradient(135deg, color-mix(in srgb, ${item.themeColor} 24%, white), color-mix(in srgb, ${item.themeColor} 52%, #dbeafe))`
+      ? `linear-gradient(135deg, color-mix(in srgb, ${item.themeColor} 24%, white), color-mix(in srgb, ${item.themeColor} 52%, color-mix(in srgb, var(--et-color-primary) 10%, white)))`
       : undefined,
   };
 }
@@ -225,7 +225,7 @@ onMounted(loadProfiles);
   min-height: 100%;
   padding: 20px;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, #f59e0b 16%, transparent) 0, transparent 34%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-warning) 16%, transparent) 0, transparent 34%),
     linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 70%, var(--et-bg-container) 30%) 100%);
   color: var(--et-text-primary);
 }
@@ -245,7 +245,7 @@ onMounted(loadProfiles);
   padding: 20px;
   border-radius: 20px;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 78%, #fef3c7 22%), color-mix(in srgb, var(--et-bg-container) 82%, #fde68a 18%));
+    linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 78%, color-mix(in srgb, var(--et-color-warning) 12%, white) 22%), color-mix(in srgb, var(--et-bg-container) 82%, color-mix(in srgb, var(--et-color-warning) 28%, white) 18%));
 }
 
 .hero-title {
@@ -358,8 +358,8 @@ onMounted(loadProfiles);
 }
 
 .sidebar-item.active {
-  background: color-mix(in srgb, #f59e0b 12%, transparent);
-  color: #b45309;
+  background: color-mix(in srgb, var(--et-color-warning) 12%, transparent);
+  color: var(--et-color-warning);
   font-weight: 600;
 }
 
@@ -417,8 +417,8 @@ onMounted(loadProfiles);
 
 .market-card:hover {
   transform: translateY(-4px);
-  border-color: color-mix(in srgb, #f59e0b 26%, var(--et-border-color-light));
-  box-shadow: 0 22px 36px rgba(249, 115, 22, 0.12);
+  border-color: color-mix(in srgb, var(--et-color-warning) 26%, var(--et-border-color-light));
+  box-shadow: 0 22px 36px color-mix(in srgb, var(--et-color-warning) 12%, transparent);
 }
 
 .market-cover {
@@ -455,11 +455,11 @@ onMounted(loadProfiles);
 }
 
 .badge-official {
-  background: #2563eb;
+  background: var(--et-color-primary);
 }
 
 .badge-hot {
-  background: #f97316;
+  background: var(--et-color-warning);
 }
 
 .market-card-body {
@@ -527,19 +527,19 @@ onMounted(loadProfiles);
 
 :global(html.dark) .appstore-page {
   background:
-    radial-gradient(circle at top left, rgba(245, 158, 11, 0.14) 0, transparent 34%),
-    linear-gradient(180deg, #09111f 0%, #0b1424 100%);
+    radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-warning) 14%, transparent) 0, transparent 34%),
+    linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 70%, var(--et-bg-container) 30%) 100%);
 }
 
 :global(html.dark) .market-hero,
 :global(html.dark) .market-sidebar,
 :global(html.dark) .market-content,
 :global(html.dark) .market-card {
-  box-shadow: 0 24px 54px rgba(2, 6, 23, 0.42);
+  box-shadow: var(--et-shadow-overlay);
 }
 
 :global(html.dark) .market-hero {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(48, 28, 4, 0.9));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 96%, transparent), color-mix(in srgb, var(--et-color-warning) 10%, var(--et-bg-container)));
 }
 
 :global(html.dark) .hero-search-card,
@@ -547,11 +547,11 @@ onMounted(loadProfiles);
 :global(html.dark) .market-sidebar,
 :global(html.dark) .market-content,
 :global(html.dark) .market-card {
-  background: rgba(15, 23, 42, 0.82);
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
 }
 
 :global(html.dark) .sidebar-item.active {
-  color: #fbbf24;
+  color: var(--et-color-warning);
 }
 
 @media (max-width: 1200px) {

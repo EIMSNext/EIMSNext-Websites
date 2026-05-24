@@ -88,7 +88,7 @@ onMounted(loadInstalls);
 .table-shell {
   border: 1px solid color-mix(in srgb, var(--et-border-color-light) 78%, transparent);
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--et-shadow-md);
 }
 
 .page-hero {
@@ -97,8 +97,8 @@ onMounted(loadInstalls);
   justify-content: space-between;
   gap: 16px;
   padding: 28px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 82%, #dbeafe 18%), color-mix(in srgb, var(--et-bg-container) 88%, #eff6ff 12%));
+  border-radius: var(--et-radius-10);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 82%, color-mix(in srgb, var(--et-color-primary) 8%, white) 18%), color-mix(in srgb, var(--et-bg-container) 88%, color-mix(in srgb, var(--et-color-primary) 4%, white) 12%));
 }
 
 .page-kicker {
@@ -119,7 +119,7 @@ onMounted(loadInstalls);
 
 .table-shell {
   padding: 18px;
-  border-radius: 10px;
+  border-radius: var(--et-radius-10);
 }
 
 .plugin-cell {
@@ -146,8 +146,8 @@ onMounted(loadInstalls);
 
 :global(html.dark) .page-hero,
 :global(html.dark) .table-shell {
-  background: rgba(15, 23, 42, 0.82);
-  box-shadow: 0 24px 54px rgba(2, 6, 23, 0.42);
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
+  box-shadow: var(--et-shadow-overlay);
 }
 
 @media (max-width: 960px) {

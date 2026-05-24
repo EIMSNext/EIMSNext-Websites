@@ -96,7 +96,7 @@ const galleryImages = computed(() => {
 
 const heroStyle = computed(() => ({
   background: profile.value?.themeColor
-    ? `linear-gradient(135deg, color-mix(in srgb, ${profile.value.themeColor} 22%, white), color-mix(in srgb, ${profile.value.themeColor} 44%, #fde68a))`
+    ? `linear-gradient(135deg, color-mix(in srgb, ${profile.value.themeColor} 22%, white), color-mix(in srgb, ${profile.value.themeColor} 44%, color-mix(in srgb, var(--et-color-warning) 28%, white)))`
     : undefined,
 }));
 
@@ -198,8 +198,8 @@ onMounted(loadDetail);
   font-size: 12px;
 }
 
-.status-badge.official { background: #2563eb; color: #fff; }
-.status-badge.hot { background: #f97316; color: #fff; }
+.status-badge.official { background: var(--et-color-primary); color: var(--et-text-on-primary); }
+.status-badge.hot { background: var(--et-color-warning); color: var(--et-text-on-primary); }
 
 .detail-tags {
   display: flex;
@@ -277,7 +277,7 @@ onMounted(loadDetail);
 }
 
 .thumb.active {
-  border-color: #f59e0b;
+  border-color: var(--et-color-warning);
 }
 
 .thumb img {
@@ -326,20 +326,20 @@ onMounted(loadDetail);
 
 :global(html.dark) .appstore-detail {
   background:
-    radial-gradient(circle at top left, rgba(245, 158, 11, 0.14) 0, transparent 32%),
-    linear-gradient(180deg, #09111f 0%, #0b1424 100%);
+    radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-warning) 14%, transparent) 0, transparent 32%),
+    linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 70%, var(--et-bg-container) 30%) 100%);
 }
 
 :global(html.dark) .detail-hero,
 :global(html.dark) .detail-main-card,
 :global(html.dark) .meta-card {
-  box-shadow: 0 24px 54px rgba(2, 6, 23, 0.42);
+  box-shadow: var(--et-shadow-overlay);
 }
 
 :global(html.dark) .detail-hero-side,
 :global(html.dark) .detail-main-card,
 :global(html.dark) .meta-card {
-  background: rgba(15, 23, 42, 0.82);
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
 }
 
 @media (max-width: 1100px) {
