@@ -1,74 +1,71 @@
 <template>
-  <div v-if="profile" class="appstore-detail">
-    <section class="detail-hero" :style="heroStyle">
-      <div class="detail-hero-main">
-        <router-link class="back-link" to="/appstore">
-          <et-icon icon="el-ArrowLeft" size="16" />
-          <span>返回市场</span>
-        </router-link>
-
-        <div class="title-row">
-          <img v-if="profile.icon" :src="profile.icon" class="profile-icon" :alt="profile.name" />
-          <div class="title-copy">
-            <div class="title-topline">
-              <h1 class="detail-title">{{ profile.name }}</h1>
-              <span v-if="profile.isOfficial" class="status-badge official">官方</span>
-              <span v-else-if="profile.isHot" class="status-badge hot">热门</span>
-            </div>
-            <div class="detail-subtitle">{{ profile.summary }}</div>
-            <div class="detail-tags">
-              <span v-for="tag in profile.tags || []" :key="tag" class="detail-tag">{{ tag }}</span>
+  <et-dialog :model-value="modelValue" title="应用详情" :show-footer="false" width="60%" @close="close">
+    <div v-if="profile" class="appstore-detail">
+      <section class="detail-hero" :style="heroStyle">
+        <div class="detail-hero-main">
+          <div class="title-row">
+            <img v-if="profile.icon" :src="profile.icon" class="profile-icon" :alt="profile.name" />
+            <div class="title-copy">
+              <div class="title-topline">
+                <h1 class="detail-title">{{ profile.name }}</h1>
+                <span v-if="profile.isOfficial" class="status-badge official">官方</span>
+                <span v-else-if="profile.isHot" class="status-badge hot">热门</span>
+              </div>
+              <div class="detail-subtitle">{{ profile.summary }}</div>
+              <div class="detail-tags">
+                <span v-for="tag in profile.tags || []" :key="tag" class="detail-tag">{{ tag }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="detail-hero-side">
-        <div class="hero-side-title">安装模板</div>
-        <div class="hero-side-text">安装后自动进入工作台，可继续配置表单、权限和流程。</div>
-        <div class="action-row">
-          <el-button type="success" size="large" @click="install">安装模板</el-button>
+        <div class="detail-hero-side">
+          <div class="hero-side-title">安装模板</div>
+          <div class="hero-side-text">安装后自动进入工作台，可继续配置表单、权限和流程。</div>
+          <div class="action-row">
+            <el-button type="success" size="large" :loading="installing" @click="install">安装模板</el-button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="detail-body">
-      <div class="detail-main-card">
-        <div class="visual-panel">
-          <img v-if="activeImage" class="hero-image" :src="activeImage" :alt="profile.name" />
-          <div v-if="galleryImages.length > 1" class="thumb-row">
-            <button v-for="image in galleryImages" :key="image" class="thumb" :class="{ active: image === activeImage }" @click="activeImage = image">
-              <img :src="image" :alt="profile.name" />
-            </button>
+      <section class="detail-body">
+        <div class="detail-main-card">
+          <div class="visual-panel">
+            <img v-if="activeImage" class="hero-image" :src="activeImage" :alt="profile.name" />
+            <div v-if="galleryImages.length > 1" class="thumb-row">
+              <button v-for="image in galleryImages" :key="image" class="thumb" :class="{ active: image === activeImage }" @click="activeImage = image">
+                <img :src="image" :alt="profile.name" />
+              </button>
+            </div>
+          </div>
+
+          <div class="content-panel">
+            <div class="panel-title">模板介绍</div>
+            <p class="panel-text">{{ profile.description || profile.summary }}</p>
           </div>
         </div>
 
-        <div class="content-panel">
-          <div class="panel-title">模板介绍</div>
-          <p class="panel-text">{{ profile.description || profile.summary }}</p>
-        </div>
-      </div>
-
-      <aside class="detail-aside">
-        <div class="meta-card">
-          <div class="meta-label">作者</div>
-          <div class="meta-value">{{ profile.author || 'EIMSNext' }}</div>
-        </div>
-        <div class="meta-card">
-          <div class="meta-label">安装量</div>
-          <div class="meta-value">{{ profile.installCount || 0 }}</div>
-        </div>
-        <div class="meta-card">
-          <div class="meta-label">场景</div>
-          <div class="meta-value">{{ profile.category || '-' }}</div>
-        </div>
-        <div class="meta-card">
-          <div class="meta-label">行业</div>
-          <div class="meta-value">{{ profile.industry || '-' }}</div>
-        </div>
-      </aside>
-    </section>
-  </div>
+        <aside class="detail-aside">
+          <div class="meta-card">
+            <div class="meta-label">作者</div>
+            <div class="meta-value">{{ profile.author || 'EIMSNext' }}</div>
+          </div>
+          <div class="meta-card">
+            <div class="meta-label">安装量</div>
+            <div class="meta-value">{{ profile.installCount || 0 }}</div>
+          </div>
+          <div class="meta-card">
+            <div class="meta-label">场景</div>
+            <div class="meta-value">{{ profile.category || '-' }}</div>
+          </div>
+          <div class="meta-card">
+            <div class="meta-label">行业</div>
+            <div class="meta-value">{{ profile.industry || '-' }}</div>
+          </div>
+        </aside>
+      </section>
+    </div>
+  </et-dialog>
 </template>
 
 <script setup lang="ts">
@@ -76,16 +73,24 @@ import type { AppProfile } from "@eimsnext/models";
 import { appProfileService } from "@eimsnext/services";
 import { useAppDefStore, useContextStore } from "@eimsnext/store";
 import { accessToken } from "@eimsnext/utils";
-import { useRoute, useRouter } from "vue-router";
 
-defineOptions({ name: "AppStoreDetailPage" });
+defineOptions({ name: "AppStoreDetailDialog" });
 
-const route = useRoute();
-const router = useRouter();
+const props = defineProps<{
+  modelValue: boolean;
+  appId: string;
+}>();
+
+const emit = defineEmits<{
+  (e: "update:modelValue", val: boolean): void;
+  (e: "install-success"): void;
+}>();
+
 const appDefStore = useAppDefStore();
 const contextStore = useContextStore();
 const profile = ref<AppProfile>();
 const activeImage = ref("");
+const installing = ref(false);
 
 const galleryImages = computed(() => {
   const item = profile.value;
@@ -100,35 +105,41 @@ const heroStyle = computed(() => ({
     : undefined,
 }));
 
+function close() {
+  emit("update:modelValue", false);
+}
+
 async function loadDetail() {
-  const id = route.params.id as string;
-  profile.value = await appProfileService.get(id);
+  if (!props.appId) return;
+  profile.value = await appProfileService.get(props.appId);
   activeImage.value = galleryImages.value[0] || "";
 }
 
+watch(() => props.modelValue, (val) => {
+  if (val && props.appId) loadDetail();
+});
+
 async function install() {
-  const id = route.params.id as string;
-  if (!accessToken.isLoggedIn()) {
-    router.push(`/login?redirect=${encodeURIComponent(route.fullPath)}`);
-    return;
+  if (!props.appId) return;
+  if (!accessToken.isLoggedIn()) return;
+
+  installing.value = true;
+  try {
+    const result = await appProfileService.install(props.appId);
+    await appDefStore.load("", false);
+    await contextStore.setAppId(result.appId, false);
+    emit("install-success");
+    close();
+  } finally {
+    installing.value = false;
   }
-
-  const result = await appProfileService.install(id);
-  await appDefStore.load("", false);
-  await contextStore.setAppId(result.appId, false);
-  router.push("/workspace");
 }
-
-onMounted(loadDetail);
 </script>
 
 <style scoped lang="scss">
 .appstore-detail {
-  min-height: 100%;
-  padding: 24px;
-  background:
-    radial-gradient(circle at top left, color-mix(in srgb, #f59e0b 16%, transparent) 0, transparent 32%),
-    linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 72%, var(--et-bg-container) 28%) 100%);
+  padding: 0;
+  color: var(--et-text-primary);
 }
 
 .detail-hero,
@@ -146,20 +157,10 @@ onMounted(loadDetail);
   border-radius: 30px;
 }
 
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--et-text-primary);
-  text-decoration: none;
-  font-size: 14px;
-}
-
 .title-row {
   display: flex;
   gap: 18px;
   align-items: flex-start;
-  margin-top: 18px;
 }
 
 .profile-icon {
@@ -324,24 +325,6 @@ onMounted(loadDetail);
   font-weight: 700;
 }
 
-:global(html.dark) .appstore-detail {
-  background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-warning) 14%, transparent) 0, transparent 32%),
-    linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 70%, var(--et-bg-container) 30%) 100%);
-}
-
-:global(html.dark) .detail-hero,
-:global(html.dark) .detail-main-card,
-:global(html.dark) .meta-card {
-  box-shadow: var(--et-shadow-overlay);
-}
-
-:global(html.dark) .detail-hero-side,
-:global(html.dark) .detail-main-card,
-:global(html.dark) .meta-card {
-  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
-}
-
 @media (max-width: 1100px) {
   .detail-hero,
   .detail-body {
@@ -350,10 +333,6 @@ onMounted(loadDetail);
 }
 
 @media (max-width: 960px) {
-  .appstore-detail {
-    padding: 16px;
-  }
-
   .detail-title {
     font-size: 26px;
   }

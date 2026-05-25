@@ -62,13 +62,16 @@ import {
   createFlowNode,
 } from "../Common/FlowData";
 import { useLocale } from "element-plus";
-import { convertCandidateToTag, convertTagToCandidate } from "./type";
+import { convertCandidateToTags, convertTagsToCandidates } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { ISelectedTag } from "@/selectedTags/type";
 import { MemberTabs } from "@/component";
 import { DataItemType } from "@/common";
+import { FieldType } from "@eimsnext/models";
+import { useFormStore } from "@eimsnext/store";
 
 const { t } = useLocale();
+const formStore = useFormStore();
 
 defineOptions({
   name: "ApproveNodeMeta",
@@ -86,22 +89,70 @@ const dialogActionType = ref<NodeActionType>();
 const dialogAction = ref<INodeActionConfig>({ actionType: NodeActionType.AddSign, enabled: false, text: "", candidates: [] });
 const dialogCandidateTags = ref<ISelectedTag[]>([]);
 
-const dynamicMembers = ref<ISelectedTag[]>([
-  {
-    id: "starter",
-    label: t("workflow.starter"),
-    icon: "el-UserFilled",
-    type: DataItemType.Dynamic,
-    data: { id: "starter", label: t("workflow.starter") },
-  },
-]);
+const dynamicMembers = ref<ISelectedTag[]>([]);
 
-const memberOptions = {
-  showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee | MemberTabs.Dynamic,
-  dynamicMembers,
+const memberOptions = computed(() => ({
+  showTabs:
+    MemberTabs.Department |
+    MemberTabs.Role |
+    MemberTabs.Employee |
+    MemberTabs.Dynamic,
+  dynamicMembers: dynamicMembers.value,
+  dynamicManagerLevels: [1, 2, 3, 4, 5],
   cascadedDept: true,
   showCascade: true,
   showContract: true,
+}));
+
+const createStarterTag = (): ISelectedTag => ({
+  id: "starter",
+  sourceId: "starter",
+  label: t("workflow.starter"),
+  icon: "el-UserFilled",
+  type: DataItemType.Dynamic,
+  data: {
+    dynamicCategory: "starter",
+    baseLabel: t("workflow.starter"),
+  },
+});
+
+const createFieldTag = (
+  field: { field: string; title: string; type: FieldType },
+): ISelectedTag | null => {
+  if (field.type !== FieldType.Employee1
+    && field.type !== FieldType.Employee2
+    && field.type !== FieldType.Department1
+    && field.type !== FieldType.Department2) {
+    return null;
+  }
+
+  const isEmployeeField =
+    field.type === FieldType.Employee1 || field.type === FieldType.Employee2;
+
+  return {
+    id: field.field,
+    sourceId: field.field,
+    label: field.title,
+    icon: isEmployeeField ? "el-UserFilled" : "icon-organization",
+    type: DataItemType.Field,
+    data: {
+      fieldType: field.type,
+      dynamicCategory: isEmployeeField ? "employeeField" : "departmentField",
+      baseLabel: field.title,
+    },
+  };
+};
+
+const loadDynamicMembers = async () => {
+  const members: ISelectedTag[] = [createStarterTag()];
+  const form = await formStore.get(flowContext.formId);
+  form?.content?.items?.forEach((field) => {
+    const tag = createFieldTag(field);
+    if (tag) {
+      members.push(tag);
+    }
+  });
+  dynamicMembers.value = members;
 };
 
 const nodeActions = computed(() => {
@@ -135,7 +186,7 @@ const editApprover = () => {
 };
 
 const finishApproverSelect = (tags: ISelectedTag[]) => {
-  activeData.value.metadata.approveMeta!.approvalCandidates = tags.map(convertTagToCandidate);
+  activeData.value.metadata.approveMeta!.approvalCandidates = convertTagsToCandidates(tags);
   selectedCandidateTags.value = tags;
   showApproverDialog.value = false;
 };
@@ -176,13 +227,13 @@ const openActionDialog = (actionType: NodeActionType) => {
     text: action.text || getDefaultActionLabel(action.actionType),
     candidates: action.candidates ? [...action.candidates] : [],
   };
-  dialogCandidateTags.value = (dialogAction.value.candidates || []).map(convertCandidateToTag);
+  dialogCandidateTags.value = (dialogAction.value.candidates || []).flatMap(convertCandidateToTags);
   showActionDialog.value = true;
 };
 
 const finishActionMemberSelect = (tags: ISelectedTag[]) => {
   dialogCandidateTags.value = tags;
-  dialogAction.value.candidates = tags.map(convertTagToCandidate);
+  dialogAction.value.candidates = convertTagsToCandidates(tags);
   showActionMemberDialog.value = false;
 };
 
@@ -220,9 +271,10 @@ const confirmActionDialog = () => {
 const init = () => {
   nextTick(() => {
     activeData.value = flowContext.activeData;
-    selectedCandidateTags.value = (activeData.value.metadata.approveMeta?.approvalCandidates || []).map(convertCandidateToTag);
+    selectedCandidateTags.value = (activeData.value.metadata.approveMeta?.approvalCandidates || []).flatMap(convertCandidateToTags);
     ready.value = true;
   });
+  loadDynamicMembers();
 };
 
 init();

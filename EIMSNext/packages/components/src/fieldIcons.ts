@@ -1,0 +1,101 @@
+const fieldIcons: Record<string, string> = {
+  // main - 基础组件
+  input: "fc-icon-input",
+  textarea: "fc-icon-textarea",
+  password: "fc-icon-password",
+  number: "fc-icon-number",
+  radio: "fc-icon-radio",
+  checkbox: "fc-icon-checkbox",
+  select: "fc-icon-select",
+  select2: "fc-icon-select",
+  switch: "fc-icon-switch",
+  rate: "fc-icon-rate",
+  timePicker: "fc-icon-time",
+  timeRange: "fc-icon-time-range",
+  slider: "fc-icon-slider",
+  timestamp: "fc-icon-date",
+  dateRange: "fc-icon-date-range",
+  colorPicker: "fc-icon-color",
+  cascader: "fc-icon-cascader",
+  elMention: "fc-icon-mention",
+  elSegmented: "fc-icon-segmented",
+  fcEditor: "fc-icon-editor",
+  dataTable: "fc-icon-data-table",
+  fcId: "fc-icon-input-id",
+  signaturePad: "fc-icon-sign",
+  fcValue: "fc-icon-value",
+
+  // main - upload
+  imageupload: "fc-icon-upload",
+  fileupload: "fc-icon-upload",
+
+  // main - selectors
+  elTransfer: "fc-icon-transfer",
+  tree: "fc-icon-tree",
+  elTreeSelect: "fc-icon-tree-select",
+  fcCity: "fc-icon-city",
+  department1: "fc-icon-select",
+  department2: "fc-icon-select",
+  employee1: "fc-icon-select",
+  employee2: "fc-icon-select",
+
+  // subform - 高级组件
+  group: "fc-icon-subform",
+  subForm: "fc-icon-group",
+  stepForm: "fc-icon-step-form",
+  tableform: "fc-icon-table-form",
+  dataselect: "fc-icon-select",
+
+  // container - 容器组件
+  fcSlot: "fc-icon-slot",
+  fcJson: "fc-icon-json",
+  elFormItem: "fc-icon-form-item",
+
+  // chart - 图表组件
+  lineChart: "fc-icon-chart-line",
+  areaChart: "fc-icon-chart-area",
+  barChart: "fc-icon-chart-bar",
+  stripeChart: "fc-icon-chart-stripe",
+  pieChart: "fc-icon-chart-pie",
+  funnelChart: "fc-icon-chart-funnel",
+  gaugeChart: "fc-icon-chart-gauge",
+  radarChart: "fc-icon-chart-radar",
+  scatterChart: "fc-icon-chart-scatter",
+  customChart: "fc-icon-chart-custom",
+
+  // aide - 辅助组件
+  elAlert: "fc-icon-alert",
+  elButton: "fc-icon-button",
+  elTag: "fc-icon-tag",
+  fcTitle: "fc-icon-title",
+  text: "fc-icon-span",
+  html: "fc-icon-html",
+  elStatistic: "fc-icon-statistic",
+  divider: "fc-icon-divider",
+  elLink: "fc-icon-link",
+  elTooltip: "fc-icon-tooltip",
+  elWatermark: "fc-icon-watermark",
+  elImage: "fc-icon-image",
+  audioBox: "fc-icon-audio",
+  videoBox: "fc-icon-video",
+  elAvatar: "fc-icon-avatar",
+  barCodeBox: "fc-icon-barcode",
+  iframeBox: "fc-icon-iframe",
+  qrCodeBox: "fc-icon-qrcode",
+
+  // layout - 布局组件
+  fcRow: "fc-icon-row",
+  fcTable: "fc-icon-table",
+  fcInlineForm: "fc-icon-inline",
+  fcFlex: "fc-icon-flex",
+  fcFlex2: "fc-icon-flex",
+  tabs: "fc-icon-tab",
+  space: "fc-icon-space",
+  elCard: "fc-icon-card",
+  collapse: "fc-icon-collapse",
+  elDescriptions: "fc-icon-descriptions",
+  fcDialog: "fc-icon-dialog",
+  fcDrawer: "fc-icon-dialog",
+};
+
+export default fieldIcons;

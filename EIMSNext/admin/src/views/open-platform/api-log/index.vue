@@ -16,11 +16,11 @@ defineOptions({ name: "OpenPlatformApiLogPage" });
 .placeholder-page { min-height: 100%; }
 
 .placeholder-card {
-  padding: 32px;
-  border-radius: 30px;
+  padding: 28px;
+  border-radius: var(--et-radius-10);
   border: 1px solid color-mix(in srgb, var(--et-border-color-light) 78%, transparent);
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--et-shadow-md);
 }
 
 .placeholder-kicker {
@@ -42,7 +42,7 @@ defineOptions({ name: "OpenPlatformApiLogPage" });
 }
 
 :global(html.dark) .placeholder-card {
-  background: rgba(15, 23, 42, 0.82);
-  box-shadow: 0 24px 54px rgba(2, 6, 23, 0.42);
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
+  box-shadow: var(--et-shadow-overlay);
 }
 </style>

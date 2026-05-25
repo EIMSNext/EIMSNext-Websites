@@ -12,7 +12,8 @@
       <aside class="filter-panel">
         <div class="filter-scroll">
           <div class="filter-group">
-            <button class="filter-all" :class="{ active: !activeCategory && !activeScenario }" @click="resetFilters">所有插件</button>
+            <button class="filter-all" :class="{ active: !activeCategory && !activeScenario }"
+              @click="resetFilters">所有插件</button>
           </div>
 
           <div class="filter-group">
@@ -25,7 +26,8 @@
             </div>
             <div class="filter-items">
               <button class="filter-item" :class="{ active: !activeCategory }" @click="setCategory('')">最新插件</button>
-              <button v-for="category in categories" :key="category" class="filter-item" :class="{ active: activeCategory === category }" @click="setCategory(category)">
+              <button v-for="category in categories" :key="category" class="filter-item"
+                :class="{ active: activeCategory === category }" @click="setCategory(category)">
                 {{ category }}
               </button>
             </div>
@@ -41,7 +43,8 @@
             </div>
             <div class="filter-items">
               <button class="filter-item" :class="{ active: !activeScenario }" @click="setScenario('')">全部场景</button>
-              <button v-for="scenario in scenarios" :key="scenario" class="filter-item" :class="{ active: activeScenario === scenario }" @click="setScenario(scenario)">
+              <button v-for="scenario in scenarios" :key="scenario" class="filter-item"
+                :class="{ active: activeScenario === scenario }" @click="setScenario(scenario)">
                 {{ scenario }}
               </button>
             </div>
@@ -55,7 +58,7 @@
             <div class="section-title">精选插件</div>
           </div>
           <div class="plugin-grid featured-grid">
-            <router-link v-for="item in featuredItems" :key="item.id" :to="`/pluginstore/${item.id}`" class="plugin-card">
+            <div v-for="item in featuredItems" :key="item.id" class="plugin-card" @click="openDetail(item)">
               <span v-if="item.installed" class="card-corner-badge">已安装</span>
               <div class="plugin-card-top">
                 <div class="plugin-info">
@@ -69,7 +72,7 @@
                   <span class="install-count">{{ formatInstallCount(item.installCount) }}</span>
                 </div>
               </div>
-            </router-link>
+            </div>
           </div>
         </section>
 
@@ -78,7 +81,7 @@
             <div class="section-title">所有插件</div>
           </div>
           <div class="plugin-grid all-grid">
-            <router-link v-for="item in profileItems" :key="item.id" :to="`/pluginstore/${item.id}`" class="plugin-card">
+            <div v-for="item in profileItems" :key="item.id" class="plugin-card" @click="openDetail(item)">
               <span v-if="item.installed" class="card-corner-badge">已安装</span>
               <div class="plugin-card-top">
                 <div class="plugin-info">
@@ -92,17 +95,20 @@
                   <span class="install-count">{{ formatInstallCount(item.installCount) }}</span>
                 </div>
               </div>
-            </router-link>
+            </div>
           </div>
         </section>
       </main>
     </div>
+
+    <PluginDetail v-model="detailVisible" :profile-id="selectedProfileId" @installed="onDetailInstalled" />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { PluginProfile } from "@eimsnext/models";
 import { pluginStoreService } from "@eimsnext/services";
+import PluginDetail from "./components/PluginDetail.vue";
 
 defineOptions({ name: "PluginStorePage" });
 
@@ -110,6 +116,8 @@ const keyword = ref("");
 const activeCategory = ref("");
 const activeScenario = ref("");
 const profileItems = ref<PluginProfile[]>([]);
+const detailVisible = ref(false);
+const selectedProfileId = ref("");
 
 const categories = computed(() => Array.from(new Set(profileItems.value.map((item: PluginProfile) => item.category).filter(Boolean))) as string[]);
 const scenarios = computed(() => Array.from(new Set(profileItems.value.map((item: PluginProfile) => item.scenario).filter(Boolean))) as string[]);
@@ -153,6 +161,16 @@ function setScenario(scenario: string) {
   loadProfiles();
 }
 
+function openDetail(item: PluginProfile) {
+  selectedProfileId.value = item.id;
+  detailVisible.value = true;
+}
+
+function onDetailInstalled() {
+  const found = profileItems.value.find((p) => p.id === selectedProfileId.value);
+  if (found) found.installed = true;
+}
+
 onMounted(loadProfiles);
 </script>
 
@@ -167,41 +185,41 @@ onMounted(loadProfiles);
 .plugin-card {
   border: 1px solid color-mix(in srgb, var(--et-border-color-light) 80%, transparent);
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
 }
 
 .toolbar-card {
-  padding: 10px 12px;
-  border-radius: 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
 }
 
 .search-input {
-  max-width: 400px;
+  max-width: 380px;
 }
 
 .pluginstore-layout {
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr);
-  gap: 16px;
-  margin-top: 14px;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .filter-panel {
-  border-radius: 16px;
+  border-radius: 10px;
   padding: 10px 8px;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--et-bg-container) 98%, transparent), color-mix(in srgb, var(--et-fill-color-light) 28%, transparent));
 }
 
 .filter-scroll {
-  max-height: calc(100vh - 180px);
+  max-height: calc(100vh - 170px);
   overflow: auto;
   padding-right: 2px;
 }
 
-.filter-group + .filter-group {
-  margin-top: 14px;
-  padding-top: 14px;
+.filter-group+.filter-group {
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid color-mix(in srgb, var(--et-border-color-light) 72%, transparent);
 }
 
@@ -216,9 +234,9 @@ onMounted(loadProfiles);
 }
 
 .filter-all {
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   border: 1px solid transparent;
 }
@@ -241,7 +259,7 @@ onMounted(loadProfiles);
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -252,9 +270,9 @@ onMounted(loadProfiles);
 }
 
 .filter-item {
-  padding: 9px 12px;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
   color: var(--et-text-secondary);
   border: 1px solid transparent;
   transition: background 0.2s ease, color 0.2s ease;
@@ -271,24 +289,24 @@ onMounted(loadProfiles);
 }
 
 .content-panel {
-  border-radius: 16px;
-  padding: 14px 14px 16px;
+  border-radius: 10px;
+  padding: 14px 16px 20px;
 }
 
-.plugin-section + .plugin-section {
-  margin-top: 24px;
+.plugin-section+.plugin-section {
+  margin-top: 28px;
 }
 
 .section-head {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .section-title {
   position: relative;
   padding-left: 12px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -305,22 +323,22 @@ onMounted(loadProfiles);
 
 .plugin-grid {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .featured-grid {
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .all-grid {
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
 .plugin-card {
   position: relative;
-  min-height: 138px;
-  border-radius: 14px;
-  padding: 16px 16px 14px;
+  min-height: 130px;
+  border-radius: 10px;
+  padding: 14px 14px 12px;
   color: inherit;
   text-decoration: none;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
@@ -329,40 +347,39 @@ onMounted(loadProfiles);
 .plugin-card:hover {
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--et-color-primary) 22%, var(--et-border-color-light));
-  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.08);
 }
 
 .card-corner-badge {
   position: absolute;
   top: 0;
   right: 0;
-  padding: 5px 10px 6px;
-  border-radius: 0 14px 0 12px;
+  padding: 4px 10px 5px;
+  border-radius: 0 10px 0 8px;
   background: color-mix(in srgb, var(--et-bg-page) 94%, white);
   color: var(--et-text-primary);
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
 .plugin-card-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
 }
 
 .plugin-info {
   display: flex;
   gap: 12px;
   min-width: 0;
-  padding-right: 64px;
 }
 
 .plugin-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   object-fit: cover;
   flex: 0 0 auto;
 }
@@ -372,25 +389,22 @@ onMounted(loadProfiles);
 }
 
 .plugin-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.3;
 }
 
 .plugin-summary {
-  margin-top: 8px;
+  margin-top: 6px;
   color: var(--et-text-secondary);
-  font-size: 14px;
-  line-height: 1.7;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  font-size: 13px;
+  line-height: 1.6;
   overflow: hidden;
 }
 
 .plugin-side-meta {
   position: absolute;
-  top: 38px;
+  bottom: 12px;
   right: 14px;
   display: flex;
   flex-direction: column;
@@ -401,14 +415,14 @@ onMounted(loadProfiles);
 
 .install-count {
   color: var(--et-text-tertiary);
-  font-size: 12px;
+  font-size: 11px;
   white-space: nowrap;
 }
 
 :global(html.dark) .card-corner-badge {
   background: rgba(30, 41, 59, 0.95);
   color: #e2e8f0;
-  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.35);
+  box-shadow: 0 4px 12px rgba(2, 6, 23, 0.28);
 }
 
 :global(html.dark) .toolbar-card,
@@ -416,7 +430,7 @@ onMounted(loadProfiles);
 :global(html.dark) .content-panel,
 :global(html.dark) .plugin-card {
   background: rgba(15, 23, 42, 0.82);
-  box-shadow: 0 22px 48px rgba(2, 6, 23, 0.38);
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.32);
 }
 
 @media (max-width: 1100px) {
@@ -432,14 +446,6 @@ onMounted(loadProfiles);
 @media (max-width: 768px) {
   .plugin-grid {
     grid-template-columns: 1fr;
-  }
-
-  .plugin-card-top {
-    flex-direction: column;
-  }
-
-  .plugin-side-meta {
-    align-items: flex-start;
   }
 }
 </style>

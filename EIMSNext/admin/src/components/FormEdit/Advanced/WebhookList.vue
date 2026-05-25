@@ -3,7 +3,7 @@
     :showNoSave="false" okText="确定" @ok="execDelete">
     <div>数据删除后将不可恢复</div>
   </EtConfirmDialog>
-  <el-drawer v-model="showEditor" direction="btt" size="95%" @close="close">
+  <el-drawer v-model="showEditor" class="elt-drawer" direction="btt" size="95%" @close="close">
     <template #header>
       <div class="main-title"><span>数据推送</span></div>
     </template>
@@ -11,7 +11,7 @@
       <WebhookEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" :key="selectedItem.id" />
     </div>
   </el-drawer>
-  <el-drawer v-model="showLog" direction="btt" size="95%" @close="showLog = false">
+  <el-drawer v-model="showLog" class="elt-drawer" direction="btt" size="95%" @close="showLog = false">
     <template #header>
       <div class="main-title"><span>推送日志</span></div>
     </template>
@@ -59,7 +59,7 @@
   </AdvanceLayout>
 
   <!-- 字段别名设置 Drawer -->
-  <el-drawer v-model="showAlias" direction="btt" size="95%" @close="showAlias = false">
+  <el-drawer v-model="showAlias" class="elt-drawer" direction="btt" size="95%" @close="showAlias = false">
     <template #header>
       <div class="main-title"><span>设置字段别名</span></div>
     </template>
@@ -249,22 +249,6 @@ onBeforeMount(() => {
       }
     }
   }
-}
-
-.main-title {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 600;
-  font-size: var(--et-font-size-16);
-}
-
-.main-content {
-  bottom: 0;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: var(--et-size-60);
 }
 
 /* Header links styling (图1) */

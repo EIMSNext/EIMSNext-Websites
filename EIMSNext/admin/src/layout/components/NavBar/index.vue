@@ -10,13 +10,13 @@
         <div class="platform-popover">
           <router-link class="platform-item" to="/workspace">
             <div class="platform-icon platform-icon--workspace">
-              <et-icon icon="homepage" size="18" />
+              <et-icon icon="homepage" size="24" />
             </div>
             <div class="platform-title">工作台</div>
           </router-link>
           <div class="platform-item platform-item--disabled">
             <div class="platform-icon platform-icon--knowledge">
-              <et-icon icon="el-Reading" size="18" />
+              <et-icon icon="el-Reading" size="24" />
             </div>
             <div>
               <div class="platform-title">知识库</div>
@@ -25,7 +25,7 @@
           </div>
           <router-link class="platform-item" to="/open-platform/pluginstore">
             <div class="platform-icon platform-icon--open">
-              <et-icon icon="el-Connection" size="18" />
+              <et-icon icon="el-Connection" size="24" />
             </div>
             <div class="platform-title">开放平台</div>
           </router-link>
@@ -62,9 +62,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--et-size-40);
   height: var(--et-size-40);
-  border-radius: 12px;
+  border-radius: 8px;
 
   &:hover {
     background: var(--et-bg-hover);
@@ -73,17 +72,17 @@
 
 .platform-popover {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .platform-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 15px;
   padding: 12px;
   text-decoration: none;
   color: var(--et-text-primary);
-  border-radius: 16px;
+  border-radius: 8px;
 
   &:hover {
     background: var(--et-bg-hover);
@@ -100,7 +99,7 @@
   height: 42px;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
+  border-radius: 8px;
 }
 
 .platform-icon--workspace {

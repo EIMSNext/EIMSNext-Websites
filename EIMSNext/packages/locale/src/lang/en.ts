@@ -154,6 +154,12 @@ export default {
     withdrawDisabled: "Withdraw not allowed",
     withdrawStarterOnly: "Only allow withdraw at the starter node",
     withdrawAllNodes: "Allow withdraw from all nodes",
+    formEmployeeField: "Employee Field",
+    formDepartmentField: "Department Field",
+    departmentManager: "Department Manager",
+    directManager: "Direct Manager",
+    higherLevelManager: "Higher-level Manager",
+    nthLevelManager: "Level {0} Manager",
   },
   dataflow: {
     formTrigger: "Form Trigger",

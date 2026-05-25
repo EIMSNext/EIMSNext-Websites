@@ -1,4 +1,5 @@
 import { ISelectedTag } from "@/selectedTags/type";
+import { IListItem } from "@/list/type";
 
 export enum MemberTabs {
   None = 0,
@@ -21,5 +22,10 @@ export interface IMemberSelectOptions {
   multiple?: boolean;
   limit?: IMemberLimit;
   dynamicMembers?: ISelectedTag[];
+  dynamicManagerLevels?: number[];
   showContract?: false;
+}
+
+export interface IDynamicMemberGroup extends IListItem {
+  items: ISelectedTag[];
 }

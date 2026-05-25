@@ -365,6 +365,7 @@ export enum CandidateType {
   Employee,
   Role,
   Dynamic,
+  FormField,
 }
 export interface IFlowNodeMetaData {
   conditionMeta?: ConditionMeta;
@@ -419,6 +420,7 @@ export interface IApprovalCandidate {
   candidateId: string;
   candidateName: string;
   cascadedDept?: boolean;
+  managerLevels?: number[];
 }
 
 export enum WfExpireActionType {
