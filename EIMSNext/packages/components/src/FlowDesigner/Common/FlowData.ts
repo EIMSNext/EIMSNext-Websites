@@ -286,6 +286,7 @@ export function createFlowNode(
             pluginId: "",
             functionId: "",
             fieldSettings: [],
+            resultFields: [],
           },
         },
       };
@@ -538,6 +539,7 @@ export interface PluginMeta {
   functionId: string;
   functionName?: string;
   fieldSettings: PluginFieldSetting[];
+  resultFields: PluginResultFieldSetting[];
 }
 
 export interface PluginFieldSetting {
@@ -549,6 +551,12 @@ export interface PluginFieldSetting {
     value?: any;
     fieldValue?: IFormFieldDef;
   };
+}
+
+export interface PluginResultFieldSetting {
+  fieldKey: string;
+  fieldName: string;
+  fieldType: string;
 }
 
 export enum EventType {
