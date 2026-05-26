@@ -2,7 +2,7 @@
   <et-drawer v-model="visible" @close="visible = false">
     <template #title>应用中心</template>
     <div class="appstore-wrapper">
-      <AppStorePanel @close="visible = false" />
+    <AppStorePanel @close="visible = false" />
     </div>
   </et-drawer>
 </template>
@@ -24,5 +24,7 @@ const visible = computed({
 .appstore-wrapper {
   display: flex;
   justify-content: center;
+  background: var(--et-bg-page);
+  height: 100%;
 }
 </style>

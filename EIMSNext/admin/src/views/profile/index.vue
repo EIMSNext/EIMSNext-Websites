@@ -148,7 +148,22 @@
           <el-form ref="actionFormRef" :model="actionForm" label-position="top">
             <template v-if="dialogMode === 'change-password'">
               <el-form-item label="新密码">
-                <el-input v-model="actionForm.newPassword" type="password" show-password />
+                <el-popover placement="bottom-start" :width="320" trigger="click" :visible="showPasswordTips">
+                  <template #reference>
+                    <el-input v-model="actionForm.newPassword" type="password" show-password
+                      @focus="showPasswordTips = true" @blur="showPasswordTips = false" />
+                  </template>
+                  <div class="password-tip-list">
+                    <div class="password-tip-item" :class="{ passed: passwordState.hasLength }">
+                      <span class="password-tip-icon">{{ passwordState.hasLength ? "✓" : "○" }}</span>
+                      <span>密码长度为8-30</span>
+                    </div>
+                    <div class="password-tip-item" :class="{ passed: passwordState.hasCategoryCount }">
+                      <span class="password-tip-icon">{{ passwordState.hasCategoryCount ? "✓" : "○" }}</span>
+                      <span>可使用数字、大写字母、小写字母及特殊字符，至少包含上述字符中的三种</span>
+                    </div>
+                  </div>
+                </el-popover>
               </el-form-item>
               <el-form-item label="确认新密码">
                 <el-input v-model="actionForm.confirmPassword" type="password" show-password />
@@ -204,6 +219,7 @@ import { authProfileService, systemService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
+import { getPasswordStrengthMessage, getPasswordStrengthState, isStrongPassword } from "@/utils/password";
 
 type DialogMode = "change-password" | "change-phone" | "bind-phone" | "change-email" | "bind-email" | "unbind-phone" | "unbind-email";
 type DialogStep = "verify" | "action";
@@ -224,6 +240,7 @@ const verifyFormRef = ref<FormInstance>();
 const actionFormRef = ref<FormInstance>();
 const verifyCountdown = ref(0);
 const actionCountdown = ref(0);
+const showPasswordTips = ref(false);
 let verifyTimer: ReturnType<typeof setInterval> | undefined;
 let actionTimer: ReturnType<typeof setInterval> | undefined;
 
@@ -239,6 +256,7 @@ const actionForm = reactive({
   email: "",
   code: "",
 });
+const passwordState = computed(() => getPasswordStrengthState(actionForm.newPassword));
 
 const hasPhone = computed(() => !!userStore.currentUser.phone);
 const hasEmail = computed(() => !!userStore.currentUser.email);
@@ -308,7 +326,20 @@ const verifyRules: FormRules = {
 const actionRules: FormRules = {
   newPassword: [
     { required: true, message: "请输入新密码", trigger: "blur" },
-    { min: 6, message: "新密码至少6位", trigger: "blur" },
+    {
+      validator: (_rule, value, callback) => {
+        if (!value) {
+          callback(new Error("请输入新密码"));
+          return;
+        }
+        if (!isStrongPassword(value)) {
+          callback(new Error(getPasswordStrengthMessage("新密码")));
+          return;
+        }
+        callback();
+      },
+      trigger: "blur",
+    },
   ],
   confirmPassword: [
     { required: true, message: "请再次输入新密码", trigger: "blur" },
@@ -383,6 +414,7 @@ const resetForms = () => {
   actionForm.phone = userStore.currentUser.phone || "";
   actionForm.email = userStore.currentUser.email || "";
   actionForm.code = "";
+  showPasswordTips.value = false;
 };
 
 const submitDialog = async () => {
@@ -838,6 +870,28 @@ onUnmounted(() => {
 
 .form-item-compact {
   margin-bottom: var(--et-space-16);
+}
+
+.password-tip-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-space-10);
+}
+
+.password-tip-item {
+  align-items: flex-start;
+  color: var(--et-text-secondary);
+  display: flex;
+  font-size: var(--et-font-size-13);
+  line-height: var(--et-line-height-20);
+}
+
+.password-tip-item.passed {
+  color: var(--et-text-primary);
+}
+
+.password-tip-icon {
+  margin-right: var(--et-space-8);
 }
 
 :deep(.security-modal .el-dialog__header) {

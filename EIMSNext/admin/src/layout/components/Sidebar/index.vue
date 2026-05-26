@@ -1,7 +1,7 @@
 <template>
   <div>
     <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
-      :isLedger="isLedger" @close="showFormEditor = false" />
+      :isLedger="isLedger" @close="console.log('[Sidebar] FormEdit closed'); showFormEditor = false" />
     <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
     <EditFormIcon
       v-if="showMenuEditor && editingMenu"

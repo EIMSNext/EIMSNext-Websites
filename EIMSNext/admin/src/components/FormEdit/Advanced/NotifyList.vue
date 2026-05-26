@@ -30,11 +30,17 @@
                   <el-switch :model-value="!notify.disabled" @change="toggleDisable(notify)"></el-switch>
                 </div>
               </template>
-              <div class="flow-content">
-                <div class="item-line">提醒类型: {{ getTriggerModeText(notify.triggerMode) }}</div>
-                <div class="item-line">提醒文字: {{ notify.notifyText || "未设置" }}</div>
-                <div class="item-line">提醒方式: {{ getChannelText(notify.channels) }}</div>
-              </div>
+               <div class="flow-content">
+                 <div class="item-line">提醒类型: {{ getTriggerModeText(notify.triggerMode) }}</div>
+                 <div v-if="getScheduleSummary(notify)" class="item-line">
+                   提醒时间: {{ getScheduleSummary(notify) }}
+                 </div>
+                 <div v-if="getRepeatSummary(notify)" class="item-line">
+                   重复规则: {{ getRepeatSummary(notify) }}
+                 </div>
+                 <div class="item-line">提醒文字: {{ notify.notifyText || "未设置" }}</div>
+                 <div class="item-line">提醒方式: {{ getChannelText(notify.channels) }}</div>
+               </div>
             </et-card>
           </template>
         </el-space>
@@ -57,6 +63,7 @@ import { FlagEnum } from "@eimsnext/utils";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
+import { getNotifyRepeatSummary, getNotifyScheduleSummary } from "../../../utils/notify";
 
 defineOptions({
   name: "NotifyList",
@@ -85,6 +92,11 @@ const createDefaultFormNotify = (): FormNotify =>
     appId: props.formDef.appId,
     formId: props.formDef.id,
     triggerMode: FormNotifyTriggerMode.DataAdded,
+    timeField: undefined,
+    startTime: undefined,
+    endTime: undefined,
+    repeatType: undefined,
+    repeatConfig: undefined,
     changeFields: [],
     dataFilter: "",
     notifyText: "有新数据提交，请及时处理",
@@ -157,6 +169,14 @@ function getChannelText(channels: NotifyChannel): string {
   if (FlagEnum.has(channels, NotifyChannel.System)) parts.push("站内消息");
   if (FlagEnum.has(channels, NotifyChannel.Email)) parts.push("邮箱消息");
   return parts.length ? parts.join("、") : "未设置";
+}
+
+function getScheduleSummary(notify: FormNotify): string {
+  return getNotifyScheduleSummary(notify, props.formDef);
+}
+
+function getRepeatSummary(notify: FormNotify): string {
+  return getNotifyRepeatSummary(notify);
 }
 
 onBeforeMount(() => {

@@ -98,7 +98,7 @@ onMounted(loadInstalls);
   gap: 16px;
   padding: 28px;
   border-radius: var(--et-radius-10);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 82%, color-mix(in srgb, var(--et-color-primary) 8%, white) 18%), color-mix(in srgb, var(--et-bg-container) 88%, color-mix(in srgb, var(--et-color-primary) 4%, white) 12%));
+  background: color-mix(in srgb, var(--et-bg-container) 92%, transparent);
 }
 
 .page-kicker {

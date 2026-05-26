@@ -65,7 +65,7 @@
           <div class="featured-grid">
             <div v-for="item in featuredItems" :key="item.id" class="market-card featured-card"
               @click="openDetail(item.id)">
-              <div class="market-cover" :style="coverStyle(item)">
+              <div class="market-cover">
                 <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
                 <div class="card-badges">
                   <span v-if="item.isOfficial" class="badge badge-official">官方</span>
@@ -98,7 +98,7 @@
 
           <div class="market-grid">
             <div v-for="item in profileItems" :key="item.id" class="market-card grid-card" @click="openDetail(item.id)">
-              <div class="market-cover compact" :style="coverStyle(item)">
+              <div class="market-cover compact">
                 <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
                 <div class="card-badges">
                   <span v-if="item.isOfficial" class="badge badge-official">官方</span>
@@ -170,14 +170,6 @@ function coverImage(item: AppProfile) {
   return item.coverImage || item.bannerImage;
 }
 
-function coverStyle(item: AppProfile) {
-  return {
-    background: item.themeColor
-      ? `linear-gradient(135deg, color-mix(in srgb, ${item.themeColor} 24%, white), color-mix(in srgb, ${item.themeColor} 52%, color-mix(in srgb, var(--et-color-primary) 10%, white)))`
-      : undefined,
-  };
-}
-
 async function loadProfiles() {
   const result = await appProfileService.query({
     keyword: keyword.value,
@@ -223,10 +215,7 @@ onMounted(loadProfiles);
 .appstore-page {
   width: 1000px;
   min-height: 100%;
-  padding: 20px;
-  background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-warning) 16%, transparent) 0, transparent 34%),
-    linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 70%, var(--et-bg-container) 30%) 100%);
+  background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
   color: var(--et-text-primary);
 }
 
@@ -244,8 +233,7 @@ onMounted(loadProfiles);
   gap: 20px;
   padding: 20px;
   border-radius: 20px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 78%, color-mix(in srgb, var(--et-color-warning) 12%, white) 22%), color-mix(in srgb, var(--et-bg-container) 82%, color-mix(in srgb, var(--et-color-warning) 28%, white) 18%));
+  background: color-mix(in srgb, var(--et-bg-container) 92%, transparent);
 }
 
 .hero-title {
@@ -353,13 +341,10 @@ onMounted(loadProfiles);
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.sidebar-item:hover {
-  background: color-mix(in srgb, var(--et-fill-color-light) 72%, transparent);
-}
-
+.sidebar-item:hover,
 .sidebar-item.active {
-  background: color-mix(in srgb, var(--et-color-warning) 12%, transparent);
-  color: var(--et-color-warning);
+  background: var(--et-bg-hover);
+  color: var(--et-text-primary);
   font-weight: 600;
 }
 
@@ -526,9 +511,7 @@ onMounted(loadProfiles);
 }
 
 :global(html.dark) .appstore-page {
-  background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-warning) 14%, transparent) 0, transparent 34%),
-    linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 70%, var(--et-bg-container) 30%) 100%);
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
 }
 
 :global(html.dark) .market-hero,
@@ -539,7 +522,7 @@ onMounted(loadProfiles);
 }
 
 :global(html.dark) .market-hero {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 96%, transparent), color-mix(in srgb, var(--et-color-warning) 10%, var(--et-bg-container)));
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
 }
 
 :global(html.dark) .hero-search-card,

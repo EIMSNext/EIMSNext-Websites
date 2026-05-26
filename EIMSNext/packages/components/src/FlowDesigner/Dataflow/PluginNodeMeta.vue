@@ -76,14 +76,47 @@
         <span>{{ getFieldHint(field) }}</span>
       </div>
     </template>
+
+    <MetaItemHeader class="mt-[12px]" label="执行结果" />
+    <div class="plugin-result-desc">如果插件的执行结果需要被后续节点使用，请设置结果的数据类型</div>
+    <div class="plugin-result-add-row">
+      <el-button link type="primary" @click="addResultField">+ 添加</el-button>
+    </div>
+    <div v-for="(field, index) in resultFields" :key="`${field.fieldKey}-${index}`" class="plugin-result-row">
+      <el-select v-model="field.fieldKey" class="plugin-result-key" filterable @change="onResultFieldKeyChanged(field)">
+        <el-option
+          v-for="resultField in availableResultFieldOptions(index)"
+          :key="resultField.key"
+          :label="resultField.name"
+          :value="resultField.key"
+        />
+      </el-select>
+      <el-input v-model="field.fieldName" class="plugin-result-name" placeholder="显示名称" />
+      <el-select v-model="field.fieldType" class="plugin-result-type">
+        <el-option v-for="item in resultTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+      </el-select>
+      <el-button link type="danger" @click="removeResultField(index)">删除</el-button>
+    </div>
   </template>
 </template>
 
 <script lang="ts" setup>
 import { computed, inject, reactive, ref } from "vue";
-import { FieldDef, FieldType, type PluginFieldDesc, type PluginRuntimeInfo } from "@eimsnext/models";
+import {
+  FieldDef,
+  FieldType,
+  type PluginFieldDesc,
+  type PluginRuntimeInfo,
+} from "@eimsnext/models";
 import { systemService } from "@eimsnext/services";
-import { FlowNodeType, IFlowContext, IFlowNodeData, PluginFieldSetting, createFlowNode } from "../Common/FlowData";
+import {
+  FlowNodeType,
+  IFlowContext,
+  IFlowNodeData,
+  PluginFieldSetting,
+  PluginResultFieldSetting,
+  createFlowNode,
+} from "../Common/FlowData";
 import { type IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
 import type { INodeForm } from "@/NodeFieldList/type";
 import { getPrevNodes } from "./type";
@@ -104,6 +137,19 @@ const nodes = ref<INodeForm[]>([]);
 const pluginId = ref("");
 const functionId = ref("");
 const mappedFieldKeys = reactive<Record<string, string>>({});
+const resultFields = ref<PluginResultFieldSetting[]>([]);
+
+const resultTypeOptions = [
+  { label: "单行文本", value: FieldType.Input },
+  { label: "多行文本", value: FieldType.TextArea },
+  { label: "数字", value: FieldType.Number },
+  { label: "日期", value: FieldType.TimeStamp },
+  { label: "单选", value: FieldType.Select1 },
+  { label: "人员", value: FieldType.Employee1 },
+  { label: "部门", value: FieldType.Department1 },
+  { label: "附件", value: FieldType.FileUpload },
+  { label: "图片", value: FieldType.ImageUpload },
+];
 
 const selectedPlugin = computed(() => plugins.value.find((x) => x.pluginId === pluginId.value));
 const selectedFunction = computed(() => selectedPlugin.value?.functions.find((x) => x.id === functionId.value));
@@ -114,11 +160,12 @@ const fieldCandidates = computed(() =>
 const init = async () => {
   activeData.value = flowContext.activeData;
   nodes.value = await getPrevNodes(flowContext.flowData, activeData.value);
-  plugins.value = await systemService.getPlugins();
+  plugins.value = await systemService.getEnabledPlugins();
 
   const pluginMeta = activeData.value.metadata.pluginMeta!;
   pluginId.value = pluginMeta.pluginId;
   functionId.value = pluginMeta.functionId;
+  resultFields.value = pluginMeta.resultFields;
   for (const item of pluginMeta.fieldSettings) {
     if (item.value.fieldValue) {
       mappedFieldKeys[item.fieldKey] = candidateKey(item.value.fieldValue);
@@ -150,6 +197,8 @@ const onPluginChanged = () => {
   activeData.value.metadata.pluginMeta!.functionId = "";
   activeData.value.metadata.pluginMeta!.functionName = undefined;
   activeData.value.metadata.pluginMeta!.fieldSettings = [];
+  activeData.value.metadata.pluginMeta!.resultFields = [];
+  resultFields.value = activeData.value.metadata.pluginMeta!.resultFields;
   clearMappedFieldKeys();
   functionId.value = "";
 };
@@ -165,6 +214,8 @@ const onFunctionChanged = () => {
     fieldType: field.fieldType,
     value: { type: field.allowCustomValue ? "Custom" : field.allowFieldMapping ? "Field" : "Empty", value: "" },
   }));
+  activeData.value.metadata.pluginMeta!.resultFields = [];
+  resultFields.value = activeData.value.metadata.pluginMeta!.resultFields;
 };
 
 const syncFieldSetting = (field: { key: string; name: string; fieldType: string }) => {
@@ -291,6 +342,13 @@ const clearMappedFieldKeys = () => {
 };
 
 const buildNodeFieldCandidates = (node: INodeForm): IFormFieldDef[] => {
+  if (node.outputFields?.length) {
+    return node.outputFields.map((field) => ({
+      ...field,
+      label: `${node.nodeName}.${field.label}`,
+    }));
+  }
+
   const formId = node.form?.id;
   const items = node.form?.content?.items ?? [];
   if (!formId) {
@@ -302,13 +360,19 @@ const buildNodeFieldCandidates = (node: INodeForm): IFormFieldDef[] => {
 
 const buildFieldCandidates = (node: INodeForm, formId: string, field: FieldDef): IFormFieldDef[] => {
   if (field.type === FieldType.TableForm) {
-    return (field.columns ?? []).map((subField) => {
+    const tableCandidate = toFormFieldDef(formId, field, undefined, node.nodeId, node.singleResult);
+    const subCandidates = (field.columns ?? []).map((subField) => {
       const candidate = toFormFieldDef(formId, subField, field, node.nodeId, node.singleResult);
       return {
         ...candidate,
         label: `${node.nodeName}.${candidate.label}`,
       };
     });
+
+    return [{
+      ...tableCandidate,
+      label: `${node.nodeName}.${tableCandidate.label}`,
+    }, ...subCandidates];
   }
 
   const candidate = toFormFieldDef(formId, field, undefined, node.nodeId, node.singleResult);
@@ -319,6 +383,40 @@ const buildFieldCandidates = (node: INodeForm, formId: string, field: FieldDef):
 };
 
 const isUploadType = (fieldType: string) => fieldType === FieldType.FileUpload || fieldType === FieldType.ImageUpload;
+
+const addResultField = () => {
+  const nextField = selectedFunction.value?.resultFields.find((field) => !resultFields.value.some((item) => item.fieldKey === field.key));
+  if (!nextField) {
+    return;
+  }
+
+  resultFields.value.push({
+    fieldKey: nextField.key,
+    fieldName: nextField.name,
+    fieldType: nextField.fieldType,
+  });
+};
+
+const removeResultField = (index: number) => {
+  resultFields.value.splice(index, 1);
+};
+
+const availableResultFieldOptions = (currentIndex: number) => {
+  const currentKey = resultFields.value[currentIndex]?.fieldKey;
+  return (selectedFunction.value?.resultFields ?? []).filter(
+    (field) => field.key === currentKey || !resultFields.value.some((item, index) => index !== currentIndex && item.fieldKey === field.key),
+  );
+};
+
+const onResultFieldKeyChanged = (field: PluginResultFieldSetting) => {
+  const selected = selectedFunction.value?.resultFields.find((item) => item.key === field.fieldKey);
+  if (!selected) {
+    return;
+  }
+
+  field.fieldName = selected.name;
+  field.fieldType = selected.fieldType;
+};
 
 init();
 </script>
@@ -365,5 +463,28 @@ init();
   color: var(--el-text-color-secondary);
   font-size: 12px;
   flex-shrink: 0;
+}
+
+.plugin-result-desc {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.plugin-result-add-row {
+  margin: 8px 0;
+}
+
+.plugin-result-row {
+  display: flex;
+  align-items: center;
+  gap: var(--et-space-8);
+  margin-bottom: 8px;
+}
+
+.plugin-result-key,
+.plugin-result-name,
+.plugin-result-type {
+  flex: 1;
 }
 </style>

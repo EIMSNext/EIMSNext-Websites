@@ -56,9 +56,7 @@ const menuGroups = [
   grid-template-columns: 220px 1fr;
   gap: 16px;
   min-height: calc(100vh - var(--et-size-50));
-  background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-primary) 14%, transparent) 0, transparent 30%),
-    linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 72%, var(--et-bg-container) 28%) 100%);
+  background: var(--et-bg-page);
 }
 
 .open-sidebar {
@@ -117,9 +115,7 @@ const menuGroups = [
 }
 
 :global(html.dark) .open-shell {
-  background:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.14) 0, transparent 30%),
-    linear-gradient(180deg, #09111f 0%, #0b1424 100%);
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
 }
 
 :global(html.dark) .open-sidebar {

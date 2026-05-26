@@ -1,7 +1,7 @@
 <template>
   <et-dialog :model-value="modelValue" title="应用详情" :show-footer="false" width="60%" @close="close">
     <div v-if="profile" class="appstore-detail">
-      <section class="detail-hero" :style="heroStyle">
+      <section class="detail-hero">
         <div class="detail-hero-main">
           <div class="title-row">
             <img v-if="profile.icon" :src="profile.icon" class="profile-icon" :alt="profile.name" />
@@ -98,12 +98,6 @@ const galleryImages = computed(() => {
   const images = [item.coverImage, item.bannerImage, ...(item.galleryImages || [])].filter(Boolean) as string[];
   return Array.from(new Set(images));
 });
-
-const heroStyle = computed(() => ({
-  background: profile.value?.themeColor
-    ? `linear-gradient(135deg, color-mix(in srgb, ${profile.value.themeColor} 22%, white), color-mix(in srgb, ${profile.value.themeColor} 44%, color-mix(in srgb, var(--et-color-warning) 28%, white)))`
-    : undefined,
-}));
 
 function close() {
   emit("update:modelValue", false);

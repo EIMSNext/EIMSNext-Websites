@@ -14,6 +14,14 @@ export interface FunctionDesc {
   name: string;
   description?: string;
   inputFields: PluginFieldDesc[];
+  resultFields: PluginResultFieldDesc[];
+}
+
+export interface PluginResultFieldDesc {
+  key: string;
+  name: string;
+  fieldType: string;
+  description?: string;
 }
 
 export interface PluginRuntimeInfo {

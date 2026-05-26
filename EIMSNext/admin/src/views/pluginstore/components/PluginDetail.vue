@@ -4,7 +4,7 @@
     <template #header>
       <div class="main-title"><span>{{profile?.name}}</span></div>
     </template>
-    <div class="plugindetail-wrapper">
+    <div class="main-content" style="overflow-y: auto;">
       <div v-if="profile" class="pluginstore-detail">
         <section class="detail-hero">
           <div class="detail-hero-main">
@@ -175,18 +175,10 @@ function openLink(url?: string) {
   overflow: auto;
 }
 
-.plugindetail-wrapper {
-  display: flex;
-  justify-content: center;
-}
-
 .pluginstore-detail {
   width: 1000px;
   min-height: 100%;
-  padding: 20px;
-  background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--et-color-primary) 16%, transparent) 0, transparent 32%),
-    linear-gradient(180deg, var(--et-bg-page) 0%, color-mix(in srgb, var(--et-bg-page) 72%, var(--et-bg-container) 28%) 100%);
+  background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
 }
 
 .detail-hero,
@@ -202,7 +194,7 @@ function openLink(url?: string) {
   gap: 24px;
   padding: 24px;
   border-radius: 10px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--et-bg-container) 80%, #dbeafe 20%), color-mix(in srgb, var(--et-bg-container) 84%, #eff6ff 16%));
+  background: color-mix(in srgb, var(--et-bg-container) 92%, transparent);
 }
 
 .title-row {
@@ -338,7 +330,7 @@ function openLink(url?: string) {
 .hero-image.placeholder {
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #bfdbfe, #dbeafe);
+  background: color-mix(in srgb, var(--et-fill-color-light) 72%, transparent);
   color: #1e3a8a;
   font-size: 32px;
   font-weight: 700;
@@ -402,7 +394,7 @@ function openLink(url?: string) {
   bottom: 3px;
   width: 4px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #14b8a6, #0ea5e9);
+  background: var(--et-color-primary);
 }
 
 .panel-meta,
@@ -482,9 +474,7 @@ function openLink(url?: string) {
 }
 
 :global(html.dark) .pluginstore-detail {
-  background:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.18) 0, transparent 32%),
-    linear-gradient(180deg, #09111f 0%, #0b1424 100%);
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
 }
 
 :global(html.dark) .detail-hero,
@@ -494,7 +484,7 @@ function openLink(url?: string) {
 }
 
 :global(html.dark) .detail-hero {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(20, 35, 64, 0.92));
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
   border-color: rgba(51, 65, 85, 0.5);
 }
 
@@ -506,8 +496,8 @@ function openLink(url?: string) {
 }
 
 :global(html.dark) .hero-image.placeholder {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(30, 64, 175, 0.65));
-  color: #dbeafe;
+  background: color-mix(in srgb, var(--et-bg-container) 72%, transparent);
+  color: var(--et-text-secondary);
 }
 
 @media (max-width: 1100px) {

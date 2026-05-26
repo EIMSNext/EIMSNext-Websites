@@ -548,6 +548,8 @@ const loadUniverModules = async () => {
     return loadedModules;
   }
 
+  console.log("[PdfPrintDesigner] loadUniverModules: starting first batch (9 facade imports)");
+  const t1 = Date.now();
   await Promise.all([
     import("@univerjs/core/facade"),
     import("@univerjs/ui/facade"),
@@ -557,7 +559,10 @@ const loadUniverModules = async () => {
     import("@univerjs/sheets-formula/facade"),
     import("@univerjs/sheets-numfmt/facade"),
   ]);
+  console.log(`[PdfPrintDesigner] loadUniverModules: first batch done in ${Date.now() - t1}ms`);
 
+  console.log("[PdfPrintDesigner] loadUniverModules: starting second batch (24 imports)");
+  const t2 = Date.now();
   const [
     core,
     react,
@@ -621,6 +626,7 @@ const loadUniverModules = async () => {
     import("@univerjs/core/facade"),
     import("@univerjs/sheets/facade"),
   ]);
+  console.log(`[PdfPrintDesigner] loadUniverModules: second batch done in ${Date.now() - t2}ms`);
 
   loadedModules = {
     core,
@@ -663,7 +669,9 @@ const initSheet = async (data: Record<string, unknown>) => {
     throw new Error("未找到打印设计器容器");
   }
 
+  console.log("[PdfPrintDesigner] initSheet: loading Univer modules...");
   const modules = await loadUniverModules();
+  console.log("[PdfPrintDesigner] initSheet: creating Univer instance...");
   const { LocaleType, merge, Univer } = modules.core;
 
   const univer = new Univer({
@@ -685,6 +693,7 @@ const initSheet = async (data: Record<string, unknown>) => {
     },
   });
 
+  console.log("[PdfPrintDesigner] initSheet: registering Univer plugins...");
   univer.registerPlugin(modules.render.UniverRenderEnginePlugin);
   univer.registerPlugin(modules.engineFormula.UniverFormulaEnginePlugin);
   univer.registerPlugin(modules.ui.UniverUIPlugin, {
@@ -741,7 +750,9 @@ const initSheet = async (data: Record<string, unknown>) => {
     getPageSettings: () => pageSettings.value,
   }, renderManagerService);
   printAreaPlugin.onRendered();
+  console.log("[PdfPrintDesigner] initSheet: scheduling requestAnimationFrame...");
   requestAnimationFrame(() => {
+    console.log("[PdfPrintDesigner] requestAnimationFrame: fired, refreshing print area");
     printAreaPlugin?.refresh();
   });
 
@@ -785,9 +796,11 @@ const initSheet = async (data: Record<string, unknown>) => {
   });
 
   printAreaPlugin?.refresh();
+  console.log("[PdfPrintDesigner] initSheet: complete");
 };
 
 const initializeDesigner = async () => {
+  console.log("[PdfPrintDesigner] initializeDesigner: start, disposed=", disposed);
   loading.value = true;
   loadError.value = "";
 
@@ -795,16 +808,22 @@ const initializeDesigner = async () => {
     const data = parseTemplateContent();
     await nextTick();
     if (disposed) {
+      console.log("[PdfPrintDesigner] initializeDesigner: already disposed, early return");
       return;
     }
 
     disposeDesigner();
+    console.log("[PdfPrintDesigner] initializeDesigner: calling initSheet...");
+    const t = Date.now();
     await initSheet(data as Record<string, unknown>);
+    console.log(`[PdfPrintDesigner] initializeDesigner: initSheet completed in ${Date.now() - t}ms`);
   } catch (error) {
+    console.error("[PdfPrintDesigner] initializeDesigner: caught error", error);
     disposeDesigner();
     loadError.value = error instanceof Error ? error.message : "打印设计器初始化失败";
     console.error("[PdfPrintDesigner] init failed", error);
   } finally {
+    console.log("[PdfPrintDesigner] initializeDesigner: end, loading=false");
     loading.value = false;
   }
 };
@@ -868,7 +887,8 @@ const onStart = (e: any) => {
 
 watch(
   () => props.printDef,
-  async (value) => {
+  async (value, oldValue) => {
+    console.log("[PdfPrintDesigner] watch printDef: changed", oldValue?.id, "->", value?.id);
     currentPrintDef.value = value;
 
     if (container.value) {
@@ -878,11 +898,13 @@ watch(
 );
 
 onMounted(async () => {
+  console.log("[PdfPrintDesigner] onMounted: component mounted");
   populateFields();
   await initializeDesigner();
 });
 
 onBeforeUnmount(() => {
+  console.log("[PdfPrintDesigner] onBeforeUnmount: component about to unmount, disposed=", disposed);
   disposed = true;
   disposeDesigner();
 });

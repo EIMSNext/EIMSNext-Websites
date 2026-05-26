@@ -207,8 +207,6 @@ onMounted(loadProfiles);
 .filter-panel {
   border-radius: 10px;
   padding: 10px 8px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--et-bg-container) 98%, transparent), color-mix(in srgb, var(--et-fill-color-light) 28%, transparent));
 }
 
 .filter-scroll {
@@ -242,9 +240,9 @@ onMounted(loadProfiles);
 }
 
 .filter-all.active {
-  background: color-mix(in srgb, var(--et-color-primary) 14%, transparent);
-  color: var(--et-color-primary);
-  border-color: color-mix(in srgb, var(--et-color-primary) 18%, transparent);
+  background: var(--et-bg-hover);
+  color: var(--et-text-primary);
+  border-color: var(--et-bg-hover);
 }
 
 .filter-title-row {
@@ -278,14 +276,10 @@ onMounted(loadProfiles);
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.filter-item:hover {
-  background: color-mix(in srgb, var(--et-fill-color-light) 76%, transparent);
-}
-
+.filter-item:hover,
 .filter-item.active {
-  background: color-mix(in srgb, var(--et-color-primary) 10%, transparent);
-  color: var(--et-color-primary);
-  border-color: color-mix(in srgb, var(--et-color-primary) 14%, transparent);
+  background: var(--et-bg-hover);
+  color: var(--et-text-primary);
 }
 
 .content-panel {
@@ -318,7 +312,7 @@ onMounted(loadProfiles);
   bottom: 4px;
   width: 4px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #14b8a6, #0ea5e9);
+  background: var(--et-color-primary);
 }
 
 .plugin-grid {
