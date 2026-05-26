@@ -16,11 +16,11 @@
         <div class="login-container">
           <div class="account-login">
             <div class="login-title">{{ t("login.loginTitle") }}</div>
-            <!-- <div class="login-register"><span>没有账号？</span>
+            <div class="login-register"><span>{{ t("login.noAccount") }}</span>
               <el-link type="primary" underline="never" href="/register" target="_self">
-                免费注册
+                {{ t("login.registerNow") }}
               </el-link>
-            </div> -->
+            </div>
             <el-form ref="loginFormRef" :model="loginData" :rules="loginRules">
               <div class="login-content">
                 <div class="login-form">

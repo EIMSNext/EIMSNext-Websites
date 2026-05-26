@@ -9,7 +9,7 @@
           <el-radio-group v-model="empStatus" @change="handleStatusChanged">
             <el-radio :label="0">在职员工</el-radio>
             <el-radio :label="1">离职员工</el-radio>
-            <el-radio :label="2">待审批</el-radio>
+            <el-radio v-if="showPendingApproval" :label="2">待审批</el-radio>
           </el-radio-group>
         </div>
         <div class="org-menu">部门</div>
@@ -140,7 +140,7 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { DataPerms, Department, Employee, FieldType } from "@eimsnext/models";
+import { DataPerms, Department, Employee, FieldType, PlatformType } from "@eimsnext/models";
 import {
   SortDirection,
   employeeService,
@@ -154,6 +154,7 @@ import {
   EtConfirm,
   ConfirmResult,
 } from "@eimsnext/components";
+import { useContextStore } from "@eimsnext/store";
 import { ElMessage, TableInstance, TableTooltipData } from "element-plus";
 
 defineOptions({
@@ -184,7 +185,9 @@ const checkedDatas = ref<any[]>([]);
 const pageNum = ref(1);
 const pageSize = ref(20);
 
+const contextStore = useContextStore();
 const isPendingMode = computed(() => empStatus.value === 2);
+const showPendingApproval = computed(() => contextStore.corpPlat === PlatformType.Public);
 
 const leftBars = ref<ToolbarItem[]>([
   {
