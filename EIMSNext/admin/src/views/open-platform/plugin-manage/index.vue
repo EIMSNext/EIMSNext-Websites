@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import type { PluginInstall } from "@eimsnext/models";
-import { pluginStoreService } from "@eimsnext/services";
+import { pluginProfileService } from "@eimsnext/services";
 
 defineOptions({ name: "OpenPlatformPluginManagePage" });
 
@@ -44,7 +44,7 @@ const items = ref<PluginInstall[]>([]);
 async function loadInstalls() {
   loading.value = true;
   try {
-    items.value = await pluginStoreService.getInstalls();
+    items.value = await pluginProfileService.getInstalls();
   } finally {
     loading.value = false;
   }
@@ -52,15 +52,15 @@ async function loadInstalls() {
 
 async function toggleEnabled(id: string, enabled: boolean) {
   if (enabled) {
-    await pluginStoreService.enableInstall(id);
+    await pluginProfileService.enableInstall(id);
   } else {
-    await pluginStoreService.disableInstall(id);
+    await pluginProfileService.disableInstall(id);
   }
   await loadInstalls();
 }
 
 async function removeInstall(id: string) {
-  await pluginStoreService.deleteInstall(id);
+  await pluginProfileService.deleteInstall(id);
   await loadInstalls();
 }
 

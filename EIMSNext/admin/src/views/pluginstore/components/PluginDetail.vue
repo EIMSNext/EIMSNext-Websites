@@ -110,7 +110,7 @@
 
 <script setup lang="ts">
 import type { PluginProfile } from "@eimsnext/models";
-import { pluginStoreService } from "@eimsnext/services";
+import { pluginProfileService } from "@eimsnext/services";
 import { ElMessage } from "element-plus";
 
 defineOptions({ name: "PluginDetail" });
@@ -138,7 +138,7 @@ async function loadDetail() {
   profile.value = null;
   activeImage.value = "";
   try {
-    const data = await pluginStoreService.get(props.profileId);
+    const data = await pluginProfileService.get(props.profileId);
     profile.value = data;
     activeImage.value = galleryImages.value[0] || "";
   } catch {
@@ -155,7 +155,7 @@ function onOpened() {
 async function install() {
   if (!profile.value) return;
   try {
-    await pluginStoreService.install(profile.value.id);
+    await pluginProfileService.install(profile.value.id);
     ElMessage.success("安装成功");
     profile.value.installed = true;
     emit("installed");

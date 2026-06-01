@@ -10,7 +10,7 @@ export interface PluginPricingPlan {
   isTrial?: boolean;
 }
 
-export interface PluginStoreRequest {
+export interface PluginProfileQueryRequest {
   keyword?: string;
   category?: string;
   scenario?: string;
@@ -43,12 +43,12 @@ export interface PluginProfile extends ModelBase {
   helpDocUrl?: string;
   templateUrl?: string;
   pricingPlans?: PluginPricingPlan[];
-  functions?: PluginStoreFunction[];
+  functions?: PluginProfileFunction[];
   installed?: boolean;
   installEnabled?: boolean;
 }
 
-export interface PluginStoreFunction {
+export interface PluginProfileFunction {
   id: string;
   name: string;
   description?: string;

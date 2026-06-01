@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import type { PluginProfile } from "@eimsnext/models";
-import { pluginStoreService } from "@eimsnext/services";
+import { pluginProfileService } from "@eimsnext/services";
 import PluginDetail from "./components/PluginDetail.vue";
 
 defineOptions({ name: "PluginStorePage" });
@@ -136,7 +136,7 @@ function formatInstallCount(count?: number) {
 }
 
 async function loadProfiles() {
-  const result = await pluginStoreService.query({
+  const result = await pluginProfileService.query({
     keyword: keyword.value,
     category: activeCategory.value,
     scenario: activeScenario.value,
