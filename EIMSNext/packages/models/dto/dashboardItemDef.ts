@@ -21,5 +21,5 @@ export interface DashboardItemDef extends CorpModelBase {
 export enum DashItemType {
   Chart = "chart",
   Comp = "comp",
-  Tool = "tool",
+  Filter = "filter",
 }

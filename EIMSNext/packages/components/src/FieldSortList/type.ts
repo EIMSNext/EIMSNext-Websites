@@ -7,9 +7,9 @@ import {
 } from "@eimsnext/models";
 import { IFormFieldDef, toFormFieldDef } from "../FieldSelect/type";
 import { SortDirection } from "@eimsnext/services";
-import { IFieldLimit } from "@/NodeFieldList/type";
-import { IListItem } from "@/list/type";
-import { DataItemType } from "@/common";
+import { IFieldLimit } from "../NodeFieldList/type";
+import { IListItem } from "../list/type";
+import { DataItemType } from "../common";
 
 export interface IFieldSortItem {
   field: IFormFieldDef;

@@ -322,8 +322,10 @@ export default {
     op: {
       eq: "Equal",
       ne: "Not equal",
-      in: "Include",
+      in: "Contains any",
+      allin: "Contains all",
       nin: "Not included",
+      between: "Range",
       empty: "Is empty",
       notempty: "Not empty",
       gt: "Greater than",

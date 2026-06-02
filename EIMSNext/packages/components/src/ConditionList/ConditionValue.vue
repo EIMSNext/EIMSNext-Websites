@@ -33,8 +33,19 @@
             <el-input size="default" v-model="value" @blur="onInput"></el-input>
           </template>
         </template>
+        <template v-else-if="isBetweenOperator && dataType == ConditionFieldType.Number">
+          <div class="range-value">
+            <el-input-number size="default" v-model="rangeValue[0]" align="right" @change="onRangeInput"></el-input-number>
+            <span class="range-separator">-</span>
+            <el-input-number size="default" v-model="rangeValue[1]" align="right" @change="onRangeInput"></el-input-number>
+          </div>
+        </template>
         <template v-else-if="dataType == ConditionFieldType.Number">
           <el-input-number size="default" v-model="value" align="right" @change="onInput"></el-input-number>
+        </template>
+        <template v-else-if="isBetweenOperator && dataType == ConditionFieldType.TimeStamp">
+          <el-date-picker size="default" v-model="rangeValue" type="datetimerange" value-format="x"
+            :format="fieldDef?.format" @change="onRangeInput"></el-date-picker>
         </template>
         <template v-else-if="dataType == ConditionFieldType.TimeStamp">
           <el-date-picker size="default" v-model="value" value-format="x" :format="fieldDef?.format"
@@ -122,11 +133,14 @@ const props = defineProps<{
   fieldBuildSetting: IFieldBuildSetting;
   nodes?: INodeForm[];
   fieldDef?: IFormFieldDef;
+  operator?: string;
 }>();
 
 const dataType = computed(() => {
   return getConditionFieldType(props.fieldDef?.type ?? FieldType.None);
 });
+
+const isBetweenOperator = computed(() => props.operator == "between");
 
 const isMemberValueType = computed(
   () =>
@@ -154,6 +168,7 @@ const memberShowTabs = ref(MemberTabs.None);
 
 const condValueType = ref(props.modelValue.type);
 const value = ref<any>(props.modelValue.value);
+const rangeValue = ref<any[]>(Array.isArray(props.modelValue.value) ? [...props.modelValue.value] : [null, null]);
 const condFieldValue = ref<IFormFieldDef>(
   props.modelValue.fieldValue ?? {
     nodeId: "",
@@ -181,6 +196,8 @@ const syncFromModelValue = () => {
   ) {
     value.value = normalizeSelectedTags(value.value);
   }
+
+  rangeValue.value = Array.isArray(props.modelValue.value) ? [...props.modelValue.value] : [null, null];
 };
 
 watch(
@@ -225,6 +242,10 @@ const onInput = () => {
 
   emitChange();
 };
+const onRangeInput = () => {
+  props.modelValue.value = [...rangeValue.value];
+  emitChange();
+};
 const onValueChange = () => {
   props.modelValue.fieldValue = condFieldValue.value;
 
@@ -267,6 +288,16 @@ const memberSelected = (members: ISelectedTag[]) => {
 
   .value-value {
     flex: 1;
+  }
+
+  .range-value {
+    display: flex;
+    align-items: center;
+    gap: var(--et-space-8);
+  }
+
+  .range-separator {
+    color: var(--et-text-secondary);
   }
 
   :deep(.selected-tags) {

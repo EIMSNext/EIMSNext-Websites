@@ -51,7 +51,7 @@ import echarts from "@/plugins/echarts";
 import { chartSettingValidate, ChartType, getChartSort, IChartSetting } from "./type";
 import { AggCalcRequest, AggregateFun, aggregateService } from "@eimsnext/services";
 import { convertToFieldArray } from "@eimsnext/utils";
-import { ISortItem, ISortList, toDynamicFilter } from "@eimsnext/components";
+import { IConditionList, ISortItem, ISortList, toDynamicFilter } from "@eimsnext/components";
 import DashSort from "../components/DashSort.vue";
 
 defineOptions({
@@ -64,6 +64,7 @@ const props = withDefaults(
     title: string;
     showHeader?: boolean;
     designerMode?: boolean;
+    externalFilter?: IConditionList;
   }>(),
   {
     showHeader: true,
@@ -73,17 +74,44 @@ const props = withDefaults(
 
 const chartOpts = ref<echarts.EChartsCoreOption>();
 
+const mergeFilter = (ownFilter?: IConditionList, externalFilter?: IConditionList) => {
+  const items: IConditionList[] = [];
+
+  if (ownFilter?.items?.length || ownFilter?.field) {
+    items.push(ownFilter);
+  }
+
+  if (externalFilter?.items?.length || externalFilter?.field) {
+    items.push(externalFilter);
+  }
+
+  if (items.length == 0) {
+    return undefined;
+  }
+
+  if (items.length == 1) {
+    return items[0];
+  }
+
+  return {
+    id: `merged_${Date.now()}`,
+    rel: "and",
+    items,
+  } as IConditionList;
+};
+
 const getChartOpts = async (setting: IChartSetting) => {
   if (!chartSettingValidate(setting)) return null;
 
   let chartType = setting.chartType || "";
   let chartSubType = setting.chartSubType || chartType;
   let opt: any;
+  const mergedFilter = mergeFilter(setting.filter, props.externalFilter);
   let aggRequest: AggCalcRequest = {
     dataSource: setting.datasource,
     dimensions: [...(setting.dimension1 || []), ...(setting.dimension2 || [])],
     metrics: [...(setting.metrics || [])],
-    filter: setting.filter ? toDynamicFilter(setting.filter) : undefined,
+    filter: mergedFilter ? toDynamicFilter(mergedFilter) : undefined,
     sort: getChartSort(setting),
     take: setting.takeEnable ? setting.take : -1,
   };
@@ -306,6 +334,14 @@ watch(
     immediate: true,
     deep: true,
   }
+);
+
+watch(
+  () => props.externalFilter,
+  async () => {
+    if (props.setting) await getChartOpts(props.setting);
+  },
+  { deep: true }
 );
 </script>
 

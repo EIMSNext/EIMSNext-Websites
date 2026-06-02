@@ -332,8 +332,10 @@ export default {
     op: {
       eq: "等于",
       ne: "不等于",
-      in: "包含",
+      in: "包含任意一个",
+      allin: "同时包含",
       nin: "不包含",
+      between: "选择范围",
       empty: "为空",
       notempty: "不为空",
       gt: "大于",

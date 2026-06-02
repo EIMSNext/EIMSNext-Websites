@@ -29,6 +29,25 @@ export interface IDynamicFilter {
   items?: IDynamicFilter[];
 }
 
+export interface IFormDataFilterOptionsRequest {
+  formId: string;
+  field: string;
+  fieldType?: string;
+  keyword?: string;
+  filter?: IDynamicFilter;
+  limit?: number;
+}
+
+export interface IFormDataFilterOptionItem {
+  id: string;
+  label: string;
+  value?: any;
+}
+
+export interface IFormDataFilterOptionsResponse {
+  items?: IFormDataFilterOptionItem[];
+}
+
 export interface IDynamicSort {
   field: string;
   type?: string;

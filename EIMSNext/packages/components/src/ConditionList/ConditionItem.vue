@@ -54,6 +54,7 @@
         :field-def="field"
         :nodes="nodes"
         :fieldBuildSetting="valueBuildSetting"
+        :operator="op"
         @change="onInput"
       ></ConditionValue>
     </div>
@@ -143,7 +144,9 @@ const buildOpLabels = () => {
     "eq",
     "ne",
     "in",
+    "allin",
     "nin",
+    "between",
     "empty",
     "notempty",
     "gt",

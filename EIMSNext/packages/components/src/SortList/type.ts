@@ -1,5 +1,5 @@
-import { DataItemType } from "@/common";
-import { IListItem } from "@/list/type";
+import { DataItemType } from "../common";
+import { IListItem } from "../list/type";
 import { FieldType } from "@eimsnext/models";
 import { SortDirection } from "@eimsnext/services";
 
