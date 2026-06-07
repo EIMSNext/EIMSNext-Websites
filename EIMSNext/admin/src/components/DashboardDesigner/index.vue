@@ -162,9 +162,9 @@
             <div>
               <div class="menu-label">工具</div>
               <div class="menu-group">
-                <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Tool" placement="right-start"
+                <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Filter" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
-                  :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Tool }">
+                  :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Filter }">
                   <div class="menu-guide">
                     <div class="guide-title">筛选组件</div>
                     <img src="@/assets/images/dsheditor/guide-chart.svg" />
@@ -173,10 +173,10 @@
                   <template #reference>
                     <div class="menu-line">
                       <div class="line-content" draggable="true"
-                        @dragstart="dashItemDragStart($event, DashItemType.Tool)"
-                        @drag="dashItemDrag($event, DashItemType.Tool), (hoverMenu = false)"
+                        @dragstart="dashItemDragStart($event, DashItemType.Filter)"
+                        @drag="dashItemDrag($event, DashItemType.Filter), (hoverMenu = false)"
                         @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
-                        @mouseover="setHoverMenu(true, DashItemType.Tool)" @mouseleave="hoverMenu = false">
+                        @mouseover="setHoverMenu(true, DashItemType.Filter)" @mouseleave="hoverMenu = false">
                         <et-icon icon="el-PieChart" class="line-icon" />
                         <div class="line-text">筛选组件</div>
                       </div>
@@ -184,7 +184,8 @@
                   </template>
                 </el-popover> -->
                 <div class="menu-line">
-                  <div class="line-content" draggable="true" unselectable="on">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Filter)"
+                    @drag="dashItemDrag($event, DashItemType.Filter)" @dragend="dashItemDrop($event, null)" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-filter"></i></div>
                     <div class="line-text">筛选组件</div>
                   </div>
@@ -230,9 +231,12 @@
   <DataSourceDialog v-model="showDataSourceDialog" :appId="dashDef.appId" :dataSource="dataSource"
     @cancel="handleSourceCancel" @ok="handleSourceOk"></DataSourceDialog>
   <EChartsDesigner v-if="dashItemDefRef" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
+  <FilterDesigner v-if="dashItemDefRef" v-model="showFilterEditor" :dash-item-def="dashItemDefRef"
+    :chart-targets="chartTargets" :binding-candidates="bindingCandidates" />
 </template>
 <script setup lang="ts">
 import { EtDrawer } from "@eimsnext/components/src/drawer";
+import { buildFieldListItems, IFormFieldDef } from "@eimsnext/components";
 import DashItemCard from "./components/DashItemCard.vue";
 import { IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
 import { uniqueId } from "@eimsnext/utils";
@@ -248,7 +252,10 @@ import {
 } from "@eimsnext/models";
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import EChartsDesigner from "./ECharts/EChartsDesigner.vue";
+import FilterDesigner from "./FilterDesigner/FilterDesigner.vue";
 import { useI18n } from "vue-i18n";
+import { useFormStore } from "@eimsnext/store";
+import { IDashboardBindingCandidate, IDashboardChartTarget } from "./FilterDesigner/type";
 const { t } = useI18n();
 
 defineOptions({
@@ -261,6 +268,7 @@ const props = defineProps<{
 }>();
 
 const contextStore = useContextStore();
+const formStore = useFormStore();
 const dashDefRef = ref<DashboardDef>(props.dashDef);
 const dashItemDefRef = ref<DashboardItemDef>();
 const gridRef = ref<any>();
@@ -272,6 +280,7 @@ const showDataSourceDialog = ref(false);
 const dataSource = ref<IDataSource>();
 
 const showChartEditor = ref(false);
+const showFilterEditor = ref(false);
 
 const state = reactive<IGridLayoutState>({
   layout: [],
@@ -289,6 +298,18 @@ const newHeight = 12;
 const mouseXY = { x: -1, y: -1 };
 const dragPos: IGridLayoutItem = { x: -1, y: -1, w: 1, h: 1, i: "" };
 const draggingItemType = ref<DashItemType>();
+const chartTargets = computed<IDashboardChartTarget[]>(() => Object.values(state.items)
+  .filter((item) => item.itemType == DashItemType.Chart)
+  .map((item) => {
+    const details = JSON.parse(item.details || "{}");
+    return {
+      id: item.id,
+      name: item.name,
+      dataSource: details.datasource,
+    };
+  })
+  .filter((item) => item.dataSource?.id));
+const bindingCandidates = ref<IDashboardBindingCandidate[]>([]);
 
 const resizeEvent = (
   i: string | number,
@@ -365,6 +386,26 @@ const handleSourceOk = async (source: IDataSource) => {
   ]);
 
   showChartEditor.value = true;
+};
+
+const loadBindingCandidates = async () => {
+  const sourceIds = Array.from(new Set(chartTargets.value.map((item) => item.dataSource.id)));
+  const items: IDashboardBindingCandidate[] = [];
+  for (const sourceId of sourceIds) {
+    const form = await formStore.get(sourceId);
+    if (!form) {
+      continue;
+    }
+    const fields = buildFieldListItems(sourceId, form.content?.items || [], !!form.usingWorkflow)
+      .map((item) => item.data)
+      .filter(Boolean) as IFormFieldDef[];
+    items.push({
+      dataSourceId: sourceId,
+      dataSourceLabel: form.name,
+      fields,
+    });
+  }
+  bindingCandidates.value = items;
 };
 
 const setHoverMenu = (b: boolean, type: DashItemType) => {
@@ -523,6 +564,9 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
     case DashItemType.Chart:
       name = t("admin.untitledChart");
       break;
+    case DashItemType.Filter:
+      name = "筛选组件";
+      break;
     default:
       name = t("admin.untitledChart");
       break;
@@ -577,7 +621,12 @@ document.addEventListener(
 const handleItemHide = (item: DashboardItemDef) => { };
 const handleItemEdit = (item: DashboardItemDef) => {
   dashItemDefRef.value = item;
-  showChartEditor.value = true;
+  if (item.itemType == DashItemType.Filter) {
+    loadBindingCandidates();
+    showFilterEditor.value = true;
+  } else {
+    showChartEditor.value = true;
+  }
 };
 const handleItemCopy = (item: DashboardItemDef) => { };
 const handleItemDelete = (item: DashboardItemDef) => { };

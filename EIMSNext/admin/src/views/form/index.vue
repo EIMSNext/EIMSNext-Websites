@@ -1,14 +1,14 @@
 <template>
   <div class="formdata-container">
-    <el-dialog v-model="showExportDialog" title="导出表单数据" width="520px">
+    <el-dialog v-model="showExportDialog" :title="$t('admin.formList.exportDialogTitle')" width="520px">
       <el-form label-width="90px">
-        <el-form-item label="导出格式">
+        <el-form-item :label="$t('admin.exportFormat')">
           <el-radio-group v-model="exportFormat">
             <el-radio :value="ExportFormat.Csv">CSV</el-radio>
             <el-radio :value="ExportFormat.Excel">Excel</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="导出列">
+        <el-form-item :label="$t('admin.exportColumns')">
           <el-checkbox-group v-model="selectedExportColumnKeys" class="export-column-group">
             <el-checkbox v-for="column in exportColumns" :key="column.key" :value="column.key">
               {{ column.header }}
@@ -17,8 +17,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showExportDialog = false">取消</el-button>
-        <el-button type="primary" :loading="exporting" @click="submitExport">确定</el-button>
+        <el-button @click="showExportDialog = false">{{ $t("common.cancel") }}</el-button>
+        <el-button type="primary" :loading="exporting" @click="submitExport">{{ $t("common.ok") }}</el-button>
       </template>
     </el-dialog>
     <et-dialog v-model="showAddDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
@@ -81,6 +81,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { bus } from "@eimsnext/utils";
 import { useRoute } from "vue-router";
 import { useFormStore, useUserStore } from "@eimsnext/store";
 import {
@@ -157,7 +158,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "dropdown",
     config: {
-      text: "请选择权限组",
+      text: "admin.formList.selectPermGroup",
       class: "auth-gropu-filter",
       command: "authgrp",
       visible: false,
@@ -250,7 +251,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "导出",
+      text: "common.export",
       class: "data-filter",
       command: "download",
       visible: true,
@@ -299,7 +300,7 @@ const submitExport = async () => {
   );
 
   if (selectedColumns.length === 0) {
-    ElMessage.warning("请至少选择一列");
+    ElMessage.warning(t("admin.selectColumn"));
     return;
   }
 
@@ -317,8 +318,8 @@ const submitExport = async () => {
     ElMessage.success(
       result.message ||
         (result.isDuplicate
-          ? "已存在相同导出任务，稍后请在消息中心或导出历史查看"
-          : "已创建导出任务")
+          ? t("admin.corpLog.messages.duplicateExport")
+          : t("admin.corpLog.messages.exportCreated"))
     );
   } finally {
     exporting.value = false;
@@ -601,7 +602,7 @@ const getAllExportFields = (): IFormFieldDef[] => {
   const result: IFormFieldDef[] = [];
   const items = formDef.value?.content?.items || [];
 
-  const dataTitleField = getDataTitle("数据标题");
+  const dataTitleField = getDataTitle(t("comp.fieldBlock.systemFields.dataTitle"));
   result.push({
     formId,
     field: dataTitleField.field,
@@ -610,7 +611,7 @@ const getAllExportFields = (): IFormFieldDef[] => {
   });
 
   if (formDef.value?.usingWorkflow) {
-    const flowStatusField = getFlowStatus("流程状态");
+    const flowStatusField = getFlowStatus(t("comp.fieldBlock.systemFields.flowStatus"));
     result.push({
       formId,
       field: flowStatusField.field,
@@ -642,21 +643,21 @@ const getAllExportFields = (): IFormFieldDef[] => {
     });
   });
 
-  const createByField = getCreateBy("提交人");
+  const createByField = getCreateBy(t("comp.fieldBlock.systemFields.createBy"));
   result.push({
     formId,
     field: createByField.field,
     label: createByField.title,
     type: createByField.type,
   });
-  const createTimeField = getCreateTime("提交时间");
+  const createTimeField = getCreateTime(t("comp.fieldBlock.systemFields.createTime"));
   result.push({
     formId,
     field: createTimeField.field,
     label: createTimeField.title,
     type: createTimeField.type,
   });
-  const updateTimeField = getUpdateTime("更新时间");
+  const updateTimeField = getUpdateTime(t("comp.fieldBlock.systemFields.updateTime"));
   result.push({
     formId,
     field: updateTimeField.field,
@@ -795,6 +796,29 @@ const idBasedSpanMethod = (data: {
   }
 };
 //#endregion
+
+const handleDataSaved = (payload: { formId: string }) => {
+  if (payload.formId !== formId) return;
+  showAddDialog.value = false;
+  pageNum.value = 1;
+  updateQueryParams();
+  handleQuery();
+};
+const handleDataDeleted = (payload: { formId: string }) => {
+  if (payload.formId !== formId) return;
+  pageNum.value = 1;
+  updateQueryParams();
+  handleQuery();
+};
+
+onMounted(() => {
+  bus.on("data:saved", handleDataSaved);
+  bus.on("data:deleted", handleDataDeleted);
+});
+onUnmounted(() => {
+  bus.off("data:saved", handleDataSaved);
+  bus.off("data:deleted", handleDataDeleted);
+});
 </script>
 <style lang="scss" scoped>
 .formdata-container {

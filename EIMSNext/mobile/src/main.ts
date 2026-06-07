@@ -1,27 +1,14 @@
 import { createApp } from "vue";
-import { AxiosHeaders } from "axios";
-import { HttpInterceptors, appSetting, http, type HttpRequestConfig } from "@eimsnext/utils";
+import { setupHttp } from "@eimsnext/utils";
 import App from "./App.vue";
 import router from "./router";
 import "vant/es/toast/style";
 import "./styles/index.scss";
 
 const initHttp = () => {
-  if (window.appSetting) {
-    appSetting.merge(window.appSetting);
-  }
-
-  const interceptors = new HttpInterceptors();
-  interceptors.errorHandler = (error) => {
+  setupHttp((error) => {
     console.error("mobile http error", error);
-  };
-
-  const httpConfig: HttpRequestConfig = {
-    headers: new AxiosHeaders(),
-    interceptors,
-  };
-
-  http.setConfig(httpConfig, httpConfig);
+  });
 };
 
 const initTheme = () => {

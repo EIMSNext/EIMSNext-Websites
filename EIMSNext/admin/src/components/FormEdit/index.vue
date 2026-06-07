@@ -138,6 +138,7 @@ async function beforeClose() {
 }
 
 function close() {
+  console.log("[FormEdit] close: closing FormEdit drawer");
   emit("close");
 }
 </script>

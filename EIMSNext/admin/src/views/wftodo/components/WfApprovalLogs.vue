@@ -70,17 +70,17 @@
     </el-space>
 
     <div v-else-if="!isLoading && !loadError" class="list-empty">
-      <el-empty description="暂无审批数据" />
+      <el-empty :description="$t('comp.wfApprovalLogs.noApprovalData')" />
     </div>
 
     <div v-if="loadError" class="list-empty">
-      <el-empty description="审批数据加载失败">
-        <el-button type="primary" @click="retryLoad">重试</el-button>
+      <el-empty :description="$t('comp.wfApprovalLogs.loadFailed')">
+        <el-button type="primary" @click="retryLoad">{{ $t("comp.wfApprovalLogs.retry") }}</el-button>
       </el-empty>
     </div>
 
-    <div v-if="isLoadingMore" class="list-status">加载中...</div>
-    <div v-else-if="!hasMore && dataRef.length > 0" class="list-status">没有更多了</div>
+    <div v-if="isLoadingMore" class="list-status">{{ $t("common.loading") }}</div>
+    <div v-else-if="!hasMore && dataRef.length > 0" class="list-status">{{ $t("comp.wfApprovalLogs.noMore") }}</div>
 
     <button v-if="showTopButton" class="top-button" type="button" @click="scrollToTop">
       <et-icon icon="backtop" size="20px" />

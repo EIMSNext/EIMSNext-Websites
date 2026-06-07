@@ -6,7 +6,7 @@
       class="search-input"
       prefix-icon="Search"
       clearable
-      placeholder="请输入"
+      :placeholder="$t('common.pleaseInput')"
     />
     <div class="search-result">
       <div class="result-container">
@@ -17,7 +17,7 @@
         >
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.Department)"
-            label="组织架构"
+            :label="$t('comp.memberSelect.tabs.department')"
             :name="MemberTabs.Department"
           >
             <div class="dept-select">
@@ -79,14 +79,14 @@
               </el-tree>
               <div v-if="options.showCascade" class="options-footer">
                 <el-checkbox :model-value="orgCascade" @change="cascadeChanged"
-                  >动态包含下级部门</el-checkbox
+                  >{{ $t("comp.memberSelect.cascadeSubDepts") }}</el-checkbox
                 >
               </div>
             </div>
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.Role)"
-            label="角色"
+            :label="$t('comp.memberSelect.tabs.role')"
             :name="MemberTabs.Role"
           >
             <div class="dept-select">
@@ -132,7 +132,7 @@
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.Employee)"
-            label="员工"
+            :label="$t('comp.memberSelect.tabs.employee')"
             :name="MemberTabs.Employee"
           >
             <div class="emp-select">
@@ -143,7 +143,7 @@
                     :class="{ active: selectedEmpDeptId == 'all' }"
                     @click.stop="selectEmpDept('all')"
                   >
-                    全部员工
+                    {{ $t("comp.memberSelect.allEmployees") }}
                   </div>
                 </div>
                 <el-tree
@@ -193,26 +193,63 @@
               options.dynamicMembers &&
               FlagEnum.has(options.showTabs!, MemberTabs.Dynamic)
             "
-            label="动态负责人"
+            :label="$t('comp.memberSelect.tabs.dynamic')"
             :name="MemberTabs.Dynamic"
           >
-            <div class="dept-select">
-              <et-list
-                v-model="selectedDyMembers"
-                :data="options.dynamicMembers"
-                :selectable="true"
-                :multiple="options.multiple"
-                :showCount="false"
-                class="borderless-list"
-                @item-check="dymChecked"
-                @all-check="dymCheckAll"
-              >
-              </et-list>
+            <div class="dynamic-member-panel">
+              <div class="dynamic-member-groups">
+                <div
+                  v-for="group in dynamicGroups"
+                  :key="group.id"
+                  class="dynamic-member-group"
+                  :class="{ active: group.id === selectedDynamicGroupId }"
+                  @click="selectDynamicGroup(group.id)"
+                >
+                  <span class="dynamic-member-item-label">{{ group.label }}</span>
+                </div>
+              </div>
+              <div class="dynamic-member-content">
+                <div class="dynamic-member-items" :class="{ 'manager-mode': isManagerGroup }">
+                  <div
+                    v-for="item in currentDynamicItems"
+                    :key="item.id"
+                  class="dynamic-member-item"
+                    :class="{ active: item.id === selectedDynamicMemberId && isManagerGroup }"
+                    @click="selectDynamicItem(item)"
+                  >
+                    <span class="dynamic-member-item-label">{{ getDynamicItemLabelByGroup(item) }}</span>
+                    <el-checkbox
+                      v-if="!isManagerGroup"
+                      :model-value="isDynamicItemChecked(item)"
+                      @click.stop=""
+                      @change="(checked: boolean) => dymChecked(item, checked)"
+                    />
+                  </div>
+                </div>
+                <div v-if="isManagerGroup" class="dynamic-member-managers">
+                    <template v-if="selectedDynamicItem">
+                      <div class="dynamic-manager-title">
+                        {{ $t("comp.memberSelect.managerLevels", { label: selectedDynamicItem.label }) }}
+                      </div>
+                    <div
+                      v-for="level in dynamicManagerLevels"
+                      :key="level"
+                      class="dynamic-manager-option"
+                    >
+                      <span>{{ getManagerLevelLabel(level) }}</span>
+                      <el-checkbox
+                        :model-value="selectedDynamicManagerLevels.includes(level)"
+                        @change="(checked: boolean) => toggleManagerLevel(level, checked)"
+                      />
+                    </div>
+                  </template>
+                </div>
+              </div>
             </div>
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.CurDept)"
-            label="当前用户所处部门"
+            :label="$t('comp.memberSelect.tabs.curDept')"
             :name="MemberTabs.CurDept"
           >
             <div class="dept-select">
@@ -265,7 +302,7 @@
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.CurUser)"
-            label="当前用户"
+            :label="$t('comp.memberSelect.tabs.curUser')"
             :name="MemberTabs.CurUser"
           >
             <div class="dept-select">
@@ -289,8 +326,9 @@
 </template>
 <script lang="ts" setup>
 import "./style/index.scss";
-import { ref, reactive, watch, onBeforeMount, toRef } from "vue";
+import { computed, ref, watch, onBeforeMount, toRef } from "vue";
 import { TreeInstance } from "element-plus";
+import { useI18n } from "vue-i18n";
 import {
   DataItemType,
   deptToTreeNode,
@@ -308,7 +346,12 @@ import {
   roleService,
 } from "@eimsnext/services";
 import { IListItem } from "../list/type";
-import { IMemberLimit, IMemberSelectOptions, MemberTabs } from "./type";
+import {
+  IDynamicMemberGroup,
+  IMemberLimit,
+  IMemberSelectOptions,
+  MemberTabs,
+} from "./type";
 import { deepMerge, FlagEnum } from "@eimsnext/utils";
 
 defineOptions({
@@ -333,6 +376,7 @@ const options = deepMerge<IMemberSelectOptions>(
   props.options || {},
 );
 
+const { t } = useI18n();
 const orgCascade = ref(options.cascadedDept ?? false);
 const userStore = useUserStore();
 const defaultProps = { children: "children", label: "label" };
@@ -354,13 +398,246 @@ const curDeptTree = ref<TreeInstance>();
 const curDeptData = ref<ITreeNode[]>();
 const singleDeptId = ref<string>("");
 const curEmpData = ref<IListItem[]>([]);
-const selectedDyMembers = ref<string[]>();
+const selectedDynamicGroupId = ref<string>("");
+const selectedDynamicMemberId = ref<string>("");
+const dynamicGroupOrder = ["starter", "employeeField", "departmentField", "manager"];
+
+const isManagerGroup = computed(() => selectedDynamicGroupId.value === "manager");
+
+const dynamicGroups = computed<IDynamicMemberGroup[]>(() => {
+  const groups: IDynamicMemberGroup[] = [];
+  const groupMap = new Map<string, IDynamicMemberGroup>();
+  const members = options.dynamicMembers || [];
+
+  const registerGroup = (id: string, label: string) => {
+    if (!groupMap.has(id)) {
+      const group: IDynamicMemberGroup = {
+        id,
+        label,
+        type: DataItemType.Group,
+        items: [],
+      };
+      groupMap.set(id, group);
+      groups.push(group);
+    }
+    return groupMap.get(id)!;
+  };
+
+  members.forEach((item) => {
+    const category = getDynamicCategory(item);
+    if (category === "employeeField") {
+      registerGroup("employeeField", t("workflow.formEmployeeField")).items.push(item);
+    } else if (category === "departmentField") {
+      registerGroup("departmentField", t("workflow.formDepartmentField")).items.push(item);
+    } else {
+      registerGroup("starter", t("workflow.starter")).items.push(item);
+    }
+  });
+
+  if (members.length > 0) {
+    registerGroup("manager", t("workflow.departmentManager")).items = managerSourceItems.value;
+  }
+
+  groups.sort(
+    (a, b) => dynamicGroupOrder.indexOf(a.id) - dynamicGroupOrder.indexOf(b.id),
+  );
+
+  return groups;
+});
+
+const managerSourceItems = computed<ISelectedTag[]>(() => {
+  return (options.dynamicMembers || []).filter((item) =>
+    getDynamicItemLabel(item).includes(keyword.value || ""),
+  );
+});
+
+const currentDynamicItems = computed<ISelectedTag[]>(() => {
+  const activeGroup = dynamicGroups.value.find(
+    (item) => item.id === selectedDynamicGroupId.value,
+  );
+  return (activeGroup?.items || []).filter((item) =>
+    getDynamicItemLabel(item).includes(keyword.value || ""),
+  );
+});
+
+const selectedDynamicItem = computed<ISelectedTag | undefined>(() => {
+  return currentDynamicItems.value.find(
+    (item) => item.id === selectedDynamicMemberId.value,
+  );
+});
+
+const dynamicManagerLevels = computed<number[]>(() => {
+  return options.dynamicManagerLevels && options.dynamicManagerLevels.length > 0
+    ? options.dynamicManagerLevels
+    : [1, 2, 3, 4, 5];
+});
+
+const selectedDynamicManagerLevels = computed<number[]>(() => {
+  const item = selectedDynamicItem.value;
+  if (!item) {
+    return [];
+  }
+
+  return dynamicManagerLevels.value.filter((level) =>
+    !!findDynamicManagerTag(item, level),
+  );
+});
+
+const normalizeManagerLevels = (levels?: number[]) => {
+  if (!levels || levels.length === 0) {
+    return [];
+  }
+
+  return [...new Set(levels.filter((x) => x > 0))].sort((a, b) => a - b);
+};
+
+const buildDynamicTagId = (item: ISelectedTag, managerLevels?: number[]) => {
+  const sourceId = item.sourceId || item.id;
+  const normalized = normalizeManagerLevels(managerLevels);
+  return normalized.length > 0
+    ? `${item.type}:${sourceId}|m:${normalized.join(",")}`
+    : `${item.type}:${sourceId}`;
+};
+
+const buildDynamicTagLabel = (item: ISelectedTag, managerLevels?: number[]) => {
+  const normalized = normalizeManagerLevels(managerLevels);
+  if (normalized.length === 0) {
+    return getDynamicItemLabel(item);
+  }
+
+  return `${getDynamicItemLabel(item)} | ${getManagerLevelLabel(normalized[0])}`;
+};
+
+const getDynamicItemLabelByGroup = (item: ISelectedTag) => {
+  if (isManagerGroup.value) {
+    return getDynamicItemLabel(item);
+  }
+
+  const category = getDynamicCategory(item);
+  if (category === "starter") {
+    return t("workflow.starter");
+  }
+
+  if (category === "employeeField") {
+    return item.data?.fieldType?.toString().endsWith("2") ? t("comp.memberSelect.multiMember") : t("comp.memberSelect.singleMember");
+  }
+
+  if (category === "departmentField") {
+    return item.data?.fieldType?.toString().endsWith("2") ? t("comp.memberSelect.multiDept") : t("comp.memberSelect.singleDept");
+  }
+
+  return getDynamicItemLabel(item);
+};
+
+const getDynamicCategory = (item: ISelectedTag) => {
+  return item.data?.dynamicCategory || "starter";
+};
+
+const getDynamicItemLabel = (item: ISelectedTag) => {
+  return item.data?.baseLabel || item.label;
+};
+
+const findDynamicTag = (item: ISelectedTag) => {
+  const sourceId = item.sourceId || item.id;
+  return tagsRef.value.find(
+    (tag) =>
+      tag.type === item.type
+      && (tag.sourceId || tag.id) === sourceId
+      && (!tag.managerLevels || tag.managerLevels.length === 0),
+  );
+};
+
+const findDynamicManagerTag = (item: ISelectedTag, level: number) => {
+  const sourceId = item.sourceId || item.id;
+  return tagsRef.value.find(
+    (tag) =>
+      tag.type === item.type
+      && (tag.sourceId || tag.id) === sourceId
+      && tag.managerLevels?.length === 1
+      && tag.managerLevels[0] === level,
+  );
+};
+
+const isDynamicItemChecked = (item: ISelectedTag) => {
+  return !!findDynamicTag(item);
+};
+
+const syncDynamicSelection = () => {
+  if (!selectedDynamicGroupId.value || !dynamicGroups.value.find((item) => item.id === selectedDynamicGroupId.value)) {
+    selectedDynamicGroupId.value = dynamicGroups.value[0]?.id || "";
+  }
+
+  if (!selectedDynamicMemberId.value || !currentDynamicItems.value.find((item) => item.id === selectedDynamicMemberId.value)) {
+    selectedDynamicMemberId.value = currentDynamicItems.value[0]?.id || "";
+  }
+};
+
+const selectDynamicGroup = (groupId: string) => {
+  selectedDynamicGroupId.value = groupId;
+  selectedDynamicMemberId.value = currentDynamicItems.value[0]?.id || "";
+};
+
+const selectDynamicItem = (item: ISelectedTag) => {
+  selectedDynamicMemberId.value = item.id;
+};
+
+const upsertDynamicTag = (item: ISelectedTag, checked: boolean, managerLevels?: number[]) => {
+  const sourceId = item.sourceId || item.id;
+  const normalizedLevels = normalizeManagerLevels(managerLevels);
+  const label = buildDynamicTagLabel(item, normalizedLevels);
+  const nextTag: ISelectedTag = {
+    ...item,
+    id: buildDynamicTagId(item, normalizedLevels),
+    sourceId,
+    label,
+    managerLevels: normalizedLevels,
+    data: {
+      ...item.data,
+      baseLabel: getDynamicItemLabel(item),
+    },
+  };
+
+  const remainTags = tagsRef.value.filter((tag) => tag.id !== nextTag.id);
+
+  if (!checked) {
+    tagsRef.value = remainTags;
+  } else if (options.multiple) {
+    tagsRef.value = [...remainTags, nextTag];
+  } else {
+    const nonDynamicTags = remainTags.filter(
+      (tag) => tag.type !== DataItemType.Dynamic && tag.type !== DataItemType.Field,
+    );
+    tagsRef.value = [...nonDynamicTags, nextTag];
+  }
+
+  emit("update:modelValue", tagsRef.value);
+};
+
+const toggleManagerLevel = (level: number, checked: boolean) => {
+  const item = selectedDynamicItem.value;
+  if (!item) {
+    return;
+  }
+
+  upsertDynamicTag(item, checked, [level]);
+};
+
+const getManagerLevelLabel = (level: number) => {
+  if (level === 1) {
+    return t("workflow.directManager");
+  }
+  if (level === 2) {
+    return t("workflow.higherLevelManager");
+  }
+  return t("workflow.nthLevelManager", { 0: level });
+};
 
 watch([keyword], ([newKeyword], [oldKeyword]) => {
   if (newKeyword != oldKeyword) {
     deptTree.value!.filter(newKeyword);
     roleTree.value!.filter(newKeyword);
     empDeptTree.value!.filter(newKeyword);
+    syncDynamicSelection();
   }
 });
 
@@ -491,7 +768,7 @@ onBeforeMount(() => {
         empName: userStore.currentUser.empName!,
         status: 0,
         departmentId: userStore.currentUser.deptId!,
-        approved: true,
+        userBound: true,
         isManager: false,
       };
       curEmpData.value = [employeeToListItem(emp)];
@@ -520,10 +797,14 @@ onBeforeMount(() => {
     if (props.modelValue[0].type == DataItemType.Department)
       singleDeptId.value = props.modelValue[0].id;
   }
+
+  syncDynamicSelection();
 });
 
 // 手动设置选中节点
 const setSelectedNodes = () => {
+  syncDynamicSelection();
+
   // 确保树数据已加载
   if (!deptData.value || !roleData.value) return;
 
@@ -737,75 +1018,13 @@ const curEmpCheckAll = (checked: boolean) => {
 };
 
 const dymChecked = (data: IListItem, checked: boolean) => {
-  if (options.multiple) {
-    if (checked) {
-      let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == DataItemType.Dynamic,
-      );
-      if (index == undefined || index == -1) {
-        tagsRef.value.push({
-          id: data.id,
-          value: data.value,
-          label: data.label,
-          type: DataItemType.Dynamic,
-          data: data.data,
-        });
-      }
-    } else {
-      tagsRef.value = tagsRef.value.filter(
-        (x) => x.type !== DataItemType.Dynamic || x.id !== data.id,
-      );
-    }
-
-    emit("update:modelValue", tagsRef.value);
-  } else {
-    if (checked) {
-      // 直接创建新数组
-      const nonDynamics = tagsRef.value.filter(
-        (x) => x.type != DataItemType.Dynamic,
-      );
-      tagsRef.value = [
-        ...nonDynamics,
-        {
-          id: data.id,
-          value: data.value,
-          label: data.label,
-          type: DataItemType.Dynamic,
-          data: data.data,
-        },
-      ];
-    } else {
-      tagsRef.value = tagsRef.value.filter(
-        (x) => x.type !== DataItemType.Dynamic || x.id !== data.id,
-      );
-    }
-    emit("update:modelValue", tagsRef.value);
-  }
+  const item = data as ISelectedTag;
+  upsertDynamicTag(item, checked, selectedDynamicManagerLevels.value);
 };
 const dymCheckAll = (checked: boolean) => {
-  if (checked) {
-    //全新增
-    options.dynamicMembers!.forEach((data) => {
-      let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == DataItemType.Dynamic,
-      );
-      if (index == undefined || index == -1) {
-        tagsRef.value.push({
-          id: data.id,
-          label: data.label,
-          type: DataItemType.Dynamic,
-          data: data.data,
-          icon: data.icon,
-        });
-      }
-    });
-  } else {
-    tagsRef.value = tagsRef.value.filter(
-      (x) => x.type !== DataItemType.Dynamic,
-    );
-  }
-
-  emit("update:modelValue", tagsRef.value);
+  currentDynamicItems.value.forEach((item) => {
+    upsertDynamicTag(item, checked, checked ? selectedDynamicManagerLevels.value : []);
+  });
 };
 
 const roleFilter = (value: string, data: any) => {
@@ -829,10 +1048,11 @@ const removeTag = (tag: ISelectedTag) => {
     if (roleTree.value) roleTree.value.setChecked(tag.id, false, false);
   } else if (tag.type == DataItemType.Employee) {
     selectedEmps.value = selectedEmps.value?.filter((x) => x != tag.id);
-  } else if (tag.type == DataItemType.Dynamic) {
-    selectedDyMembers.value = selectedDyMembers.value?.filter(
-      (x) => x != tag.id,
-    );
+  } else if (
+    tag.type == DataItemType.Dynamic ||
+    tag.type == DataItemType.Field
+  ) {
+    syncDynamicSelection();
   }
 };
 
@@ -1043,4 +1263,5 @@ const getNodeIconColor = (node: ITreeNode) => {
 .custom-list-item {
   cursor: pointer;
 }
+
 </style>

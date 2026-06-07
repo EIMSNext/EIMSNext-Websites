@@ -4,12 +4,12 @@
     <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
   <PdfPreview v-model="showPdfPreview" :title="pdfPreviewTitle" :pdf-url="pdfPreviewUrl" />
-  <et-dialog v-model="showShareDialog" class="share-dialog" title="分享" width="640px" :show-footer="false" append-to-body>
+  <et-dialog v-model="showShareDialog" class="share-dialog" :title="$t('admin.formData.share')" width="640px" :show-footer="false" append-to-body>
     <div class="share-dialog-body">
       <div class="share-section">
         <div class="share-section-title-row">
-          <div class="share-section-title">企业/团队成员</div>
-          <div class="share-section-desc">企业成员访问该链接需要登录并授权</div>
+          <div class="share-section-title">{{ $t("admin.formData.enterpriseMembers") }}</div>
+          <div class="share-section-desc">{{ $t("admin.formData.enterpriseMembersDesc") }}</div>
         </div>
         <ShareLinkBar :url="shareUrl" />
       </div>
@@ -44,11 +44,12 @@ import {
   IFieldPerm,
   DataPerms,
   FormDef,
-  PrintTemplate,
+  PrintDef,
   WorkflowActionStatus,
 } from "@eimsnext/models";
 import { useFormStore, useUserStore } from "@eimsnext/store";
-import { customPrintService, formDataService, PrintRequest, printTemplateService, workflowService } from "@eimsnext/services";
+import { customPrintService, formDataService, PrintRequest, printDefService, workflowService } from "@eimsnext/services";
+import { bus } from "@eimsnext/utils";
 import { FormActionSettings } from "@/components/FormView/type";
 import { MessageIcon, ShareLinkBar, ToolbarItem } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
@@ -93,7 +94,7 @@ const printConfig = ref(getPrintConfig(false));
 
 const formPrintData = ref();
 const printTrigger = ref<HTMLElement | null>(null);
-const customPrintTemplates = ref<PrintTemplate[]>([]);
+const customPrintTemplates = ref<PrintDef[]>([]);
 const showPdfPreview = ref(false);
 const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
@@ -109,7 +110,7 @@ const leftBars = computed<ToolbarItem[]>(() => {
     {
       type: "button",
       config: {
-        text: "分享",
+        text: t("admin.formData.share"),
         command: "share",
         visible: !inEdit.value,
         icon: "el-share",
@@ -203,9 +204,9 @@ const leftBars = computed<ToolbarItem[]>(() => {
   return bars;
 });
 
-const loadPrintTemplates = async (formId: string) => {
+const loadPrintDefs = async (formId: string) => {
   const query = buildQuery({ filter: { formId } });
-  customPrintTemplates.value = await printTemplateService.query<PrintTemplate>(query);
+  customPrintTemplates.value = await printDefService.query<PrintDef>(query);
 };
 
 const openCustomPrintPreview = (print: any) => {
@@ -216,15 +217,15 @@ const openCustomPrintPreview = (print: any) => {
 
 const toolbarHandler = async (cmd: string, e: MouseEvent) => {
   if (cmd.startsWith("custom-print:")) {
-    const templateId = cmd.replace("custom-print:", "");
-    let req: PrintRequest = { dataIds: [props.dataId], templateId: templateId }
+    const printId = cmd.replace("custom-print:", "");
+    let req: PrintRequest = { dataIds: [props.dataId], printId }
     let printResult = await customPrintService.print(req);
 
     if (printResult && printResult.downloadUrl) {
       openCustomPrintPreview(printResult);
     }
     else {
-      ElMessage.error(printResult?.message || "打印失败")
+      ElMessage.error(printResult?.message || t("admin.formData.printFailed"))
     }
 
     return;
@@ -295,6 +296,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
 const execDelete = () => {
   formDataService.delete(props.dataId).then(() => {
     emit("ok");
+    bus.emit("data:deleted", { formId: props.formId });
   });
 };
 
@@ -320,6 +322,7 @@ const saveDraft = (data: any) => {
   request.then((res) => {
     formData.value = res.data;
     emit("ok");
+    bus.emit("data:saved", { formId: props.formId });
   });
 };
 const submitData = (data: any) => {
@@ -339,6 +342,7 @@ const submitData = (data: any) => {
   request.then((res) => {
     formData.value = res.data;
     emit("ok");
+    bus.emit("data:saved", { formId: props.formId });
   });
 };
 
@@ -368,7 +372,7 @@ onBeforeMount(async () => {
   let form = await formStore.get(props.formId);
   if (form) {
     formDef.value = form;
-    await loadPrintTemplates(form.id);
+    await loadPrintDefs(form.id);
   }
 
   let data = await formDataService.get<FormData>(props.dataId);

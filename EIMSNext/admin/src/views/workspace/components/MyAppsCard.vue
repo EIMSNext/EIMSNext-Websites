@@ -64,7 +64,7 @@ defineOptions({
   name: "MyAppsCard",
 });
 import AddEditApp from "@/views/app/components/AddEditApp.vue";
-import { App, UserType } from "@eimsnext/models";
+import { AppDef, UserType } from "@eimsnext/models";
 import { useAppStore, useContextStore, useUserStore } from "@eimsnext/store";
 import { useI18n } from "vue-i18n";
 import { ConfirmResult, EtConfirm } from "@eimsnext/components";
@@ -78,7 +78,7 @@ const userStore = useUserStore();
 const curUser = toRef(userStore.currentUser);
 const showAddEditDialog = ref(false);
 const isEditMode = ref(false);
-const currentApp = ref<App | undefined>(undefined);
+const currentApp = ref<AppDef | undefined>(undefined);
 
 const createApp = () => {
   isEditMode.value = false;
@@ -86,7 +86,7 @@ const createApp = () => {
   showAddEditDialog.value = true;
 };
 
-const handleEditClick = (app: App) => {
+const handleEditClick = (app: AppDef) => {
   isEditMode.value = true;
   currentApp.value = app;
   showAddEditDialog.value = true;
@@ -98,12 +98,12 @@ const handleSaved = () => {
   currentApp.value = undefined;
 };
 
-const gotoApp = async (app: App) => {
+const gotoApp = async (app: AppDef) => {
   await contextStore.setAppId(app.id);
   const path = "/app/" + app.id + "/mytasks";
   router.push(path);
 };
-const handleDeleteClick = async (app: App) => {
+const handleDeleteClick = async (app: AppDef) => {
   var confirm = await EtConfirm.showDialog(
     t("admin.deleteFormConfirm_Content"),
     { title: t("admin.deleteFormConfirm_Title", [app?.name]) },

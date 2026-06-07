@@ -8,6 +8,8 @@ import {
 import { useFormStore } from "@eimsnext/store";
 import { INodeForm } from "@/NodeFieldList/type";
 import { DataItemType } from "@/common";
+import { IFormFieldDef } from "@/FieldSelect/type";
+import { DataflowTriggerKind, FieldType } from "@eimsnext/models";
 
 export function buildWfNodeListItems(wfFlowData: IFlowData): IListItem[] {
   const items: IListItem[] = [];
@@ -44,16 +46,37 @@ export async function getPrevNodes(
       prevNode.nodeType != FlowNodeType.ConditionOther &&
       prevNode.nodeType != FlowNodeType.Branch2
     ) {
+      const currentNodeId = prevNode.id;
       let node: INodeForm | undefined = {
-        nodeId: prevNode.id,
+        nodeId: currentNodeId,
         nodeName: prevNode.name,
         singleResult: false,
       };
       let formId: string | undefined = undefined;
-      switch (prevNode.nodeType) {
-        case FlowNodeType.Start:
-          formId = prevNode.metadata.triggerMeta?.formId;
+        switch (prevNode.nodeType) {
+          case FlowNodeType.Start:
           node.singleResult = true;
+          if (prevNode.metadata.triggerMeta?.triggerKind === DataflowTriggerKind.Http) {
+            node.outputFields = (prevNode.metadata.triggerMeta?.httpSettings?.sampleFields ?? []).map((field) => ({
+              formId: currentNodeId,
+              field: field.key,
+              label: field.label,
+              type: field.type === "number" ? FieldType.Number : FieldType.Input,
+              isSubField: false,
+              nodeId: currentNodeId,
+              singleResultNode: true,
+              sourceType: "http",
+            } satisfies IFormFieldDef));
+          } else if (prevNode.metadata.triggerMeta?.triggerKind === DataflowTriggerKind.Schedule) {
+            formId = prevNode.metadata.triggerMeta?.timeSettings?.sourceType === "formField"
+              ? prevNode.metadata.triggerMeta?.formId
+              : undefined;
+            if (!formId) {
+              node.outputFields = [];
+            }
+          } else {
+            formId = prevNode.metadata.triggerMeta?.formId;
+          }
           break;
         case FlowNodeType.Insert:
           formId = prevNode.metadata.insertMeta?.formId;
@@ -70,6 +93,15 @@ export async function getPrevNodes(
           break;
         case FlowNodeType.Plugin:
           node.singleResult = prevNode.metadata.pluginMeta?.singleResult ?? true;
+          node.outputFields = (prevNode.metadata.pluginMeta?.resultFields ?? []).map((field) => ({
+            formId: currentNodeId,
+            field: field.fieldKey,
+            label: field.fieldName,
+            type: field.fieldType as FieldType,
+            isSubField: false,
+            nodeId: currentNodeId,
+            singleResultNode: true,
+          } satisfies IFormFieldDef));
           break;
       }
       if (formId) {

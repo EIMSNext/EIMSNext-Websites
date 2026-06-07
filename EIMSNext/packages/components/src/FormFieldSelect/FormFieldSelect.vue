@@ -3,7 +3,7 @@
     v-model="selectedFieldId"
     filterable
     clearable
-    placeholder="请选择字段"
+    :placeholder="t('comp.formFieldSelect.pleaseSelectField')"
     :loading="loading"
     @change="handleChange"
   >
@@ -23,6 +23,9 @@ import { useFormStore } from "@eimsnext/store";
 import { IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
 import { ref, watch, computed, onMounted } from "vue";
 import { FieldType } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FormFieldSelect",

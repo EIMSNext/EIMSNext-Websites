@@ -71,7 +71,7 @@ const confirm = (
 
     const props = {
       modelValue: visible.value,
-      title: options.title || "确认操作吗？",
+      title: options.title || (t !== undefined ? t("comp.etConfirm.confirmOperation") : "确认操作吗？"),
       showCancel: options.showCancel ?? true,
       showNoSave: options.showNoSave ?? false,
       cancelText:

@@ -8,7 +8,7 @@
         <NotifyList :form-def="formDef"></NotifyList>
       </el-tab-pane>
       <el-tab-pane label="打印模板" name="print" class="adv-panel">
-        <PrintTemplateList :form-def="formDef"></PrintTemplateList>
+        <PrintDefList :form-def="formDef"></PrintDefList>
       </el-tab-pane>
       <el-tab-pane label="智能助手" name="dataflow" class="adv-panel">
         <DataflowList :form-def="formDef" />
@@ -24,7 +24,7 @@ import DataAdvanced from "./DataAdvanced.vue";
 import NotifyList from "./NotifyList.vue";
 import WebhookList from "./WebhookList.vue";
 import DataflowList from "./DataflowList.vue";
-import PrintTemplateList from "./PrintTemplateList.vue";
+import PrintDefList from "./PrintDefList.vue";
 import { FormDef } from "@eimsnext/models";
 import { TabsPaneContext } from "element-plus";
 

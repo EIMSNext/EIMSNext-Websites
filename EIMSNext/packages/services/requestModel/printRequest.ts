@@ -1,11 +1,11 @@
-import { PrintTemplateType } from "@eimsnext/models";
+import { PrintDefType } from "@eimsnext/models";
 
 export interface PrintRequest {
   dataIds: string[];
-  templateId: string;
+  printId: string;
 }
 
 export interface PrintPreviewRequest {
   content: string;
-  printType: PrintTemplateType;
+  printType: PrintDefType;
 }

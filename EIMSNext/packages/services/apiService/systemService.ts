@@ -25,6 +25,10 @@ export class SystemService extends ServiceBase {
     return this.http().api.get<PluginRuntimeInfo[]>("/system/plugins");
   }
 
+  getEnabledPlugins(): Promise<PluginRuntimeInfo[]> {
+    return this.http().api.get<PluginRuntimeInfo[]>("/system/enabledplugins");
+  }
+
   reloadPlugin(): Promise<PluginReloadResult> {
     return this.http().api.post<PluginReloadResult>("/system/reloadplugin", {});
   }

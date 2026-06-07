@@ -112,3 +112,37 @@
   z-index: 999;
   pointer-events: auto;
 }
+
+.elt-drawer {
+  .el-drawer__header {
+    height: 60px;
+    padding: 18px;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--et-border-color);
+  }
+  .main-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    font-size: var(--et-font-size-16);
+  }
+
+  .main-content {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: var(--et-size-60);
+    background: var(--et-bg-page);
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.w_full {
+  width: 100%;
+}
+.h_full {
+  height: 100%;
+}

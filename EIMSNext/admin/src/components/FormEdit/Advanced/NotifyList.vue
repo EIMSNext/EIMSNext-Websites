@@ -3,7 +3,7 @@
     :showNoSave="false" okText="确定" @ok="execDelete">
     <div>数据删除后将不可恢复</div>
   </EtConfirmDialog>
-  <el-drawer v-model="showDrawer" direction="btt" size="95%" @close="close">
+  <el-drawer v-model="showDrawer" class="elt-drawer" direction="btt" size="95%" @close="close">
     <template #header>
       <div class="main-title"><span>提醒助手</span></div>
     </template>
@@ -30,11 +30,17 @@
                   <el-switch :model-value="!notify.disabled" @change="toggleDisable(notify)"></el-switch>
                 </div>
               </template>
-              <div class="flow-content">
-                <div class="item-line">提醒类型: {{ getTriggerModeText(notify.triggerMode) }}</div>
-                <div class="item-line">提醒文字: {{ notify.notifyText || "未设置" }}</div>
-                <div class="item-line">提醒方式: {{ getChannelText(notify.channels) }}</div>
-              </div>
+               <div class="flow-content">
+                 <div class="item-line">提醒类型: {{ getTriggerModeText(notify.triggerMode) }}</div>
+                 <div v-if="getScheduleSummary(notify)" class="item-line">
+                   提醒时间: {{ getScheduleSummary(notify) }}
+                 </div>
+                 <div v-if="getRepeatSummary(notify)" class="item-line">
+                   重复规则: {{ getRepeatSummary(notify) }}
+                 </div>
+                 <div class="item-line">提醒文字: {{ notify.notifyText || "未设置" }}</div>
+                 <div class="item-line">提醒方式: {{ getChannelText(notify.channels) }}</div>
+               </div>
             </et-card>
           </template>
         </el-space>
@@ -57,6 +63,7 @@ import { FlagEnum } from "@eimsnext/utils";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
+import { getNotifyRepeatSummary, getNotifyScheduleSummary } from "../../../utils/notify";
 
 defineOptions({
   name: "NotifyList",
@@ -85,6 +92,11 @@ const createDefaultFormNotify = (): FormNotify =>
     appId: props.formDef.appId,
     formId: props.formDef.id,
     triggerMode: FormNotifyTriggerMode.DataAdded,
+    timeField: undefined,
+    startTime: undefined,
+    endTime: undefined,
+    repeatType: undefined,
+    repeatConfig: undefined,
     changeFields: [],
     dataFilter: "",
     notifyText: "有新数据提交，请及时处理",
@@ -159,6 +171,14 @@ function getChannelText(channels: NotifyChannel): string {
   return parts.length ? parts.join("、") : "未设置";
 }
 
+function getScheduleSummary(notify: FormNotify): string {
+  return getNotifyScheduleSummary(notify, props.formDef);
+}
+
+function getRepeatSummary(notify: FormNotify): string {
+  return getNotifyRepeatSummary(notify);
+}
+
 onBeforeMount(() => {
   if (props.formDef) {
     loadFormNotifies(props.formDef.id);
@@ -222,21 +242,5 @@ onBeforeMount(() => {
       }
     }
   }
-}
-
-.main-title {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 600;
-  font-size: var(--et-font-size-16);
-}
-
-.main-content {
-  bottom: 0;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: var(--et-size-60);
 }
 </style>

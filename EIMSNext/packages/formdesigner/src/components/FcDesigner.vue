@@ -238,12 +238,11 @@
                           v-if="hiddenItem.indexOf(element.name) === -1"
                           @click="clickMenu(element)"
                         >
-                          <template v-if="item.name !== 'template'">
+                            <template v-if="item.name !== 'template'">
                             <div class="_fc-l-icon">
-                              <i
-                                class="fc-icon"
-                                :class="element.icon || 'icon-input'"
-                              ></i>
+                              <et-icon
+                                :icon="fieldIcons[element.name] || 'el-EditPen'"
+                              />
                             </div>
                             <span class="_fc-l-name">{{
                               t("com." + element.name + ".name") ||
@@ -888,6 +887,7 @@ import style from "../config/base/style";
 import advanced from "../config/base/advanced";
 import validate from "../config/base/validate";
 import ruleList, { defaultDrag } from "../config";
+import { EtIcon, fieldIcons } from "@eimsnext/components";
 import fcDraggable from "vuedraggable/src/vuedraggable";
 import createMenu from "../config/menu";
 import {
@@ -982,6 +982,7 @@ export default defineComponent({
     SubList,
     PageInput,
     fcDraggable,
+    EtIcon,
     DragForm: designerForm.$form(),
     ViewForm: viewForm.$form(),
     // #if ONLY_PC
@@ -4365,6 +4366,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       ...methods,
+      fieldIcons,
       fieldRef,
       formListRef,
       dragHeight,

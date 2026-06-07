@@ -38,20 +38,14 @@
         @click.stop="addNode(FlowNodeType.Delete)">
         {{ t("workflow.deleteDataNode") }}
       </el-button>
-      <!-- <el-button
-        icon="el-plus"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Print)"
-      >
+      <el-button icon="el-plus" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Print)">
         {{ t("workflow.printNode") }}
       </el-button>
-      <el-button
-        icon="el-plus"
-        style="width: 100%; margin-left: 0; margin-top: 10px"
-        @click.stop="addNode(FlowNodeType.Plugin)"
-      >
+      <el-button icon="el-plus" class="popover-action-button popover-action-button-spaced"
+        @click.stop="addNode(FlowNodeType.Plugin)">
         {{ t("workflow.pluginNode") }}
-      </el-button> -->
+      </el-button>
       <el-button icon="el-copy-document" class="popover-action-button popover-action-button-spaced"
         @click.stop="addNode(FlowNodeType.Branch2)">
         {{ t("workflow.branch2Node") }}

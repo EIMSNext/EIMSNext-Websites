@@ -12,6 +12,7 @@ export interface INodeForm {
   nodeName: string;
   singleResult: boolean;
   form?: FormDef;
+  outputFields?: IFormFieldDef[];
 }
 export enum FieldBuildRule {
   All = 0,

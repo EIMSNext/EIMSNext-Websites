@@ -8,22 +8,22 @@
     @cancel="cancel"
   >
     <el-form :model="formData" :rules="rules" label-width="80px" class="dialog-form">
-      <el-form-item label="员工编码" prop="nickname">
-        <el-input v-model="formData.code" placeholder="请输入员工编码" />
+      <el-form-item :label="$t('department.empCode')" prop="nickname">
+        <el-input v-model="formData.code" :placeholder="$t('department.empCodePlaceholder')" />
       </el-form-item>
-      <el-form-item label="员工姓名" prop="empName">
-        <el-input v-model="formData.empName" placeholder="请输入员工姓名" />
+      <el-form-item :label="$t('department.empName')" prop="empName">
+        <el-input v-model="formData.empName" :placeholder="$t('department.empNamePlaceholder')" />
       </el-form-item>
-      <el-form-item label="手机号码" prop="workPhone">
-        <el-input v-model="formData.workPhone" placeholder="请输入手机号码" maxlength="11" />
+      <el-form-item :label="$t('department.phone')" prop="workPhone">
+        <el-input v-model="formData.workPhone" :placeholder="$t('department.phonePlaceholder')" maxlength="11" />
       </el-form-item>
-      <el-form-item label="邮箱" prop="workEmail">
-        <el-input v-model="formData.workEmail" placeholder="请输入邮箱" maxlength="50" />
+      <el-form-item :label="$t('department.email')" prop="workEmail">
+        <el-input v-model="formData.workEmail" :placeholder="$t('department.emailPlaceholder')" maxlength="50" />
       </el-form-item>
-      <el-form-item label="所属部门" prop="departmentId">
+      <el-form-item :label="$t('department.department')" prop="departmentId">
         <el-tree-select
           v-model="formData.departmentId"
-          placeholder="请选择所属部门"
+          :placeholder="$t('department.departmentPlaceholder')"
           :data="deptList"
           :props="{ children: 'children', label: 'label', disabled: 'disabled' }"
           node-key="id"
@@ -44,8 +44,8 @@
         </div>
         <div class="footer-right">
           <slot name="footer-right">
-            <el-button v-if="showSaveAndInvite" @click="saveAndInvite">保存并邀请</el-button>
-            <el-button type="primary" @click="save">保存</el-button>
+            <el-button v-if="showSaveAndInvite" @click="saveAndInvite">{{ $t("department.saveAndInvite") }}</el-button>
+            <el-button type="primary" @click="save">{{ $t("common.save") }}</el-button>
           </slot>
         </div>
       </div>
@@ -53,10 +53,13 @@
   </et-dialog>
 </template>
 <script lang="ts" setup>
+import { useI18n } from "vue-i18n";
 import { ITreeNode, buildDeptTree } from "@eimsnext/components";
-import { Department, Employee, EmployeeRequest, PlatformType } from "@eimsnext/models";
+import { Department, Employee, EmployeeRequest, EmployeeStatus, PlatformType } from "@eimsnext/models";
 import { employeeService } from "@eimsnext/services";
 import { useContextStore, useDeptStore } from "@eimsnext/store";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "AddEditEmp",
@@ -76,38 +79,38 @@ const deptStore = useDeptStore();
 const contextStore = useContextStore();
 const deptList = ref<ITreeNode[]>(); // 部门列表
 const showDialog = ref(true);
-const title = props.edit ? "修改员工信息" : "添加新员工";
+const title = computed(() => props.edit ? t("department.editEmployee") : t("department.addEmployee"));
 const showSaveAndInvite = computed(() => contextStore.corpPlat === PlatformType.Public);
 const formData = ref<Employee>({
   id: "",
   code: "",
   empName: "",
   departmentId: "",
-  status: 1,
+  status: EmployeeStatus.Active,
   isManager: false,
-  approved: false,
+  userBound: true,
 });
 if (props.edit) formData.value = props.emp!;
 
 const rules = reactive({
-  code: [{ required: true, message: "员工编码不能为空", trigger: "blur" }],
-  empName: [{ required: true, message: "员工姓名不能为空", trigger: "blur" }],
+  code: [{ required: true, message: t("admin.department.messages.codeRequired"), trigger: "blur" }],
+  empName: [{ required: true, message: t("admin.department.messages.nameRequired"), trigger: "blur" }],
   workPhone: [
     {
       pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
-      message: "请输入正确的手机号码",
+      message: t("admin.department.messages.phoneInvalid"),
       trigger: "blur",
     },
   ],
   workEmail: [
     {
       pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/,
-      message: "请输入正确的邮箱地址",
+      message: t("admin.department.messages.emailInvalid"),
       trigger: "blur",
     },
   ],
-  deptId: [{ required: true, message: "所属部门不能为空", trigger: "blur" }],
-  inviteId: [{ message: "用户角色不能为空", trigger: "blur" }],
+  deptId: [{ required: true, message: t("admin.department.messages.deptRequired"), trigger: "blur" }],
+  inviteId: [{ message: t("admin.department.messages.roleRequired"), trigger: "blur" }],
 });
 
 onBeforeMount(() => {

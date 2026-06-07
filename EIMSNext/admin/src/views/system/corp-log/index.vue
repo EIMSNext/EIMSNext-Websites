@@ -1,14 +1,14 @@
 <template>
   <div class="corp-log-container">
-    <el-dialog v-model="showExportDialog" title="导出日志" width="520px">
+    <el-dialog v-model="showExportDialog" :title="$t('admin.corpLog.exportDialogTitle')" width="520px">
       <el-form label-width="90px">
-        <el-form-item label="导出格式">
+        <el-form-item :label="$t('admin.exportFormat')">
           <el-radio-group v-model="exportFormat">
             <el-radio :value="ExportFormat.Csv">CSV</el-radio>
             <el-radio :value="ExportFormat.Excel">Excel</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="导出列">
+        <el-form-item :label="$t('admin.exportColumns')">
           <el-checkbox-group v-model="selectedExportColumnKeys" class="export-column-group">
             <el-checkbox
               v-for="column in currentExportColumns"
@@ -21,32 +21,32 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showExportDialog = false">取消</el-button>
-        <el-button type="primary" :loading="exporting" @click="submitExport">确定</el-button>
+        <el-button @click="showExportDialog = false">{{ $t("common.cancel") }}</el-button>
+        <el-button type="primary" :loading="exporting" @click="submitExport">{{ $t("common.confirm") }}</el-button>
       </template>
     </el-dialog>
 
     <el-card shadow="never" class="corp-log-card">
       <el-tabs v-model="activeTab" class="corp-log-tabs" @tab-change="handleTabChange">
-        <el-tab-pane label="登录日志" name="login" />
-        <el-tab-pane label="操作日志" name="action" />
+        <el-tab-pane :label="$t('admin.corpLog.loginTab')" name="login" />
+        <el-tab-pane :label="$t('admin.corpLog.actionTab')" name="action" />
       </el-tabs>
 
       <div v-if="activeTab === 'login'" class="filter-panel">
         <div class="filter-grid login-grid">
           <div class="filter-item">
-            <div class="filter-label">登录人</div>
-            <el-input v-model="loginFilters.userName" clearable placeholder="请输入登录人" />
+            <div class="filter-label">{{ $t("admin.corpLog.loginUser") }}</div>
+            <el-input v-model="loginFilters.userName" clearable :placeholder="$t('admin.corpLog.loginUserPlaceholder')" />
           </div>
           <div class="filter-item range-item">
-            <div class="filter-label">登录时间</div>
-            <el-date-picker v-model="loginFilters.dateRange" type="daterange" value-format="x" start-placeholder="开始日期"
-              end-placeholder="结束日期" range-separator="~" clearable />
+            <div class="filter-label">{{ $t("admin.corpLog.loginTime") }}</div>
+            <el-date-picker v-model="loginFilters.dateRange" type="daterange" value-format="x" :start-placeholder="$t('common.date.start')"
+              :end-placeholder="$t('common.date.end')" range-separator="~" clearable />
           </div>
           <div class="filter-actions">
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
-            <el-button @click="openExportDialog">导出</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t("common.search") }}</el-button>
+            <el-button @click="handleReset">{{ $t("common.reset") }}</el-button>
+            <el-button @click="openExportDialog">{{ $t("common.export") }}</el-button>
           </div>
         </div>
       </div>
@@ -54,32 +54,32 @@
       <div v-else class="filter-panel">
         <div class="filter-grid action-grid">
           <div class="filter-item">
-            <div class="filter-label">实体类型</div>
-            <el-select v-model="actionFilters.entityType" clearable placeholder="全部">
-              <el-option label="全部" value="" />
+            <div class="filter-label">{{ $t("admin.corpLog.entityType") }}</div>
+            <el-select v-model="actionFilters.entityType" clearable :placeholder="$t('common.all')">
+              <el-option :label="$t('common.all')" value="" />
               <el-option v-for="item in entityTypeOptions" :key="item" :label="item" :value="item" />
             </el-select>
           </div>
           <div class="filter-item">
-            <div class="filter-label">操作类型</div>
-            <el-select v-model="actionFilters.action" clearable placeholder="全部">
-              <el-option label="全部" value="" />
+            <div class="filter-label">{{ $t("admin.corpLog.actionType") }}</div>
+            <el-select v-model="actionFilters.action" clearable :placeholder="$t('common.all')">
+              <el-option :label="$t('common.all')" value="" />
               <el-option v-for="item in actionOptions" :key="item" :label="item" :value="item" />
             </el-select>
           </div>
           <div class="filter-item">
-            <div class="filter-label">操作人</div>
-            <el-input v-model="actionFilters.operatorName" clearable placeholder="请输入操作人" />
+            <div class="filter-label">{{ $t("admin.corpLog.operator") }}</div>
+            <el-input v-model="actionFilters.operatorName" clearable :placeholder="$t('admin.corpLog.operatorPlaceholder')" />
           </div>
           <div class="filter-item range-item action-range-item">
-            <div class="filter-label">操作时间</div>
-            <el-date-picker v-model="actionFilters.dateRange" type="daterange" value-format="x" start-placeholder="开始日期"
-              end-placeholder="结束日期" range-separator="~" clearable />
+            <div class="filter-label">{{ $t("admin.corpLog.operationTime") }}</div>
+            <el-date-picker v-model="actionFilters.dateRange" type="daterange" value-format="x" :start-placeholder="$t('common.date.start')"
+              :end-placeholder="$t('common.date.end')" range-separator="~" clearable />
           </div>
           <div class="filter-actions">
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
-            <el-button @click="openExportDialog">导出</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t("common.search") }}</el-button>
+            <el-button @click="handleReset">{{ $t("common.reset") }}</el-button>
+            <el-button @click="openExportDialog">{{ $t("common.export") }}</el-button>
           </div>
         </div>
       </div>
@@ -93,44 +93,44 @@
           class="corp-log-table"
         >
           <template v-if="activeTab === 'login'">
-            <el-table-column label="登录人" min-width="160">
+            <el-table-column :label="$t('admin.corpLog.loginUser')" min-width="160">
               <template #default="scope">
                 {{ scope.row.createBy?.label || scope.row.userName || "-" }}
               </template>
             </el-table-column>
-            <el-table-column label="登录时间" min-width="180">
+            <el-table-column :label="$t('admin.corpLog.loginTime')" min-width="180">
               <template #default="scope">
                 {{ formatDateTime(scope.row.createTime) }}
               </template>
             </el-table-column>
-            <el-table-column label="登录标识" min-width="180">
+            <el-table-column :label="$t('admin.corpLog.loginId')" min-width="180">
               <template #default="scope">
                 {{ scope.row.loginId || "-" }}
               </template>
             </el-table-column>
-            <el-table-column label="失败原因" min-width="160">
+            <el-table-column :label="$t('admin.corpLog.failReason')" min-width="160">
               <template #default="scope">
                 {{ scope.row.failReason || "-" }}
               </template>
             </el-table-column>
-            <el-table-column label="IP" min-width="140" prop="clientIp" />
+            <el-table-column :label="$t('admin.corpLog.ip')" min-width="140" prop="clientIp" />
           </template>
 
           <template v-else>
-            <el-table-column label="操作人" min-width="160">
+            <el-table-column :label="$t('admin.corpLog.operator')" min-width="160">
               <template #default="scope">
                 {{ scope.row.createBy?.label || "-" }}
               </template>
             </el-table-column>
-            <el-table-column label="操作时间" min-width="180">
+            <el-table-column :label="$t('admin.corpLog.operationTime')" min-width="180">
               <template #default="scope">
                 {{ formatDateTime(scope.row.createTime) }}
               </template>
             </el-table-column>
-            <el-table-column label="操作类型" min-width="160" prop="action" />
-            <el-table-column label="实体类型" min-width="160" prop="entityType" />
-            <el-table-column label="操作详情" min-width="320" prop="detail" />
-            <el-table-column label="IP" min-width="140" prop="clientIp" />
+            <el-table-column :label="$t('admin.corpLog.actionType')" min-width="160" prop="action" />
+            <el-table-column :label="$t('admin.corpLog.entityType')" min-width="160" prop="entityType" />
+            <el-table-column :label="$t('admin.corpLog.detail')" min-width="320" prop="detail" />
+            <el-table-column :label="$t('admin.corpLog.ip')" min-width="140" prop="clientIp" />
           </template>
         </el-table>
       </div>
@@ -157,6 +157,9 @@ import {
 } from "@eimsnext/models";
 import { auditLogService, auditLoginService } from "@eimsnext/services";
 import buildQuery from "odata-query";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "CorpLog",
@@ -181,20 +184,20 @@ const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
 const selectedExportColumnKeys = ref<string[]>([]);
 
 const loginExportColumns: ExportColumn[] = [
-  { key: "userName", header: "登录人", type: ExportColumnType.String },
-  { key: "createTime", header: "登录时间", type: ExportColumnType.Date },
-  { key: "loginId", header: "登录标识", type: ExportColumnType.String },
-  { key: "failReason", header: "失败原因", type: ExportColumnType.String },
-  { key: "clientIp", header: "IP", type: ExportColumnType.String },
+  { key: "userName", header: t("admin.corpLog.loginUser"), type: ExportColumnType.String },
+  { key: "createTime", header: t("admin.corpLog.loginTime"), type: ExportColumnType.Date },
+  { key: "loginId", header: t("admin.corpLog.loginId"), type: ExportColumnType.String },
+  { key: "failReason", header: t("admin.corpLog.failReason"), type: ExportColumnType.String },
+  { key: "clientIp", header: t("admin.corpLog.ip"), type: ExportColumnType.String },
 ];
 
 const actionExportColumns: ExportColumn[] = [
-  { key: "operatorName", header: "操作人", type: ExportColumnType.String },
-  { key: "createTime", header: "操作时间", type: ExportColumnType.Date },
-  { key: "action", header: "操作类型", type: ExportColumnType.String },
-  { key: "entityType", header: "实体类型", type: ExportColumnType.String },
-  { key: "detail", header: "操作详情", type: ExportColumnType.String },
-  { key: "clientIp", header: "IP", type: ExportColumnType.String },
+  { key: "operatorName", header: t("admin.corpLog.operator"), type: ExportColumnType.String },
+  { key: "createTime", header: t("admin.corpLog.operationTime"), type: ExportColumnType.Date },
+  { key: "action", header: t("admin.corpLog.actionType"), type: ExportColumnType.String },
+  { key: "entityType", header: t("admin.corpLog.entityType"), type: ExportColumnType.String },
+  { key: "detail", header: t("admin.corpLog.detail"), type: ExportColumnType.String },
+  { key: "clientIp", header: t("admin.corpLog.ip"), type: ExportColumnType.String },
 ];
 
 const loginFilters = reactive({
@@ -380,7 +383,7 @@ const submitExport = async () => {
   );
 
   if (columns.length === 0) {
-    ElMessage.warning("请至少选择一列");
+    ElMessage.warning(t("admin.selectColumn"));
     return;
   }
 
@@ -416,7 +419,7 @@ const submitExport = async () => {
     showExportDialog.value = false;
     ElMessage.success(
       result.message ||
-      (result.isDuplicate ? "已存在相同导出任务，稍后请在消息中心或导出历史查看" : "已创建导出任务")
+      (result.isDuplicate ? t("admin.corpLog.messages.duplicateExport") : t("admin.corpLog.messages.exportCreated"))
     );
   } finally {
     exporting.value = false;

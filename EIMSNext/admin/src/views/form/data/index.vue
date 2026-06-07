@@ -5,13 +5,13 @@
       <div class="shared-form-card">
         <div class="shared-form-header">
           <div>
-            <div class="shared-form-title">{{ formDef?.name || "表单详情" }}</div>
+            <div class="shared-form-title">{{ formDef?.name || $t("admin.formData.formDetail") }}</div>
           </div>
           <div class="shared-form-header-actions">
             <button
               class="shared-form-header-action-btn"
               type="button"
-              :title="isFullscreen ? '退出全屏' : '全屏显示'"
+              :title="isFullscreen ? $t('admin.formData.exitFullscreen') : $t('admin.formData.fullscreen')"
               @click="toggle"
             >
               <et-icon :icon="isFullscreen ? 'fullscreen-exit' : 'fullscreen'" size="18" />
@@ -19,7 +19,7 @@
             <button
               class="shared-form-header-action-btn"
               type="button"
-              title="关闭"
+              :title="$t('common.close')"
               @click="closeCurrentPage"
             >
               <et-icon icon="el-close" size="18" />
@@ -48,12 +48,12 @@
           </section>
           <aside class="shared-form-side">
             <div class="shared-side-tabs">
-              <button class="shared-form-tab active" type="button">流程动态</button>
-              <button class="shared-form-tab" type="button">数据日志</button>
+              <button class="shared-form-tab active" type="button">{{ $t("admin.formData.flowDynamic") }}</button>
+              <button class="shared-form-tab" type="button">{{ $t("admin.formData.dataLog") }}</button>
             </div>
             <div class="shared-side-head">
-              <div class="shared-side-title">流程动态</div>
-              <div class="shared-side-extra">{{ approvalLogs.length }} 条</div>
+              <div class="shared-side-title">{{ $t("admin.formData.flowDynamic") }}</div>
+              <div class="shared-side-extra">{{ approvalLogs.length }} {{ $t("admin.formData.records") }}</div>
             </div>
             <div class="shared-side-body">
               <template v-if="approvalLogs.length > 0">
@@ -65,8 +65,8 @@
                   <div class="workflow-operator-row">
                     <div class="workflow-avatar">{{ getOperatorInitial(log.approver?.label) }}</div>
                     <div class="workflow-operator-content">
-                      <div class="workflow-operator-name">{{ log.approver?.label || "系统" }}</div>
-                      <div class="workflow-operator-meta">审批处理</div>
+                      <div class="workflow-operator-name">{{ log.approver?.label || $t("admin.formData.system") }}</div>
+                      <div class="workflow-operator-meta">{{ $t("admin.formData.approvalProcess") }}</div>
                     </div>
                   </div>
                   <div v-if="log.comment" class="workflow-comment">{{ log.comment }}</div>
@@ -75,7 +75,7 @@
               <template v-else>
                 <div class="workflow-card workflow-card-compact">
                   <div class="workflow-card-header">
-                    <div class="workflow-node">提交流程</div>
+                    <div class="workflow-node">{{ $t("admin.formData.submitProcess") }}</div>
                     <div class="workflow-time">{{ formatDate(formData?.createTime) }}</div>
                   </div>
                   <div class="workflow-operator-row">
@@ -84,9 +84,9 @@
                     </div>
                     <div class="workflow-operator-content">
                       <div class="workflow-operator-name">
-                        {{ formData?.createBy?.label || "未知" }}
+                        {{ formData?.createBy?.label || $t("admin.formData.unknown") }}
                       </div>
-                      <div class="workflow-operator-meta">发起人</div>
+                      <div class="workflow-operator-meta">{{ $t("admin.formData.initiator") }}</div>
                     </div>
                   </div>
                 </div>
@@ -113,17 +113,18 @@ defineOptions({
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { FormDef, FormData, PrintTemplate, WfApprovalLog } from "@eimsnext/models";
+import { FormDef, FormData, PrintDef, WfApprovalLog } from "@eimsnext/models";
 import {
   customPrintService,
   formDataService,
   PrintRequest,
-  printTemplateService,
+  printDefService,
   wfApprovalLogService,
 } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
 import { ToolbarItem } from "@eimsnext/components";
 import { useTagsViewStore } from "@/store";
+import { useI18n } from "vue-i18n";
 import FormView from "@/components/FormView/index.vue";
 import FormPrintDiv from "@/components/WebPrint/FormPrintDiv.vue";
 import { getPrintConfig, IPrintData } from "@/components/WebPrint/type";
@@ -132,6 +133,7 @@ import dayjs from "dayjs";
 
 const PdfPreview = defineAsyncComponent(() => import("@/components/PrintDesigner/PdfPreview.vue"));
 
+const { t } = useI18n();
 const route = useRoute();
 const formStore = useFormStore();
 const tagsViewStore = useTagsViewStore();
@@ -139,7 +141,7 @@ const { isFullscreen, toggle } = useFullscreen();
 const formDef = ref<FormDef>();
 const formData = ref<FormData>();
 const approvalLogs = ref<WfApprovalLog[]>([]);
-const customPrintTemplates = ref<PrintTemplate[]>([]);
+const customPrintTemplates = ref<PrintDef[]>([]);
 const loading = ref(false);
 const printConfig = ref(getPrintConfig(false));
 const formPrintData = ref<IPrintData>();
@@ -170,7 +172,7 @@ const toolbarItems = computed<ToolbarItem[]>(() => {
     {
       type: "button",
       config: {
-        text: "分享",
+        text: t("admin.formData.share"),
         command: "share",
         visible: true,
         icon: "el-share",
@@ -209,9 +211,9 @@ const toolbarItems = computed<ToolbarItem[]>(() => {
   return bars;
 });
 
-const loadPrintTemplates = async (formId: string) => {
+const loadPrintDefs = async (formId: string) => {
   const query = buildQuery({ filter: { formId } });
-  customPrintTemplates.value = await printTemplateService.query<PrintTemplate>(query);
+  customPrintTemplates.value = await printDefService.query<PrintDef>(query);
 };
 
 const openCustomPrintPreview = (print: any) => {
@@ -231,14 +233,14 @@ const generatePrintData = () => {
 
 const toolbarHandler = async (cmd: string) => {
   if (cmd.startsWith("custom-print:")) {
-    const templateId = cmd.replace("custom-print:", "");
-    const req: PrintRequest = { dataIds: [route.params.dataId.toString()], templateId };
+    const printId = cmd.replace("custom-print:", "");
+    const req: PrintRequest = { dataIds: [route.params.dataId.toString()], printId };
     const printResult = await customPrintService.print(req);
 
     if (printResult?.downloadUrl) {
       openCustomPrintPreview(printResult);
     } else {
-      ElMessage.error(printResult?.message || "打印失败");
+      ElMessage.error(printResult?.message || t("admin.formData.printFailed"));
     }
     return;
   }
@@ -299,7 +301,7 @@ onBeforeMount(async () => {
 
     if (form) {
       formDef.value = form;
-      await loadPrintTemplates(form.id);
+      await loadPrintDefs(form.id);
     }
 
     if (data) {

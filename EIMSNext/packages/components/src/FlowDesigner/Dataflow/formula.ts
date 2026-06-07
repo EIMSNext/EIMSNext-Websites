@@ -44,6 +44,23 @@ function buildFieldDef(node: INodeForm, field: FieldDef, parent?: FieldDef) {
 export function buildDataflowFieldTree(nodes: INodeForm[]): IDataflowFormulaTreeItem[] {
   return nodes.map((node) => {
     const children: IDataflowFormulaTreeItem[] = [];
+    if (node.outputFields?.length) {
+      node.outputFields.forEach((field) => {
+        children.push({
+          id: `${node.nodeId}:${field.field}`,
+          label: field.label,
+          field,
+          formula: true,
+        });
+      });
+
+      return {
+        id: node.nodeId,
+        label: node.nodeName,
+        children,
+      };
+    }
+
     const fields = node.form?.content?.items ?? [];
     fields.forEach((field) => {
       if (field.type == FieldType.TableForm && field.columns?.length) {

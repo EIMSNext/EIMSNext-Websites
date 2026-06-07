@@ -21,8 +21,11 @@
       </div>
     </div>
     <div class="container-content-wrapper">
-      <template v-if="chartSetting && chartSettingValidate(chartSetting)">
-        <e-charts-viewer :setting="chartSetting" :title="itemDef.name" :show-header="isView" />
+      <template v-if="itemDef.itemType == DashItemType.Chart && chartSetting && chartSettingValidate(chartSetting)">
+        <e-charts-viewer :setting="chartSetting" :title="itemDef.name" :show-header="isView" :external-filter="externalFilter" />
+      </template>
+      <template v-else-if="itemDef.itemType == DashItemType.Filter">
+        <FilterWidgetCard :item-def="itemDef" @change="onFilterValueChanged" />
       </template>
       <template v-else>
         <el-empty class="et-dash-empty">
@@ -36,10 +39,11 @@
   </div>
 </template>
 <script setup lang="ts">
-import { DashboardItemDef } from "@eimsnext/models";
+import { DashboardItemDef, DashItemType } from "@eimsnext/models";
 import { useLocale } from "element-plus";
 import { chartSettingValidate, IChartSetting } from "../ECharts/type";
 import EChartsViewer from "../ECharts/EChartsViewer.vue";
+import FilterWidgetCard from "./FilterWidgetCard.vue";
 const { t } = useLocale();
 
 defineOptions({
@@ -52,6 +56,7 @@ const props = withDefaults(
     isView?: boolean;
     height?: number;
     width?: number;
+    externalFilter?: any;
   }>(),
   {
     isView: false,
@@ -60,7 +65,7 @@ const props = withDefaults(
 
 const chartSetting = ref<IChartSetting>(JSON.parse(props.itemDef.details));
 
-const emit = defineEmits(["hide", "edit", "copy", "delete"]);
+const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change"]);
 const onHide = () => {
   emit("hide", props.itemDef);
 };
@@ -72,6 +77,9 @@ const onCopy = () => {
 };
 const onDelete = () => {
   emit("delete", props.itemDef);
+};
+const onFilterValueChanged = (payload: { itemId: string; value: any }) => {
+  emit("filter-change", payload);
 };
 </script>
 <style lang="scss" scoped>
@@ -233,6 +241,17 @@ const onDelete = () => {
           margin-top: var(--et-space-10);
         }
       }
+    }
+
+    .tool-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--et-space-8);
+      color: var(--et-text-secondary);
+      pointer-events: none;
     }
   }
 }

@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
 import { store } from "../setup";
 import { ref } from "vue";
-import { useAppStoreHook } from "../genericStore/appStore";
+import { bus } from "@eimsnext/utils";
+import { useAppStoreHook } from "../genericStore/appDefStore";
 import { useFormStoreHook } from "../genericStore/formStore";
 import { corporateService } from "@eimsnext/services";
 import { Corporate, PlatformType } from "@eimsnext/models";
@@ -35,7 +36,7 @@ export const useContextStore = defineStore("context", () => {
               corpName.value = corp.name;
               corpPlat.value = corp.platform;
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
               reject(error);
             }),
           ,
@@ -44,12 +45,12 @@ export const useContextStore = defineStore("context", () => {
             .then(() => {
               updateAppChanged();
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
               reject(error);
             }),
         ])
           .then(() => resolve())
-          .catch((error) => {
+          .catch((error: unknown) => {
             reject(error);
           });
       } else {
@@ -109,6 +110,8 @@ export const useContextStore = defineStore("context", () => {
     appId.value = "";
     updateAppChanged();
   };
+
+  bus.on("auth:logout", clearAll);
 
   return {
     corpId,

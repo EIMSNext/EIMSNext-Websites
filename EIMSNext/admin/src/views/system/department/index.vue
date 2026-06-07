@@ -4,14 +4,15 @@
     <div class="main-row">
       <!-- 部门树 -->
       <div class="dept-tree-col">
-        <div class="org-menu">员工</div>
+        <div class="org-menu">{{ $t("admin.department.title") }}</div>
         <div class="menu-items">
           <el-radio-group v-model="empStatus" @change="handleStatusChanged">
-            <el-radio :label="0">在职员工</el-radio>
-            <el-radio :label="1">离职员工</el-radio>
+            <el-radio :label="0">{{ $t("admin.department.active") }}</el-radio>
+            <el-radio :label="1">{{ $t("admin.department.resigned") }}</el-radio>
+            <el-radio v-if="showPendingApproval" :label="2">{{ $t("admin.department.pending") }}</el-radio>
           </el-radio-group>
         </div>
-        <div class="org-menu">部门</div>
+        <div class="org-menu">{{ $t("admin.department.deptTitle") }}</div>
         <div class="dept-tree-wrapper">
           <dept-tree :editable="true" @node-click="handleDeptChanged" />
         </div>
@@ -38,11 +39,17 @@
               @row-click="edit"
             >
               <el-table-column type="selection" width="40" />
-              <el-table-column label="姓名" width="150" prop="empName" />
-              <el-table-column label="编码" width="150" prop="code" />
-              <el-table-column label="工作电话" width="150" prop="workPhone" />
-              <el-table-column label="工作邮箱" width="150" prop="workEmail" />
-              <el-table-column label="部门" prop="department.name" />
+            <el-table-column :label="$t('admin.department.name')" width="150" prop="empName" />
+            <el-table-column :label="$t('admin.department.code')" width="150" prop="code" />
+            <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
+            <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
+            <el-table-column :label="$t('admin.department.dept')" prop="department.name" />
+            <el-table-column v-if="isPendingMode" :label="$t('common.edit')" fixed="right" width="160">
+              <template #default="scope">
+                <el-button link type="primary" @click.stop="reviewSingle(scope.row, true)">{{ $t("admin.department.approve") }}</el-button>
+                <el-button link type="danger" @click.stop="reviewSingle(scope.row, false)">{{ $t("admin.department.reject") }}</el-button>
+              </template>
+            </el-table-column>
               <!-- <el-table-column label="操作" fixed="right" width="150">
                 <template #default="scope">
                   <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
@@ -56,6 +63,30 @@
           <div class="pagination-container">
             <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
           </div>
+        </el-card>
+      </div>
+      <div v-if="isPendingMode" class="pending-detail-col">
+        <el-card shadow="never" class="pending-detail-card">
+          <template v-if="selectedEmp">
+            <div class="detail-title">{{ $t("admin.department.joinApplication") }}</div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t("admin.empName") }}</span>
+              <span>{{ selectedEmp.empName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t("admin.empCode") }}</span>
+              <span>{{ selectedEmp.code || "-" }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t("admin.department.phone") }}</span>
+              <span>{{ selectedEmp.workPhone || "-" }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t("admin.department.email") }}</span>
+              <span>{{ selectedEmp.workEmail || "-" }}</span>
+            </div>
+          </template>
+          <el-empty v-else :description="$t('admin.department.selectPending')" />
         </el-card>
       </div>
     </div>
@@ -109,8 +140,11 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { DataPerms, Department, Employee, FieldType } from "@eimsnext/models";
-import { SortDirection, employeeService } from "@eimsnext/services";
+import { DataPerms, Department, Employee, FieldType, PlatformType } from "@eimsnext/models";
+import {
+  SortDirection,
+  employeeService,
+} from "@eimsnext/services";
 import buildQuery from "odata-query";
 import {
   ToolbarItem,
@@ -120,7 +154,11 @@ import {
   EtConfirm,
   ConfirmResult,
 } from "@eimsnext/components";
-import { TableInstance, TableTooltipData } from "element-plus";
+import { useContextStore } from "@eimsnext/store";
+import { ElMessage, TableInstance, TableTooltipData } from "element-plus";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "DeptManager",
@@ -138,7 +176,7 @@ const showSort = ref(false);
 const sortList = ref<IFieldSortList>({
   items: [
     {
-      field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input },
+      field: { formId: "employee", field: "empName", label: t("admin.department.name"), type: FieldType.Input },
       sort: SortDirection.Asc,
     },
   ],
@@ -150,11 +188,15 @@ const checkedDatas = ref<any[]>([]);
 const pageNum = ref(1);
 const pageSize = ref(20);
 
+const contextStore = useContextStore();
+const isPendingMode = computed(() => empStatus.value === 2);
+const showPendingApproval = computed(() => contextStore.corpPlat === PlatformType.Public);
+
 const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "新增",
+      text: t("common.addNew"),
       type: "success",
       command: "add",
       visible: true,
@@ -168,7 +210,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "删除",
+      text: t("common.delete"),
       type: "danger",
       command: "delete",
       visible: true,
@@ -177,8 +219,8 @@ const leftBars = ref<ToolbarItem[]>([
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(
-            `你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`,
-            { title: "你确定要删除所选数据吗？" }
+            t("common.message.deleteConfirm_Content", { 0: checkedDatas.value.length }),
+            { title: t("common.message.deleteConfirm_Title") }
           );
           if (confirm == ConfirmResult.Yes) {
             await employeeService
@@ -191,6 +233,34 @@ const leftBars = ref<ToolbarItem[]>([
       },
     },
   },
+  {
+    type: "button",
+    config: {
+      text: t("admin.department.toolbar.batchApprove"),
+      type: "primary",
+      command: "approve",
+      visible: false,
+      icon: "el-select",
+      disabled: true,
+      onCommand: async () => {
+        await reviewSelected(true);
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: t("admin.department.toolbar.batchReject"),
+      type: "danger",
+      command: "reject",
+      visible: false,
+      icon: "el-close",
+      disabled: true,
+      onCommand: async () => {
+        await reviewSelected(false);
+      },
+    },
+  },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-upload" } },
   // { type: "button", config: { text: "导出", command: "download", icon: "el-download" } }
 ]);
@@ -199,7 +269,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "筛选",
+      text: t("common.filter"),
       class: "data-filter",
       command: "filter",
       visible: true,
@@ -213,7 +283,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "排序",
+      text: t("common.sort"),
       class: "data-filter",
       command: "sort",
       visible: true,
@@ -227,7 +297,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "刷新",
+      text: t("common.refresh"),
       class: "data-filter",
       command: "refresh",
       visible: true,
@@ -316,12 +386,6 @@ const handleDeptChanged = (dept?: Department) => {
   updateQueryParams();
   handleQuery();
 };
-const handleQuery = () => {
-  loading.value = true;
-
-  loadCount();
-  loadData();
-};
 const rowClassName = (row: any) => {
   return "pointer";
 };
@@ -341,14 +405,32 @@ const loadData = () => {
     .query<Employee>(query)
     .then((res: Employee[]) => {
       dataRef.value = res;
+      if (isPendingMode.value) {
+        selectedEmp.value = res[0];
+      }
     })
     .finally(() => (loading.value = false));
 };
 
+const handleQuery = async () => {
+  loading.value = true;
+  try {
+    checkedDatas.value = [];
+    loadCount();
+    loadData();
+  } finally {
+    loading.value = false;
+  }
+};
+
 const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
-  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
-    checkedDatas.value.length == 0;
+  const hasSelection = checkedDatas.value.length > 0;
+  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled = !hasSelection;
+  const approveBar = leftBars.value.find((x) => x.config.command == "approve");
+  const rejectBar = leftBars.value.find((x) => x.config.command == "reject");
+  if (approveBar) approveBar.config.disabled = !hasSelection;
+  if (rejectBar) rejectBar.config.disabled = !hasSelection;
 };
 const tableToolFormatter = (data: TableTooltipData<FormData>) => {
   return `${data.cellValue}`;
@@ -358,10 +440,53 @@ const edit = (row: Employee, column: any) => {
   if (column.type == "selection") {
     tableRef.value?.toggleRowSelection(row);
   } else {
+    if (isPendingMode.value) {
+      selectedEmp.value = row;
+      return;
+    }
     editMode.value = true;
     selectedEmp.value = row;
     showAddEditDialog.value = true;
   }
+};
+
+const reviewSingle = async (row: Employee, approved: boolean) => {
+  const confirm = await EtConfirm.showDialog(
+    t("admin.department.messages." + (approved ? "approveSingle" : "rejectSingle"), { name: row.empName }),
+    { title: t("admin.department.messages." + (approved ? "approveTitle" : "rejectTitle")) }
+  );
+  if (confirm != ConfirmResult.Yes) {
+    return;
+  }
+
+  await employeeService.reviewJoinCorporate({ employeeIds: [row.id], approved });
+  ElMessage.success(t("admin.department.messages." + (approved ? "approveSuccess" : "rejectSuccess")));
+  await handleQuery();
+};
+
+const reviewSelected = async (approved: boolean) => {
+  const employeeIds = checkedDatas.value.map((x) => x.id).filter((x): x is string => !!x);
+
+  if (!employeeIds.length) {
+    ElMessage.warning(t("admin.department.messages.selectPending"));
+    return;
+  }
+
+  const confirm = await EtConfirm.showDialog(
+    t("admin.department.messages." + (approved ? "batchApproveConfirm" : "batchRejectConfirm"), { count: employeeIds.length }),
+    { title: t("admin.department.messages." + (approved ? "batchApproveTitle" : "batchRejectTitle")) }
+  );
+  if (confirm != ConfirmResult.Yes) {
+    return;
+  }
+
+  await employeeService.reviewJoinCorporate({
+    employeeIds,
+    approved,
+  });
+
+  ElMessage.success(t("admin.department.messages." + (approved ? "batchApproveSuccess" : "batchRejectSuccess")));
+  await handleQuery();
 };
 
 // 重置密码
@@ -389,6 +514,14 @@ const handleSaved = (data: Employee) => {
   showAddEditDialog.value = false;
   handleQuery();
 };
+
+watch(isPendingMode, () => {
+  leftBars.value.find((x) => x.config.command == "add")!.config.visible = !isPendingMode.value;
+  leftBars.value.find((x) => x.config.command == "delete")!.config.visible = !isPendingMode.value;
+  leftBars.value.find((x) => x.config.command == "approve")!.config.visible = isPendingMode.value;
+  leftBars.value.find((x) => x.config.command == "reject")!.config.visible = isPendingMode.value;
+  selectedEmp.value = undefined;
+});
 
 onMounted(() => {
   updateQueryParams();
@@ -459,6 +592,17 @@ onMounted(() => {
   flex: 1; // 允许在有空间时扩展
 }
 
+.pending-detail-col {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pending-detail-card {
+  height: 100%;
+}
+
 // 员工列表卡片样式
 .emp-list-card {
   height: 100%;
@@ -505,6 +649,24 @@ onMounted(() => {
 .menu-items {
   margin: 0 var(--et-space-20);
   font-size: var(--et-font-size-14);
+}
+
+.detail-title {
+  margin-bottom: var(--et-space-16);
+  font-size: var(--et-font-size-16);
+  font-weight: 600;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--et-space-12);
+  margin-bottom: var(--et-space-12);
+}
+
+.detail-label {
+  color: var(--et-text-tertiary);
+  flex-shrink: 0;
 }
 
 :deep(.data-filter) {

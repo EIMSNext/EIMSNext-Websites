@@ -8,19 +8,20 @@
     @cancel="cancel"
     @ok="save"
   >
-    <el-form :model="formData" :rules="rules" label-width="80px" class="dialog-form">
-      <el-form-item label="分组名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入分组名称" />
-      </el-form-item>
-      <el-form-item label="分组描述" prop="description">
-        <el-input v-model="formData.description" type="textarea" placeholder="请输入分组描述" />
-      </el-form-item>
-    </el-form>
+      <el-form :model="formData" :rules="rules" label-width="80px" class="dialog-form">
+        <el-form-item :label="$t('comp.addEditRoleGroup.groupName')" prop="name">
+          <el-input v-model="formData.name" :placeholder="$t('comp.addEditRoleGroup.groupNamePlaceholder')" />
+        </el-form-item>
+        <el-form-item :label="$t('comp.addEditRoleGroup.groupDesc')" prop="description">
+          <el-input v-model="formData.description" type="textarea" :placeholder="$t('comp.addEditRoleGroup.groupDescPlaceholder')" />
+        </el-form-item>
+      </el-form>
   </et-dialog>
 </template>
 <script lang="ts" setup>
 import { RoleGroup, RoleGroupRequest } from "@eimsnext/models";
 import { roleGroupService } from "@eimsnext/services";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "AddEditRoleGroup",
@@ -37,12 +38,13 @@ const props = withDefaults(
 );
 
 const showDialog = ref(true);
-const title = props.edit ? "修改分组信息" : "添加分组";
+const { t } = useI18n();
+const title = props.edit ? t("comp.addEditRoleGroup.editGroup") : t("comp.addEditRoleGroup.addGroup");
 const formData = ref<RoleGroup>({ id: "", name: "", description: "", sortValue: -1 });
 if (props.edit) formData.value = props.pGroup!;
 
 const rules = reactive({
-  name: [{ required: true, message: "分组名称不能为空", trigger: "blur" }],
+  name: [{ required: true, message: t("comp.addEditRoleGroup.groupNameRequired"), trigger: "blur" }],
 });
 
 const emit = defineEmits(["cancel", "ok"]);

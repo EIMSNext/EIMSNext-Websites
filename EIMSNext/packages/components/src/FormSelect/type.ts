@@ -1,4 +1,4 @@
-import { App, FormDef, FormType } from "@eimsnext/models";
+import { AppDef, FormDef, FormType } from "@eimsnext/models";
 
 export interface IFormItem {
   id: string;
@@ -12,7 +12,7 @@ export interface IFormSelectOptions {
 }
 
 export function buildFormListItems(
-  app: App,
+  app: AppDef,
   options?: IFormSelectOptions,
 ): IFormItem[] {
   const items: IFormItem[] = [];

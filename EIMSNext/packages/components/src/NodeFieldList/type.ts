@@ -3,8 +3,8 @@ import {
   getFieldIcon,
   splitSubField,
   toFormFieldDef,
-} from "@/FieldSelect/type";
-import { DataItemType, ITreeNode } from "@/common";
+} from "../FieldSelect/type";
+import { DataItemType, ITreeNode } from "../common";
 import { FieldDef, FieldType, FormDef, IFieldPerm } from "@eimsnext/models";
 
 export interface INodeForm {
@@ -12,6 +12,7 @@ export interface INodeForm {
   nodeName: string;
   singleResult: boolean;
   form?: FormDef;
+  outputFields?: IFormFieldDef[];
 }
 export enum FieldBuildRule {
   All = 0,
@@ -126,8 +127,28 @@ export function buildNodeFieldTree(
     singleResult: boolean,
     ignoreTable: boolean,
   ) => {
-    const children = forms.find((x) => x.nodeId == pNode.id)?.form?.content
-      ?.items;
+    const nodeForm = forms.find((x) => x.nodeId == pNode.id);
+    const outputFields = nodeForm?.outputFields ?? [];
+    if (outputFields.length > 0) {
+      outputFields.forEach((fieldDef) => {
+        if (!setting.matchType || isFieldTypeMatched(fieldDataType, fieldDef.type)) {
+          const node: ITreeNode = {
+            id: `${pNode.id}-${fieldDef.field}`,
+            value: fieldDef.field,
+            label: fieldDef.label,
+            type: DataItemType.Field,
+            children: [],
+            data: fieldDef,
+            icon: getFieldIcon(fieldDef.type),
+          };
+          if (!pNode.children) pNode.children = [];
+          pNode.children.push(node);
+        }
+      });
+      return;
+    }
+
+    const children = nodeForm?.form?.content?.items;
     if (children && children.length > 0) {
       //master fields
       children.forEach((x: FieldDef) => {

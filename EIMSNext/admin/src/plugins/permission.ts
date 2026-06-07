@@ -20,6 +20,17 @@ export function setupPermission() {
           console.warn("userStore.initialize failed, continuing with cached data");
         }
 
+        const needsCorpOnboarding = !userStore.currentUser.corpId;
+        if (needsCorpOnboarding && to.path !== "/corp-onboarding") {
+          next({ path: "/corp-onboarding", replace: true });
+          return;
+        }
+
+        if (!needsCorpOnboarding && to.path === "/corp-onboarding") {
+          next({ path: "/workspace", replace: true });
+          return;
+        }
+
         let allowed = true;
         if (to.meta.allowedUserTypes && to.meta.allowedUserTypes.length > 0) {
           allowed =

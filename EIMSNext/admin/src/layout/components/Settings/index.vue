@@ -1,5 +1,5 @@
 <template>
-  <el-drawer v-model="settingsVisible" header-class="uisetting-header" size="300" :title="t('settings.uisetting')">
+  <el-drawer v-model="settingsVisible" class="elt-drawer" size="300" :title="t('settings.uisetting')">
     <div class="py-1 flex-x-between">
       <span>{{ t("settings.theme") }}</span>
       <el-switch v-model="isDark" @change="changeTheme" />
@@ -61,11 +61,3 @@ const changeTheme = (val: any) => {
 };
 
 </script>
-
-<style lang="scss" scoped></style>
-<style lang="scss">
-.uisetting-header {
-  margin-bottom: 0 !important;
-  font-weight: 600;
-}
-</style>

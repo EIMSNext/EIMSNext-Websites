@@ -7,6 +7,7 @@ import {
   getFlowStatus,
   getUpdateTime,
 } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
 
 export interface FieldBlockField {
   field: string;
@@ -20,6 +21,7 @@ export interface FieldBlockField {
 export interface FieldBlockBuildOptions {
   showSubFields?: boolean;
   showSystemFields?: boolean;
+  t?: ReturnType<typeof useI18n>["t"];
 }
 
 const FIELD_BLOCK_TOKEN_REGEX = /\$\{([^}]+)\}/g;
@@ -28,8 +30,19 @@ export function buildFieldBlockFields(
   formDef?: FormDef,
   options: FieldBlockBuildOptions = {},
 ) {
-  const { showSubFields = true, showSystemFields = true } = options;
+  const { showSubFields = true, showSystemFields = true, t } = options;
   const fields: FieldBlockField[] = [];
+
+  const getTypeLabel = (type: FieldType) => {
+    if (!t) return getFieldBlockTypeLabel(type);
+    const key = type.toLowerCase();
+    return t(`comp.fieldBlock.typeLabels.${key}` as any) || t("common.fields");
+  };
+
+  const getSystemFieldLabel = (key: string) => {
+    if (!t) return key;
+    return t(`comp.fieldBlock.systemFields.${key}` as any);
+  };
 
   const appendField = (field: FieldDef, parent?: FieldDef) => {
     fields.push({
@@ -38,7 +51,7 @@ export function buildFieldBlockFields(
       type: field.type,
       token: `\${${parent ? `${parent.field}>${field.field}` : field.field}}`,
       isSubField: !!parent,
-      typeLabel: getFieldBlockTypeLabel(field.type),
+      typeLabel: getTypeLabel(field.type),
     });
   };
 
@@ -55,13 +68,13 @@ export function buildFieldBlockFields(
 
   if (showSystemFields) {
     const systemFields = [
-      getCreateBy("提交人"),
-      getCreateTime("提交时间"),
-      getUpdateTime("更新时间"),
+      getCreateBy(getSystemFieldLabel("createBy")),
+      getCreateTime(getSystemFieldLabel("createTime")),
+      getUpdateTime(getSystemFieldLabel("updateTime")),
     ];
 
     if (formDef?.usingWorkflow) {
-      systemFields.unshift(getFlowStatus("流程状态"));
+      systemFields.unshift(getFlowStatus(getSystemFieldLabel("flowStatus")));
     }
 
     systemFields.forEach((field) => appendField(field));

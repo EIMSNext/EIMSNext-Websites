@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
-import { accessToken, http } from "@eimsnext/utils";
+import { accessToken, http, bus } from "@eimsnext/utils";
 import { CurrentUser, UserType } from "@eimsnext/models";
 import { useStorage } from "@vueuse/core";
 import { store } from "../setup";
 import { authService, systemService, LoginRequest } from "@eimsnext/services";
-import { useAppStoreHook } from "../genericStore/appStore";
+import { useAppStoreHook } from "../genericStore/appDefStore";
 import { useFormStoreHook } from "../genericStore/formStore";
 import { useDeptStoreHook } from "../genericStore/deptStore";
 import { useContextStoreHook } from "../contextStore";
@@ -60,14 +60,11 @@ export const useUserStore = defineStore("currentuser", () => {
   // const switchCorp = () => { }
 
   const logout = () => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       accessToken.clear();
       currentUser.value = new CurrentUser();
       initialized.value = false;
-      useFormStoreHook().clear();
-      useAppStoreHook().clear();
-      useDeptStoreHook().clear();
-      useContextStoreHook().clearAll();
+      bus.emit("auth:logout");
 
       resolve();
     });
@@ -79,22 +76,27 @@ export const useUserStore = defineStore("currentuser", () => {
   const isInitialized = () => initialized.value;
 
   const initialize = async (force: boolean = false): Promise<any> => {
-    if (force || !initialized.value) {
-      await get(false);
+      if (force || !initialized.value) {
+        await get(false);
 
-      let promises = [];
-      if (currentUser.value.corpId) {
+        let promises = [];
+        if (currentUser.value.corpId) {
         useAppStoreHook().clear();
         useFormStoreHook().clear();
         useDeptStoreHook().clear();
         promises.push(
           useContextStoreHook().setCorpId(currentUser.value.corpId, true),
         );
-        promises.push(useDeptStoreHook().load("", false));
-      }
+          promises.push(useDeptStoreHook().load("", false));
+        } else {
+          useAppStoreHook().clear();
+          useFormStoreHook().clear();
+          useDeptStoreHook().clear();
+          useContextStoreHook().clearAll();
+        }
 
-      return Promise.all(promises);
-    }
+        return Promise.all(promises);
+      }
     return Promise.resolve();
   };
 

@@ -11,13 +11,13 @@ import { ref, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import WfApprovalLogs from "@/views/wftodo/components/WfApprovalLogs.vue";
 import { useAppStore } from "@eimsnext/store";
-import { App } from "@eimsnext/models";
+import { AppDef } from "@eimsnext/models";
 
 
 const route = useRoute();
 const appStore = useAppStore();
 
-const selectedApp = ref<App | null>(null);
+const selectedApp = ref<AppDef | null>(null);
 const filter = ref({ nodeType: 3 });
 
 // 监听路由参数变化

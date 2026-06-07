@@ -9,13 +9,13 @@
   ></AddEditDept>
   <et-confirm-dialog
     v-model="showDeleteDialog"
-    title="确认要删除吗?"
+    :title="$t('role.confirmDelete')"
     :showNoSave="false"
-    okText="确认"
+    :okText="$t('common.confirm')"
     @cancel="showDeleteDialog = false"
     @ok="handleDeleteConfirm"
   >
-    确认删除已选中的数据项?
+    {{ $t("role.confirmDeleteData") }}
   </et-confirm-dialog>
   <el-card shadow="never" class="dept-card">
     <el-input
@@ -23,7 +23,7 @@
       class="search-input"
       prefix-icon="Search"
       clearable
-      placeholder="请输入"
+      :placeholder="$t('role.searchPlaceholder')"
     />
     <el-tree
       ref="deptTreeRef"

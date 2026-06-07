@@ -38,17 +38,21 @@
           :height="item.h"
           :width="item.w"
           :is-view="true"
+          :external-filter="chartFilters[state.items[item.i].id]"
+          @filter-change="handleFilterChange"
         />
       </grid-item>
     </grid-layout>
   </div>
 </template>
 <script lang="ts" setup>
+import { reactive } from "vue";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
 import { IGridLayoutItem, IGridLayoutState } from "@/components/DashboardDesigner/type";
 import { DashboardDef, DashboardItemDef } from "@eimsnext/models";
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import { useRoute } from "vue-router";
+import { useChartFilterLinkage } from "./useChartFilterLinkage";
 const route = useRoute();
 
 const dashId = route.params.dashId.toString();
@@ -62,6 +66,8 @@ const state = reactive<IGridLayoutState>({
 const colNum = ref(24);
 const colWidth = ref(150);
 const rowHeight = ref(10);
+
+const { chartFilters, rebuildChartFilters, handleFilterChange } = useChartFilterLinkage(state);
 
 const containerResizedEvent = (
   i: string | number,
@@ -96,6 +102,7 @@ dashboardDefService.get<DashboardDef>(dashId).then((dash) => {
           itemDefs.forEach((x) => {
             state.items[x.layoutId] = x;
           });
+          rebuildChartFilters();
         }
       });
   } catch (e) {
