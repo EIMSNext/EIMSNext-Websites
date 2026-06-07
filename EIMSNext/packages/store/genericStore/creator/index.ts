@@ -1,5 +1,5 @@
 import { IIdentity } from "@eimsnext/models";
-import { http } from "@eimsnext/utils";
+import { bus, http } from "@eimsnext/utils";
 import { useStorage } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
@@ -98,6 +98,8 @@ export default function createStore<T extends IIdentity>(
     const clear = () => {
       items.value = initData;
     };
+
+    bus.on("auth:logout", clear);
 
     return { loading, items, load, get, update, remove, clear };
   });

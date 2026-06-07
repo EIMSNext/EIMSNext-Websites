@@ -1,7 +1,7 @@
 <template>
   <div class="field-block-editor" :class="{ focused: isFocused, disabled }">
     <div class="editor-shell" :style="shellStyle">
-      <div v-if="showPlaceholder" class="editor-placeholder">{{ placeholder }}</div>
+      <div v-if="showPlaceholder" class="editor-placeholder">{{ placeholderText }}</div>
       <div ref="editorRef" class="editor-instance"></div>
       <div class="editor-actions">
         <FieldBlockPicker
@@ -23,6 +23,7 @@
 import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror/lib/codemirror";
 import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { FormDef } from "@eimsnext/models";
 import { FieldBlockPicker } from "../FieldBlockPicker";
 import {
@@ -31,6 +32,8 @@ import {
   findFieldBlockField,
   getFieldBlockTokens,
 } from "../FieldBlock/shared";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FieldBlockCodeEditor",
@@ -53,7 +56,7 @@ const props = withDefaults(
     fields: () => [],
     showSubFields: true,
     showSystemFields: true,
-    placeholder: "输入文字或添加字段，至少需要添加一个字段",
+    placeholder: "",
     maxBlocks: 5,
     maxRows: 3,
     disabled: false,
@@ -82,6 +85,8 @@ const shellStyle = computed(() => ({
   minHeight: `${lineHeight}px`,
   maxHeight: `${props.maxRows * lineHeight}px`,
 }));
+
+const placeholderText = computed(() => props.placeholder || t("comp.fieldBlockCodeEditor.placeholder"));
 
 const fieldItems = computed(() =>
   props.fields.length > 0

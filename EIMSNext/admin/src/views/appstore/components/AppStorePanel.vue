@@ -2,30 +2,30 @@
   <div class="appstore-page">
     <section class="market-hero">
       <div class="hero-copy">
-        <h1 class="hero-title">应用中心</h1>
-        <p class="hero-subtitle">参考业务场景和行业分类快速选择模板，安装后即可进入工作台继续配置。</p>
+        <h1 class="hero-title">{{ $t("admin.appStore.title") }}</h1>
+        <p class="hero-subtitle">{{ $t("admin.appStore.subtitle") }}</p>
         <div class="hero-stats">
           <div class="hero-stat">
             <span class="hero-stat-value">{{ profileItems.length }}</span>
-            <span class="hero-stat-label">模板总数</span>
+            <span class="hero-stat-label">{{ $t("admin.appStore.totalTemplates") }}</span>
           </div>
           <div class="hero-stat">
             <span class="hero-stat-value">{{ featuredPool.length }}</span>
-            <span class="hero-stat-label">推荐模板</span>
+            <span class="hero-stat-label">{{ $t("admin.appStore.featuredTemplates") }}</span>
           </div>
           <div class="hero-stat">
             <span class="hero-stat-value">{{ industries.length }}</span>
-            <span class="hero-stat-label">覆盖行业</span>
+            <span class="hero-stat-label">{{ $t("admin.appStore.industries") }}</span>
           </div>
         </div>
       </div>
 
       <div class="hero-search-card">
-        <div class="hero-search-title">查找业务模板</div>
-        <div class="hero-search-subtitle">按名称、场景和行业筛选，快速定位适合当前企业的应用方案</div>
-        <el-input v-model="keyword" class="search-input" placeholder="请输入应用名称" @keyup.enter="loadProfiles">
+        <div class="hero-search-title">{{ $t("admin.appStore.findTemplates") }}</div>
+        <div class="hero-search-subtitle">{{ $t("admin.appStore.filterDesc") }}</div>
+        <el-input v-model="keyword" class="search-input" :placeholder="$t('admin.appStore.searchPlaceholder')" @keyup.enter="loadProfiles">
           <template #append>
-            <el-button @click="loadProfiles">搜索</el-button>
+            <el-button @click="loadProfiles">{{ $t("admin.appStore.search") }}</el-button>
           </template>
         </el-input>
       </div>
@@ -34,8 +34,8 @@
     <div class="market-layout">
       <aside class="market-sidebar">
         <div class="sidebar-section">
-          <div class="sidebar-section-title">场景</div>
-          <button class="sidebar-item" :class="{ active: !activeCategory }" @click="setCategory('')">全部场景</button>
+          <div class="sidebar-section-title">{{ $t("admin.appStore.category") }}</div>
+          <button class="sidebar-item" :class="{ active: !activeCategory }" @click="setCategory('')">{{ $t("admin.appStore.allCategories") }}</button>
           <button v-for="category in categories" :key="category" class="sidebar-item"
             :class="{ active: activeCategory === category }" @click="setCategory(category)">
             {{ category }}
@@ -43,8 +43,8 @@
         </div>
 
         <div class="sidebar-section">
-          <div class="sidebar-section-title">行业</div>
-          <button class="sidebar-item" :class="{ active: !activeIndustry }" @click="setIndustry('')">全部行业</button>
+          <div class="sidebar-section-title">{{ $t("admin.appStore.industry") }}</div>
+          <button class="sidebar-item" :class="{ active: !activeIndustry }" @click="setIndustry('')">{{ $t("admin.appStore.allIndustries") }}</button>
           <button v-for="industry in industries" :key="industry" class="sidebar-item"
             :class="{ active: activeIndustry === industry }" @click="setIndustry(industry)">
             {{ industry }}
@@ -56,10 +56,10 @@
         <section class="market-section">
           <div class="section-head">
             <div>
-              <div class="section-title">为你推荐</div>
-              <div class="section-subtitle">优先展示官方、热门与高安装量模板</div>
+              <div class="section-title">{{ $t("admin.appStore.featured") }}</div>
+              <div class="section-subtitle">{{ $t("admin.appStore.featuredDesc") }}</div>
             </div>
-            <el-button link type="primary" @click="rotateFeatured">换一批</el-button>
+            <el-button link type="primary" @click="rotateFeatured">{{ $t("admin.appStore.rotate") }}</el-button>
           </div>
 
           <div class="featured-grid">
@@ -68,8 +68,8 @@
               <div class="market-cover">
                 <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
                 <div class="card-badges">
-                  <span v-if="item.isOfficial" class="badge badge-official">官方</span>
-                  <span v-else-if="item.isHot" class="badge badge-hot">热门</span>
+                  <span v-if="item.isOfficial" class="badge badge-official">{{ $t("admin.official") }}</span>
+                  <span v-else-if="item.isHot" class="badge badge-hot">{{ $t("admin.hot") }}</span>
                 </div>
               </div>
 
@@ -80,8 +80,8 @@
                   <span v-for="tag in (item.tags || []).slice(0, 4)" :key="tag" class="market-tag">{{ tag }}</span>
                 </div>
                 <div class="market-meta">
-                  <span>{{ item.category || '通用模板' }}</span>
-                  <span>{{ item.installCount || 0 }} 安装</span>
+                  <span>{{ item.category || $t("admin.appStore.generalCategory") }}</span>
+                  <span>{{ item.installCount || 0 }} {{ $t("admin.appStore.installs") }}</span>
                 </div>
               </div>
             </div>
@@ -91,8 +91,8 @@
         <section class="market-section">
           <div class="section-head">
             <div>
-              <div class="section-title">全部模板</div>
-              <div class="section-subtitle">统一风格展示，强化封面、标签、作者与安装量层级</div>
+              <div class="section-title">{{ $t("admin.appStore.allTemplates") }}</div>
+              <div class="section-subtitle">{{ $t("admin.appStore.allTemplatesDesc") }}</div>
             </div>
           </div>
 
@@ -101,22 +101,22 @@
               <div class="market-cover compact">
                 <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
                 <div class="card-badges">
-                  <span v-if="item.isOfficial" class="badge badge-official">官方</span>
+                  <span v-if="item.isOfficial" class="badge badge-official">{{ $t("admin.official") }}</span>
                 </div>
               </div>
 
               <div class="market-card-body">
                 <div class="market-list-head">
                   <div class="market-card-title">{{ item.name }}</div>
-                  <div class="market-card-extra">{{ item.author || 'EIMSNext' }}</div>
+                  <div class="market-card-extra">{{ item.author || $t("admin.developer") }}</div>
                 </div>
                 <div class="market-card-desc two-line">{{ item.summary }}</div>
                 <div class="market-tags small">
                   <span v-for="tag in (item.tags || []).slice(0, 5)" :key="tag" class="market-tag">{{ tag }}</span>
                 </div>
                 <div class="market-meta">
-                  <span>{{ item.industry || '通用行业' }}</span>
-                  <span>{{ item.installCount || 0 }} 安装</span>
+                  <span>{{ item.industry || $t("admin.appStore.generalIndustry") }}</span>
+                  <span>{{ item.installCount || 0 }} {{ $t("admin.appStore.installs") }}</span>
                 </div>
               </div>
             </div>

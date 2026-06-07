@@ -1,5 +1,5 @@
 <template>
-  <et-dialog :model-value="modelValue" title="应用详情" :show-footer="false" width="60%" @close="close">
+  <et-dialog :model-value="modelValue" :title="$t('admin.appStore.appDetail')" :show-footer="false" width="60%" @close="close">
     <div v-if="profile" class="appstore-detail">
       <section class="detail-hero">
         <div class="detail-hero-main">
@@ -8,8 +8,8 @@
             <div class="title-copy">
               <div class="title-topline">
                 <h1 class="detail-title">{{ profile.name }}</h1>
-                <span v-if="profile.isOfficial" class="status-badge official">官方</span>
-                <span v-else-if="profile.isHot" class="status-badge hot">热门</span>
+                <span v-if="profile.isOfficial" class="status-badge official">{{ $t("admin.appStore.official") }}</span>
+                <span v-else-if="profile.isHot" class="status-badge hot">{{ $t("admin.appStore.hot") }}</span>
               </div>
               <div class="detail-subtitle">{{ profile.summary }}</div>
               <div class="detail-tags">
@@ -20,10 +20,10 @@
         </div>
 
         <div class="detail-hero-side">
-          <div class="hero-side-title">安装模板</div>
-          <div class="hero-side-text">安装后自动进入工作台，可继续配置表单、权限和流程。</div>
+          <div class="hero-side-title">{{ $t("admin.appStore.installTemplate") }}</div>
+          <div class="hero-side-text">{{ $t("admin.appStore.installDesc") }}</div>
           <div class="action-row">
-            <el-button type="success" size="large" :loading="installing" @click="install">安装模板</el-button>
+            <el-button type="success" size="large" :loading="installing" @click="install">{{ $t("admin.appStore.installTemplate") }}</el-button>
           </div>
         </div>
       </section>
@@ -40,26 +40,26 @@
           </div>
 
           <div class="content-panel">
-            <div class="panel-title">模板介绍</div>
+            <div class="panel-title">{{ $t("admin.appStore.templateIntro") }}</div>
             <p class="panel-text">{{ profile.description || profile.summary }}</p>
           </div>
         </div>
 
         <aside class="detail-aside">
           <div class="meta-card">
-            <div class="meta-label">作者</div>
+            <div class="meta-label">{{ $t("admin.appStore.author") }}</div>
             <div class="meta-value">{{ profile.author || 'EIMSNext' }}</div>
           </div>
           <div class="meta-card">
-            <div class="meta-label">安装量</div>
+            <div class="meta-label">{{ $t("admin.installCount") }}</div>
             <div class="meta-value">{{ profile.installCount || 0 }}</div>
           </div>
           <div class="meta-card">
-            <div class="meta-label">场景</div>
+            <div class="meta-label">{{ $t("admin.appStore.category") }}</div>
             <div class="meta-value">{{ profile.category || '-' }}</div>
           </div>
           <div class="meta-card">
-            <div class="meta-label">行业</div>
+            <div class="meta-label">{{ $t("admin.appStore.industry") }}</div>
             <div class="meta-value">{{ profile.industry || '-' }}</div>
           </div>
         </aside>

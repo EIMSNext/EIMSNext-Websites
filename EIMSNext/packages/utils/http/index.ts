@@ -14,6 +14,7 @@ import {
   HttpInterceptors,
 } from "./interface";
 import type { HttpRequestConfig } from "./interface";
+import { setupHttp } from "./setupHttp";
 
 export {
   http,
@@ -30,4 +31,5 @@ export {
   ODataMetadata,
   HttpInterceptors,
   HttpRequestConfig,
+  setupHttp,
 };

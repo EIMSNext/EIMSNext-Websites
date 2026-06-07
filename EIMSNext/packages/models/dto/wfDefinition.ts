@@ -104,5 +104,7 @@ export enum FlowType {
 export enum EventSourceType {
   None = "0",
   Form = "1",
-  Buttton = "2",
+  Button = "2",
+  Schedule = "3",
+  Http = "4",
 }

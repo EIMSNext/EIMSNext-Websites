@@ -11,31 +11,31 @@
     <div class="empty-app">
       <div class="empty-content">
         <div class="empty-tips">
-          <div class="empty-title">创建以下对象，开始构建应用</div>
-          <!-- <el-link target="_blank">了解表单和仪表盘</el-link> -->
+          <div class="empty-title">{{ $t("admin.appPage.createPlaceholder") }}</div>
+          <!-- <el-link target="_blank">{{ $t("admin.myApp") }}</el-link> -->
         </div>
         <div class="creator-container">
           <div class="creator-item" @click="createForm(false, false)">
             <div class="tip-icon generic">
               <div class="create-icon generic"></div>
-              <div class="tip-title">新建普通表单</div>
+              <div class="tip-title">{{ $t("admin.appPage.newForm") }}</div>
             </div>
-            <div class="tip-desc">适用于数据上报、问卷调研等业务。</div>
+            <div class="tip-desc">{{ $t("admin.appPage.newFormDesc") }}</div>
           </div>
 
           <div class="creator-item" @click="createForm(true, false)">
             <div class="tip-icon flow">
               <div class="create-icon flow"></div>
-              <div class="tip-title">新建流程表单</div>
+              <div class="tip-title">{{ $t("admin.appPage.newFlowForm") }}</div>
             </div>
-            <div class="tip-desc">适用于有特定流程，需要不同成员分步骤填写数据的业务。</div>
+            <div class="tip-desc">{{ $t("admin.appPage.newFlowFormDesc") }}</div>
           </div>
           <div class="creator-item" @click="createForm(false, true)">
             <div class="tip-icon generic">
               <div class="create-icon generic"></div>
-              <div class="tip-title">新建数据台账</div>
+              <div class="tip-title">{{ $t("admin.appPage.newLedger") }}</div>
             </div>
-            <div class="tip-desc">用于财务台账，库存台账等持续使用业务</div>
+            <div class="tip-desc">{{ $t("admin.appPage.newLedgerDesc") }}</div>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
     content: {
       layout: "[]",
       options:
-        '{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":false,"innerText":"提交"}}',
+        `{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"${t('common.reset')}"},"submitBtn":{"show":false,"innerText":"${t('common.submit')}"}}`,
     },
     usingWorkflow: usingFlow,
     isLedger: ledger,

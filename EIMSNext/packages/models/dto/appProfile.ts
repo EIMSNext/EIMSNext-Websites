@@ -1,6 +1,6 @@
 import { ModelBase } from "./modelBase";
 
-export interface AppProfileRequest {
+export interface AppProfileQueryRequest {
   keyword?: string;
   category?: string;
   industry?: string;

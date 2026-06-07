@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { accessToken, http } from "@eimsnext/utils";
+import { accessToken, http, bus } from "@eimsnext/utils";
 import { CurrentUser, UserType } from "@eimsnext/models";
 import { useStorage } from "@vueuse/core";
 import { store } from "../setup";
@@ -60,14 +60,11 @@ export const useUserStore = defineStore("currentuser", () => {
   // const switchCorp = () => { }
 
   const logout = () => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       accessToken.clear();
       currentUser.value = new CurrentUser();
       initialized.value = false;
-      useFormStoreHook().clear();
-      useAppStoreHook().clear();
-      useDeptStoreHook().clear();
-      useContextStoreHook().clearAll();
+      bus.emit("auth:logout");
 
       resolve();
     });

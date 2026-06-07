@@ -1,8 +1,8 @@
-import type { AppProfile, AppProfileRequest } from "../../models/dto/appProfile";
+import type { AppProfile, AppProfileQueryRequest } from "../../models/dto/appProfile";
 import { ServiceBase } from "../interface";
 
 export class AppProfileService extends ServiceBase {
-  query(params: AppProfileRequest) {
+  query(params: AppProfileQueryRequest) {
     return this.http().api.get<{ total: number; items: AppProfile[] }>("/open/appstore", params);
   }
 

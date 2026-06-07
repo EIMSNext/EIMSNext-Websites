@@ -29,7 +29,7 @@
       <el-menu mode="vertical">
 <router-link custom :to="{ name: 'mytasks', params: { appId: app?.id } }" v-slot="{ navigate }">
           <el-menu-item index="mytodo" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
-            <el-badge :is-dot="hasAppTodo" :offset="[0, 8]">
+            <el-badge :is-dot="hasAppTodo" :offset="[0, 12]">
               <et-icon icon="icon-mytodo" class="step-image" size="14px" />
             </el-badge>
             <span v-if="isSidebarOpened" class="app-menu-text">

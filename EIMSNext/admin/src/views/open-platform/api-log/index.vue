@@ -1,9 +1,9 @@
 <template>
   <div class="placeholder-page">
     <div class="placeholder-card">
-      <div class="placeholder-kicker">预留能力</div>
-      <h1 class="placeholder-title">API调用日志</h1>
-      <p class="placeholder-text">后续将在此展示开放接口调用日志，包括应用标识、调用状态、耗时、错误明细与时间范围筛选。</p>
+      <div class="placeholder-kicker">{{ $t("admin.openPlatform.reservedCapability") }}</div>
+      <h1 class="placeholder-title">{{ $t("admin.openPlatform.apiLog") }}</h1>
+      <p class="placeholder-text">{{ $t("admin.openPlatform.apiLogDesc") }}</p>
     </div>
   </div>
 </template>

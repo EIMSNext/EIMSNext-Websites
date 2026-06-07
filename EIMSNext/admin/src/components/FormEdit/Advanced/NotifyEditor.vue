@@ -74,124 +74,12 @@
 
             <div v-if="showScheduleConfig" class="notify-schedule">
               <div class="label">提醒时间</div>
-
-              <div v-if="isTimeFieldScheduled" class="notify-margin schedule-row">
-                <div class="sub-label">时间字段</div>
-                <el-select
-                  :model-value="formNotify.timeField"
-                  class="notify-select"
-                  placeholder="请选择时间字段"
-                  @change="updateTimeField"
-                >
-                  <el-option
-                    v-for="field in availableTimeFields"
-                    :key="field.field"
-                    :label="field.label"
-                    :value="field.field"
-                  />
-                </el-select>
-              </div>
-
-              <div v-if="isCustomScheduled" class="notify-margin schedule-row">
-                <div class="sub-label">开始时间</div>
-                <el-date-picker
-                  v-model="startTimeInput"
-                  class="notify-select"
-                  type="datetime"
-                  value-format="x"
-                  format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="请选择开始时间"
-                />
-              </div>
-
-              <div class="notify-margin schedule-row">
-                <div class="sub-label">重复规则</div>
-                <el-select :model-value="repeatTypeInput" class="notify-select" @change="updateRepeatType">
-                  <el-option
-                    v-for="item in repeatTypeOptions"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
-                </el-select>
-              </div>
-
-              <div v-if="showCustomRepeatConfig" class="notify-margin repeat-config">
-                <div class="sub-label">自定义重复</div>
-
-                <el-radio-group :model-value="customRepeatMode" class="monthly-mode-group" @change="updateCustomRepeatMode">
-                  <el-radio label="weekly">按周</el-radio>
-                  <el-radio label="monthly">按月</el-radio>
-                </el-radio-group>
-
-                <template v-if="customRepeatMode === 'weekly'">
-                  <div class="repeat-inline">
-                    <span>每</span>
-                    <el-input-number :model-value="weeklyInterval" :min="1" :max="52" @update:modelValue="updateWeeklyInterval" />
-                    <span>周提醒一次</span>
-                  </div>
-                  <el-checkbox-group :model-value="weeklyDays" class="weekdays-group" @change="updateWeeklyDays">
-                    <el-checkbox
-                      v-for="day in weekdayOptions"
-                      :key="day.value"
-                      :label="day.value"
-                    >
-                      {{ day.label }}
-                    </el-checkbox>
-                  </el-checkbox-group>
-                </template>
-
-                <template v-else>
-                  <div class="repeat-inline">
-                    <span>每</span>
-                    <el-input-number :model-value="monthlyInterval" :min="1" :max="24" @update:modelValue="updateMonthlyInterval" />
-                    <span>个月提醒一次</span>
-                  </div>
-                  <el-radio-group :model-value="monthlyMode" class="monthly-mode-group" @change="updateMonthlyMode">
-                    <el-radio label="day">指定日期</el-radio>
-                    <el-radio label="relative">相对日期</el-radio>
-                  </el-radio-group>
-
-                  <div v-if="monthlyMode === 'day'" class="repeat-inline">
-                    <span>每月第</span>
-                    <el-input-number :model-value="monthDay" :min="1" :max="31" @update:modelValue="updateMonthDay" />
-                    <span>天</span>
-                  </div>
-
-                  <div v-else class="repeat-inline wrap">
-                    <span>每月第</span>
-                    <el-select :model-value="monthWeekIndex" class="short-select" @change="updateMonthWeekIndex">
-                      <el-option
-                        v-for="item in weekIndexOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                      />
-                    </el-select>
-                    <el-select :model-value="monthWeekday" class="short-select" @change="updateMonthWeekday">
-                      <el-option
-                        v-for="item in weekdayOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                      />
-                    </el-select>
-                  </div>
-                </template>
-              </div>
-
-              <div class="notify-margin schedule-row">
-                <div class="sub-label">结束时间</div>
-                <el-date-picker
-                  v-model="endTimeInput"
-                  class="notify-select"
-                  type="datetime"
-                  value-format="x"
-                  format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="不设置则持续提醒"
-                  clearable
-                />
-              </div>
+              <TriggerTimeSettings
+                v-model="scheduleSettings"
+                class="notify-margin"
+                :field-options="availableTimeFields"
+                :allow-mode-switch="false"
+              />
             </div>
 
             <div v-if="showFilter" class="notify-filter">
@@ -299,7 +187,9 @@
 import {
   FormDef,
   FormNotify,
-  FormNotifyRepeatType,
+  TimerOffsetDirection,
+  TimerOffsetUnit,
+  TimerRepeatType,
   FormNotifyRequest,
   FormNotifyTriggerMode,
   NotifyChannel,
@@ -316,17 +206,17 @@ import {
   MemberSelectDialog,
   MemberTabs,
   SelectedTags,
+  TriggerTimeMode,
+  TriggerTimeSettings,
+  TriggerTimeSettingsValue,
+  createDefaultTriggerTimeSettings,
   convertCandidateToTags,
   convertTagsToCandidates,
+  normalizeTriggerTimeSettings,
 } from "@eimsnext/components";
 import { formNotifyService } from "@eimsnext/services";
 import { ElMessage } from "element-plus";
-import {
-  CustomRepeatConfig,
-  NotifyTimeFieldOption,
-  getNotifyTimeFieldOptions,
-  parseNotifyRepeatConfig,
-} from "../../../utils/notify";
+import { NotifyTimeFieldOption, getNotifyTimeFieldOptions } from "../../../utils/notify";
 
 defineOptions({
   name: "NotifyEditor",
@@ -349,14 +239,6 @@ const filterMode = ref<"any" | "condition">("any");
 const showFieldDialog = ref(false);
 const showMemberDialog = ref(false);
 const tempChangeFields = ref<string[]>([]);
-const customRepeatMode = ref<"weekly" | "monthly">("weekly");
-const weeklyInterval = ref(1);
-const weeklyDays = ref<number[]>([]);
-const monthlyInterval = ref(1);
-const monthlyMode = ref<"day" | "relative">("day");
-const monthDay = ref(1);
-const monthWeekIndex = ref(1);
-const monthWeekday = ref(1);
 const syncingFromModel = ref(false);
 
 const memberOptions = {
@@ -364,34 +246,6 @@ const memberOptions = {
   cascadedDept: true,
   showCascade: true,
 };
-
-const repeatTypeOptions = [
-  { value: FormNotifyRepeatType.Once, label: "仅提醒一次" },
-  { value: FormNotifyRepeatType.Daily, label: "每天" },
-  { value: FormNotifyRepeatType.Weekly, label: "每周" },
-  { value: FormNotifyRepeatType.BiWeekly, label: "每两周" },
-  { value: FormNotifyRepeatType.Monthly, label: "每月" },
-  { value: FormNotifyRepeatType.Yearly, label: "每年" },
-  { value: FormNotifyRepeatType.Custom, label: "自定义" },
-];
-
-const weekdayOptions = [
-  { value: 0, label: "周日" },
-  { value: 1, label: "周一" },
-  { value: 2, label: "周二" },
-  { value: 3, label: "周三" },
-  { value: 4, label: "周四" },
-  { value: 5, label: "周五" },
-  { value: 6, label: "周六" },
-];
-
-const weekIndexOptions = [
-  { value: 1, label: "第一个" },
-  { value: 2, label: "第二个" },
-  { value: 3, label: "第三个" },
-  { value: 4, label: "第四个" },
-  { value: 5, label: "最后一个" },
-];
 
 const isCustomScheduled = computed(
   () => formNotify.value.triggerMode === FormNotifyTriggerMode.CustomScheduled
@@ -407,40 +261,57 @@ const showChangeFields = computed(
 const showDataChangedTip = computed(() => showChangeFields.value);
 const showCustomModeTip = computed(() => isCustomScheduled.value);
 const showTimeFieldTip = computed(() => isTimeFieldScheduled.value);
-const showCustomRepeatConfig = computed(
-  () => showScheduleConfig.value && repeatTypeInput.value === FormNotifyRepeatType.Custom
-);
 
 const availableTimeFields = computed<NotifyTimeFieldOption[]>(() => {
   return getNotifyTimeFieldOptions(props.formDef);
 });
 
-const startTimeInput = computed<string | undefined>({
-  get: () => toTimeInput(formNotify.value.startTime),
-  set: (value) => {
-    const nextValue = toTimestamp(value);
-    formNotify.value.startTime = isCustomScheduled.value && nextValue == null ? Date.now() : nextValue;
-    emitModelUpdate();
+const scheduleSettings = computed<TriggerTimeSettingsValue>({
+  get: () => {
+    const mode = isCustomScheduled.value ? TriggerTimeMode.Custom : TriggerTimeMode.Field;
+    return normalizeTriggerTimeSettings({
+      mode,
+      repeatType: formNotify.value.repeatType,
+      repeatConfig: formNotify.value.repeatConfig,
+      custom: {
+        startTime: formNotify.value.startTime,
+        endTime: isCustomScheduled.value ? formNotify.value.endTime : undefined,
+      },
+      field: {
+        timeField: formNotify.value.timeField,
+        endTime: isTimeFieldScheduled.value ? formNotify.value.endTime : undefined,
+        fixedTime: formNotify.value.fixedTime,
+        direction: formNotify.value.direction,
+        offsetValue: formNotify.value.offsetValue,
+        offsetUnit: formNotify.value.offsetUnit,
+      },
+    }, availableTimeFields.value);
   },
-});
-
-const endTimeInput = computed<string | undefined>({
-  get: () => toTimeInput(formNotify.value.endTime),
   set: (value) => {
-    formNotify.value.endTime = toTimestamp(value);
-    emitModelUpdate();
-  },
-});
-
-const repeatTypeInput = computed<FormNotifyRepeatType>({
-  get: () => formNotify.value.repeatType ?? FormNotifyRepeatType.Once,
-  set: (value) => {
-    formNotify.value.repeatType = value;
-    if (value !== FormNotifyRepeatType.Custom) {
-      formNotify.value.repeatConfig = undefined;
+    const normalized = normalizeTriggerTimeSettings(value, availableTimeFields.value);
+    formNotify.value.repeatType = normalized.repeatType;
+    formNotify.value.repeatConfig = normalized.repeatConfig;
+    if (normalized.mode === TriggerTimeMode.Custom) {
+      formNotify.value.startTime = normalized.custom?.startTime;
+      formNotify.value.endTime = normalized.custom?.endTime;
+      formNotify.value.timeField = undefined;
+      formNotify.value.fixedTime = undefined;
+      formNotify.value.direction = TimerOffsetDirection.At;
+      formNotify.value.offsetValue = undefined;
+      formNotify.value.offsetUnit = undefined;
+      formNotify.value.fieldFormat = undefined;
     } else {
-      syncRepeatConfig();
+      formNotify.value.startTime = undefined;
+      formNotify.value.timeField = normalized.field?.timeField;
+      formNotify.value.endTime = normalized.field?.endTime;
+      formNotify.value.fixedTime = normalized.field?.fixedTime;
+      formNotify.value.direction = normalized.field?.direction ?? TimerOffsetDirection.At;
+      formNotify.value.offsetValue = normalized.field?.offsetValue;
+      formNotify.value.offsetUnit = normalized.field?.offsetUnit;
+      const option = availableTimeFields.value.find((x) => x.field === normalized.field?.timeField);
+      formNotify.value.fieldFormat = option?.format;
     }
+    emitModelUpdate();
   },
 });
 
@@ -456,7 +327,7 @@ function initFromModelValue() {
   syncingFromModel.value = true;
   try {
     formNotify.value = cloneDeep(props.modelValue);
-    formNotify.value.repeatType ??= FormNotifyRepeatType.Once;
+    formNotify.value.repeatType ??= TimerRepeatType.Once;
 
     if (formNotify.value.dataFilter) {
       try {
@@ -489,26 +360,9 @@ function initFromModelValue() {
     }
 
     tempChangeFields.value = [...(formNotify.value.changeFields || [])];
-    initRepeatConfig();
     normalizeState();
   } finally {
     syncingFromModel.value = false;
-  }
-}
-
-function initRepeatConfig() {
-  const config = parseNotifyRepeatConfig(formNotify.value.repeatConfig);
-  customRepeatMode.value = config?.mode === "monthly" ? "monthly" : "weekly";
-  weeklyInterval.value = Math.max(1, config?.interval ?? 1);
-  weeklyDays.value = (config?.weekdays || []).filter((x) => x >= 0 && x <= 6);
-  monthlyInterval.value = Math.max(1, config?.interval ?? 1);
-  monthlyMode.value = config?.monthlyMode === "relative" ? "relative" : "day";
-  monthDay.value = normalizeMonthDay(config?.monthDay ?? 1);
-  monthWeekIndex.value = normalizeWeekIndex(config?.weekIndex ?? 1);
-  monthWeekday.value = normalizeWeekday(config?.weekday ?? 1);
-
-  if (weeklyDays.value.length === 0) {
-    weeklyDays.value = [1];
   }
 }
 
@@ -520,9 +374,14 @@ function updateTriggerMode(value: FormNotifyTriggerMode) {
   formNotify.value.notifyText = getDefaultNotifyText();
   formNotify.value.channels = NotifyChannel.System;
   formNotify.value.timeField = undefined;
+  formNotify.value.fixedTime = undefined;
+  formNotify.value.direction = TimerOffsetDirection.At;
+  formNotify.value.offsetValue = undefined;
+  formNotify.value.offsetUnit = undefined;
+  formNotify.value.fieldFormat = undefined;
   formNotify.value.startTime = undefined;
   formNotify.value.endTime = undefined;
-  formNotify.value.repeatType = FormNotifyRepeatType.Once;
+  formNotify.value.repeatType = TimerRepeatType.Once;
   formNotify.value.repeatConfig = undefined;
 
   filter.value = { id: "", rel: "and", items: [] };
@@ -530,17 +389,13 @@ function updateTriggerMode(value: FormNotifyTriggerMode) {
   notifier.value = [];
   changeMode.value = "all";
   tempChangeFields.value = [];
-  customRepeatMode.value = "weekly";
-  weeklyInterval.value = 1;
-  weeklyDays.value = [1];
-  monthlyInterval.value = 1;
-  monthlyMode.value = "day";
-  monthDay.value = 1;
-  monthWeekIndex.value = 1;
-  monthWeekday.value = 1;
 
   if (isTimeFieldScheduled.value) {
-    formNotify.value.timeField = availableTimeFields.value[0]?.field;
+    const defaults = normalizeTriggerTimeSettings(
+      createDefaultTriggerTimeSettings(TriggerTimeMode.Field),
+      availableTimeFields.value,
+    );
+    formNotify.value.timeField = defaults.field?.timeField;
   }
 
   normalizeState();
@@ -629,6 +484,11 @@ function normalizeState() {
 
     if (!showScheduleConfig.value) {
       formNotify.value.timeField = undefined;
+      formNotify.value.fixedTime = undefined;
+      formNotify.value.direction = TimerOffsetDirection.At;
+      formNotify.value.offsetValue = undefined;
+      formNotify.value.offsetUnit = undefined;
+      formNotify.value.fieldFormat = undefined;
       formNotify.value.startTime = undefined;
       formNotify.value.endTime = undefined;
       formNotify.value.repeatType = undefined;
@@ -653,10 +513,10 @@ function normalizeState() {
     formNotify.value.dataFilter = "";
   }
 
-  if (formNotify.value.repeatType === FormNotifyRepeatType.Custom) {
-    syncRepeatConfig();
-  } else {
-    formNotify.value.repeatConfig = undefined;
+  if (showScheduleConfig.value) {
+    const normalized = scheduleSettings.value;
+    formNotify.value.repeatType = normalized.repeatType;
+    formNotify.value.repeatConfig = normalized.repeatConfig;
   }
 }
 
@@ -680,71 +540,6 @@ function emitModelUpdate() {
   emit("update:modelValue", formNotify.value);
 }
 
-function syncRepeatConfig() {
-  if (formNotify.value.repeatType !== FormNotifyRepeatType.Custom) {
-    formNotify.value.repeatConfig = undefined;
-    return;
-  }
-
-  const config: CustomRepeatConfig =
-    customRepeatMode.value === "weekly"
-      ? {
-          mode: "weekly",
-          interval: Math.max(1, weeklyInterval.value || 1),
-          weekdays: (weeklyDays.value.length ? weeklyDays.value : [1]).slice().sort((a, b) => a - b),
-        }
-      : {
-          mode: "monthly",
-          interval: Math.max(1, monthlyInterval.value || 1),
-          monthlyMode: monthlyMode.value,
-          monthDay: monthlyMode.value === "day" ? normalizeMonthDay(monthDay.value) : undefined,
-          weekIndex: monthlyMode.value === "relative" ? normalizeWeekIndex(monthWeekIndex.value) : undefined,
-          weekday: monthlyMode.value === "relative" ? normalizeWeekday(monthWeekday.value) : undefined,
-        };
-
-  formNotify.value.repeatConfig = JSON.stringify(config);
-}
-
-function toTimeInput(value?: number) {
-  return value == null ? undefined : `${value}`;
-}
-
-function toTimestamp(value?: string) {
-  if (!value) {
-    return undefined;
-  }
-
-  const result = Number(value);
-  return Number.isFinite(result) ? result : undefined;
-}
-
-function normalizeMonthDay(value: number) {
-  return Math.min(31, Math.max(1, Math.trunc(value || 1)));
-}
-
-function normalizeWeekIndex(value: number) {
-  return Math.min(5, Math.max(1, Math.trunc(value || 1)));
-}
-
-function normalizeWeekday(value: number) {
-  return Math.min(6, Math.max(0, Math.trunc(value ?? 1)));
-}
-
-function updateTimeField(value?: string) {
-  formNotify.value.timeField = value;
-  emitModelUpdate();
-}
-
-function updateRepeatType(value: FormNotifyRepeatType) {
-  formNotify.value.repeatType = value;
-  if (value === FormNotifyRepeatType.Custom) {
-    syncRepeatConfig();
-  } else {
-    formNotify.value.repeatConfig = undefined;
-  }
-  emitModelUpdate();
-}
-
 function updateFilterMode(value: "any" | "condition") {
   filterMode.value = value;
   formNotify.value.dataFilter = value === "condition" ? JSON.stringify(filter.value) : "";
@@ -766,58 +561,6 @@ function updateChangeMode(value: "all" | "specific") {
     tempChangeFields.value = [];
     emitModelUpdate();
   }
-}
-
-function updateCustomRepeatMode(value: string | number | boolean | undefined) {
-  customRepeatMode.value = value === "monthly" ? "monthly" : "weekly";
-  syncRepeatConfig();
-  emitModelUpdate();
-}
-
-function updateWeeklyInterval(value?: number) {
-  weeklyInterval.value = Math.max(1, value || 1);
-  syncRepeatConfig();
-  emitModelUpdate();
-}
-
-function updateWeeklyDays(value: Array<string | number | boolean>) {
-  const normalized = value
-    .map((item) => (typeof item === "number" ? item : Number(item)))
-    .filter((item) => Number.isInteger(item) && item >= 0 && item <= 6);
-
-  weeklyDays.value = normalized.length ? normalized : [1];
-  syncRepeatConfig();
-  emitModelUpdate();
-}
-
-function updateMonthlyInterval(value?: number) {
-  monthlyInterval.value = Math.max(1, value || 1);
-  syncRepeatConfig();
-  emitModelUpdate();
-}
-
-function updateMonthlyMode(value: string | number | boolean | undefined) {
-  monthlyMode.value = value === "relative" ? "relative" : "day";
-  syncRepeatConfig();
-  emitModelUpdate();
-}
-
-function updateMonthDay(value?: number) {
-  monthDay.value = normalizeMonthDay(value || 1);
-  syncRepeatConfig();
-  emitModelUpdate();
-}
-
-function updateMonthWeekIndex(value: number) {
-  monthWeekIndex.value = normalizeWeekIndex(value);
-  syncRepeatConfig();
-  emitModelUpdate();
-}
-
-function updateMonthWeekday(value: number) {
-  monthWeekday.value = normalizeWeekday(value);
-  syncRepeatConfig();
-  emitModelUpdate();
 }
 
 watch(showFieldDialog, (val) => {
@@ -848,6 +591,11 @@ const save = async () => {
       formId: formNotify.value.formId,
       triggerMode: formNotify.value.triggerMode,
       timeField: formNotify.value.timeField,
+      fixedTime: formNotify.value.fixedTime,
+      direction: formNotify.value.direction,
+      offsetValue: formNotify.value.offsetValue,
+      offsetUnit: formNotify.value.offsetUnit,
+      fieldFormat: formNotify.value.fieldFormat,
       startTime: formNotify.value.startTime,
       endTime: formNotify.value.endTime,
       repeatType: formNotify.value.repeatType,

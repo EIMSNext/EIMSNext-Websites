@@ -1,9 +1,9 @@
 <template>
   <div class="placeholder-page">
     <div class="placeholder-card">
-      <div class="placeholder-kicker">预留能力</div>
-      <h1 class="placeholder-title">开发文档</h1>
-      <p class="placeholder-text">后续将在此接入开放平台文档中心，统一整理接入说明、鉴权方式、示例代码和插件开发规范。</p>
+      <div class="placeholder-kicker">{{ $t("admin.openPlatform.reservedCapability") }}</div>
+      <h1 class="placeholder-title">{{ $t("admin.openPlatform.devDocs") }}</h1>
+      <p class="placeholder-text">{{ $t("admin.openPlatform.devDocsDesc") }}</p>
     </div>
   </div>
 </template>

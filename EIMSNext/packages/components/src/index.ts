@@ -32,6 +32,7 @@ import { DataSelectFieldPicker } from "./DataSelectFieldPicker";
 import { DataSelectFilter } from "./DataSelectFilter";
 import { FieldBlockPicker } from "./FieldBlockPicker";
 import { FieldBlockCodeEditor } from "./FieldBlockCodeEditor";
+import { TriggerTimeSettings } from "./TriggerTimeSettings";
 
 export {
   applyTheme,
@@ -49,6 +50,7 @@ export * from "./dialog";
 export * from "./FieldBlockPicker";
 export * from "./FieldBlockCodeEditor";
 export * from "./FieldBlock/shared";
+export * from "./TriggerTimeSettings";
 export { default as fieldIcons } from "./fieldIcons";
 
 export default [
@@ -94,4 +96,5 @@ export default [
   DataSelectFilter,
   FieldBlockPicker,
   FieldBlockCodeEditor,
+  TriggerTimeSettings,
 ];

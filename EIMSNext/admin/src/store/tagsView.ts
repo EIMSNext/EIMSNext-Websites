@@ -1,3 +1,6 @@
+import { bus } from "@eimsnext/utils";
+import { TODO_TAB_ORDER } from "@/config/todoTabs";
+
 export const useTagsViewStore = defineStore("tagsView", () => {
   const visitedViews = ref<TagView[]>([]);
   const cachedViews = ref<string[]>([]);
@@ -9,59 +12,30 @@ export const useTagsViewStore = defineStore("tagsView", () => {
    * 添加已访问视图到已访问视图列表中
    */
   function addVisitedView(view: TagView) {
-    // 如果已经存在于已访问的视图列表中，则不再添加
-    if (visitedViews.value.some((v) => v.path === view.path)) {
+    if (visitedViews.value.some((v) => v.path === view.path)) return;
+
+    const baseName = view.name?.split("-")[0] ?? view.name;
+    if (!view.affix) {
+      visitedViews.value.push(view);
       return;
     }
-    // 处理全局路由的name属性，提取基础名称
-    const baseName = view.name?.includes("-") ? view.name.split("-")[0] : view.name;
-    // 如果视图是固定的（affix），则在已访问的视图列表的第一个不固定页签之前添加
-    if (view.affix) {
-      if (baseName == "mytasks") {
-        visitedViews.value.splice(0, 0, view);
-      } else if (baseName == "mystarted") {
-        let index = visitedViews.value.findIndex((x) => {
-          const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
-          return xBaseName == "mytasks";
-        });
-        visitedViews.value.splice(index + 1, 0, view);
-      } else if (baseName == "myapproved") {
-        let index = visitedViews.value.findIndex((x) => {
-          const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
-          return xBaseName == "mystarted";
-        });
-        if (index == -1)
-          index = visitedViews.value.findIndex((x) => {
-            const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
-            return xBaseName == "mytasks";
-          });
 
-        visitedViews.value.splice(index + 1, 0, view);
-      } else if (baseName == "cctome") {
-        let index = visitedViews.value.findIndex((x) => {
-          const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
-          return xBaseName == "myapproved";
+    const orderIndex = TODO_TAB_ORDER.indexOf(baseName as typeof TODO_TAB_ORDER[number]);
+    if (orderIndex >= 0) {
+      let insertPos = 0;
+      for (let i = orderIndex - 1; i >= 0; i--) {
+        const prevIdx = visitedViews.value.findIndex((v) => {
+          const vb = v.name?.split("-")[0] ?? v.name;
+          return vb === TODO_TAB_ORDER[i];
         });
-        if (index == -1)
-          index = visitedViews.value.findIndex((x) => {
-            const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
-            return xBaseName == "mystarted";
-          });
-        if (index == -1)
-          index = visitedViews.value.findIndex((x) => {
-            const xBaseName = x.name?.includes("-") ? x.name.split("-")[0] : x.name;
-            return xBaseName == "mytasks";
-          });
-
-        visitedViews.value.splice(index + 1, 0, view);
-      } else {
-        let index = visitedViews.value.findIndex((x) => !x.affix);
-        if (index < 0) visitedViews.value.push(view);
-        else visitedViews.value.splice(index, 0, view);
+        if (prevIdx >= 0) { insertPos = prevIdx + 1; break; }
       }
+      visitedViews.value.splice(insertPos, 0, view);
     } else {
-      // 如果视图不是固定的，则在已访问的视图列表的末尾添加
-      visitedViews.value.push(view);
+      const firstNonAffix = visitedViews.value.findIndex((v) => !v.affix);
+      firstNonAffix < 0
+        ? visitedViews.value.push(view)
+        : visitedViews.value.splice(firstNonAffix, 0, view);
     }
   }
 
@@ -289,6 +263,12 @@ export const useTagsViewStore = defineStore("tagsView", () => {
       }
     }
   }
+
+  bus.on("auth:logout", () => {
+    const affixTags = visitedViews.value.filter((tag) => tag?.affix);
+    visitedViews.value = affixTags;
+    cachedViews.value = [];
+  });
 
   return {
     visitedViews,

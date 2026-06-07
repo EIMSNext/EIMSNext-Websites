@@ -24,11 +24,11 @@
               @selection-change="handleSelectionChange"
             >
               <el-table-column type="selection" width="40" />
-              <el-table-column label="姓名" width="150" prop="empName" />
-              <el-table-column label="编码" width="150" prop="code" />
-              <el-table-column label="工作电话" width="150" prop="workPhone" />
-              <el-table-column label="工作邮箱" width="150" prop="workEmail" />
-              <el-table-column label="部门" prop="department.name" />
+          <el-table-column :label="$t('admin.role.name')" width="150" prop="empName" />
+          <el-table-column :label="$t('admin.role.code')" width="150" prop="code" />
+          <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
+          <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
+          <el-table-column :label="$t('admin.role.dept')" prop="department.name" />
               <!-- <el-table-column label="操作" fixed="right" width="150">
               <template #default="scope">
                 <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
@@ -107,6 +107,9 @@ import {
   MemberTabs,
   ConfirmResult,
 } from "@eimsnext/components";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "RoleManager",
@@ -121,7 +124,7 @@ const showSort = ref(false);
 const sortList = ref<IFieldSortList>({
   items: [
     {
-      field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input },
+      field: { formId: "employee", field: "empName", label: t("admin.role.name"), type: FieldType.Input },
       sort: SortDirection.Asc,
     },
   ],
@@ -137,7 +140,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "添加",
+      text: t("common.add"),
       type: "success",
       command: "add",
       visible: true,
@@ -150,7 +153,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "移除",
+      text: t("admin.role.toolbar.remove"),
       type: "danger",
       command: "delete",
       visible: true,
@@ -159,8 +162,8 @@ const leftBars = ref<ToolbarItem[]>([
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(
-            `你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`,
-            { title: "你确定要删除所选数据吗？" }
+            t("common.message.deleteConfirm_Content", { 0: checkedDatas.value.length }),
+            { title: t("common.message.deleteConfirm_Title") }
           );
           if (confirm == ConfirmResult.Yes) {
             await roleService
@@ -184,7 +187,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "筛选",
+      text: t("common.filter"),
       class: "data-filter",
       command: "filter",
       visible: true,
@@ -198,7 +201,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "排序",
+      text: t("common.sort"),
       class: "data-filter",
       command: "sort",
       visible: true,
@@ -212,7 +215,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "刷新",
+      text: t("common.refresh"),
       class: "data-filter",
       command: "refresh",
       visible: true,

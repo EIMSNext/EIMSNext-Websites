@@ -6,7 +6,7 @@
       class="search-input"
       prefix-icon="Search"
       clearable
-      placeholder="请输入"
+      :placeholder="$t('common.pleaseInput')"
     />
     <div class="search-result">
       <div class="result-container">
@@ -17,7 +17,7 @@
         >
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.Department)"
-            label="组织架构"
+            :label="$t('comp.memberSelect.tabs.department')"
             :name="MemberTabs.Department"
           >
             <div class="dept-select">
@@ -79,14 +79,14 @@
               </el-tree>
               <div v-if="options.showCascade" class="options-footer">
                 <el-checkbox :model-value="orgCascade" @change="cascadeChanged"
-                  >动态包含下级部门</el-checkbox
+                  >{{ $t("comp.memberSelect.cascadeSubDepts") }}</el-checkbox
                 >
               </div>
             </div>
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.Role)"
-            label="角色"
+            :label="$t('comp.memberSelect.tabs.role')"
             :name="MemberTabs.Role"
           >
             <div class="dept-select">
@@ -132,7 +132,7 @@
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.Employee)"
-            label="员工"
+            :label="$t('comp.memberSelect.tabs.employee')"
             :name="MemberTabs.Employee"
           >
             <div class="emp-select">
@@ -143,7 +143,7 @@
                     :class="{ active: selectedEmpDeptId == 'all' }"
                     @click.stop="selectEmpDept('all')"
                   >
-                    全部员工
+                    {{ $t("comp.memberSelect.allEmployees") }}
                   </div>
                 </div>
                 <el-tree
@@ -193,7 +193,7 @@
               options.dynamicMembers &&
               FlagEnum.has(options.showTabs!, MemberTabs.Dynamic)
             "
-            label="动态负责人"
+            :label="$t('comp.memberSelect.tabs.dynamic')"
             :name="MemberTabs.Dynamic"
           >
             <div class="dynamic-member-panel">
@@ -227,10 +227,10 @@
                   </div>
                 </div>
                 <div v-if="isManagerGroup" class="dynamic-member-managers">
-                  <template v-if="selectedDynamicItem">
-                    <div class="dynamic-manager-title">
-                      {{ `${selectedDynamicItem.label}的主管级别：` }}
-                    </div>
+                    <template v-if="selectedDynamicItem">
+                      <div class="dynamic-manager-title">
+                        {{ $t("comp.memberSelect.managerLevels", { label: selectedDynamicItem.label }) }}
+                      </div>
                     <div
                       v-for="level in dynamicManagerLevels"
                       :key="level"
@@ -249,7 +249,7 @@
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.CurDept)"
-            label="当前用户所处部门"
+            :label="$t('comp.memberSelect.tabs.curDept')"
             :name="MemberTabs.CurDept"
           >
             <div class="dept-select">
@@ -302,7 +302,7 @@
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.CurUser)"
-            label="当前用户"
+            :label="$t('comp.memberSelect.tabs.curUser')"
             :name="MemberTabs.CurUser"
           >
             <div class="dept-select">
@@ -327,7 +327,8 @@
 <script lang="ts" setup>
 import "./style/index.scss";
 import { computed, ref, watch, onBeforeMount, toRef } from "vue";
-import { TreeInstance, useLocale } from "element-plus";
+import { TreeInstance } from "element-plus";
+import { useI18n } from "vue-i18n";
 import {
   DataItemType,
   deptToTreeNode,
@@ -375,7 +376,7 @@ const options = deepMerge<IMemberSelectOptions>(
   props.options || {},
 );
 
-const { t } = useLocale();
+const { t } = useI18n();
 const orgCascade = ref(options.cascadedDept ?? false);
 const userStore = useUserStore();
 const defaultProps = { children: "children", label: "label" };
@@ -518,11 +519,11 @@ const getDynamicItemLabelByGroup = (item: ISelectedTag) => {
   }
 
   if (category === "employeeField") {
-    return item.data?.fieldType?.toString().endsWith("2") ? "成员多选" : "成员单选";
+    return item.data?.fieldType?.toString().endsWith("2") ? t("comp.memberSelect.multiMember") : t("comp.memberSelect.singleMember");
   }
 
   if (category === "departmentField") {
-    return item.data?.fieldType?.toString().endsWith("2") ? "部门多选" : "部门单选";
+    return item.data?.fieldType?.toString().endsWith("2") ? t("comp.memberSelect.multiDept") : t("comp.memberSelect.singleDept");
   }
 
   return getDynamicItemLabel(item);

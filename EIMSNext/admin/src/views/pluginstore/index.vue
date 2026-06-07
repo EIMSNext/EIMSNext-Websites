@@ -1,7 +1,7 @@
 <template>
   <div class="pluginstore-page">
     <div class="toolbar-card">
-      <el-input v-model="keyword" class="search-input" placeholder="搜索插件" @keyup.enter="loadProfiles">
+      <el-input v-model="keyword" class="search-input" :placeholder="$t('admin.plugin.searchPlugin')" @keyup.enter="loadProfiles">
         <template #prefix>
           <et-icon icon="el-Search" size="15" />
         </template>
@@ -13,19 +13,19 @@
         <div class="filter-scroll">
           <div class="filter-group">
             <button class="filter-all" :class="{ active: !activeCategory && !activeScenario }"
-              @click="resetFilters">所有插件</button>
+              @click="resetFilters">{{ $t("admin.plugin.allPlugins") }}</button>
           </div>
 
           <div class="filter-group">
             <div class="filter-title-row">
               <span class="filter-title">
                 <et-icon icon="el-Box" size="13" />
-                工具类型
+                {{ $t("admin.plugin.toolType") }}
               </span>
               <et-icon icon="el-ArrowUp" size="12" />
             </div>
             <div class="filter-items">
-              <button class="filter-item" :class="{ active: !activeCategory }" @click="setCategory('')">最新插件</button>
+              <button class="filter-item" :class="{ active: !activeCategory }" @click="setCategory('')">{{ $t("admin.plugin.latestPlugins") }}</button>
               <button v-for="category in categories" :key="category" class="filter-item"
                 :class="{ active: activeCategory === category }" @click="setCategory(category)">
                 {{ category }}
@@ -37,12 +37,12 @@
             <div class="filter-title-row">
               <span class="filter-title">
                 <et-icon icon="el-Grid" size="13" />
-                业务场景
+                {{ $t("admin.plugin.bizScenario") }}
               </span>
               <et-icon icon="el-ArrowUp" size="12" />
             </div>
             <div class="filter-items">
-              <button class="filter-item" :class="{ active: !activeScenario }" @click="setScenario('')">全部场景</button>
+              <button class="filter-item" :class="{ active: !activeScenario }" @click="setScenario('')">{{ $t("admin.plugin.allScenarios") }}</button>
               <button v-for="scenario in scenarios" :key="scenario" class="filter-item"
                 :class="{ active: activeScenario === scenario }" @click="setScenario(scenario)">
                 {{ scenario }}
@@ -55,11 +55,11 @@
       <main class="content-panel">
         <section class="plugin-section">
           <div class="section-head">
-            <div class="section-title">精选插件</div>
+            <div class="section-title">{{ $t("admin.plugin.featuredPlugins") }}</div>
           </div>
           <div class="plugin-grid featured-grid">
             <div v-for="item in featuredItems" :key="item.id" class="plugin-card" @click="openDetail(item)">
-              <span v-if="item.installed" class="card-corner-badge">已安装</span>
+              <span v-if="item.installed" class="card-corner-badge">{{ $t("admin.plugin.installed") }}</span>
               <div class="plugin-card-top">
                 <div class="plugin-info">
                   <img v-if="item.icon" class="plugin-icon" :src="item.icon" :alt="item.name" />
@@ -78,11 +78,11 @@
 
         <section class="plugin-section">
           <div class="section-head">
-            <div class="section-title">所有插件</div>
+            <div class="section-title">{{ $t("admin.plugin.allPlugins") }}</div>
           </div>
           <div class="plugin-grid all-grid">
             <div v-for="item in profileItems" :key="item.id" class="plugin-card" @click="openDetail(item)">
-              <span v-if="item.installed" class="card-corner-badge">已安装</span>
+              <span v-if="item.installed" class="card-corner-badge">{{ $t("admin.plugin.installed") }}</span>
               <div class="plugin-card-top">
                 <div class="plugin-info">
                   <img v-if="item.icon" class="plugin-icon" :src="item.icon" :alt="item.name" />
@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import type { PluginProfile } from "@eimsnext/models";
-import { pluginStoreService } from "@eimsnext/services";
+import { pluginProfileService } from "@eimsnext/services";
 import PluginDetail from "./components/PluginDetail.vue";
 
 defineOptions({ name: "PluginStorePage" });
@@ -136,7 +136,7 @@ function formatInstallCount(count?: number) {
 }
 
 async function loadProfiles() {
-  const result = await pluginStoreService.query({
+  const result = await pluginProfileService.query({
     keyword: keyword.value,
     category: activeCategory.value,
     scenario: activeScenario.value,

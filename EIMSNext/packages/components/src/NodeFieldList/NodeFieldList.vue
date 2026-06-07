@@ -5,7 +5,7 @@
     :props="selectProps"
     :render-after-expand="true"
     node-key="id"
-    :placeholder="t('comp.selectField')"
+    :placeholder="t('common.selectField')"
     :default-expanded-keys="defaultExpand"
     :filterable="true"
     :clearable="true"

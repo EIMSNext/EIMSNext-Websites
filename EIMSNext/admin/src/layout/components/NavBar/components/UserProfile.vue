@@ -54,13 +54,11 @@ defineOptions({
   name: "UserProfile",
 });
 
-import { useTagsViewStore } from "@/store";
 import { CurrentUser, UserType } from "@eimsnext/models";
 import { useUserStore, useContextStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
 
-const tagsViewStore = useTagsViewStore();
 const userStore = useUserStore();
 const contextStore = useContextStore();
 const route = useRoute();
@@ -92,14 +90,9 @@ function logout() {
     type: "warning",
     lockScroll: false,
   }).then(() => {
-    userStore
-      .logout()
-      .then(() => {
-        tagsViewStore.delAllViews();
-      })
-      .then(() => {
-        router.push(`/login`);
-      });
+    userStore.logout().then(() => {
+      router.push(`/login`);
+    });
   });
 }
 </script>

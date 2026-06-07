@@ -61,6 +61,7 @@ const flowData = ref<IFlowData>(createDataflowData(EventSourceType.Form, t));
 flowData.value.startNode.metadata.triggerMeta!.formId = props.formId;
 
 const flowContext = reactive<IFlowContext>({
+  definitionId: props.flowDef.id,
   appId: props.appId,
   eventSource: props.flowDef.eventSource,
   sourceId: props.flowDef.sourceId,
@@ -161,8 +162,14 @@ const save = async () => {
     disabled: currentWfDef.value.disabled,
   };
   if (req.id)
-    wfDefinitionService.put<WfDefinition>(req.id, req).then((res) => (currentWfDef.value = res));
-  else wfDefinitionService.post<WfDefinition>(req).then((res) => (currentWfDef.value = res));
+    wfDefinitionService.put<WfDefinition>(req.id, req).then((res) => {
+      currentWfDef.value = res;
+      flowContext.definitionId = res.id;
+    });
+  else wfDefinitionService.post<WfDefinition>(req).then((res) => {
+    currentWfDef.value = res;
+    flowContext.definitionId = res.id;
+  });
 };
 </script>
 <style lang="scss">

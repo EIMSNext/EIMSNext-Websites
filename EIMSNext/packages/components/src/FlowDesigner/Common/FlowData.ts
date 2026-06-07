@@ -3,9 +3,17 @@ import { uniqueId } from "@eimsnext/utils";
 import {
   FlowType,
   EventSourceType,
+  TimerOffsetDirection,
+  TimerOffsetUnit,
+  TimerRepeatType,
   NotifyChannel,
   WorkflowAutoProcessRule,
   WorkflowWithdrawRule,
+  DataflowTriggerKind,
+  DataflowScheduleSourceType,
+  DataflowHttpSampleField,
+  DataflowHttpTriggerSetting,
+  DataflowTimeTriggerSetting,
 } from "@eimsnext/models";
 import { IConditionList } from "@/ConditionList/type";
 import { IFormFieldList } from "@/FormFieldList/type";
@@ -75,6 +83,7 @@ export interface WorkflowMeta {
 }
 
 export interface IFlowContext {
+  definitionId?: string;
   appId: string;
   formId: string;
   flowType: FlowType;
@@ -490,6 +499,9 @@ export interface TriggerMeta {
   condition: IConditionList;
   changeFields?: string[]; //数据修改时，哪些字段修改会触发
   singleResult: boolean;
+  triggerKind?: DataflowTriggerKind;
+  timeSettings?: DataflowTimeTriggerSetting;
+  httpSettings?: DataflowHttpTriggerSetting;
 }
 
 export interface InsertMeta {
@@ -572,6 +584,11 @@ export function createDataflowData(
   eventSource: EventSourceType,
   t: Translator
 ): IFlowData {
+  const triggerKind = eventSource === EventSourceType.Http
+    ? DataflowTriggerKind.Http
+    : eventSource === EventSourceType.Schedule
+      ? DataflowTriggerKind.Schedule
+      : DataflowTriggerKind.Form;
   return {
     dfCascade: CascadeMode.Never,
     eventSource: eventSource,
@@ -587,6 +604,23 @@ export function createDataflowData(
           nodeAction: "",
           condition: { id: uniqueId(), rel: "and", items: [] },
           singleResult: true,
+          triggerKind,
+          timeSettings: {
+            sourceType: DataflowScheduleSourceType.Custom,
+            repeatType: TimerRepeatType.Once,
+            fixedTime: "09:00",
+            offsetValue: 1,
+            offsetUnit: TimerOffsetUnit.Minute,
+            direction: TimerOffsetDirection.At,
+          },
+          httpSettings: {
+            allowedIps: [],
+            responseEnabled: false,
+            responseStatusCode: 200,
+            responseContentType: "application/json",
+            responseBody: "",
+            sampleFields: [],
+          },
         },
       },
     },

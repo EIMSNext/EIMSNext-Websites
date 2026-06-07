@@ -77,10 +77,10 @@
       </div>
     </template>
 
-    <MetaItemHeader class="mt-[12px]" label="执行结果" />
-    <div class="plugin-result-desc">如果插件的执行结果需要被后续节点使用，请设置结果的数据类型</div>
+    <MetaItemHeader class="mt-[12px]" :label="$t('comp.pluginNode.executionResult')" />
+    <div class="plugin-result-desc">{{ $t('comp.pluginNode.executionResultDesc') }}</div>
     <div class="plugin-result-add-row">
-      <el-button link type="primary" @click="addResultField">+ 添加</el-button>
+      <el-button link type="primary" @click="addResultField">+ {{ $t('common.add') }}</el-button>
     </div>
     <div v-for="(field, index) in resultFields" :key="`${field.fieldKey}-${index}`" class="plugin-result-row">
       <el-select v-model="field.fieldKey" class="plugin-result-key" filterable @change="onResultFieldKeyChanged(field)">
@@ -91,11 +91,11 @@
           :value="resultField.key"
         />
       </el-select>
-      <el-input v-model="field.fieldName" class="plugin-result-name" placeholder="显示名称" />
+      <el-input v-model="field.fieldName" class="plugin-result-name" :placeholder="$t('comp.pluginNode.displayName')" />
       <el-select v-model="field.fieldType" class="plugin-result-type">
-        <el-option v-for="item in resultTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+        <el-option v-for="item in resultTypeOptions" :key="item.value" :label="$t(item.label)" :value="item.value" />
       </el-select>
-      <el-button link type="danger" @click="removeResultField(index)">删除</el-button>
+      <el-button link type="danger" @click="removeResultField(index)">{{ $t('common.delete') }}</el-button>
     </div>
   </template>
 </template>
@@ -121,9 +121,9 @@ import { type IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
 import type { INodeForm } from "@/NodeFieldList/type";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
-import { useLocale } from "element-plus";
+import { useI18n } from "vue-i18n";
 
-const { t } = useLocale();
+const { t } = useI18n();
 
 defineOptions({
   name: "PluginNodeMeta",
@@ -140,15 +140,15 @@ const mappedFieldKeys = reactive<Record<string, string>>({});
 const resultFields = ref<PluginResultFieldSetting[]>([]);
 
 const resultTypeOptions = [
-  { label: "单行文本", value: FieldType.Input },
-  { label: "多行文本", value: FieldType.TextArea },
-  { label: "数字", value: FieldType.Number },
-  { label: "日期", value: FieldType.TimeStamp },
-  { label: "单选", value: FieldType.Select1 },
-  { label: "人员", value: FieldType.Employee1 },
-  { label: "部门", value: FieldType.Department1 },
-  { label: "附件", value: FieldType.FileUpload },
-  { label: "图片", value: FieldType.ImageUpload },
+  { label: t("comp.pluginNode.resultTypes.input"), value: FieldType.Input },
+  { label: t("comp.pluginNode.resultTypes.textarea"), value: FieldType.TextArea },
+  { label: t("comp.pluginNode.resultTypes.number"), value: FieldType.Number },
+  { label: t("comp.pluginNode.resultTypes.timestamp"), value: FieldType.TimeStamp },
+  { label: t("comp.pluginNode.resultTypes.select1"), value: FieldType.Select1 },
+  { label: t("comp.pluginNode.resultTypes.employee1"), value: FieldType.Employee1 },
+  { label: t("comp.pluginNode.resultTypes.department1"), value: FieldType.Department1 },
+  { label: t("comp.pluginNode.resultTypes.fileUpload"), value: FieldType.FileUpload },
+  { label: t("comp.pluginNode.resultTypes.imageUpload"), value: FieldType.ImageUpload },
 ];
 
 const selectedPlugin = computed(() => plugins.value.find((x) => x.pluginId === pluginId.value));
@@ -250,32 +250,32 @@ const hasFieldCandidates = (field: PluginFieldDesc) => getFieldCandidates(field.
 
 const getFieldPlaceholder = (field: PluginFieldDesc) => {
   if (!hasFieldCandidates(field)) {
-    return "暂无可映射字段";
+    return t("comp.pluginNode.noMappableFields");
   }
 
   if (isUploadType(field.fieldType)) {
-    return "请选择文件或图片字段";
+    return t("comp.pluginNode.selectFileOrImageField");
   }
 
-  return "请选择前置节点字段";
+  return t("comp.pluginNode.selectPrevNodeField");
 };
 
 const getEmptyText = (field: PluginFieldDesc) => {
   if (isUploadType(field.fieldType)) {
-    return "当前前置节点里没有兼容的文件/图片字段";
+    return t("comp.pluginNode.noCompatibleFileImageFields");
   }
 
-  return "当前前置节点里没有兼容字段";
+  return t("comp.pluginNode.noCompatibleFields");
 };
 
 const getFieldHint = (field: PluginFieldDesc) => {
   const candidates = getFieldCandidates(field.fieldType, field.compatibleFieldTypes);
   const subFieldCount = candidates.filter((item) => item.isSubField).length;
   const uploadCount = candidates.filter((item) => isUploadType(String(item.type))).length;
-  const fileHint = isUploadType(field.fieldType) ? "支持文件/图片字段映射。" : "";
-  const subFieldHint = subFieldCount > 0 ? `可选子表字段 ${subFieldCount} 个。` : "";
-  const uploadHint = isUploadType(field.fieldType) && uploadCount > 0 ? `文件/图片字段 ${uploadCount} 个。` : "";
-  const countHint = `兼容字段 ${candidates.length} 个。`;
+  const fileHint = isUploadType(field.fieldType) ? t("comp.pluginNode.supportsFileImageMapping") : "";
+  const subFieldHint = subFieldCount > 0 ? t("comp.pluginNode.optionalSubFields", { count: subFieldCount }) : "";
+  const uploadHint = isUploadType(field.fieldType) && uploadCount > 0 ? t("comp.pluginNode.fileImageFields", { count: uploadCount }) : "";
+  const countHint = t("comp.pluginNode.compatibleFields", { count: candidates.length });
   return [countHint, subFieldHint, uploadHint, fileHint].filter(Boolean).join(" ");
 };
 
@@ -288,14 +288,14 @@ const getCandidateGroups = (field: PluginFieldDesc) => {
 
   if (isUploadType(field.fieldType)) {
     return buildGroups([
-      { label: "文件/图片字段", items: uploadFields },
-      { label: "其他兼容字段", items: normalFields },
+      { label: t("comp.pluginNode.fileImageFieldsGroup"), items: uploadFields },
+      { label: t("comp.pluginNode.otherCompatibleFieldsGroup"), items: normalFields },
     ]);
   }
 
   return buildGroups([
-    { label: "主表字段", items: mainFields },
-    { label: "子表字段", items: subFields },
+    { label: t("comp.pluginNode.mainTableFieldsGroup"), items: mainFields },
+    { label: t("comp.pluginNode.subTableFieldsGroup"), items: subFields },
   ]);
 };
 
@@ -304,13 +304,13 @@ const buildGroups = (groups: Array<{ label: string; items: IFormFieldDef[] }>) =
 const getCandidateMeta = (candidate: IFormFieldDef) => {
   const tags = [] as string[];
   if (candidate.isSubField) {
-    tags.push("子表");
+    tags.push(t("comp.pluginNode.subTable"));
   }
   if (isUploadType(String(candidate.type))) {
-    tags.push("文件");
+    tags.push(t("comp.pluginNode.file"));
   }
   if (candidate.singleResultNode === false) {
-    tags.push("多结果");
+    tags.push(t("comp.pluginNode.multiResult"));
   }
 
   return tags.join(" / ");

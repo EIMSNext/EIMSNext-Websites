@@ -3,8 +3,8 @@ import {
   getFieldIcon,
   splitSubField,
   toFormFieldDef,
-} from "@/FieldSelect/type";
-import { DataItemType, ITreeNode } from "@/common";
+} from "../FieldSelect/type";
+import { DataItemType, ITreeNode } from "../common";
 import { FieldDef, FieldType, FormDef, IFieldPerm } from "@eimsnext/models";
 
 export interface INodeForm {
