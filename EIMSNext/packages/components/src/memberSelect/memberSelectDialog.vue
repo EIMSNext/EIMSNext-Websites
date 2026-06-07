@@ -2,7 +2,7 @@
   <et-dialog
     :model-value="modelValue"
     class="member-select-dialog"
-    title="部门成员列表"
+    :title="t('comp.memberSelectDialog.deptMemberList')"
     destroy-on-close
     width="750px"
     @cancel="cancel"
@@ -13,7 +13,7 @@
     </div>
     <template #footer-left>
       <el-button v-if="memberOptions?.showContract" class="contact-link-btn" link @click="openLink"
-        >通讯录</el-button
+        >{{ t("comp.memberSelectDialog.contacts") }}</el-button
       >
     </template>
   </et-dialog>
@@ -21,9 +21,12 @@
 <script lang="ts" setup>
 import "./style/index.scss";
 import { ref, reactive, onBeforeMount } from "vue";
+import { useI18n } from "vue-i18n";
 import { ISelectedTag } from "../selectedTags/type";
 import { IMemberLimit, IMemberSelectOptions, MemberTabs } from "./type";
 import { DataItemType } from "@/common";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "MemberSelectDialog",

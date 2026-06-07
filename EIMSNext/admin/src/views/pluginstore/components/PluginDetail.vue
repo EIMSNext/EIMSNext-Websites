@@ -13,26 +13,25 @@
               <div class="title-copy">
                 <div class="title-topline">
                   <h1 class="detail-title">{{ profile.name }}</h1>
-                  <span v-if="profile.isOfficial" class="status-badge official">官方</span>
-                  <span v-else-if="profile.isHot" class="status-badge hot">热门</span>
-                  <span v-if="profile.installed" class="status-badge installed">已安装</span>
+                  <span v-if="profile.isOfficial" class="status-badge official">{{ $t("admin.official") }}</span>
+                  <span v-else-if="profile.isHot" class="status-badge hot">{{ $t("admin.hot") }}</span>
+                  <span v-if="profile.installed" class="status-badge installed">{{ $t("admin.plugin.installed") }}</span>
                 </div>
                 <div class="detail-subtitle">{{ profile.summary }}</div>
                 <div class="detail-tags">
                   <span v-for="tag in profile.tags || []" :key="tag" class="detail-tag">{{ tag }}</span>
                 </div>
-                <div class="detail-install-meta">安装量 {{ profile.installCount || 0 }}</div>
+                <div class="detail-install-meta">{{ $t("admin.plugin.installs", { count: profile.installCount || 0 }) }}</div>
               </div>
             </div>
           </div>
 
           <div class="detail-hero-side">
-            <div class="hero-side-title">快速操作</div>
-            <div class="hero-side-text">查看帮助文档、安装插件，并在已安装插件中统一管理启停状态。</div>
+            <div class="hero-side-title">{{ $t("admin.plugin.quickActions") }}</div>
+            <div class="hero-side-text">{{ $t("admin.plugin.quickActionsDesc") }}</div>
             <div class="action-row">
-              <el-button v-if="profile.helpDocUrl" plain @click="openLink(profile.helpDocUrl)">使用说明</el-button>
-              <el-button type="primary" size="large" @click="install">{{ profile.installed ? "重新安装" : "安装插件"
-              }}</el-button>
+              <el-button v-if="profile.helpDocUrl" plain @click="openLink(profile.helpDocUrl)">{{ $t("admin.plugin.usageGuide") }}</el-button>
+              <el-button type="primary" size="large" @click="install">{{ profile.installed ? $t("admin.plugin.reinstall") : $t("admin.plugin.installPlugin") }}</el-button>
             </div>
           </div>
         </section>
@@ -52,53 +51,53 @@
 
             <div class="content-panel">
               <div class="panel-head">
-                <div class="panel-title with-bar">插件介绍</div>
+                <div class="panel-title with-bar">{{ $t("admin.plugin.pluginIntro") }}</div>
               </div>
               <p class="panel-text">{{ profile.description || profile.summary }}</p>
             </div>
 
             <div class="content-panel">
               <div class="panel-head">
-                <div class="panel-title with-bar">插件函数</div>
-                <div class="panel-meta">{{ (profile.functions || []).length }} 个函数</div>
+                <div class="panel-title with-bar">{{ $t("admin.plugin.pluginFunctions") }}</div>
+                <div class="panel-meta">{{ $t("admin.plugin.functions", { count: (profile.functions || []).length }) }}</div>
               </div>
 
               <div v-if="profile.functions?.length" class="function-grid">
                 <div v-for="fn in profile.functions" :key="fn.id || fn.name" class="function-card">
                   <div class="function-name">{{ fn.name }}</div>
-                  <div class="function-desc">{{ fn.description || '暂无说明' }}</div>
+                  <div class="function-desc">{{ fn.description || $t("admin.plugin.noDescription") }}</div>
                   <div class="function-fields">
                     <span v-for="field in fn.inputFields || []" :key="field.key" class="function-field-tag">
                       {{ field.name }}
                     </span>
-                    <span v-if="!(fn.inputFields || []).length" class="function-field-tag muted">无输入字段</span>
+                    <span v-if="!(fn.inputFields || []).length" class="function-field-tag muted">{{ $t("admin.plugin.noInputFields") }}</span>
                   </div>
                 </div>
               </div>
 
-              <el-empty v-else description="暂无函数清单" />
+              <el-empty v-else :description="$t('pluginDetail.noFunctions')" />
             </div>
           </div>
 
           <aside class="detail-aside">
             <div class="meta-card">
-              <div class="meta-label">工具类型</div>
+              <div class="meta-label">{{ $t("admin.plugin.toolType") }}</div>
               <div class="meta-value">{{ profile.category || '-' }}</div>
             </div>
             <div class="meta-card">
-              <div class="meta-label">业务场景</div>
+              <div class="meta-label">{{ $t("admin.plugin.bizScenario") }}</div>
               <div class="meta-value">{{ profile.scenario || '-' }}</div>
             </div>
             <div class="meta-card">
-              <div class="meta-label">开发者</div>
-              <div class="meta-value">{{ profile.developerName || 'EIMSNext' }}</div>
+              <div class="meta-label">{{ $t("admin.plugin.developer") }}</div>
+              <div class="meta-value">{{ profile.developerName || $t("admin.developer") }}</div>
             </div>
             <div class="meta-card">
-              <div class="meta-label">版本</div>
+              <div class="meta-label">{{ $t("admin.version") }}</div>
               <div class="meta-value">{{ profile.version }}</div>
             </div>
             <div class="meta-card">
-              <div class="meta-label">安装量</div>
+              <div class="meta-label">{{ $t("admin.installCount") }}</div>
               <div class="meta-value">{{ profile.installCount || 0 }}</div>
             </div>
           </aside>
@@ -112,6 +111,9 @@
 import type { PluginProfile } from "@eimsnext/models";
 import { pluginProfileService } from "@eimsnext/services";
 import { ElMessage } from "element-plus";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({ name: "PluginDetail" });
 
@@ -142,7 +144,7 @@ async function loadDetail() {
     profile.value = data;
     activeImage.value = galleryImages.value[0] || "";
   } catch {
-    ElMessage.error("加载插件详情失败");
+    ElMessage.error(t("admin.plugin.loadFailed"));
   }
 }
 
@@ -156,11 +158,11 @@ async function install() {
   if (!profile.value) return;
   try {
     await pluginProfileService.install(profile.value.id);
-    ElMessage.success("安装成功");
+    ElMessage.success(t("admin.plugin.installSuccess"));
     profile.value.installed = true;
     emit("installed");
   } catch {
-    ElMessage.error("安装失败");
+    ElMessage.error(t("admin.plugin.installFailed"));
   }
 }
 

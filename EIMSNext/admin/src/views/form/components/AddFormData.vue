@@ -12,6 +12,7 @@ import { ref, watch } from "vue";
 import { FormDef, FormData, FormContent, FormDataRequest, DataAction, IFieldPerm } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
+import { bus } from "@eimsnext/utils";
 import { FormActionSettings } from "@/components/FormView/type";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -74,6 +75,7 @@ const saveDraft = (data: any) => {
   request.then((res) => {
     formData.value = res.data;
     emit("save", res);
+    bus.emit("data:saved", { formId: props.formId });
   });
 };;
 const submitData = (data: any) => {
@@ -101,6 +103,7 @@ const submitData = (data: any) => {
   request.then((res) => {
     formData.value = res.data;
     emit("submit", res);
+    bus.emit("data:saved", { formId: props.formId });
   });
 };
 </script>

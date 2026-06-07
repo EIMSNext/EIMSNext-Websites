@@ -35,7 +35,8 @@ import { showToast } from "vant";
 import { FlowStatus, type NodeActionConfig, type NodeActionType, type WfTodo } from "@eimsnext/models";
 import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
-import { formDataServiceMobile, getNodeActionLabel, todoServiceMobile } from "@/services/mobileService";
+import { getNodeActionLabel } from "@eimsnext/services";
+import { formDataServiceMobile, todoServiceMobile } from "@/services/mobileService";
 
 type MobileActionKey = NodeActionType | "withdraw" | "urge";
 

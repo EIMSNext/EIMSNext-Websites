@@ -22,6 +22,7 @@ export interface IFormFieldDef {
   isSubField?: boolean;
   nodeId?: string;
   singleResultNode?: boolean;
+  sourceType?: "form" | "http" | "schedule";
 }
 export function splitSubField(subField: string) {
   return subField.split(">");

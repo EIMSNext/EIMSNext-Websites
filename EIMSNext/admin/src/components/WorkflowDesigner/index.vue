@@ -11,15 +11,15 @@
                 :key="item.id || `draft-${item.version}`" @click="selectVersion(item)">
                 <div class="wf-version-item">
                   <span>流程版本(V{{ item.version }})</span>
-                  <el-tag v-if="item.isCurrent" size="small" type="success">启用中</el-tag>
-                  <el-tag v-else-if="!item.released" size="small" type="warning">设计中</el-tag>
+                  <el-tag v-if="item.isCurrent" size="small" type="success">{{ $t("common.flowStatus.approving") }}</el-tag>
+                  <el-tag v-else-if="!item.released" size="small" type="warning">{{ $t("common.flowStatus.indesign") }}</el-tag>
                   <el-tag v-else size="small" type="info">历史</el-tag>
                 </div>
               </el-dropdown-item>
               <el-dropdown-item v-else>
                 <div class="wf-version-item">
                   <span>流程版本(V1)</span>
-                  <el-tag size="small" type="warning">设计中</el-tag>
+                  <el-tag size="small" type="warning">{{ $t("common.flowStatus.indesign") }}</el-tag>
                 </div>
               </el-dropdown-item>
               <el-dropdown-item divided @click="createVersion" :disabled="versions.length === 0">
@@ -50,7 +50,7 @@
     </div>
 
     <et-dialog :modelValue="showVersionDialog" class="version-manage-dialog" title="管理已有版本" width="760px"
-      :showNoSave="false" :showCancel="false" okText="关闭" @cancel="showVersionDialog = false"
+      :showNoSave="false" :showCancel="false" :ok-text="$t('common.close')" @cancel="showVersionDialog = false"
       @ok="showVersionDialog = false">
       <div class="version-dialog-body">
         <div v-for="item in versions" :key="item.id" class="version-row">
@@ -58,11 +58,11 @@
             <div class="version-row-title">
               <span class="version-name">流程版本(V{{ item.version }})</span>
               <el-tag v-if="!item.released" size="small" effect="plain" type="warning">
-                设计中
-              </el-tag>
-              <el-tag v-else-if="item.isCurrent" size="small" effect="plain" type="success">
-                启用中
-              </el-tag>
+                 {{ $t("common.flowStatus.indesign") }}
+                </el-tag>
+                <el-tag v-else-if="item.isCurrent" size="small" effect="plain" type="success">
+                 {{ $t("common.flowStatus.approving") }}
+                </el-tag>
               <el-tag v-else size="small" effect="plain" type="info">历史</el-tag>
             </div>
           </div>

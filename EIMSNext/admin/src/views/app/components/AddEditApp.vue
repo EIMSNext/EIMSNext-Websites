@@ -1,14 +1,14 @@
 <template>
   <et-dialog v-model="showDialog" width="500px" :title="title" :append-to-body="true" :destroy-on-close="true"
     @cancel="cancel" @ok="save">
-    <el-form ref="appRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
-      <el-form-item label="应用名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入应用名称" />
-      </el-form-item>
-      <el-form-item label="应用描述" prop="description">
-        <el-input v-model="formData.description" placeholder="请输入应用描述" type="textarea" :rows="5" />
-      </el-form-item>
-      <el-form-item label="应用图标" prop="icon">
+      <el-form ref="appRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
+        <el-form-item :label="$t('comp.addEditApp.appName')" prop="name">
+          <el-input v-model="formData.name" :placeholder="$t('comp.addEditApp.appNamePlaceholder')" />
+        </el-form-item>
+        <el-form-item :label="$t('comp.addEditApp.appDesc')" prop="description">
+          <el-input v-model="formData.description" :placeholder="$t('comp.addEditApp.appDescPlaceholder')" type="textarea" :rows="5" />
+        </el-form-item>
+        <el-form-item :label="$t('comp.addEditApp.appIcon')" prop="icon">
         <el-popover trigger="click" placement="bottom-start" width="340px">
           <template #reference>
             <div class="app-icon" :style="{ backgroundColor: appIconColor }"">
@@ -26,6 +26,7 @@
 import { AppDef, AppDefRequest } from "@eimsnext/models";
 import { appDefService } from "@eimsnext/services";
 import { useAppStore } from "@eimsnext/store";
+import { useI18n } from "vue-i18n";
 import AppIconSelect from "./AppIconSelect.vue";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 
@@ -44,15 +45,16 @@ const props = withDefaults(
 );
 
 const appStore = useAppStore();
+const { t } = useI18n();
 const showDialog = ref(true);
-const title = props.edit ? "修改应用信息" : "添加新应用";
+const title = props.edit ? t("comp.addEditApp.editApp") : t("comp.addEditApp.addApp");
 const formData = ref<AppDef>({ id: "", name: "", sortIndex: 0, appMenus: [], icon: "" });
 if (props.edit) formData.value = props.app!;
 const appIcon = ref(getAppIcon(formData.value))
 const appIconColor = ref(getAppIconColor(formData.value))
 
 const rules = reactive({
-  name: [{ required: true, message: "应用名称不能为空", trigger: "blur" }],
+  name: [{ required: true, message: t("comp.addEditApp.appNameRequired"), trigger: "blur" }],
 });
 
 const onIconSelected = (payload: { icon: string; iconColor: string }) => {

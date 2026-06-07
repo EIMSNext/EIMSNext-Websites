@@ -3,7 +3,7 @@ import { ExportResponse, FormData, FormDataExportRequest, FormDataRequest } from
 import {
   IFormDataFilterOptionsRequest,
   IFormDataFilterOptionsResponse,
-} from "@/requestModel";
+} from "../requestModel";
 
 export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
   protected modelName(): string {

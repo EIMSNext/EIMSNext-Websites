@@ -15,7 +15,7 @@
       </div>
       <div class="formula-bottom">
         <div class="formula-tree-panel">
-          <el-input v-model="fieldKeyword" placeholder="请输入关键字" />
+          <el-input v-model="fieldKeyword" :placeholder="t('comp.triggerNodeMeta.searchKeyword')" />
           <el-tree
             class="formula-tree"
             :data="filteredFieldTree"
@@ -25,7 +25,7 @@
           />
         </div>
         <div class="formula-tree-panel">
-          <el-input v-model="formulaKeyword" placeholder="请输入关键字" />
+          <el-input v-model="formulaKeyword" :placeholder="t('comp.triggerNodeMeta.searchKeyword')" />
           <el-tree
             class="formula-tree"
             :data="filteredFormulaTree"
@@ -50,7 +50,7 @@ import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror";
 import "codemirror/addon/mode/simple";
 import { computed, markRaw, nextTick, ref, watch } from "vue";
-import { useLocale } from "element-plus";
+import { useI18n } from "vue-i18n";
 import { formulaInfo, formulaTree, type IFormulaGroupMeta } from "@eimsnext/utils";
 import { INodeForm } from "@/NodeFieldList/type";
 import { IFormulaRef, IFormulaValue } from "@/FormFieldList/type";
@@ -61,7 +61,7 @@ import {
   IDataflowFormulaTreeItem,
 } from "./formula";
 
-const { t } = useLocale();
+const { t } = useI18n();
 
 defineOptions({
   name: "FormulaEditorDialog",

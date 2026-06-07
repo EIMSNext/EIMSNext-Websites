@@ -4,13 +4,13 @@
     @cancel="showAddEditGroupDialog = false" @ok="handleGroupSaved"></AddEditRoleGroup>
   <AddEditRole v-if="showAddEditRoleDialog" :edit="editMode" :p-group="currentGroup!" :p-role="selectedRole"
     @cancel="showAddEditRoleDialog = false" @ok="handleRoleSaved"></AddEditRole>
-  <et-confirm-dialog v-model="showDeleteDialog" title="确认要删除吗?" :showNoSave="false" okText="确认"
+  <et-confirm-dialog v-model="showDeleteDialog" :title="$t('role.confirmDelete')" :showNoSave="false" :okText="$t('common.confirm')"
     @cancel="showDeleteDialog = false" @ok="handleDeleteConfirm">
-    确认删除已选中的数据项?
+    {{ $t("role.confirmDeleteData") }}
   </et-confirm-dialog>
   <el-card shadow="never" class="role-card">
     <div class="form-action">
-      <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="请输入" />
+      <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable :placeholder="$t('role.searchPlaceholder')" />
       <el-button @click="handleAddGroupClick">
         <et-icon icon="el-plus"></et-icon>
       </el-button>

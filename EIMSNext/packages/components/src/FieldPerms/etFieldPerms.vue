@@ -2,15 +2,15 @@
   <div class="et-field-perms">
     <!-- 表头 -->
     <div class="field-list-header">
-      <span class="field-header">字段</span>
-      <div class="field-view-col">可见</div>
-      <div class="field-edit-col">可编辑 <span class="tips">!</span></div>
+      <span class="field-header">{{ $t("common.fields") }}</span>
+      <div class="field-view-col">{{ $t("comp.fieldPerms.view") }}</div>
+      <div class="field-edit-col">{{ $t("comp.fieldPerms.edit") }} <span class="tips">{{ $t("comp.fieldPerms.tips") }}</span></div>
     </div>
 
     <!-- 列表项 -->
     <div class="field-list-content-wrapper">
       <div class="check-all">
-        全选
+        {{ $t("common.selectAll") }}
         <div class="field-view-col">
           <el-checkbox
             :model-value="allVisibleChecked"
@@ -50,35 +50,35 @@
                 @change="(val: boolean) => handlePermChange(item, 'editable', val)"
               />
 
-              <el-popover
-                v-if="item.type === FieldType.TableForm"
-                placement="left"
-                :width="150"
-                :hide-after="0"
-                trigger="click"
-              >
-                <template #reference>
-                  <div class="subform-tag">
-                    <el-button :plain="true" class="subform-button">
-                      <et-icon icon="el-memo" class="subform-icon" />
-                    </el-button>
-                  </div>
-                </template>
-                <div>
-                  <el-checkbox
-                    :model-value="item.tableInsert"
-                    @change="(val: boolean) => handleTablePermChange(item, 'tableInsert', val)"
-                  >可新增记录</el-checkbox>
-                  <el-checkbox
-                    :model-value="item.tableEdit"
-                    @change="(val: boolean) => handleTablePermChange(item, 'tableEdit', val)"
-                  >可编辑已有记录</el-checkbox>
-                  <el-checkbox
-                    :model-value="item.tableDelete"
-                    @change="(val: boolean) => handleTablePermChange(item, 'tableDelete', val)"
-                  >可删除已有记录</el-checkbox>
-                </div>
-              </el-popover>
+                  <el-popover
+                    v-if="item.type === FieldType.TableForm"
+                    placement="left"
+                    :width="150"
+                    :hide-after="0"
+                    trigger="click"
+                  >
+                    <template #reference>
+                      <div class="subform-tag">
+                        <el-button :plain="true" class="subform-button">
+                          <et-icon icon="el-memo" class="subform-icon" />
+                        </el-button>
+                      </div>
+                    </template>
+                    <div>
+                      <el-checkbox
+                        :model-value="item.tableInsert"
+                        @change="(val: boolean) => handleTablePermChange(item, 'tableInsert', val)"
+                      >{{ $t("comp.fieldPerms.addRecord") }}</el-checkbox>
+                      <el-checkbox
+                        :model-value="item.tableEdit"
+                        @change="(val: boolean) => handleTablePermChange(item, 'tableEdit', val)"
+                      >{{ $t("comp.fieldPerms.editRecord") }}</el-checkbox>
+                      <el-checkbox
+                        :model-value="item.tableDelete"
+                        @change="(val: boolean) => handleTablePermChange(item, 'tableDelete', val)"
+                      >{{ $t("comp.fieldPerms.deleteRecord") }}</el-checkbox>
+                    </div>
+                  </el-popover>
             </div>
           </div>
         </template>
@@ -92,6 +92,9 @@ import "./style/index.scss";
 import { computed, ref, watch } from "vue";
 import { IFieldPermItem } from "./type";
 import { FieldDef, FieldType, isSystemField } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "EtFieldPerms",

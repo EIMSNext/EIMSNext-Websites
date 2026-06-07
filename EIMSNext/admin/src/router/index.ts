@@ -2,10 +2,79 @@ import { UserType } from "@eimsnext/models";
 import type { App } from "vue";
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
 
-export const AppLayout = () => import("@/layout/applayout/index.vue");
+const AppLayout = () => import("@/layout/applayout/index.vue");
 export const SysLayout = () => import("@/layout/syslayout/index.vue");
-export const TodoLayout = () => import("@/layout/todolayout/index.vue");
-export const OpenPlatformLayout = () => import("@/layout/openplatform/index.vue");
+const TodoLayout = () => import("@/layout/todolayout/index.vue");
+const OpenPlatformLayout = () => import("@/layout/openplatform/index.vue");
+
+interface SystemRouteDef {
+  path: string;
+  component: () => Promise<any>;
+  title?: string;
+  allowedUserTypes?: UserType[];
+}
+
+const systemRoutes: SystemRouteDef[] = [
+  { path: "department",  component: () => import("@/views/system/department/index.vue"),  allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "role",        component: () => import("@/views/system/role/index.vue"),        title: "role",        allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "admin",       component: () => import("@/views/system/admin/index.vue"),       title: "admin",       allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "corp-log",    component: () => import("@/views/system/corp-log/index.vue"),    title: "corp-log",    allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "flow-manage", component: () => import("@/views/system/flow-manage/index.vue"), title: "flow-manage", allowedUserTypes: [UserType.CorpAdmin] },
+  { path: "plugin",      component: () => import("@/views/system/plugin/index.vue"),      title: "plugin",      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+];
+
+interface OpenPlatformRouteDef {
+  path: string;
+  component: () => Promise<any>;
+  title?: string;
+}
+
+const openPlatformRoutes: OpenPlatformRouteDef[] = [
+  { path: "pluginstore",   component: () => import("@/views/pluginstore/index.vue"),                title: "pluginstore" },
+  { path: "plugin-manage", component: () => import("@/views/open-platform/plugin-manage/index.vue"), title: "plugin-manage" },
+  { path: "api-key",       component: () => import("@/views/open-platform/api-key/index.vue"),       title: "api-key" },
+  { path: "api-log",       component: () => import("@/views/open-platform/api-log/index.vue"),       title: "api-log" },
+  { path: "docs",          component: () => import("@/views/open-platform/docs/index.vue"),          title: "open-platform-docs" },
+];
+
+type RouteMeta<R> = R extends { meta: infer M } ? M : never;
+
+function createSysRoutes(defs: SystemRouteDef[]): RouteRecordRaw[] {
+  return defs.map((d) => ({
+    path: `/system/${d.path}`,
+    component: SysLayout,
+    children: [{
+      path: "",
+      component: d.component,
+      meta: { title: d.title ?? "", icon: "collection", keepAlive: true, requiresAuth: true, allowedUserTypes: d.allowedUserTypes },
+    }],
+  }));
+}
+
+function createOpenPlatformRoutes(defs: OpenPlatformRouteDef[]): RouteRecordRaw[] {
+  return defs.map((d) => ({
+    path: `/open-platform/${d.path}`,
+    component: OpenPlatformLayout,
+    children: [{
+      path: "",
+      component: d.component,
+      meta: { title: d.title, keepAlive: true, requiresAuth: true },
+    }],
+  }));
+}
+
+function createTodoRoute(path: string, name: string, component: () => Promise<any>, title: string): RouteRecordRaw {
+  return {
+    path,
+    component: TodoLayout,
+    children: [{
+      path: "",
+      name: `${name}-global`,
+      component,
+      meta: { title, affix: false, keepAlive: true, requiresAuth: true, closable: true },
+    }],
+  };
+}
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
@@ -55,235 +124,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import("@/views/corp-onboarding/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
-  {
-    path: "/mytasks",
-    component: TodoLayout,
-    children: [
-      {
-        path: "",
-        name: "mytasks-global",
-        component: () => import("@/views/wftodo/global/mytasks.vue"),
-        meta: {
-          title: "我的待办",
-          affix: false,
-          keepAlive: true,
-          requiresAuth: true,
-          closable: true,
-        },
-      },
-    ],
-  },
-  {
-    path: "/mystarted",
-    component: TodoLayout,
-    children: [
-      {
-        path: "",
-        name: "mystarted-global",
-        component: () => import("@/views/wftodo/global/mystarted.vue"),
-        meta: {
-          title: "我发起的",
-          affix: false,
-          keepAlive: true,
-          requiresAuth: true,
-          closable: true,
-        },
-      },
-    ],
-  },
-  {
-    path: "/myapproved",
-    component: TodoLayout,
-    children: [
-      {
-        path: "",
-        name: "myapproved-global",
-        component: () => import("@/views/wftodo/global/myapproved.vue"),
-        meta: {
-          title: "我审批的",
-          affix: false,
-          keepAlive: true,
-          requiresAuth: true,
-          closable: true,
-        },
-      },
-    ],
-  },
-  {
-    path: "/cctome",
-    component: TodoLayout,
-    children: [
-      {
-        path: "",
-        name: "cctome-global",
-        component: () => import("@/views/wftodo/global/cctome.vue"),
-        meta: {
-          title: "抄送我的",
-          affix: false,
-          keepAlive: true,
-          requiresAuth: true,
-          closable: true,
-        },
-      },
-    ],
-  },
-  {
-    path: "/system/department",
-    component: SysLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/system/department/index.vue"),
-        meta: {
-          title: "",
-          icon: "collection",
-          keepAlive: true,
-          requiresAuth: true,
-          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
-        },
-      },
-    ],
-  },
-  {
-    path: "/system/role",
-    component: SysLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/system/role/index.vue"),
-        meta: {
-          title: "role",
-          icon: "collection",
-          keepAlive: true,
-          requiresAuth: true,
-          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
-        },
-      },
-    ],
-  },
-  {
-    path: "/system/admin",
-    component: SysLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/system/admin/index.vue"),
-        meta: {
-          title: "admin",
-          icon: "collection",
-          keepAlive: true,
-          requiresAuth: true,
-          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
-        },
-      },
-    ],
-  },
-  {
-    path: "/system/corp-log",
-    component: SysLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/system/corp-log/index.vue"),
-        meta: {
-          title: "corp-log",
-          icon: "collection",
-          keepAlive: true,
-          requiresAuth: true,
-          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
-        },
-      },
-    ],
-  },
-  {
-    path: "/system/flow-manage",
-    component: SysLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/system/flow-manage/index.vue"),
-        meta: {
-          title: "flow-manage",
-          icon: "collection",
-          keepAlive: true,
-          requiresAuth: true,
-          allowedUserTypes: [UserType.CorpAdmin],
-        },
-      },
-    ],
-  },
-  {
-    path: "/system/plugin",
-    component: SysLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/system/plugin/index.vue"),
-        meta: {
-          title: "plugin",
-          icon: "collection",
-          keepAlive: true,
-          requiresAuth: true,
-          allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
-        },
-      },
-    ],
-  },
-  {
-    path: "/open-platform/pluginstore",
-    component: OpenPlatformLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/pluginstore/index.vue"),
-        meta: { title: "pluginstore", keepAlive: true, requiresAuth: true },
-      },
-    ],
-  },
-  {
-    path: "/open-platform/plugin-manage",
-    component: OpenPlatformLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/open-platform/plugin-manage/index.vue"),
-        meta: { title: "plugin-manage", keepAlive: true, requiresAuth: true },
-      },
-    ],
-  },
-  {
-    path: "/open-platform/api-key",
-    component: OpenPlatformLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/open-platform/api-key/index.vue"),
-        meta: { title: "api-key", keepAlive: true, requiresAuth: true },
-      },
-    ],
-  },
-  {
-    path: "/open-platform/api-log",
-    component: OpenPlatformLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/open-platform/api-log/index.vue"),
-        meta: { title: "api-log", keepAlive: true, requiresAuth: true },
-      },
-    ],
-  },
-  {
-    path: "/open-platform/docs",
-    component: OpenPlatformLayout,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/open-platform/docs/index.vue"),
-        meta: { title: "open-platform-docs", keepAlive: true, requiresAuth: true },
-      },
-    ],
-  },
+  createTodoRoute("/mytasks", "mytasks", () => import("@/views/wftodo/global/mytasks.vue"), "我的待办"),
+  createTodoRoute("/mystarted", "mystarted", () => import("@/views/wftodo/global/mystarted.vue"), "我发起的"),
+  createTodoRoute("/myapproved", "myapproved", () => import("@/views/wftodo/global/myapproved.vue"), "我审批的"),
+  createTodoRoute("/cctome", "cctome", () => import("@/views/wftodo/global/cctome.vue"), "抄送我的"),
+  ...createSysRoutes(systemRoutes),
+  ...createOpenPlatformRoutes(openPlatformRoutes),
   {
     path: "/system/:formId",
     component: SysLayout,

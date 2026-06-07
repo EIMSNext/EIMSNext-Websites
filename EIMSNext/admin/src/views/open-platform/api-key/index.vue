@@ -1,9 +1,9 @@
 <template>
   <div class="placeholder-page">
     <div class="placeholder-card">
-      <div class="placeholder-kicker">预留能力</div>
-      <h1 class="placeholder-title">API Key</h1>
-      <p class="placeholder-text">后续将在此接入开放平台密钥管理，统一查看密钥、权限范围、更新时间和调用约束。</p>
+      <div class="placeholder-kicker">{{ $t("admin.openPlatform.reservedCapability") }}</div>
+      <h1 class="placeholder-title">{{ $t("admin.openPlatform.apiKey") }}</h1>
+      <p class="placeholder-text">{{ $t("admin.openPlatform.apiKeyDesc") }}</p>
     </div>
   </div>
 </template>

@@ -8,7 +8,7 @@
       @command="addingField"
     >
       <el-button class="btn-add-trigger">
-        {{ "+ " + t("comp.selectField") }}
+        {{ "+ " + t("common.selectField") }}
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">

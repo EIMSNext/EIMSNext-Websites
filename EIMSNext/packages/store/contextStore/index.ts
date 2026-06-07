@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { store } from "../setup";
 import { ref } from "vue";
+import { bus } from "@eimsnext/utils";
 import { useAppStoreHook } from "../genericStore/appDefStore";
 import { useFormStoreHook } from "../genericStore/formStore";
 import { corporateService } from "@eimsnext/services";
@@ -109,6 +110,8 @@ export const useContextStore = defineStore("context", () => {
     appId.value = "";
     updateAppChanged();
   };
+
+  bus.on("auth:logout", clearAll);
 
   return {
     corpId,

@@ -1,179 +1,163 @@
 <template>
-  <MetaItemHeader
-    :label="t('dataflow.triggeringForm')"
-    :required="true"
-  ></MetaItemHeader>
-  <div class="section-indent">
-    <el-input
-      v-model="formName"
-      readonly
-      size="default"
-      class="full-width-input"
-    />
-  </div>
-  <MetaItemHeader
-    class="mt-[8px]"
-    :label="t('dataflow.trigger')"
-    :required="true"
-  ></MetaItemHeader>
-  <div class="trigger-header ml-[8px]">
-    <el-popover
-      popper-class="data-triggers"
-      placement="bottom"
-      :show-arrow="false"
-      width="200"
-      trigger="click"
-    >
-      <div class="trigger-header">
-        <!-- <div class="trigger-desc">{{ t("表单事件") }}</div> -->
-        <div
-          class="add-trigger"
-          :class="{ notAllow: triggerBySubmit }"
-          @click="addTrigger(EventType.Submitted)"
-        >
-          {{ t("dataflow.addedRecord") }}
+  <template v-if="triggerKind === DataflowTriggerKind.Form">
+    <MetaItemHeader :label="t('dataflow.triggeringForm')" :required="true" />
+    <div class="section-indent">
+      <el-input v-model="formName" readonly size="default" class="full-width-input" />
+    </div>
+    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.trigger')" :required="true" />
+    <div class="trigger-header ml-[8px]">
+      <el-popover popper-class="data-triggers" placement="bottom" :show-arrow="false" width="200" trigger="click">
+        <div class="trigger-header">
+          <div class="add-trigger" :class="{ notAllow: triggerBySubmit }" @click="addTrigger(EventType.Submitted)">
+            {{ t("dataflow.addedRecord") }}
+          </div>
+          <template v-if="!usingFlow">
+            <div class="add-trigger" :class="{ notAllow: triggerByUpdate }" @click="addTrigger(EventType.Modified)">
+              {{ t("dataflow.updatedRecord") }}
+            </div>
+            <div class="add-trigger" :class="{ notAllow: triggerByDelete }" @click="addTrigger(EventType.Removed)">
+              {{ t("dataflow.deletedRecord") }}
+            </div>
+          </template>
+          <template v-if="usingFlow">
+            <div class="add-trigger" :class="{ notAllow: triggerByApproved }" @click="addTrigger(EventType.Approved)">
+              {{ t("dataflow.wfApproved") }}
+            </div>
+            <div class="add-trigger" :class="{ notAllow: triggerByRejected }" @click="addTrigger(EventType.Rejected)">
+              {{ t("dataflow.wfRejected") }}
+            </div>
+            <div class="add-trigger" :class="{ notAllow: triggerByApproving }" @click="addTrigger(EventType.Approving)">
+              {{ t("dataflow.wfNextNode") }}
+            </div>
+          </template>
         </div>
-        <template v-if="!usingFlow">
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByUpdate }"
-            @click="addTrigger(EventType.Modified)"
-          >
-            {{ t("dataflow.updatedRecord") }}
-          </div>
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByDelete }"
-            @click="addTrigger(EventType.Removed)"
-          >
-            {{ t("dataflow.deletedRecord") }}
-          </div>
+        <template #reference>
+          <el-button class="btn-add-trigger">{{ "+ " + t("dataflow.addTrigger") }}</el-button>
         </template>
-        <template v-if="usingFlow">
-          <!-- <div class="trigger-desc">{{ t("审批事件") }}</div> -->
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByApproved }"
-            @click="addTrigger(EventType.Approved)"
-          >
-            {{ t("dataflow.wfApproved") }}
-          </div>
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByRejected }"
-            @click="addTrigger(EventType.Rejected)"
-          >
-            {{ t("dataflow.wfRejected") }}
-          </div>
-          <div
-            class="add-trigger"
-            :class="{ notAllow: triggerByApproving }"
-            @click="addTrigger(EventType.Approving)"
-          >
-            {{ t("dataflow.wfNextNode") }}
+      </el-popover>
+      <div class="item-triggers">
+        <template v-for="(item, index) in triggerList" :key="item.id">
+          <div class="show-triggers">
+            <div class="color-838892">{{ index == 0 ? t("dataflow.when") : t("dataflow.or") }}</div>
+            <template v-if="item.id == EventType.Approving">
+              <div class="trigger-approving-content">
+                <div>{{ t("dataflow.wfNextNode") }}</div>
+                <div class="trigger-node-select-wrap">
+                  <el-select v-model="wfNodeId" :placeholder="t('dataflow.selectNode')" size="default" class="trigger-node-select" @change="onNodeInput">
+                    <el-option v-for="item in nodeList" :key="item.id" :label="item.label" :value="item.id" />
+                  </el-select>
+                </div>
+                <el-select v-model="nodeAction" size="default" class="trigger-action-select" @change="onActionInput">
+                  <el-option v-for="item in actionList" :key="item.id" :label="item.label" :value="item.id" />
+                </el-select>
+              </div>
+            </template>
+            <template v-else>
+              <div class="trigger-label">{{ t(item.title) }}</div>
+            </template>
+            <div class="trigger-delete" @click="delTrigger(item.id)">
+              <et-icon icon="el-delete" class="btn-delete-trigger"></et-icon>
+            </div>
           </div>
         </template>
       </div>
-      <template #reference>
-        <el-button class="btn-add-trigger">
-          {{ "+ " + t("dataflow.addTrigger") }}
-        </el-button>
-      </template>
-    </el-popover>
-    <div class="item-triggers">
-      <template v-for="(item, index) in triggerList">
-        <div class="show-triggers">
-          <div class="color-838892">
-            {{ index == 0 ? t("dataflow.when") : t("dataflow.or") }}
-          </div>
-          <template v-if="item.id == EventType.Approving">
-            <div class="trigger-approving-content">
-              <div>{{ t("dataflow.wfNextNode") }}</div>
-              <div class="trigger-node-select-wrap">
-                <el-select
-                  v-model="wfNodeId"
-                  :placeholder="t('dataflow.selectNode')"
-                  size="default"
-                  class="trigger-node-select"
-                  @change="onNodeInput"
-                >
-                  <el-option
-                    v-for="item in nodeList"
-                    :key="item.id"
-                    :label="item.label"
-                    :value="item.id"
-                  />
-                </el-select>
-              </div>
-              <el-select
-                v-model="nodeAction"
-                size="default"
-                class="trigger-action-select"
-                @change="onActionInput"
-              >
-                <el-option
-                  v-for="item in actionList"
-                  :key="item.id"
-                  :label="item.label"
-                  :value="item.id"
-                />
-              </el-select>
-            </div>
-          </template>
-          <template v-else>
-            <div class="trigger-label">
-              {{ t(item.title) }}
-            </div>
-          </template>
-
-          <div class="trigger-delete" @click="delTrigger(item.id)">
-            <et-icon icon="el-delete" class="btn-delete-trigger"></et-icon>
-          </div>
-        </div>
-      </template>
     </div>
-  </div>
-  <MetaItemHeader
-    class="mt-[12px]"
-    :label="t('dataflow.triggerCondition')"
-    :required="true"
-  ></MetaItemHeader>
-  <ConditionList
-    v-model="condList"
-    :formId="flowContext!.formId"
-    @change="onCondInput"
-    @remove="onCondClear"
-  ></ConditionList>
+    <MetaItemHeader class="mt-[12px]" :label="t('dataflow.triggerCondition')" :required="true" />
+    <ConditionList v-model="condList" :formId="flowContext!.formId" @change="onCondInput" @remove="onCondClear" />
+  </template>
+
+  <template v-else-if="triggerKind === DataflowTriggerKind.Schedule">
+    <MetaItemHeader :label="t('dataflow.triggerTime')" :required="true" />
+    <TriggerTimeSettings v-model="scheduleValue" :field-options="availableTimeFields" :allow-mode-switch="true" class="section-indent" />
+    <MetaItemHeader v-if="showScheduleCondition" class="mt-[12px]" :label="t('dataflow.triggerCondition')" :required="true" />
+    <ConditionList v-if="showScheduleCondition" v-model="condList" :formId="flowContext!.formId" @change="onCondInput" @remove="onCondClear" />
+    <div v-else class="section-indent muted-text">{{ t("dataflow.noTriggerData") }}</div>
+  </template>
+
+  <template v-else>
+    <MetaItemHeader :label="t('dataflow.triggerAddress')" :required="true" />
+    <div class="section-indent">
+      <el-input :model-value="hookUrl" readonly class="full-width-input">
+        <template #append>
+          <el-button @click="copyHookUrl">{{ t("common.copy") }}</el-button>
+        </template>
+      </el-input>
+    </div>
+    <MetaItemHeader class="mt-[12px]" :label="t('dataflow.triggerConfig')" :required="false" />
+    <div class="section-indent http-config">
+      <el-checkbox v-model="enableIpLimit">{{ t("dataflow.allowedIps") }}</el-checkbox>
+      <el-input
+        v-if="enableIpLimit"
+        v-model="allowedIpText"
+        type="textarea"
+        :rows="3"
+        :placeholder="t('comp.triggerNodeMeta.oneIpPerLine')"
+        @change="syncAllowedIps"
+      />
+      <el-checkbox v-model="enableCustomResponse">{{ t("dataflow.responseContent") }}</el-checkbox>
+      <div v-if="enableCustomResponse" class="response-config">
+        <el-input-number v-model="responseStatusCode" :min="200" :max="599" @change="syncHttpSettings" />
+        <el-input v-model="responseContentType" placeholder="Content-Type" @change="syncHttpSettings" />
+        <el-input v-model="responseBody" type="textarea" :rows="4" :placeholder="t('comp.triggerNodeMeta.responseBodyPlaceholder')" @change="syncHttpSettings" />
+      </div>
+    </div>
+    <MetaItemHeader class="mt-[12px]" :label="t('dataflow.sampleFields')" :required="false" />
+    <div class="section-indent http-config">
+      <el-button type="primary" @click="openSampleDialog">{{ t("dataflow.fetchSampleData") }}</el-button>
+      <el-table :data="httpFields" size="small" border class="http-table">
+        <el-table-column prop="label" :label="t('comp.triggerNodeMeta.fieldName')" min-width="180" />
+        <el-table-column prop="type" :label="t('comp.triggerNodeMeta.fieldType')" width="120" />
+        <el-table-column prop="sampleValue" :label="t('comp.triggerNodeMeta.sampleValue')" min-width="220" show-overflow-tooltip />
+      </el-table>
+    </div>
+  </template>
+
+  <HttpSampleDialog
+    v-model="showSampleDialog"
+    :dataflow-id="flowContext.definitionId"
+    :corp-id="corpId"
+    :hook-url="hookUrl"
+    @captured="onHttpSampleCaptured"
+  />
 </template>
 <script lang="ts" setup>
-import {
-  computed,
-  inject,
-  nextTick,
-  onBeforeMount,
-  ref,
-  watch,
-} from "vue";
+import { computed, inject, onBeforeMount, ref } from "vue";
 import {
   IFlowData,
   FlowNodeType,
   IFlowContext,
   IFlowNodeData,
-  createFlowNode,
   EventType,
 } from "../Common/FlowData";
-import { FormDef, WfDefinition } from "@eimsnext/models";
+import {
+  DataflowScheduleSourceType,
+  DataflowTriggerKind,
+  FieldType,
+  FormDef,
+  TimerOffsetDirection,
+  TimerOffsetUnit,
+  TimerRepeatType,
+  WfDefinition,
+} from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { FlagEnum, uniqueId } from "@eimsnext/utils";
-import { wfDefinitionService } from "@eimsnext/services";
+import { DataflowHttpSampleResult, wfDefinitionService } from "@eimsnext/services";
 import buildQuery from "odata-query";
-import { useLocale } from "element-plus";
+import { ElMessage } from "element-plus";
+import { useI18n } from "vue-i18n";
 import { buildWfNodeListItems } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { IConditionList } from "@/ConditionList/type";
 import { IListItem } from "@/list/type";
 import { DataItemType } from "@/common";
-const { t } = useLocale();
+import {
+  TriggerTimeFieldOption,
+  TriggerTimeMode,
+  TriggerTimeSettings,
+  TriggerTimeSettingsValue,
+} from "../../TriggerTimeSettings";
+import HttpSampleDialog from "./HttpSampleDialog.vue";
+const { t } = useI18n();
 
 defineOptions({
   name: "TriggerNodeMeta",
@@ -191,6 +175,9 @@ const wfFlowData = ref<IFlowData>();
 const wfNodeId = ref("");
 const nodeAction = ref("submit");
 const nodeList = ref<IListItem[]>([]);
+const allowedIpText = ref("");
+const showSampleDialog = ref(false);
+const corpId = computed(() => (flowContext as any).corpId || "");
 const actionList = ref<IListItem[]>([
   {
     id: "submit",
@@ -199,6 +186,90 @@ const actionList = ref<IListItem[]>([
   },
   // { id: "return", label: t("dataflow.wfAction_Return") },
 ]);
+
+const triggerKind = computed(() => activeData.value.metadata.triggerMeta?.triggerKind ?? DataflowTriggerKind.Form);
+const availableTimeFields = computed<TriggerTimeFieldOption[]>(() => formRef.value ? buildNotifyTimeFieldOptions(formRef.value) : []);
+const showScheduleCondition = computed(() => scheduleValue.value.mode === TriggerTimeMode.Field);
+const httpFields = computed(() => activeData.value.metadata.triggerMeta?.httpSettings?.sampleFields ?? []);
+const hookUrl = computed(() => {
+  const dataflowId = flowContext.definitionId || "{dataflowId}";
+  return `/api/v1/tenant/{corpId}/dataflow/${dataflowId}`;
+});
+const enableIpLimit = computed({
+  get: () => (activeData.value.metadata.triggerMeta?.httpSettings?.allowedIps?.length ?? 0) > 0,
+  set: (value: boolean) => {
+    if (!activeData.value.metadata.triggerMeta?.httpSettings) return;
+    activeData.value.metadata.triggerMeta.httpSettings.allowedIps = value ? parseIpText(allowedIpText.value) : [];
+  },
+});
+const enableCustomResponse = computed({
+  get: () => !!activeData.value.metadata.triggerMeta?.httpSettings?.responseEnabled,
+  set: (value: boolean) => {
+    if (!activeData.value.metadata.triggerMeta?.httpSettings) return;
+    activeData.value.metadata.triggerMeta.httpSettings.responseEnabled = value;
+  },
+});
+const responseStatusCode = computed({
+  get: () => activeData.value.metadata.triggerMeta?.httpSettings?.responseStatusCode ?? 200,
+  set: (value: number) => {
+    if (!activeData.value.metadata.triggerMeta?.httpSettings) return;
+    activeData.value.metadata.triggerMeta.httpSettings.responseStatusCode = value;
+  },
+});
+const responseContentType = computed({
+  get: () => activeData.value.metadata.triggerMeta?.httpSettings?.responseContentType ?? "application/json",
+  set: (value: string) => {
+    if (!activeData.value.metadata.triggerMeta?.httpSettings) return;
+    activeData.value.metadata.triggerMeta.httpSettings.responseContentType = value;
+  },
+});
+const responseBody = computed({
+  get: () => activeData.value.metadata.triggerMeta?.httpSettings?.responseBody ?? "",
+  set: (value: string) => {
+    if (!activeData.value.metadata.triggerMeta?.httpSettings) return;
+    activeData.value.metadata.triggerMeta.httpSettings.responseBody = value;
+  },
+});
+
+const scheduleValue = computed<TriggerTimeSettingsValue>({
+  get: () => {
+    const timeSettings = activeData.value.metadata.triggerMeta?.timeSettings;
+    return {
+      mode: timeSettings?.sourceType === DataflowScheduleSourceType.FormField ? TriggerTimeMode.Field : TriggerTimeMode.Custom,
+      repeatType: timeSettings?.repeatType ?? TimerRepeatType.Once,
+      repeatConfig: timeSettings?.repeatConfig,
+      custom: {
+        startTime: timeSettings?.startTime,
+        endTime: timeSettings?.sourceType === DataflowScheduleSourceType.Custom ? timeSettings?.endTime : undefined,
+      },
+      field: {
+        timeField: timeSettings?.timeField,
+        fieldFormat: timeSettings?.fieldFormat,
+        direction: timeSettings?.direction ?? TimerOffsetDirection.At,
+        fixedTime: timeSettings?.fixedTime || "09:00",
+        offsetValue: timeSettings?.offsetValue ?? 1,
+        offsetUnit: timeSettings?.offsetUnit ?? TimerOffsetUnit.Minute,
+        endTime: timeSettings?.sourceType === DataflowScheduleSourceType.FormField ? timeSettings?.endTime : undefined,
+      },
+    };
+  },
+  set: (value) => {
+    if (!activeData.value.metadata.triggerMeta) return;
+    activeData.value.metadata.triggerMeta.timeSettings = {
+      sourceType: value.mode === TriggerTimeMode.Field ? DataflowScheduleSourceType.FormField : DataflowScheduleSourceType.Custom,
+      startTime: value.mode === TriggerTimeMode.Custom ? value.custom?.startTime : undefined,
+      endTime: value.mode === TriggerTimeMode.Custom ? value.custom?.endTime : value.field?.endTime,
+      timeField: value.mode === TriggerTimeMode.Field ? value.field?.timeField : undefined,
+      fieldFormat: value.mode === TriggerTimeMode.Field ? value.field?.fieldFormat : undefined,
+      direction: value.mode === TriggerTimeMode.Field ? value.field?.direction ?? TimerOffsetDirection.At : TimerOffsetDirection.At,
+      fixedTime: value.mode === TriggerTimeMode.Field ? value.field?.fixedTime : undefined,
+      offsetValue: value.mode === TriggerTimeMode.Field ? value.field?.offsetValue : undefined,
+      offsetUnit: value.mode === TriggerTimeMode.Field ? value.field?.offsetUnit : undefined,
+      repeatType: value.repeatType,
+      repeatConfig: value.repeatConfig,
+    };
+  },
+});
 
 const triggerBySubmit = computed(() => {
   return FlagEnum.has(selectedTriggers.value, EventType.Submitted);
@@ -262,12 +333,82 @@ const onActionInput = (val: string) => {
   activeData.value.metadata.triggerMeta!.nodeAction = val;
 };
 
+function copyHookUrl() {
+  navigator.clipboard.writeText(hookUrl.value).then(() => {
+    ElMessage.success(t("comp.triggerNodeMeta.copied"));
+  });
+}
+
+function parseIpText(value: string) {
+  return value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+}
+
+function syncAllowedIps() {
+  if (!activeData.value.metadata.triggerMeta?.httpSettings) return;
+  activeData.value.metadata.triggerMeta.httpSettings.allowedIps = parseIpText(allowedIpText.value);
+}
+
+function syncHttpSettings() {
+  if (!activeData.value.metadata.triggerMeta?.httpSettings) return;
+  activeData.value.metadata.triggerMeta.httpSettings.responseStatusCode = responseStatusCode.value;
+  activeData.value.metadata.triggerMeta.httpSettings.responseContentType = responseContentType.value;
+  activeData.value.metadata.triggerMeta.httpSettings.responseBody = responseBody.value;
+}
+
+function openSampleDialog() {
+  if (!flowContext.definitionId) {
+    ElMessage.warning(t("dataflow.httpSampleDialog.errorNoDraft"));
+    return;
+  }
+  showSampleDialog.value = true;
+}
+
+function onHttpSampleCaptured(result: DataflowHttpSampleResult) {
+  const settings = activeData.value.metadata.triggerMeta?.httpSettings;
+  if (settings && result.sampleFields) {
+    settings.sampleCapturedAt = result.capturedAt ?? Date.now();
+    settings.sampleFields = result.sampleFields;
+  }
+  ElMessage.success(t("dataflow.httpSampleDialog.viewSample"));
+}
+
+function buildNotifyTimeFieldOptions(formDef: FormDef): TriggerTimeFieldOption[] {
+  const items: TriggerTimeFieldOption[] = [];
+
+  (formDef.content?.items || []).forEach((field) => {
+    if (field.type === FieldType.TimeStamp && field.field) {
+      items.push({
+        field: field.field,
+        label: field.title,
+        format: field.props?.format,
+        type: field.type,
+      });
+    }
+  });
+
+  items.push({
+    field: "createTime",
+    label: t("comp.fieldBlock.systemFields.createTime"),
+    format: "YYYY-MM-DD HH:mm:ss",
+    type: FieldType.TimeStamp,
+  });
+  items.push({
+    field: "updateTime",
+    label: t("comp.fieldBlock.systemFields.updateTime"),
+    format: "YYYY-MM-DD HH:mm:ss",
+    type: FieldType.TimeStamp,
+  });
+
+  return items.filter((item, index, array) => array.findIndex((x) => x.field === item.field) === index);
+}
+
 onBeforeMount(() => {
   selectedTriggers.value =
     activeData.value.metadata.triggerMeta!.eventType ?? 0;
   condList.value = activeData.value.metadata.triggerMeta!.condition;
   wfNodeId.value = activeData.value.metadata.triggerMeta!.wfNodeId;
   nodeAction.value = activeData.value.metadata.triggerMeta!.nodeAction;
+  allowedIpText.value = (activeData.value.metadata.triggerMeta?.httpSettings?.allowedIps ?? []).join("\n");
 
   formStore.get(flowContext.formId).then((form) => {
     formRef.value = form;
@@ -332,5 +473,25 @@ onBeforeMount(() => {
 
 .trigger-delete {
   margin-left: var(--et-space-8);
+}
+
+.http-config {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.http-table {
+  width: 100%;
+}
+
+.response-config {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.muted-text {
+  color: var(--et-text-secondary);
 }
 </style>

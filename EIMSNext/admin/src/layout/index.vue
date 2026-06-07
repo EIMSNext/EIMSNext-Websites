@@ -6,7 +6,7 @@
       </el-header>
       <el-container class="layout-main-shell">
         <el-aside width="45px" class="main-left-menu">
-          <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
+          <el-tooltip :content="t('admin.workspace')" placement="right" :hide-after="0">
             <router-link custom :to="{ path: '/workspace' }" v-slot="{ navigate }">
               <div class="main-left-menu-item" @click="navigate">
                 <!-- <AppIcon :app="workspaceApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->

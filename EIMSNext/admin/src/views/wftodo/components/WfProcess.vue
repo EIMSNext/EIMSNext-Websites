@@ -20,7 +20,7 @@
     @cancel="resetActionDialog"
   >
     <div class="action-dialog-body">
-      <el-select v-if="needsNodeSelection" v-model="selectedTargetNodeId" class="full-width" placeholder="请选择回退节点">
+      <el-select v-if="needsNodeSelection" v-model="selectedTargetNodeId" class="full-width" :placeholder="$t('comp.wfProcess.selectReturnNode')">
         <el-option v-for="node in returnTargets" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId" />
       </el-select>
       <member-select-dialog
@@ -39,7 +39,7 @@
         :empty-text="t('comp.emptyEmp')"
         @editTag="showMemberDialog = true"
       />
-      <el-input v-model="comment" type="textarea" :rows="4" placeholder="请输入审批意见" />
+      <el-input v-model="comment" type="textarea" :rows="4" :placeholder="$t('comp.wfProcess.enterComment')" />
     </div>
   </et-dialog>
 </template>

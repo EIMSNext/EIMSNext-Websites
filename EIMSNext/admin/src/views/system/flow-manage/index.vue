@@ -1,6 +1,6 @@
 <template>
   <div class="flow-manage-container">
-    <el-dialog v-model="showApproverDialog" title="变更当前节点审批人" width="520px" destroy-on-close>
+    <el-dialog v-model="showApproverDialog" :title="$t('admin.flowManage.changeApprover')" width="520px" destroy-on-close>
       <member-select-dialog
         v-model="showMemberDialog"
         :tags="selectedApproverTags"
@@ -13,14 +13,14 @@
           v-model="selectedApproverTags"
           :editable="true"
           :multiple="false"
-          empty-text="请选择审批人"
+          :empty-text="$t('admin.flowManage.selectApprover')"
           @editTag="showMemberDialog = true"
         />
-        <el-input v-model="changeComment" type="textarea" :rows="4" placeholder="请输入变更说明，可选" />
+        <el-input v-model="changeComment" type="textarea" :rows="4" :placeholder="$t('admin.flowManage.changeComment')" />
       </div>
       <template #footer>
-        <el-button @click="closeApproverDialog">取消</el-button>
-        <el-button type="primary" :loading="actionLoading" @click="submitChangeApprover">确定</el-button>
+        <el-button @click="closeApproverDialog">{{ $t("common.cancel") }}</el-button>
+        <el-button type="primary" :loading="actionLoading" @click="submitChangeApprover">{{ $t("common.ok") }}</el-button>
       </template>
     </el-dialog>
 
@@ -29,18 +29,18 @@
         <div class="toolbar-actions">
           <el-button :disabled="checkedRows.length === 0 || actionLoading" @click="handleTerminate">
             <et-icon icon="circle-close" />
-            废弃实例
+            {{ $t("admin.flowManage.terminate") }}
           </el-button>
           <el-button :disabled="checkedRows.length === 0 || actionLoading" @click="openApproverDialog">
             <et-icon icon="edit-pen" />
-            变更当前节点审批人
+            {{ $t("admin.flowManage.changeApprover") }}
           </el-button>
         </div>
         <div class="toolbar-search">
           <el-input
             v-model="keyword"
             clearable
-            placeholder="请输入数据ID进行查询"
+            :placeholder="$t('admin.flowManage.searchPlaceholder')"
             @clear="handleSearch"
             @keyup.enter="handleSearch"
           >
@@ -63,20 +63,20 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="52" reserve-selection :selectable="() => true" />
-          <el-table-column label="状态" min-width="100">
+          <el-table-column :label="$t('admin.status')" min-width="100">
             <template #default>
-              <span class="status-running">进行中</span>
+              <span class="status-running">{{ $t("admin.flowManage.inProgress") }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="数据ID" min-width="180" prop="dataId" />
-          <el-table-column label="表单名称" min-width="180" prop="formName" />
-          <el-table-column label="申请人" min-width="120">
+          <el-table-column :label="$t('admin.flowManage.dataId')" min-width="180" prop="dataId" />
+          <el-table-column :label="$t('admin.flowManage.formName')" min-width="180" prop="formName" />
+          <el-table-column :label="$t('admin.flowManage.applicant')" min-width="120">
             <template #default="scope">{{ scope.row.starter?.label || "-" }}</template>
           </el-table-column>
-          <el-table-column label="当前审批人" min-width="140" prop="currentApproverName" />
-          <el-table-column label="部门" min-width="180" prop="departmentName" />
-          <el-table-column label="当前节点" min-width="160" prop="approveNodeName" />
-          <el-table-column label="当前节点到达时间" min-width="180">
+          <el-table-column :label="$t('admin.flowManage.currentApprover')" min-width="140" prop="currentApproverName" />
+          <el-table-column :label="$t('admin.flowManage.department')" min-width="180" prop="departmentName" />
+          <el-table-column :label="$t('admin.flowManage.currentNode')" min-width="160" prop="approveNodeName" />
+          <el-table-column :label="$t('admin.flowManage.nodeArrivalTime')" min-width="180">
             <template #default="scope">{{ formatDateTime(scope.row.approveNodeStartTime) }}</template>
           </el-table-column>
         </el-table>
@@ -94,6 +94,9 @@ import { dateFormat } from "@/utils/common";
 import { FlowManageTodoItem } from "@eimsnext/models";
 import { workflowService } from "@eimsnext/services";
 import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FlowManage",
@@ -160,10 +163,10 @@ const handleTerminate = async () => {
     return;
   }
 
-  await ElMessageBox.confirm(`确认废弃选中的 ${checkedRows.value.length} 条流程实例吗？`, "废弃实例", {
+  await ElMessageBox.confirm(t("admin.flowManage.confirmTerminate", { count: checkedRows.value.length }), t("admin.flowManage.terminate"), {
     type: "warning",
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
+    confirmButtonText: t("common.ok"),
+    cancelButtonText: t("common.cancel"),
   });
 
   actionLoading.value = true;
@@ -176,7 +179,7 @@ const handleTerminate = async () => {
         })
       )
     );
-    ElMessage.success("流程已废弃");
+    ElMessage.success(t("admin.flowManage.terminateSuccess"));
     checkedRows.value = [];
     await handleQuery();
   } finally {
@@ -214,7 +217,7 @@ const submitChangeApprover = async () => {
 
   const targetEmployeeId = selectedApproverTags.value[0]?.id;
   if (!targetEmployeeId) {
-    ElMessage.warning("请选择新的审批人");
+    ElMessage.warning(t("admin.flowManage.selectNewApprover"));
     return;
   }
 
@@ -231,7 +234,7 @@ const submitChangeApprover = async () => {
         })
       )
     );
-    ElMessage.success("审批人已更新");
+    ElMessage.success(t("admin.flowManage.approverUpdated"));
     closeApproverDialog();
     checkedRows.value = [];
     await handleQuery();

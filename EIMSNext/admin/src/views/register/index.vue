@@ -144,7 +144,7 @@ const registerForm = reactive({
 });
 
 const passwordState = computed(() => getPasswordStrengthState(registerForm.password));
-const sendCodeText = computed(() => (countdown.value > 0 ? `${countdown.value}s后重发` : t("register.sendCode")));
+const sendCodeText = computed(() => (countdown.value > 0 ? `${countdown.value}${t("comp.register.resendAfter")}` : t("register.sendCode")));
 const sendCodeDisabled = computed(() => countdown.value > 0);
 
 const registerRules = computed<FormRules>(() => ({

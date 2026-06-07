@@ -18,7 +18,7 @@
       </span>
     </template>
     <div class="field-block-picker">
-      <el-input v-model="keyword" placeholder="搜索" clearable>
+      <el-input v-model="keyword" :placeholder="$t('common.search')" clearable>
         <template #prefix>
           <el-icon><Search /></el-icon>
         </template>
@@ -35,7 +35,7 @@
           <span class="item-type">{{ getFieldBlockTypeLabel(item.type) }}</span>
         </button>
         <div v-if="filteredFields.length === 0" class="picker-empty">
-          暂无可选字段
+          {{ $t("comp.fieldBlockPicker.noFields") }}
         </div>
       </div>
     </div>
@@ -46,11 +46,14 @@
 import { computed, ref, watch } from "vue";
 import { Search, Plus } from "@element-plus/icons-vue";
 import { FormDef } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
 import {
   buildFieldBlockFields,
   FieldBlockField,
   getFieldBlockTypeLabel,
 } from "../FieldBlock/shared";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FieldBlockPicker",
@@ -84,7 +87,7 @@ const visible = ref(false);
 const keyword = ref("");
 
 const tooltipContent = computed(() =>
-  props.limitReached ? `最多添加${props.maxBlocks}个字段` : "添加字段"
+  props.limitReached ? t("comp.fieldBlockPicker.maxBlocks", { maxBlocks: props.maxBlocks }) : t("comp.fieldBlockPicker.addField")
 );
 
 const fieldItems = computed(() =>
@@ -93,6 +96,7 @@ const fieldItems = computed(() =>
     : buildFieldBlockFields(props.formDef, {
         showSubFields: props.showSubFields,
         showSystemFields: props.showSystemFields,
+        t,
       })
 );
 

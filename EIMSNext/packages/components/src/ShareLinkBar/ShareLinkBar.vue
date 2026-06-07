@@ -2,8 +2,8 @@
   <div class="share-link-bar">
     <el-input :model-value="url" readonly class="share-link-input" />
     <div class="share-link-actions">
-      <el-button text @click="copyLink">复制</el-button>
-      <el-button text @click="openLink">打开</el-button>
+      <el-button text @click="copyLink">{{ t("common.copy") }}</el-button>
+      <el-button text @click="openLink">{{ t("comp.shareLinkBar.open") }}</el-button>
       <el-popover placement="bottom-end" trigger="click" :width="220" @show="renderQrCode">
         <template #reference>
           <el-button text class="share-link-qrcode-btn">
@@ -23,6 +23,9 @@ import { Grid } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import QRCodeStyling from "qr-code-styling";
 import { nextTick, ref } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "ShareLinkBar",
@@ -48,9 +51,9 @@ const copyLink = async () => {
       document.body.removeChild(input);
     }
 
-    ElMessage.success("链接已复制");
+    ElMessage.success(t("comp.shareLinkBar.linkCopied"));
   } catch {
-    ElMessage.error("复制失败");
+    ElMessage.error(t("comp.shareLinkBar.copyFailed"));
   }
 };
 

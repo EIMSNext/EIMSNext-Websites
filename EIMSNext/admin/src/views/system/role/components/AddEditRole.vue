@@ -8,23 +8,24 @@
     @cancel="cancel"
     @ok="save"
   >
-    <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
-      <el-form-item label="角色组">
-        <el-input :model-value="pGroup.name" readonly />
-      </el-form-item>
-      <el-form-item label="角色名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入角色名称" />
-      </el-form-item>
-      <el-form-item label="角色描述" prop="description">
-        <el-input v-model="formData.description" type="textarea" placeholder="请输入角色描述" />
-      </el-form-item>
-    </el-form>
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
+        <el-form-item :label="$t('comp.addEditRole.roleGroup')">
+          <el-input :model-value="pGroup.name" readonly />
+        </el-form-item>
+        <el-form-item :label="$t('comp.addEditRole.roleName')" prop="name">
+          <el-input v-model="formData.name" :placeholder="$t('comp.addEditRole.roleNamePlaceholder')" />
+        </el-form-item>
+        <el-form-item :label="$t('comp.addEditRole.roleDesc')" prop="description">
+          <el-input v-model="formData.description" type="textarea" :placeholder="$t('comp.addEditRole.roleDescPlaceholder')" />
+        </el-form-item>
+      </el-form>
   </et-dialog>
 </template>
 <script lang="ts" setup>
 import { Role, RoleGroup, RoleRequest } from "@eimsnext/models";
 import { roleService } from "@eimsnext/services";
 import { FormInstance } from "element-plus";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "AddEditRole",
@@ -41,8 +42,9 @@ const props = withDefaults(
   }
 );
 
+const { t } = useI18n();
 const showDialog = ref(true);
-const title = props.edit ? "修改角色信息" : "添加";
+const title = props.edit ? t("comp.addEditRole.editRole") : t("common.add");
 const formData = ref<Role>({
   id: "",
   name: "",
@@ -56,7 +58,7 @@ else {
   formData.value.roleGroupId = props.pGroup.id;
 }
 const rules = reactive({
-  name: [{ required: true, message: "角色名称不能为空", trigger: "blur" }],
+  name: [{ required: true, message: t("comp.addEditRole.roleNameRequired"), trigger: "blur" }],
 });
 
 const emit = defineEmits(["cancel", "ok"]);

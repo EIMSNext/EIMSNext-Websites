@@ -1,9 +1,9 @@
 <template>
   <div class="plugin-manage-page">
     <section class="table-shell">
-      <div class="table-header">已安装插件</div>
+      <div class="table-header">{{ $t("admin.openPlatform.installedPlugins") }}</div>
       <el-table v-loading="loading" :data="items" style="width: 100%">
-        <el-table-column label="插件" min-width="340">
+        <el-table-column :label="$t('admin.openPlatform.plugin')" min-width="340">
           <template #default="scope">
             <div class="plugin-cell">
               <img v-if="scope.row.icon" class="plugin-icon" :src="scope.row.icon" :alt="scope.row.name" />
@@ -14,17 +14,17 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="version" label="版本" width="120" />
-        <el-table-column prop="status" label="状态" width="130" />
-        <el-table-column label="启用" width="140">
+        <el-table-column prop="version" :label="$t('admin.openPlatform.version')" width="120" />
+        <el-table-column prop="status" :label="$t('admin.openPlatform.status')" width="130" />
+        <el-table-column :label="$t('admin.openPlatform.enable')" width="140">
           <template #default="scope">
             <el-switch :model-value="scope.row.enabled"
               @change="(value) => toggleEnabled(scope.row.id, value as boolean)" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="140">
+        <el-table-column :label="$t('admin.openPlatform.action')" width="140">
           <template #default="scope">
-            <el-button link type="danger" @click="removeInstall(scope.row.id)">卸载</el-button>
+            <el-button link type="danger" @click="removeInstall(scope.row.id)">{{ $t("admin.openPlatform.uninstall") }}</el-button>
           </template>
         </el-table-column>
       </el-table>

@@ -2,26 +2,17 @@ import {
   FieldType,
   FormDef,
   FormNotify,
-  FormNotifyRepeatType,
+  TimerRepeatType,
   FormNotifyTriggerMode,
   getCreateTime,
   getUpdateTime,
 } from "@eimsnext/models";
+import {
+  TriggerTimeFieldOption,
+  parseRepeatConfig as parseNotifyRepeatConfig,
+} from "@eimsnext/components";
 
-export interface NotifyTimeFieldOption {
-  field: string;
-  label: string;
-}
-
-export interface CustomRepeatConfig {
-  mode?: "weekly" | "monthly";
-  interval?: number;
-  weekdays?: number[];
-  monthlyMode?: "day" | "relative";
-  monthDay?: number;
-  weekIndex?: number;
-  weekday?: number;
-}
+export type NotifyTimeFieldOption = TriggerTimeFieldOption;
 
 export function getNotifyTimeFieldOptions(formDef: FormDef): NotifyTimeFieldOption[] {
   const items: NotifyTimeFieldOption[] = [];
@@ -31,6 +22,8 @@ export function getNotifyTimeFieldOptions(formDef: FormDef): NotifyTimeFieldOpti
       items.push({
         field: field.field,
         label: field.title,
+        format: field.props?.format,
+        type: field.type,
       });
     }
   });
@@ -38,10 +31,14 @@ export function getNotifyTimeFieldOptions(formDef: FormDef): NotifyTimeFieldOpti
   items.push({
     field: getCreateTime("提交时间").field,
     label: "提交时间",
+    format: getCreateTime("提交时间").props?.format,
+    type: FieldType.TimeStamp,
   });
   items.push({
     field: getUpdateTime("更新时间").field,
     label: "更新时间",
+    format: getUpdateTime("更新时间").props?.format,
+    type: FieldType.TimeStamp,
   });
 
   return items.filter((item, index, arr) => arr.findIndex((x) => x.field === item.field) === index);
@@ -53,18 +50,6 @@ export function getNotifyTimeFieldText(formDef: FormDef, field?: string): string
   }
 
   return getNotifyTimeFieldOptions(formDef).find((item) => item.field === field)?.label || field;
-}
-
-export function parseNotifyRepeatConfig(value?: string): CustomRepeatConfig | null {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(value) as CustomRepeatConfig;
-  } catch {
-    return null;
-  }
 }
 
 export function getNotifyWeekdayText(value?: number): string {
@@ -131,15 +116,15 @@ export function getNotifyRepeatSummary(notify: FormNotify): string {
   }
 
   const map: Record<string, string> = {
-    [FormNotifyRepeatType.Once]: "仅提醒一次",
-    [FormNotifyRepeatType.Daily]: "每天",
-    [FormNotifyRepeatType.Weekly]: "每周",
-    [FormNotifyRepeatType.BiWeekly]: "每两周",
-    [FormNotifyRepeatType.Monthly]: "每月",
-    [FormNotifyRepeatType.Yearly]: "每年",
+    [TimerRepeatType.Once]: "仅提醒一次",
+    [TimerRepeatType.Daily]: "每天",
+    [TimerRepeatType.Weekly]: "每周",
+    [TimerRepeatType.BiWeekly]: "每两周",
+    [TimerRepeatType.Monthly]: "每月",
+    [TimerRepeatType.Yearly]: "每年",
   };
 
-  if (notify.repeatType !== FormNotifyRepeatType.Custom) {
+  if (notify.repeatType !== TimerRepeatType.Custom) {
     return map[notify.repeatType] || "";
   }
 

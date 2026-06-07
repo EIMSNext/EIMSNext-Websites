@@ -4,15 +4,15 @@
     <div class="main-row">
       <!-- 部门树 -->
       <div class="dept-tree-col">
-        <div class="org-menu">员工</div>
+        <div class="org-menu">{{ $t("admin.department.title") }}</div>
         <div class="menu-items">
           <el-radio-group v-model="empStatus" @change="handleStatusChanged">
-            <el-radio :label="0">在职员工</el-radio>
-            <el-radio :label="1">离职员工</el-radio>
-            <el-radio v-if="showPendingApproval" :label="2">待审批</el-radio>
+            <el-radio :label="0">{{ $t("admin.department.active") }}</el-radio>
+            <el-radio :label="1">{{ $t("admin.department.resigned") }}</el-radio>
+            <el-radio v-if="showPendingApproval" :label="2">{{ $t("admin.department.pending") }}</el-radio>
           </el-radio-group>
         </div>
-        <div class="org-menu">部门</div>
+        <div class="org-menu">{{ $t("admin.department.deptTitle") }}</div>
         <div class="dept-tree-wrapper">
           <dept-tree :editable="true" @node-click="handleDeptChanged" />
         </div>
@@ -39,17 +39,17 @@
               @row-click="edit"
             >
               <el-table-column type="selection" width="40" />
-              <el-table-column label="姓名" width="150" prop="empName" />
-              <el-table-column label="编码" width="150" prop="code" />
-              <el-table-column label="工作电话" width="150" prop="workPhone" />
-              <el-table-column label="工作邮箱" width="150" prop="workEmail" />
-              <el-table-column label="部门" prop="department.name" />
-              <el-table-column v-if="isPendingMode" label="操作" fixed="right" width="160">
-                <template #default="scope">
-                  <el-button link type="primary" @click.stop="reviewSingle(scope.row, true)">同意</el-button>
-                  <el-button link type="danger" @click.stop="reviewSingle(scope.row, false)">拒绝</el-button>
-                </template>
-              </el-table-column>
+            <el-table-column :label="$t('admin.department.name')" width="150" prop="empName" />
+            <el-table-column :label="$t('admin.department.code')" width="150" prop="code" />
+            <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
+            <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
+            <el-table-column :label="$t('admin.department.dept')" prop="department.name" />
+            <el-table-column v-if="isPendingMode" :label="$t('common.edit')" fixed="right" width="160">
+              <template #default="scope">
+                <el-button link type="primary" @click.stop="reviewSingle(scope.row, true)">{{ $t("admin.department.approve") }}</el-button>
+                <el-button link type="danger" @click.stop="reviewSingle(scope.row, false)">{{ $t("admin.department.reject") }}</el-button>
+              </template>
+            </el-table-column>
               <!-- <el-table-column label="操作" fixed="right" width="150">
                 <template #default="scope">
                   <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
@@ -68,25 +68,25 @@
       <div v-if="isPendingMode" class="pending-detail-col">
         <el-card shadow="never" class="pending-detail-card">
           <template v-if="selectedEmp">
-            <div class="detail-title">加入申请</div>
+            <div class="detail-title">{{ $t("admin.department.joinApplication") }}</div>
             <div class="detail-item">
-              <span class="detail-label">员工姓名</span>
+              <span class="detail-label">{{ $t("admin.empName") }}</span>
               <span>{{ selectedEmp.empName }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">员工编码</span>
+              <span class="detail-label">{{ $t("admin.empCode") }}</span>
               <span>{{ selectedEmp.code || "-" }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">手机号</span>
+              <span class="detail-label">{{ $t("admin.department.phone") }}</span>
               <span>{{ selectedEmp.workPhone || "-" }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">邮箱</span>
+              <span class="detail-label">{{ $t("admin.department.email") }}</span>
               <span>{{ selectedEmp.workEmail || "-" }}</span>
             </div>
           </template>
-          <el-empty v-else description="请选择待审批员工" />
+          <el-empty v-else :description="$t('admin.department.selectPending')" />
         </el-card>
       </div>
     </div>
@@ -156,6 +156,9 @@ import {
 } from "@eimsnext/components";
 import { useContextStore } from "@eimsnext/store";
 import { ElMessage, TableInstance, TableTooltipData } from "element-plus";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "DeptManager",
@@ -173,7 +176,7 @@ const showSort = ref(false);
 const sortList = ref<IFieldSortList>({
   items: [
     {
-      field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input },
+      field: { formId: "employee", field: "empName", label: t("admin.department.name"), type: FieldType.Input },
       sort: SortDirection.Asc,
     },
   ],
@@ -193,7 +196,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "新增",
+      text: t("common.addNew"),
       type: "success",
       command: "add",
       visible: true,
@@ -207,7 +210,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "删除",
+      text: t("common.delete"),
       type: "danger",
       command: "delete",
       visible: true,
@@ -216,8 +219,8 @@ const leftBars = ref<ToolbarItem[]>([
       onCommand: async () => {
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(
-            `你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`,
-            { title: "你确定要删除所选数据吗？" }
+            t("common.message.deleteConfirm_Content", { 0: checkedDatas.value.length }),
+            { title: t("common.message.deleteConfirm_Title") }
           );
           if (confirm == ConfirmResult.Yes) {
             await employeeService
@@ -233,7 +236,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "批量同意",
+      text: t("admin.department.toolbar.batchApprove"),
       type: "primary",
       command: "approve",
       visible: false,
@@ -247,7 +250,7 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "批量拒绝",
+      text: t("admin.department.toolbar.batchReject"),
       type: "danger",
       command: "reject",
       visible: false,
@@ -266,7 +269,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "筛选",
+      text: t("common.filter"),
       class: "data-filter",
       command: "filter",
       visible: true,
@@ -280,7 +283,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "排序",
+      text: t("common.sort"),
       class: "data-filter",
       command: "sort",
       visible: true,
@@ -294,7 +297,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "刷新",
+      text: t("common.refresh"),
       class: "data-filter",
       command: "refresh",
       visible: true,
@@ -449,17 +452,15 @@ const edit = (row: Employee, column: any) => {
 
 const reviewSingle = async (row: Employee, approved: boolean) => {
   const confirm = await EtConfirm.showDialog(
-    approved
-      ? `确认同意【${row.empName}】的加入申请吗？`
-      : `确认拒绝【${row.empName}】的加入申请吗？`,
-    { title: approved ? "同意加入申请" : "拒绝加入申请" }
+    t("admin.department.messages." + (approved ? "approveSingle" : "rejectSingle"), { name: row.empName }),
+    { title: t("admin.department.messages." + (approved ? "approveTitle" : "rejectTitle")) }
   );
   if (confirm != ConfirmResult.Yes) {
     return;
   }
 
   await employeeService.reviewJoinCorporate({ employeeIds: [row.id], approved });
-  ElMessage.success(approved ? "已同意加入申请" : "已拒绝加入申请");
+  ElMessage.success(t("admin.department.messages." + (approved ? "approveSuccess" : "rejectSuccess")));
   await handleQuery();
 };
 
@@ -467,15 +468,13 @@ const reviewSelected = async (approved: boolean) => {
   const employeeIds = checkedDatas.value.map((x) => x.id).filter((x): x is string => !!x);
 
   if (!employeeIds.length) {
-    ElMessage.warning("请选择待审批员工");
+    ElMessage.warning(t("admin.department.messages.selectPending"));
     return;
   }
 
   const confirm = await EtConfirm.showDialog(
-    approved
-      ? `确认同意选中的 ${employeeIds.length} 条加入申请吗？`
-      : `确认拒绝选中的 ${employeeIds.length} 条加入申请吗？`,
-    { title: approved ? "批量同意加入申请" : "批量拒绝加入申请" }
+    t("admin.department.messages." + (approved ? "batchApproveConfirm" : "batchRejectConfirm"), { count: employeeIds.length }),
+    { title: t("admin.department.messages." + (approved ? "batchApproveTitle" : "batchRejectTitle")) }
   );
   if (confirm != ConfirmResult.Yes) {
     return;
@@ -486,7 +485,7 @@ const reviewSelected = async (approved: boolean) => {
     approved,
   });
 
-  ElMessage.success(approved ? "已批量同意加入申请" : "已批量拒绝加入申请");
+  ElMessage.success(t("admin.department.messages." + (approved ? "batchApproveSuccess" : "batchRejectSuccess")));
   await handleQuery();
 };
 

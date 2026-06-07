@@ -3,57 +3,57 @@
     <div class="page-card">
       <div class="page-head">
         <div>
-          <h1>创建或加入企业</h1>
-          <p>当前账号尚未加入企业，请先创建企业或申请加入已有企业。</p>
+          <h1>{{ $t("admin.corpOnboarding.title") }}</h1>
+          <p>{{ $t("admin.corpOnboarding.subtitle") }}</p>
         </div>
-        <el-button link type="danger" @click="logout">退出登录</el-button>
+        <el-button link type="danger" @click="logout">{{ $t("navbar.logout") }}</el-button>
       </div>
 
       <div class="content-grid">
         <section v-if="hasPendingInvite" class="panel-card invite-card">
-          <div class="section-title">待处理邀请</div>
-          <div class="section-tip">当前账号匹配到企业邀请，接受后将进入对应企业，拒绝后该邀请员工会转为离职。</div>
+          <div class="section-title">{{ $t("admin.corpOnboarding.pendingInvite") }}</div>
+          <div class="section-tip">{{ $t("admin.corpOnboarding.pendingInviteTip") }}</div>
           <div class="invite-actions">
-            <el-button type="primary" :loading="processingInvite" @click="handleInviteDecision(true)">接受邀请</el-button>
-            <el-button :loading="processingInvite" @click="handleInviteDecision(false)">拒绝邀请</el-button>
+            <el-button type="primary" :loading="processingInvite" @click="handleInviteDecision(true)">{{ $t("admin.corpOnboarding.acceptInvite") }}</el-button>
+            <el-button :loading="processingInvite" @click="handleInviteDecision(false)">{{ $t("admin.corpOnboarding.rejectInvite") }}</el-button>
           </div>
         </section>
 
         <section class="panel-card">
-          <div class="section-title">创建企业</div>
-          <div class="section-tip">适合首次使用，创建后将直接进入工作台。</div>
+          <div class="section-title">{{ $t("admin.corpOnboarding.createCorp") }}</div>
+          <div class="section-tip">{{ $t("admin.corpOnboarding.createCorpTip") }}</div>
           <el-form :model="createForm" label-position="top">
-            <el-form-item label="企业名称">
-              <el-input v-model="createForm.name" maxlength="50" placeholder="请输入企业名称" />
+            <el-form-item :label="$t('corpOnboarding.corpName')">
+              <el-input v-model="createForm.name" maxlength="50" :placeholder="$t('corpOnboarding.corpNamePlaceholder')" />
             </el-form-item>
-            <el-form-item label="企业简介">
+            <el-form-item :label="$t('corpOnboarding.corpIntro')">
               <el-input
                 v-model="createForm.description"
                 type="textarea"
                 :rows="3"
                 maxlength="200"
                 show-word-limit
-                placeholder="选填"
+                :placeholder="$t('corpOnboarding.corpIntroPlaceholder')"
               />
             </el-form-item>
-            <el-button type="primary" :loading="creating" @click="createCorporate">创建并进入</el-button>
+            <el-button type="primary" :loading="creating" @click="createCorporate">{{ $t("admin.corpOnboarding.createAndEnter") }}</el-button>
           </el-form>
         </section>
 
         <section class="panel-card">
-          <div class="section-title">加入企业</div>
-          <div class="section-tip">搜索企业后提交申请，等待企业管理员审批。</div>
+          <div class="section-title">{{ $t("admin.corpOnboarding.joinCorp") }}</div>
+          <div class="section-tip">{{ $t("admin.corpOnboarding.joinCorpTip") }}</div>
           <div class="search-row">
             <el-input
               v-model="keyword"
-              placeholder="输入企业名称或编码"
+              :placeholder="$t('corpOnboarding.searchPlaceholder')"
               clearable
               @keyup.enter="searchCorporates"
             />
-            <el-button :loading="searching" @click="searchCorporates">搜索</el-button>
+            <el-button :loading="searching" @click="searchCorporates">{{ $t("common.search") }}</el-button>
           </div>
 
-          <el-empty v-if="searched && !searchResults.length" description="暂无匹配企业" />
+          <el-empty v-if="searched && !searchResults.length" :description="$t('corpOnboarding.noMatchCorp')" />
 
           <div v-else-if="searchResults.length" class="corp-list">
             <div v-for="corp in searchResults" :key="corp.id" class="corp-item">
@@ -62,14 +62,14 @@
                   <span class="corp-name">{{ corp.name }}</span>
                   <span class="corp-code">{{ corp.code }}</span>
                 </div>
-                <div class="corp-description">{{ corp.description || "暂无企业简介" }}</div>
+                <div class="corp-description">{{ corp.description || $t("admin.corpOnboarding.noCorpIntro") }}</div>
               </div>
-              <el-button type="primary" plain @click="applyJoinCorporate(corp)">申请加入</el-button>
+              <el-button type="primary" plain @click="applyJoinCorporate(corp)">{{ $t("admin.corpOnboarding.applyJoin") }}</el-button>
             </div>
           </div>
 
           <div v-if="appliedCorpName" class="apply-hint">
-            已提交加入 {{ appliedCorpName }} 的申请，请等待审批。
+            {{ $t("admin.corpOnboarding.appliedHint", { name: appliedCorpName }) }}
           </div>
         </section>
       </div>
@@ -81,10 +81,13 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useUserStore } from "@eimsnext/store";
 import { corpOnboardingService, corporateService, employeeService, ODataQueryRequest } from "@eimsnext/services";
 import type { Corporate } from "@eimsnext/models";
 import { ElMessage } from "element-plus";
+
+const { t } = useI18n();
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -123,7 +126,7 @@ async function searchCorporates() {
 
 async function createCorporate() {
   if (!createForm.name.trim()) {
-    ElMessage.warning("请输入企业名称");
+    ElMessage.warning(t("admin.corpOnboarding.messages.nameRequired"));
     return;
   }
 
@@ -134,7 +137,7 @@ async function createCorporate() {
       name: createForm.name.trim(),
       description: createForm.description.trim(),
     });
-    ElMessage.success("企业创建成功");
+    ElMessage.success(t("admin.corpOnboarding.messages.createSuccess"));
     await userStore.initialize(true);
     await router.replace("/workspace");
   } finally {
@@ -147,10 +150,10 @@ async function applyJoinCorporate(corp: Corporate) {
     await corpOnboardingService.applyJoinCorporate({
       corpId: corp.id,
     });
-    appliedCorpName.value = corp.name || "目标企业";
-    ElMessage.success("申请已提交");
+    appliedCorpName.value = corp.name || t("admin.corpOnboarding.targetCorp");
+    ElMessage.success(t("admin.corpOnboarding.messages.applySubmitted"));
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : "申请提交失败");
+    ElMessage.error(error instanceof Error ? error.message : t("admin.corpOnboarding.messages.applyFailed"));
   }
 }
 
@@ -159,16 +162,16 @@ async function handleInviteDecision(accepted: boolean) {
   try {
     await employeeService.acceptInvite({ accepted });
     if (accepted) {
-      ElMessage.success("已接受邀请");
+      ElMessage.success(t("admin.corpOnboarding.messages.inviteAccepted"));
       await userStore.initialize(true);
       await router.replace("/workspace");
       return;
     }
 
-    ElMessage.success("已拒绝邀请");
+    ElMessage.success(t("admin.corpOnboarding.messages.inviteRejected"));
     await userStore.initialize(true);
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : accepted ? "接受邀请失败" : "拒绝邀请失败");
+    ElMessage.error(error instanceof Error ? error.message : accepted ? t("admin.corpOnboarding.messages.acceptFailed") : t("admin.corpOnboarding.messages.rejectFailed"));
   } finally {
     processingInvite.value = false;
   }
