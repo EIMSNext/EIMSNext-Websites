@@ -623,6 +623,24 @@ export default {
       childMenuDeleteBlocked: "This group contains child menus and cannot be deleted",
       groupDeleteContent: "The group cannot be restored after deletion",
     },
+    messageCenter: {
+      title: "Message Center",
+      dataNotify: "Data Notifications",
+      flowNotify: "Flow Notifications",
+      appNotify: "App Messages",
+      systemNotify: "System Messages",
+      systemNotice: "System Notices",
+      unreadOnly: "Unread Only",
+      readAll: "Mark All as Read",
+      empty: "No messages",
+      retention: "Messages from the last six months are retained",
+    },
+    loginExtra: {
+      codeLogin: "Verification Code Login",
+    },
+    editor: {
+      placeholder: "Please enter content...",
+    },
     sidebarEditor: {
       name: "Name",
       namePlaceholder: "Please enter name",
@@ -660,6 +678,12 @@ export default {
       dataFilter: "Data Permissions",
       dataFilterDesc: "Which data can be managed",
       fieldPerm: "Field Permissions",
+    },
+    pdfPreview: {
+      download: "Download",
+      closePreview: "Close Preview",
+      empty: "No preview available",
+      downloadFailed: "Download failed",
     },
     dashboardFilterDesigner: {
       editTitle: "Edit Filter",
@@ -728,6 +752,9 @@ export default {
         memberScope: "Member/Department Scope",
         fixedRange: "Fixed Range",
       },
+    },
+    printDesigner: {
+      pageSummary: "Paper: {paper} {orientation} | Margins {top}/{right}/{bottom}/{left} mm",
     },
     tagsView: {
       refresh: "Refresh",

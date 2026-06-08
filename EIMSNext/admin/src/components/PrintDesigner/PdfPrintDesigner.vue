@@ -361,7 +361,16 @@ const pageSettingsDraft = reactive<PrintPageSettings>(createDefaultPageSettings(
 const designerReady = computed(() => !loading.value && !loadError.value && !!workbookApi);
 const pageSetupSummary = computed(() => {
   const margins = pageSettings.value.margins;
-  return `纸张：${pageSettings.value.paperSize} ${pageSettings.value.orientation === "landscape" ? "横向" : "竖向"} | 页边距 ${margins.top}/${margins.right}/${margins.bottom}/${margins.left} mm`;
+  return t("admin.printDesigner.pageSummary", {
+    paper: pageSettings.value.paperSize,
+    orientation: pageSettings.value.orientation === "landscape"
+      ? t("admin.printDesigner.landscape")
+      : t("admin.printDesigner.portrait"),
+    top: margins.top,
+    right: margins.right,
+    bottom: margins.bottom,
+    left: margins.left,
+  });
 });
 
 let univerObj: InstanceType<UniverModule["Univer"]> | undefined;

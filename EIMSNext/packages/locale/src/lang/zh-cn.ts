@@ -800,6 +800,24 @@ export default {
       childMenuDeleteBlocked: "当前分组下存在子菜单，不能删除",
       groupDeleteContent: "分组删除后不可恢复",
     },
+    messageCenter: {
+      title: "消息中心",
+      dataNotify: "数据提醒",
+      flowNotify: "流程提醒",
+      appNotify: "应用消息",
+      systemNotify: "系统消息",
+      systemNotice: "系统公告",
+      unreadOnly: "只看未读",
+      readAll: "全部转为已读",
+      empty: "暂无消息",
+      retention: "保存最近六个月的消息记录",
+    },
+    loginExtra: {
+      codeLogin: "验证码登录",
+    },
+    editor: {
+      placeholder: "请输入内容...",
+    },
     sidebarEditor: {
       name: "名称",
       namePlaceholder: "请输入名称",
@@ -837,6 +855,12 @@ export default {
       dataFilter: "数据权限",
       dataFilterDesc: "可以管理哪些数据",
       fieldPerm: "字段权限",
+    },
+    pdfPreview: {
+      download: "下载",
+      closePreview: "关闭预览",
+      empty: "暂无预览内容",
+      downloadFailed: "下载失败",
     },
     dashboardFilterDesigner: {
       editTitle: "编辑筛选器",
@@ -905,6 +929,9 @@ export default {
         memberScope: "成员/部门选择范围",
         fixedRange: "固定范围",
       },
+    },
+    printDesigner: {
+      pageSummary: "纸张：{paper} {orientation} | 页边距 {top}/{right}/{bottom}/{left} mm",
     },
     tagsView: {
       refresh: "刷新",
