@@ -1,10 +1,10 @@
 <template>
   <div class="adv-container">
     <el-tabs v-model="activeName" tabPosition="left" class="adv-tabs" @tab-click="handleClick">
-      <el-tab-pane label="内部发布" name="internal" class="adv-panel">
+      <el-tab-pane :label="$t('admin.publish.internal')" name="internal" class="adv-panel">
         <InternalPublish :form-def="formDef" />
       </el-tab-pane>
-      <el-tab-pane label="公开发布" name="public" class="adv-panel">To do</el-tab-pane>
+      <el-tab-pane :label="$t('admin.publish.public')" name="public" class="adv-panel">To do</el-tab-pane>
     </el-tabs>
   </div>
 </template>

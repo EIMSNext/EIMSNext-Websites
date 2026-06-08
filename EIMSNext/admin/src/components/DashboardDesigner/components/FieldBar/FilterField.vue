@@ -21,7 +21,7 @@
   <div class="item dimension-item">
     <div @click="onFieldClick" class="item-text">
       <et-icon icon="el-filter" color="var(--et-text-on-primary)" class="field-icon"></et-icon>
-      <span ref="filterBtnRef">设置过滤条件</span>
+      <span ref="filterBtnRef">{{ t("admin.dashboardFieldBar.setFilter") }}</span>
     </div>
   </div>
 </template>
@@ -30,6 +30,9 @@ import { IConditionList } from "@eimsnext/components";
 import DashFilter from "../DashFilter.vue";
 import { uniqueId } from "@eimsnext/utils";
 import { cloneDeep } from "lodash-es";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FilterField",

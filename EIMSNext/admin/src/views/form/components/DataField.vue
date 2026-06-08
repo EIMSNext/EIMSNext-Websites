@@ -55,7 +55,7 @@ onBeforeMount(() => {
         form.content.items,
         form.usingWorkflow,
         undefined,
-        { fieldPerms: props.fieldPerms }
+        { fieldPerms: props.fieldPerms, t } as any
       );
   });
 });

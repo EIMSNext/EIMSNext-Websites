@@ -11,7 +11,7 @@
             style="width: 100%"
           >
             <div class="notify-mode">
-              <div class="label mode-label">提醒类型</div>
+              <div class="label mode-label">{{ t("admin.notify.type") }}</div>
               <el-select
                 :model-value="formNotify.triggerMode"
                 class="notify-select"
@@ -19,32 +19,32 @@
               >
                 <el-option
                   :value="FormNotifyTriggerMode.DataAdded"
-                  label="新数据提交时提醒"
+                  :label="t('admin.notify.mode.dataAddedNotify')"
                 />
                 <el-option
                   :value="FormNotifyTriggerMode.DataChanged"
-                  label="数据修改时提醒"
+                  :label="t('admin.notify.mode.dataChangedNotify')"
                 />
                 <el-option
                   :value="FormNotifyTriggerMode.CustomScheduled"
-                  label="自定义定时提醒"
+                  :label="t('admin.notify.mode.customScheduledNotify')"
                 />
                 <el-option
                   :value="FormNotifyTriggerMode.TimeFieldScheduled"
-                  label="字段定时提醒"
+                  :label="t('admin.notify.mode.timeFieldScheduledNotify')"
                 />
               </el-select>
 
               <div v-if="showDataChangedTip" class="tip">
-                提示：被提醒人若不在相关权限组中，收到提醒时无法查看数据。
+                {{ t("admin.notify.dataChangedTip") }}
               </div>
 
               <div v-if="showCustomModeTip" class="tip">
-                提示：自定义定时提醒不关联具体数据，点击消息后将打开当前表单列表页。
+                {{ t("admin.notify.customModeTip") }}
               </div>
 
               <div v-if="showTimeFieldTip" class="tip">
-                提示：字段定时提醒会以所选时间字段值作为首次提醒时间，再按重复规则持续提醒，直到结束时间。
+                {{ t("admin.notify.timeFieldTip") }}
               </div>
 
                 <div v-if="showChangeFields" class="modify-fields">
@@ -54,8 +54,8 @@
                     class="notify-select"
                     @change="updateChangeMode"
                   >
-                    <el-option value="all" label="任意字段修改后提醒" />
-                    <el-option value="specific" label="指定字段修改后提醒" />
+                    <el-option value="all" :label="t('admin.notify.changeMode.all')" />
+                    <el-option value="specific" :label="t('admin.notify.changeMode.specific')" />
                   </el-select>
                   <el-button
                     v-if="changeMode === 'specific'"
@@ -63,17 +63,17 @@
                     style="margin-left: var(--et-space-12)"
                     @click="showFieldDialog = true"
                   >
-                    选择字段 ({{ formNotify.changeFields?.length || 0 }})
+                    {{ t("admin.notify.selectField") }} ({{ formNotify.changeFields?.length || 0 }})
                   </el-button>
                 </div>
                 <div v-if="changeMode === 'specific'" class="tip">
-                  提示：如果设置了多个提醒字段，任意一个字段被修改就会触发提醒
+                  {{ t("admin.notify.specificFieldTip") }}
                 </div>
               </div>
             </div>
 
             <div v-if="showScheduleConfig" class="notify-schedule">
-              <div class="label">提醒时间</div>
+              <div class="label">{{ t("admin.notify.time") }}</div>
               <TriggerTimeSettings
                 v-model="scheduleSettings"
                 class="notify-margin"
@@ -83,10 +83,10 @@
             </div>
 
             <div v-if="showFilter" class="notify-filter">
-              <div class="label">提醒条件</div>
+              <div class="label">{{ t("admin.notify.condition") }}</div>
               <el-select :model-value="filterMode" class="notify-select" @change="updateFilterMode">
-                <el-option value="any" label="任意数据" />
-                <el-option value="condition" label="满足条件的数据" />
+                <el-option value="any" :label="t('admin.notify.filterMode.any')" />
+                <el-option value="condition" :label="t('admin.notify.filterMode.condition')" />
               </el-select>
               <condition-list
                 v-if="filterMode === 'condition'"
@@ -98,7 +98,7 @@
             </div>
 
             <div class="notify-notifier">
-              <div class="label">被提醒人</div>
+              <div class="label">{{ t("admin.notify.notifier") }}</div>
               <selected-tags
                 v-model="notifier"
                 :editable="true"
@@ -106,12 +106,12 @@
                 @editTag="editNotifier"
               />
               <div v-if="isCustomScheduled" class="tip">
-                提示：自定义定时提醒不支持使用表单字段作为提醒人。
+                {{ t("admin.notify.customNotifierTip") }}
               </div>
             </div>
 
             <div class="notify-msg">
-              <div class="label">提醒文字</div>
+              <div class="label">{{ t("admin.notify.text") }}</div>
               <div class="content notify-margin">
                 <el-input
                   v-if="isCustomScheduled"
@@ -120,7 +120,7 @@
                   :rows="4"
                   maxlength="200"
                   show-word-limit
-                  placeholder="请输入提醒内容"
+                  :placeholder="t('admin.notify.placeholder.customText')"
                 />
                 <FieldBlockCodeEditor
                   v-else
@@ -128,7 +128,7 @@
                   :formDef="formDef"
                   :showSubFields="false"
                   :maxBlocks="6"
-                  placeholder="请输入提醒内容或添加字段"
+                  :placeholder="t('admin.notify.placeholder.richText')"
                   @update:modelValue="updateNotifyText"
                   @limit="notifyTextLimitReached"
                 />
@@ -136,32 +136,32 @@
             </div>
 
             <div class="notify-chanel">
-              <div class="label">提醒方式</div>
+              <div class="label">{{ t("admin.notify.channel") }}</div>
               <div class="channel-item">
                 <el-checkbox
                   :model-value="hasChannel(NotifyChannel.System)"
                   @change="toggleChannel(NotifyChannel.System, $event)"
                 >
-                  站内消息
+                  {{ t("admin.notify.channels.system") }}
                 </el-checkbox>
                 <el-checkbox
                   :model-value="hasChannel(NotifyChannel.Email)"
                   @change="toggleChannel(NotifyChannel.Email, $event)"
                 >
-                  邮箱消息
+                  {{ t("admin.notify.channels.email") }}
                 </el-checkbox>
               </div>
             </div>
           </el-space>
         </div>
       </div>
-      <div class="btn-pane"><el-button type="primary" @click="save">保存</el-button></div>
+      <div class="btn-pane"><el-button type="primary" @click="save">{{ t("common.save") }}</el-button></div>
     </div>
   </div>
 
   <et-dialog
     v-model="showFieldDialog"
-    title="提醒字段设置"
+    :title="t('admin.notify.fieldDialogTitle')"
     width="500px"
     @ok="confirmFieldSelection"
   >
@@ -217,6 +217,9 @@ import {
 import { formNotifyService } from "@eimsnext/services";
 import { ElMessage } from "element-plus";
 import { NotifyTimeFieldOption, getNotifyTimeFieldOptions } from "../../../utils/notify";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "NotifyEditor",
@@ -263,7 +266,7 @@ const showCustomModeTip = computed(() => isCustomScheduled.value);
 const showTimeFieldTip = computed(() => isTimeFieldScheduled.value);
 
 const availableTimeFields = computed<NotifyTimeFieldOption[]>(() => {
-  return getNotifyTimeFieldOptions(props.formDef);
+  return getNotifyTimeFieldOptions(props.formDef, t);
 });
 
 const scheduleSettings = computed<TriggerTimeSettingsValue>({
@@ -404,16 +407,16 @@ function updateTriggerMode(value: FormNotifyTriggerMode) {
 
 function getDefaultNotifyText() {
   if (formNotify.value.triggerMode === FormNotifyTriggerMode.DataAdded) {
-    return "有新数据提交，请及时处理";
+    return t("admin.notify.defaultText");
   }
   if (formNotify.value.triggerMode === FormNotifyTriggerMode.DataChanged) {
-    return "有数据被修改，请及时处理";
+    return t("admin.notify.dataChangedText");
   }
   if (formNotify.value.triggerMode === FormNotifyTriggerMode.TimeFieldScheduled) {
-    return "有数据到期，请及时处理";
+    return t("admin.notify.expiredText");
   }
 
-  return "已到提醒时间，请及时处理";
+  return t("admin.notify.dueText");
 }
 
 function confirmFieldSelection() {
@@ -442,12 +445,12 @@ function editNotifier() {
 
 function finishSelectNotifier(tags: ISelectedTag[]) {
   const candidates: IApprovalCandidate[] = convertTagsToCandidates(tags);
-  const normalizedCandidates = isCustomScheduled.value
+    const normalizedCandidates = isCustomScheduled.value
     ? candidates.filter((item) => item.candidateType !== FORM_FIELD_CANDIDATE_TYPE)
     : candidates;
 
   if (isCustomScheduled.value && normalizedCandidates.length !== candidates.length) {
-    ElMessage.warning("自定义定时提醒不支持使用表单字段作为提醒人");
+    ElMessage.warning(t("admin.notify.customNotifierTip"));
   }
 
   formNotify.value.notifiers = JSON.stringify(normalizedCandidates);
@@ -457,7 +460,7 @@ function finishSelectNotifier(tags: ISelectedTag[]) {
 }
 
 function notifyTextLimitReached() {
-  ElMessage.warning("提醒文字最多添加6个字段");
+  ElMessage.warning(t("admin.notify.fieldLimitTip"));
 }
 
 function updateNotifyText(value: string) {
@@ -617,7 +620,7 @@ const save = async () => {
     emit("saved", formNotify.value);
   } catch (error) {
     console.error("保存提醒配置失败:", error);
-    ElMessage.error("保存失败");
+    ElMessage.error(t("admin.notify.saveFailed"));
   }
 };
 </script>

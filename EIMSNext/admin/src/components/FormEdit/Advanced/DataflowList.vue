@@ -1,13 +1,13 @@
 <template>
   <EtConfirmDialog
     v-model="showDeleteConfirmDialog"
-    title="你确定要删除所选数据吗？"
+    :title="t('common.message.deleteConfirm_Title')"
     :icon="MessageIcon.Warning"
     :showNoSave="false"
-    okText="确定"
+    :okText="t('common.ok')"
     @ok="execDelete"
   >
-    <div>数据删除后将不可恢复</div>
+    <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
   <et-dialog v-model="showAddDialog" :title="t('dataflow.newDataflowDialog')" width="640px">
     <div class="add-dialog">
@@ -74,7 +74,7 @@
     </template>
     <DataflowDesigner :appId="formDef.appId" :formId="formDef.id" :flow-def="selectedFlow!" />
   </et-drawer>
-  <AdvanceLayout title="智能助手" desc="实现自动同步更新表单数据、执行插件等智能化操作">
+  <AdvanceLayout :title="t('admin.advanced.dataflow')" :desc="t('dataflow.formTriggerDesc') + ' / ' + t('dataflow.scheduleTriggerDesc') + ' / ' + t('dataflow.httpTriggerDesc')">
     <div class="flow-container">
       <div class="panel-header">
         <div class="header-left">
@@ -90,15 +90,15 @@
             <et-card class="flow-card" :title="flow.name">
               <template #action>
                 <div class="flow-header">
-                  <el-button @click="edit(flow)">编辑</el-button>
-                  <el-button @click="remove(flow)">删除</el-button>
+                  <el-button @click="edit(flow)">{{ t("common.edit") }}</el-button>
+                  <el-button @click="remove(flow)">{{ t("common.delete") }}</el-button>
                   <el-switch
                     :model-value="!flow.disabled"
                     @change="toggleDisable(flow)"
                   ></el-switch>
                 </div>
               </template>
-              <div class="flow-content">触发: {{ getTriggerSource(flow) }}</div>
+              <div class="flow-content">{{ t("admin.advanced.triggerPrefix") }}: {{ getTriggerSource(flow) }}</div>
             </et-card>
           </template>
         </el-space>
@@ -149,10 +149,10 @@ const getTriggerSource = (flow: WfDefinition) => {
   }
 
    if (flow.eventSource == EventSourceType.Http) {
-    return "HTTP触发";
+    return t("dataflow.httpTrigger");
   }
 
-  return "定时触发";
+  return t("dataflow.scheduleTrigger");
 };
 
 const addNew = (eventSource: EventSourceType) => {

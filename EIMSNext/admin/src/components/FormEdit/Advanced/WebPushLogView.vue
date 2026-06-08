@@ -3,27 +3,27 @@
     <div class="log-container">
       <div class="filter-line">
         <el-select v-model="filterValue" class="log-filter" @change="filterChanged">
-          <el-option label="推送失败日志" value="0"></el-option>
-          <el-option label="推送成功日志" value="1"></el-option>
-          <el-option label="全部日志" value="-1"></el-option>
+          <el-option :label="t('admin.webhook.log.failed')" value="0"></el-option>
+          <el-option :label="t('admin.webhook.log.success')" value="1"></el-option>
+          <el-option :label="t('admin.webhook.log.all')" value="-1"></el-option>
         </el-select>
-        <span class="log-tip">仅保留6个月的推送日志</span>
+        <span class="log-tip">{{ t("admin.webhook.log.retention") }}</span>
       </div>
       <div class="log-detail">
         <el-table v-loading="loading" :data="dataRef">
-          <el-table-column :formatter="formatter" label="推送时间" width="150" prop="createTime" />
-          <el-table-column label="推送地址" width="600" prop="url" />
-          <el-table-column :formatter="formatter" label="推送事件" width="150" prop="triggerType" />
-          <el-table-column :formatter="formatter" label="推送结果" width="100" prop="success">
+          <el-table-column :formatter="formatter" :label="t('admin.webhook.log.pushTime')" width="150" prop="createTime" />
+          <el-table-column :label="t('admin.webhook.log.pushUrl')" width="600" prop="url" />
+          <el-table-column :formatter="formatter" :label="t('admin.webhook.log.pushEvent')" width="150" prop="triggerType" />
+          <el-table-column :formatter="formatter" :label="t('admin.webhook.log.pushResult')" width="100" prop="success">
             <template #default="scope">
               <div
                 v-html="formatter(scope.row, { property: 'success' }, scope.row['success'])"
               ></div>
             </template>
           </el-table-column>
-          <el-table-column label="推送详情" fixed="right" width="150">
+          <el-table-column :label="t('admin.webhook.log.pushDetail')" fixed="right" width="150">
             <template #default="scope">
-              <el-button class="link-text" size="small">查看详情</el-button>
+              <el-button class="link-text" size="small">{{ t("admin.webhook.log.viewDetail") }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -71,7 +71,7 @@ const sortList = ref<IFieldSortList>({
       field: {
         formId: "webPushLog",
         field: "createTime",
-        label: "推送时间",
+        label: t("admin.webhook.log.pushTime"),
         type: FieldType.TimeStamp,
       },
       sort: SortDirection.Desc,
@@ -144,7 +144,7 @@ const formatter = (row: any, column: any, cellValue: any) => {
     return dateFormat(cellValue, "YYYY-MM-DD HH:mm:ss");
 
   if (column.property == "success")
-    return cellValue == true ? "成功" : "<span style='color:var(--et-color-danger)'>失败</span>";
+    return cellValue == true ? t("admin.webhook.log.successText") : `<span style='color:var(--et-color-danger)'>${t("admin.webhook.log.failedText")}</span>`;
 
   if (column.property == "triggerType") {
     let split = cellValue.toString().split(".");

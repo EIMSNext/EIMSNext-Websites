@@ -5,38 +5,38 @@
         <template #default>
           <el-dropdown trigger="hover" placement="right-start" :show-arrow="false">
             <div class="submenu-trigger">
-              <span>汇总方式</span>
+              <span>{{ t("admin.dashboardFieldBar.summaryMethod") }}</span>
               <et-icon icon="el-ArrowRight" />
             </div>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item @click="setAggFun(AggregateFun.Sum)">
                   <div class="ag-container">
-                    <span class="ag-title">求和</span>
+                    <span class="ag-title">{{ t("admin.dashboardFieldBar.sum") }}</span>
                     <et-icon v-if="field.aggFun === AggregateFun.Sum" icon="el-Check" />
                   </div>
                 </el-dropdown-item>
                 <el-dropdown-item @click="setAggFun(AggregateFun.Avg)">
                   <div class="ag-container">
-                    <span class="ag-title">平均值</span>
+                    <span class="ag-title">{{ t("admin.dashboardFieldBar.avg") }}</span>
                     <et-icon v-if="field.aggFun === AggregateFun.Avg" icon="el-Check" />
                   </div>
                 </el-dropdown-item>
                 <el-dropdown-item @click="setAggFun(AggregateFun.Max)">
                   <div class="ag-container">
-                    <span class="ag-title">最大值</span>
+                    <span class="ag-title">{{ t("admin.dashboardFieldBar.max") }}</span>
                     <et-icon v-if="field.aggFun === AggregateFun.Max" icon="el-Check" />
                   </div>
                 </el-dropdown-item>
                 <el-dropdown-item @click="setAggFun(AggregateFun.Min)">
                   <div class="ag-container">
-                    <span class="ag-title">最小值</span>
+                    <span class="ag-title">{{ t("admin.dashboardFieldBar.min") }}</span>
                     <et-icon v-if="field.aggFun === AggregateFun.Min" icon="el-Check" />
                   </div>
                 </el-dropdown-item>
                 <el-dropdown-item @click="setAggFun(AggregateFun.Count)">
                   <div class="ag-container">
-                    <span class="ag-title">计数</span>
+                    <span class="ag-title">{{ t("admin.dashboardFieldBar.count") }}</span>
                     <et-icon v-if="field.aggFun === AggregateFun.Count" icon="el-Check" />
                   </div>
                 </el-dropdown-item>
@@ -52,6 +52,9 @@
 import { AggregateFun } from "@eimsnext/services";
 import { IMetricsField } from "../../ECharts/type";
 import BasicField from "./BasicField.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "MetricsField",

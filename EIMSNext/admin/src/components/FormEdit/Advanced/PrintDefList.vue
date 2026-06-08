@@ -1,13 +1,13 @@
 <template>
   <EtConfirmDialog
     v-model="showDeleteConfirmDialog"
-    title="你确定要删除所选数据吗？"
+    :title="t('common.message.deleteConfirm_Title')"
     :icon="MessageIcon.Warning"
     :showNoSave="false"
-    okText="确定"
+    :okText="t('common.ok')"
     @ok="execDelete"
   >
-    <div>数据删除后将不可恢复</div>
+    <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
   <EtDrawer v-model="showDrawer" @close="close">
     <template #title>
@@ -16,12 +16,12 @@
 
     <component :is="PdfPrintDesigner" :form-def="formDef" :print-def="selectedPrint!" />
   </EtDrawer>
-  <AdvanceLayout title="打印定义" desc="打印表单时将按照使用中的模板格式打印">
+  <AdvanceLayout :title="t('admin.printDef.title')" :desc="t('admin.printDef.desc')">
     <div class="flow-container">
       <div class="panel-header">
         <div class="header-left">
           <el-button type="primary" icon="plus" @click="addNew(PrintDefType.Pdf)">
-            新建打印定义
+            {{ t("admin.printDef.new") }}
           </el-button>
         </div>
         <div class="header-right"></div>
@@ -32,13 +32,13 @@
             <et-card class="flow-card" :title="print.name">
               <template #action>
                 <div class="flow-header">
-                  <el-button @click="edit(print)">编辑</el-button>
-                  <el-button @click="remove(print)">删除</el-button>
+                  <el-button @click="edit(print)">{{ t("common.edit") }}</el-button>
+                  <el-button @click="remove(print)">{{ t("common.delete") }}</el-button>
                 </div>
               </template>
               <div class="flow-content">
-                <div class="item-line">使用范围: aaaa</div>
-                <div class="item-line">文件名称: bbbb</div>
+                <div class="item-line">{{ t("admin.printDef.scope") }}: aaaa</div>
+                <div class="item-line">{{ t("admin.printDef.fileName") }}: bbbb</div>
               </div>
             </et-card>
           </template>
@@ -54,6 +54,9 @@ import { FormDef, PrintDef, PrintDefType } from "@eimsnext/models";
 import { MessageIcon } from "@eimsnext/components";
 import { printDefService } from "@eimsnext/services";
 import buildQuery from "odata-query";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const PdfPrintDesigner = defineAsyncComponent(() => import("@/components/PrintDesigner/PdfPrintDesigner.vue"));
 
@@ -80,7 +83,7 @@ const loadPrints = (formId: string) => {
 const addNew = (printType: PrintDefType) => {
   selectedPrint.value = {
     id: "",
-    name: "未命名打印定义",
+    name: t("admin.printDef.untitled"),
     appId: props.formDef.appId,
     formId: props.formDef.id,
     content: "",

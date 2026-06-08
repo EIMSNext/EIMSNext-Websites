@@ -26,7 +26,7 @@
             filterable
             collapse-tags
             collapse-tags-tooltip
-            placeholder="搜索并选择..."
+            :placeholder="t('admin.dashboardFilterDesigner.rangePanel.searchAndSelect')"
             class="range-select"
             @change="onItemsChange"
           >
@@ -37,7 +37,7 @@
               :value="item.id"
             />
           </el-select>
-          <el-button v-if="selectedIds.length > 0" size="small" text @click="clearItems">清除</el-button>
+          <el-button v-if="selectedIds.length > 0" size="small" text @click="clearItems">{{ t("admin.dashboardFilterDesigner.rangePanel.clear") }}</el-button>
         </div>
 
         <div v-if="selectedIds.length > 0" class="selected-tags">
@@ -51,54 +51,54 @@
             {{ getItemLabel(id) }}
           </el-tag>
         </div>
-        <div v-else class="range-empty">尚未选择任何值</div>
+        <div v-else class="range-empty">{{ t("admin.dashboardFilterDesigner.rangePanel.emptySelected") }}</div>
       </template>
 
       <div v-if="!localEnabled" class="range-hint-text">
         <template v-if="rangeSourceType == 'staticOptions'">
-          所有静态选项值都会作为候选
+          {{ t("admin.dashboardFilterDesigner.rangePanel.staticOptionsHint") }}
         </template>
         <template v-else>
-          查询真实业务值去重作为候选，最多 50 条
+          {{ t("admin.dashboardFilterDesigner.rangePanel.distinctDataHint") }}
         </template>
       </div>
 
       <div v-if="localEnabled && isSelectType && !hasItems" class="range-empty">
-        当前字段暂无候选值
+        {{ t("admin.dashboardFilterDesigner.rangePanel.noCandidates") }}
       </div>
     </div>
 
     <div v-if="isFixedRangeType" class="range-body">
       <div v-if="localEnabled" class="fixed-range-editor">
         <div class="range-input-row">
-          <span class="range-input-label">最小值</span>
+          <span class="range-input-label">{{ t("admin.dashboardFilterDesigner.rangePanel.min") }}</span>
           <el-input
             :model-value="minValue"
             type="number"
-            placeholder="不限制"
+            :placeholder="t('admin.dashboardFilterDesigner.rangePanel.noLimit')"
             size="small"
             @input="onMinInput"
           />
         </div>
         <div class="range-input-row">
-          <span class="range-input-label">最大值</span>
+          <span class="range-input-label">{{ t("admin.dashboardFilterDesigner.rangePanel.max") }}</span>
           <el-input
             :model-value="maxValue"
             type="number"
-            placeholder="不限制"
+            :placeholder="t('admin.dashboardFilterDesigner.rangePanel.noLimit')"
             size="small"
             @input="onMaxInput"
           />
         </div>
       </div>
       <div v-else class="range-hint-text">
-        由系统根据业务数据自动计算值域范围
+        {{ t("admin.dashboardFilterDesigner.rangePanel.autoRangeHint") }}
       </div>
     </div>
 
     <div v-if="isMemberScopeType" class="range-body">
       <div class="range-hint-text">
-        成员/部门范围请在下方「成员/部门范围」中设置
+        {{ t("admin.dashboardFilterDesigner.rangePanel.memberScopeHint") }}
       </div>
     </div>
   </div>
@@ -112,6 +112,9 @@ import {
 } from "@eimsnext/models";
 import { IFormDataFilterOptionItem } from "@eimsnext/services";
 import { DashboardConditionFieldType } from "../fieldType";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   allowedRange?: DashboardFilterAllowedRange;
@@ -132,13 +135,13 @@ const maxValue = ref<any>(props.allowedRange?.max);
 const rangeTypeLabel = computed(() => {
   switch (props.rangeSourceType) {
     case "staticOptions":
-      return "静态选项值";
+      return t("admin.dashboardFilterDesigner.rangePanel.staticOptions");
     case "distinctData":
-      return "真实业务值去重";
+      return t("admin.dashboardFilterDesigner.rangePanel.distinctData");
     case "memberScope":
-      return "成员/部门选择范围";
+      return t("admin.dashboardFilterDesigner.rangePanel.memberScope");
     case "fixedRange":
-      return "固定范围";
+      return t("admin.dashboardFilterDesigner.rangePanel.fixedRange");
     default:
       return "";
   }

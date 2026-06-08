@@ -1,44 +1,44 @@
 <template>
   <div class="flow-designer">
-    <el-dialog v-model="showPageSetupDialog" title="打印模板设置" width="560px">
+    <el-dialog v-model="showPageSetupDialog" :title="t('admin.printDesigner.settings')" width="560px">
       <el-form label-width="88px">
-        <el-form-item label="纸张大小">
+        <el-form-item :label="t('admin.printDesigner.paperSize')">
           <el-select v-model="pageSettingsDraft.paperSize" class="w-full">
             <el-option v-for="option in paperSizeOptions" :key="option.value" :label="option.label" :value="option.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="纸张方向">
+        <el-form-item :label="t('admin.printDesigner.paperOrientation')">
           <el-radio-group v-model="pageSettingsDraft.orientation">
-            <el-radio-button label="portrait">竖向</el-radio-button>
-            <el-radio-button label="landscape">横向</el-radio-button>
+            <el-radio-button label="portrait">{{ t("admin.printDesigner.portrait") }}</el-radio-button>
+            <el-radio-button label="landscape">{{ t("admin.printDesigner.landscape") }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="页边距">
+        <el-form-item :label="t('admin.printDesigner.pageMargin')">
           <div class="page-margin-grid">
             <div class="page-margin-item">
-              <span class="page-margin-label">上</span>
+              <span class="page-margin-label">{{ t("admin.printDesigner.marginTop") }}</span>
               <el-input-number v-model="pageSettingsDraft.margins.top" :min="0" :step="1" :precision="0" controls-position="right" />
             </div>
             <div class="page-margin-item">
-              <span class="page-margin-label">右</span>
+              <span class="page-margin-label">{{ t("admin.printDesigner.marginRight") }}</span>
               <el-input-number v-model="pageSettingsDraft.margins.right" :min="0" :step="1" :precision="0" controls-position="right" />
             </div>
             <div class="page-margin-item">
-              <span class="page-margin-label">下</span>
+              <span class="page-margin-label">{{ t("admin.printDesigner.marginBottom") }}</span>
               <el-input-number v-model="pageSettingsDraft.margins.bottom" :min="0" :step="1" :precision="0" controls-position="right" />
             </div>
             <div class="page-margin-item">
-              <span class="page-margin-label">左</span>
+              <span class="page-margin-label">{{ t("admin.printDesigner.marginLeft") }}</span>
               <el-input-number v-model="pageSettingsDraft.margins.left" :min="0" :step="1" :precision="0" controls-position="right" />
             </div>
           </div>
-          <span class="page-margin-unit">单位：mm</span>
+          <span class="page-margin-unit">{{ t("admin.printDesigner.marginUnit") }}</span>
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="showPageSetupDialog = false">取消</el-button>
-          <el-button type="primary" @click="applyPageSettings">确定</el-button>
+          <el-button @click="showPageSetupDialog = false">{{ t("common.cancel") }}</el-button>
+          <el-button type="primary" @click="applyPageSettings">{{ t("common.ok") }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -52,14 +52,14 @@
         <span class="page-setup-summary">{{ pageSetupSummary }}</span>
       </div>
       <div class="right">
-        <el-button @click="openPageSetupDialog">打印模板设置</el-button>
-        <el-button :loading="previewing" :disabled="!designerReady" @click="preview">预览</el-button>
-        <el-button :loading="saving" :disabled="!designerReady" @click="save">保存</el-button>
+        <el-button @click="openPageSetupDialog">{{ t("admin.printDesigner.settings") }}</el-button>
+        <el-button :loading="previewing" :disabled="!designerReady" @click="preview">{{ t("admin.printDesigner.preview") }}</el-button>
+        <el-button :loading="saving" :disabled="!designerReady" @click="save">{{ t("common.save") }}</el-button>
       </div>
     </div>
     <div class="print-design-container" v-loading="loading">
       <el-tabs v-model="activeTab" class="field-container">
-        <el-tab-pane label="表单字段" name="form" class="field-panel">
+        <el-tab-pane :label="t('admin.printDesigner.formFields')" name="form" class="field-panel">
           <el-tree
             ref="formFieldsTreeRef"
             class="mt-2"
@@ -89,13 +89,13 @@
             </template>
           </el-tree>
         </el-tab-pane>
-        <el-tab-pane label="系统字段" name="system" class="field-panel">
+        <el-tab-pane :label="t('admin.printDesigner.systemFields')" name="system" class="field-panel">
           <div>system</div>
         </el-tab-pane>
       </el-tabs>
       <div class="designer-stage">
         <el-alert v-if="loadError" type="error" :closable="false" show-icon>
-          <template #title>打印设计器加载失败</template>
+          <template #title>{{ t("admin.printDesigner.designerLoadFailed") }}</template>
           {{ loadError }}
         </el-alert>
         <div ref="container" class="univer-container"></div>
@@ -113,6 +113,9 @@ import Draggable from "vuedraggable";
 import { customPrintService, PrintPreviewRequest, printDefService } from "@eimsnext/services";
 import { IPrintMetadata } from "./type";
 import PdfPreview from "./PdfPreview.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "PdfPrintDesigner",
@@ -451,8 +454,8 @@ const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: 
   runtimeApi.registerComponent(PAGE_SETUP_MENU_ICON_ID, createPageSetupMenuIcon(modules.react));
   runtimeApi.createMenu({
     id: PAGE_SETUP_MENU_ID,
-    title: "页面设置",
-    tooltip: "页面设置",
+    title: t("admin.printDesigner.pageSetupMenu"),
+    tooltip: t("admin.printDesigner.pageSetupMenu"),
     icon: PAGE_SETUP_MENU_ICON_ID,
     order: 1000,
     action: openPageSetupDialog,
@@ -481,7 +484,7 @@ const parseTemplateContent = () => {
 
   const parsed = JSON.parse(currentPrintDef.value.content);
   if (!isRecord(parsed)) {
-    throw new Error("打印模板数据格式无效");
+    throw new Error(t("admin.printDesigner.invalidTemplate"));
   }
 
   const workbookData = { ...parsed };
@@ -502,7 +505,7 @@ const serializeTemplateContent = () => applyPageSetupToWorkbookData({
 
 const ensureWorkbookApi = () => {
   if (!workbookApi) {
-    throw new Error("打印设计器尚未完成初始化");
+    throw new Error(t("admin.printDesigner.designerNotReady"));
   }
 
   return workbookApi;
@@ -666,7 +669,7 @@ const loadUniverModules = async () => {
 
 const initSheet = async (data: Record<string, unknown>) => {
   if (!container.value) {
-    throw new Error("未找到打印设计器容器");
+    throw new Error(t("admin.printDesigner.containerMissing"));
   }
 
   console.log("[PdfPrintDesigner] initSheet: loading Univer modules...");
@@ -732,11 +735,11 @@ const initSheet = async (data: Record<string, unknown>) => {
       : DEFAULT_SHEET_ID;
 
   if (!renderManagerService) {
-    throw new Error("Univer 渲染服务未初始化，无法加载打印区域插件");
+    throw new Error(t("admin.printDesigner.renderServiceMissing"));
   }
 
   if (!runtimeUnitId) {
-    throw new Error("Univer 工作簿缺少 unitId，无法加载打印区域插件");
+    throw new Error(t("admin.printDesigner.unitIdMissing"));
   }
 
   univerObj = univer;
@@ -757,7 +760,7 @@ const initSheet = async (data: Record<string, unknown>) => {
   });
 
   if (!runtimeApi.Event?.DragOver || !runtimeApi.Event?.Drop) {
-    throw new Error("Univer 0.21 运行时事件接口发生变化，请检查 facade Event 定义");
+    throw new Error(t("admin.printDesigner.eventApiChanged"));
   }
 
   runtimeApi.addEvent(runtimeApi.Event.DragOver, (params: any) => {
@@ -786,7 +789,7 @@ const initSheet = async (data: Record<string, unknown>) => {
       };
 
       if (typeof (cell as any).setCustomMetaData !== "function") {
-        throw new Error("Univer 0.21 运行时未提供 setCustomMetaData，打印字段元数据写入失败");
+        throw new Error(t("admin.printDesigner.metadataApiMissing"));
       }
 
       (cell as any).setCustomMetaData(printMetadata);
@@ -820,7 +823,7 @@ const initializeDesigner = async () => {
   } catch (error) {
     console.error("[PdfPrintDesigner] initializeDesigner: caught error", error);
     disposeDesigner();
-    loadError.value = error instanceof Error ? error.message : "打印设计器初始化失败";
+    loadError.value = error instanceof Error ? error.message : t("admin.printDesigner.initFailed");
     console.error("[PdfPrintDesigner] init failed", error);
   } finally {
     console.log("[PdfPrintDesigner] initializeDesigner: end, loading=false");
@@ -839,14 +842,14 @@ const preview = async () => {
     const printResult = await customPrintService.preview(req);
     if (printResult?.downloadUrl) {
       previewPdfUrl.value = printResult.downloadUrl;
-      previewPdfTitle.value = currentPrintDef.value.name || "打印预览";
+      previewPdfTitle.value = currentPrintDef.value.name || t("admin.printDesigner.previewTitle");
       showPrintPreview.value = true;
       return;
     }
 
-    ElMessage.error(printResult?.message || "打印失败");
+    ElMessage.error(printResult?.message || t("admin.printDesigner.previewFailed"));
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : "打印失败");
+    ElMessage.error(error instanceof Error ? error.message : t("admin.printDesigner.previewFailed"));
   } finally {
     previewing.value = false;
   }
@@ -868,7 +871,7 @@ const save = async () => {
       ? await printDefService.put<PrintDef>(req.id, req)
       : await printDefService.post<PrintDef>(req);
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : "保存失败");
+    ElMessage.error(error instanceof Error ? error.message : t("common.saveFailed"));
   } finally {
     saving.value = false;
   }

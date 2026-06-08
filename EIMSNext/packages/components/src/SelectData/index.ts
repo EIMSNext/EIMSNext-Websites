@@ -88,18 +88,25 @@ export const buildDataSelectFields = (form?: FormDef, includeSystemFields: boole
   if (!includeSystemFields || !form) {
     return result;
   }
+  const systemFieldLabel = (key: "flowStatus" | "dataTitle" | "createBy" | "createTime" | "updateTime") => ({
+    flowStatus: "流程状态",
+    dataTitle: "数据标题",
+    createBy: "提交人",
+    createTime: "提交时间",
+    updateTime: "更新时间",
+  }[key]);
 
   if (form.usingWorkflow) {
-    const flowField = getFlowStatus("流程状态");
+    const flowField = getFlowStatus(systemFieldLabel("flowStatus"));
     result.unshift({ field: flowField.field, label: flowField.title, type: flowField.type });
   }
 
-  const dataTitleField = getDataTitle("数据标题");
+  const dataTitleField = getDataTitle(systemFieldLabel("dataTitle"));
   result.unshift({ field: dataTitleField.field, label: dataTitleField.title, type: dataTitleField.type });
 
-  const createByField = getCreateBy("提交人");
-  const createTimeField = getCreateTime("提交时间");
-  const updateTimeField = getUpdateTime("更新时间");
+  const createByField = getCreateBy(systemFieldLabel("createBy"));
+  const createTimeField = getCreateTime(systemFieldLabel("createTime"));
+  const updateTimeField = getUpdateTime(systemFieldLabel("updateTime"));
 
   result.push(
     { field: createByField.field, label: createByField.title, type: createByField.type },
@@ -272,7 +279,7 @@ export const formatDataSelectValue = (
   options?: { t?: (key: string) => string },
 ) => {
   if (field?.field === SystemField.FlowStatus || field?.type === (getFlowStatus("流程状态").type as FieldType)) {
-    const status = flowStatusArray().find((item) => item.id === value);
+    const status = flowStatusArray(options?.t).find((item) => item.id === value);
     return status ? (options?.t ? options.t(status.i18n) : status.label) : stringifyDataSelectValue(value);
   }
 

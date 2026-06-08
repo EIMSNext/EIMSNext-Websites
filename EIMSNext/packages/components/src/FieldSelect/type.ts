@@ -71,9 +71,17 @@ export function buildFieldListItems(
   fields: FieldDef[],
   usingWf: boolean,
   nodeId?: string,
-  fieldLimit?: IFieldLimit,
+  fieldLimit?: (IFieldLimit & { t?: (key: string) => string }),
 ): IListItem[] {
   const items: IListItem[] = [];
+  const t = fieldLimit?.t;
+  const getSystemFieldLabel = (key: "dataTitle" | "flowStatus" | "createBy" | "createTime") =>
+    t ? t(`comp.fieldBlock.systemFields.${key}`) : ({
+      dataTitle: "数据标题",
+      flowStatus: "流程状态",
+      createBy: "提交人",
+      createTime: "提交时间",
+    }[key]);
 
   if (
     !fieldLimit ||
@@ -82,7 +90,7 @@ export function buildFieldListItems(
   ) {
     let dataTitle: IFormFieldDef = toFormFieldDef(
       formId,
-      getDataTitle("数据标题"),
+      getDataTitle(getSystemFieldLabel("dataTitle")),
       undefined,
       nodeId,
     );
@@ -96,7 +104,7 @@ export function buildFieldListItems(
     if (usingWf) {
       let status: IFormFieldDef = toFormFieldDef(
         formId,
-        getFlowStatus("流程状态"),
+        getFlowStatus(getSystemFieldLabel("flowStatus")),
         undefined,
         nodeId,
       );
@@ -161,7 +169,7 @@ export function buildFieldListItems(
     if (formId != "employee") {
       let submitor: IFormFieldDef = toFormFieldDef(
         formId,
-        getCreateBy("提交人"),
+        getCreateBy(getSystemFieldLabel("createBy")),
         undefined,
         nodeId,
       );
@@ -174,7 +182,7 @@ export function buildFieldListItems(
 
       let createTime: IFormFieldDef = toFormFieldDef(
         formId,
-        getCreateTime("提交时间"),
+        getCreateTime(getSystemFieldLabel("createTime")),
         undefined,
         nodeId,
       );

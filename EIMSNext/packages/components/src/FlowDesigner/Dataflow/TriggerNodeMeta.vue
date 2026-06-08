@@ -165,7 +165,7 @@ defineOptions({
 
 const formStore = useFormStore();
 const formRef = ref<FormDef>();
-const formName = ref(t(""));
+const formName = ref("");
 const usingFlow = ref(false);
 const selectedTriggers = ref(0);
 const flowContext = inject<IFlowContext>("flowContext")!;
@@ -178,7 +178,7 @@ const nodeList = ref<IListItem[]>([]);
 const allowedIpText = ref("");
 const showSampleDialog = ref(false);
 const corpId = computed(() => (flowContext as any).corpId || "");
-const actionList = ref<IListItem[]>([
+const actionList = computed<IListItem[]>(() => [
   {
     id: "submit",
     label: t("dataflow.wfAction_Submit"),

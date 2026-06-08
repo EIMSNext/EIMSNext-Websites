@@ -202,7 +202,7 @@ watch(
   { deep: true },
 );
 
-const fieldValueTypes: IListItem[] = [
+const fieldValueTypes = computed<IListItem[]>(() => [
   {
     id: FieldValueType.Custom,
     label: t("comp.value_Custom"),
@@ -223,7 +223,7 @@ const fieldValueTypes: IListItem[] = [
     label: t("comp.value_Empty"),
     type: DataItemType.Unknown,
   },
-];
+]);
 
 const emit = defineEmits(["update:modelValue", "change"]);
 const onValueTypeChange = () => {

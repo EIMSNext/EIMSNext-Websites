@@ -2,23 +2,23 @@
   <div class="api-config-pane">
     <div class="config-content">
       <div class="config-pane">
-        <div class="pane-label">服务器地址</div>
+        <div class="pane-label">{{ t("admin.webhook.serverUrl") }}</div>
         <div class="pane-row">
           <el-input v-model="hook.url" class="pane-row-stretch" autocomplete="new-password" />
-          <el-button type="primary" class="btn-test" :loading="testing" @click="testConnection">服务器连接测试</el-button>
+          <el-button type="primary" class="btn-test" :loading="testing" @click="testConnection">{{ t("admin.webhook.testConnection") }}</el-button>
         </div>
         <div class="pane-label">Secret</div>
         <div class="pane-row">
           <el-input v-model="hook.secret" class="pane-row-stretch" autocomplete="new-password" />
-          <el-button type="primary" class="btn-test" @click="generateSecret">生成Secret</el-button>
+          <el-button type="primary" class="btn-test" @click="generateSecret">{{ t("admin.webhook.generateSecret") }}</el-button>
         </div>
-        <div class="pane-label">推送事件</div>
+        <div class="pane-label">{{ t("admin.webhook.trigger") }}</div>
         <div class="pane-row">
           <div class="triggers-container">
             <div class="push-event-title">
-              <span>数据事件</span>
-              <span class="push-event-title-desc">表单数据发生变更时，推送变更后的数据</span>
-              <el-button size="small" class="btn-sample">查看样例</el-button>
+              <span>{{ t("admin.webhook.dataEvent") }}</span>
+              <span class="push-event-title-desc">{{ t("admin.webhook.dataEventDesc") }}</span>
+              <el-button size="small" class="btn-sample">{{ t("admin.webhook.viewSample") }}</el-button>
             </div>
             <div class="push-event-triggers">
               <el-checkbox
@@ -41,9 +41,9 @@
               </el-checkbox>
             </div>
             <div class="push-event-title">
-              <span>流程事件</span>
-              <span class="push-event-title-desc">流程状态/待办发生变更时，推送变更后的数据</span>
-              <el-button size="small" class="btn-sample">查看样例</el-button>
+              <span>{{ t("admin.webhook.workflowEvent") }}</span>
+              <span class="push-event-title-desc">{{ t("admin.webhook.workflowEventDesc") }}</span>
+              <el-button size="small" class="btn-sample">{{ t("admin.webhook.viewSample") }}</el-button>
             </div>
             <div class="push-event-triggers">
               <el-checkbox
@@ -62,7 +62,7 @@
           </div>
         </div>
       </div>
-      <div class="btn-pane"><el-button type="primary" @click="save">保存</el-button></div>
+      <div class="btn-pane"><el-button type="primary" @click="save">{{ t("common.save") }}</el-button></div>
     </div>
   </div>
 </template>
@@ -160,7 +160,7 @@ const resolveRequestErrorMessage = (error: unknown, fallback: string) => {
 
 const testConnection = async () => {
   if (!hook.value?.url) {
-    ElMessage.error("请输入服务器地址");
+    ElMessage.error(t("admin.webhook.serverUrlRequired"));
     return;
   }
 
@@ -168,13 +168,13 @@ const testConnection = async () => {
     testing.value = true;
     const result = await webhookService.test<{ success: boolean; message?: string }>(buildWebhookRequest());
     if (result?.success) {
-      ElMessage.success(result.message || "连接测试成功");
+      ElMessage.success(result.message || t("admin.webhook.testSuccess"));
       return;
     }
 
-    ElMessage.error(result?.message || "连接测试失败");
+    ElMessage.error(result?.message || t("admin.webhook.testFailed"));
   } catch (error) {
-    ElMessage.error(resolveRequestErrorMessage(error, "连接测试失败"));
+    ElMessage.error(resolveRequestErrorMessage(error, t("admin.webhook.testFailed")));
   } finally {
     testing.value = false;
   }

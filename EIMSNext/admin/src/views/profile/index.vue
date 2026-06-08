@@ -129,7 +129,7 @@
           </el-form>
           <div class="verify-switches">
             <el-link v-for="option in verifyOptions" :key="option.value" type="primary" underline="never"
-              @click="verifyMethod = option.value">
+              @click="switchVerifyMethod(option.value)">
               {{ option.label }}
             </el-link>
           </div>
@@ -138,7 +138,7 @@
         <template v-else>
           <el-form ref="actionFormRef" :model="actionForm" label-position="top">
             <template v-if="dialogMode === 'change-password'">
-              <el-form-item :label="$t('profile.newPassword')">
+              <el-form-item :label="$t('admin.profile.newPassword')">
                 <el-popover placement="bottom-start" :width="320" trigger="click" :visible="showPasswordTips">
                   <template #reference>
                     <el-input v-model="actionForm.newPassword" type="password" show-password
@@ -156,15 +156,15 @@
                   </div>
                 </el-popover>
               </el-form-item>
-              <el-form-item :label="$t('profile.confirmPassword')">
+              <el-form-item :label="$t('admin.profile.confirmPassword')">
                 <el-input v-model="actionForm.confirmPassword" type="password" show-password />
               </el-form-item>
             </template>
             <template v-else-if="dialogMode === 'change-phone' || dialogMode === 'bind-phone'">
-              <el-form-item :label="$t('profile.phoneNumber')">
+              <el-form-item :label="$t('admin.profile.phoneNumber')">
                 <el-input v-model="actionForm.phone" maxlength="11" />
               </el-form-item>
-              <el-form-item :label="$t('profile.code')">
+              <el-form-item :label="$t('admin.profile.code')">
                 <el-input v-model="actionForm.code">
                   <template #append>
                     <el-button link type="primary" @click="sendActionCode('phone')">{{ $t("admin.profile.sendCode") }}</el-button>
@@ -173,10 +173,10 @@
               </el-form-item>
             </template>
             <template v-else-if="dialogMode === 'change-email' || dialogMode === 'bind-email'">
-              <el-form-item :label="$t('profile.email')">
+              <el-form-item :label="$t('admin.profile.email')">
                 <el-input v-model="actionForm.email" />
               </el-form-item>
-              <el-form-item :label="$t('profile.code')">
+              <el-form-item :label="$t('admin.profile.code')">
                 <el-input v-model="actionForm.code">
                   <template #append>
                     <el-button link type="primary" @click="sendActionCode('email')">{{ $t("admin.profile.sendCode") }}</el-button>
@@ -253,8 +253,8 @@ const hasPhone = computed(() => !!userStore.currentUser.phone);
 const hasEmail = computed(() => !!userStore.currentUser.email);
 const canUnbindPhone = computed(() => hasPhone.value && hasEmail.value);
 const canUnbindEmail = computed(() => hasPhone.value && hasEmail.value);
-const displayPhone = computed(() => maskPhone(userStore.currentUser.phone) || "未绑定");
-const displayEmail = computed(() => maskEmail(userStore.currentUser.email) || "未绑定");
+const displayPhone = computed(() => maskPhone(userStore.currentUser.phone) || t("admin.misc.unbound"));
+const displayEmail = computed(() => maskEmail(userStore.currentUser.email) || t("admin.misc.unbound"));
 
 const verifyOptions = computed(() => {
   const options: Array<{ value: VerifyMethod; label: string }> = [{ value: "password", label: t("admin.profile.passwordVerify") }];
@@ -267,17 +267,26 @@ const verifyOptions = computed(() => {
   return options.length == 1 ? options : options.filter(x => x.value != verifyMethod.value);
 });
 
-const dialogTitleMap: Record<DialogMode, string> = {
-  "change-password": t("admin.profile.change") + t("admin.profile.password"),
-  "change-phone": t("admin.profile.change") + t("admin.profile.phone"),
-  "bind-phone": t("admin.profile.bind") + t("admin.profile.phone"),
-  "change-email": t("admin.profile.change") + t("admin.profile.email"),
-  "bind-email": t("admin.profile.bind") + t("admin.profile.email"),
-  "unbind-phone": t("admin.profile.unbind") + t("admin.profile.phone"),
-  "unbind-email": t("admin.profile.unbind") + t("admin.profile.email"),
-};
-
-const dialogTitle = computed(() => dialogTitleMap[dialogMode.value]);
+const dialogTitle = computed(() => {
+  switch (dialogMode.value) {
+    case "change-password":
+      return t("admin.profile.change") + t("admin.profile.password");
+    case "change-phone":
+      return t("admin.profile.change") + t("admin.profile.phone");
+    case "bind-phone":
+      return t("admin.profile.bind") + t("admin.profile.phone");
+    case "change-email":
+      return t("admin.profile.change") + t("admin.profile.email");
+    case "bind-email":
+      return t("admin.profile.bind") + t("admin.profile.email");
+    case "unbind-phone":
+      return t("admin.profile.unbind") + t("admin.profile.phone");
+    case "unbind-email":
+      return t("admin.profile.unbind") + t("admin.profile.email");
+    default:
+      return "";
+  }
+});
 const actionTip = computed(() => {
   switch (dialogMode.value) {
     case "change-password":
@@ -300,14 +309,11 @@ const verifyPrimaryValue = computed(() => {
   if (verifyMethod.value === "phone") {
     return displayPhone.value;
   }
-  return displayPhone.value !== t("common.draft") ? displayPhone.value : displayEmail.value;
+  return hasPhone.value ? displayPhone.value : displayEmail.value;
 });
 const verifyInputLabel = computed(() => (verifyMethod.value === "password" ? t("admin.profile.password") : t("admin.profile.code")));
-const verifySendText = computed(() => (verifyCountdown.value > 0 ? `${verifyCountdown.value}s${t("common.draft")}${t("admin.profile.sendCode")}` : t("admin.profile.sendCode")));
-const actionSendText = computed(() => (actionCountdown.value > 0 ? `${actionCountdown.value}s${t("common.draft")}${t("admin.profile.sendCode")}` : t("admin.profile.sendCode")));
 const verifyCodeTarget = computed(() => (verifyMethod.value === "phone" ? userStore.currentUser.phone : userStore.currentUser.email));
 const verifyCodeDisabled = computed(() => verifyMethod.value === "password" || verifyCountdown.value > 0 || !verifyCodeTarget.value);
-const actionCodeDisabled = computed(() => actionCountdown.value > 0 || !getActionTargetValue());
 
 const verifyRules: FormRules = {
   password: [{ required: true, message: t("admin.profile.rules.passwordRequired"), trigger: "blur" }],
@@ -333,11 +339,11 @@ const actionRules: FormRules = {
     },
   ],
   confirmPassword: [
-    { required: true, message: t("admin.profile.rules.confirmPasswordRequired"), trigger: "blur" },
+    { required: true, message: t("admin.profile.rules.codeRequired"), trigger: "blur" },
     {
       validator: (_rule, value, callback) => {
         if (!value) {
-          callback(new Error(t("admin.profile.rules.confirmPasswordRequired")));
+          callback(new Error(t("admin.profile.rules.codeRequired")));
           return;
         }
         if (value !== actionForm.newPassword) {
@@ -379,7 +385,7 @@ const openDialog = (mode: DialogMode) => {
   verifyToken.value = "";
   resetForms();
 
-  if (verifyMethod.value === "password" && verifyPrimaryValue.value === "未绑定") {
+  if (verifyMethod.value === "password" && !hasPhone.value) {
     verifyMethod.value = hasPhone.value ? "phone" : "email";
   }
 
@@ -428,7 +434,7 @@ const submitDialog = async () => {
 
     await validateActionForm();
     await submitAction();
-    ElMessage.success("保存成功");
+    ElMessage.success(t("common.saveSuccess"));
     await refreshCurrentUser();
     closeDialog();
   } catch (error) {

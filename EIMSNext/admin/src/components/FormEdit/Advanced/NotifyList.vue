@@ -1,21 +1,21 @@
 <template>
-  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
-    :showNoSave="false" okText="确定" @ok="execDelete">
-    <div>数据删除后将不可恢复</div>
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')" :icon="MessageIcon.Warning"
+    :showNoSave="false" :okText="t('common.ok')" @ok="execDelete">
+    <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
   <el-drawer v-model="showDrawer" class="elt-drawer" direction="btt" size="95%" @close="close">
     <template #header>
-      <div class="main-title"><span>提醒助手</span></div>
+      <div class="main-title"><span>{{ t("admin.notify.title") }}</span></div>
     </template>
     <div class="main-content">
       <NotifyEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" :key="editorKey" @saved="onSaved" />
     </div>
   </el-drawer>
-  <AdvanceLayout title="提醒助手" desc="设置推送规则，根据规则自动给相关人员发送提醒消息">
+  <AdvanceLayout :title="t('admin.notify.title')" :desc="t('admin.notify.desc')">
     <div class="flow-container">
       <div class="panel-header">
         <div class="header-left">
-          <el-button type="primary" icon="plus" @click="addNew()">新建提醒助手</el-button>
+          <el-button type="primary" icon="plus" @click="addNew()">{{ t("admin.notify.new") }}</el-button>
         </div>
         <div class="header-right"></div>
       </div>
@@ -25,21 +25,21 @@
             <et-card class="flow-card" :title="getNotifyTitle(notify)">
               <template #action>
                 <div class="flow-header">
-                  <el-button @click="edit(notify)">编辑</el-button>
-                  <el-button @click="remove(notify)">删除</el-button>
+                  <el-button @click="edit(notify)">{{ t("common.edit") }}</el-button>
+                  <el-button @click="remove(notify)">{{ t("common.delete") }}</el-button>
                   <el-switch :model-value="!notify.disabled" @change="toggleDisable(notify)"></el-switch>
                 </div>
               </template>
                <div class="flow-content">
-                 <div class="item-line">提醒类型: {{ getTriggerModeText(notify.triggerMode) }}</div>
+                 <div class="item-line">{{ t("admin.notify.type") }}: {{ getTriggerModeText(notify.triggerMode) }}</div>
                  <div v-if="getScheduleSummary(notify)" class="item-line">
-                   提醒时间: {{ getScheduleSummary(notify) }}
+                   {{ t("admin.notify.time") }}: {{ getScheduleSummary(notify) }}
                  </div>
                  <div v-if="getRepeatSummary(notify)" class="item-line">
-                   重复规则: {{ getRepeatSummary(notify) }}
+                   {{ t("admin.notify.repeatRule") }}: {{ getRepeatSummary(notify) }}
                  </div>
-                 <div class="item-line">提醒文字: {{ notify.notifyText || "未设置" }}</div>
-                 <div class="item-line">提醒方式: {{ getChannelText(notify.channels) }}</div>
+                 <div class="item-line">{{ t("admin.notify.text") }}: {{ notify.notifyText || t("common.notset") }}</div>
+                 <div class="item-line">{{ t("admin.notify.channel") }}: {{ getChannelText(notify.channels) }}</div>
                </div>
             </et-card>
           </template>
@@ -64,6 +64,9 @@ import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
 import { getNotifyRepeatSummary, getNotifyScheduleSummary } from "../../../utils/notify";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "NotifyList",
@@ -99,7 +102,7 @@ const createDefaultFormNotify = (): FormNotify =>
     repeatConfig: undefined,
     changeFields: [],
     dataFilter: "",
-    notifyText: "有新数据提交，请及时处理",
+    notifyText: t("admin.notify.defaultText"),
     notifiers: "[]",
     channels: NotifyChannel.System,
     disabled: false,
@@ -151,32 +154,32 @@ function close() {
 
 function getNotifyTitle(notify: FormNotify): string {
   const modeText = getTriggerModeText(notify.triggerMode);
-  return `${modeText}提醒`;
+  return `${modeText}${t("admin.notify.titleSuffix")}`;
 }
 
 function getTriggerModeText(mode: FormNotifyTriggerMode): string {
   const map: Record<number, string> = {
-    [FormNotifyTriggerMode.DataAdded]: "新数据提交",
-    [FormNotifyTriggerMode.DataChanged]: "数据修改",
-    [FormNotifyTriggerMode.CustomScheduled]: "自定义定时",
-    [FormNotifyTriggerMode.TimeFieldScheduled]: "字段定时",
+    [FormNotifyTriggerMode.DataAdded]: t("admin.notify.mode.dataAdded"),
+    [FormNotifyTriggerMode.DataChanged]: t("admin.notify.mode.dataChanged"),
+    [FormNotifyTriggerMode.CustomScheduled]: t("admin.notify.mode.customScheduled"),
+    [FormNotifyTriggerMode.TimeFieldScheduled]: t("admin.notify.mode.timeFieldScheduled"),
   };
-  return map[mode] || "未知";
+  return map[mode] || t("admin.notify.unknown");
 }
 
 function getChannelText(channels: NotifyChannel): string {
   const parts: string[] = [];
-  if (FlagEnum.has(channels, NotifyChannel.System)) parts.push("站内消息");
-  if (FlagEnum.has(channels, NotifyChannel.Email)) parts.push("邮箱消息");
-  return parts.length ? parts.join("、") : "未设置";
+  if (FlagEnum.has(channels, NotifyChannel.System)) parts.push(t("admin.notify.channels.system"));
+  if (FlagEnum.has(channels, NotifyChannel.Email)) parts.push(t("admin.notify.channels.email"));
+  return parts.length ? parts.join("、") : t("common.notset");
 }
 
 function getScheduleSummary(notify: FormNotify): string {
-  return getNotifyScheduleSummary(notify, props.formDef);
+  return getNotifyScheduleSummary(notify, props.formDef, t);
 }
 
 function getRepeatSummary(notify: FormNotify): string {
-  return getNotifyRepeatSummary(notify);
+  return getNotifyRepeatSummary(notify, t);
 }
 
 onBeforeMount(() => {

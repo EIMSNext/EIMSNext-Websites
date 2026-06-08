@@ -24,8 +24,16 @@ export function buildColumns(
   fields: FieldDef[],
   usingWf: boolean,
   displayFields: IFormFieldDef[],
-  fieldPerms?: IFieldPerm[]
+  fieldPerms?: IFieldPerm[],
+  t?: (key: string) => string,
 ): ITableColumn[] {
+  const getSystemFieldLabel = (key: "dataTitle" | "flowStatus" | "createBy" | "createTime") =>
+    t ? t(`comp.fieldBlock.systemFields.${key}`) : ({
+      dataTitle: "数据标题",
+      flowStatus: "流程状态",
+      createBy: "提交人",
+      createTime: "提交时间",
+    }[key]);
   const dispalyAll = displayFields.length == 0;
   const subDisplayFields = new Dictionary();
   displayFields.forEach((d) => {
@@ -49,7 +57,7 @@ export function buildColumns(
 
   const columns: ITableColumn[] = [];
   if (dispalyAll || displayFields.find((d) => d.field == SystemField.DataTitle)) {
-    const dataTitleField = getDataTitle("数据标题");
+    const dataTitleField = getDataTitle(getSystemFieldLabel("dataTitle"));
     columns.push({
       field: dataTitleField.field,
       title: dataTitleField.title,
@@ -61,7 +69,7 @@ export function buildColumns(
   }
 
   if (usingWf && (dispalyAll || displayFields.find((d) => d.field == SystemField.FlowStatus))) {
-    const statusField = getFlowStatus("流程状态");
+    const statusField = getFlowStatus(getSystemFieldLabel("flowStatus"));
     columns.push({
       field: statusField.field,
       title: statusField.title,
@@ -103,7 +111,7 @@ export function buildColumns(
   });
 
   if (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateBy)) {
-    const createByField = getCreateBy("提交人");
+    const createByField = getCreateBy(getSystemFieldLabel("createBy"));
     columns.push({
       field: createByField.field,
       title: createByField.title,
@@ -114,7 +122,7 @@ export function buildColumns(
   }
 
   if (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateTime)) {
-    const createTimeField = getCreateTime("提交时间");
+    const createTimeField = getCreateTime(getSystemFieldLabel("createTime"));
     columns.push({
       field: createTimeField.field,
       title: createTimeField.title,

@@ -104,17 +104,20 @@ const memberOptions = computed(() => ({
   showContract: true,
 }));
 
-const createStarterTag = (): ISelectedTag => ({
-  id: "starter",
-  sourceId: "starter",
-  label: t("workflow.starter"),
-  icon: "el-UserFilled",
-  type: DataItemType.Dynamic,
-  data: {
-    dynamicCategory: "starter",
-    baseLabel: t("workflow.starter"),
-  },
-});
+const createStarterTag = (): ISelectedTag => {
+  const label = t("workflow.starter");
+  return {
+    id: "starter",
+    sourceId: "starter",
+    label,
+    icon: "el-UserFilled",
+    type: DataItemType.Dynamic,
+    data: {
+      dynamicCategory: "starter",
+      baseLabel: label,
+    },
+  };
+};
 
 const createFieldTag = (
   field: { field: string; title: string; type: FieldType },

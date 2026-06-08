@@ -124,10 +124,10 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import("@/views/corp-onboarding/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
-  createTodoRoute("/mytasks", "mytasks", () => import("@/views/wftodo/global/mytasks.vue"), "我的待办"),
-  createTodoRoute("/mystarted", "mystarted", () => import("@/views/wftodo/global/mystarted.vue"), "我发起的"),
-  createTodoRoute("/myapproved", "myapproved", () => import("@/views/wftodo/global/myapproved.vue"), "我审批的"),
-  createTodoRoute("/cctome", "cctome", () => import("@/views/wftodo/global/cctome.vue"), "抄送我的"),
+  createTodoRoute("/mytasks", "mytasks", () => import("@/views/wftodo/global/mytasks.vue"), "common.wfProcess.mytasks"),
+  createTodoRoute("/mystarted", "mystarted", () => import("@/views/wftodo/global/mystarted.vue"), "common.wfProcess.mystarted"),
+  createTodoRoute("/myapproved", "myapproved", () => import("@/views/wftodo/global/myapproved.vue"), "common.wfProcess.myapproved"),
+  createTodoRoute("/cctome", "cctome", () => import("@/views/wftodo/global/cctome.vue"), "common.wfProcess.cctome"),
   ...createSysRoutes(systemRoutes),
   ...createOpenPlatformRoutes(openPlatformRoutes),
   {
@@ -222,7 +222,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/wftodo/app/tasks.vue"),
         name: "mytasks",
         meta: {
-          title: "我的待办",
+          title: "common.wfProcess.mytasks",
           affix: false,
           keepAlive: true,
           requiresAuth: true,
@@ -239,7 +239,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/wftodo/app/started.vue"),
         name: "mystarted",
         meta: {
-          title: "我发起的",
+          title: "common.wfProcess.mystarted",
           affix: false,
           keepAlive: true,
           requiresAuth: true,
@@ -257,7 +257,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/wftodo/app/approved.vue"),
         name: "myapproved",
         meta: {
-          title: "我审批的",
+          title: "common.wfProcess.myapproved",
           affix: false,
           keepAlive: true,
           requiresAuth: true,
@@ -275,7 +275,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/wftodo/app/cctome.vue"),
         name: "cctome",
         meta: {
-          title: "抄送我的",
+          title: "common.wfProcess.cctome",
           affix: false,
           keepAlive: true,
           requiresAuth: true,
@@ -297,7 +297,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/profile",
     name: "Profile",
     component: () => import("@/views/profile/index.vue"),
-    meta: { title: "个人中心", icon: "user", hidden: true, requiresAuth: true },
+    meta: { title: "navbar.profile", icon: "user", hidden: true, requiresAuth: true },
   },
 ];
 

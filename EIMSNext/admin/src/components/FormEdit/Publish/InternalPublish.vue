@@ -2,13 +2,13 @@
   <div>
     <EtConfirmDialog
       v-model="showDeleteConfirmDialog"
-      title="你确定要删除所选数据吗？"
+      :title="t('common.message.deleteConfirm_Title')"
       :icon="MessageIcon.Warning"
       :showNoSave="false"
-      okText="确定"
+      :okText="t('common.ok')"
       @ok="execDelete"
     >
-      <div>数据删除后将不可恢复</div>
+      <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
     </EtConfirmDialog>
     <NewPublishDialog
       v-if="showDialog"
@@ -18,11 +18,11 @@
       destroy-on-close
       @close="close"
     />
-    <AdvanceLayout title="内部发布" desc="设置成员权限，成员登录后根据权限访问">
+    <AdvanceLayout :title="t('admin.publish.internal')" :desc="t('admin.internalPublish.desc')">
       <div class="auth-grp-container">
         <div class="panel-header">
           <div class="header-left">
-            <el-button type="primary" icon="plus" @click="addNew()">新建权限组</el-button>
+            <el-button type="primary" icon="plus" @click="addNew()">{{ t("admin.internalPublish.newGroup") }}</el-button>
           </div>
           <div class="header-right"></div>
         </div>
@@ -32,8 +32,8 @@
               <et-card class="auth-grp-card" :title="authGrp.name">
                 <template #action>
                   <div class="auth-grp-header">
-                    <el-button @click="edit(authGrp)">编辑</el-button>
-                    <el-button @click="remove(authGrp)">删除</el-button>
+                    <el-button @click="edit(authGrp)">{{ t("common.edit") }}</el-button>
+                    <el-button @click="remove(authGrp)">{{ t("common.delete") }}</el-button>
                     <el-switch
                       :model-value="!authGrp.disabled"
                       @change="toggleDisable(authGrp)"

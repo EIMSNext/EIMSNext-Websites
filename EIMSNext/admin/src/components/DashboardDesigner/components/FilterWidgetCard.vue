@@ -3,20 +3,20 @@
     <div class="filter-widget-header">{{ setting.name || itemDef.name }}</div>
 
     <div v-if="selectedBinding?.field" class="filter-widget-body">
-      <div v-if="isNoValueOp" class="no-value-hint">无输入</div>
+      <div v-if="isNoValueOp" class="no-value-hint">{{ t("admin.dashFilter.noInput") }}</div>
 
       <selected-tags
         v-else-if="isMemberType"
         :model-value="memberValue"
         :multiple="isMultiple"
         :editable="true"
-        :empty-text="isDepartmentType ? '请选择部门' : '请选择成员'"
+        :empty-text="isDepartmentType ? t('comp.emptyDept') : t('comp.emptyEmp')"
         @editTag="showMemberDialog = true"
       />
 
       <div v-else-if="showRangeMode" class="range-wrapper">
-        <el-input v-model="rangeValue[0]" placeholder="最小值" @change="emitRangeValue" />
-        <el-input v-model="rangeValue[1]" placeholder="最大值" @change="emitRangeValue" />
+        <el-input v-model="rangeValue[0]" :placeholder="t('common.minValue')" @change="emitRangeValue" />
+        <el-input v-model="rangeValue[1]" :placeholder="t('common.maxValue')" @change="emitRangeValue" />
       </div>
 
       <el-select
@@ -25,17 +25,17 @@
         :multiple="isMultiple"
         filterable
         clearable
-        placeholder="请选择"
+        :placeholder="t('common.pleaseSelect')"
         class="full-width"
         @change="emitOptionValue"
       >
         <el-option v-for="item in options" :key="item.id" :label="item.label" :value="item.value ?? item.id" />
       </el-select>
 
-      <el-input v-else v-model="textValue" placeholder="请输入" @change="emitTextValue" />
+      <el-input v-else v-model="textValue" :placeholder="t('common.pleaseInput')" @change="emitTextValue" />
     </div>
 
-    <div v-else class="filter-widget-empty">请先配置筛选字段</div>
+    <div v-else class="filter-widget-empty">{{ t("admin.dashFilter.emptyBinding") }}</div>
   </div>
 
   <member-select-dialog
@@ -59,6 +59,9 @@ import { DashboardFilterSetting, DashboardItemDef, FieldType } from "@eimsnext/m
 import { useDeptStore, useUserStore } from "@eimsnext/store";
 import { IFormDataFilterOptionItem, formDataService } from "@eimsnext/services";
 import { DashboardConditionFieldType, getDashboardConditionFieldType, isDashboardMultiValueType } from "../fieldType";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FilterWidgetCard",
@@ -119,12 +122,12 @@ const resolveDynamicDefault = async () => {
   switch (setting.value.dynamicDefault?.type) {
     case "currentUser":
       return userStore.currentUser.empId
-        ? [{ id: userStore.currentUser.empId, label: userStore.currentUser.empName || "当前人", type: DataItemType.Employee }]
+        ? [{ id: userStore.currentUser.empId, label: userStore.currentUser.empName || t("admin.dashFilter.currentUser"), type: DataItemType.Employee }]
         : [];
     case "currentDept":
       if (!userStore.currentUser.deptId) return [];
       const dept = await deptStore.get(userStore.currentUser.deptId);
-      return [{ id: userStore.currentUser.deptId, label: dept?.name || "当前部门", type: DataItemType.Department }];
+      return [{ id: userStore.currentUser.deptId, label: dept?.name || t("admin.dashFilter.currentDept"), type: DataItemType.Department }];
     default:
       return setting.value.defaultValue;
   }
