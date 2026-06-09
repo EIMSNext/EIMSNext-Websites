@@ -68,6 +68,7 @@ import {
   IFlowContext,
   IFlowNodeData,
   createFlowNode,
+  syncFlowNodeOrder,
 } from "./FlowData";
 import { FlowType } from "@eimsnext/models";
 import { useLocale } from "element-plus";
@@ -127,14 +128,8 @@ function addNewNode(
     index = props.pNodeDatas.indexOf(props.nodeData) + 1;
   }
 
-  let next = pNodeDatas.find((x) => x.id === curNodeData.nextId);
-
-  newNodeData.prevId = curNodeData.id;
-  newNodeData.nextId = next?.id;
-  curNodeData.nextId = newNodeData.id;
-  if (next) next.prevId = newNodeData.id;
-
   pNodeDatas.splice(index, 0, newNodeData);
+  syncFlowNodeOrder(flowContext.flowData, pNodeDatas);
 
   popoverRef.value.hide();
 }

@@ -14,9 +14,10 @@ import {
   DataflowHttpSampleField,
   DataflowHttpTriggerSetting,
   DataflowTimeTriggerSetting,
+  FieldType,
 } from "@eimsnext/models";
-import { IConditionList } from "@/ConditionList/type";
-import { IFormFieldList } from "@/FormFieldList/type";
+import { ConditionValueType, IConditionList } from "@/ConditionList/type";
+import { FieldValueType, IFormFieldList, IFormFieldValue } from "@/FormFieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
 import { Translator } from "element-plus";
 import { IFormFieldDef } from "@/FieldSelect/type";
@@ -88,11 +89,16 @@ export interface IFlowContext {
   formId: string;
   flowType: FlowType;
   clonedData: IFlowNodeData;
+  draggingData?: IFlowNodeDragData;
   activeData: IFlowNodeData;
   eventSource?: EventSourceType;
   sourceId?: string;
   flowData: IFlowData;
   structureReadonly?: boolean;
+}
+export interface IFlowNodeDragData {
+  nodeData: IFlowNodeData;
+  pNodeDatas: IFlowNodeData[];
 }
 export function createFlowNode(
   nodeType: FlowNodeType,
@@ -357,6 +363,270 @@ function findFlowNodeFromChild(
     if (child.childNodes) {
       let subChild = findFlowNodeFromChild(child.childNodes, nodeId);
       if (subChild) return subChild;
+    }
+  }
+  return undefined;
+}
+
+export function syncFlowNodeOrder(
+  flowData: IFlowData,
+  pNodeDatas: IFlowNodeData[]
+) {
+  const anchor = getFlowNodeListAnchor(flowData, pNodeDatas);
+
+  if (anchor) {
+    anchor.nextId = pNodeDatas[0]?.id;
+  }
+
+  pNodeDatas.forEach((node, index) => {
+    node.prevId = index === 0 ? anchor?.id : pNodeDatas[index - 1]?.id;
+    node.nextId = pNodeDatas[index + 1]?.id;
+  });
+}
+
+export function moveFlowNode(
+  flowData: IFlowData,
+  nodeData: IFlowNodeData,
+  fromNodeDatas: IFlowNodeData[],
+  toNodeDatas: IFlowNodeData[],
+  toNodeData: IFlowNodeData,
+  position: "before" | "after"
+) {
+  const fromIndex = fromNodeDatas.indexOf(nodeData);
+  const toIndex = toNodeDatas.indexOf(toNodeData);
+  const dropToListStart =
+    toIndex < 0 &&
+    (toNodeData.nodeType === FlowNodeType.Start ||
+      toNodeData.nodeType === FlowNodeType.Condition ||
+      toNodeData.nodeType === FlowNodeType.ConditionOther);
+  if (fromIndex < 0 || (toIndex < 0 && !dropToListStart) || nodeData === toNodeData) return false;
+  if (isNodeListInsideNode(nodeData, toNodeDatas)) return false;
+
+  let insertIndex = dropToListStart ? 0 : position === "after" ? toIndex + 1 : toIndex;
+  fromNodeDatas.splice(fromIndex, 1);
+  if (fromNodeDatas === toNodeDatas && fromIndex < insertIndex) insertIndex -= 1;
+  toNodeDatas.splice(insertIndex, 0, nodeData);
+
+  syncFlowNodeOrder(flowData, fromNodeDatas);
+  if (fromNodeDatas !== toNodeDatas) {
+    syncFlowNodeOrder(flowData, toNodeDatas);
+  }
+
+  return true;
+}
+
+function isNodeListInsideNode(
+  nodeData: IFlowNodeData,
+  nodeDatas: IFlowNodeData[]
+): boolean {
+  if (nodeData.childNodes === nodeDatas) return true;
+
+  return nodeData.childNodes?.some((child) => isNodeListInsideNode(child, nodeDatas)) ?? false;
+}
+
+export function cleanupInvalidDataflowDependencies(flowData: IFlowData) {
+  const nodes = collectFlowNodes(flowData);
+
+  nodes.forEach((node) => {
+    const validNodeIds = getPrevNodeIdSet(flowData, node);
+    cleanupNodeDependencies(node, validNodeIds);
+  });
+}
+
+function collectFlowNodes(flowData: IFlowData) {
+  const nodes: IFlowNodeData[] = [flowData.startNode];
+
+  collectFlowNodesFromChild(flowData.nodes, nodes);
+  return nodes;
+}
+
+function collectFlowNodesFromChild(
+  childNodes: IFlowNodeData[] | undefined,
+  nodes: IFlowNodeData[]
+) {
+  childNodes?.forEach((node) => {
+    nodes.push(node);
+    if (node.conditionData) nodes.push(node.conditionData);
+    collectFlowNodesFromChild(node.childNodes, nodes);
+  });
+}
+
+function getPrevNodeIdSet(flowData: IFlowData, flowNode: IFlowNodeData) {
+  const nodeIds = new Set<string>();
+  let prevNode = getPrevNodeByLink(flowData, flowNode);
+
+  while (prevNode) {
+    nodeIds.add(prevNode.id);
+    prevNode = getPrevNodeByLink(flowData, prevNode);
+  }
+
+  return nodeIds;
+}
+
+function getPrevNodeByLink(
+  flowData: IFlowData,
+  flowNode: IFlowNodeData
+): IFlowNodeData | undefined {
+  if (flowNode.nodeType === FlowNodeType.Start) return undefined;
+  return flowNode.prevId ? getFlowNodeById(flowData, flowNode.prevId) : undefined;
+}
+
+function cleanupNodeDependencies(
+  node: IFlowNodeData,
+  validNodeIds: Set<string>
+) {
+  const metadata = node.metadata;
+
+  cleanupConditionDependencies(metadata.conditionMeta?.condition, validNodeIds, true);
+  cleanupConditionDependencies(metadata.triggerMeta?.condition, validNodeIds, false);
+  cleanupConditionDependencies(metadata.queryOneMeta?.condition, validNodeIds, false);
+  cleanupConditionDependencies(metadata.queryManyMeta?.condition, validNodeIds, false);
+  cleanupConditionDependencies(metadata.updateMeta?.condition, validNodeIds, false);
+  cleanupConditionDependencies(metadata.updateMeta?.subCondition, validNodeIds, false);
+  cleanupConditionDependencies(metadata.deleteMeta?.condition, validNodeIds, false);
+
+  if (metadata.updateMeta?.updateMode === UpdateMode.Node && !isValidDependency(metadata.updateMeta.nodeId, validNodeIds)) {
+    metadata.updateMeta.nodeId = undefined;
+    metadata.updateMeta.formId = "";
+    metadata.updateMeta.condition = { id: uniqueId(), rel: "and", items: [] };
+    metadata.updateMeta.subCondition = undefined;
+    metadata.updateMeta.formFieldList = { items: [] };
+    metadata.updateMeta.insertFieldList = { items: [] };
+  }
+
+  if (metadata.deleteMeta?.deleteMode === UpdateMode.Node && !isValidDependency(metadata.deleteMeta.nodeId, validNodeIds)) {
+    metadata.deleteMeta.nodeId = undefined;
+    metadata.deleteMeta.formId = "";
+    metadata.deleteMeta.condition = { id: uniqueId(), rel: "and", items: [] };
+  }
+
+  cleanupFormFieldListDependencies(metadata.insertMeta?.formFieldList, validNodeIds);
+  cleanupFormFieldListDependencies(metadata.updateMeta?.formFieldList, validNodeIds);
+  cleanupFormFieldListDependencies(metadata.updateMeta?.insertFieldList, validNodeIds);
+  cleanupPluginDependencies(metadata.pluginMeta?.fieldSettings, validNodeIds);
+}
+
+function cleanupFormFieldListDependencies(
+  fieldList: IFormFieldList | undefined,
+  validNodeIds: Set<string>
+) {
+  fieldList?.items.forEach((item) => {
+    if (cleanupFieldValueDependencies(item.value, validNodeIds)) {
+      item.value = { type: FieldValueType.Empty };
+    }
+  });
+}
+
+function cleanupFieldValueDependencies(
+  value: IFormFieldValue,
+  validNodeIds: Set<string>
+) {
+  if (
+    value.type === FieldValueType.Field &&
+    value.fieldValue &&
+    !isValidDependency(value.fieldValue.nodeId, validNodeIds)
+  ) {
+    return true;
+  }
+
+  if (value.type === FieldValueType.Formula && value.formulaValue) {
+    const hasInvalidRef = value.formulaValue.refs.some(
+      (ref) => !isValidDependency(ref.field.nodeId, validNodeIds)
+    );
+    const hasInvalidDrivingField =
+      value.formulaValue.drivingField &&
+      !isValidDependency(value.formulaValue.drivingField.nodeId, validNodeIds);
+    return hasInvalidRef || hasInvalidDrivingField;
+  }
+
+  return false;
+}
+
+function cleanupConditionDependencies(
+  condition: IConditionList | undefined,
+  validNodeIds: Set<string>,
+  clearConditionField: boolean
+) {
+  if (!condition) return;
+
+  if (condition.items?.length) {
+    condition.items.forEach((item) =>
+      cleanupConditionDependencies(item, validNodeIds, clearConditionField)
+    );
+    return;
+  }
+
+  if (clearConditionField && !isValidDependency(condition.field?.nodeId, validNodeIds)) {
+    condition.field = createEmptyFormFieldDef();
+    condition.op = "empty";
+    condition.value = { type: ConditionValueType.Custom, value: null };
+    return;
+  }
+
+  if (
+    condition.value?.type === ConditionValueType.Field &&
+    condition.value.fieldValue &&
+    !isValidDependency(condition.value.fieldValue.nodeId, validNodeIds)
+  ) {
+    condition.value = { type: ConditionValueType.Custom, value: null };
+  }
+}
+
+function cleanupPluginDependencies(
+  fieldSettings: PluginFieldSetting[] | undefined,
+  validNodeIds: Set<string>
+) {
+  fieldSettings?.forEach((setting) => {
+    if (
+      setting.value.fieldValue &&
+      !isValidDependency(setting.value.fieldValue.nodeId, validNodeIds)
+    ) {
+      delete setting.value.fieldValue;
+      setting.value.type = "Empty";
+      delete setting.value.value;
+    }
+  });
+}
+
+function isValidDependency(
+  nodeId: string | undefined,
+  validNodeIds: Set<string>
+) {
+  return !nodeId || validNodeIds.has(nodeId);
+}
+
+function createEmptyFormFieldDef(): IFormFieldDef {
+  return {
+    nodeId: "",
+    formId: "",
+    field: "",
+    label: "",
+    type: FieldType.None,
+  };
+}
+
+function getFlowNodeListAnchor(
+  flowData: IFlowData,
+  pNodeDatas: IFlowNodeData[]
+): IFlowNodeData | undefined {
+  if (flowData.nodes === pNodeDatas) return flowData.startNode;
+
+  return findFlowNodeListAnchorFromChild(flowData.nodes, pNodeDatas);
+}
+
+function findFlowNodeListAnchorFromChild(
+  childNodes: IFlowNodeData[],
+  pNodeDatas: IFlowNodeData[]
+): IFlowNodeData | undefined {
+  for (let i = 0; i < childNodes.length; i++) {
+    const child = childNodes[i];
+    if (child.nodeType === FlowNodeType.BranchItem && child.childNodes === pNodeDatas) {
+      return child.conditionData ?? child;
+    }
+
+    if (child.childNodes) {
+      const anchor = findFlowNodeListAnchorFromChild(child.childNodes, pNodeDatas);
+      if (anchor) return anchor;
     }
   }
   return undefined;
