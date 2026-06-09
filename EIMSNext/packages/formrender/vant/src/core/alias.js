@@ -30,4 +30,5 @@ export default {
   array: "fc-group",
   object: "fc-sub-form",
   subForm: "fc-sub-form",
+  serialno: "fc-serialno",
 };

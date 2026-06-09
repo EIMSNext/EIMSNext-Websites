@@ -740,3 +740,7 @@
 .icon-alignitems-center:before {
     content: "\e67d";
 }
+
+.icon-serial-number:before {
+    content: "\e6dd";
+}

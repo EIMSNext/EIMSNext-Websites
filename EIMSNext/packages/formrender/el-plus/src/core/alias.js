@@ -76,4 +76,5 @@ export default {
   employee1: "fc-employee-select",
   employee2: "fc-employee-select",
   dataselect: "fc-data-select",
+  serialno: "fc-serialno",
 };
