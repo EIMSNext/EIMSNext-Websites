@@ -4,7 +4,7 @@
       <div class="header">
         <div class="header-left">
           <span class="header-title">{{ title }}</span>
-          <span title="设置数据标题，编辑方式等" class="header-describe">{{ desc }}</span>
+          <span :title="desc" class="header-describe">{{ desc }}</span>
           <slot name="headeractions" />
         </div>
       </div>

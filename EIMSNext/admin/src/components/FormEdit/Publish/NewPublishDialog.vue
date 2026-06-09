@@ -1,7 +1,7 @@
 <template>
   <et-dialog
     :modelValue="modelValue"
-    :title="'创建权限组'"
+    :title="t('admin.publishEditor.createGroup')"
     width="750px"
     destroy-on-close
     @ok="save"
@@ -9,16 +9,16 @@
   >
     <div class="new-publish-container">
       <div class="member-select">
-        <div class="item-title">对成员发布</div>
+        <div class="item-title">{{ t("admin.publishEditor.publishToMembers") }}</div>
         <selected-tags v-model="members" :editable="true" @editTag="editTag"></selected-tags>
       </div>
       <div class="auth-group-select">
-        <div class="item-title">成员权限</div>
+        <div class="item-title">{{ t("admin.publishEditor.memberPermission") }}</div>
         <el-select v-model="newAuthGrp.type">
-          <el-option label="管理本人数据" :value="AuthGroupType.ManageSelfData"></el-option>
-          <el-option label="查看所有数据" :value="AuthGroupType.ViewAllData"></el-option>
-          <el-option label="管理所有数据" :value="AuthGroupType.ManageAllData"></el-option>
-          <el-option label="自定义" :value="AuthGroupType.Custom"></el-option>
+          <el-option :label="t('admin.publishEditor.manageSelfData')" :value="AuthGroupType.ManageSelfData"></el-option>
+          <el-option :label="t('admin.publishEditor.viewAllData')" :value="AuthGroupType.ViewAllData"></el-option>
+          <el-option :label="t('admin.publishEditor.manageAllData')" :value="AuthGroupType.ManageAllData"></el-option>
+          <el-option :label="t('admin.publishEditor.custom')" :value="AuthGroupType.Custom"></el-option>
         </el-select>
       </div>
       <AuthGroupEditor
@@ -73,7 +73,7 @@ const props = defineProps<{
 const newAuthGrp = toRef(
   props.authGroup ?? {
     id: "",
-    name: "管理本人数据",
+    name: t("admin.publishEditor.manageSelfData"),
     appId: props.formDef.appId,
     formId: props.formDef.id,
     type: AuthGroupType.ManageSelfData,
@@ -137,7 +137,7 @@ const save = async () => {
     : authGroupService.post<AuthGroupRequest>(req);
 
   await request.then(() => {
-    ElMessage.success("保存成功");
+    ElMessage.success(t("common.saveSuccess"));
     emit("close", true);
   });
 };

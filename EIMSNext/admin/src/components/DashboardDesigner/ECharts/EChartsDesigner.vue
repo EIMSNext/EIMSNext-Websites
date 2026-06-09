@@ -4,15 +4,15 @@
       <el-input v-model="dashItemDef.name" class="title-editor" />
     </template>
     <template #top-right>
-      <el-button @click="onSave">保存</el-button>
+      <el-button @click="onSave">{{ t("common.save") }}</el-button>
     </template>
     <el-container class="design-container">
       <el-aside width="250px" class="left-aside">
         <div class="left-container">
           <div class="data-source">
             <div class="data-source-setting">
-              <span>数据源</span>
-              <div class="choose-data" @click="changeDataSource">更改数据源</div>
+              <span>{{ t("admin.dashboardChartDesigner.dataSource") }}</span>
+              <div class="choose-data" @click="changeDataSource">{{ t("admin.dashboardChartDesigner.changeDataSource") }}</div>
             </div>
             <div class="data-source-title">
               <et-icon size="16px" :icon="getFormIcon()" :color="getAppIconColor()"></et-icon>
@@ -21,18 +21,18 @@
           </div>
           <div class="data-source" v-if="chartSetting.datasource.type == DatasourceType.Form">
             <div class="data-source-setting">
-              <span>数据获取权限</span>
+              <span>{{ t("admin.dashboardChartDesigner.dataAccess") }}</span>
             </div>
             <div class="data-source-title">
               <el-select v-model="selectedRole" @change="roleChanged">
-                <el-option :label="t('表单中的全部数据')" value="1"></el-option>
-                <el-option :label="t('继承成员对表单的权限')" value="2"></el-option>
+                <el-option :label="t('admin.dashboardChartDesigner.allFormData')" value="1"></el-option>
+                <el-option :label="t('admin.dashboardChartDesigner.inheritFormPerms')" value="2"></el-option>
               </el-select>
             </div>
           </div>
           <div class="fields-container">
             <div class="field-title">
-              <span>字段</span>
+              <span>{{ t("admin.dashboardChartDesigner.fields") }}</span>
               <!-- <div class="field-operation">
               <div @click="addComputedField" v-if="DatasourceType == DatasourceType.Form">
                 <et-icon icon="el-plus"></et-icon>
@@ -77,7 +77,7 @@
       </el-aside>
       <el-main class="center-echarts center-echarts-main">
         <div class="center-box" :class="{ 'green-line': dropable.dimension1 }">
-          <div class="title">维度</div>
+          <div class="title">{{ t("admin.dashboardChartDesigner.dimension") }}</div>
           <div class="drag-target-container container-veidoo">
             <Draggable
               class="dimension1"
@@ -99,7 +99,7 @@
           </div>
         </div>
         <div class="center-box" :class="{ 'green-line': dropable.metrics }">
-          <div class="title">指标</div>
+          <div class="title">{{ t("admin.dashboardChartDesigner.metric") }}</div>
           <div class="drag-target-container container-veidoo">
             <Draggable
               class="metrics"
@@ -121,7 +121,7 @@
           </div>
         </div>
         <div class="center-box">
-          <div class="title">过滤条件</div>
+          <div class="title">{{ t("admin.dashboardChartDesigner.filter") }}</div>
           <div class="drag-target-container container-veidoo">
             <div class="filter">
               <FilterField
@@ -146,7 +146,7 @@
       <el-aside width="300px" class="echarts-config">
         <div class="config-box">
           <el-collapse v-model="activeCollItems" expand-icon-position="left">
-            <el-collapse-item name="charttype" title="图表类型" class="box-head">
+            <el-collapse-item name="charttype" :title="t('admin.dashboardChartDesigner.chartType')" class="box-head">
               <div class="box-body chart-type-body">
                 <template v-for="cc in chartConfigs" :key="cc.id">
                   <el-tooltip placement="left" effect="light">
@@ -172,7 +172,7 @@
             <el-collapse-item
               v-if="chartConfig && chartConfig.subType"
               name="chartsubtype"
-              title="柱状图类型"
+              :title="t('admin.dashboardChartDesigner.barSubType')"
               class="box-head"
             >
               <div class="box-body chart-type-body">
@@ -187,10 +187,10 @@
                 </template>
               </div>
             </el-collapse-item>
-            <el-collapse-item name="datatake" title="数据显示" class="box-head">
+            <el-collapse-item name="datatake" :title="t('admin.dashboardChartDesigner.dataDisplay')" class="box-head">
               <div class="box-body chart-type-body">
                 <div class="data-top">
-                  <el-checkbox v-model="chartSetting.takeEnable">显示前</el-checkbox>
+                  <el-checkbox v-model="chartSetting.takeEnable">{{ t("admin.dashboardChartDesigner.showTop") }}</el-checkbox>
                   <el-input-number
                     v-model="chartSetting.take"
                     :disabled="!chartSetting.takeEnable"
@@ -198,7 +198,7 @@
                     :controls="false"
                     class="take-input"
                   />
-                  <span class="take-label">条数据</span>
+                  <span class="take-label">{{ t("admin.dashboardChartDesigner.records") }}</span>
                 </div>
               </div>
             </el-collapse-item>

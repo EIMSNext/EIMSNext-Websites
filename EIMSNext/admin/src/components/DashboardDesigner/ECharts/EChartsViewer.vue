@@ -38,7 +38,7 @@
       <el-empty class="et-dash-empty">
         <div class="empty-wrapper">
           <i class="x-icon iconfont-fx-pc icon-info-o"></i>
-          <div class="empty-text">组件配置异常</div>
+          <div class="empty-text">{{ t("admin.dashItem.invalidConfig") }}</div>
         </div>
       </el-empty>
     </template>
@@ -53,6 +53,9 @@ import { AggCalcRequest, AggregateFun, aggregateService } from "@eimsnext/servic
 import { convertToFieldArray } from "@eimsnext/utils";
 import { IConditionList, ISortItem, ISortList, toDynamicFilter } from "@eimsnext/components";
 import DashSort from "../components/DashSort.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "EChartsViewer",

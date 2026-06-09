@@ -1,5 +1,19 @@
 <template>
-  <div class="flow-node-wrapper">
+  <div
+    class="flow-node-wrapper"
+    :class="{
+      dragging: isDragging,
+      'drag-over': isDragOver,
+      'drag-over-before': isDragOver && dragOverPosition === 'before',
+      'drag-over-after': isDragOver && dragOverPosition === 'after',
+    }"
+    :draggable="canDrag"
+    @dragstart="dragStart"
+    @dragover="dragOver"
+    @dragleave="dragLeave"
+    @drop="dropNode"
+    @dragend="dragEnd"
+  >
     <el-popover ref="popoverRef" width="60" popper-class="node-action-popover" trigger="hover" placement="top-end"
       :show-arrow="false" :disabled="flowContext.structureReadonly || (!allowCopy && !allowDelete)">
       <div class="node-actions">
@@ -47,7 +61,11 @@ import {
   IFlowContext,
   FlowNodeType,
   IFlowNodeMetaData,
+  cleanupInvalidDataflowDependencies,
+  moveFlowNode,
+  syncFlowNodeOrder,
 } from "./FlowData";
+import { FlowType } from "@eimsnext/models";
 
 defineOptions({
   name: "FlowNode",
@@ -79,7 +97,25 @@ const props = withDefaults(
 
 const flowContext = inject<IFlowContext>("flowContext")!;
 const popoverRef = ref();
+const isDragging = ref(false);
+const isDragOver = ref(false);
+const dragOverPosition = ref<"before" | "after">("before");
 const isActived = computed(() => flowContext.activeData.id === props.nodeData.id);
+const canDrag = computed(
+  () =>
+    !flowContext.structureReadonly &&
+    props.allowDelete &&
+    props.nodeData.nodeType !== FlowNodeType.Condition &&
+    props.nodeData.nodeType !== FlowNodeType.ConditionOther
+);
+const canDrop = computed(() => !flowContext.structureReadonly);
+const isDropTarget = computed(
+  () =>
+    props.pNodeDatas.includes(props.nodeData) ||
+    props.nodeData.nodeType === FlowNodeType.Start ||
+    props.nodeData.nodeType === FlowNodeType.Condition ||
+    props.nodeData.nodeType === FlowNodeType.ConditionOther
+);
 const content = computed(() => {
   if (props.contentFun) return props.contentFun(props.nodeData.metadata);
 
@@ -111,12 +147,8 @@ const delClick = (data: IFlowNodeData) => {
     default:
       {
         let index = props.pNodeDatas.indexOf(data);
-        let prev = props.pNodeDatas.find((x) => x.id === data.prevId);
-        let next = props.pNodeDatas.find((x) => x.id === data.nextId);
-        if (prev) prev.nextId = next?.id;
-        if (next) next.prevId = prev?.id;
-
         props.pNodeDatas.splice(index, 1);
+        syncFlowNodeOrder(flowContext.flowData, props.pNodeDatas);
       }
       break;
   }
@@ -127,5 +159,89 @@ const nodeClick = (data: IFlowNodeData) => {
   flowContext.activeData = data;
 
   emit("nodeClick", data);
+};
+
+const dragStart = (event: DragEvent) => {
+  if (!canDrag.value) {
+    event.preventDefault();
+    return;
+  }
+
+  flowContext.draggingData = {
+    nodeData: props.nodeData,
+    pNodeDatas: props.pNodeDatas,
+  };
+  isDragging.value = true;
+  event.dataTransfer?.setData("text/plain", props.nodeData.id);
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+  }
+};
+
+const dragOver = (event: DragEvent) => {
+  const draggingData = flowContext.draggingData;
+  if (
+    !canDrop.value ||
+    !isDropTarget.value ||
+    !draggingData ||
+    draggingData.nodeData === props.nodeData
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = "move";
+  }
+  if (
+    props.nodeData.nodeType === FlowNodeType.Start ||
+    props.nodeData.nodeType === FlowNodeType.Condition ||
+    props.nodeData.nodeType === FlowNodeType.ConditionOther
+  ) {
+    dragOverPosition.value = "after";
+  } else {
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    dragOverPosition.value = event.clientY > rect.top + rect.height / 2 ? "after" : "before";
+  }
+  isDragOver.value = true;
+};
+
+const dragLeave = () => {
+  isDragOver.value = false;
+};
+
+const dropNode = (event: DragEvent) => {
+  const draggingData = flowContext.draggingData;
+  isDragOver.value = false;
+  if (
+    !canDrop.value ||
+    !isDropTarget.value ||
+    !draggingData ||
+    draggingData.nodeData === props.nodeData
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const moved = moveFlowNode(
+    flowContext.flowData,
+    draggingData.nodeData,
+    draggingData.pNodeDatas,
+    props.pNodeDatas,
+    props.nodeData,
+    dragOverPosition.value
+  );
+  if (moved && flowContext.flowType === FlowType.Dataflow) {
+    cleanupInvalidDataflowDependencies(flowContext.flowData);
+  }
+};
+
+const dragEnd = () => {
+  isDragging.value = false;
+  isDragOver.value = false;
+  dragOverPosition.value = "before";
+  flowContext.draggingData = undefined;
 };
 </script>

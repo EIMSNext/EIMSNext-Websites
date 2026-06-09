@@ -248,6 +248,45 @@
       }
     }
 
+    &[draggable="true"] {
+      cursor: grab;
+
+      .flow-node-title {
+        cursor: grab;
+      }
+    }
+
+    &.dragging {
+      opacity: 0.45;
+    }
+
+    &.drag-over-before,
+    &.drag-over-after {
+      .flow-node {
+        outline: 2px solid var(--et-color-primary);
+      }
+    }
+
+    &.drag-over-before::before,
+    &.drag-over-after::before {
+      content: "";
+      position: absolute;
+      left: calc(50% - var(--et-size-100));
+      width: var(--et-size-200);
+      height: var(--et-space-2);
+      border-radius: var(--et-radius-2);
+      background: var(--et-color-primary);
+      z-index: var(--et-z-sticky);
+    }
+
+    &.drag-over-before::before {
+      top: calc(var(--et-space-6) * -1);
+    }
+
+    &.drag-over-after::before {
+      bottom: var(--et-space-20);
+    }
+
     .flow-connector {
       margin-top: var(--et-space-30);
       width: 100%;

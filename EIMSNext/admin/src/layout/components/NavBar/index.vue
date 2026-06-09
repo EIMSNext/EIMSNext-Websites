@@ -12,22 +12,22 @@
             <div class="platform-icon platform-icon--workspace">
               <et-icon icon="homepage" size="24" />
             </div>
-            <div class="platform-title">工作台</div>
+            <div class="platform-title">{{ $t("admin.shell.workspace") }}</div>
           </router-link>
           <div class="platform-item platform-item--disabled">
             <div class="platform-icon platform-icon--knowledge">
               <et-icon icon="el-Reading" size="24" />
             </div>
             <div>
-              <div class="platform-title">知识库</div>
-              <div class="platform-desc">敬请期待</div>
+              <div class="platform-title">{{ $t("admin.shell.knowledgeBase") }}</div>
+              <div class="platform-desc">{{ $t("admin.shell.comingSoon") }}</div>
             </div>
           </div>
           <router-link class="platform-item" to="/open-platform/pluginstore">
             <div class="platform-icon platform-icon--open">
               <et-icon icon="el-Connection" size="24" />
             </div>
-            <div class="platform-title">开放平台</div>
+            <div class="platform-title">{{ $t("admin.shell.openPlatform") }}</div>
           </router-link>
         </div>
       </el-popover>

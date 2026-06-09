@@ -11,6 +11,9 @@ import { computed, ref, watch } from "vue";
 import { IListItem } from "@/list/type";
 import { IFieldLimit } from "@/NodeFieldList/type";
 import { DataItemType } from "@/common";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FieldSelect",
@@ -54,7 +57,10 @@ watch(
     if (newFormId) {
       formStore.get(newFormId).then((form) => {
         if (form?.content?.items) {
-          fieldList.value = buildFieldListItems(newFormId, form?.content?.items, form.usingWorkflow, undefined, props.fieldLimit);
+          fieldList.value = buildFieldListItems(newFormId, form?.content?.items, form.usingWorkflow, undefined, {
+            ...(props.fieldLimit || {}),
+            t,
+          });
         }
       });
     }

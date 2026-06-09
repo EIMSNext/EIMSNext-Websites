@@ -1,14 +1,14 @@
 <template>
-  <el-drawer v-model="showMessage" class="elt-drawer" header-class="msgcenter-header" title="消息中心" size="70%">
+  <el-drawer v-model="showMessage" class="elt-drawer" header-class="msgcenter-header" :title="t('admin.messageCenter.title')" size="70%">
     <div class="page-message-center">
       <div class="message-center-container">
         <div class="message-center-nav">
           <el-menu :default-active="activeMenu" @select="handleMenuSelect">
-            <el-menu-item :index="MessageCategory.DataNotify">数据提醒</el-menu-item>
-            <el-menu-item :index="MessageCategory.FlowNotify">流程提醒</el-menu-item>
-            <el-menu-item :index="MessageCategory.AppNotify">应用消息</el-menu-item>
-            <el-menu-item :index="MessageCategory.SystemNotify">系统消息</el-menu-item>
-            <el-menu-item :index="MessageCategory.SystemNotice">系统公告</el-menu-item>
+            <el-menu-item :index="MessageCategory.DataNotify">{{ t("admin.messageCenter.dataNotify") }}</el-menu-item>
+            <el-menu-item :index="MessageCategory.FlowNotify">{{ t("admin.messageCenter.flowNotify") }}</el-menu-item>
+            <el-menu-item :index="MessageCategory.AppNotify">{{ t("admin.messageCenter.appNotify") }}</el-menu-item>
+            <el-menu-item :index="MessageCategory.SystemNotify">{{ t("admin.messageCenter.systemNotify") }}</el-menu-item>
+            <el-menu-item :index="MessageCategory.SystemNotice">{{ t("admin.messageCenter.systemNotice") }}</el-menu-item>
           </el-menu>
         </div>
         <div class="message-center-content">
@@ -16,26 +16,26 @@
             <div class="message-list-header">
               <div class="message-filter no-border"></div>
               <div class="read-operation-btn">
-                <el-checkbox v-model="unreadOnly">只看未读</el-checkbox>
+                <el-checkbox v-model="unreadOnly">{{ t("admin.messageCenter.unreadOnly") }}</el-checkbox>
                 <el-link class="link-text read-link" underline="never" @click="handleReadAll">
-                  全部转为已读
+                  {{ t("admin.messageCenter.readAll") }}
                 </el-link>
               </div>
             </div>
             <div class="message-list-body">
               <template v-if="activeMenu === MessageCategory.DataNotify">
                 <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
-                <el-empty v-if="pagedMessages.length === 0" description="暂无消息" />
+                <el-empty v-if="pagedMessages.length === 0" :description="t('admin.messageCenter.empty')" />
               </template>
               <template v-if="activeMenu === MessageCategory.FlowNotify">
                 <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
-                <el-empty v-if="pagedMessages.length === 0" description="暂无消息" />
+                <el-empty v-if="pagedMessages.length === 0" :description="t('admin.messageCenter.empty')" />
               </template>
               <template v-if="activeMenu === MessageCategory.SystemNotify">
                 <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
-                <el-empty v-if="pagedMessages.length === 0" description="暂无消息" />
+                <el-empty v-if="pagedMessages.length === 0" :description="t('admin.messageCenter.empty')" />
               </template>
-              <div class="expire-tip">保存最近六个月的消息记录</div>
+              <div class="expire-tip">{{ t("admin.messageCenter.retention") }}</div>
             </div>
             <div class="message-list-footer">
               <simple-pagination v-model:current-page="currentPage" :total="totalRef"

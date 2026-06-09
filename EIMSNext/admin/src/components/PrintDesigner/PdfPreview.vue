@@ -5,9 +5,9 @@
       <div class="pdf-preview-title">{{ title }}</div>
       <el-button text class="pdf-preview-tool-btn" @click="handleDownload" :disabled="!pdfUrl">
         <et-icon icon="el-download" size="18px" />
-        <span style="margin-left: 4px;">下载</span>
+        <span style="margin-left: 4px;">{{ t("admin.pdfPreview.download") }}</span>
       </el-button>
-      <el-button text class="pdf-preview-close" aria-label="关闭预览" @click="handleClose">
+      <el-button text class="pdf-preview-close" :aria-label="t('admin.pdfPreview.closePreview')" @click="handleClose">
         <et-icon icon="el-close" size="24px" />
       </el-button>
     </div>
@@ -23,6 +23,9 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "PdfPreview",
@@ -46,7 +49,7 @@ const emit = defineEmits<{
 }>();
 
 const drawerSize = "100%";
-const emptyText = "暂无预览内容";
+const emptyText = t("admin.pdfPreview.empty");
 
 const handleClose = () => {
   emit("update:modelValue", false);
@@ -68,7 +71,7 @@ const handleDownload = async () => {
     URL.revokeObjectURL(objectUrl);
     document.body.removeChild(link);
   } catch (error) {
-    console.error("下载失败", error);
+    console.error(t("admin.pdfPreview.downloadFailed"), error);
   }
 };
 </script>

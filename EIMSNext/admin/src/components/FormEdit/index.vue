@@ -5,10 +5,10 @@
     </template>
     <template #top-center>
       <el-tabs v-model="activeName" class="nav-tabs" :before-leave="tabChanging">
-        <el-tab-pane label="表单设计" name="formedit" />
-        <el-tab-pane v-if="usingFlow" label="流程设定" name="workflow" />
-        <el-tab-pane label="高级功能" name="advance" />
-        <el-tab-pane label="表单发布" name="publish" />
+        <el-tab-pane :label="t('admin.formEdit.design')" name="formedit" />
+        <el-tab-pane v-if="usingFlow" :label="t('admin.formEdit.workflow')" name="workflow" />
+        <el-tab-pane :label="t('admin.formEdit.advanced')" name="advance" />
+        <el-tab-pane :label="t('admin.formEdit.publish')" name="publish" />
       </el-tabs>
     </template>
     <div v-if="loadedTabs.formedit" v-show="activeName == 'formedit'">
@@ -88,7 +88,7 @@ const onSave = async (content: FormContent) => {
   formStore.update(resp);
   contextStore.setAppChanged(); //reload 菜单
 
-  ElMessage.success("保存成功");
+  ElMessage.success(t("admin.formEdit.saveSuccess"));
 };
 const tabChanging = async (activeName: TabPaneName, oldActiveName: TabPaneName) => {
   return await askSave(oldActiveName.toString());
@@ -97,13 +97,13 @@ const tabChanging = async (activeName: TabPaneName, oldActiveName: TabPaneName) 
 const askSave = async (tabName: string): Promise<boolean> => {
   if (tabName === "formedit" && formBuilder.value.isDirty()) {
     let confirm = await EtConfirm.showDialog(
-      "你修改了表单设计但没有保存，是否需要保存表单设计并继续？",
+      t("admin.formEdit.designDirtyContent"),
       {
-        title: "表单设计有修改，是否保存？",
+        title: t("admin.formEdit.designDirtyTitle"),
         icon: MessageIcon.Question,
         showCancel: true,
         showNoSave: true,
-        okText: "保存并继续",
+        okText: t("admin.formEdit.saveAndContinue"),
       },
       t
     );
@@ -113,13 +113,13 @@ const askSave = async (tabName: string): Promise<boolean> => {
     return confirm != ConfirmResult.Cancel;
   } else if (tabName === "workflow" && wfDesigner.value?.isDirty()) {
     let confirm = await EtConfirm.showDialog(
-      "你修改了流程设定但没有保存，是否需要保存流程设定并继续？",
+      t("admin.formEdit.workflowDirtyContent"),
       {
-        title: "流程设定有修改，是否保存？",
+        title: t("admin.formEdit.workflowDirtyTitle"),
         icon: MessageIcon.Question,
         showCancel: true,
         showNoSave: true,
-        okText: "保存并继续",
+        okText: t("admin.formEdit.saveAndContinue"),
       },
       t
     );

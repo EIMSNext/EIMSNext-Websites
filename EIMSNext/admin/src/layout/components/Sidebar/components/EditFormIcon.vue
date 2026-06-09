@@ -9,10 +9,10 @@
     @ok="save"
   >
     <el-form ref="menuRef" :model="formData" :rules="rules" label-width="60px" class="dialog-form">
-      <el-form-item label="名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入名称" />
+      <el-form-item :label="t('admin.sidebarEditor.name')" prop="name">
+        <el-input v-model="formData.name" :placeholder="t('admin.sidebarEditor.namePlaceholder')" />
       </el-form-item>
-      <el-form-item label="图标">
+      <el-form-item :label="t('admin.sidebarEditor.icon')">
         <el-popover trigger="click" placement="bottom-start" width="340px">
           <template #reference>
             <et-icon
@@ -36,6 +36,9 @@
 <script lang="ts" setup>
 import { AppMenu, EditAppMenuRequest, FormType } from "@eimsnext/models";
 import { appDefService } from "@eimsnext/services";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "EditFormIcon",
@@ -50,7 +53,7 @@ const emit = defineEmits(["cancel", "ok"]);
 const showDialog = ref(true);
 const menuRef = ref();
 const title = computed(() =>
-  props.menu.menuType === FormType.Dashboard ? "修改仪表盘名称和图标" : "修改表单名称和图标"
+  props.menu.menuType === FormType.Dashboard ? t("admin.sidebarEditor.editDashboardTitle") : t("admin.sidebarEditor.editFormTitle")
 );
 
 const formData = ref({
@@ -60,7 +63,7 @@ const formData = ref({
 });
 
 const rules = reactive({
-  name: [{ required: true, message: "名称不能为空", trigger: "blur" }],
+  name: [{ required: true, message: t("admin.sidebarEditor.nameRequired"), trigger: "blur" }],
 });
 
 const onIconSelected = (payload: { icon?: string; iconColor?: string }) => {

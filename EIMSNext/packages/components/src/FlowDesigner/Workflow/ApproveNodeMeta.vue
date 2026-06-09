@@ -30,8 +30,45 @@
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane :label="t('workflow.transitionRules')" name="transitionRules" />
+      <el-tab-pane :label="t('workflow.transitionRules')" name="transitionRules">
+        <div class="transition-rules-panel">
+          <div class="transition-rule-section">
+            <MetaItemHeader :label="t('workflow.submitCondition')" />
+            <el-select v-model="submitCondition.enabled" class="full-width-select">
+              <el-option :label="t('workflow.submitConditionMet')" :value="false" />
+              <el-option :label="t('workflow.submitConditionFormula')" :value="true" />
+            </el-select>
+            <el-button class="rule-action-button" @click="showSubmitConditionDialog = true">
+              {{ t('workflow.addSubmitCondition') }}
+            </el-button>
+          </div>
+
+          <div class="transition-rule-section">
+            <MetaItemHeader :label="t('workflow.noApproverHandling')" />
+            <el-select v-model="noApproverSetting.actionType" class="full-width-select">
+              <el-option :label="t('workflow.noApproverStopAndReport')" :value="WfNoApproverActionType.StopAndReport" />
+              <el-option :label="t('workflow.noApproverTransferToMember')" :value="WfNoApproverActionType.TransferToMember" />
+              <el-option :label="t('workflow.noApproverAutoSubmit')" :value="WfNoApproverActionType.AutoSubmit" />
+            </el-select>
+            <el-button
+              v-if="noApproverSetting.actionType === WfNoApproverActionType.TransferToMember"
+              class="rule-action-button member-button"
+              @click="showNoApproverMemberDialog = true"
+            >
+              {{ noApproverMemberButtonText }}
+            </el-button>
+          </div>
+        </div>
+      </el-tab-pane>
     </el-tabs>
+
+    <FormulaEditorDialog
+      v-model="submitFormulaValue"
+      v-model:visible="showSubmitFormulaDialog"
+      :nodes="formulaNodes"
+      :title="t('workflow.submitConditionDialogTitle')"
+      :description="t('workflow.submitConditionDialogDesc')"
+    />
 
     <et-dialog v-model="showActionDialog" :title="dialogTitle" width="500px" destroy-on-close @ok="confirmActionDialog"
       @cancel="cancelActionDialog">
@@ -47,11 +84,39 @@
 
     <member-select-dialog v-model="showActionMemberDialog" :tags="dialogCandidateTags" :member-options="memberOptions"
       destroy-on-close @ok="finishActionMemberSelect" />
+
+    <et-dialog
+      v-model="showSubmitConditionDialog"
+      :title="t('workflow.submitConditionDialogTitle')"
+      width="560px"
+      destroy-on-close
+      @ok="confirmSubmitConditionDialog"
+      @cancel="showSubmitConditionDialog = false"
+    >
+      <div class="submit-condition-dialog">
+        <MetaItemHeader :label="t('workflow.submitConditionPrompt')" />
+        <el-input
+          v-model="submitCondition.promptText"
+          :placeholder="t('workflow.submitConditionPromptPlaceholder')"
+        />
+        <el-button class="formula-edit-button" @click="showSubmitFormulaDialog = true">
+          {{ submitFormulaButtonText }}
+        </el-button>
+      </div>
+    </et-dialog>
+
+    <member-select-dialog
+      v-model="showNoApproverMemberDialog"
+      :tags="noApproverCandidateTags"
+      :member-options="noApproverMemberOptions"
+      destroy-on-close
+      @ok="finishNoApproverMemberSelect"
+    />
   </template>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, nextTick, ref } from "vue";
+import { computed, inject, nextTick, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import {
   FlowNodeType,
@@ -59,6 +124,8 @@ import {
   IFlowNodeData,
   NodeActionType,
   INodeActionConfig,
+  ISubmitConditionSetting,
+  INoApproverSetting,
   createFlowNode,
 } from "../Common/FlowData";
 import { useLocale } from "element-plus";
@@ -67,8 +134,11 @@ import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { ISelectedTag } from "@/selectedTags/type";
 import { MemberTabs } from "@/component";
 import { DataItemType } from "@/common";
-import { FieldType } from "@eimsnext/models";
+import { FieldType, FormDef, WfNoApproverActionType } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
+import FormulaEditorDialog from "../Dataflow/FormulaEditorDialog.vue";
+import { INodeForm } from "@/NodeFieldList/type";
+import { IFormulaValue } from "@/FormFieldList/type";
 
 const { t } = useLocale();
 const formStore = useFormStore();
@@ -85,9 +155,15 @@ const selectedCandidateTags = ref<ISelectedTag[]>([]);
 const activeConfigTab = ref("nodeActions");
 const showActionDialog = ref(false);
 const showActionMemberDialog = ref(false);
+const showSubmitConditionDialog = ref(false);
+const showSubmitFormulaDialog = ref(false);
+const showNoApproverMemberDialog = ref(false);
 const dialogActionType = ref<NodeActionType>();
 const dialogAction = ref<INodeActionConfig>({ actionType: NodeActionType.AddSign, enabled: false, text: "", candidates: [] });
 const dialogCandidateTags = ref<ISelectedTag[]>([]);
+const submitFormulaValue = ref<IFormulaValue>();
+const noApproverCandidateTags = ref<ISelectedTag[]>([]);
+const formulaNodes = ref<INodeForm[]>([]);
 
 const dynamicMembers = ref<ISelectedTag[]>([]);
 
@@ -104,17 +180,66 @@ const memberOptions = computed(() => ({
   showContract: true,
 }));
 
-const createStarterTag = (): ISelectedTag => ({
-  id: "starter",
-  sourceId: "starter",
-  label: t("workflow.starter"),
-  icon: "el-UserFilled",
-  type: DataItemType.Dynamic,
-  data: {
-    dynamicCategory: "starter",
-    baseLabel: t("workflow.starter"),
-  },
+const noApproverMemberOptions = computed(() => ({
+  showTabs:
+    MemberTabs.Department |
+    MemberTabs.Role |
+    MemberTabs.Employee |
+    MemberTabs.Dynamic,
+  dynamicMembers: dynamicMembers.value,
+  dynamicManagerLevels: [1, 2, 3, 4, 5],
+  cascadedDept: true,
+  showCascade: true,
+  showContract: true,
+  multiple: false,
+}));
+
+const ensureApproveMeta = () => {
+  if (!activeData.value.metadata.approveMeta) {
+    activeData.value.metadata.approveMeta = createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!;
+  }
+
+  return activeData.value.metadata.approveMeta;
+};
+
+const submitCondition = computed<ISubmitConditionSetting>(() => {
+  const approveMeta = ensureApproveMeta();
+  if (!approveMeta.submitCondition) {
+    approveMeta.submitCondition = {
+      enabled: false,
+      promptText: "",
+    };
+  }
+
+  return approveMeta.submitCondition;
 });
+
+const noApproverSetting = computed<INoApproverSetting>(() => {
+  const approveMeta = ensureApproveMeta();
+  if (!approveMeta.noApproverSetting) {
+    approveMeta.noApproverSetting = {
+      actionType: WfNoApproverActionType.StopAndReport,
+      candidates: [],
+    };
+  }
+
+  return approveMeta.noApproverSetting;
+});
+
+const createStarterTag = (): ISelectedTag => {
+  const label = t("workflow.starter");
+  return {
+    id: "starter",
+    sourceId: "starter",
+    label,
+    icon: "el-UserFilled",
+    type: DataItemType.Dynamic,
+    data: {
+      dynamicCategory: "starter",
+      baseLabel: label,
+    },
+  };
+};
 
 const createFieldTag = (
   field: { field: string; title: string; type: FieldType },
@@ -146,6 +271,7 @@ const createFieldTag = (
 const loadDynamicMembers = async () => {
   const members: ISelectedTag[] = [createStarterTag()];
   const form = await formStore.get(flowContext.formId);
+  loadFormulaNodes(form);
   form?.content?.items?.forEach((field) => {
     const tag = createFieldTag(field);
     if (tag) {
@@ -155,16 +281,24 @@ const loadDynamicMembers = async () => {
   dynamicMembers.value = members;
 };
 
+const loadFormulaNodes = (form?: FormDef) => {
+  formulaNodes.value = [
+    {
+      nodeId: "",
+      nodeName: t("workflow.currentForm"),
+      form,
+      singleResult: true,
+    },
+  ];
+};
+
 const nodeActions = computed(() => {
-  if (!activeData.value.metadata.approveMeta) {
-    activeData.value.metadata.approveMeta = createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!;
+  const approveMeta = ensureApproveMeta();
+  if (!approveMeta.nodeActions) {
+    approveMeta.nodeActions = createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!.nodeActions || [];
   }
 
-  if (!activeData.value.metadata.approveMeta.nodeActions) {
-    activeData.value.metadata.approveMeta.nodeActions = createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!.nodeActions || [];
-  }
-
-  return activeData.value.metadata.approveMeta.nodeActions!;
+  return approveMeta.nodeActions!;
 });
 
 const dialogTitle = computed(() => {
@@ -179,6 +313,18 @@ const dialogCandidateLabel = computed(() => {
   return dialogActionType.value === NodeActionType.Transfer
     ? t("workflow.transferCandidates")
     : t("workflow.addSignCandidates");
+});
+
+const submitFormulaButtonText = computed(() => {
+  return submitFormulaValue.value?.expression?.trim()
+    ? t("workflow.editSubmitCondition")
+    : t("workflow.addSubmitCondition");
+});
+
+const noApproverMemberButtonText = computed(() => {
+  return noApproverCandidateTags.value.length > 0
+    ? t("workflow.reselectMember")
+    : t("workflow.selectMember");
 });
 
 const editApprover = () => {
@@ -237,6 +383,25 @@ const finishActionMemberSelect = (tags: ISelectedTag[]) => {
   showActionMemberDialog.value = false;
 };
 
+const confirmSubmitConditionDialog = () => {
+  if (submitCondition.value.enabled && !submitFormulaValue.value?.expression?.trim()) {
+    ElMessage.warning(t("workflow.submitConditionRequired"));
+    return;
+  }
+
+  submitCondition.value.formulaValue = submitFormulaValue.value;
+  if (!submitCondition.value.promptText?.trim()) {
+    submitCondition.value.promptText = t("workflow.submitConditionDefaultPrompt");
+  }
+  showSubmitConditionDialog.value = false;
+};
+
+const finishNoApproverMemberSelect = (tags: ISelectedTag[]) => {
+  noApproverCandidateTags.value = tags.slice(0, 1);
+  noApproverSetting.value.candidates = convertTagsToCandidates(noApproverCandidateTags.value);
+  showNoApproverMemberDialog.value = false;
+};
+
 const cancelActionDialog = () => {
   showActionDialog.value = false;
   showActionMemberDialog.value = false;
@@ -272,10 +437,44 @@ const init = () => {
   nextTick(() => {
     activeData.value = flowContext.activeData;
     selectedCandidateTags.value = (activeData.value.metadata.approveMeta?.approvalCandidates || []).flatMap(convertCandidateToTags);
+    submitFormulaValue.value = activeData.value.metadata.approveMeta?.submitCondition?.formulaValue;
+    noApproverCandidateTags.value = (activeData.value.metadata.approveMeta?.noApproverSetting?.candidates || []).flatMap(convertCandidateToTags);
     ready.value = true;
   });
   loadDynamicMembers();
 };
+
+watch(
+  () => submitCondition.value.enabled,
+  (enabled) => {
+    if (!enabled) {
+      submitCondition.value.formulaValue = undefined;
+      submitFormulaValue.value = undefined;
+      return;
+    }
+
+    if (!submitCondition.value.formulaValue?.expression?.trim()) {
+      showSubmitConditionDialog.value = true;
+    }
+  },
+);
+
+watch(
+  () => submitFormulaValue.value,
+  (value) => {
+    submitCondition.value.formulaValue = value;
+  },
+);
+
+watch(
+  () => noApproverSetting.value.actionType,
+  (actionType) => {
+    if (actionType !== WfNoApproverActionType.TransferToMember) {
+      noApproverSetting.value.candidates = [];
+      noApproverCandidateTags.value = [];
+    }
+  },
+);
 
 init();
 </script>
@@ -288,6 +487,10 @@ init();
 
 .node-config-tabs {
   margin-top: var(--et-space-12);
+}
+
+.full-width-select {
+  width: 100%;
 }
 
 .node-actions-panel {
@@ -329,5 +532,38 @@ init();
 
 .candidate-header {
   margin-top: var(--et-space-8);
+}
+
+.transition-rules-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-space-16);
+  margin-top: var(--et-space-12);
+}
+
+.transition-rule-section {
+  border: 1px solid var(--et-border-color);
+  border-radius: var(--et-radius-6);
+  padding: var(--et-space-12);
+  background: var(--et-bg-container);
+}
+
+.rule-action-button {
+  width: 100%;
+  margin-top: var(--et-space-12);
+}
+
+.member-button {
+  border-style: dashed;
+}
+
+.submit-condition-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-space-12);
+}
+
+.formula-edit-button {
+  width: 100%;
 }
 </style>

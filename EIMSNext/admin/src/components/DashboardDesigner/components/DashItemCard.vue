@@ -4,20 +4,20 @@
     <div v-if="!isView" class="container-header">
       <div class="header-action-container">
         <div class="header-action">
-          <div class="action-btn" title="在桌面端隐藏该组件" @click="onHide">
+          <div class="action-btn" :title="t('admin.dashItem.hideOnDesktop')" @click="onHide">
             <et-icon icon="el-hide" />
           </div>
-          <div class="action-btn" title="编辑" @click="onEdit"><et-icon icon="el-editPen" /></div>
-          <div class="action-btn" title="复制" @click="onCopy">
+          <div class="action-btn" :title="t('common.edit')" @click="onEdit"><et-icon icon="el-editPen" /></div>
+          <div class="action-btn" :title="t('admin.dashItem.copy')" @click="onCopy">
             <et-icon icon="el-documentCopy" />
           </div>
-          <div class="action-btn" title="删除" @click="onDelete"><et-icon icon="el-delete" /></div>
+          <div class="action-btn" :title="t('common.delete')" @click="onDelete"><et-icon icon="el-delete" /></div>
           <span></span>
           <div class="action-btn custom-line-action"></div>
         </div>
       </div>
       <div class="header-title">
-        <span class="title-text item-text">未命名统计表</span>
+        <span class="title-text item-text">{{ t("admin.untitledChart") }}</span>
       </div>
     </div>
     <div class="container-content-wrapper">
@@ -31,7 +31,7 @@
         <el-empty class="et-dash-empty">
           <div class="empty-wrapper">
             <i class="x-icon iconfont-fx-pc icon-info-o"></i>
-            <div class="empty-text">组件配置异常</div>
+            <div class="empty-text">{{ t("admin.dashItem.invalidConfig") }}</div>
           </div>
         </el-empty>
       </template>

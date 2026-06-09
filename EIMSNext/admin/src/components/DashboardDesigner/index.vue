@@ -4,23 +4,23 @@
       <el-input v-model="dashDefRef.name" class="title-editor" />
     </template>
     <template #top-right>
-      <el-button @click="onSave">保存</el-button>
-      <el-button @click="onPreview">预览</el-button>
+      <el-button @click="onSave">{{ t("common.save") }}</el-button>
+      <el-button @click="onPreview">{{ t("common.preview") }}</el-button>
     </template>
     <el-container class="design-container">
       <el-aside width="180px" class="left-aside">
         <div class="dash-designer-menu">
           <div class="menu-wrapper">
             <div>
-              <div class="menu-label">图表</div>
+              <div class="menu-label">{{ t("admin.dashboardDesigner.chart") }}</div>
               <div class="menu-group">
                 <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Chart" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
                   :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Chart }">
                   <div class="menu-guide">
-                    <div class="guide-title">统计表</div>
+                    <div class="guide-title">{{ t("admin.dashboardDesigner.statsChart") }}</div>
                     <img src="@/assets/images/dsheditor/guide-chart.svg" />
-                    <div class="guide-des">提供多种图表样式，对数据进行汇总统计</div>
+                    <div class="guide-des">{{ t("admin.dashboardDesigner.statsChartDesc") }}</div>
                   </div>
                   <template #reference>
                     <div class="menu-line">
@@ -30,7 +30,7 @@
                         @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
                         @mouseover="setHoverMenu(true, DashItemType.Chart)" @mouseleave="hoverMenu = false">
                         <et-icon icon="el-PieChart" class="line-icon" />
-                        <div class="line-text">统计表</div>
+                        <div class="line-text">{{ t("admin.dashboardDesigner.statsChart") }}</div>
                       </div>
                     </div>
                   </template>
@@ -160,7 +160,7 @@
               </div>
             </div>
             <div>
-              <div class="menu-label">工具</div>
+              <div class="menu-label">{{ t("admin.dashboardDesigner.tools") }}</div>
               <div class="menu-group">
                 <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Filter" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
@@ -187,7 +187,7 @@
                   <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Filter)"
                     @drag="dashItemDrag($event, DashItemType.Filter)" @dragend="dashItemDrop($event, null)" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-filter"></i></div>
-                    <div class="line-text">筛选组件</div>
+                    <div class="line-text">{{ t("admin.dashboardDesigner.filterWidget") }}</div>
                   </div>
                 </div>
                 <!--    <div class="menu-line">
@@ -396,7 +396,7 @@ const loadBindingCandidates = async () => {
     if (!form) {
       continue;
     }
-    const fields = buildFieldListItems(sourceId, form.content?.items || [], !!form.usingWorkflow)
+    const fields = buildFieldListItems(sourceId, form.content?.items || [], !!form.usingWorkflow, undefined, { t } as any)
       .map((item) => item.data)
       .filter(Boolean) as IFormFieldDef[];
     items.push({
@@ -565,7 +565,7 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
       name = t("admin.untitledChart");
       break;
     case DashItemType.Filter:
-      name = "筛选组件";
+      name = t("admin.dashboardDesigner.filterWidgetName");
       break;
     default:
       name = t("admin.untitledChart");
@@ -652,7 +652,7 @@ watch(
           });
         }
       } catch (e) {
-        console.error("布局JSON解析失败：", e);
+        console.error(t("admin.dashboardDesigner.layoutParseFailed"), e);
         state.layout.splice(0, state.layout.length); // 解析失败则清空布局
       }
     } else if (newVal) {

@@ -153,11 +153,11 @@ function handleDragEnd() {
 async function deleteGroup(menu: AppMenu) {
   const menuType = getMenuType(menu.menuType);
   if (menuType === FormType.Group && menu.subMenus && menu.subMenus.length > 0) {
-    ElMessage.warning("当前分组下存在子菜单，不能删除");
+    ElMessage.warning(t("admin.misc.childMenuDeleteBlocked"));
     return;
   }
 
-  const message = menuType === FormType.Group ? "分组删除后不可恢复" : t("admin.deleteFormConfirm_Content");
+  const message = menuType === FormType.Group ? t("admin.misc.groupDeleteContent") : t("admin.deleteFormConfirm_Content");
   const confirm = await EtConfirm.showDialog(
     message,
     {

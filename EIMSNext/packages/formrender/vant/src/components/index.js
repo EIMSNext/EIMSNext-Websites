@@ -8,6 +8,7 @@ import Radio from './radio';
 import DatePicker from './datePicker';
 import TimePicker from './timePicker';
 import Group from './group';
+import SerialNo from './serialno';
 import IconWarning from './icon/IconWarning.vue';
 
 export default [
@@ -21,5 +22,6 @@ export default [
     DatePicker,
     TimePicker,
     Group,
+    SerialNo,
     Uploader,
 ]

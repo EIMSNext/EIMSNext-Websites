@@ -36,12 +36,12 @@ export function convertTagToCandidate(tag: ISelectedTag): IApprovalCandidate {
 
 function getManagerLevelLabel(level: number): string {
   if (level === 1) {
-    return "直接部门主管";
+    return "workflow.directManager";
   }
   if (level === 2) {
-    return "上级部门主管";
+    return "workflow.higherLevelManager";
   }
-  return `${level}级部门主管`;
+  return `workflow.nthLevelManager|${level}`;
 }
 
 export function convertCandidateToTag(

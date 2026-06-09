@@ -48,23 +48,23 @@
         @click="closeSelectedTag(selectedTag)"
       >
         <et-icon icon="close" />
-        关闭
+        {{ t("admin.tagsView.close") }}
       </li>
       <li @click="closeOtherTags">
         <et-icon icon="close_other" />
-        关闭其它
+        {{ t("admin.tagsView.closeOther") }}
       </li>
       <li v-if="!isFirstView()" @click="closeLeftTags">
         <et-icon icon="close_left" />
-        关闭左侧
+        {{ t("admin.tagsView.closeLeft") }}
       </li>
       <li v-if="!isLastView()" @click="closeRightTags">
         <et-icon icon="close_right" />
-        关闭右侧
+        {{ t("admin.tagsView.closeRight") }}
       </li>
       <li @click="closeAllTags(selectedTag)">
         <et-icon icon="close_all" />
-        关闭所有
+        {{ t("admin.tagsView.closeAll") }}
       </li>
     </ul>
   </div>

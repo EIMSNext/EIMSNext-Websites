@@ -60,7 +60,7 @@
                   </div>
                 </div>
                 <!-- <div class="footer">
-                <div class="switch-btn">验证码登录</div>
+                <div class="switch-btn">{{ t("admin.loginExtra.codeLogin") }}</div>
               </div> -->
               </div>
             </el-form>

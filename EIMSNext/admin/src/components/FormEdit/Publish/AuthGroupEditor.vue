@@ -1,14 +1,14 @@
 <template>
   <div class="ag-container">
     <el-tabs v-model="activeName" tabPosition="left" class="ag-tabs">
-      <el-tab-pane label="名称信息" name="name" class="ag-panel">
+      <el-tab-pane :label="t('admin.publishEditor.nameInfo')" name="name" class="ag-panel">
         <div class="auth-content">
           <div class="ag-name-wrapper">
-            <div class="ag-desc">可设置权限组名称和描述信息</div>
+            <div class="ag-desc">{{ t("admin.publishEditor.nameInfoDesc") }}</div>
             <div class="ag-name">
               <el-input
                 v-model="authGrp.name"
-                placeholder="填写权限组名称"
+                :placeholder="t('admin.publishEditor.namePlaceholder')"
                 autocomplete="new-password"
               />
             </div>
@@ -17,75 +17,75 @@
                 v-model="authGrp.desc"
                 type="textarea"
                 class="ag-desc-textarea"
-                placeholder="填写描述信息"
+                :placeholder="t('admin.publishEditor.descPlaceholder')"
               />
             </div>
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="操作权限" name="dataperm" class="ag-panel">
+      <el-tab-pane :label="t('admin.publishEditor.dataPerm')" name="dataperm" class="ag-panel">
         <div class="auth-content">
           <div class="data-perms">
-            <div class="ag-desc">可对流程和数据进行哪些操作</div>
+            <div class="ag-desc">{{ t("admin.publishEditor.dataPermDesc") }}</div>
             <div class="data-perms-group">
               <el-checkbox
                 :modelValue="dataPerms == DataPerms.All"
                 :indeterminate="dataPerms != DataPerms.All && dataPerms > 0"
                 @change="(val) => dataPermsChanged(DataPerms.All, val)"
               >
-                全选
+                {{ t("admin.publishEditor.selectAll") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canView"
                 @change="(val) => dataPermsChanged(DataPerms.View, val)"
               >
-                查看
+                {{ t("admin.publishEditor.view") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canAddNew"
                 @change="(val) => dataPermsChanged(DataPerms.AddNew, val)"
               >
-                添加
+                {{ t("admin.publishEditor.add") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canCopy"
                 @change="(val) => dataPermsChanged(DataPerms.Copy, val)"
               >
-                复制
+                {{ t("admin.publishEditor.copy") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canEdit"
                 @change="(val) => dataPermsChanged(DataPerms.Edit, val)"
               >
-                编辑
+                {{ t("admin.publishEditor.edit") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canRemove"
                 @change="(val) => dataPermsChanged(DataPerms.Remove, val)"
               >
-                删除
+                {{ t("admin.publishEditor.remove") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canImport"
                 @change="(val) => dataPermsChanged(DataPerms.Import, val)"
               >
-                导入
+                {{ t("admin.publishEditor.import") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canExport"
                 @change="(val) => dataPermsChanged(DataPerms.Export, val)"
               >
-                导出
+                {{ t("admin.publishEditor.export") }}
               </el-checkbox>
             </div>
           </div>
         </div>
       </el-tab-pane>
 
-      <el-tab-pane label="数据权限" name="datafilter" class="ag-panel">
+      <el-tab-pane :label="t('admin.publishEditor.dataFilter')" name="datafilter" class="ag-panel">
         <div class="auth-content">
           <div class="ag-data-filter">
-            <div class="ag-desc">可以管理哪些数据</div>
+            <div class="ag-desc">{{ t("admin.publishEditor.dataFilterDesc") }}</div>
             <ConditionList
               v-model="dataFilter"
               :formId="formDef.id"
@@ -96,7 +96,7 @@
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="字段权限" name="fieldperm" class="ag-panel">
+      <el-tab-pane :label="t('admin.publishEditor.fieldPerm')" name="fieldperm" class="ag-panel">
         <EtFieldPerms
           v-model="fieldPerms"
           :fields="formDef.content?.items"

@@ -25,9 +25,16 @@ export function buildSortFieldListItems(
   fields: FieldDef[],
   usingWf: boolean,
   nodeId?: string,
-  fieldLimit?: IFieldLimit,
+  fieldLimit?: (IFieldLimit & { t?: (key: string) => string }),
 ): IListItem[] {
   const items: IListItem[] = [];
+  const t = fieldLimit?.t;
+  const getSystemFieldLabel = (key: "flowStatus" | "createBy" | "createTime") =>
+    t ? t(`comp.fieldBlock.systemFields.${key}`) : ({
+      flowStatus: "流程状态",
+      createBy: "提交人",
+      createTime: "提交时间",
+    }[key]);
 
   if (
     !fieldLimit ||
@@ -37,7 +44,7 @@ export function buildSortFieldListItems(
     if (usingWf) {
       let status: IFormFieldDef = toFormFieldDef(
         formId,
-        getFlowStatus("流程状态"),
+        getFlowStatus(getSystemFieldLabel("flowStatus")),
         undefined,
         nodeId,
       );
@@ -81,7 +88,7 @@ export function buildSortFieldListItems(
     if (formId != "employee") {
       let submitor: IFormFieldDef = toFormFieldDef(
         formId,
-        getCreateBy("提交人"),
+        getCreateBy(getSystemFieldLabel("createBy")),
         undefined,
         nodeId,
       );
@@ -94,7 +101,7 @@ export function buildSortFieldListItems(
 
       let createTime: IFormFieldDef = toFormFieldDef(
         formId,
-        getCreateTime("提交时间"),
+        getCreateTime(getSystemFieldLabel("createTime")),
         undefined,
         nodeId,
       );

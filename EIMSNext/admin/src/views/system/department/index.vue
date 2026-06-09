@@ -468,7 +468,7 @@ const reviewSelected = async (approved: boolean) => {
   const employeeIds = checkedDatas.value.map((x) => x.id).filter((x): x is string => !!x);
 
   if (!employeeIds.length) {
-    ElMessage.warning(t("admin.department.messages.selectPending"));
+    ElMessage.warning(t("admin.department.selectPending"));
     return;
   }
 

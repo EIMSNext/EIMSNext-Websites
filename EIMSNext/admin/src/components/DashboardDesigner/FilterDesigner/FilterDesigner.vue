@@ -1,18 +1,18 @@
 <template>
   <EtDrawer :model-value="modelValue" @close="close">
     <template #title>
-      <span class="drawer-title">编辑筛选器</span>
+      <span class="drawer-title">{{ t("admin.dashboardFilterDesigner.editTitle") }}</span>
     </template>
     <template #top-right>
-      <el-button @click="close">取消</el-button>
-      <el-button type="primary" @click="onSave">确定</el-button>
+      <el-button @click="close">{{ t("common.cancel") }}</el-button>
+      <el-button type="primary" @click="onSave">{{ t("common.ok") }}</el-button>
     </template>
 
     <div class="filter-shell">
       <section class="filter-column charts-column">
-        <div class="column-title">1.选择需要筛选的图表</div>
+        <div class="column-title">{{ t("admin.dashboardFilterDesigner.stepCharts") }}</div>
         <div class="chart-actions">
-          <el-checkbox :model-value="allChecked" @change="(val) => toggleAll(Boolean(val))">全选</el-checkbox>
+          <el-checkbox :model-value="allChecked" @change="(val) => toggleAll(Boolean(val))">{{ t("admin.dashboardFilterDesigner.checkAll") }}</el-checkbox>
         </div>
         <el-checkbox-group v-model="setting.targetChartIds" class="chart-list">
           <el-checkbox v-for="chart in chartTargets" :key="chart.id" :label="chart.id" class="chart-item">
@@ -22,14 +22,14 @@
       </section>
 
       <section class="filter-column fields-column">
-        <div class="column-title">2.选择筛选字段</div>
+        <div class="column-title">{{ t("admin.dashboardFilterDesigner.stepFields") }}</div>
         <div v-for="candidate in visibleBindingCandidates" :key="candidate.dataSourceId" class="field-block">
           <div class="field-block-title">{{ candidate.dataSourceLabel }}</div>
           <el-select
             :model-value="getBindingField(candidate.dataSourceId)"
             filterable
             clearable
-            placeholder="请选择字段"
+            :placeholder="t('admin.dashboardFilterDesigner.selectFieldPlaceholder')"
             class="field-select"
             @change="(val) => onFieldChange(candidate, val)"
           >
@@ -49,14 +49,14 @@
       </section>
 
       <section class="filter-column settings-column">
-        <div class="column-title">3.设置</div>
+        <div class="column-title">{{ t("admin.dashboardFilterDesigner.stepSettings") }}</div>
 
         <el-form label-position="top" class="settings-form">
-          <el-form-item label="名称">
+          <el-form-item :label="t('admin.dashboardFilterDesigner.name')">
             <el-input v-model="setting.name" />
           </el-form-item>
 
-          <el-form-item label="筛选方式">
+          <el-form-item :label="t('admin.dashboardFilterDesigner.filterMode')">
             <template v-if="filterModeEditable">
               <el-segmented v-model="setting.filterMode" :options="filterModeOptions" block />
             </template>
@@ -65,11 +65,11 @@
             </template>
           </el-form-item>
 
-          <el-form-item label="默认值">
+          <el-form-item :label="t('admin.dashboardFilterDesigner.defaultValue')">
             <div class="value-head-row">
               <el-segmented v-model="setting.defaultValueMode" :options="defaultModeOptions" size="small" />
               <div class="operator-wrap">
-                <span class="operator-label">操作符</span>
+                <span class="operator-label">{{ t("admin.dashboardFilterDesigner.operator") }}</span>
                 <el-select v-model="setting.operator" class="operator-select">
                   <el-option v-for="op in operatorOptions" :key="op.id" :label="op.label" :value="op.id" />
                 </el-select>
@@ -85,8 +85,8 @@
 
               <template v-else-if="selectedFieldType == 'number' || selectedFieldType == 'timestamp'">
                 <div v-if="setting.operator == 'between'" class="range-row">
-                  <el-input v-model="rangeValue[0]" placeholder="最小值" @change="syncRangeValue" />
-                  <el-input v-model="rangeValue[1]" placeholder="最大值" @change="syncRangeValue" />
+                  <el-input v-model="rangeValue[0]" :placeholder="t('admin.dashboardFilterDesigner.minValue')" @change="syncRangeValue" />
+                  <el-input v-model="rangeValue[1]" :placeholder="t('admin.dashboardFilterDesigner.maxValue')" @change="syncRangeValue" />
                 </div>
                 <el-input v-else v-model="singleValue" @change="syncSingleValue" />
               </template>
@@ -96,7 +96,7 @@
                   :model-value="memberTags"
                   :multiple="isMultipleType"
                   :editable="true"
-                  :empty-text="isDepartmentType ? '请选择部门' : '请选择成员'"
+                  :empty-text="isDepartmentType ? t('comp.emptyDept') : t('comp.emptyEmp')"
                   @editTag="openMemberDialog"
                 />
               </template>
@@ -112,10 +112,10 @@
               </template>
             </div>
 
-            <div v-else class="no-value-hint">该操作符不需要输入值</div>
+            <div v-else class="no-value-hint">{{ t("admin.dashboardFilterDesigner.noValueInput") }}</div>
           </el-form-item>
 
-          <el-form-item label="可选范围">
+          <el-form-item :label="t('admin.dashboardFilterDesigner.allowedRange')">
             <RangeOptionPanel
               v-model:allowed-range="setting.allowedRange"
               :range-source-type="setting.rangeSourceType || 'distinctData'"
@@ -124,18 +124,18 @@
             />
           </el-form-item>
 
-          <el-form-item v-if="isMemberType" label="成员/部门范围">
+          <el-form-item v-if="isMemberType" :label="t('admin.dashboardFilterDesigner.memberDeptRange')">
             <selected-tags
               :model-value="memberLimitTags"
               multiple
               editable
-              empty-text="不限制"
+              :empty-text="t('admin.dashboardFilterDesigner.noLimit')"
               @editTag="openMemberLimitDialog"
             />
           </el-form-item>
 
-          <el-form-item label="筛选联动">
-            <div class="range-empty">没有可以联动的筛选组件</div>
+          <el-form-item :label="t('admin.dashboardFilterDesigner.linkage')">
+            <div class="range-empty">{{ t("admin.dashboardFilterDesigner.noLinkage") }}</div>
           </el-form-item>
         </el-form>
       </section>
@@ -182,6 +182,7 @@ import {
 import { cloneDeep } from "lodash-es";
 import { DashboardConditionFieldType, getDashboardConditionFieldType, isDashboardMultiValueType } from "../fieldType";
 import RangeOptionPanel from "./RangeOptionPanel.vue";
+import { useI18n } from "vue-i18n";
 import {
   createDefaultFilterSetting,
   getFieldTypeGroup,
@@ -192,6 +193,8 @@ import {
   isFilterSetting,
   toBinding,
 } from "./type";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FilterDesigner",
@@ -249,12 +252,12 @@ const filterModeLabel = computed(() => {
   switch (selectedFieldType.value) {
     case DashboardConditionFieldType.Number:
     case DashboardConditionFieldType.TimeStamp:
-      return "范围筛选";
+      return t("admin.dashboardFilterDesigner.rangeFilter");
     case DashboardConditionFieldType.Input:
     case DashboardConditionFieldType.Other:
-      return "文本筛选";
+      return t("admin.dashboardFilterDesigner.textFilter");
     default:
-      return "选项筛选";
+      return t("admin.dashboardFilterDesigner.optionFilter");
   }
 });
 
@@ -274,57 +277,57 @@ const operatorOptions = computed(() => {
     case DashboardConditionFieldType.Number:
     case DashboardConditionFieldType.TimeStamp:
       return [
-        { id: "eq", label: "等于" },
-        { id: "between", label: "选择范围" },
+        { id: "eq", label: t("admin.dashboardFilterDesigner.eq") },
+        { id: "between", label: t("admin.dashboardFilterDesigner.between") },
       ];
     case DashboardConditionFieldType.Select2:
     case DashboardConditionFieldType.CheckBox:
     case DashboardConditionFieldType.Employee2:
     case DashboardConditionFieldType.Department2:
       return [
-        { id: "in", label: "包含任意一个" },
-        { id: "allin", label: "同时包含" },
-        { id: "eq", label: "等于" },
-        { id: "empty", label: "为空" },
-        { id: "notempty", label: "不为空" },
+        { id: "in", label: t("admin.dashboardFilterDesigner.in") },
+        { id: "allin", label: t("admin.dashboardFilterDesigner.allin") },
+        { id: "eq", label: t("admin.dashboardFilterDesigner.eq") },
+        { id: "empty", label: t("admin.dashboardFilterDesigner.empty") },
+        { id: "notempty", label: t("admin.dashboardFilterDesigner.notempty") },
       ];
     case DashboardConditionFieldType.Asset:
       return [
-        { id: "empty", label: "为空" },
-        { id: "notempty", label: "不为空" },
+        { id: "empty", label: t("admin.dashboardFilterDesigner.empty") },
+        { id: "notempty", label: t("admin.dashboardFilterDesigner.notempty") },
       ];
     default:
       return [
-        { id: "eq", label: "等于" },
-        { id: "empty", label: "为空" },
-        { id: "notempty", label: "不为空" },
+        { id: "eq", label: t("admin.dashboardFilterDesigner.eq") },
+        { id: "empty", label: t("admin.dashboardFilterDesigner.empty") },
+        { id: "notempty", label: t("admin.dashboardFilterDesigner.notempty") },
       ];
   }
 });
 
 const filterModeOptions = computed(() => [
-  { label: "选择选项", value: "options" },
-  { label: "输入文本", value: "text" },
+  { label: t("admin.dashboardFilterDesigner.optionsMode"), value: "options" },
+  { label: t("admin.dashboardFilterDesigner.textMode"), value: "text" },
 ]);
 
 const defaultModeOptions = computed(() => [
-  { label: "静态值", value: "static" },
-  { label: "动态值", value: "dynamic" },
+  { label: t("admin.dashboardFilterDesigner.staticValue"), value: "static" },
+  { label: t("admin.dashboardFilterDesigner.dynamicValue"), value: "dynamic" },
 ]);
 
 const dynamicDefaultOptions = computed(() => {
   switch (selectedFieldType.value) {
     case DashboardConditionFieldType.Employee1:
     case DashboardConditionFieldType.Employee2:
-      return [{ id: "currentUser", label: "当前人" }];
+      return [{ id: "currentUser", label: t("admin.dashboardFilterDesigner.currentUser") }];
     case DashboardConditionFieldType.Department1:
     case DashboardConditionFieldType.Department2:
-      return [{ id: "currentDept", label: "当前部门" }];
+      return [{ id: "currentDept", label: t("admin.dashboardFilterDesigner.currentDept") }];
     case DashboardConditionFieldType.TimeStamp:
       return [
-        { id: "today", label: "今天" },
-        { id: "thisWeek", label: "本周" },
-        { id: "thisMonth", label: "本月" },
+        { id: "today", label: t("admin.dashboardFilterDesigner.today") },
+        { id: "thisWeek", label: t("admin.dashboardFilterDesigner.thisWeek") },
+        { id: "thisMonth", label: t("admin.dashboardFilterDesigner.thisMonth") },
       ];
     default:
       return [];
@@ -368,27 +371,27 @@ const toggleAll = (checked: boolean) => {
 const getFieldTypeText = (type?: string) => {
   switch (getDashboardConditionFieldType(type)) {
     case DashboardConditionFieldType.Number:
-      return "数字";
+      return t("admin.dashboardFilterDesigner.fieldType.number");
     case DashboardConditionFieldType.TimeStamp:
-      return "时间";
+      return t("admin.dashboardFilterDesigner.fieldType.time");
     case DashboardConditionFieldType.Employee1:
-      return "成员单选";
+      return t("admin.dashboardFilterDesigner.fieldType.employee1");
     case DashboardConditionFieldType.Employee2:
-      return "成员多选";
+      return t("admin.dashboardFilterDesigner.fieldType.employee2");
     case DashboardConditionFieldType.Department1:
-      return "部门单选";
+      return t("admin.dashboardFilterDesigner.fieldType.department1");
     case DashboardConditionFieldType.Department2:
-      return "部门多选";
+      return t("admin.dashboardFilterDesigner.fieldType.department2");
     case DashboardConditionFieldType.Select1:
-      return "下拉单选";
+      return t("admin.dashboardFilterDesigner.fieldType.select1");
     case DashboardConditionFieldType.Select2:
-      return "下拉多选";
+      return t("admin.dashboardFilterDesigner.fieldType.select2");
     case DashboardConditionFieldType.CheckBox:
-      return "复选框";
+      return t("admin.dashboardFilterDesigner.fieldType.checkbox");
     case DashboardConditionFieldType.Asset:
-      return "附件/图片";
+      return t("admin.dashboardFilterDesigner.fieldType.asset");
     default:
-      return "文本";
+      return t("admin.dashboardFilterDesigner.fieldType.text");
   }
 };
 
@@ -481,15 +484,15 @@ const applyDynamicDefault = async () => {
 
   const type = dynamicDefaultType.value;
   setting.dynamicDefault = { type };
-  if (type == "currentUser") {
-    setting.defaultValue = userStore.currentUser.empId
-      ? [{ id: userStore.currentUser.empId, label: userStore.currentUser.empName || "当前人", type: DataItemType.Employee }]
+    if (type == "currentUser") {
+      setting.defaultValue = userStore.currentUser.empId
+      ? [{ id: userStore.currentUser.empId, label: userStore.currentUser.empName || t("admin.dashboardFilterDesigner.currentUser"), type: DataItemType.Employee }]
       : [];
   } else if (type == "currentDept") {
     const deptId = userStore.currentUser.deptId;
     const dept = deptId ? await deptStore.get(deptId) : undefined;
     setting.defaultValue = deptId
-      ? [{ id: deptId, label: dept?.name || "当前部门", type: DataItemType.Department }]
+      ? [{ id: deptId, label: dept?.name || t("admin.dashboardFilterDesigner.currentDept"), type: DataItemType.Department }]
       : [];
   } else if (type == "today") {
     const now = new Date();

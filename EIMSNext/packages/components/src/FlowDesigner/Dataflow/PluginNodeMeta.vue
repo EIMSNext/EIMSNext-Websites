@@ -139,7 +139,7 @@ const functionId = ref("");
 const mappedFieldKeys = reactive<Record<string, string>>({});
 const resultFields = ref<PluginResultFieldSetting[]>([]);
 
-const resultTypeOptions = [
+const resultTypeOptions = computed(() => [
   { label: t("comp.pluginNode.resultTypes.input"), value: FieldType.Input },
   { label: t("comp.pluginNode.resultTypes.textarea"), value: FieldType.TextArea },
   { label: t("comp.pluginNode.resultTypes.number"), value: FieldType.Number },
@@ -149,7 +149,7 @@ const resultTypeOptions = [
   { label: t("comp.pluginNode.resultTypes.department1"), value: FieldType.Department1 },
   { label: t("comp.pluginNode.resultTypes.fileUpload"), value: FieldType.FileUpload },
   { label: t("comp.pluginNode.resultTypes.imageUpload"), value: FieldType.ImageUpload },
-];
+]);
 
 const selectedPlugin = computed(() => plugins.value.find((x) => x.pluginId === pluginId.value));
 const selectedFunction = computed(() => selectedPlugin.value?.functions.find((x) => x.id === functionId.value));

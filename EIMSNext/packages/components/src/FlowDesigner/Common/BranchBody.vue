@@ -89,6 +89,7 @@ function addNewNode(pNodeDatas: IFlowNodeData[], newBranchItem: IFlowNodeData) {
   childNodes.splice(lastIndex, 1);
   nextTick(() => {
     childNodes.push(newBranchItem, lastBranchItem);
+    newBranchItem.prevId = props.nodeData.id;
   });
 }
 </script>

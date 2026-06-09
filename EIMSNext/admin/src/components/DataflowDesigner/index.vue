@@ -3,8 +3,8 @@
     <div class="flow-actions">
       <div class="left"></div>
       <div class="right">
-        <el-button @click="save">保存</el-button>
-        <el-button>启用</el-button>
+        <el-button @click="save">{{ t("common.save") }}</el-button>
+        <el-button>{{ t("admin.misc.dataflowActivate") }}</el-button>
       </div>
     </div>
     <div class="flow-editor-wrapper">
@@ -57,7 +57,7 @@ const props = defineProps<{
 const ready = ref(false);
 const currentWfDef = ref<WfDefinition>(props.flowDef);
 
-const flowData = ref<IFlowData>(createDataflowData(EventSourceType.Form, t));
+const flowData = ref<IFlowData>(createDataflowData(props.flowDef.eventSource ?? EventSourceType.Form, t));
 flowData.value.startNode.metadata.triggerMeta!.formId = props.formId;
 
 const flowContext = reactive<IFlowContext>({

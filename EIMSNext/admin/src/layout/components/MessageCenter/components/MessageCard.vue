@@ -3,15 +3,15 @@
     <div class="message-item-header">
       <div class="unread-point" :class="{ 'has-read': message.isRead }"></div>
       <span class="message-time">{{ displayTime }}</span>
-      <span v-if="!message.isRead" class="read-set-btn text-btn" @click="emit('read', message.id)">转为已读</span>
+      <span v-if="!message.isRead" class="read-set-btn text-btn" @click="emit('read', message.id)">{{ t("admin.misc.markRead") }}</span>
     </div>
     <div class="message-item-body">
       <div class="message-paragraph">
-        {{ message.title || "系统消息" }}
+        {{ message.title || t("admin.misc.systemMessage") }}
         <!-- <div v-if="message.detail" class="message-detail">{{ message.detail }}</div> -->
         <a v-if="message.url" class="download-link" :href="message.url" target="_blank"
           @click="emit('read', message.id)">
-          {{ message.messageType == MessageType.ExportNotify ? "下载文件" : "查看详情" }}
+          {{ message.messageType == MessageType.ExportNotify ? t("admin.misc.downloadFile") : t("admin.misc.viewDetails") }}
         </a>
       </div>
     </div>
@@ -21,6 +21,9 @@
 import { MessageType, SystemMessage } from "@eimsnext/models";
 import { computed } from "vue";
 import { dateFormat } from "@/utils/common";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   message: SystemMessage;

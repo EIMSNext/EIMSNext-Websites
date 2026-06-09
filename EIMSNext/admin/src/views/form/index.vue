@@ -171,7 +171,9 @@ const leftBars = ref<ToolbarItem[]>([
         columns.value = buildColumns(
           formDef.value!.content?.items!,
           formDef.value!.usingWorkflow,
-          []
+          [],
+          undefined,
+          t
         );
         updateQueryParams();
         handleQuery();
@@ -352,7 +354,7 @@ formStore.get(formId).then(async (form: FormDef | undefined) => {
         });
     }
     initChildrenField(form.content?.items!, [], fieldPerms.value);
-    columns.value = buildColumns(form.content?.items!, form.usingWorkflow, [], fieldPerms.value);
+    columns.value = buildColumns(form.content?.items!, form.usingWorkflow, [], fieldPerms.value, t);
     updateQueryParams();
     handleQuery();
   }
@@ -374,7 +376,7 @@ const sortList = ref<IFieldSortList>({
       field: {
         formId: formId,
         field: SystemField.CreateTime,
-        label: "提交时间",
+        label: t("comp.fieldBlock.systemFields.createTime"),
         type: FieldType.TimeStamp,
       },
       sort: SortDirection.Desc,
@@ -431,7 +433,9 @@ const setField = (fields: IFormFieldDef[]) => {
   columns.value = buildColumns(
     formDef.value!.content?.items!,
     formDef.value!.usingWorkflow,
-    fieldList.value
+    fieldList.value,
+    undefined,
+    t
   );
   updateQueryParams();
   handleQuery();

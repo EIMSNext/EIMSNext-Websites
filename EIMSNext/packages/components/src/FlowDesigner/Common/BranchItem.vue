@@ -10,7 +10,7 @@
         :node-data="nodeData.conditionData!"
         :data-index="dataIndex"
       />
-      <template v-for="item in nodeData.childNodes">
+      <template v-for="item in nodeData.childNodes" :key="item.id">
         <ApproveNode
           v-if="item.nodeType == FlowNodeType.Approve"
           :p-node-datas="nodeData.childNodes!"

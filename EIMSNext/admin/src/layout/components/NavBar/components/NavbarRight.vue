@@ -2,7 +2,7 @@
   <div class="navbar__right">
     <div class="appstore-trigger" @click="settingStore.appStoreVisible = true">
       <div class="appstore-entry">
-        <et-icon icon="icon-appdefault" size="18" /><span>应用中心</span>
+        <et-icon icon="icon-appdefault" size="18" /><span>{{ $t("admin.shell.appCenter") }}</span>
       </div>
     </div>
     <!-- 非手机设备（窄屏）才显示 -->

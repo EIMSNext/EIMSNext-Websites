@@ -1,14 +1,14 @@
 <template>
-  <AdvanceLayout title="数据协作" desc="设置数据标题，编辑方式等">
+  <AdvanceLayout :title="t('admin.advanced.dataCollab')" :desc="t('admin.advanced.dataCollabDesc')">
     <template #headeractions>
-      <span class="help-link">帮助文档</span>
+      <span class="help-link">{{ t("admin.advanced.helpDoc") }}</span>
     </template>
     <div class="data-advanced">
       <div class="config-section">
-        <div class="section-title">数据标题</div>
+        <div class="section-title">{{ t("admin.advanced.dataTitle") }}</div>
         <el-radio-group v-model="mode" class="mode-group">
-          <el-radio value="default">默认标题</el-radio>
-          <el-radio value="custom">自定义标题</el-radio>
+          <el-radio value="default">{{ t("admin.advanced.defaultTitle") }}</el-radio>
+          <el-radio value="custom">{{ t("admin.advanced.customTitle") }}</el-radio>
         </el-radio-group>
 
         <div v-if="mode === 'default'" class="default-title-box">
@@ -22,11 +22,11 @@
             :showSubFields="false"
             :maxBlocks="5"
             :maxRows="3"
-            placeholder="输入文字或添加字段，至少需要添加一个字段"
+            :placeholder="t('admin.advanced.dataTitlePlaceholder')"
           />
         </div>
 
-        <el-button type="primary" class="save-button" @click="save">保存</el-button>
+        <el-button type="primary" class="save-button" @click="save">{{ t("common.save") }}</el-button>
       </div>
     </div>
   </AdvanceLayout>
@@ -43,6 +43,9 @@ import {
 import { DataTitleSettings, FormDef, FormSettings } from "@eimsnext/models";
 import { formDefService } from "@eimsnext/services";
 import { useFormStore, useContextStore } from "@eimsnext/store";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "DataAdvanced",
@@ -88,12 +91,12 @@ function ensureFormSettings() {
 function validateCustomTitle() {
   const tokens = getFieldBlockTokens(content.value);
   if (tokens.length === 0) {
-    ElMessage.error("至少需要添加一个字段");
+    ElMessage.error(t("admin.advanced.minFieldError"));
     return false;
   }
 
   if (tokens.length > 5) {
-    ElMessage.error("最多添加5个字段");
+    ElMessage.error(t("admin.advanced.maxFieldError"));
     return false;
   }
 
@@ -127,9 +130,9 @@ async function save() {
     props.formDef.formSettings = resp.formSettings;
     formStore.update(resp);
     contextStore.setAppChanged();
-    ElMessage.success("保存成功");
+    ElMessage.success(t("common.saveSuccess"));
   } catch {
-    ElMessage.error("保存失败");
+    ElMessage.error(t("common.saveFailed"));
   }
 }
 </script>

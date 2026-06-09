@@ -67,6 +67,34 @@ export interface ExpireSetting {
   transferSetting?: TransferSetting;
 }
 
+export enum WfNoApproverActionType {
+  StopAndReport = 0,
+  TransferToMember = 1,
+  AutoSubmit = 2,
+}
+
+export interface FormulaRef {
+  key: string;
+  field: unknown;
+}
+
+export interface FormulaValue {
+  expression: string;
+  refs: FormulaRef[];
+  drivingField?: unknown;
+}
+
+export interface SubmitConditionSetting {
+  enabled?: boolean;
+  formulaValue?: FormulaValue;
+  promptText?: string;
+}
+
+export interface NoApproverSetting {
+  actionType?: WfNoApproverActionType;
+  candidates?: ApprovalCandidate[];
+}
+
 export enum NodeActionType {
   Submit = "submit",
   Return = "return",
@@ -91,6 +119,8 @@ export interface ApproveSetting {
   nodeActions?: NodeActionConfig[];
   notifyChannels?: NotifyChannel;
   expireSetting?: ExpireSetting;
+  submitCondition?: SubmitConditionSetting;
+  noApproverSetting?: NoApproverSetting;
 }
 
 export interface WfNodeSetting {

@@ -65,6 +65,12 @@ import HideConfig from "./components/HideConfig.vue";
 import FcEditor from "@eimsnext/form-render-elplus";
 import SpanInput from "./components/SpanInput.vue";
 import Id from "./components/Id.vue";
+import SerialNo from "./components/serialno/component.jsx";
+import SerialNoSegments from "./components/SerialNoSegments.vue";
+import SerialNoCounterDialog from "./components/SerialNoCounterDialog.vue";
+import SerialNoDateDialog from "./components/SerialNoDateDialog.vue";
+import SerialNoFixedDialog from "./components/SerialNoFixedDialog.vue";
+import SerialNoFieldDialog from "./components/SerialNoFieldDialog.vue";
 import LanguageInput from "./components/language/LanguageInput.vue";
 import AudioBox from "./components/aide/AudioBox.vue";
 import VideoBox from "./components/aide/VideoBox.vue";
@@ -205,6 +211,13 @@ addComponent("FcEcharts", Echarts);
 addComponent("FcTitle", FcTitle);
 addComponent("FcCity", FcCity);
 addComponent("FcId", Id);
+addComponent("fc-serialno", SerialNo);
+
+designerForm.component("SerialNoSegments", SerialNoSegments);
+designerForm.component("SerialNoCounterDialog", SerialNoCounterDialog);
+designerForm.component("SerialNoDateDialog", SerialNoDateDialog);
+designerForm.component("SerialNoFixedDialog", SerialNoFixedDialog);
+designerForm.component("SerialNoFieldDialog", SerialNoFieldDialog);
 
 const setFormula = function (formula) {
   const _formulas = Array.isArray(formula) ? formula : [formula];

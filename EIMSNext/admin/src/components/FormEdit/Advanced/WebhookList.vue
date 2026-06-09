@@ -1,11 +1,11 @@
 <template>
-  <EtConfirmDialog v-model="showDeleteConfirmDialog" title="你确定要删除所选数据吗？" :icon="MessageIcon.Warning"
-    :showNoSave="false" okText="确定" @ok="execDelete">
-    <div>数据删除后将不可恢复</div>
+  <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')" :icon="MessageIcon.Warning"
+    :showNoSave="false" :okText="t('common.ok')" @ok="execDelete">
+    <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
   <el-drawer v-model="showEditor" class="elt-drawer" direction="btt" size="95%" @close="close">
     <template #header>
-      <div class="main-title"><span>数据推送</span></div>
+      <div class="main-title"><span>{{ t("admin.webhook.title") }}</span></div>
     </template>
     <div class="main-content">
       <WebhookEditor v-if="selectedItem" v-model="selectedItem" :formDef="formDef" :key="selectedItem.id" />
@@ -13,43 +13,43 @@
   </el-drawer>
   <el-drawer v-model="showLog" class="elt-drawer" direction="btt" size="95%" @close="showLog = false">
     <template #header>
-      <div class="main-title"><span>推送日志</span></div>
+      <div class="main-title"><span>{{ t("admin.webhook.logTitle") }}</span></div>
     </template>
     <div class="main-content">
       <WebPushLogView v-if="selectedItem" v-model="selectedItem" />
     </div>
   </el-drawer>
-  <AdvanceLayout title="数据推送" desc="数据推送可将表单数据推送至你指定的服务器">
+  <AdvanceLayout :title="t('admin.webhook.title')" :desc="t('admin.webhook.desc')">
     <div class="flow-container">
       <div class="panel-header">
         <div class="header-left">
-          <el-button type="primary" icon="plus" @click="addNew()">新建数据推送</el-button>
+          <el-button type="primary" icon="plus" @click="addNew()">{{ t("admin.webhook.new") }}</el-button>
         </div>
         <div class="header-right header-links">
           <div class="alias-panel" aria-label="text-links">
-            <a class="link" @click="openAliasPanel">设置字段别名</a>
+            <a class="link" @click="openAliasPanel">{{ t("admin.webhook.alias") }}</a>
             <span class="sep">|</span>
-            <a class="link" @click="openFieldMapPanel">字段对照表及JSON样例</a>
+            <a class="link" @click="openFieldMapPanel">{{ t("admin.webhook.fieldMap") }}</a>
             <span class="sep">|</span>
-            <a class="link" @click="openStructurePanel">表单数据结构</a>
+            <a class="link" @click="openStructurePanel">{{ t("admin.webhook.structure") }}</a>
           </div>
         </div>
       </div>
       <div>
         <el-space direction="vertical" class="flow-space">
           <template v-for="hook in webhooks">
-            <et-card class="flow-card" :title="'推送到自定义服务器'">
+            <et-card class="flow-card" :title="t('admin.webhook.customServer')">
               <template #action>
                 <div class="flow-header">
-                  <el-button @click="viewLog(hook)">推送日志</el-button>
-                  <el-button @click="edit(hook)">编辑</el-button>
-                  <el-button @click="remove(hook)">删除</el-button>
+                  <el-button @click="viewLog(hook)">{{ t("admin.webhook.logTitle") }}</el-button>
+                  <el-button @click="edit(hook)">{{ t("common.edit") }}</el-button>
+                  <el-button @click="remove(hook)">{{ t("common.delete") }}</el-button>
                   <el-switch :model-value="!hook.disabled" @change="toggleDisable(hook)"></el-switch>
                 </div>
               </template>
               <div class="flow-content">
-                <div class="item-line">服务器地址: {{ hook.url }}</div>
-                <div class="item-line">推送事件: {{ hook.triggers }}</div>
+                <div class="item-line">{{ t("admin.webhook.serverUrl") }}: {{ hook.url }}</div>
+                <div class="item-line">{{ t("admin.webhook.trigger") }}: {{ hook.triggers }}</div>
               </div>
             </et-card>
           </template>
@@ -61,7 +61,7 @@
   <!-- 字段别名设置 Drawer -->
   <el-drawer v-model="showAlias" class="elt-drawer" direction="btt" size="95%" @close="showAlias = false">
     <template #header>
-      <div class="main-title"><span>设置字段别名</span></div>
+      <div class="main-title"><span>{{ t("admin.webhook.alias") }}</span></div>
     </template>
     <div class="main-content">
       <WebhookAliasEditor :formDef="formDef" @saved="onAliasSaved" />
@@ -71,12 +71,12 @@
   <!-- 字段对照表 Drawer（占位） -->
   <el-drawer v-model="showFieldMap" direction="btt" size="95%" @close="showFieldMap = false">
     <template #header>
-      <div class="main-title"><span>字段对照表及JSON样例</span></div>
+      <div class="main-title"><span>{{ t("admin.webhook.fieldMap") }}</span></div>
     </template>
     <div class="alias-drawer-content" style="padding: 16px 20px;">
-      <p>此处展示字段对照表及示例JSON（占位内容）</p>
+      <p>{{ t("admin.webhook.fieldMapPlaceholder") }}</p>
       <pre style="background:#f6f7f9;border:1px solid #e8eaed;padding:12px;overflow:auto;max-height:320px;">{
-      "字段示例": ["field1", "field2", "field3"]
+      "{{ t("admin.webhook.sampleField") }}": ["field1", "field2", "field3"]
       }</pre>
     </div>
   </el-drawer>
@@ -84,10 +84,10 @@
   <!-- 表单数据结构 Drawer（占位） -->
   <el-drawer v-model="showStructure" direction="btt" size="95%" @close="showStructure = false">
     <template #header>
-      <div class="main-title"><span>表单数据结构</span></div>
+      <div class="main-title"><span>{{ t("admin.webhook.structure") }}</span></div>
     </template>
     <div class="alias-drawer-content" style="padding: 16px 20px;">
-      <p>表单数据结构描述（占位内容）</p>
+      <p>{{ t("admin.webhook.structurePlaceholder") }}</p>
     </div>
   </el-drawer>
 </template>
@@ -102,6 +102,9 @@ import { webhookService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "WebhookList",

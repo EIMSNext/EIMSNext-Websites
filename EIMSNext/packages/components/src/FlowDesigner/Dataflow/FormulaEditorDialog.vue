@@ -2,7 +2,7 @@
   <EtDialog
     v-model="dialogVisible"
     class="formula-editor-dialog"
-    :title="t('dataflow.formulaEditor')"
+    :title="title || t('dataflow.formulaEditor')"
     width="1100px"
     :destroy-on-close="true"
     :append-to-body="true"
@@ -12,6 +12,9 @@
     <div class="formula-editor">
       <div class="formula-script">
         <div ref="editorRef"></div>
+      </div>
+      <div v-if="description" class="formula-description">
+        {{ description }}
       </div>
       <div class="formula-bottom">
         <div class="formula-tree-panel">
@@ -71,6 +74,8 @@ const props = defineProps<{
   modelValue?: IFormulaValue;
   visible: boolean;
   nodes: INodeForm[];
+  title?: string;
+  description?: string;
 }>();
 
 const emit = defineEmits(["update:modelValue", "update:visible"]);
@@ -246,6 +251,12 @@ watch(
   border: 1px solid var(--et-border-color-light);
   background: var(--et-bg-container);
   overflow: hidden;
+}
+
+.formula-description {
+  color: var(--et-text-secondary);
+  font-size: var(--et-font-size-12);
+  line-height: var(--et-line-height-20);
 }
 
 .formula-bottom {
