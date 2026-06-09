@@ -15,9 +15,10 @@ import {
   DataflowHttpTriggerSetting,
   DataflowTimeTriggerSetting,
   FieldType,
+  WfNoApproverActionType,
 } from "@eimsnext/models";
 import { ConditionValueType, IConditionList } from "@/ConditionList/type";
-import { FieldValueType, IFormFieldList, IFormFieldValue } from "@/FormFieldList/type";
+import { FieldValueType, IFormFieldList, IFormFieldValue, IFormulaValue } from "@/FormFieldList/type";
 import { IFieldSortList } from "@/FieldSortList/type";
 import { Translator } from "element-plus";
 import { IFormFieldDef } from "@/FieldSelect/type";
@@ -187,6 +188,14 @@ export function createFlowNode(
             approveMode: ApproveMode.OrSign,
             approvalCandidates: [],
             enableCopyto: false,
+            submitCondition: {
+              enabled: false,
+              promptText: "",
+            },
+            noApproverSetting: {
+              actionType: WfNoApproverActionType.StopAndReport,
+              candidates: [],
+            },
             nodeActions: [
               { actionType: NodeActionType.Submit, enabled: true, text: t("common.wfProcess.submit") },
               { actionType: NodeActionType.Return, enabled: false, text: t("workflow.nodeActionReturn") },
@@ -674,6 +683,8 @@ export interface ApproveMeta {
   nodeActions?: INodeActionConfig[];
   notifyChannels?: NotifyChannel;
   expireSetting?: IExpireSetting;
+  submitCondition?: ISubmitConditionSetting;
+  noApproverSetting?: INoApproverSetting;
 }
 
 export enum NodeActionType {
@@ -691,6 +702,18 @@ export interface INodeActionConfig {
   text?: string;
   candidates?: IApprovalCandidate[];
 }
+
+export interface ISubmitConditionSetting {
+  enabled?: boolean;
+  formulaValue?: IFormulaValue;
+  promptText?: string;
+}
+
+export interface INoApproverSetting {
+  actionType?: WfNoApproverActionType;
+  candidates?: IApprovalCandidate[];
+}
+
 export interface CopytoMeta {
   approvalCandidates: IApprovalCandidate[];
 }
