@@ -1,23 +1,24 @@
 import {
   ApproveAction,
-  type App,
+  type AppDef,
   type FormData,
   type FormDef,
   type WfTodo,
 } from "@eimsnext/models";
 import {
-  appService,
+  appDefService,
   authService,
   formDataService,
   formDefService,
+  formListViewService,
   systemService,
   wfTodoService,
   workflowService,
   getNodeActions,
-  getNodeActionLabel,
 } from "@eimsnext/services";
 import type { LoginRequest } from "@eimsnext/services";
 import { ODataQueryRequest } from "@eimsnext/services";
+import type { FormListView } from "@eimsnext/models";
 
 const buildODataQuery = (filter?: string, skip = 0, top = 20, orderby?: string) => {
   const query = new ODataQueryRequest();
@@ -40,11 +41,11 @@ export const mobileAuthService = {
 };
 
 export const appServiceMobile = {
-  getMyApps(): Promise<App[]> {
-    return appService.query<App>();
+  getMyApps(): Promise<AppDef[]> {
+    return appDefService.query<AppDef>();
   },
-  get(appId: string): Promise<App> {
-    return appService.get<App>(appId);
+  get(appId: string): Promise<AppDef> {
+    return appDefService.get<AppDef>(appId);
   },
 };
 
@@ -57,17 +58,23 @@ export const formServiceMobile = {
   },
 };
 
+export const formListViewServiceMobile = {
+  query(formId: string): Promise<FormListView[]> {
+    return formListViewService.query<FormListView>(`$filter=formid eq '${formId}'&$orderby=sortIndex asc,createTime asc`);
+  },
+};
+
 export const formDataServiceMobile = {
-  query(formId: string, skip = 0, top = 20): Promise<FormData[]> {
+  query(formId: string, skip = 0, top = 20, filter?: any, sort?: any): Promise<FormData[]> {
     return formDataService.dynamicQuery<FormData>({
       skip,
       take: top,
-      filter: `formId eq '${formId}'`,
-      sort: "createTime desc",
+      filter: filter || `formId eq '${formId}'`,
+      sort: sort || "createTime desc",
     });
   },
-  count(formId: string): Promise<number> {
-    return formDataService.dynamicCount(`formId eq '${formId}'`);
+  count(formId: string, filter?: any): Promise<number> {
+    return formDataService.dynamicCount(filter || `formId eq '${formId}'`);
   },
   get(dataId: string): Promise<FormData> {
     return formDataService.get<FormData>(dataId);

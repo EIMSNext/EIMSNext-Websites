@@ -5,11 +5,15 @@
         <InternalPublish :form-def="formDef" />
       </el-tab-pane>
       <el-tab-pane :label="$t('admin.publish.public')" name="public" class="adv-panel">To do</el-tab-pane>
+      <el-tab-pane :label="$t('common.view')" name="view" class="adv-panel">
+        <ViewPublish :form-def="formDef" />
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 <script setup lang="ts">
 import InternalPublish from "./InternalPublish.vue";
+import ViewPublish from "./ViewPublish.vue";
 import { FormDef } from "@eimsnext/models";
 import { TabsPaneContext } from "element-plus";
 

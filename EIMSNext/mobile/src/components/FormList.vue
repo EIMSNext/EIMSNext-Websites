@@ -6,15 +6,15 @@
           <img v-if="app?.icon" :src="app.icon" alt="" />
           <van-icon v-else name="apps-o" />
         </span>
-        <span>{{ app?.name || "表单" }}</span>
+        <span>{{ app?.name || t("mobile.formList.fallbackTitle") }}</span>
       </div>
     </template>
 
     <div class="form-page">
       <van-tabs v-model:active="activeTab" sticky>
-        <van-tab title="目录" name="forms">
+        <van-tab :title="t('mobile.formList.catalog')" name="forms">
           <div class="form-list-wrap">
-            <van-search v-model="keyword" placeholder="输入名称来搜索" />
+            <van-search v-model="keyword" :placeholder="t('mobile.formList.searchPlaceholder')" />
             <van-pull-refresh v-model="refreshing" @refresh="loadForms">
               <div class="form-list">
                 <MobileCard
@@ -36,7 +36,7 @@
           </div>
         </van-tab>
 
-        <van-tab title="流程中心" name="workflow">
+        <van-tab :title="t('mobile.workflow.title')" name="workflow">
           <WorkflowTabs :embedded="true" :app-id="appId" />
         </van-tab>
       </van-tabs>
@@ -47,7 +47,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import type { App, FormDef } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
+import type { AppDef, FormDef } from "@eimsnext/models";
 import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
 import WorkflowTabs from "@/components/WorkflowTabs.vue";
@@ -55,12 +56,13 @@ import { appServiceMobile, formServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
 const appId = route.params.appId as string;
 
 const activeTab = ref("forms");
 const refreshing = ref(false);
 const keyword = ref("");
-const app = ref<App>();
+const app = ref<AppDef>();
 const forms = ref<FormDef[]>([]);
 
 const filteredForms = computed(() => {
