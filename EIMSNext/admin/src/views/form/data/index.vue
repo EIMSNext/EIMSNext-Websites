@@ -48,47 +48,96 @@
           </section>
           <aside class="shared-form-side">
             <div class="shared-side-tabs">
-              <button class="shared-form-tab active" type="button">{{ $t("admin.formData.flowDynamic") }}</button>
-              <button class="shared-form-tab" type="button">{{ $t("admin.formData.dataLog") }}</button>
+              <button
+                class="shared-form-tab"
+                :class="{ active: sideTab === 'flow' }"
+                type="button"
+                @click="sideTab = 'flow'"
+              >
+                {{ $t("admin.formData.flowDynamic") }}
+              </button>
+              <button
+                class="shared-form-tab"
+                :class="{ active: sideTab === 'dataLog' }"
+                type="button"
+                @click="sideTab = 'dataLog'"
+              >
+                {{ $t("admin.formData.dataLog") }}
+              </button>
             </div>
             <div class="shared-side-head">
-              <div class="shared-side-title">{{ $t("admin.formData.flowDynamic") }}</div>
-              <div class="shared-side-extra">{{ approvalLogs.length }} {{ $t("admin.formData.records") }}</div>
+              <div class="shared-side-title">{{ sideTitle }}</div>
+              <div class="shared-side-extra">{{ sideRecordCount }} {{ $t("admin.formData.records") }}</div>
             </div>
             <div class="shared-side-body">
-              <template v-if="approvalLogs.length > 0">
-                <div v-for="log in approvalLogs" :key="log.id" class="workflow-card">
-                  <div class="workflow-card-header">
-                    <div class="workflow-node">{{ log.nodeName }}</div>
-                    <div class="workflow-time">{{ formatDate(log.approvalTime) }}</div>
+              <template v-if="sideTab === 'flow'">
+                <template v-if="approvalLogs.length > 0">
+                  <div v-for="log in approvalLogs" :key="log.id" class="workflow-card">
+                    <div class="workflow-card-header">
+                      <div class="workflow-node">{{ log.nodeName }}</div>
+                      <div class="workflow-time">{{ formatDate(log.approvalTime) }}</div>
+                    </div>
+                    <div class="workflow-operator-row">
+                      <div class="workflow-avatar">{{ getOperatorInitial(log.approver?.label) }}</div>
+                      <div class="workflow-operator-content">
+                        <div class="workflow-operator-name">{{ log.approver?.label || $t("admin.formData.system") }}</div>
+                        <div class="workflow-operator-meta">{{ $t("admin.formData.approvalProcess") }}</div>
+                      </div>
+                    </div>
+                    <div v-if="log.comment" class="workflow-comment">{{ log.comment }}</div>
                   </div>
-                  <div class="workflow-operator-row">
-                    <div class="workflow-avatar">{{ getOperatorInitial(log.approver?.label) }}</div>
-                    <div class="workflow-operator-content">
-                      <div class="workflow-operator-name">{{ log.approver?.label || $t("admin.formData.system") }}</div>
-                      <div class="workflow-operator-meta">{{ $t("admin.formData.approvalProcess") }}</div>
+                </template>
+                <template v-else>
+                  <div class="workflow-card workflow-card-compact">
+                    <div class="workflow-card-header">
+                      <div class="workflow-node">{{ $t("admin.formData.submitProcess") }}</div>
+                      <div class="workflow-time">{{ formatDate(formData?.createTime) }}</div>
+                    </div>
+                    <div class="workflow-operator-row">
+                      <div class="workflow-avatar">
+                        {{ getOperatorInitial(formData?.createBy?.label) }}
+                      </div>
+                      <div class="workflow-operator-content">
+                        <div class="workflow-operator-name">
+                          {{ formData?.createBy?.label || $t("admin.formData.unknown") }}
+                        </div>
+                        <div class="workflow-operator-meta">{{ $t("admin.formData.initiator") }}</div>
+                      </div>
                     </div>
                   </div>
-                  <div v-if="log.comment" class="workflow-comment">{{ log.comment }}</div>
+                </template>
+              </template>
+              <template v-else-if="changeLogs.length > 0">
+                <div v-for="log in changeLogs" :key="log.id" class="workflow-card change-log-card">
+                  <div class="workflow-card-header">
+                    <div class="workflow-node">{{ $t("admin.formData.actionUpdate") }}</div>
+                    <div class="workflow-time">{{ formatDate(log.operateTime) }}</div>
+                  </div>
+                  <div class="workflow-operator-row">
+                    <div class="workflow-avatar">{{ getOperatorInitial(log.operator?.label) }}</div>
+                    <div class="workflow-operator-content">
+                      <div class="workflow-operator-name">{{ log.operator?.label || $t("admin.formData.system") }}</div>
+                      <div class="workflow-operator-meta">{{ $t("admin.formData.dataLog") }}</div>
+                    </div>
+                  </div>
+                  <div class="change-list">
+                    <div v-for="item in log.content" :key="`${log.id}-${item.fieldId}`" class="change-row">
+                      <div class="change-field">
+                        {{ item.fieldLabel || item.fieldId }}
+                        <span class="change-type">{{ formatChangeType(item.changeType) }}</span>
+                      </div>
+                      <div class="change-values">
+                        <span>{{ formatChangeValue(item.oriVallue) }}</span>
+                        <span class="change-arrow">→</span>
+                        <span>{{ formatChangeValue(item.newVallue) }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </template>
               <template v-else>
                 <div class="workflow-card workflow-card-compact">
-                  <div class="workflow-card-header">
-                    <div class="workflow-node">{{ $t("admin.formData.submitProcess") }}</div>
-                    <div class="workflow-time">{{ formatDate(formData?.createTime) }}</div>
-                  </div>
-                  <div class="workflow-operator-row">
-                    <div class="workflow-avatar">
-                      {{ getOperatorInitial(formData?.createBy?.label) }}
-                    </div>
-                    <div class="workflow-operator-content">
-                      <div class="workflow-operator-name">
-                        {{ formData?.createBy?.label || $t("admin.formData.unknown") }}
-                      </div>
-                      <div class="workflow-operator-meta">{{ $t("admin.formData.initiator") }}</div>
-                    </div>
-                  </div>
+                  <div class="workflow-node">{{ $t("admin.formData.noDataLog") }}</div>
                 </div>
               </template>
             </div>
@@ -113,7 +162,7 @@ defineOptions({
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { FormDef, FormData, PrintDef, WfApprovalLog } from "@eimsnext/models";
+import { DataChangeType, FormDataChangeLog, FormDef, FormData, PrintDef, WfApprovalLog } from "@eimsnext/models";
 import {
   customPrintService,
   formDataService,
@@ -141,6 +190,7 @@ const { isFullscreen, toggle } = useFullscreen();
 const formDef = ref<FormDef>();
 const formData = ref<FormData>();
 const approvalLogs = ref<WfApprovalLog[]>([]);
+const changeLogs = ref<FormDataChangeLog[]>([]);
 const customPrintTemplates = ref<PrintDef[]>([]);
 const loading = ref(false);
 const printConfig = ref(getPrintConfig(false));
@@ -149,6 +199,15 @@ const printTrigger = ref<HTMLElement | null>(null);
 const showPdfPreview = ref(false);
 const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
+const sideTab = ref<"flow" | "dataLog">("flow");
+
+const sideTitle = computed(() => {
+  return sideTab.value === "flow" ? t("admin.formData.flowDynamic") : t("admin.formData.dataLog");
+});
+
+const sideRecordCount = computed(() => {
+  return sideTab.value === "flow" ? approvalLogs.value.length : changeLogs.value.length;
+});
 
 const formatDate = (value?: number) => {
   if (!value) return "-";
@@ -157,6 +216,23 @@ const formatDate = (value?: number) => {
 
 const getOperatorInitial = (label?: string) => {
   return label?.slice(0, 1) || "-";
+};
+
+const formatChangeValue = (value: unknown) => {
+  if (value === null || value === undefined || value === "") return "-";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+
+const formatChangeType = (type: DataChangeType) => {
+  switch (type) {
+    case DataChangeType.Added:
+      return t("admin.formData.changeAdded");
+    case DataChangeType.Deleted:
+      return t("admin.formData.changeDeleted");
+    default:
+      return t("admin.formData.changeModified");
+  }
 };
 
 const toolbarItems = computed<ToolbarItem[]>(() => {
@@ -287,7 +363,7 @@ onBeforeMount(async () => {
   loading.value = true;
 
   try {
-    const [form, data, logs] = await Promise.all([
+    const [form, data, logs, dataLogs] = await Promise.all([
       formStore.get(formId),
       formDataService.get<FormData>(dataId),
       wfApprovalLogService.query<WfApprovalLog>(
@@ -297,6 +373,7 @@ onBeforeMount(async () => {
           top: 20,
         })
       ),
+      formDataService.getChangeLogs(dataId, 0, 20),
     ]);
 
     if (form) {
@@ -310,6 +387,7 @@ onBeforeMount(async () => {
     }
 
     approvalLogs.value = logs || [];
+    changeLogs.value = dataLogs || [];
   } finally {
     loading.value = false;
   }
@@ -548,6 +626,46 @@ onBeforeMount(async () => {
 .workflow-comment {
   margin-top: 10px;
   line-height: 1.6;
+}
+
+.change-log-card {
+  padding-bottom: 10px;
+}
+
+.change-list {
+  margin-top: 12px;
+  border-top: 1px solid #eef2f7;
+}
+
+.change-row {
+  padding: 10px 0 0;
+}
+
+.change-field {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.change-type {
+  margin-left: 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.change-values {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.change-arrow {
+  color: #94a3b8;
 }
 
 .print-trigger {

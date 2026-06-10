@@ -1,5 +1,5 @@
 import { ApiServiceBase } from "../interface";
-import { ExportResponse, FormData, FormDataExportRequest, FormDataRequest } from "@eimsnext/models";
+import { ExportResponse, FormData, FormDataChangeLog, FormDataExportRequest, FormDataRequest } from "@eimsnext/models";
 import {
   IFormDataFilterOptionsRequest,
   IFormDataFilterOptionsResponse,
@@ -16,6 +16,21 @@ export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
 
   getFilterOptions(data: IFormDataFilterOptionsRequest): Promise<IFormDataFilterOptionsResponse> {
     return this.http().api.post<IFormDataFilterOptionsResponse>(`/FormData/filter/options`, data);
+  }
+
+  async getChangeLogs(dataId: string, skip = 0, top = 20, authGroupId?: string): Promise<FormDataChangeLog[]> {
+    const params: Record<string, unknown> = { skip, top };
+    if (authGroupId) params.authGroupId = authGroupId;
+
+    const result = await this.http().api.get<{ value: FormDataChangeLog[] }>(`/FormData/${dataId}/changelog`, params);
+    return result.value;
+  }
+
+  countChangeLogs(dataId: string, authGroupId?: string): Promise<number> {
+    const params: Record<string, unknown> = {};
+    if (authGroupId) params.authGroupId = authGroupId;
+
+    return this.http().api.get<number>(`/FormData/${dataId}/changelog/$count`, params);
   }
 }
 
