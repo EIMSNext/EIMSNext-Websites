@@ -1,5 +1,5 @@
 ﻿import { ODataServiceBase } from "../interface";
-import { Role, RoleRequest } from "@eimsnext/models";
+import { MoveRoleTreeNodeRequest, Role, RoleRequest } from "@eimsnext/models";
 
 export class RoleService extends ODataServiceBase<Role, RoleRequest> {
   protected modelName(): string {
@@ -18,6 +18,10 @@ export class RoleService extends ODataServiceBase<Role, RoleRequest> {
       roleId,
       empIds,
     });
+  }
+
+  move(data: MoveRoleTreeNodeRequest): Promise<void> {
+    return this.http().api.post<void>("/Role/Move", data);
   }
 }
 

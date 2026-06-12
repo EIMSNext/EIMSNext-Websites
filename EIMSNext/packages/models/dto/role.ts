@@ -15,3 +15,11 @@ export interface Role extends CorpModelBase {
   sortValue: number;
   roleGroup?: RoleGroup;
 }
+
+export interface MoveRoleTreeNodeRequest {
+  id: string;
+  isGroup: boolean;
+  roleGroupId: string;
+  previousId?: string;
+  nextId?: string;
+}
