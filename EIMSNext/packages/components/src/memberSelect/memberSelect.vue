@@ -752,8 +752,9 @@ onBeforeMount(() => {
     deptData.value = JSON.parse(JSON.stringify(filteredDeptData));
     empDeptData.value = JSON.parse(JSON.stringify(filteredDeptData));
 
-    if (userStore.currentUser.deptId) {
-      deptStore.get(userStore.currentUser.deptId).then((x) => {
+    const currentDepartmentId = userStore.currentUser.departmentIds?.[0] ?? userStore.currentUser.deptId;
+    if (currentDepartmentId) {
+      deptStore.get(currentDepartmentId).then((x) => {
         if (x) {
           const curDeptNode = [deptToTreeNode(x)];
           // 不应用范围过滤，直接显示当前用户部门
@@ -767,9 +768,8 @@ onBeforeMount(() => {
         code: userStore.currentUser.empCode!,
         empName: userStore.currentUser.empName!,
         status: 0,
-        departmentId: userStore.currentUser.deptId!,
         userBound: true,
-        isManager: false,
+        departments: currentDepartmentId ? [{ id: currentDepartmentId, name: curDeptData.value?.[0]?.label ?? "" }] : [],
       };
       curEmpData.value = [employeeToListItem(emp)];
     }
@@ -894,10 +894,12 @@ const selectEmpDept = (deptId: string) => {
   deptChanging.value = true;
   selectedEmpDeptId.value = deptId;
 
-  let $filter = deptId == "all" ? "" : `$filter=departmentId eq '${deptId}'`;
   empData.value = [];
   selectedEmps.value = [];
-  employeeService.query<Employee>($filter).then((res) => {
+  const request = deptId && deptId !== "all"
+    ? employeeService.queryByDepartment<Employee>(deptId)
+    : employeeService.query<Employee>();
+  request.then((res) => {
     res.forEach((x) => {
       empData.value.push(employeeToListItem(x));
 

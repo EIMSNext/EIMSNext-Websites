@@ -43,7 +43,6 @@
             <el-table-column :label="$t('admin.department.code')" width="150" prop="code" />
             <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
             <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
-            <el-table-column :label="$t('admin.department.dept')" prop="department.name" />
             <el-table-column v-if="isPendingMode" :label="$t('common.edit')" fixed="right" width="160">
               <template #default="scope">
                 <el-button link type="primary" @click.stop="reviewSingle(scope.row, true)">{{ $t("admin.department.approve") }}</el-button>
@@ -338,13 +337,7 @@ const setSort = (sort: IFieldSortList) => {
 };
 
 const updateQueryParams = () => {
-  let statusFilter = { status: { eq: empStatus.value } };
-  let preFilter: any = statusFilter;
-  if (deptHeriarchyId.value) {
-    preFilter = {
-      and: [statusFilter, { "department/heriarchyId": { startswith: deptHeriarchyId.value } }],
-    };
-  }
+  let preFilter: any = { status: { eq: empStatus.value } };
 
   queryParams.value = toODataQuery(
     condList.value,
@@ -353,7 +346,6 @@ const updateQueryParams = () => {
     pageSize.value,
     preFilter
   );
-  queryParams.value.expand = "department";
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -364,8 +356,8 @@ const queryParams = ref<ODataQuery<Employee>>({
 const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
-const deptHeriarchyId = ref("");
 const empStatus = ref(0);
+const selectedDepartmentId = ref("");
 
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
@@ -381,8 +373,8 @@ const handleStatusChanged = () => {
 };
 
 const handleDeptChanged = (dept?: Department) => {
-  deptHeriarchyId.value = dept?.heriarchyId ?? "";
-
+  selectedDepartmentId.value = dept?.id ?? "";
+  pageNum.value = 1;
   updateQueryParams();
   handleQuery();
 };
@@ -393,7 +385,11 @@ const rowClassName = (row: any) => {
 const loadCount = () => {
   let query = buildQuery({ filter: queryParams.value.filter });
 
-  employeeService.count(query).then((cnt: number) => {
+  const request = selectedDepartmentId.value
+    ? employeeService.countByDepartment(selectedDepartmentId.value, true, query)
+    : employeeService.count(query);
+
+  request.then((cnt: number) => {
     totalRef.value = cnt;
   });
 };
@@ -401,8 +397,11 @@ const loadData = () => {
   loading.value = true;
   let query = buildQuery(queryParams.value);
 
-  employeeService
-    .query<Employee>(query)
+  const request = selectedDepartmentId.value
+    ? employeeService.queryByDepartment<Employee>(selectedDepartmentId.value, true, query)
+    : employeeService.query<Employee>(query);
+
+  request
     .then((res: Employee[]) => {
       dataRef.value = res;
       if (isPendingMode.value) {

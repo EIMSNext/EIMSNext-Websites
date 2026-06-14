@@ -125,9 +125,10 @@ const resolveDynamicDefault = async () => {
         ? [{ id: userStore.currentUser.empId, label: userStore.currentUser.empName || t("admin.dashFilter.currentUser"), type: DataItemType.Employee }]
         : [];
     case "currentDept":
-      if (!userStore.currentUser.deptId) return [];
-      const dept = await deptStore.get(userStore.currentUser.deptId);
-      return [{ id: userStore.currentUser.deptId, label: dept?.name || t("admin.dashFilter.currentDept"), type: DataItemType.Department }];
+      const deptId = userStore.currentUser.departmentIds?.[0] ?? userStore.currentUser.deptId;
+      if (!deptId) return [];
+      const dept = await deptStore.get(deptId);
+      return [{ id: deptId, label: dept?.name || t("admin.dashFilter.currentDept"), type: DataItemType.Department }];
     default:
       return setting.value.defaultValue;
   }

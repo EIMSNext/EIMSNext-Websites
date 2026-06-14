@@ -11,6 +11,7 @@ export class CurrentUser {
   empCode?: string;
   empName?: string;
   corpId?: string;
+  departmentIds?: string[];
   deptId?: string;
   userType: UserType = UserType.None;
   apps?: App[];
