@@ -47,19 +47,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { ref, onMounted } from "vue";
 import {
-  DataItemType,
-  ISelectedTag,
   MemberSelectDialog,
   MemberTabs,
   SelectedTags,
+  ISelectedTag,
 } from "@eimsnext/components";
-import { DashboardFilterSetting, DashboardItemDef, FieldType } from "@eimsnext/models";
-import { useDeptStore, useUserStore } from "@eimsnext/store";
-import { IFormDataFilterOptionItem, formDataService } from "@eimsnext/services";
-import { DashboardConditionFieldType, getDashboardConditionFieldType, isDashboardMultiValueType } from "../fieldType";
+import { DashboardItemDef } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
+import { useFilterWidgetData } from "./useFilterWidgetData";
 
 const { t } = useI18n();
 
@@ -73,37 +70,27 @@ const props = defineProps<{
 
 const emit = defineEmits(["change"]);
 
-const userStore = useUserStore();
-const deptStore = useDeptStore();
 const showMemberDialog = ref(false);
-const options = ref<IFormDataFilterOptionItem[]>([]);
-const optionValue = ref<any>();
-const textValue = ref<any>();
-const rangeValue = ref<[any, any]>([undefined, undefined]);
-const memberValue = ref<ISelectedTag[]>([]);
 
-const setting = computed<DashboardFilterSetting>(() => JSON.parse(props.itemDef.details || "{}"));
-const getMemberLimit = (value: DashboardFilterSetting): { deptIds?: string[] } | undefined => {
-  return (value as DashboardFilterSetting & { memberLimit?: { deptIds?: string[] } }).memberLimit;
-};
-const selectedBinding = computed(() => setting.value.bindings?.[0]);
-const fieldTypeGroup = computed(() => selectedBinding.value?.field ? getDashboardConditionFieldType(selectedBinding.value.field.type as FieldType) : DashboardConditionFieldType.Other);
-const isMultiple = computed(() => isDashboardMultiValueType(selectedBinding.value?.field?.type as FieldType));
-const isMemberType = computed(() => [DashboardConditionFieldType.Employee1, DashboardConditionFieldType.Employee2, DashboardConditionFieldType.Department1, DashboardConditionFieldType.Department2].includes(fieldTypeGroup.value));
-const isDepartmentType = computed(() => [DashboardConditionFieldType.Department1, DashboardConditionFieldType.Department2].includes(fieldTypeGroup.value));
-const showRangeMode = computed(() => setting.value.operator == "between");
-const isNoValueOp = computed(() => ["empty", "notempty"].includes(setting.value.operator ?? ""));
-const showOptionsMode = computed(() => setting.value.filterMode == "options" && !showRangeMode.value && !isMemberType.value && !isNoValueOp.value);
-
-const memberOptions = computed(() => ({
-  showTabs: isDepartmentType.value ? MemberTabs.Department | MemberTabs.CurDept : MemberTabs.Employee | MemberTabs.CurUser,
-  multiple: isMultiple.value,
-  limit: !isDepartmentType.value && getMemberLimit(setting.value)?.deptIds?.length
-    ? {
-        depts: (getMemberLimit(setting.value)?.deptIds || []).map((id: string) => ({ id, label: id, type: DataItemType.Department })),
-      }
-    : undefined,
-}));
+const {
+  options,
+  optionValue,
+  textValue,
+  rangeValue,
+  memberValue,
+  setting,
+  selectedBinding,
+  fieldTypeGroup,
+  isMultiple,
+  isMemberType,
+  isDepartmentType,
+  showRangeMode,
+  isNoValueOp,
+  showOptionsMode,
+  memberOptions,
+  applyDefaultValue,
+  loadOptions,
+} = useFilterWidgetData(props);
 
 const emitValue = (value: any) => {
   emit("change", { itemId: props.itemDef.id, value });
@@ -118,80 +105,12 @@ const memberSelected = (tags: ISelectedTag[]) => {
   emitValue(isMultiple.value ? tags : (tags[0] ? [tags[0]] : []));
 };
 
-const resolveDynamicDefault = async () => {
-  switch (setting.value.dynamicDefault?.type) {
-    case "currentUser":
-      return userStore.currentUser.empId
-        ? [{ id: userStore.currentUser.empId, label: userStore.currentUser.empName || t("admin.dashFilter.currentUser"), type: DataItemType.Employee }]
-        : [];
-    case "currentDept":
-      const deptId = userStore.currentUser.departmentIds?.[0] ?? userStore.currentUser.deptId;
-      if (!deptId) return [];
-      const dept = await deptStore.get(deptId);
-      return [{ id: deptId, label: dept?.name || t("admin.dashFilter.currentDept"), type: DataItemType.Department }];
-    default:
-      return setting.value.defaultValue;
-  }
-};
-
-const applyDefaultValue = async () => {
-  if (isNoValueOp.value) return;
-
-  const defaultValue = setting.value.defaultValueMode == "dynamic"
-    ? await resolveDynamicDefault()
-    : setting.value.defaultValue;
-
-  if (isMemberType.value) {
-    memberValue.value = Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : [];
-    emitValue(memberValue.value);
-    return;
-  }
-
-  if (showRangeMode.value) {
-    rangeValue.value = Array.isArray(defaultValue) ? [defaultValue[0], defaultValue[1]] : [undefined, undefined];
-    emitRangeValue();
-    return;
-  }
-
-  if (showOptionsMode.value) {
-    optionValue.value = defaultValue;
-    emitOptionValue();
-    return;
-  }
-
-  textValue.value = defaultValue;
-  emitTextValue();
-};
-
-const loadOptions = async () => {
-  const binding = selectedBinding.value;
-  if (!binding?.field) {
-    options.value = [];
-    return;
-  }
-
-  if (binding.field.options?.length) {
-    options.value = binding.field.options.map((item) => ({ id: item.value, label: item.label, value: item.value }));
-    return;
-  }
-
-  if (setting.value.rangeSourceType == "memberScope") {
-    options.value = [];
-    return;
-  }
-
-  const resp = await formDataService.getFilterOptions({
-    formId: binding.dataSourceId,
-    field: binding.field.field,
-    fieldType: binding.field.type,
-    limit: 50,
-  });
-  options.value = resp.items || [];
-};
-
 onMounted(async () => {
   await loadOptions();
-  await applyDefaultValue();
+  const defaultValuePayload = await applyDefaultValue();
+  if (defaultValuePayload) {
+    emit("change", defaultValuePayload);
+  }
 });
 </script>
 

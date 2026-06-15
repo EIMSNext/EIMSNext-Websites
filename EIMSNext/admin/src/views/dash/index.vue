@@ -48,7 +48,7 @@
 <script lang="ts" setup>
 import { reactive } from "vue";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
-import { IGridLayoutItem, IGridLayoutState } from "@/components/DashboardDesigner/type";
+import { IGridLayoutItem, IGridLayoutState } from "@eimsnext/models";
 import { DashboardDef, DashboardItemDef } from "@eimsnext/models";
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import { useRoute } from "vue-router";

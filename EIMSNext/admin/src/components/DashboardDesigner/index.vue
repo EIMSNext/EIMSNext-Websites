@@ -36,27 +36,27 @@
                   </template>
                 </el-popover>
 
-                <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Chart" placement="right-start"
+                <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.DetailTable" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
-                  :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Chart }">
+                  :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.DetailTable }">
                   <div class="menu-guide">
-                    <div class="guide-title">统计表</div>
+                    <div class="guide-title">{{ t("admin.dashboardDesigner.detailTable") }}</div>
                     <img src="@/assets/images/dsheditor/guide-chart.svg" />
-                    <div class="guide-des">提供多种图表样式，对数据进行汇总统计</div>
+                    <div class="guide-des">{{ t("admin.dashboardDesigner.detailTableDesc") }}</div>
                   </div>
                   <template #reference>
                     <div class="menu-line">
                       <div class="line-content" draggable="true"
-                        @dragstart="dashItemDragStart($event, DashItemType.Chart)"
-                        @drag="dashItemDrag($event, DashItemType.Chart), (hoverMenu = false)"
+                        @dragstart="dashItemDragStart($event, DashItemType.DetailTable)"
+                        @drag="dashItemDrag($event, DashItemType.DetailTable), (hoverMenu = false)"
                         @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
-                        @mouseover="setHoverMenu(true, DashItemType.Chart)" @mouseleave="hoverMenu = false">
-                        <et-icon icon="el-PieChart" class="line-icon" />
-                        <div class="line-text">明细表</div>
+                        @mouseover="setHoverMenu(true, DashItemType.DetailTable)" @mouseleave="hoverMenu = false">
+                        <et-icon icon="el-Grid" class="line-icon" />
+                        <div class="line-text">{{ t("admin.dashboardDesigner.detailTable") }}</div>
                       </div>
                     </div>
                   </template>
-                </el-popover> -->
+                </el-popover>
                 <!-- <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-table"></i></div>
@@ -185,7 +185,7 @@
                 </el-popover> -->
                 <div class="menu-line">
                   <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Filter)"
-                    @drag="dashItemDrag($event, DashItemType.Filter)" @dragend="dashItemDrop($event, null)" unselectable="on">
+                    @drag="dashItemDrag($event, DashItemType.Filter)" @dragend="handleFilterDrop($event)" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-filter"></i></div>
                     <div class="line-text">{{ t("admin.dashboardDesigner.filterWidget") }}</div>
                   </div>
@@ -231,6 +231,7 @@
   <DataSourceDialog v-model="showDataSourceDialog" :appId="dashDef.appId" :dataSource="dataSource"
     @cancel="handleSourceCancel" @ok="handleSourceOk"></DataSourceDialog>
   <EChartsDesigner v-if="dashItemDefRef" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
+  <DetailTableDesigner v-if="dashItemDefRef" v-model="showDetailTableEditor" :dash-item-def="dashItemDefRef" />
   <FilterDesigner v-if="dashItemDefRef" v-model="showFilterEditor" :dash-item-def="dashItemDefRef"
     :chart-targets="chartTargets" :binding-candidates="bindingCandidates" />
 </template>
@@ -253,9 +254,12 @@ import {
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import EChartsDesigner from "./ECharts/EChartsDesigner.vue";
 import FilterDesigner from "./FilterDesigner/FilterDesigner.vue";
+import DetailTableDesigner from "./DetailTable/DetailTableDesigner.vue";
 import { useI18n } from "vue-i18n";
 import { useFormStore } from "@eimsnext/store";
 import { IDashboardBindingCandidate, IDashboardChartTarget } from "./FilterDesigner/type";
+import { createDefaultDetailTableSetting } from "./DetailTable/type";
+import { useDashboardDragDrop } from "./useDashboardDragDrop";
 const { t } = useI18n();
 
 defineOptions({
@@ -280,6 +284,7 @@ const showDataSourceDialog = ref(false);
 const dataSource = ref<IDataSource>();
 
 const showChartEditor = ref(false);
+const showDetailTableEditor = ref(false);
 const showFilterEditor = ref(false);
 
 const state = reactive<IGridLayoutState>({
@@ -289,17 +294,29 @@ const state = reactive<IGridLayoutState>({
   resizable: true,
 });
 
-const elItemsRef = ref<any>({});
-const colNum = ref(24);
+const {
+  colNum,
+  mouseXY,
+  dragPos,
+  draggingItemType,
+  elItemsRef,
+  setItemRef,
+  dashItemDragStart,
+  gridDragOver,
+  dashItemDrag,
+  dashItemDrop,
+  getMinWidth,
+  getMinHeight,
+  getMaxHeight,
+  getZIndex,
+  setupMouseTracking,
+} = useDashboardDragDrop(state, gridRef);
+
 const colWidth = ref(150);
 const rowHeight = ref(10);
-const newWidth = 12;
-const newHeight = 12;
-const mouseXY = { x: -1, y: -1 };
-const dragPos: IGridLayoutItem = { x: -1, y: -1, w: 1, h: 1, i: "" };
-const draggingItemType = ref<DashItemType>();
+
 const chartTargets = computed<IDashboardChartTarget[]>(() => Object.values(state.items)
-  .filter((item) => item.itemType == DashItemType.Chart)
+  .filter((item) => [DashItemType.Chart, DashItemType.DetailTable].includes(item.itemType))
   .map((item) => {
     const details = JSON.parse(item.details || "{}");
     return {
@@ -334,19 +351,6 @@ const containerResizedEvent = (
   newWPx: number
 ) => { };
 
-const getMinWidth = (item: IGridLayoutItem) => {
-  return 6;
-};
-const getMinHeight = (item: IGridLayoutItem) => {
-  return 3;
-};
-const getMaxHeight = (item: IGridLayoutItem) => {
-  return 60;
-};
-const getZIndex = (item: IGridLayoutItem) => {
-  return 99999;
-};
-
 const openSourceDialog = (b: boolean, type: DashItemType) => {
   draggingItemType.value = type;
   showDataSourceDialog.value = true;
@@ -361,7 +365,9 @@ const handleSourceOk = async (source: IDataSource) => {
   dataSource.value = source;
   showDataSourceDialog.value = false;
 
-  let details = { datasource: dataSource.value };
+  let details = dragPos.type == DashItemType.DetailTable
+    ? createDefaultDetailTableSetting(dataSource.value)
+    : { datasource: dataSource.value };
   let layoutId = uniqueId();
 
   state.layout.push({
@@ -385,7 +391,13 @@ const handleSourceOk = async (source: IDataSource) => {
     dragPos.w,
   ]);
 
-  showChartEditor.value = true;
+  showChartEditor.value = false;
+  showDetailTableEditor.value = false;
+  if (dragPos.type == DashItemType.DetailTable) {
+    showDetailTableEditor.value = true;
+  } else {
+    showChartEditor.value = true;
+  }
 };
 
 const loadBindingCandidates = async () => {
@@ -413,141 +425,28 @@ const setHoverMenu = (b: boolean, type: DashItemType) => {
   hoverMenuType.value = type;
 };
 
-const setItemRef = (item: IGridLayoutItem, e: any) => {
-  elItemsRef.value[item.i] = e;
-};
-const dashItemDragStart = (e: DragEvent, type: DashItemType) => {
-  if (!e.dataTransfer) return;
-  e.dataTransfer.dropEffect = "copy";
-  e.dataTransfer.setData("text", JSON.stringify({ type }));
-  // e.dataTransfer.setDragImage(new Image(), 0, 0);
-};
-const gridDragOver = (e: DragEvent) => {
-  e.preventDefault();
-  if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
-};
-
-const dashItemDrag = async (e: DragEvent, type: DashItemType) => {
-  let parentRect = gridRef.value!.$el.getBoundingClientRect();
-  let mouseInGrid = false;
-
-  if (
-    mouseXY.x > parentRect.left &&
-    mouseXY.x < parentRect.right &&
-    mouseXY.y > parentRect.top &&
-    mouseXY.y < parentRect.bottom
-  ) {
-    mouseInGrid = true;
-  }
-  if (mouseInGrid === true && state.layout.findIndex((item) => item.i === "drop") === -1) {
+const handleFilterDrop = async (e: DragEvent) => {
+  const result = await dashItemDrop(e, null);
+  if (result) {
+    const layoutId = uniqueId();
     state.layout.push({
-      x: (state.layout.length * 2) % colNum.value,
-      y: state.layout.length + colNum.value,
-      w: newWidth,
-      h: newHeight,
-      i: "drop",
-      type: type,
-      inEdit: false,
-      drag: true,
+      x: result.x,
+      y: result.y,
+      w: result.w,
+      h: result.h,
+      i: layoutId,
+      type: result.type,
     });
     await nextTick();
-  }
-
-  if (!elItemsRef.value.drop) {
-    return;
-  }
-
-  const index = state.layout.findIndex((item) => item.i === "drop");
-  if (index !== -1) {
-    if (elItemsRef.value.drop?.el?.style) {
-      elItemsRef.value.drop.el.style.display = "none";
-    }
-    const elRef = elItemsRef.value.drop;
-    const new_pos = elRef.calcXY(mouseXY.y - parentRect.top, mouseXY.x - parentRect.left);
-    if (mouseInGrid === true) {
-      gridRef.value.emitter.emit("dragEvent", [
-        "dragstart",
-        "drop",
-        new_pos.x,
-        new_pos.y,
-        state.layout[index].h,
-        state.layout[index].w,
-      ]);
-      dragPos.i = "drop";
-      dragPos.x = state.layout[index].x;
-      dragPos.y = state.layout[index].y;
-      dragPos.h = newWidth;
-      dragPos.w = newHeight;
-      dragPos.type = state.layout[index].type;
-    }
-    if (mouseInGrid === false) {
-      gridRef.value.emitter.emit("dragEvent", [
-        "dragend",
-        "drop",
-        new_pos.x,
-        new_pos.y,
-        state.layout[index].h,
-        state.layout[index].w,
-      ]);
-      state.layout = state.layout.filter((obj) => obj.i !== "drop");
-      await nextTick();
-    }
-  }
-};
-const dashItemDrop = async (e: DragEvent, callback: any) => {
-  const parentRect = gridRef.value!.$el.getBoundingClientRect();
-  let mouseInGrid = false;
-  if (
-    e.clientX > parentRect.left - 10 &&
-    e.clientX < parentRect.right + 10 &&
-    e.clientY > parentRect.top - 10 &&
-    e.clientY < parentRect.bottom + 10
-  ) {
-    mouseInGrid = true;
-  }
-  if (
-    mouseXY.x > parentRect.left &&
-    mouseXY.x < parentRect.right &&
-    mouseXY.y > parentRect.top &&
-    mouseXY.y < parentRect.bottom
-  ) {
-    mouseInGrid = true;
-  }
-  if (mouseInGrid === true) {
     gridRef.value.emitter.emit("dragEvent", [
       "dragend",
       "drop",
-      dragPos.x,
-      dragPos.y,
-      dragPos.h,
-      dragPos.w,
+      result.x,
+      result.y,
+      result.h,
+      result.w,
     ]);
-    state.layout = state.layout.filter((obj) => obj.i !== "drop");
-
-    if (callback) {
-      callback(true, dragPos.type);
-    } else {
-      let layoutId = uniqueId();
-      state.layout.push({
-        x: dragPos.x,
-        y: dragPos.y,
-        w: dragPos.w,
-        h: dragPos.h,
-        i: layoutId,
-        type: dragPos.type,
-      });
-      await createNewDashItem(dragPos.type!, "", layoutId);
-
-      await nextTick();
-      gridRef.value.emitter.emit("dragEvent", [
-        "dragend",
-        dragPos.i,
-        dragPos.x,
-        dragPos.y,
-        dragPos.h,
-        dragPos.w,
-      ]);
-    }
+    await createNewDashItem(result.type!, "{}", layoutId);
   }
 };
 
@@ -563,6 +462,9 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
   switch (itemType) {
     case DashItemType.Chart:
       name = t("admin.untitledChart");
+      break;
+    case DashItemType.DetailTable:
+      name = t("admin.untitledDetailTable");
       break;
     case DashItemType.Filter:
       name = t("admin.dashboardDesigner.filterWidgetName");
@@ -609,21 +511,20 @@ const close = () => {
   emit("close");
 };
 
-document.addEventListener(
-  "dragover",
-  (e) => {
-    mouseXY.x = e.clientX;
-    mouseXY.y = e.clientY;
-  },
-  false
-);
+const cleanupMouseTracking = setupMouseTracking();
+onUnmounted(() => cleanupMouseTracking());
 
 const handleItemHide = (item: DashboardItemDef) => { };
 const handleItemEdit = (item: DashboardItemDef) => {
   dashItemDefRef.value = item;
+  showChartEditor.value = false;
+  showDetailTableEditor.value = false;
+  showFilterEditor.value = false;
   if (item.itemType == DashItemType.Filter) {
     loadBindingCandidates();
     showFilterEditor.value = true;
+  } else if (item.itemType == DashItemType.DetailTable) {
+    showDetailTableEditor.value = true;
   } else {
     showChartEditor.value = true;
   }

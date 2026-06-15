@@ -37,3 +37,5 @@ export * from "./dto/plugin";
 export * from "./dto/pluginProfile";
 export * from "./dto/flowManage";
 export * from "./dto/dataflow";
+export * from "./dto/tableColumn";
+export * from "./dto/dashboardLayout";
