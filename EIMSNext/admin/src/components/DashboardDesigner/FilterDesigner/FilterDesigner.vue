@@ -489,7 +489,7 @@ const applyDynamicDefault = async () => {
       ? [{ id: userStore.currentUser.empId, label: userStore.currentUser.empName || t("admin.dashboardFilterDesigner.currentUser"), type: DataItemType.Employee }]
       : [];
   } else if (type == "currentDept") {
-    const deptId = userStore.currentUser.deptId;
+    const deptId = userStore.currentUser.departmentIds?.[0] ?? userStore.currentUser.deptId;
     const dept = deptId ? await deptStore.get(deptId) : undefined;
     setting.defaultValue = deptId
       ? [{ id: deptId, label: dept?.name || t("admin.dashboardFilterDesigner.currentDept"), type: DataItemType.Department }]

@@ -1,14 +1,25 @@
 <template>
   <template v-if="ready">
     <MetaItemHeader :label="t('workflow.approver')" :required="true" :tips="t('workflow.maxApproverTips')" />
-    <el-select v-model="activeData.metadata.approveMeta!.approveMode" class="sub-item approve-mode-select">
-      <el-option :label="t('workflow.orSign')" :value="1" />
-      <el-option :label="t('workflow.counterSign')" :value="2" />
+    <el-select v-model="approverType" class="sub-item approve-mode-select">
+      <el-option :label="t('workflow.normalApproval')" :value="ApproverType.Normal" />
+      <el-option :label="t('workflow.byLevelApproval')" :value="ApproverType.ByLevel" />
     </el-select>
-    <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
-      @editTag="editApprover" />
-    <member-select-dialog v-model="showApproverDialog" :tags="selectedCandidateTags" :member-options="memberOptions"
-      destroy-on-close @ok="finishApproverSelect" />
+    <template v-if="isNormalApprover">
+      <MetaItemHeader :label="t('workflow.approvalMode')" />
+      <el-select v-model="activeData.metadata.approveMeta!.approveMode" class="sub-item approve-mode-select">
+        <el-option :label="t('workflow.orSign')" :value="1" />
+        <el-option :label="t('workflow.counterSign')" :value="2" />
+      </el-select>
+      <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
+        @editTag="editApprover" />
+      <member-select-dialog v-model="showApproverDialog" :tags="selectedCandidateTags" :member-options="memberOptions"
+        destroy-on-close @ok="finishApproverSelect" />
+    </template>
+    <el-button v-else class="by-level-rule-button" @click="openByLevelDialog">
+      <span>{{ t("workflow.byLevelRuleConfigured") }}</span>
+      <el-icon><Edit /></el-icon>
+    </el-button>
 
     <el-tabs v-model="activeConfigTab" class="node-config-tabs">
       <!-- <el-tab-pane :label="t('workflow.fieldPerms')" name="fieldPerms" /> -->
@@ -112,6 +123,54 @@
       destroy-on-close
       @ok="finishNoApproverMemberSelect"
     />
+
+    <et-dialog
+      v-model="showByLevelDialog"
+      :title="t('workflow.byLevelApprovalRuleTitle')"
+      width="600px"
+      destroy-on-close
+      @ok="confirmByLevelDialog"
+      @cancel="showByLevelDialog = false"
+    >
+      <div class="by-level-dialog">
+        <p class="by-level-desc">{{ t("workflow.byLevelApprovalRuleDesc") }}</p>
+        <MetaItemHeader :label="t('workflow.approvalTerminal')" />
+        <div class="by-level-row">
+          <el-radio v-model="byLevelDraft.terminal" :label="ByLevelApprovalTerminal.StarterDepartment">
+            {{ t("workflow.initiator") }}
+          </el-radio>
+          <el-select
+            v-model="byLevelDraft.endLevel"
+            :disabled="byLevelDraft.terminal !== ByLevelApprovalTerminal.StarterDepartment"
+            class="by-level-select"
+          >
+            <el-option
+              v-for="option in starterLevelOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
+        </div>
+        <div class="by-level-row">
+          <el-radio v-model="byLevelDraft.terminal" :label="ByLevelApprovalTerminal.Organization">
+            {{ t("workflow.organizationInAddressBook") }}
+          </el-radio>
+          <el-select
+            v-model="byLevelDraft.endLevel"
+            :disabled="byLevelDraft.terminal !== ByLevelApprovalTerminal.Organization"
+            class="by-level-select"
+          >
+            <el-option
+              v-for="option in organizationLevelOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
+        </div>
+      </div>
+    </et-dialog>
   </template>
 </template>
 
@@ -119,9 +178,12 @@
 import { computed, inject, nextTick, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import {
+  ApproverType,
+  ByLevelApprovalTerminal,
   FlowNodeType,
   IFlowContext,
   IFlowNodeData,
+  IByLevelApprovalSetting,
   NodeActionType,
   INodeActionConfig,
   ISubmitConditionSetting,
@@ -139,6 +201,7 @@ import { useFormStore } from "@eimsnext/store";
 import FormulaEditorDialog from "../Dataflow/FormulaEditorDialog.vue";
 import { INodeForm } from "@/NodeFieldList/type";
 import { IFormulaValue } from "@/FormFieldList/type";
+import { Edit } from "@element-plus/icons-vue";
 
 const { t } = useLocale();
 const formStore = useFormStore();
@@ -158,12 +221,18 @@ const showActionMemberDialog = ref(false);
 const showSubmitConditionDialog = ref(false);
 const showSubmitFormulaDialog = ref(false);
 const showNoApproverMemberDialog = ref(false);
+const showByLevelDialog = ref(false);
 const dialogActionType = ref<NodeActionType>();
 const dialogAction = ref<INodeActionConfig>({ actionType: NodeActionType.AddSign, enabled: false, text: "", candidates: [] });
 const dialogCandidateTags = ref<ISelectedTag[]>([]);
 const submitFormulaValue = ref<IFormulaValue>();
 const noApproverCandidateTags = ref<ISelectedTag[]>([]);
 const formulaNodes = ref<INodeForm[]>([]);
+const byLevelDraft = ref<IByLevelApprovalSetting>({
+  terminal: ByLevelApprovalTerminal.StarterDepartment,
+  startLevel: 1,
+  endLevel: 1,
+});
 
 const dynamicMembers = ref<ISelectedTag[]>([]);
 
@@ -198,6 +267,16 @@ const ensureApproveMeta = () => {
   if (!activeData.value.metadata.approveMeta) {
     activeData.value.metadata.approveMeta = createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!;
   }
+  if (activeData.value.metadata.approveMeta.approverType === undefined) {
+    activeData.value.metadata.approveMeta.approverType = ApproverType.Normal;
+  }
+  if (!activeData.value.metadata.approveMeta.byLevelApprovalSetting) {
+    activeData.value.metadata.approveMeta.byLevelApprovalSetting = {
+      terminal: ByLevelApprovalTerminal.StarterDepartment,
+      startLevel: 1,
+      endLevel: 1,
+    };
+  }
 
   return activeData.value.metadata.approveMeta;
 };
@@ -225,6 +304,40 @@ const noApproverSetting = computed<INoApproverSetting>(() => {
 
   return approveMeta.noApproverSetting;
 });
+
+const approverType = computed<ApproverType>({
+  get() {
+    return ensureApproveMeta().approverType ?? ApproverType.Normal;
+  },
+  set(value) {
+    const approveMeta = ensureApproveMeta();
+    approveMeta.approverType = value;
+    if (value === ApproverType.ByLevel) {
+      approveMeta.approvalCandidates = [];
+      selectedCandidateTags.value = [];
+    }
+  },
+});
+
+const isNormalApprover = computed(() => approverType.value === ApproverType.Normal);
+
+const starterLevelOptions = computed(() => [
+  { value: 1, label: t("workflow.directDepartmentManager") },
+  ...[2, 3, 4, 5, 6].map((level) => ({
+    value: level,
+    label: level === 2
+      ? t("workflow.upperDepartmentManager")
+      : t("workflow.nthDepartmentManager", { level }),
+  })),
+]);
+
+const organizationLevelOptions = computed(() => [
+  { value: 1, label: t("workflow.topDepartmentManager") },
+  ...[2, 3, 4, 5, 6].map((level) => ({
+    value: level,
+    label: t("workflow.topDepartmentDownManager", { level: level - 1 }),
+  })),
+]);
 
 const createStarterTag = (): ISelectedTag => {
   const label = t("workflow.starter");
@@ -332,9 +445,33 @@ const editApprover = () => {
 };
 
 const finishApproverSelect = (tags: ISelectedTag[]) => {
+  if (!isNormalApprover.value) {
+    showApproverDialog.value = false;
+    return;
+  }
+
   activeData.value.metadata.approveMeta!.approvalCandidates = convertTagsToCandidates(tags);
   selectedCandidateTags.value = tags;
   showApproverDialog.value = false;
+};
+
+const openByLevelDialog = () => {
+  const setting = ensureApproveMeta().byLevelApprovalSetting;
+  byLevelDraft.value = {
+    terminal: setting?.terminal ?? ByLevelApprovalTerminal.StarterDepartment,
+    startLevel: setting?.startLevel ?? 1,
+    endLevel: setting?.endLevel ?? 1,
+  };
+  showByLevelDialog.value = true;
+};
+
+const confirmByLevelDialog = () => {
+  ensureApproveMeta().byLevelApprovalSetting = {
+    terminal: byLevelDraft.value.terminal ?? ByLevelApprovalTerminal.StarterDepartment,
+    startLevel: 1,
+    endLevel: byLevelDraft.value.endLevel ?? 1,
+  };
+  showByLevelDialog.value = false;
 };
 
 const getDefaultActionLabel = (actionType: NodeActionType) => {
@@ -436,9 +573,12 @@ const confirmActionDialog = () => {
 const init = () => {
   nextTick(() => {
     activeData.value = flowContext.activeData;
-    selectedCandidateTags.value = (activeData.value.metadata.approveMeta?.approvalCandidates || []).flatMap(convertCandidateToTags);
-    submitFormulaValue.value = activeData.value.metadata.approveMeta?.submitCondition?.formulaValue;
-    noApproverCandidateTags.value = (activeData.value.metadata.approveMeta?.noApproverSetting?.candidates || []).flatMap(convertCandidateToTags);
+    const approveMeta = ensureApproveMeta();
+    selectedCandidateTags.value = approveMeta.approverType === ApproverType.ByLevel
+      ? []
+      : (approveMeta.approvalCandidates || []).flatMap(convertCandidateToTags);
+    submitFormulaValue.value = approveMeta.submitCondition?.formulaValue;
+    noApproverCandidateTags.value = (approveMeta.noApproverSetting?.candidates || []).flatMap(convertCandidateToTags);
     ready.value = true;
   });
   loadDynamicMembers();
@@ -476,6 +616,16 @@ watch(
   },
 );
 
+watch(
+  () => approverType.value,
+  (value) => {
+    if (value === ApproverType.ByLevel) {
+      ensureApproveMeta().approvalCandidates = [];
+      selectedCandidateTags.value = [];
+    }
+  },
+);
+
 init();
 </script>
 
@@ -483,6 +633,40 @@ init();
 .approve-mode-select {
   width: 100%;
   margin-bottom: var(--et-space-8);
+}
+
+.by-level-rule-button {
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: var(--et-space-8);
+}
+
+.by-level-dialog {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-space-12);
+}
+
+.by-level-desc {
+  margin: 0;
+  color: var(--et-text-secondary);
+  line-height: 1.7;
+}
+
+.by-level-row {
+  display: flex;
+  align-items: center;
+  gap: var(--et-space-12);
+}
+
+.by-level-row .el-radio {
+  width: 88px;
+  margin-right: 0;
+}
+
+.by-level-select {
+  flex: 1;
 }
 
 .node-config-tabs {

@@ -28,7 +28,11 @@
           <el-table-column :label="$t('admin.role.code')" width="150" prop="code" />
           <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
           <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
-          <el-table-column :label="$t('admin.role.dept')" prop="department.name" />
+          <el-table-column :label="$t('admin.role.dept')">
+            <template #default="scope">
+              {{ formatDepartments(scope.row as Employee) }}
+            </template>
+          </el-table-column>
               <!-- <el-table-column label="操作" fixed="right" width="150">
               <template #default="scope">
                 <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
@@ -94,7 +98,7 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { AdminPermissionSnapshot, DataPerms, Department, Employee, FieldType, Role, ScopeMode, UserType } from "@eimsnext/models";
+import { AdminPermissionSnapshot, DataPerms, Employee, FieldType, Role, ScopeMode, UserType } from "@eimsnext/models";
 import { SortDirection, employeeService, roleService, systemService } from "@eimsnext/services";
 import { useUserStore } from "@eimsnext/store";
 import buildQuery from "odata-query";
@@ -296,7 +300,6 @@ const updateQueryParams = () => {
     pageSize.value,
     preFilter
   );
-  queryParams.value.expand = "department";
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -370,7 +373,7 @@ const syncManageToolbar = () => {
     deleteBar.config.disabled =
       !canManageRoleMembers.value ||
       checkedDatas.value.length == 0 ||
-      checkedDatas.value.some((emp) => !canManageEmployeeDepartment(emp.departmentId));
+      checkedDatas.value.some((emp: Employee) => (emp.departments ?? []).every((d) => !canManageEmployeeDepartment(d.id)));
   }
 };
 const handleRoleQuery = (role?: Role) => {
@@ -410,6 +413,10 @@ const loadData = () => {
       dataRef.value = res;
     })
     .finally(() => (loading.value = false));
+};
+
+const formatDepartments = (employee: Employee) => {
+  return employee.departments?.map((x) => x.name).filter(Boolean).join(", ") ?? "";
 };
 
 const handleSelectionChange = (selection: any[]) => {

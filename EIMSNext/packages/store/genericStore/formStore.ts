@@ -15,7 +15,6 @@ export const useFormStore = createStore<FormDef>("forms", "FormDef", [
         { field: "code", title: "工号", type: FieldType.Input },
         { field: "workPhone", title: "工作电话", type: FieldType.Input },
         { field: "workEmail", title: "工作邮箱", type: FieldType.Input },
-        { field: "departmentId", title: "部门", type: FieldType.Input },
       ],
     },
   },

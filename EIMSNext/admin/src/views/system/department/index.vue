@@ -43,7 +43,6 @@
             <el-table-column :label="$t('admin.department.code')" width="150" prop="code" />
             <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
             <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
-            <el-table-column :label="$t('admin.department.dept')" prop="department.name" />
             <el-table-column v-if="isPendingMode && isUnrestrictedAdmin" :label="$t('common.edit')" fixed="right" width="160">
               <template #default="scope">
                 <el-button link type="primary" @click.stop="reviewSingle(scope.row, true)">{{ $t("admin.department.approve") }}</el-button>
@@ -346,13 +345,7 @@ const setSort = (sort: IFieldSortList) => {
 };
 
 const updateQueryParams = () => {
-  let statusFilter = { status: { eq: empStatus.value } };
-  let preFilter: any = statusFilter;
-  if (deptHeriarchyId.value) {
-    preFilter = {
-      and: [statusFilter, { "department/heriarchyId": { startswith: deptHeriarchyId.value } }],
-    };
-  }
+  let preFilter: any = { status: { eq: empStatus.value } };
 
   queryParams.value = toODataQuery(
     condList.value,
@@ -361,7 +354,6 @@ const updateQueryParams = () => {
     pageSize.value,
     preFilter
   );
-  queryParams.value.expand = "department";
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -372,10 +364,10 @@ const queryParams = ref<ODataQuery<Employee>>({
 const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
-const deptHeriarchyId = ref("");
 const empStatus = ref(0);
 const userStore = useUserStore();
 const adminPermissions = ref<AdminPermissionSnapshot>();
+const selectedDepartmentId = ref("");
 const isUnrestrictedAdmin = computed(() =>
   [
     UserType.System,
@@ -414,8 +406,8 @@ const handleStatusChanged = () => {
 };
 
 const handleDeptChanged = (dept?: Department) => {
-  deptHeriarchyId.value = dept?.heriarchyId ?? "";
-
+  selectedDepartmentId.value = dept?.id ?? "";
+  pageNum.value = 1;
   updateQueryParams();
   handleQuery();
 };
@@ -426,7 +418,11 @@ const rowClassName = (row: any) => {
 const loadCount = () => {
   let query = buildQuery({ filter: queryParams.value.filter });
 
-  employeeService.count(appendAdminScope(query)).then((cnt: number) => {
+  const request = selectedDepartmentId.value
+    ? employeeService.countByDepartment(selectedDepartmentId.value, true, appendAdminScope(query))
+    : employeeService.count(appendAdminScope(query));
+
+  request.then((cnt: number) => {
     totalRef.value = cnt;
   });
 };
@@ -434,8 +430,11 @@ const loadData = () => {
   loading.value = true;
   let query = buildQuery(queryParams.value);
 
-  employeeService
-    .query<Employee>(appendAdminScope(query))
+  const request = selectedDepartmentId.value
+    ? employeeService.queryByDepartment<Employee>(selectedDepartmentId.value, true, appendAdminScope(query))
+    : employeeService.query<Employee>(appendAdminScope(query));
+
+  request
     .then((res: Employee[]) => {
       dataRef.value = res;
       if (isPendingMode.value) {
@@ -465,7 +464,7 @@ const syncManageToolbar = () => {
   if (deleteBar) {
     deleteBar.config.visible = canManageAnyDepartment;
     deleteBar.config.disabled =
-      checkedDatas.value.length === 0 || checkedDatas.value.some((emp) => !canManageDepartment(emp.departmentId));
+      checkedDatas.value.length === 0 || checkedDatas.value.some((emp) => (emp.departments ?? []).every((d: { id: string }) => !canManageDepartment(d.id)));
   }
 };
 
@@ -473,7 +472,7 @@ const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
   const hasSelection = checkedDatas.value.length > 0;
   leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
-    !hasSelection || checkedDatas.value.some((emp) => !canManageDepartment(emp.departmentId));
+    !hasSelection || checkedDatas.value.some((emp: Employee) => (emp.departments ?? []).every((d) => !canManageDepartment(d.id)));
   const approveBar = leftBars.value.find((x) => x.config.command == "approve");
   const rejectBar = leftBars.value.find((x) => x.config.command == "reject");
   if (approveBar) approveBar.config.disabled = !hasSelection;
@@ -491,7 +490,7 @@ const edit = (row: Employee, column: any) => {
       selectedEmp.value = row;
       return;
     }
-    if (canManageDepartment(row.departmentId)) {
+    if ((row.departments ?? []).some((d) => canManageDepartment(d.id))) {
       editMode.value = true;
       selectedEmp.value = row;
       showAddEditDialog.value = true;

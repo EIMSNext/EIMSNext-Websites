@@ -405,7 +405,6 @@ const dynamicGroupOrder = ["starter", "employeeField", "departmentField", "manag
 
 const isManagerGroup = computed(() => selectedDynamicGroupId.value === "manager");
 const adminScopeParam = () => options.adminScope ? "adminScope=true" : "";
-const joinQuery = (...parts: string[]) => parts.filter(Boolean).join("&");
 const loadDepartments = () => options.adminScope
   ? departmentService.query<Department>(adminScopeParam())
   : deptStore.load();
@@ -758,8 +757,9 @@ onBeforeMount(() => {
     deptData.value = JSON.parse(JSON.stringify(filteredDeptData));
     empDeptData.value = JSON.parse(JSON.stringify(filteredDeptData));
 
-    if (userStore.currentUser.deptId) {
-      deptStore.get(userStore.currentUser.deptId).then((x) => {
+    const currentDepartmentId = userStore.currentUser.departmentIds?.[0] ?? userStore.currentUser.deptId;
+    if (currentDepartmentId) {
+      deptStore.get(currentDepartmentId).then((x) => {
         if (x) {
           const curDeptNode = [deptToTreeNode(x)];
           // 不应用范围过滤，直接显示当前用户部门
@@ -773,9 +773,8 @@ onBeforeMount(() => {
         code: userStore.currentUser.empCode!,
         empName: userStore.currentUser.empName!,
         status: 0,
-        departmentId: userStore.currentUser.deptId!,
         userBound: true,
-        isManager: false,
+        departments: currentDepartmentId ? [{ id: currentDepartmentId, name: curDeptData.value?.[0]?.label ?? "" }] : [],
       };
       curEmpData.value = [employeeToListItem(emp)];
     }
@@ -896,54 +895,18 @@ const singleDeptChecked = (data: ITreeNode, val: string) => {
   }
 };
 
-const findTreeNode = (nodes: ITreeNode[] | undefined, id: string): ITreeNode | undefined => {
-  for (const node of nodes || []) {
-    if (node.id === id) return node;
-    const matched = findTreeNode(node.children, id);
-    if (matched) return matched;
-  }
-  return undefined;
-};
-
-const collectDescendantDeptIds = (node: ITreeNode | undefined, ids: string[]) => {
-  if (!node) return;
-  ids.push(node.id);
-  node.children?.forEach((child) => collectDescendantDeptIds(child, ids));
-};
-
-const getLimitedEmployeeDeptIds = (deptId: string) => {
-  const limitDeptIds = options.limit?.depts?.map((dept) => dept.id) || [];
-  if (limitDeptIds.length === 0) {
-    return deptId === "all" ? undefined : [deptId];
-  }
-
-  if (deptId === "all") return limitDeptIds;
-  if (limitDeptIds.includes(deptId)) return [deptId];
-
-  const descendantIds: string[] = [];
-  collectDescendantDeptIds(findTreeNode(empDeptData.value, deptId), descendantIds);
-  return descendantIds.filter((id) => limitDeptIds.includes(id));
-};
-
-const buildEmployeeDeptFilter = (deptIds: string[] | undefined) => {
-  if (!deptIds) return "";
-  if (deptIds.length === 0) return undefined;
-  return `$filter=${deptIds.map((id) => `departmentId eq '${id}'`).join(" or ")}`;
-};
-
 const selectEmpDept = (deptId: string) => {
   deptChanging.value = true;
   selectedEmpDeptId.value = deptId;
 
-  const $filter = buildEmployeeDeptFilter(getLimitedEmployeeDeptIds(deptId));
   empData.value = [];
   selectedEmps.value = [];
-  if ($filter === undefined) {
-    deptChanging.value = false;
-    return;
-  }
 
-  employeeService.query<Employee>(joinQuery($filter, adminScopeParam())).then((res) => {
+  const request = deptId && deptId !== "all"
+    ? employeeService.queryByDepartment<Employee>(deptId, false, adminScopeParam())
+    : employeeService.query<Employee>(adminScopeParam());
+
+  request.then((res) => {
     res.forEach((x) => {
       empData.value.push(employeeToListItem(x));
 

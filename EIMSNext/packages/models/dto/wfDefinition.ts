@@ -111,9 +111,27 @@ export interface NodeActionConfig {
   candidates?: ApprovalCandidate[];
 }
 
+export enum ApproverType {
+  Normal = 0,
+  ByLevel = 1,
+}
+
+export enum ByLevelApprovalTerminal {
+  StarterDepartment = 0,
+  Organization = 1,
+}
+
+export interface ByLevelApprovalSetting {
+  terminal?: ByLevelApprovalTerminal;
+  startLevel?: number;
+  endLevel?: number;
+}
+
 export interface ApproveSetting {
+  approverType?: ApproverType;
   approvalMode?: string | number;
   candidates?: ApprovalCandidate[];
+  byLevelApprovalSetting?: ByLevelApprovalSetting;
   enableCopyto?: boolean;
   copytoCandidates?: ApprovalCandidate[];
   nodeActions?: NodeActionConfig[];
