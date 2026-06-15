@@ -29,33 +29,33 @@
 
     <aside class="admin-sidebar">
       <section class="sidebar-section">
-        <div class="section-label">系统管理组</div>
+        <div class="section-label">{{ t('admin.adminGroup.sysAdminGroup') }}</div>
         <button
           class="tree-node system-node"
           :class="{ active: selectedKind === 'system' }"
           @click="selectSystemAdmins"
         >
           <et-icon icon="icon-admin" color="var(--et-color-primary)" />
-          <span>系统管理员</span>
+          <span>{{ t('admin.adminGroup.sysAdmin') }}</span>
         </button>
       </section>
 
       <section class="sidebar-section normal-section">
         <div class="section-header">
-          <span class="section-label">普通管理组</span>
+          <span class="section-label">{{ t('admin.adminGroup.normalGroup') }}</span>
           <el-dropdown trigger="click">
             <el-button class="add-button" type="primary">
               <et-icon icon="el-plus" />
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="openCreate(AdminGroupType.Folder)">管理分组</el-dropdown-item>
-                <el-dropdown-item @click="openCreate(AdminGroupType.Normal)">管理组</el-dropdown-item>
+                <el-dropdown-item @click="openCreate(AdminGroupType.Folder)">{{ t('admin.adminGroup.group') }}</el-dropdown-item>
+                <el-dropdown-item @click="openCreate(AdminGroupType.Normal)">{{ t('admin.adminGroup.adminGroup') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </div>
-        <el-input v-model="keyword" class="group-search" clearable placeholder="选择管理组">
+        <el-input v-model="keyword" class="group-search" clearable :placeholder="t('admin.adminGroup.selectGroup')">
           <template #prefix>
             <et-icon icon="el-UserFilled" />
           </template>
@@ -139,21 +139,21 @@
     <main class="admin-main">
       <template v-if="selectedKind === 'system'">
         <header class="content-header">
-          <strong>系统管理员</strong>
-          <span>系统管理员具备全产品/模块的全量管理及数据权限，建议配置不超过 5 人</span>
+          <strong>{{ t('admin.adminGroup.sysAdmin') }}</strong>
+          <span>{{ t('admin.adminGroup.sysAdminDesc') }}</span>
         </header>
         <section class="form-section">
-          <div class="form-label">管理员</div>
+          <div class="form-label">{{ t('admin.adminGroup.admin') }}</div>
           <selected-tags
             :model-value="systemAdminTags"
             :editable="true"
-            :empty-text="'选择管理员'"
+            :empty-text="t('admin.adminGroup.selectAdmin')"
             class="select-box"
             @editTag="openSystemEmployeeSelect"
           />
         </section>
         <div class="footer-actions">
-          <el-button type="primary" :loading="saving" @click="saveSystemAdmins">保存</el-button>
+          <el-button type="primary" :loading="saving" @click="saveSystemAdmins">{{ t('admin.adminGroup.save') }}</el-button>
         </div>
       </template>
 
@@ -162,46 +162,46 @@
           <strong>{{ selectedGroup.name }}</strong>
         </header>
         <section class="form-section">
-          <div class="form-label">管理员</div>
+          <div class="form-label">{{ t('admin.adminGroup.admin') }}</div>
           <selected-tags
             :model-value="employeeTags"
             :editable="true"
-            :empty-text="'选择管理员'"
+            :empty-text="t('admin.adminGroup.selectAdmin')"
             class="select-box"
             @editTag="openEmployeeSelect"
           />
         </section>
 
         <section class="form-section">
-          <div class="form-label">应用管理</div>
+          <div class="form-label">{{ t('admin.adminGroup.appManage') }}</div>
           <div class="field-line">
             <el-button link type="primary" @click="showAppDialog = true">
               <et-icon icon="el-plus" />
-              选择可编辑的应用
+              {{ t('admin.adminGroup.selectEditableApp') }}
             </el-button>
           </div>
           <selected-tags
             :model-value="appTags"
             :editable="true"
-            :empty-text="'选择应用'"
+            :empty-text="t('admin.adminGroup.selectApp')"
             class="select-box compact"
             @editTag="showAppDialog = true"
           />
-          <el-checkbox v-model="draft.canCreateOrDeleteApp">可添加/删除应用</el-checkbox>
+          <el-checkbox v-model="draft.canCreateOrDeleteApp">{{ t('admin.adminGroup.canAddDeleteApp') }}</el-checkbox>
         </section>
 
         <section class="form-section">
           <div class="scope-row">
-            <span class="scope-label">可选部门</span>
+            <span class="scope-label">{{ t('admin.adminGroup.optionalDept') }}</span>
             <el-radio-group v-model="draft.appDepartmentScopeMode">
-              <el-radio :label="ScopeMode.All">全部部门</el-radio>
-              <el-radio :label="ScopeMode.Partial">部分部门</el-radio>
+              <el-radio :label="ScopeMode.All">{{ t('admin.adminGroup.allDepts') }}</el-radio>
+              <el-radio :label="ScopeMode.Partial">{{ t('admin.adminGroup.partialDepts') }}</el-radio>
             </el-radio-group>
           </div>
           <selected-tags
             :model-value="appDeptTags"
             :editable="draft.appDepartmentScopeMode === ScopeMode.Partial"
-            :empty-text="'选择部门'"
+            :empty-text="t('admin.adminGroup.selectDept')"
             class="select-box"
             @editTag="openAppDeptSelect"
           />
@@ -209,24 +209,24 @@
 
         <section class="form-section">
           <div class="scope-row">
-            <span class="scope-label">可选角色</span>
+            <span class="scope-label">{{ t('admin.adminGroup.optionalRole') }}</span>
             <el-radio-group v-model="draft.appRoleScopeMode">
-              <el-radio :label="ScopeMode.All">全部角色</el-radio>
-              <el-radio :label="ScopeMode.Partial">部分角色</el-radio>
+              <el-radio :label="ScopeMode.All">{{ t('admin.adminGroup.allRoles') }}</el-radio>
+              <el-radio :label="ScopeMode.Partial">{{ t('admin.adminGroup.partialRoles') }}</el-radio>
             </el-radio-group>
           </div>
           <selected-tags
             :model-value="appRoleTags"
             :editable="draft.appRoleScopeMode === ScopeMode.Partial"
-            :empty-text="'选择角色'"
+            :empty-text="t('admin.adminGroup.selectRole')"
             class="select-box"
             @editTag="openAppRoleSelect"
           />
         </section>
 
         <section class="contact-section">
-          <div class="form-label">通讯录管理</div>
-          <div class="contact-desc">可为成员设置通讯录管理权限，并可在通讯录管理组中查看。</div>
+          <div class="form-label">{{ t('admin.adminGroup.contactTitle') }}</div>
+          <div class="contact-desc">{{ t('admin.adminGroup.contactDesc') }}</div>
           <div class="contact-card">
             <div class="contact-card-header">
               <strong>{{ selectedGroup.name }}</strong>
@@ -237,12 +237,12 @@
             </div>
             <div class="contact-card-body">
               <div class="summary-row">
-                <strong>内部部门</strong>
+                <strong>{{ t('admin.adminGroup.internalDept') }}</strong>
                 <span>{{ contactDepartmentSummary }}</span>
               </div>
               <selected-tags v-if="draft.contactDepartmentScopeMode === ScopeMode.Partial" :model-value="contactDeptTags" />
               <div class="summary-row">
-                <strong>内部角色</strong>
+                <strong>{{ t('admin.adminGroup.internalRole') }}</strong>
                 <span>{{ contactRoleSummary }}</span>
               </div>
               <selected-tags v-if="draft.contactRoleScopeMode === ScopeMode.Partial" :model-value="contactRoleTags" />
@@ -251,19 +251,19 @@
         </section>
 
         <div class="footer-actions">
-          <el-button @click="openEdit(selectedGroup)">编辑名称</el-button>
-          <el-button type="danger" plain @click="deleteGroup(selectedGroup)">删除</el-button>
-          <el-button type="primary" :loading="saving" @click="savePermissions">保存</el-button>
+          <el-button @click="openEdit(selectedGroup)">{{ t('admin.adminGroup.editName') }}</el-button>
+          <el-button type="danger" plain @click="deleteGroup(selectedGroup)">{{ t('admin.adminGroup.delete') }}</el-button>
+          <el-button type="primary" :loading="saving" @click="savePermissions">{{ t('admin.adminGroup.save') }}</el-button>
         </div>
       </template>
 
       <template v-else-if="selectedGroup?.type === AdminGroupType.Folder">
         <header class="content-header">
           <strong>{{ selectedGroup.name }}</strong>
-          <span>管理分组用于组织普通管理组，可拖动管理组进入或移出。</span>
+          <span>{{ t('admin.adminGroup.groupDesc') }}</span>
         </header>
       </template>
-      <el-empty v-else description="请选择管理组" />
+      <el-empty v-else :description="t('admin.adminGroup.pleaseSelectGroup')" />
     </main>
   </div>
 </template>
@@ -295,11 +295,14 @@ import {
 import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
 import Draggable from "vuedraggable";
 import { ElMessage } from "element-plus";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "AdminManager",
   inheritAttrs: false,
 });
+
+const { t } = useI18n();
 
 type AdminTreeItem = AdminGroup & { children: AdminTreeItem[] };
 type MemberDialogTarget = "systemEmployees" | "employees" | "appDepartments" | "appRoles";
@@ -511,14 +514,21 @@ const contactDraft = computed(() => ({
 }));
 
 const contactDepartmentSummary = computed(() => {
-  if (draft.value.contactDepartmentPermission === PermissionLevel.None) return "未配置";
-  return `可见可管理-${draft.value.contactDepartmentScopeMode === ScopeMode.All ? "全部部门" : "部分部门"}`;
+  if (draft.value.contactDepartmentPermission === PermissionLevel.None) return t('admin.adminGroup.notConfigured');
+  return draft.value.contactDepartmentScopeMode === ScopeMode.All
+    ? t('admin.adminGroup.viewManageAllDept')
+    : t('admin.adminGroup.viewManagePartialDept');
 });
 
 const contactRoleSummary = computed(() => {
-  if (draft.value.contactRolePermission === PermissionLevel.None) return "未配置";
-  const level = draft.value.contactRolePermission === PermissionLevel.Manage ? "可见可管理" : "可见";
-  return `${level}-${draft.value.contactRoleScopeMode === ScopeMode.All ? "全部角色" : "部分角色"}`;
+  if (draft.value.contactRolePermission === PermissionLevel.None) return t('admin.adminGroup.notConfigured');
+  const level = draft.value.contactRolePermission === PermissionLevel.Manage
+    ? t('admin.adminGroup.viewManage')
+    : t('admin.adminGroup.visible');
+  const scope = draft.value.contactRoleScopeMode === ScopeMode.All
+    ? t('admin.adminGroup.allRoles')
+    : t('admin.adminGroup.partialRoles');
+  return `${level}-${scope}`;
 });
 
 const loadData = async () => {
@@ -626,7 +636,7 @@ const saveGroupInfo = async (form: { name: string; description: string }) => {
 
 const deleteGroup = async (group: AdminGroup) => {
   if (group.type === AdminGroupType.Folder && groups.value.some((item) => item.parentId === group.id)) {
-    ElMessage.warning("当前分组下存在管理组，不能删除");
+    ElMessage.warning(t('admin.adminGroup.cannotDeleteWithSubgroups'));
     return;
   }
 
@@ -702,12 +712,12 @@ const clearContactPermission = () => {
 
 const saveSystemAdmins = async () => {
   if (!systemGroup.value?.id) {
-    ElMessage.warning("当前企业缺少系统管理员组，请联系管理员处理");
+    ElMessage.warning(t('admin.adminGroup.missingSysAdminGroup'));
     return;
   }
 
   if (systemEmployeeIds.value.length > 5) {
-    ElMessage.warning("系统管理员不能超过5人");
+    ElMessage.warning(t('admin.adminGroup.max5SysAdmins'));
     return;
   }
 
@@ -721,7 +731,7 @@ const saveSystemAdmins = async () => {
     const index = groups.value.findIndex((item) => item.id === group.id);
     if (index > -1) groups.value[index] = normalizeGroup(group);
     else groups.value.push(normalizeGroup(group));
-    ElMessage.success("保存成功");
+    ElMessage.success(t('admin.adminGroup.saveSuccess'));
   } finally {
     saving.value = false;
   }
@@ -752,7 +762,7 @@ const savePermissions = async () => {
     const index = groups.value.findIndex((group) => group.id === updated.id);
     if (index > -1) groups.value[index] = normalizeGroup(updated);
     syncDraft(normalizeGroup(updated));
-    ElMessage.success("保存成功");
+    ElMessage.success(t('admin.adminGroup.saveSuccess'));
   } finally {
     saving.value = false;
   }
@@ -832,7 +842,7 @@ const handleChildMove = () => !keyword.value.trim() && draggingGroup.value?.type
 
 const dropToFolder = async (folder: AdminTreeItem) => {
   if (keyword.value.trim()) {
-    ElMessage.warning("请先清空搜索条件再调整排序");
+    ElMessage.warning(t('admin.adminGroup.clearSearchBeforeSort'));
     return;
   }
 

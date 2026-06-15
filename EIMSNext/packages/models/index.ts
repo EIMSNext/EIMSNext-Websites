@@ -8,7 +8,7 @@ export * from "./dto/auditLog";
 export * from "./dto/authGroup";
 export * from "./dto/client";
 export * from "./dto/corporate";
-export * from "./dto/dfExecLog";
+export * from "./dto/dfRunLog";
 export * from "./dto/employee";
 export * from "./dto/formData";
 export * from "./dto/formDef";

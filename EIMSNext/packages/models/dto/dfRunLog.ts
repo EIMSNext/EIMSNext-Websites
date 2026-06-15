@@ -1,5 +1,5 @@
 import { DataflowTriggerKind } from "./dataflow";
-import { CorpModelBase, Operator } from "./modelBase";
+import { CorpModelBase, ModelBase, Operator } from "./modelBase";
 import { EventSourceType } from "./wfDefinition";
 
 export interface DfRunLog extends CorpModelBase {
@@ -19,7 +19,8 @@ export interface DfRunLog extends CorpModelBase {
   errMsg?: string;
 }
 
-export interface DfExecLog extends CorpModelBase {
+export interface DfRunLogNode extends ModelBase {
+  corpId?: string;
   runLogId?: string;
   dataflowId?: string;
   wfInstanceId?: string;
@@ -53,7 +54,7 @@ export interface DfRunLogQueryResult {
 
 export interface DfRunLogDetail {
   run: DfRunLog;
-  nodes: DfExecLog[];
+  nodes: DfRunLogNode[];
   executedNodeIds: string[];
   failedNodeIds: string[];
 }

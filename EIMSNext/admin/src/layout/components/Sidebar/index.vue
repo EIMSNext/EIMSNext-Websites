@@ -64,7 +64,7 @@
       </el-menu>
     </div>
     <div v-if="isSidebarOpened" class="form-action">
-      <el-input>
+      <el-input v-model="menuFilterText" clearable :placeholder="t('common.search')">
         <template #prefix>
           <et-icon icon="el-search" size="14px"></et-icon>
         </template>
@@ -100,7 +100,7 @@
     <el-scrollbar>
       <SidebarMenu
         :app-id="contextStore.appId"
-        :menu-list="appMenus"
+        :menu-list="filteredAppMenus"
         :can-manage="canManageCurrentApp"
         @editForm="editForm"
         @editMenu="openEditMenu"
@@ -141,6 +141,23 @@ const getMenuType = (menuType: FormType | number | undefined): FormType => {
 };
 
 const { t } = useI18n();
+
+const menuFilterText = ref("");
+const filteredAppMenus = computed(() => {
+  const keyword = menuFilterText.value.trim().toLowerCase();
+  if (!keyword) return appMenus.value;
+
+  const matchMenu = (m: AppMenu): AppMenu | null => {
+    const title = (m.title ?? "").toString().toLowerCase();
+    const matchedSub = (m.subMenus || []).map(matchMenu).filter((x): x is AppMenu => x !== null);
+    if (title.includes(keyword) || matchedSub.length > 0) {
+      return { ...m, subMenus: matchedSub };
+    }
+    return null;
+  };
+
+  return appMenus.value.map(matchMenu).filter((x): x is AppMenu => x !== null);
+});
 
 const newForm = ref<FormDef>();
 const showFormEditor = ref(false);
@@ -337,7 +354,7 @@ const deleteMenu = async (menu: AppMenu) => {
     const updated = await appDefService.deleteGroup({ appId: contextStore.appId, menuId: menu.menuId });
     handleAppUpdated(updated);
   } catch (error: any) {
-    ElMessage.warning(error?.message || "当前分组下存在子菜单，不能删除");
+    ElMessage.warning(error?.message || t("admin.misc.childMenuDeleteBlocked"));
   }
 };
 

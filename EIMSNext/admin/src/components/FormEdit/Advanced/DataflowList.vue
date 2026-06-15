@@ -78,7 +78,7 @@
     <template #title>
       <span>{{ t("dataflow.executionLog") }}</span>
     </template>
-    <DataflowExecLogView
+    <DataflowRunLogView
       v-if="logFlow"
       :form-def="formDef"
       :flow-def="logFlow"
@@ -119,7 +119,7 @@
 </template>
 <script setup lang="ts">
 import DataflowDesigner from "../../DataflowDesigner/index.vue";
-import DataflowExecLogView from "./DataflowExecLogView.vue";
+import DataflowRunLogView from "./DataflowRunLogView.vue";
 import { FormDef, EventSourceType, WfDefinition, FlowType } from "@eimsnext/models";
 import { wfDefinitionService } from "@eimsnext/services";
 import { Clock, Document, Link } from "@element-plus/icons-vue";

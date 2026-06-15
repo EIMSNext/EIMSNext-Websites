@@ -1,7 +1,7 @@
 <template>
   <et-dialog
     :model-value="modelValue"
-    title="通讯录管理"
+    :title="t('admin.adminGroup.contactTitle')"
     width="850px"
     destroy-on-close
     @cancel="cancel"
@@ -17,39 +17,39 @@
 
     <div class="contact-permission">
       <section class="permission-section">
-        <div class="section-title">内部部门</div>
-        <el-checkbox v-model="local.contactDepartmentEnabled">可见/可管理</el-checkbox>
+        <div class="section-title">{{ t('admin.adminGroup.internalDept') }}</div>
+        <el-checkbox v-model="local.contactDepartmentEnabled">{{ t('admin.adminGroup.visibleAndManage') }}</el-checkbox>
         <div class="scope-row">
           <el-radio-group v-model="local.contactDepartmentScopeMode">
-            <el-radio :label="ScopeMode.All">全部部门</el-radio>
-            <el-radio :label="ScopeMode.Partial">部分部门</el-radio>
+            <el-radio :label="ScopeMode.All">{{ t('admin.adminGroup.allDepts') }}</el-radio>
+            <el-radio :label="ScopeMode.Partial">{{ t('admin.adminGroup.partialDepts') }}</el-radio>
           </el-radio-group>
         </div>
         <selected-tags
           :model-value="deptTags"
           :editable="local.contactDepartmentEnabled && local.contactDepartmentScopeMode === ScopeMode.Partial"
-          :empty-text="'选择部门'"
+          :empty-text="t('admin.adminGroup.selectDept')"
           class="scope-tags"
           @editTag="openDepartmentSelect"
         />
       </section>
 
       <section class="permission-section">
-        <div class="section-title">内部角色</div>
+        <div class="section-title">{{ t('admin.adminGroup.internalRole') }}</div>
         <div class="checkbox-row">
-          <el-checkbox v-model="roleCanView">可见</el-checkbox>
-          <el-checkbox v-model="roleCanManage">可管理</el-checkbox>
+          <el-checkbox v-model="roleCanView">{{ t('admin.adminGroup.visible') }}</el-checkbox>
+          <el-checkbox v-model="roleCanManage">{{ t('admin.adminGroup.manage') }}</el-checkbox>
         </div>
         <div class="scope-row">
           <el-radio-group v-model="local.contactRoleScopeMode">
-            <el-radio :label="ScopeMode.All">全部角色</el-radio>
-            <el-radio :label="ScopeMode.Partial">部分角色</el-radio>
+            <el-radio :label="ScopeMode.All">{{ t('admin.adminGroup.allRoles') }}</el-radio>
+            <el-radio :label="ScopeMode.Partial">{{ t('admin.adminGroup.partialRoles') }}</el-radio>
           </el-radio-group>
         </div>
         <selected-tags
           :model-value="roleTags"
           :editable="local.contactRolePermission !== PermissionLevel.None && local.contactRoleScopeMode === ScopeMode.Partial"
-          :empty-text="'选择角色'"
+          :empty-text="t('admin.adminGroup.selectRole')"
           class="scope-tags"
           @editTag="openRoleSelect"
         />
@@ -61,10 +61,13 @@
 <script setup lang="ts">
 import { PermissionLevel, ScopeMode } from "@eimsnext/models";
 import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "ContactPermissionDialog",
 });
+
+const { t } = useI18n();
 
 type ContactDraft = {
   contactDepartmentPermission: PermissionLevel;

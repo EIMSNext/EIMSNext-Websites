@@ -113,6 +113,9 @@ import { RoleGroup, Role } from "@eimsnext/models";
 import { roleGroupService, roleService } from "@eimsnext/services";
 import Draggable from "vuedraggable";
 import { ElMessage } from "element-plus";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 type RoleTreeNode = {
   id: string;
@@ -276,7 +279,7 @@ const handleDeleteClick = (node: RoleTreeNode) => {
 const handleDeleteConfirm = async () => {
   if (!toDeleteNode.value) return;
   if (toDeleteNode.value.kind === "group" && toDeleteNode.value.children.length > 0) {
-    ElMessage.warning("当前分组下存在角色，不能删除");
+    ElMessage.warning(t('comp.addEditRoleGroup.cannotDeleteWithRoles'));
     showDeleteDialog.value = false;
     return;
   }
@@ -366,7 +369,7 @@ const handleChildMove = () => !keyword.value.trim() && draggingNode.value?.kind 
 
 const dropToGroup = async (group: RoleTreeNode) => {
   if (keyword.value.trim()) {
-    ElMessage.warning("请先清空搜索条件再调整排序");
+    ElMessage.warning(t('admin.adminGroup.clearSearchBeforeSort'));
     return;
   }
 

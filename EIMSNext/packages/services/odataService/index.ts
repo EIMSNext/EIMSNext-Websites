@@ -2,7 +2,7 @@ export * from "./adminGroupService";
 export * from "./appDefService";
 export * from "./auditLogService";
 export * from "./authGroupService";
-export * from "./dfExecLogService";
+export * from "./dfRunLogService";
 export * from "./corporateService";
 export * from "./departmentService";
 export * from "./employeeService";

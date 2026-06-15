@@ -1,27 +1,27 @@
 <template>
-  <div class="dataflow-exec-log-view">
+  <div class="dataflow-run-log-view">
     <div v-if="mode === 'list'" class="log-list-page">
       <div class="log-toolbar">
         <div class="toolbar-item">
-          <span class="toolbar-label">触发时间</span>
+          <span class="toolbar-label">{{ t("dataflow.runlog.triggerTime") }}</span>
           <el-date-picker
             v-model="timeRange"
             type="datetimerange"
             value-format="x"
             range-separator="~"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
+            :start-placeholder="t('dataflow.runlog.startTime')"
+            :end-placeholder="t('dataflow.runlog.endTime')"
             clearable
           />
         </div>
         <div class="toolbar-item">
-          <span class="toolbar-label">执行结果</span>
-          <el-select v-model="successFilter" placeholder="请选择" clearable class="result-select">
-            <el-option label="成功" value="success" />
-            <el-option label="失败" value="failed" />
+          <span class="toolbar-label">{{ t("dataflow.runlog.result") }}</span>
+          <el-select v-model="successFilter" :placeholder="t('common.pleaseSelect')" clearable class="result-select">
+            <el-option :label="t('dataflow.runlog.success')" value="success" />
+            <el-option :label="t('dataflow.runlog.failed')" value="failed" />
           </el-select>
         </div>
-        <el-button type="primary" @click="reloadRuns">筛选</el-button>
+        <el-button type="primary" @click="reloadRuns">{{ t("dataflow.runlog.filter") }}</el-button>
       </div>
 
       <el-table
@@ -32,20 +32,20 @@
         class="log-table"
         @row-click="openRunDetail"
       >
-        <el-table-column prop="triggerTime" label="触发时间" width="220">
+        <el-table-column :label="t('dataflow.runlog.triggerTime')" width="220">
           <template #default="{ row }">{{ formatDate(row.triggerTime) }}</template>
         </el-table-column>
-        <el-table-column prop="triggerBy" label="触发人" width="180">
-          <template #default="{ row }">{{ row.triggerBy?.label || "匿名用户" }}</template>
+        <el-table-column :label="t('dataflow.runlog.triggerBy')" width="180">
+          <template #default="{ row }">{{ row.triggerBy?.label || t("dataflow.runlog.anonymousUser") }}</template>
         </el-table-column>
-        <el-table-column label="触发动作" min-width="180">
+        <el-table-column :label="t('dataflow.runlog.triggerAction')" min-width="180">
           <template #default="{ row }">{{ getTriggerLabel(row) }}</template>
         </el-table-column>
-        <el-table-column label="执行结果" min-width="260">
+        <el-table-column :label="t('dataflow.runlog.result')" min-width="260">
           <template #default="{ row }">
             <div class="result-cell">
               <el-tag :type="row.success ? 'success' : 'danger'" effect="dark">
-                {{ row.success ? "成功" : "失败" }}
+                {{ row.success ? t("dataflow.runlog.success") : t("dataflow.runlog.failed") }}
               </el-tag>
               <span v-if="!row.success" class="result-error">{{ row.errMsg }}</span>
             </div>
@@ -54,7 +54,7 @@
       </el-table>
 
       <div class="log-pagination">
-        <span>共 {{ total }} 条</span>
+        <span>{{ t("dataflow.runlog.totalRecords", { total }) }}</span>
         <el-pagination
           v-model:current-page="pageIndex"
           v-model:page-size="pageSize"
@@ -70,12 +70,12 @@
 
     <div v-else class="log-detail-page">
       <div class="detail-header">
-        <el-button link icon="el-arrow-left" @click="backToList">返回日志列表</el-button>
+        <el-button link icon="el-arrow-left" @click="backToList">{{ t("dataflow.runlog.backToList") }}</el-button>
         <div class="detail-title">
           <span>{{ flowDef.name }}</span>
           <span v-if="detail?.run.dataflowVersion" class="version">V{{ detail.run.dataflowVersion }}</span>
           <el-tag v-if="detail" :type="detail.run.success ? 'success' : 'danger'" effect="dark">
-            {{ detail.run.success ? "成功" : "失败" }}
+            {{ detail.run.success ? t("dataflow.runlog.success") : t("dataflow.runlog.failed") }}
           </el-tag>
         </div>
       </div>
@@ -92,43 +92,43 @@
                 <strong>{{ selectedNode.name }}</strong>
                 <span class="node-type">{{ selectedLog?.nodeName && selectedLog.nodeName !== selectedNode.name ? selectedLog.nodeName : "" }}</span>
               </div>
-              <el-button link type="primary" @click="viewNodeConfig">查看节点配置</el-button>
+              <el-button link type="primary" @click="viewNodeConfig">{{ t("dataflow.runlog.viewNodeConfig") }}</el-button>
             </div>
 
             <el-button v-if="selectedLog && !selectedLog.success" type="primary" disabled class="retry-button">
-              重试
+              {{ t("dataflow.runlog.retry") }}
             </el-button>
 
             <div class="detail-section">
-              <div class="detail-label">执行时间</div>
+              <div class="detail-label">{{ t("dataflow.runlog.execTime") }}</div>
               <div class="detail-value">{{ formatExecTime(selectedLog) }}</div>
             </div>
 
             <template v-if="selectedLog">
               <template v-if="selectedLog.success">
                 <div class="detail-section">
-                  <div class="detail-label">执行结果</div>
-                  <div class="detail-value success-text">执行成功</div>
+                  <div class="detail-label">{{ t("dataflow.runlog.result") }}</div>
+                  <div class="detail-value success-text">{{ t("dataflow.runlog.execSuccess") }}</div>
                 </div>
               </template>
               <template v-else>
                 <div class="detail-section">
-                  <div class="detail-label">失败原因</div>
-                  <div class="detail-value danger-text">{{ selectedLog.failureReason || selectedLog.errMsg || "执行失败" }}</div>
+                  <div class="detail-label">{{ t("dataflow.runlog.failReason") }}</div>
+                  <div class="detail-value danger-text">{{ selectedLog.failureReason || selectedLog.errMsg || t("dataflow.runlog.execFailed") }}</div>
                 </div>
                 <div class="detail-section">
-                  <div class="detail-label">修改建议</div>
-                  <div class="detail-value">{{ selectedLog.troubleshootingSuggestion || "检查该节点配置及前置节点输出数据" }}</div>
+                  <div class="detail-label">{{ t("dataflow.runlog.troubleshootSuggestion") }}</div>
+                  <div class="detail-value">{{ selectedLog.troubleshootingSuggestion || t("dataflow.runlog.checkNodeConfig") }}</div>
                 </div>
               </template>
             </template>
-            <div v-else class="empty-node-log">该节点未执行</div>
+            <div v-else class="empty-node-log">{{ t("dataflow.runlog.nodeNotExecuted") }}</div>
           </template>
-          <el-empty v-else description="请选择节点" />
+          <el-empty v-else :description="t('dataflow.runlog.pleaseSelectNode')" />
         </aside>
       </div>
 
-      <el-drawer v-model="showConfig" title="查看节点配置" direction="rtl" size="520px">
+      <el-drawer v-model="showConfig" :title="t('dataflow.runlog.viewNodeConfig')" direction="rtl" size="520px">
         <div class="config-readonly">
           <DataflowMetaEditor />
         </div>
@@ -150,13 +150,13 @@ import {
   createFlowNode,
   getFlowNodeById,
 } from "@eimsnext/components";
-import { DfExecLog, DfRunLog, DfRunLogDetail, EventSourceType, FlowType, FormDef, WfDefinition } from "@eimsnext/models";
-import { dfExecLogService } from "@eimsnext/services";
+import { DfRunLogNode, DfRunLog, DfRunLogDetail, EventSourceType, FlowType, FormDef, WfDefinition } from "@eimsnext/models";
+import { dfRunLogService } from "@eimsnext/services";
 import { dateFormat } from "@/utils/common";
 import { useLocale } from "element-plus";
 
 defineOptions({
-  name: "DataflowExecLogView",
+  name: "DataflowRunLogView",
 });
 
 const props = defineProps<{
@@ -176,7 +176,7 @@ const timeRange = ref<string[]>();
 const successFilter = ref<"" | "success" | "failed">("");
 const detail = ref<DfRunLogDetail>();
 const selectedNode = ref<IFlowNodeData>();
-const selectedLog = ref<DfExecLog>();
+const selectedLog = ref<DfRunLogNode>();
 const showConfig = ref(false);
 
 const flowData = ref<IFlowData>(createFlowData());
@@ -205,7 +205,7 @@ const flowContext = reactive<IFlowContext>({
 provide("flowContext", flowContext);
 
 const nodeLogMap = computed(() => {
-  const map = new Map<string, DfExecLog>();
+  const map = new Map<string, DfRunLogNode>();
   detail.value?.nodes.forEach((item) => {
     if (item.nodeId) map.set(item.nodeId, item);
   });
@@ -234,7 +234,7 @@ async function loadRuns() {
   loading.value = true;
   try {
     const [startTime, endTime] = timeRange.value ?? [];
-    const result = await dfExecLogService.queryRuns({
+    const result = await dfRunLogService.queryRuns({
       dataflowId: props.flowDef.id,
       startTime: startTime ? Number(startTime) : undefined,
       endTime: endTime ? Number(endTime) : undefined,
@@ -260,7 +260,7 @@ async function openRunDetail(run: DfRunLog) {
   selectedNode.value = undefined;
   selectedLog.value = undefined;
   try {
-    detail.value = await dfExecLogService.getRunDetail(run.id);
+    detail.value = await dfRunLogService.getRunDetail(run.id);
     logState.executedNodeIds = new Set(detail.value.executedNodeIds);
     logState.failedNodeIds = new Set(detail.value.failedNodeIds);
     syncFlowContext();
@@ -295,7 +295,7 @@ function formatDate(value?: number) {
   return value ? dateFormat(value, "YYYY-MM-DD HH:mm:ss") : "-";
 }
 
-function formatExecTime(log?: DfExecLog) {
+function formatExecTime(log?: DfRunLogNode) {
   if (!log) return "-";
   if (log.startTime && log.endTime && log.startTime !== log.endTime) {
     return `${formatDate(log.startTime)} ~ ${formatDate(log.endTime)}`;
@@ -306,9 +306,9 @@ function formatExecTime(log?: DfExecLog) {
 
 function getTriggerLabel(run: DfRunLog) {
   const source = `${run.eventSource}`;
-  if (source === `${EventSourceType.Http}` || source === "4") return "HTTP触发";
-  if (source === `${EventSourceType.Schedule}` || source === "3") return "定时触发";
-  return "数据推送触发";
+  if (source === `${EventSourceType.Http}` || source === "4") return t("dataflow.runlog.triggerHttp");
+  if (source === `${EventSourceType.Schedule}` || source === "3") return t("dataflow.runlog.triggerSchedule");
+  return t("dataflow.runlog.triggerDataPush");
 }
 
 function isNodeExecuted(node: IFlowNodeData): boolean {
@@ -338,7 +338,7 @@ onBeforeMount(loadRuns);
 </script>
 
 <style lang="scss" scoped>
-.dataflow-exec-log-view {
+.dataflow-run-log-view {
   height: 100%;
   min-height: 0;
   background: var(--et-bg-page);
