@@ -136,6 +136,27 @@ const getFormulaValidation = () => {
   return errors;
 };
 
+const hasMissingField = (value: unknown): boolean => {
+  if (!value || typeof value !== "object") return false;
+  if ((value as { missing?: boolean }).missing) return true;
+  if (Array.isArray(value)) return value.some(hasMissingField);
+  return Object.values(value).some(hasMissingField);
+};
+
+const getMissingFieldValidation = () => {
+  const errors: { nodeId: string; nodeName: string }[] = [];
+  const visitNode = (node: any) => {
+    if (hasMissingField(node.metadata)) {
+      errors.push({ nodeId: node.id, nodeName: node.name });
+    }
+    node.conditionData && visitNode(node.conditionData);
+    node.childNodes?.forEach(visitNode);
+  };
+
+  [flowData.value.startNode, ...flowData.value.nodes, flowData.value.endNode].forEach(visitNode);
+  return errors;
+};
+
 const save = async () => {
   const formulaErrors = getFormulaValidation();
   if (formulaErrors.length > 0) {
@@ -143,6 +164,19 @@ const save = async () => {
       t("dataflow.formulaSaveDisabledContent"),
       {
         title: t("dataflow.formulaSaveDisabledTitle"),
+        icon: MessageIcon.Warning,
+      },
+    );
+    if (confirm != ConfirmResult.Yes) return;
+    currentWfDef.value.disabled = true;
+  }
+
+  const missingFieldErrors = getMissingFieldValidation();
+  if (missingFieldErrors.length > 0) {
+    const confirm = await EtConfirm.showDialog(
+      t("dataflow.missingFieldSaveDisabledContent"),
+      {
+        title: t("dataflow.missingFieldSaveDisabledTitle"),
         icon: MessageIcon.Warning,
       },
     );

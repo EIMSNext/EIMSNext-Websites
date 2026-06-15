@@ -52,30 +52,34 @@
       <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
     <et-toolbar class="form-list-toolbar" :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+    <div v-if="availableViews.length > 0" class="view-tabs">
+      <button
+        v-for="view in availableViews"
+        :key="view.id"
+        type="button"
+        class="view-tab"
+        :class="{ active: curListView?.id === view.id }"
+        @click="switchView(view.id)"
+      >
+        <span class="view-tab-icon"></span>
+        {{ view.name }}
+      </button>
+    </div>
     <div class="data-list data-list-full-height">
-      <el-table ref="tableRef" :data="flattedData" :span-method="idBasedSpanMethod" class="data-table-full"
-        show-overflow-tooltip :tooltip-formatter="tableToolFormatter" :row-class-name="rowClassName" :fit="true"
-        @selection-change="selectionChanged" @row-click="showDetails">
-        <el-table-column type="selection" width="40" :selectable="selectable" />
-        <template v-for="col in columns">
-          <template v-if="col.children">
-            <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip :resizable="true">
-              <template v-if="col.children" v-for="sub in col.children">
-                <el-table-column :prop="sub.field" :formatter="formatter" :label="sub.title" :width="sub.width"
-                  :resizable="true" :dangerouslyUseHTMLString="true"></el-table-column>
-              </template>
-            </el-table-column>
-          </template>
-          <template v-else>
-            <el-table-column :prop="col.field" :label="col.title" :width="col.width" show-overflow-tooltip
-              :resizable="true">
-              <template #default="scope">
-                <div v-html="formatter(scope.row, { property: col.field }, scope.row[col.field])"></div>
-              </template>
-            </el-table-column>
-          </template>
-        </template>
-      </el-table>
+      <FormListViewRenderer
+        v-if="formDef && curListView"
+        :form-def="formDef"
+        :view="curListView"
+        :settings="curListViewSettings"
+        :rows="dataRef || []"
+        :columns="columns"
+        :flatted-data="flattedData"
+        :span-method="idBasedSpanMethod"
+        :selectable="selectable"
+        :display-fields="listViewDisplayFields"
+        @selection-change="selectionChanged"
+        @row-click="showDetails"
+      />
       <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
     </div>
   </div>
@@ -103,13 +107,17 @@ import {
   UserType,
   IFieldPerm,
   DataPerms,
+  FormListView,
+  FormListViewField,
+  FormListViewSettings,
+  FormListViewType,
 } from "@eimsnext/models";
 import { ITableColumn, buildColumns } from "./type";
 import {
   IDynamicFindOptions,
-  SortDirection,
   authGroupService,
   formDataService,
+  formListViewService,
 } from "@eimsnext/services";
 import {
   MessageIcon,
@@ -119,16 +127,20 @@ import {
   IFieldSortList,
   IFormFieldDef,
   IToolbarItemDropdownItem,
-  flowStatusArray,
 } from "@eimsnext/components";
-import { TableTooltipData } from "element-plus";
-import type { TableInstance } from "element-plus";
-import { dateFormat, getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
+import { getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
 import Pagination from "../../components/Pagination/index.vue";
 import { useI18n } from "vue-i18n";
+import FormListViewRenderer from "./components/FormListViewRenderer.vue";
+import {
+  createDefaultFormListView,
+  getViewDisplayFields,
+  parseCondition,
+  parseSort,
+  parseViewSettings,
+} from "./listViewUtils";
 const { t } = useI18n();
 
-const tableRef = ref<TableInstance>();
 const displayItemCount = 3; //最多显示3条明细
 const showAddDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
@@ -145,6 +157,10 @@ const fieldBtnRef = ref();
 const authGrps = ref<AuthGroup[]>([]);
 const curAuthGrp = ref<AuthGroup>();
 const fieldPerms = ref<IFieldPerm[]>();
+const listViews = ref<FormListView[]>([]);
+const curListView = ref<FormListView>();
+const curListViewSettings = ref<FormListViewSettings>({});
+const listViewDisplayFields = ref<FormListViewField[]>([]);
 const userStore = useUserStore();
 const { currentUser } = userStore;
 
@@ -153,6 +169,16 @@ const canAdd = computed(() => hasDataPerm(currentUser.userType, DataPerms.AddNew
 const canRemove = computed(() =>
   hasDataPerm(currentUser.userType, DataPerms.Remove, dataPerms.value)
 );
+const availableViews = computed(() => {
+  if (!formDef.value) return [];
+  const source = listViews.value.length > 0 ? listViews.value : [createDefaultFormListView(formDef.value, t)];
+  const authGroupId = curAuthGrp.value?.id;
+  return source.filter((view) => {
+    if (view.disabled) return false;
+    if (!authGroupId || !view.authGroupIds || view.authGroupIds.length === 0) return true;
+    return view.authGroupIds.includes(authGroupId);
+  });
+});
 
 const leftBars = ref<ToolbarItem[]>([
   {
@@ -167,16 +193,7 @@ const leftBars = ref<ToolbarItem[]>([
         curAuthGrp.value = authGrps.value.find((x) => x.id == cmd);
         fieldPerms.value = curAuthGrp.value?.fieldPerms;
 
-        initChildrenField(formDef.value!.content?.items!, []);
-        columns.value = buildColumns(
-          formDef.value!.content?.items!,
-          formDef.value!.usingWorkflow,
-          [],
-          undefined,
-          t
-        );
-        updateQueryParams();
-        handleQuery();
+        applyCurrentView(curListView.value?.id);
       },
     },
   },
@@ -328,37 +345,36 @@ const submitExport = async () => {
   }
 };
 
-formStore.get(formId).then(async (form: FormDef | undefined) => {
-  if (form) {
-    formDef.value = form;
-    if (userStore.currentUser.userType == UserType.Employee) {
-      await authGroupService
-        .query<AuthGroup>(`$filter=appid eq '${form.appId}' AND formid eq '${form.id}'`)
-        .then((res) => {
-          authGrps.value = res;
-          if (res.length > 0) {
-            curAuthGrp.value = res[0];
-            fieldPerms.value = curAuthGrp.value.fieldPerms;
+const loadFormContext = async () => {
+  const form = await formStore.get(formId);
+  if (!form) return;
 
-            let menuItems: IToolbarItemDropdownItem[] = res.map((x) => {
-              return { text: x.name, command: x.id, visible: true };
-            });
-            menuItems[0].checked = true;
+  formDef.value = form;
+  if (userStore.currentUser.userType == UserType.Employee) {
+    const res = await authGroupService.query<AuthGroup>(`$filter=appid eq '${form.appId}' AND formid eq '${form.id}'`);
+    authGrps.value = res;
+    if (res.length > 0) {
+      curAuthGrp.value = res[0];
+      fieldPerms.value = curAuthGrp.value.fieldPerms;
 
-            let grpItem = leftBars.value.find((x) => x.config.command == "authgrp");
-            if (grpItem) {
-              grpItem.config.menuItems = menuItems;
-              grpItem.config.visible = true;
-            }
-          }
-        });
+      const menuItems: IToolbarItemDropdownItem[] = res.map((x) => {
+        return { text: x.name, command: x.id, visible: true };
+      });
+      menuItems[0].checked = true;
+
+      const grpItem = leftBars.value.find((x) => x.config.command == "authgrp");
+      if (grpItem) {
+        grpItem.config.menuItems = menuItems;
+        grpItem.config.visible = true;
+      }
     }
-    initChildrenField(form.content?.items!, [], fieldPerms.value);
-    columns.value = buildColumns(form.content?.items!, form.usingWorkflow, [], fieldPerms.value, t);
-    updateQueryParams();
-    handleQuery();
   }
-});
+
+  listViews.value = await formListViewService.query<FormListView>(`$filter=formid eq '${form.id}'&$orderby=sortIndex asc,createTime asc`);
+  applyCurrentView();
+};
+
+void loadFormContext();
 
 const queryParams = ref<IDynamicFindOptions>({
   skip: 0,
@@ -368,21 +384,9 @@ const queryParams = ref<IDynamicFindOptions>({
 const totalRef = ref(0);
 const dataRef = ref<FormData[]>();
 const showFilter = ref(false);
-const condList = ref<IConditionList>({ id: "", rel: "and" });
+const condList = ref<IConditionList>({ id: "", rel: "and", items: [] });
 const showSort = ref(false);
-const sortList = ref<IFieldSortList>({
-  items: [
-    {
-      field: {
-        formId: formId,
-        field: SystemField.CreateTime,
-        label: t("comp.fieldBlock.systemFields.createTime"),
-        type: FieldType.TimeStamp,
-      },
-      sort: SortDirection.Desc,
-    },
-  ],
-});
+const sortList = ref<IFieldSortList>({ items: [] });
 const showField = ref(false);
 const fieldList = ref<IFormFieldDef[]>([]);
 const pageNum = ref(1);
@@ -394,6 +398,45 @@ const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
 const selectedExportColumnKeys = ref<string[]>([]);
 
 const exportColumns = computed<ExportColumn[]>(() => buildExportColumns());
+
+const applyCurrentView = (preferredViewId?: string) => {
+  if (!formDef.value) return;
+
+  const nextView =
+    availableViews.value.find((view) => view.id === preferredViewId) ||
+    availableViews.value[0] ||
+    createDefaultFormListView(formDef.value, t);
+
+  curListView.value = nextView;
+  curListViewSettings.value = parseViewSettings(nextView.settings);
+
+  const displayFields = getViewDisplayFields(formDef.value, nextView, curListViewSettings.value, t);
+  fieldList.value = displayFields;
+  listViewDisplayFields.value = displayFields.map((field) => ({
+    field: field.field,
+    label: field.label,
+    type: field.type,
+    isSubField: field.isSubField,
+  }));
+  condList.value = parseCondition(nextView.defaultFilter);
+  sortList.value = parseSort(formId, nextView.defaultSort, t);
+  pageNum.value = 1;
+
+  initChildrenField(formDef.value.content?.items || [], fieldList.value, fieldPerms.value);
+  columns.value = buildColumns(
+    formDef.value.content?.items || [],
+    formDef.value.usingWorkflow,
+    fieldList.value,
+    fieldPerms.value,
+    t,
+  );
+  updateQueryParams();
+  handleQuery();
+};
+
+const switchView = (viewId: string) => {
+  applyCurrentView(viewId);
+};
 
 const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
@@ -428,6 +471,12 @@ const setSort = (sort: IFieldSortList) => {
 
 const setField = (fields: IFormFieldDef[]) => {
   fieldList.value = fields;
+  listViewDisplayFields.value = fields.map((field) => ({
+    field: field.field,
+    label: field.label,
+    type: field.type,
+    isSubField: field.isSubField,
+  }));
   showField.value = false;
   initChildrenField(formDef.value!.content?.items!, fieldList.value);
   columns.value = buildColumns(
@@ -442,8 +491,9 @@ const setField = (fields: IFormFieldDef[]) => {
 };
 
 const updateQueryParams = () => {
+  const queryFields = curListView.value?.pcType === FormListViewType.Table ? fieldList.value : [];
   queryParams.value = toDynamicFindOptions(
-    fieldList.value,
+    queryFields,
     condList.value,
     sortList.value,
     (pageNum.value - 1) * pageSize.value,
@@ -481,115 +531,9 @@ const onDataSaved = () => {
   updateQueryParams();
   handleQuery();
 };
-const rowClassName = (row: any) => {
-  return "pointer";
-};
 
 const selectable = (row: any, index: number) => {
   return !formDef.value?.usingWorkflow || row[SystemField.FlowStatus] == FlowStatus.Draft;
-};
-const formatter = (row: any, column: any, cellValue: any) => {
-  if (column.property == SystemField.FlowStatus) {
-    return getFlowStatusName(cellValue);
-  }
-  const colSetting = getColumnSetting(column.property);
-  if (colSetting) {
-    if (colSetting.type == FieldType.TimeStamp) {
-      return dateFormat(cellValue, colSetting.format);
-    }
-    // 添加对图片字段的处理
-    if (colSetting.type == FieldType.ImageUpload) {
-      if (!cellValue) return "";
-
-      // 处理图片对象数组，提取url属性
-      if (Array.isArray(cellValue)) {
-        // 过滤出有效的图片对象
-        const validImages = cellValue.filter(
-          (item) => typeof item === "object" && item !== null && item.url
-        );
-        if (validImages.length === 0) return "";
-
-        return validImages
-          .map((img) => {
-            const imgUrl = img.url.replace(/\\/g, "/");
-            return `<img src="${imgUrl}" class="table-image-thumb table-image-thumb-spaced" />`;
-          })
-          .join("");
-      } else if (typeof cellValue === "object" && cellValue !== null && cellValue.url) {
-        const imgUrl = cellValue.url.replace(/\\/g, "/");
-        return `<img src="${imgUrl}" class="table-image-thumb" />`;
-      } else if (typeof cellValue === "string") {
-        const imgUrl = cellValue.replace(/\\/g, "/");
-        return `<img src="${imgUrl}" class="table-image-thumb" />`;
-      }
-    }
-  }
-
-  if (cellValue && typeof cellValue === "object") {
-    if (cellValue.label) {
-      return cellValue.label;
-    }
-    if (Array.isArray(cellValue)) {
-      // 处理嵌套数组格式 [[val1], [val2], ...]
-      if (cellValue.length > 0 && Array.isArray(cellValue[0])) {
-        return cellValue
-          .map((item) => {
-            if (Array.isArray(item) && item.length > 0) {
-              const first = item[0];
-              if (typeof first === "object" && first !== null) {
-                return first.label || first.name || String(first);
-              }
-              return String(first ?? "");
-            }
-            return String(item ?? "");
-          })
-          .filter(Boolean)
-          .join(", ");
-      }
-      if (cellValue.length > 0 && typeof cellValue[0] === "object" && cellValue[0] !== null) {
-        return cellValue
-          .map((item) => item.label || item.name || "")
-          .filter(Boolean)
-          .join(", ");
-      } else {
-        return cellValue
-          .map((item) => String(item))
-          .filter(Boolean)
-          .join(", ");
-      }
-    }
-  }
-
-  if (cellValue !== undefined && cellValue !== null) {
-    return String(cellValue);
-  }
-
-  return "";
-};
-const getColumnSetting = (field: string) => {
-  const findSub = (children: ITableColumn[], field: string) => {
-    let col: any = undefined;
-
-    for (let i = 0; i < children.length; i++) {
-      if (children[i].field == field) {
-        col = children[i];
-        break;
-      }
-
-      if (children[i].children && children[i].children!.length > 0)
-        col = findSub(children[i].children!, field);
-
-      if (col) break;
-    }
-
-    return col;
-  };
-
-  return findSub(columns.value, field);
-};
-const getFlowStatusName = (status: FlowStatus) => {
-  let st = flowStatusArray().find((x) => x.id == status);
-  return st ? t(st.i18n) : "";
 };
 
 const buildExportColumns = (): ExportColumn[] => {
@@ -682,18 +626,9 @@ const toExportColumnType = (type: FieldType) => {
 
   return ExportColumnType.String;
 };
-const tableToolFormatter = (data: TableTooltipData<FormData>) => {
-  return formatter(data.row, data.column, data.cellValue);
-};
-
-const showDetails = (row: FormData, column: any) => {
-  let selectable = row[SystemField.FlowStatus] == FlowStatus.Draft;
-  if (column.type == "selection" && selectable) {
-    tableRef.value?.toggleRowSelection(row);
-  } else {
-    selectedData.value = row;
-    showDetailsDialog.value = true;
-  }
+const showDetails = (row: FormData) => {
+  selectedData.value = row;
+  showDetailsDialog.value = true;
 };
 const handleViewOk = () => {
   loadData();
@@ -835,12 +770,54 @@ onUnmounted(() => {
 }
 
 .data-list-full-height {
-  height: 100%;
+  height: calc(100% - 46px);
 }
 
 .data-table-full {
   width: 100%;
   height: 100%;
+}
+
+.view-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--et-space-8);
+  min-height: 46px;
+  padding: 0 var(--et-space-12);
+  border: 1px solid var(--et-border-color-light);
+  border-bottom: 0;
+  background: var(--et-bg-container);
+}
+
+.view-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--et-space-6);
+  height: 32px;
+  padding: 0 var(--et-space-12);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--et-text-secondary);
+  cursor: pointer;
+  font-weight: 600;
+
+  &:hover,
+  &.active {
+    color: var(--et-color-primary);
+  }
+
+  &.active {
+    border-bottom-color: var(--et-color-primary);
+  }
+}
+
+.view-tab-icon {
+  width: 10px;
+  height: 14px;
+  border-left: 4px solid currentColor;
+  border-right: 2px solid currentColor;
+  opacity: 0.9;
 }
 
 :deep(.data-filter) {

@@ -69,6 +69,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  adminScope: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const deptStore = useDeptStore();
@@ -86,8 +90,12 @@ watch(keyword, (val) => {
   deptTreeRef.value!.filter(val);
 });
 
+const loadDepartments = () => props.adminScope
+  ? departmentService.query<Department>("adminScope=true")
+  : deptStore.load();
+
 onBeforeMount(() => {
-  deptStore.load().then((data: Department[]) => {
+  loadDepartments().then((data: Department[]) => {
     deptList.value = buildDeptTree(data);
   });
 });
@@ -121,7 +129,7 @@ const handleEditClick = (data: ITreeNode) => {
 };
 const handleSaved = (data: Department) => {
   showAddEditDialog.value = false;
-  deptStore.load().then((depts: Department[]) => {
+  loadDepartments().then((depts: Department[]) => {
     deptList.value = buildDeptTree(depts);
   });
 };
@@ -133,7 +141,7 @@ const handleDeleteConfirm = async () => {
   await departmentService.delete(selectedDept.value?.id!);
 
   deptStore.remove(selectedDept.value?.id!);
-  departmentService.query<Department>().then((depts: Department[]) => {
+  loadDepartments().then((depts: Department[]) => {
     deptList.value = buildDeptTree(depts);
     deptStore.load().then();
   });

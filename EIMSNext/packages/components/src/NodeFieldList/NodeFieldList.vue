@@ -52,6 +52,29 @@ const selectedNodeId = computed(() =>
     : undefined,
 );
 
+const missingLabel = (field: IFormFieldDef) => {
+  const label = field.label || field.field;
+  return label.includes(t("dataflow.deletedField")) ? label : `${label}（${t("dataflow.deletedField")}）`;
+};
+
+const appendMissingSelectedNode = () => {
+  nodeList.value = nodeList.value.filter((item) => !item.data?.missing || item.id === selectedNodeId.value);
+  if (!props.modelValue?.field || !selectedNodeId.value) return;
+  if (findNode(nodeList.value, selectedNodeId.value)) return;
+
+  nodeList.value = [
+    {
+      id: selectedNodeId.value,
+      value: props.modelValue.field,
+      label: missingLabel(props.modelValue),
+      type: DataItemType.Field,
+      disabled: true,
+      data: { ...props.modelValue, label: missingLabel(props.modelValue), missing: true },
+    },
+    ...nodeList.value,
+  ];
+};
+
 const rebuildNodeTree = () => {
   nodeList.value = buildNodeFieldTree(
     props.nodes,
@@ -64,6 +87,7 @@ const rebuildNodeTree = () => {
     .map((x) => x.id);
 
   selectedNode.value = selectedNodeId.value;
+  appendMissingSelectedNode();
 };
 
 const filterNode: FilterNodeMethodFunction = (
@@ -103,6 +127,7 @@ watch(
   () => props.modelValue,
   () => {
     selectedNode.value = selectedNodeId.value;
+    appendMissingSelectedNode();
   },
   {
     deep: true,

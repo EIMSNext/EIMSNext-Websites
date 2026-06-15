@@ -19,6 +19,7 @@
       :group="dragGroup"
       filter=".more-wrapper, .more-wrapper *"
       :prevent-on-filter="false"
+      :disabled="!canManage"
       :move="handleRootMove"
       ghost-class="menu-drag-ghost"
       :animation="180"
@@ -31,6 +32,7 @@
           <SidebarMenuItem
             :item="element"
             :app-id="appId"
+            :can-manage="canManage"
             @editForm="emit('editForm', $event.id, $event.type)"
              @editMenu="emit('editMenu', $event)"
              @editGroup="emit('editGroup', $event)"
@@ -60,6 +62,7 @@ defineOptions({
 const props = defineProps<{
   appId: string;
   menuList: AppMenu[];
+  canManage?: boolean;
 }>();
 
 const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "menusChanged"]);

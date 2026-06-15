@@ -1,4 +1,3 @@
-import { Department } from "./department";
 import { CorpModelBase, IdBase } from "./modelBase";
 
 export interface EmployeeRequest extends IdBase {
@@ -6,9 +5,21 @@ export interface EmployeeRequest extends IdBase {
   empName?: string;
   workPhone?: string;
   workEmail?: string;
-  departmentId?: string;
-  isManager?: boolean;
+  departments?: EmployeeDepartmentRequest[];
   invite?: string;
+}
+
+export interface EmployeeDepartmentRequest {
+  departmentId: string;
+  isManager?: boolean;
+  sortValue?: number;
+}
+
+export interface DepartmentRef {
+  id: string;
+  name: string;
+  isManager?: boolean;
+  sortValue?: number;
 }
 
 export interface Employee extends CorpModelBase {
@@ -19,10 +30,8 @@ export interface Employee extends CorpModelBase {
   workPhone?: string;
   workEmail?: string;
   status: number;
-  departmentId: string;
-  isManager: boolean;
   userBound: boolean;
-  department?: Department;
+  departments?: DepartmentRef[];
 }
 
 export enum EmployeeStatus {

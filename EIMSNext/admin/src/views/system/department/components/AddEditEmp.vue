@@ -8,7 +8,7 @@
     @cancel="cancel"
   >
     <el-form :model="formData" :rules="rules" label-width="80px" class="dialog-form">
-      <el-form-item :label="$t('department.empCode')" prop="nickname">
+      <el-form-item :label="$t('department.empCode')" prop="code">
         <el-input v-model="formData.code" :placeholder="$t('department.empCodePlaceholder')" />
       </el-form-item>
       <el-form-item :label="$t('department.empName')" prop="empName">
@@ -20,18 +20,27 @@
       <el-form-item :label="$t('department.email')" prop="workEmail">
         <el-input v-model="formData.workEmail" :placeholder="$t('department.emailPlaceholder')" maxlength="50" />
       </el-form-item>
-      <el-form-item :label="$t('department.department')" prop="departmentId">
+      <el-form-item :label="$t('department.department')" prop="departments">
         <el-tree-select
-          v-model="formData.departmentId"
+          v-model="selectedDepartmentIds"
           :placeholder="$t('department.departmentPlaceholder')"
           :data="deptList"
           :props="{ children: 'children', label: 'label', disabled: 'disabled' }"
           node-key="id"
           value-key="id"
+          multiple
+          collapse-tags
+          collapse-tags-tooltip
           filterable
           check-strictly
           :render-after-expand="false"
         />
+        <div v-if="selectedDepartmentIds.length" class="department-relations">
+          <div v-for="departmentId in selectedDepartmentIds" :key="departmentId" class="department-relation-row">
+            <span class="department-relation-name">{{ getDepartmentName(departmentId) }}</span>
+            <el-checkbox v-model="departmentManagers[departmentId]">{{ $t("department.manager") }}</el-checkbox>
+          </div>
+        </div>
       </el-form-item>
       <!-- <el-form-item label="邮箱" prop="email">
         <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50" />
@@ -55,9 +64,10 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 import { ITreeNode, buildDeptTree } from "@eimsnext/components";
-import { Department, Employee, EmployeeRequest, EmployeeStatus, PlatformType } from "@eimsnext/models";
-import { employeeService } from "@eimsnext/services";
+import { Department, Employee, EmployeeDepartmentRequest, EmployeeRequest, EmployeeStatus, PlatformType, ScopeMode } from "@eimsnext/models";
+import { departmentService, employeeService } from "@eimsnext/services";
 import { useContextStore, useDeptStore } from "@eimsnext/store";
+import { ElMessage } from "element-plus";
 
 const { t } = useI18n();
 
@@ -69,9 +79,15 @@ const props = withDefaults(
   defineProps<{
     edit: boolean;
     emp?: Employee;
+    adminScope?: boolean;
+    departmentScopeMode?: ScopeMode;
+    departmentIds?: string[];
   }>(),
   {
     edit: false,
+    adminScope: false,
+    departmentScopeMode: ScopeMode.All,
+    departmentIds: () => [],
   }
 );
 
@@ -81,16 +97,33 @@ const deptList = ref<ITreeNode[]>(); // 部门列表
 const showDialog = ref(true);
 const title = computed(() => props.edit ? t("department.editEmployee") : t("department.addEmployee"));
 const showSaveAndInvite = computed(() => contextStore.corpPlat === PlatformType.Public);
-const formData = ref<Employee>({
+const departmentNameMap = ref<Record<string, string>>({});
+const selectedDepartmentIds = ref<string[]>([]);
+const departmentManagers = reactive<Record<string, boolean>>({});
+const formData = ref<EmployeeRequest>({
   id: "",
   code: "",
   empName: "",
-  departmentId: "",
-  status: EmployeeStatus.Active,
-  isManager: false,
-  userBound: true,
+  departments: [],
 });
-if (props.edit) formData.value = props.emp!;
+if (props.edit && props.emp) {
+  formData.value = {
+    id: props.emp.id,
+    code: props.emp.code,
+    empName: props.emp.empName,
+    workPhone: props.emp.workPhone,
+    workEmail: props.emp.workEmail,
+    departments: props.emp.departments?.map((x, index) => ({
+      departmentId: x.id,
+      isManager: x.isManager,
+      sortValue: x.sortValue ?? index,
+    })) ?? [],
+  };
+  selectedDepartmentIds.value = props.emp.departments?.map((x) => x.id) ?? [];
+  props.emp.departments?.forEach((x) => {
+    departmentManagers[x.id] = !!x.isManager;
+  });
+}
 
 const rules = reactive({
   code: [{ required: true, message: t("admin.department.messages.codeRequired"), trigger: "blur" }],
@@ -109,64 +142,137 @@ const rules = reactive({
       trigger: "blur",
     },
   ],
-  deptId: [{ required: true, message: t("admin.department.messages.deptRequired"), trigger: "blur" }],
+  departments: [{ required: true, message: t("admin.department.messages.deptRequired"), trigger: "change" }],
   inviteId: [{ message: t("admin.department.messages.roleRequired"), trigger: "blur" }],
 });
 
 onBeforeMount(() => {
-  deptStore.load().then((data: Department[]) => {
-    deptList.value = buildDeptTree(data);
+  const loader = props.adminScope
+    ? departmentService.query<Department>("adminScope=true")
+    : deptStore.load();
+  loader.then((data: Department[]) => {
+    deptList.value = filterManageableDepartments(buildDeptTree(data));
+    departmentNameMap.value = Object.fromEntries(data.map((x) => [x.id, x.name]));
   });
 });
+
+const filterManageableDepartments = (nodes: ITreeNode[]) => {
+  if (props.departmentScopeMode !== ScopeMode.Partial || props.departmentIds.length === 0) return nodes;
+
+  const allowedIds = new Set(props.departmentIds);
+  const filterNode = (node: ITreeNode): ITreeNode | undefined => {
+    const children = node.children?.map(filterNode).filter((child): child is ITreeNode => !!child) || [];
+    if (allowedIds.has(node.id)) return { ...node, children };
+    if (children.length > 0) return { ...node, disabled: true, children };
+    return undefined;
+  };
+
+  return nodes.map(filterNode).filter((node): node is ITreeNode => !!node);
+};
 
 const emit = defineEmits(["cancel", "ok"]);
 const cancel = () => {
   emit("cancel");
 };
-const saveAndInvite = async () => {
-  const newEmp: EmployeeRequest = {
+const getDepartmentName = (departmentId: string) => {
+  return departmentNameMap.value[departmentId] ?? departmentId;
+};
+
+watch(selectedDepartmentIds, (departmentIds) => {
+  departmentIds.forEach((departmentId) => {
+    if (departmentManagers[departmentId] === undefined) {
+      departmentManagers[departmentId] = false;
+    }
+  });
+
+  Object.keys(departmentManagers).forEach((departmentId) => {
+    if (!departmentIds.includes(departmentId)) {
+      delete departmentManagers[departmentId];
+    }
+  });
+
+  formData.value.departments = buildDepartments();
+});
+
+const buildDepartments = (): EmployeeDepartmentRequest[] => {
+  return selectedDepartmentIds.value.map((departmentId, index) => ({
+    departmentId,
+    isManager: !!departmentManagers[departmentId],
+    sortValue: index,
+  }));
+};
+
+const buildRequest = (invite?: string): EmployeeRequest | undefined => {
+  const departments = buildDepartments();
+  if (!departments.length) {
+    ElMessage.warning(t("admin.department.messages.deptRequired"));
+    return;
+  }
+
+  return {
     id: formData.value.id,
     code: formData.value.code,
     empName: formData.value.empName,
     workPhone: formData.value.workPhone,
     workEmail: formData.value.workEmail,
-    departmentId: formData.value.departmentId,
-    isManager: false,
-    invite: formData.value.workPhone || formData.value.workEmail,
+    departments,
+    invite,
   };
+};
+
+const saveAndInvite = async () => {
+  const newEmp = buildRequest(formData.value.workPhone || formData.value.workEmail);
+  if (!newEmp) return;
 
   if (props.edit) {
-    formData.value = await employeeService.patch<Employee>(newEmp.id, newEmp);
+    const saved = await employeeService.patch<Employee>(newEmp.id, newEmp);
+    emit("ok", saved);
   } else {
-    formData.value = await employeeService.post<Employee>(newEmp);
+    const saved = await employeeService.post<Employee>(newEmp);
+    emit("ok", saved);
   }
-
-  emit("ok", formData.value);
 };
 
 const save = async () => {
-  const newEmp: EmployeeRequest = {
-    id: formData.value.id,
-    code: formData.value.code,
-    empName: formData.value.empName,
-    workPhone: formData.value.workPhone,
-    workEmail: formData.value.workEmail,
-    departmentId: formData.value.departmentId,
-    isManager: false,
-  };
+  const newEmp = buildRequest();
+  if (!newEmp) return;
 
   if (props.edit) {
-    formData.value = await employeeService.patch<Employee>(newEmp.id, newEmp);
+    const saved = await employeeService.patch<Employee>(newEmp.id, newEmp);
+    emit("ok", saved);
   } else {
-    formData.value = await employeeService.post<Employee>(newEmp);
+    const saved = await employeeService.post<Employee>(newEmp);
+    emit("ok", saved);
   }
-
-  emit("ok", formData.value);
 };
 </script>
 
 <style lang="scss" scoped>
 .dialog-form {
   padding: var(--et-space-12) var(--et-space-20);
+}
+
+.department-relations {
+  width: 100%;
+  margin-top: var(--et-space-8);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: var(--el-border-radius-base);
+  padding: var(--et-space-4) var(--et-space-8);
+  box-sizing: border-box;
+}
+
+.department-relation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  gap: var(--et-space-12);
+}
+
+.department-relation-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

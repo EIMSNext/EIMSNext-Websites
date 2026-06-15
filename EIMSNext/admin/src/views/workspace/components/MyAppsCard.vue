@@ -3,8 +3,7 @@
     @ok="handleSaved"></AddEditApp>
   <et-card :title="t('admin.myApp')">
     <template #action>
-      <el-button v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin" icon="plus"
-        @click="createApp">
+      <el-button v-if="canCreateApp" icon="plus" @click="createApp">
         {{ t("admin.newApp") }}
       </el-button>
     </template>
@@ -29,20 +28,17 @@
                     <div class="favorite-icon">
                       <et-icon icon="el-star" size="large"></et-icon>
                     </div>
-                    <div v-if="
-                      curUser.userType == UserType.CorpOwmer ||
-                      curUser.userType == UserType.CorpAdmin
-                    " class="setting-icon">
+                    <div v-if="canShowAppActions(app)" class="setting-icon">
                       <el-dropdown placement="bottom-start" size="large">
                         <el-button class="setting-btn">
                           <et-icon icon="el-setting" size="large"></et-icon>
                         </el-button>
                         <template #dropdown>
                           <el-dropdown-menu class="app-dropdown-menu">
-                            <el-dropdown-item @click="handleEditClick(app)">
+                            <el-dropdown-item v-if="canManageApp(app)" @click="handleEditClick(app)">
                               {{ t("admin.editNameAndIcon") }}
                             </el-dropdown-item>
-                            <el-dropdown-item class="btn-delete" @click="handleDeleteClick(app)">
+                            <el-dropdown-item v-if="canDeleteApp(app)" class="btn-delete" @click="handleDeleteClick(app)">
                               {{ t("common.delete") }}
                             </el-dropdown-item>
                           </el-dropdown-menu>
@@ -64,38 +60,54 @@ defineOptions({
   name: "MyAppsCard",
 });
 import AddEditApp from "@/views/app/components/AddEditApp.vue";
-import { AppDef, UserType } from "@eimsnext/models";
-import { useAppStore, useContextStore, useUserStore } from "@eimsnext/store";
+import { AppDef } from "@eimsnext/models";
+import { useAppStore, useContextStore } from "@eimsnext/store";
 import { useI18n } from "vue-i18n";
 import { ConfirmResult, EtConfirm } from "@eimsnext/components";
+import { appDefService } from "@eimsnext/services";
+import { useAdminPermissions } from "@/composables/useAdminPermissions";
 const { t } = useI18n();
 
 const router = useRouter();
 const appStore = useAppStore();
 const contextStore = useContextStore();
 const { items: appsRef } = storeToRefs(appStore);
-const userStore = useUserStore();
-const curUser = toRef(userStore.currentUser);
 const showAddEditDialog = ref(false);
 const isEditMode = ref(false);
 const currentApp = ref<AppDef | undefined>(undefined);
+const {
+  loadAdminPermissions,
+  canCreateApp,
+  canManageAppId,
+  canDeleteAppId,
+} = useAdminPermissions();
+
+const canManageApp = (app: AppDef) => canManageAppId(app.id);
+const canDeleteApp = (app: AppDef) => canDeleteAppId(app.id);
+const canShowAppActions = (app: AppDef) => canManageApp(app) || canDeleteApp(app);
+const refreshAdminPermissions = () => loadAdminPermissions(true);
 
 const createApp = () => {
+  if (!canCreateApp.value) return;
+
   isEditMode.value = false;
   currentApp.value = undefined;
   showAddEditDialog.value = true;
 };
 
 const handleEditClick = (app: AppDef) => {
+  if (!canManageApp(app)) return;
+
   isEditMode.value = true;
   currentApp.value = app;
   showAddEditDialog.value = true;
 };
 
-const handleSaved = () => {
+const handleSaved = async () => {
   showAddEditDialog.value = false;
   isEditMode.value = false;
   currentApp.value = undefined;
+  await refreshAdminPermissions();
 };
 
 const gotoApp = async (app: AppDef) => {
@@ -104,15 +116,23 @@ const gotoApp = async (app: AppDef) => {
   router.push(path);
 };
 const handleDeleteClick = async (app: AppDef) => {
+  if (!canDeleteApp(app)) return;
+
   var confirm = await EtConfirm.showDialog(
     t("admin.deleteFormConfirm_Content"),
     { title: t("admin.deleteFormConfirm_Title", [app?.name]) },
     t
   );
   if (confirm == ConfirmResult.Yes) {
-    appStore.remove(app.id);
+    await appDefService.delete(app.id);
+    appStore.remove(app.id, false);
+    await refreshAdminPermissions();
   }
 };
+
+onMounted(async () => {
+  await refreshAdminPermissions();
+});
 </script>
 <style lang="scss" scoped>
 .content {

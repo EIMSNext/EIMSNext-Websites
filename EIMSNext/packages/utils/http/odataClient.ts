@@ -102,11 +102,14 @@ export class ODataClient {
   }
 
   private formatUrl<T>(url: string, id?: string) {
+    const queryIndex = url.indexOf("?");
+    const path = queryIndex >= 0 ? url.substring(0, queryIndex) : url;
+    const query = queryIndex >= 0 ? url.substring(queryIndex) : "";
     let idPath = id ? "/" + id : "";
-    url = url.startsWith("/") ? url : "/" + url;
-    return url.startsWith("http")
-      ? url
-      : getODataUrl(url, this.apiVersion) + idPath;
+    const normalizedPath = path.startsWith("/") || path.startsWith("http") ? path : "/" + path;
+    return normalizedPath.startsWith("http")
+      ? `${normalizedPath}${idPath}${query}`
+      : `${getODataUrl(normalizedPath, this.apiVersion)}${idPath}${query}`;
   }
 
   private getAxiosHeaders(contentType?: ContentType) {

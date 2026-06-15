@@ -4,7 +4,7 @@
     <div class="main-row">
       <!-- 角色树 -->
       <div class="role-tree-col">
-        <role-tree :editable="true" @role-click="handleRoleQuery" />
+        <role-tree :editable="isUnrestrictedAdmin" admin-scope @role-click="handleRoleQuery" />
       </div>
       <!-- 用户列表 -->
       <div class="emp-list-col">
@@ -28,7 +28,11 @@
           <el-table-column :label="$t('admin.role.code')" width="150" prop="code" />
           <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
           <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
-          <el-table-column :label="$t('admin.role.dept')" prop="department.name" />
+          <el-table-column :label="$t('admin.role.dept')">
+            <template #default="scope">
+              {{ formatDepartments(scope.row as Employee) }}
+            </template>
+          </el-table-column>
               <!-- <el-table-column label="操作" fixed="right" width="150">
               <template #default="scope">
                 <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
@@ -85,7 +89,7 @@
     </el-popover>
     <member-select-dialog
       v-model="showMemberDialog"
-      :member-options="{ showTabs: MemberTabs.Employee }"
+      :member-options="memberDialogOptions"
       destroy-on-close
       @ok="finishSelect"
     />
@@ -94,8 +98,9 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { DataPerms, Department, Employee, FieldType, Role } from "@eimsnext/models";
-import { SortDirection, employeeService, roleService } from "@eimsnext/services";
+import { AdminPermissionSnapshot, DataPerms, Employee, FieldType, Role, ScopeMode, UserType } from "@eimsnext/models";
+import { SortDirection, employeeService, roleService, systemService } from "@eimsnext/services";
+import { useUserStore } from "@eimsnext/store";
 import buildQuery from "odata-query";
 import {
   ToolbarItem,
@@ -103,6 +108,7 @@ import {
   toODataQuery,
   IFieldSortList,
   ISelectedTag,
+  DataItemType,
   EtConfirm,
   MemberTabs,
   ConfirmResult,
@@ -110,6 +116,7 @@ import {
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+const userStore = useUserStore();
 
 defineOptions({
   name: "RoleManager",
@@ -146,6 +153,8 @@ const leftBars = ref<ToolbarItem[]>([
       visible: true,
       icon: "el-plus",
       onCommand: () => {
+        if (!canManageRoleMembers.value) return;
+
         showMemberDialog.value = true;
       },
     },
@@ -160,6 +169,8 @@ const leftBars = ref<ToolbarItem[]>([
       icon: "el-delete",
       disabled: true,
       onCommand: async () => {
+        if (!canManageRoleMembers.value) return;
+
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(
             t("common.message.deleteConfirm_Content", { 0: checkedDatas.value.length }),
@@ -240,6 +251,11 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
 };
 
 const finishSelect = (tags: ISelectedTag[]) => {
+  if (!canManageRoleMembers.value) {
+    showMemberDialog.value = false;
+    return;
+  }
+
   if (tags.length > 0) {
     roleService
       .addEmps(
@@ -284,7 +300,6 @@ const updateQueryParams = () => {
     pageSize.value,
     preFilter
   );
-  queryParams.value.expand = "department";
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -296,6 +311,51 @@ const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
 const roleId = ref("");
+const adminPermissions = ref<AdminPermissionSnapshot>();
+const isUnrestrictedAdmin = computed(() =>
+  [
+    UserType.System,
+    UserType.Client,
+    UserType.CorpOwmer,
+    UserType.CorpAdmin,
+  ].includes(userStore.currentUser.userType),
+);
+const canManageCurrentRole = computed(() => {
+  if (isUnrestrictedAdmin.value) return true;
+  const permissions = adminPermissions.value;
+  if (!roleId.value || !permissions?.isNormalAdmin) return false;
+  if (permissions.contactManageRoleScopeMode === ScopeMode.All) return true;
+  return permissions.contactManageRoleIds.includes(roleId.value);
+});
+const hasManageDepartmentScope = computed(() => {
+  if (isUnrestrictedAdmin.value) return true;
+  const permissions = adminPermissions.value;
+  if (!permissions?.isNormalAdmin) return false;
+  return permissions.contactManageDepartmentScopeMode === ScopeMode.All || permissions.contactManageDepartmentIds.length > 0;
+});
+const canManageRoleMembers = computed(() => canManageCurrentRole.value && hasManageDepartmentScope.value);
+const canManageEmployeeDepartment = (departmentId?: string) => {
+  if (isUnrestrictedAdmin.value) return true;
+  const permissions = adminPermissions.value;
+  if (!departmentId || !permissions?.isNormalAdmin) return false;
+  if (permissions.contactManageDepartmentScopeMode === ScopeMode.All) return true;
+  return permissions.contactManageDepartmentIds.includes(departmentId);
+};
+const managedDepartmentTags = computed<ISelectedTag[]>(() => {
+  const permissions = adminPermissions.value;
+  if (!permissions?.isNormalAdmin || permissions.contactManageDepartmentScopeMode !== ScopeMode.Partial) return [];
+  return permissions.contactManageDepartmentIds.map((id) => ({
+    id,
+    label: id,
+    type: DataItemType.Department,
+  }));
+});
+const memberDialogOptions = computed(() => ({
+  showTabs: MemberTabs.Employee,
+  adminScope: true,
+  limit: managedDepartmentTags.value.length > 0 ? { depts: managedDepartmentTags.value } : undefined,
+}));
+const appendAdminScope = (query: string) => query ? `${query}&adminScope=true` : "adminScope=true";
 
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
@@ -304,10 +364,23 @@ const pageChanged = (curPage: number, pSize: number) => {
   updateQueryParams();
   loadData();
 };
+const syncManageToolbar = () => {
+  const addBar = leftBars.value.find((x) => x.config.command == "add");
+  const deleteBar = leftBars.value.find((x) => x.config.command == "delete");
+  if (addBar) addBar.config.visible = canManageRoleMembers.value;
+  if (deleteBar) {
+    deleteBar.config.visible = canManageRoleMembers.value;
+    deleteBar.config.disabled =
+      !canManageRoleMembers.value ||
+      checkedDatas.value.length == 0 ||
+      checkedDatas.value.some((emp: Employee) => (emp.departments ?? []).every((d) => !canManageEmployeeDepartment(d.id)));
+  }
+};
 const handleRoleQuery = (role?: Role) => {
   roleId.value = role?.id ?? "";
 
   updateQueryParams();
+  syncManageToolbar();
   handleQuery();
 };
 const handleQuery = () => {
@@ -318,6 +391,7 @@ const handleQuery = () => {
   }
   loading.value = true;
 
+  syncManageToolbar();
   loadCount();
   loadData();
 };
@@ -325,7 +399,7 @@ const handleQuery = () => {
 const loadCount = () => {
   let query = buildQuery({ filter: queryParams.value.filter });
 
-  employeeService.count(query).then((cnt: number) => {
+  employeeService.count(appendAdminScope(query)).then((cnt: number) => {
     totalRef.value = cnt;
   });
 };
@@ -334,17 +408,20 @@ const loadData = () => {
   let query = buildQuery(queryParams.value);
 
   employeeService
-    .query<Employee>(query)
+    .query<Employee>(appendAdminScope(query))
     .then((res: Employee[]) => {
       dataRef.value = res;
     })
     .finally(() => (loading.value = false));
 };
 
+const formatDepartments = (employee: Employee) => {
+  return employee.departments?.map((x) => x.name).filter(Boolean).join(", ") ?? "";
+};
+
 const handleSelectionChange = (selection: any[]) => {
   checkedDatas.value = selection;
-  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
-    checkedDatas.value.length == 0;
+  syncManageToolbar();
 };
 
 const showDetails = (row: FormData, column: any) => {
@@ -358,7 +435,13 @@ const showDetails = (row: FormData, column: any) => {
   // }
 };
 
-onMounted(() => {
+watch([canManageCurrentRole, hasManageDepartmentScope], () => {
+  syncManageToolbar();
+});
+
+onMounted(async () => {
+  adminPermissions.value = await systemService.getAdminPermissions();
+  syncManageToolbar();
   handleQuery();
 });
 </script>

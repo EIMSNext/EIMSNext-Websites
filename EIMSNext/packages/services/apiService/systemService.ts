@@ -1,4 +1,4 @@
-import { CurrentUser, PluginReloadResult, PluginRuntimeInfo } from "@eimsnext/models";
+import { AdminPermissionSnapshot, CurrentUser, PluginReloadResult, PluginRuntimeInfo } from "@eimsnext/models";
 import { ServiceBase } from "../interface";
 
 export class SystemService extends ServiceBase {
@@ -8,6 +8,10 @@ export class SystemService extends ServiceBase {
 
   getAppMenuPerms(appId: string): Promise<any> {
     return this.http().api.get<any>(`/system/AppMenuPerms?appId=${appId}`);
+  }
+
+  getAdminPermissions(): Promise<AdminPermissionSnapshot> {
+    return this.http().api.get<AdminPermissionSnapshot>("/system/AdminPermissions");
   }
 
   switchCorp(corpId: string): Promise<any> {

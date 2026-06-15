@@ -1,5 +1,5 @@
 <template>
-  <MobilePage title="工作台" @back="goBack">
+  <MobilePage :title="t('mobile.workspace.title')" @back="goBack">
     <div class="workspace-content">
       <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
         <MobileCard class="todo-card" @click="goToMyTasks">
@@ -8,7 +8,7 @@
               <van-icon name="clock-o" size="28" />
             </div>
             <div>
-              <div class="todo-title">待办</div>
+              <div class="todo-title">{{ t("mobile.workspace.todo") }}</div>
               <div class="todo-count">{{ todoCount }}</div>
             </div>
           </div>
@@ -18,19 +18,19 @@
         <MobileCard class="quick-actions">
           <div class="action-item" @click="goToMyStarted">
             <van-icon name="records" />
-            <span>我发起的</span>
+            <span>{{ t("mobile.workflow.started") }}</span>
           </div>
           <div class="action-item" @click="goToMyApproved">
             <van-icon name="passed" />
-            <span>我已审批</span>
+            <span>{{ t("mobile.workflow.approved") }}</span>
           </div>
           <div class="action-item" @click="goToMyCced">
             <van-icon name="share-o" />
-            <span>抄送我的</span>
+            <span>{{ t("mobile.workflow.cced") }}</span>
           </div>
         </MobileCard>
 
-        <div class="section-title">我的应用</div>
+        <div class="section-title">{{ t("mobile.workspace.myApps") }}</div>
         <div class="app-grid">
           <MobileCard
             v-for="app in apps"
@@ -53,22 +53,24 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import type { App } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
+import type { AppDef } from "@eimsnext/models";
 import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
 import { appServiceMobile, todoServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
+const { t } = useI18n();
 const refreshing = ref(false);
 const todoCount = ref(0);
-const apps = ref<App[]>([]);
+const apps = ref<AppDef[]>([]);
 
 const goBack = () => router.back();
 const goToMyTasks = () => router.push("/wftodo");
 const goToMyStarted = () => router.push("/wftodo?tab=started");
 const goToMyApproved = () => router.push("/wftodo?tab=approved");
 const goToMyCced = () => router.push("/wftodo?tab=cced");
-const gotoApp = (app: App) => router.push(`/app/${app.id}`);
+const gotoApp = (app: AppDef) => router.push(`/app/${app.id}`);
 
 const loadApps = async () => {
   apps.value = await appServiceMobile.getMyApps();

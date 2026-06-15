@@ -341,6 +341,7 @@ import { ISelectedTag } from "../selectedTags/type";
 import { Department, Employee, RoleGroup, Role } from "@eimsnext/models";
 import { useDeptStore, useUserStore } from "@eimsnext/store";
 import {
+  departmentService,
   employeeService,
   roleGroupService,
   roleService,
@@ -403,6 +404,10 @@ const selectedDynamicMemberId = ref<string>("");
 const dynamicGroupOrder = ["starter", "employeeField", "departmentField", "manager"];
 
 const isManagerGroup = computed(() => selectedDynamicGroupId.value === "manager");
+const adminScopeParam = () => options.adminScope ? "adminScope=true" : "";
+const loadDepartments = () => options.adminScope
+  ? departmentService.query<Department>(adminScopeParam())
+  : deptStore.load();
 
 const dynamicGroups = computed<IDynamicMemberGroup[]>(() => {
   const groups: IDynamicMemberGroup[] = [];
@@ -746,14 +751,15 @@ onBeforeMount(() => {
       orgCascade.value = firstDept.cascadedDept;
   }
 
-  deptStore.load().then((data: Department[]) => {
+  loadDepartments().then((data: Department[]) => {
     let detps = buildDeptTree(data);
     const filteredDeptData = filterDeptTreeByScope(detps);
     deptData.value = JSON.parse(JSON.stringify(filteredDeptData));
     empDeptData.value = JSON.parse(JSON.stringify(filteredDeptData));
 
-    if (userStore.currentUser.deptId) {
-      deptStore.get(userStore.currentUser.deptId).then((x) => {
+    const currentDepartmentId = userStore.currentUser.departmentIds?.[0] ?? userStore.currentUser.deptId;
+    if (currentDepartmentId) {
+      deptStore.get(currentDepartmentId).then((x) => {
         if (x) {
           const curDeptNode = [deptToTreeNode(x)];
           // 不应用范围过滤，直接显示当前用户部门
@@ -767,9 +773,8 @@ onBeforeMount(() => {
         code: userStore.currentUser.empCode!,
         empName: userStore.currentUser.empName!,
         status: 0,
-        departmentId: userStore.currentUser.deptId!,
         userBound: true,
-        isManager: false,
+        departments: currentDepartmentId ? [{ id: currentDepartmentId, name: curDeptData.value?.[0]?.label ?? "" }] : [],
       };
       curEmpData.value = [employeeToListItem(emp)];
     }
@@ -784,7 +789,7 @@ onBeforeMount(() => {
     roleGroupService.query<RoleGroup>().then((data) => {
       roleGroups = data;
     }),
-    roleService.query<Role>().then((data) => {
+    roleService.query<Role>(adminScopeParam()).then((data) => {
       roles = data;
     }),
   ]).then(() => {
@@ -894,10 +899,14 @@ const selectEmpDept = (deptId: string) => {
   deptChanging.value = true;
   selectedEmpDeptId.value = deptId;
 
-  let $filter = deptId == "all" ? "" : `$filter=departmentId eq '${deptId}'`;
   empData.value = [];
   selectedEmps.value = [];
-  employeeService.query<Employee>($filter).then((res) => {
+
+  const request = deptId && deptId !== "all"
+    ? employeeService.queryByDepartment<Employee>(deptId, false, adminScopeParam())
+    : employeeService.query<Employee>(adminScopeParam());
+
+  request.then((res) => {
     res.forEach((x) => {
       empData.value.push(employeeToListItem(x));
 

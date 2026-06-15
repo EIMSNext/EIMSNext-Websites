@@ -1,6 +1,6 @@
 <template>
-  <div class="branch-item">
-    <SvgLine />
+  <div class="branch-item" :class="{ 'log-executed': isExecuted }">
+    <SvgLine :executed="isExecuted" />
     <div class="branch-item-panel">
       <div class="branch-item-condition branch-item-condition-spacer" />
       <ConditionNode
@@ -82,7 +82,8 @@ import DeleteNode from "./DeleteNode.vue";
 import PrintNode from "./PrintNode.vue";
 import PluginNode from "./PluginNode.vue";
 import BranchNode from "./BranchNode.vue";
-import { FlowNodeType, IFlowNodeData } from "./FlowData";
+import { computed, inject } from "vue";
+import { FlowNodeType, IFlowContext, IFlowNodeData } from "./FlowData";
 import SvgLine from "./SvgLine.vue";
 
 defineOptions({
@@ -94,6 +95,20 @@ const props = defineProps<{
   nodeData: IFlowNodeData;
   dataIndex: number;
 }>();
+const flowContext = inject<IFlowContext>("flowContext")!;
+const isExecuted = computed(() => {
+  if (!flowContext.logState) return false;
+  if (flowContext.logState.isBranchExecuted?.(props.nodeData)) return true;
+  return props.nodeData.childNodes?.some(hasExecutedNode) ?? false;
+});
+
+const hasExecutedNode = (node: IFlowNodeData): boolean => {
+  if (flowContext.logState?.executedNodeIds.has(node.id) || flowContext.logState?.failedNodeIds.has(node.id)) {
+    return true;
+  }
+
+  return node.childNodes?.some(hasExecutedNode) ?? false;
+};
 </script>
 
 <style scoped>

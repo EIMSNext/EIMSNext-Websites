@@ -15,6 +15,7 @@ export interface AppDef extends CorpModelBase {
   description?: string;
   icon?: string;
   iconColor?: string;
+  groupId?: string;
   sortIndex: number;
   appMenus: AppMenu[];
 }

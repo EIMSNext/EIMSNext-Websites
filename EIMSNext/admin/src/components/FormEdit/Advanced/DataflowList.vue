@@ -74,6 +74,16 @@
     </template>
     <DataflowDesigner :appId="formDef.appId" :formId="formDef.id" :flow-def="selectedFlow!" />
   </et-drawer>
+  <et-drawer v-model="showLogDrawer">
+    <template #title>
+      <span>{{ t("dataflow.executionLog") }}</span>
+    </template>
+    <DataflowExecLogView
+      v-if="logFlow"
+      :form-def="formDef"
+      :flow-def="logFlow"
+    />
+  </et-drawer>
   <AdvanceLayout :title="t('admin.advanced.dataflow')" :desc="t('dataflow.formTriggerDesc') + ' / ' + t('dataflow.scheduleTriggerDesc') + ' / ' + t('dataflow.httpTriggerDesc')">
     <div class="flow-container">
       <div class="panel-header">
@@ -91,6 +101,7 @@
               <template #action>
                 <div class="flow-header">
                   <el-button @click="edit(flow)">{{ t("common.edit") }}</el-button>
+                  <el-button @click="viewLog(flow)">{{ t("dataflow.viewExecutionLog") }}</el-button>
                   <el-button @click="remove(flow)">{{ t("common.delete") }}</el-button>
                   <el-switch
                     :model-value="!flow.disabled"
@@ -108,10 +119,11 @@
 </template>
 <script setup lang="ts">
 import DataflowDesigner from "../../DataflowDesigner/index.vue";
+import DataflowExecLogView from "./DataflowExecLogView.vue";
 import { FormDef, EventSourceType, WfDefinition, FlowType } from "@eimsnext/models";
 import { wfDefinitionService } from "@eimsnext/services";
 import { Clock, Document, Link } from "@element-plus/icons-vue";
-import { useLocale } from "element-plus";
+import { ElMessage, useLocale } from "element-plus";
 import buildQuery from "odata-query";
 import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
@@ -127,10 +139,12 @@ const props = defineProps<{
 }>();
 
 const showDrawer = ref(false);
+const showLogDrawer = ref(false);
 const showAddDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const dataflows = ref<WfDefinition[]>([]);
 const selectedFlow = ref<WfDefinition>();
+const logFlow = ref<WfDefinition>();
 const newEventSource = ref<EventSourceType>(EventSourceType.Form);
 const nameDraft = ref("");
 
@@ -190,6 +204,11 @@ const edit = (flow: WfDefinition) => {
   showDrawer.value = true;
 };
 
+const viewLog = (flow: WfDefinition) => {
+  logFlow.value = flow;
+  showLogDrawer.value = true;
+};
+
 const remove = (flow: WfDefinition) => {
   selectedFlow.value = flow;
   showDeleteConfirmDialog.value = true;
@@ -201,11 +220,33 @@ const execDelete = () => {
   });
 };
 const toggleDisable = (flow: WfDefinition) => {
+  if (flow.disabled && hasMissingField(flow)) {
+    ElMessage.warning(t("dataflow.missingFieldEnableBlocked"));
+    return;
+  }
+
   wfDefinitionService
     .patch<WfDefinition>(flow.id, { id: flow.id, disabled: !flow.disabled })
     .then(() => {
       flow.disabled = !flow.disabled;
     });
+};
+
+const hasMissingField = (flow: WfDefinition) => {
+  if (!flow.content) return false;
+  try {
+    const data = JSON.parse(flow.content);
+    return findMissingFlag(data);
+  } catch {
+    return false;
+  }
+};
+
+const findMissingFlag = (value: unknown): boolean => {
+  if (!value || typeof value !== "object") return false;
+  if ((value as { missing?: boolean }).missing) return true;
+  if (Array.isArray(value)) return value.some(findMissingFlag);
+  return Object.values(value).some(findMissingFlag);
 };
 
 function close() {

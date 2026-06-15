@@ -96,6 +96,15 @@ export interface IFlowContext {
   sourceId?: string;
   flowData: IFlowData;
   structureReadonly?: boolean;
+  logState?: IFlowLogState;
+}
+export interface IFlowLogState {
+  executedNodeIds: Set<string>;
+  failedNodeIds: Set<string>;
+  isNodeExecuted?: (nodeData: IFlowNodeData) => boolean;
+  isLineExecuted?: (nodeData: IFlowNodeData, branchItemData?: IFlowNodeData) => boolean;
+  isBranchExecuted?: (branchItemData: IFlowNodeData) => boolean;
+  onNodeClick?: (nodeData: IFlowNodeData) => void;
 }
 export interface IFlowNodeDragData {
   nodeData: IFlowNodeData;
@@ -186,7 +195,13 @@ export function createFlowNode(
         metadata: {
           approveMeta: {
             approveMode: ApproveMode.OrSign,
+            approverType: ApproverType.Normal,
             approvalCandidates: [],
+            byLevelApprovalSetting: {
+              terminal: ByLevelApprovalTerminal.StarterDepartment,
+              startLevel: 1,
+              endLevel: 1,
+            },
             enableCopyto: false,
             submitCondition: {
               enabled: false,
@@ -648,6 +663,19 @@ export enum ApproveMode {
   CounterSign,
   AutoSign,
 }
+export enum ApproverType {
+  Normal = 0,
+  ByLevel = 1,
+}
+export enum ByLevelApprovalTerminal {
+  StarterDepartment = 0,
+  Organization = 1,
+}
+export interface IByLevelApprovalSetting {
+  terminal?: ByLevelApprovalTerminal;
+  startLevel?: number;
+  endLevel?: number;
+}
 export enum CandidateType {
   Unknown,
   Department,
@@ -677,7 +705,9 @@ export interface ConditionMeta {
 }
 export interface ApproveMeta {
   approveMode: ApproveMode;
+  approverType?: ApproverType;
   approvalCandidates: IApprovalCandidate[];
+  byLevelApprovalSetting?: IByLevelApprovalSetting;
   enableCopyto?: boolean;
   copytoCandidates?: IApprovalCandidate[];
   nodeActions?: INodeActionConfig[];

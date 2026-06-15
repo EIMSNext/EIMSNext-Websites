@@ -1,6 +1,6 @@
 <template>
-  <div class="field-item" :class="{ invalid: !!errorMessage }">
-    <div class="field-name">
+  <div class="field-item" :class="{ invalid: !!displayError }">
+    <div class="field-name" :class="{ missing: field.missing }">
       <el-input
         :value="field.label"
         :title="field.label"
@@ -22,10 +22,10 @@
       <et-icon icon="el-delete" class="pointer" @click="onRemove"></et-icon>
     </div>
   </div>
-  <div v-if="errorMessage" class="field-error">{{ errorMessage }}</div>
+  <div v-if="displayError" class="field-error">{{ displayError }}</div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   FieldBuildRule,
   IFieldBuildSetting,
@@ -57,6 +57,7 @@ const props = defineProps<{
 
 const field = ref(props.modelValue.field);
 const value = ref(props.modelValue.value);
+const displayError = computed(() => props.errorMessage || (field.value.missing ? t("dataflow.deletedField") : ""));
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
 
@@ -103,6 +104,12 @@ const emitChange = () => {
 
 .field-item.invalid {
   border-color: var(--et-color-danger);
+}
+
+.field-name.missing {
+  :deep(.el-input__inner) {
+    color: var(--et-color-danger);
+  }
 }
 
 .field-error {

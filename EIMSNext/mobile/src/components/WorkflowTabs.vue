@@ -1,5 +1,5 @@
 <template>
-  <MobilePage v-if="!embedded" title="流程中心" @back="goBack">
+  <MobilePage v-if="!embedded" :title="t('mobile.workflow.title')" @back="goBack">
     <div class="workflow-page">
       <InnerWorkflowTabs
         :active-tab="activeTab"
@@ -25,6 +25,7 @@
 <script setup lang="ts">
 import { computed, defineComponent, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import type { WfTodo } from "@eimsnext/models";
 import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
@@ -43,6 +44,7 @@ const props = withDefaults(
 
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
 const appId = computed(() => props.appId || (route.params.appId as string) || "");
 const activeTab = ref<string>((route.query.tab as string) || "todo");
 
@@ -75,6 +77,7 @@ const InnerWorkflowTabs = defineComponent({
   },
   emits: ["change-tab", "open-approval", "open-detail"],
   setup(innerProps, { emit }) {
+    const { t } = useI18n();
     const currentTab = ref(innerProps.activeTab);
     const refreshing = ref(false);
     const loading = ref(false);
@@ -113,6 +116,7 @@ const InnerWorkflowTabs = defineComponent({
       refreshing,
       loading,
       list,
+      t,
       emit,
       load,
       openApproval: (task: WfTodo) => emit("open-approval", task),
@@ -125,15 +129,15 @@ const InnerWorkflowTabs = defineComponent({
   },
   template: `
     <van-tabs :active="currentTab" @update:active="switchTab">
-      <van-tab title="我的待办" name="todo" />
-      <van-tab title="我发起的" name="started" />
-      <van-tab title="我处理的" name="approved" />
-      <van-tab title="抄送我的" name="cced" />
+      <van-tab :title="t('mobile.workflow.todo')" name="todo" />
+      <van-tab :title="t('mobile.workflow.started')" name="started" />
+      <van-tab :title="t('mobile.workflow.processed')" name="approved" />
+      <van-tab :title="t('mobile.workflow.cced')" name="cced" />
     </van-tabs>
     <div class="workflow-list-wrap">
       <van-pull-refresh v-model="refreshing" @refresh="load">
-        <div v-if="loading" class="workflow-empty">加载中...</div>
-        <div v-else-if="list.length === 0" class="workflow-empty">暂无数据</div>
+        <div v-if="loading" class="workflow-empty">{{ t('common.loading') }}</div>
+        <div v-else-if="list.length === 0" class="workflow-empty">{{ t('common.noData') }}</div>
         <div v-else class="workflow-list">
           <MobileCard
             v-for="task in list"
@@ -145,10 +149,10 @@ const InnerWorkflowTabs = defineComponent({
               <div class="workflow-form-name">{{ task.formName }}</div>
               <div class="workflow-time">{{ task.approveNodeStartTime || task.createTime || task.updateTime }}</div>
             </div>
-            <div class="workflow-node">{{ task.approveNodeName || '流程记录' }}</div>
-            <div class="workflow-starter">发起人：{{ task.starter?.label || '-' }}</div>
+            <div class="workflow-node">{{ task.approveNodeName || t('mobile.workflow.record') }}</div>
+            <div class="workflow-starter">{{ t('mobile.workflow.starter') }}: {{ task.starter?.label || '-' }}</div>
             <div class="workflow-brief">
-              <div v-for="item in task.dataBrief?.slice(0, 2)" :key="item.field">{{ item.title }}：{{ item.value }}</div>
+              <div v-for="item in task.dataBrief?.slice(0, 2)" :key="item.field">{{ item.title }}: {{ item.value }}</div>
             </div>
           </MobileCard>
         </div>

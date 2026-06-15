@@ -4,37 +4,16 @@
     <div class="sidebar-container">
       <!-- 顶部布局顶部 || 左侧布局左侧 -->
       <div class="sys-menu-wrap">
-        <el-menu mode="vertical">
-          <router-link custom :to="{ path: resolveFullPath('department') }" v-slot="{ navigate }">
-            <el-menu-item index="department" @click="() => navigate()">
-              <et-icon icon="icon-organization" class="step-image" size="14px" />
-              <span class="app-menu-text">{{ $t("admin.shellMenu.org") }}</span>
-            </el-menu-item>
-          </router-link>
-          <router-link custom :to="{ path: resolveFullPath('role') }" v-slot="{ navigate }">
-            <el-menu-item index="role" @click="() => navigate()">
-              <et-icon icon="icon-role" class="step-image" size="14px" />
-              <span class="app-menu-text">{{ $t("admin.shellMenu.role") }}</span>
-            </el-menu-item>
-          </router-link>
-          <router-link custom :to="{ path: resolveFullPath('admin') }" v-slot="{ navigate }">
-            <el-menu-item index="admin" @click="() => navigate()">
-              <et-icon icon="icon-admin" class="step-image" size="14px" />
-              <span class="app-menu-text">{{ $t("admin.shellMenu.admin") }}</span>
-            </el-menu-item>
-          </router-link>
-          <router-link custom :to="{ path: resolveFullPath('corp-log') }" v-slot="{ navigate }">
-            <el-menu-item index="corp-log" @click="() => navigate()">
-              <et-icon icon="icon-admin" class="step-image" size="14px" />
-              <span class="app-menu-text">{{ $t("admin.shellMenu.corpLog") }}</span>
-            </el-menu-item>
-          </router-link>
-          <router-link custom :to="{ path: resolveFullPath('flow-manage') }" v-slot="{ navigate }">
-            <el-menu-item v-if="curUser.userType == UserType.CorpAdmin" index="flow-manage" @click="() => navigate()">
-              <et-icon icon="tree" class="step-image" size="14px" />
-              <span class="app-menu-text">{{ $t("admin.shellMenu.flowManage") }}</span>
-            </el-menu-item>
-          </router-link>
+        <el-menu mode="vertical" :default-active="route.path">
+          <div v-for="group in menuGroups" :key="group.title" class="menu-group">
+            <div class="group-title">{{ $t(group.title) }}</div>
+            <router-link v-for="item in group.items" :key="item.path" custom :to="{ path: resolveFullPath(item.path) }" v-slot="{ navigate }">
+              <el-menu-item :index="resolveFullPath(item.path)" @click="() => navigate()">
+                <et-icon :icon="item.icon" class="step-image" size="14px" />
+                <span class="app-menu-text">{{ $t(item.label) }}</span>
+              </el-menu-item>
+            </router-link>
+          </div>
         </el-menu>
       </div>
     </div>
@@ -55,12 +34,65 @@ import { useUserStore } from "@eimsnext/store";
 import { UserType } from "@eimsnext/models";
 import SysMain from "./SysMain/index.vue";
 
+interface SysMenuItem {
+  path: string;
+  icon: string;
+  label: string;
+  visible?: boolean;
+}
+
+interface SysMenuGroup {
+  title: string;
+  items: SysMenuItem[];
+}
+
 const userStore = useUserStore();
 const curUser = toRef(userStore.currentUser);
+const route = useRoute();
 const wfbasePath = `/system/`;
 const resolveFullPath = (routePath: string) => wfbasePath + routePath;
+const isCorpAdmin = computed(() => curUser.value.userType == UserType.CorpAdmin);
+const isUnrestrictedAdmin = computed(() =>
+  curUser.value.userType == UserType.CorpOwmer || curUser.value.userType == UserType.CorpAdmin,
+);
 
-onBeforeMount(async () => { });
+const menuGroups = computed<SysMenuGroup[]>(() => {
+  const groups: SysMenuGroup[] = [
+    {
+      title: "admin.shellMenu.contacts",
+      items: [
+        { path: "department", icon: "icon-organization", label: "admin.shellMenu.org" },
+        { path: "role", icon: "icon-role", label: "admin.shellMenu.role" },
+      ],
+    },
+    {
+      title: "admin.shellMenu.permissionCenter",
+      items: [{ path: "admin", icon: "icon-admin", label: "admin.shellMenu.admin", visible: isUnrestrictedAdmin.value }],
+    },
+    {
+      title: "admin.shellMenu.logAudit",
+      items: [{ path: "corp-log", icon: "icon-admin", label: "admin.shellMenu.corpLog", visible: isUnrestrictedAdmin.value }],
+    },
+    {
+      title: "admin.shellMenu.managementTools",
+      items: [
+        {
+          path: "flow-manage",
+          icon: "tree",
+          label: "admin.shellMenu.flowManage",
+          visible: isCorpAdmin.value,
+        },
+      ],
+    },
+  ];
+
+  return groups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => item.visible !== false),
+    }))
+    .filter((group) => group.items.length > 0);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -101,6 +133,18 @@ onBeforeMount(async () => { });
 
 .sys-menu-wrap {
   margin-top: var(--et-space-10);
+}
+
+.menu-group + .menu-group {
+  margin-top: 14px;
+}
+
+.group-title {
+  padding: 0 14px 6px;
+  color: var(--et-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 :deep(.el-menu-item) {

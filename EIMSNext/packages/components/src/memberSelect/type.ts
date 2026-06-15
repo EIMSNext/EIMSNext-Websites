@@ -24,6 +24,7 @@ export interface IMemberSelectOptions {
   dynamicMembers?: ISelectedTag[];
   dynamicManagerLevels?: number[];
   showContract?: false;
+  adminScope?: boolean;
 }
 
 export interface IDynamicMemberGroup extends IListItem {
