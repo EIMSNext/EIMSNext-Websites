@@ -15,7 +15,7 @@
             </router-link>
           </el-tooltip>
           <template
-            v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
+            v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin || curUser.userType == UserType.AppAdmin"
           >
             <el-tooltip :content="t('route.system')" placement="right" :hide-after="0">
               <router-link custom :to="{ path: '/system/department' }" v-slot="{ navigate }">

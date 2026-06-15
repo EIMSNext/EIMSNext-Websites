@@ -3,6 +3,7 @@
     xmlns="http://www.w3.org/2000/svg"
     version="1.1"
     class="line-svg"
+    :class="{ executed: props.executed }"
     width="2"
     preserveAspectRatio="xMinYMin meet"
   >
@@ -16,8 +17,18 @@ defineOptions({
   name: "SvgLine",
 });
 
+const props = withDefaults(
+  defineProps<{
+    executed?: boolean;
+  }>(),
+  {
+    executed: false,
+  },
+);
+
 const lineStyle = computed(() => {
-  return "stroke: var(--et-border-color-strong); stroke-width: 10;";
+  const color = props.executed ? "var(--et-color-success)" : "var(--et-border-color-strong)";
+  return `stroke: ${color}; stroke-width: 10;`;
 });
 </script>
 <style lang="scss" scoped>
@@ -30,5 +41,9 @@ const lineStyle = computed(() => {
   width: var(--et-space-2);
   z-index: -1;
   vector-effect: non-scaling-stroke;
+
+  &.executed {
+    border-color: var(--et-color-success);
+  }
 }
 </style>

@@ -1381,6 +1381,13 @@ export default {
     dataflowName: "名称",
     newDataflow: "新建智能助手",
     newDataflowDialog: "新建智能助手Pro",
+    executionLog: "执行日志",
+    viewExecutionLog: "查看执行日志",
+    deletedField: "已删除字段",
+    missingFieldSaveDisabledTitle: "存在不可用字段",
+    missingFieldSaveDisabledContent:
+      "该智能助手存在已删除或不可用字段，保存后将自动禁用。你可以确认保存并禁用，或取消后继续修改。",
+    missingFieldEnableBlocked: "该智能助手存在不可用字段，修复后才能启用",
     formTriggerDesc: "表单中数据发生变化时，触发自动化操作",
     scheduleTriggerDesc: "根据设定的时间、频率周期性触发自动化操作",
     httpTriggerDesc: "指定URL接收到第三方数据时，触发自动化操作",

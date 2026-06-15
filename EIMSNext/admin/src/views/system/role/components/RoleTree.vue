@@ -27,7 +27,7 @@
   <el-card shadow="never" class="role-card">
     <div class="form-action">
       <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable :placeholder="$t('role.searchPlaceholder')" />
-      <el-button @click="handleAddGroupClick">
+      <el-button v-if="editable" @click="handleAddGroupClick">
         <et-icon icon="el-plus" />
       </el-button>
     </div>
@@ -38,6 +38,7 @@
         :group="dragGroup"
         ghost-class="drag-ghost"
         :animation="180"
+        :disabled="!editable"
         :move="handleRootMove"
         @start="handleRootDragStart"
         @end="handleDragEnd"
@@ -69,6 +70,7 @@
                 :group="dragGroup"
                 ghost-class="drag-ghost"
                 :animation="180"
+                :disabled="!editable"
                 :move="handleChildMove"
                 @start="handleChildDragStart(element, $event)"
                 @end="handleDragEnd"
@@ -126,6 +128,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  adminScope: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const treeItems = ref<RoleTreeNode[]>([]);
@@ -159,7 +165,7 @@ const loadData = () => {
     roleGroupService.query<RoleGroup>().then((data) => {
       roleGroups = data;
     }),
-    roleService.query<Role>().then((data) => {
+    roleService.query<Role>(props.adminScope ? "adminScope=true" : "").then((data) => {
       roles = data;
     }),
   ]).then(() => {

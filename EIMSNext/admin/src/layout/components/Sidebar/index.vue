@@ -70,7 +70,7 @@
         </template>
       </el-input>
 
-      <template v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin">
+      <template v-if="canManageCurrentApp">
         <el-dropdown placement="bottom-start" size="large">
           <el-button class="create-button">
             <et-icon icon="el-plus"></et-icon>
@@ -101,6 +101,7 @@
       <SidebarMenu
         :app-id="contextStore.appId"
         :menu-list="appMenus"
+        :can-manage="canManageCurrentApp"
         @editForm="editForm"
         @editMenu="openEditMenu"
         @editGroup="openEditGroup"
@@ -124,14 +125,14 @@ import {
   FormDef,
   FormDefRequest,
   FormType,
-  UserType,
 } from "@eimsnext/models";
-import { useAppStore, useContextStore, useFormStore, useUserStore } from "@eimsnext/store";
+import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
 import { appDefService, dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
 import { ElMessage } from "element-plus";
+import { useAdminPermissions } from "@/composables/useAdminPermissions";
 
 const getMenuType = (menuType: FormType | number | undefined): FormType => {
   if (menuType === undefined) return FormType.Form;
@@ -158,15 +159,15 @@ const { appMenus } = storeToRefs(permissionStore);
 const appStore = useAppStore();
 const formStore = useFormStore();
 const contextStore = useContextStore();
-const userStore = useUserStore();
-const curUser = toRef(userStore.currentUser);
 const appId = toRef(contextStore.appId);
 const app = ref<AppDef>();
+const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
 
 const systemStore = useSystemStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
 const appTodoCount = ref(0);
 const hasAppTodo = computed(() => appTodoCount.value > 0);
+const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
 let appTodoTimer: ReturnType<typeof setInterval> | null = null;
 
 // 展开/收缩菜单
@@ -195,6 +196,7 @@ watch(
 );
 
 onMounted(() => {
+  loadAdminPermissions();
   appTodoTimer = setInterval(() => {
     loadAppTodoCount();
   }, BADGE_REFRESH_INTERVAL);
@@ -208,6 +210,8 @@ onBeforeUnmount(() => {
 });
 
 const createForm = (usingFlow: boolean, ledger: boolean) => {
+  if (!canManageCurrentApp.value) return;
+
   usingWorkflow.value = usingFlow;
   isLedger.value = ledger;
 
@@ -235,6 +239,8 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
 };
 
 const editForm = async (formId: string, type: FormType) => {
+  if (!canManageCurrentApp.value) return;
+
   if (type == FormType.Form) {
     const form = await formStore.get(formId);
     if (form) {
@@ -254,6 +260,8 @@ const editForm = async (formId: string, type: FormType) => {
 };
 
 const createDashboard = () => {
+  if (!canManageCurrentApp.value) return;
+
   let req: DashboardDefRequest = {
     id: "",
     appId: contextStore.appId,
@@ -270,11 +278,15 @@ const createDashboard = () => {
 };
 
 const openEditMenu = (menu: AppMenu) => {
+  if (!canManageCurrentApp.value) return;
+
   editingMenu.value = { ...menu };
   showMenuEditor.value = true;
 };
 
 const openEditGroup = (menu: AppMenu) => {
+  if (!canManageCurrentApp.value) return;
+
   editingGroup.value = { ...menu };
   showGroupEditor.value = true;
 };
@@ -294,7 +306,7 @@ const handleAppUpdated = (updatedApp: AppDef) => {
 };
 
 const saveMenus = async () => {
-  if (!app.value) {
+  if (!app.value || !canManageCurrentApp.value) {
     return;
   }
 
@@ -306,6 +318,8 @@ const saveMenus = async () => {
 };
 
 const deleteMenu = async (menu: AppMenu) => {
+  if (!canManageCurrentApp.value) return;
+
   const menuType = getMenuType(menu.menuType);
   if (menuType === FormType.Form) {
     formStore.remove(menu.menuId);
@@ -328,6 +342,8 @@ const deleteMenu = async (menu: AppMenu) => {
 };
 
 const createFolder = () => {
+  if (!canManageCurrentApp.value) return;
+
   editingGroup.value = undefined;
   showGroupEditor.value = true;
 };

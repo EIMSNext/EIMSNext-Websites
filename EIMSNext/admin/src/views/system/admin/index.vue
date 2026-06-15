@@ -274,6 +274,7 @@ import ContactPermissionDialog from "./ContactPermissionDialog.vue";
 import AdminGroupEditDialog from "./AdminGroupEditDialog.vue";
 import {
   AdminGroup,
+  AdminPermissionSnapshot,
   AdminGroupRequest,
   AdminGroupType,
   AppDef,
@@ -289,6 +290,7 @@ import {
   departmentService,
   employeeService,
   roleService,
+  systemService,
 } from "@eimsnext/services";
 import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
 import Draggable from "vuedraggable";
@@ -320,6 +322,7 @@ type AdminPermissionDraft = Pick<
 
 const loading = ref(false);
 const saving = ref(false);
+const adminPermissions = ref<AdminPermissionSnapshot>();
 const keyword = ref("");
 const groups = ref<AdminGroup[]>([]);
 const treeItems = ref<AdminTreeItem[]>([]);
@@ -478,9 +481,10 @@ const idsToRoleTags = (ids: string[]): ISelectedTag[] => {
 };
 
 const memberDialogOptions = computed(() => {
-  if (memberDialogTarget.value === "appDepartments") return { showTabs: MemberTabs.Department };
-  if (memberDialogTarget.value === "appRoles") return { showTabs: MemberTabs.Role };
-  return { showTabs: MemberTabs.Employee };
+  const adminScope = adminPermissions.value?.isNormalAdmin ?? true;
+  if (memberDialogTarget.value === "appDepartments") return { showTabs: MemberTabs.Department, adminScope };
+  if (memberDialogTarget.value === "appRoles") return { showTabs: MemberTabs.Role, adminScope };
+  return { showTabs: MemberTabs.Employee, adminScope };
 });
 
 const memberDialogTags = computed(() => {
@@ -520,14 +524,16 @@ const contactRoleSummary = computed(() => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const [adminGroups, empList, deptList, roleList, appList] = await Promise.all([
+    const [adminGroups, empList, deptList, roleList, appList, permissions] = await Promise.all([
       adminGroupService.query<AdminGroup>(),
-      employeeService.query<Employee>("$filter=status eq 0"),
-      departmentService.query<Department>(),
-      roleService.query<Role>(),
+      employeeService.query<Employee>("$filter=status eq 0&adminScope=true"),
+      departmentService.query<Department>("adminScope=true"),
+      roleService.query<Role>("adminScope=true"),
       appDefService.query<AppDef>(),
+      systemService.getAdminPermissions(),
     ]);
 
+    adminPermissions.value = permissions;
     groups.value = adminGroups.map(normalizeGroup);
     refreshTree();
     systemGroup.value = groups.value.find((group) => group.type === AdminGroupType.System);

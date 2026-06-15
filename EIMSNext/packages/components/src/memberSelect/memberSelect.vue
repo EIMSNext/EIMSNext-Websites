@@ -341,6 +341,7 @@ import { ISelectedTag } from "../selectedTags/type";
 import { Department, Employee, RoleGroup, Role } from "@eimsnext/models";
 import { useDeptStore, useUserStore } from "@eimsnext/store";
 import {
+  departmentService,
   employeeService,
   roleGroupService,
   roleService,
@@ -403,6 +404,11 @@ const selectedDynamicMemberId = ref<string>("");
 const dynamicGroupOrder = ["starter", "employeeField", "departmentField", "manager"];
 
 const isManagerGroup = computed(() => selectedDynamicGroupId.value === "manager");
+const adminScopeParam = () => options.adminScope ? "adminScope=true" : "";
+const joinQuery = (...parts: string[]) => parts.filter(Boolean).join("&");
+const loadDepartments = () => options.adminScope
+  ? departmentService.query<Department>(adminScopeParam())
+  : deptStore.load();
 
 const dynamicGroups = computed<IDynamicMemberGroup[]>(() => {
   const groups: IDynamicMemberGroup[] = [];
@@ -746,7 +752,7 @@ onBeforeMount(() => {
       orgCascade.value = firstDept.cascadedDept;
   }
 
-  deptStore.load().then((data: Department[]) => {
+  loadDepartments().then((data: Department[]) => {
     let detps = buildDeptTree(data);
     const filteredDeptData = filterDeptTreeByScope(detps);
     deptData.value = JSON.parse(JSON.stringify(filteredDeptData));
@@ -784,7 +790,7 @@ onBeforeMount(() => {
     roleGroupService.query<RoleGroup>().then((data) => {
       roleGroups = data;
     }),
-    roleService.query<Role>().then((data) => {
+    roleService.query<Role>(adminScopeParam()).then((data) => {
       roles = data;
     }),
   ]).then(() => {
@@ -890,14 +896,54 @@ const singleDeptChecked = (data: ITreeNode, val: string) => {
   }
 };
 
+const findTreeNode = (nodes: ITreeNode[] | undefined, id: string): ITreeNode | undefined => {
+  for (const node of nodes || []) {
+    if (node.id === id) return node;
+    const matched = findTreeNode(node.children, id);
+    if (matched) return matched;
+  }
+  return undefined;
+};
+
+const collectDescendantDeptIds = (node: ITreeNode | undefined, ids: string[]) => {
+  if (!node) return;
+  ids.push(node.id);
+  node.children?.forEach((child) => collectDescendantDeptIds(child, ids));
+};
+
+const getLimitedEmployeeDeptIds = (deptId: string) => {
+  const limitDeptIds = options.limit?.depts?.map((dept) => dept.id) || [];
+  if (limitDeptIds.length === 0) {
+    return deptId === "all" ? undefined : [deptId];
+  }
+
+  if (deptId === "all") return limitDeptIds;
+  if (limitDeptIds.includes(deptId)) return [deptId];
+
+  const descendantIds: string[] = [];
+  collectDescendantDeptIds(findTreeNode(empDeptData.value, deptId), descendantIds);
+  return descendantIds.filter((id) => limitDeptIds.includes(id));
+};
+
+const buildEmployeeDeptFilter = (deptIds: string[] | undefined) => {
+  if (!deptIds) return "";
+  if (deptIds.length === 0) return undefined;
+  return `$filter=${deptIds.map((id) => `departmentId eq '${id}'`).join(" or ")}`;
+};
+
 const selectEmpDept = (deptId: string) => {
   deptChanging.value = true;
   selectedEmpDeptId.value = deptId;
 
-  let $filter = deptId == "all" ? "" : `$filter=departmentId eq '${deptId}'`;
+  const $filter = buildEmployeeDeptFilter(getLimitedEmployeeDeptIds(deptId));
   empData.value = [];
   selectedEmps.value = [];
-  employeeService.query<Employee>($filter).then((res) => {
+  if ($filter === undefined) {
+    deptChanging.value = false;
+    return;
+  }
+
+  employeeService.query<Employee>(joinQuery($filter, adminScopeParam())).then((res) => {
     res.forEach((x) => {
       empData.value.push(employeeToListItem(x));
 

@@ -59,6 +59,25 @@ export interface AdminGroup extends CorpModelBase {
   contactRoleIds: string[];
 }
 
+export interface AdminPermissionSnapshot {
+  isNormalAdmin: boolean;
+  canCreateOrDeleteApp: boolean;
+  manageableAppIds: string[];
+  deletableAppIds: string[];
+  appDepartmentScopeMode: ScopeMode;
+  appDepartmentIds: string[];
+  appRoleScopeMode: ScopeMode;
+  appRoleIds: string[];
+  contactViewDepartmentScopeMode: ScopeMode;
+  contactViewDepartmentIds: string[];
+  contactManageDepartmentScopeMode: ScopeMode;
+  contactManageDepartmentIds: string[];
+  contactViewRoleScopeMode: ScopeMode;
+  contactViewRoleIds: string[];
+  contactManageRoleScopeMode: ScopeMode;
+  contactManageRoleIds: string[];
+}
+
 export interface MoveAdminGroupRequest {
   id: string;
   parentId: string;

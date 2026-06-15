@@ -6,6 +6,9 @@
       'drag-over': isDragOver,
       'drag-over-before': isDragOver && dragOverPosition === 'before',
       'drag-over-after': isDragOver && dragOverPosition === 'after',
+      'log-executed': isLogExecuted,
+      'log-failed': isLogFailed,
+      'log-line-executed': isLogLineExecuted,
     }"
     :draggable="canDrag"
     @dragstart="dragStart"
@@ -33,7 +36,7 @@
       </div>
       <template #reference>
         <slot>
-          <div class="flow-node" :class="[{ active: isActived }]" @click.stop="nodeClick(nodeData)">
+          <div class="flow-node" :class="[{ active: isActived, success: isLogExecuted && !isLogFailed, error: isLogFailed }]" @click.stop="nodeClick(nodeData)">
             <div class="flow-node-title initiator">
               <et-icon :icon="'el-' + iconName" class="node-icon" :color="iconColor" />
               <span class="node-title-text">
@@ -62,6 +65,7 @@ import {
   FlowNodeType,
   IFlowNodeMetaData,
   cleanupInvalidDataflowDependencies,
+  getFlowNodeById,
   moveFlowNode,
   syncFlowNodeOrder,
 } from "./FlowData";
@@ -101,6 +105,30 @@ const isDragging = ref(false);
 const isDragOver = ref(false);
 const dragOverPosition = ref<"before" | "after">("before");
 const isActived = computed(() => flowContext.activeData.id === props.nodeData.id);
+const isLogFailed = computed(() => flowContext.logState?.failedNodeIds.has(props.nodeData.id) ?? false);
+const isLogExecuted = computed(() => {
+  if (!flowContext.logState) return false;
+  if (flowContext.logState.executedNodeIds.has(props.nodeData.id)) return true;
+  if (props.branchItemData && isBranchItemExecuted(props.branchItemData)) return true;
+  if (
+    (props.nodeData.nodeType === FlowNodeType.Branch ||
+      props.nodeData.nodeType === FlowNodeType.Branch2) &&
+    props.nodeData.childNodes?.some(isBranchItemExecuted)
+  ) {
+    return true;
+  }
+
+  return flowContext.logState.isNodeExecuted?.(props.nodeData) ?? false;
+});
+const isLogLineExecuted = computed(() => {
+  if (!flowContext.logState) return false;
+  if (flowContext.logState.isLineExecuted?.(props.nodeData, props.branchItemData)) return true;
+  if (props.branchItemData && isBranchItemExecuted(props.branchItemData)) return true;
+  const nextId = props.nodeData.nextId;
+  if (!nextId) return false;
+  const nextNode = getFlowNodeById(flowContext.flowData, nextId);
+  return nextNode ? isNodeOrBranchExecuted(nextNode) : false;
+});
 const canDrag = computed(
   () =>
     !flowContext.structureReadonly &&
@@ -157,8 +185,30 @@ const delClick = (data: IFlowNodeData) => {
 const emit = defineEmits(["nodeClick"]);
 const nodeClick = (data: IFlowNodeData) => {
   flowContext.activeData = data;
+  flowContext.logState?.onNodeClick?.(data);
 
   emit("nodeClick", data);
+};
+
+const isBranchItemExecuted = (branchItem: IFlowNodeData) => {
+  if (flowContext.logState?.isBranchExecuted?.(branchItem)) return true;
+  return branchItem.childNodes?.some(isNodeOrBranchExecuted) ?? false;
+};
+
+const isNodeOrBranchExecuted = (node: IFlowNodeData): boolean => {
+  if (flowContext.logState?.executedNodeIds.has(node.id) || flowContext.logState?.failedNodeIds.has(node.id)) {
+    return true;
+  }
+
+  if (node.nodeType === FlowNodeType.Branch || node.nodeType === FlowNodeType.Branch2) {
+    return node.childNodes?.some(isBranchItemExecuted) ?? false;
+  }
+
+  if (node.nodeType === FlowNodeType.BranchItem) {
+    return isBranchItemExecuted(node);
+  }
+
+  return node.childNodes?.some(isNodeOrBranchExecuted) ?? false;
 };
 
 const dragStart = (event: DragEvent) => {

@@ -32,11 +32,11 @@ import { TabPaneName } from "element-plus";
 import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
 import { useSystemStore } from "@/store/system";
-import { FormContent, FormDef } from "@eimsnext/models";
+import { AdminPermissionSnapshot, FieldType, FormContent, FormDef, ScopeMode } from "@eimsnext/models";
 import { useFormStore, useContextStore } from "@eimsnext/store";
 import { ConfirmResult, EtConfirm, MessageIcon } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
-import { formDefService } from "@eimsnext/services";
+import { formDefService, systemService } from "@eimsnext/services";
 
 const WorkflowDesigner = defineAsyncComponent(() => import("../WorkflowDesigner/index.vue"));
 const Advanced = defineAsyncComponent(() => import("./Advanced/index.vue"));
@@ -63,6 +63,7 @@ const locale = computed(() => systemStore.locale);
 
 const formName = ref(props.formDef.name);
 const formDefRef = ref<FormDef>(props.formDef);
+const adminPermissions = ref<AdminPermissionSnapshot>();
 const activeName = ref("formedit");
 const loadedTabs = ref<Record<string, boolean>>({
   formedit: true,
@@ -75,16 +76,119 @@ watch(activeName, (tabName) => {
   loadedTabs.value[tabName] = true;
 }, { immediate: true });
 
+type FormRuleNode = {
+  field?: string;
+  type?: string;
+  props?: Record<string, any>;
+  children?: FormRuleNode[];
+  columns?: FormRuleNode[];
+  subForm?: FormRuleNode[];
+  [key: string]: any;
+};
+
+const scopeFieldTypes = new Set<string>([
+  FieldType.Department1,
+  FieldType.Department2,
+  FieldType.Employee1,
+  FieldType.Employee2,
+]);
+
+const parseLayout = (layout: unknown): { root?: FormRuleNode | FormRuleNode[]; fromString: boolean } => {
+  if (!layout) return { fromString: false };
+  if (typeof layout === "string") {
+    try {
+      return { root: JSON.parse(layout), fromString: true };
+    } catch {
+      return { fromString: true };
+    }
+  }
+
+  return { root: layout as FormRuleNode | FormRuleNode[], fromString: false };
+};
+
+const visitRuleNodes = (root: unknown, visitor: (node: FormRuleNode) => void) => {
+  const visit = (node: unknown) => {
+    if (!node) return;
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
+    if (typeof node !== "object") return;
+
+    const rule = node as FormRuleNode;
+    visitor(rule);
+    visit(rule.children);
+    visit(rule.columns);
+    visit(rule.subForm);
+    visit(rule.rule);
+  };
+
+  visit(root);
+};
+
+const collectScopedFieldKeys = (content?: FormContent) => {
+  const fieldKeys = new Set<string>();
+  const { root } = parseLayout(content?.layout);
+  visitRuleNodes(root, (rule) => {
+    if (rule.field && scopeFieldTypes.has(String(rule.type))) fieldKeys.add(rule.field);
+  });
+  return fieldKeys;
+};
+
+const loadAdminPermissions = async () => {
+  if (!adminPermissions.value) adminPermissions.value = await systemService.getAdminPermissions();
+  return adminPermissions.value;
+};
+
+const getManagedDepartmentIds = async () => {
+  const permissions = await loadAdminPermissions();
+  if (!permissions.isNormalAdmin) return [];
+  if (permissions.contactManageDepartmentScopeMode !== ScopeMode.Partial) return [];
+  return permissions.contactManageDepartmentIds || [];
+};
+
+const applyDefaultAdminScopes = async (content: FormContent) => {
+  const managedDepartmentIds = await getManagedDepartmentIds();
+  if (managedDepartmentIds.length === 0) return content;
+
+  const previousFieldKeys = collectScopedFieldKeys(formDefRef.value.content);
+  const layout = parseLayout(content.layout);
+  let changed = false;
+
+  visitRuleNodes(layout.root, (rule) => {
+    if (!rule.field || previousFieldKeys.has(rule.field) || !scopeFieldTypes.has(String(rule.type))) return;
+
+    const props = rule.props || {};
+    const hasManualScope = props.limitType === "custom" || (Array.isArray(props.limitScope) && props.limitScope.length > 0);
+    if (hasManualScope) return;
+
+    rule.props = {
+      ...props,
+      limitType: "custom",
+      limitScope: [...managedDepartmentIds],
+    };
+    changed = true;
+  });
+
+  if (changed && layout.fromString && layout.root) {
+    content.layout = JSON.stringify(layout.root);
+  }
+
+  return content;
+};
+
 const onSave = async (content: FormContent) => {
+  const scopedContent = await applyDefaultAdminScopes(content);
   let req = {
     id: props.formDef.id,
     appId: props.formDef.appId,
     name: formName.value,
-    content: content,
+    content: scopedContent,
   };
 
   let resp = await formDefService.patch<FormDef>(req.id, req);
   formDefRef.value = resp;
+  formBuilder.value?.resetDirty(scopedContent);
   formStore.update(resp);
   contextStore.setAppChanged(); //reload 菜单
 

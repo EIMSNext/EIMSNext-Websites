@@ -1382,6 +1382,13 @@ export default {
     dataflowName: "Name",
     newDataflow: "New Automation",
     newDataflowDialog: "New Automation Pro",
+    executionLog: "Execution Logs",
+    viewExecutionLog: "View Logs",
+    deletedField: "Deleted field",
+    missingFieldSaveDisabledTitle: "Invalid fields detected",
+    missingFieldSaveDisabledContent:
+      "This automation contains deleted or unavailable fields. Saving will disable it. Confirm to save as disabled, or cancel and continue editing.",
+    missingFieldEnableBlocked: "This automation contains unavailable fields. Fix them before enabling.",
     formTriggerDesc: "Trigger automation when form data changes",
     scheduleTriggerDesc: "Trigger automation periodically based on configured time and frequency",
     httpTriggerDesc: "Trigger automation when the specified URL receives third-party data",

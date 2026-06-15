@@ -125,6 +125,7 @@ const roleCanManage = computed({
 
 const dialogMemberOptions = computed(() => ({
   showTabs: selectingType.value === "dept" ? MemberTabs.Department : MemberTabs.Role,
+  adminScope: true,
 }));
 
 const dialogTags = computed(() => (selectingType.value === "dept" ? props.deptTags : props.roleTags));

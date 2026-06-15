@@ -96,6 +96,15 @@ export interface IFlowContext {
   sourceId?: string;
   flowData: IFlowData;
   structureReadonly?: boolean;
+  logState?: IFlowLogState;
+}
+export interface IFlowLogState {
+  executedNodeIds: Set<string>;
+  failedNodeIds: Set<string>;
+  isNodeExecuted?: (nodeData: IFlowNodeData) => boolean;
+  isLineExecuted?: (nodeData: IFlowNodeData, branchItemData?: IFlowNodeData) => boolean;
+  isBranchExecuted?: (branchItemData: IFlowNodeData) => boolean;
+  onNodeClick?: (nodeData: IFlowNodeData) => void;
 }
 export interface IFlowNodeDragData {
   nodeData: IFlowNodeData;

@@ -52,6 +52,9 @@ const route = useRoute();
 const wfbasePath = `/system/`;
 const resolveFullPath = (routePath: string) => wfbasePath + routePath;
 const isCorpAdmin = computed(() => curUser.value.userType == UserType.CorpAdmin);
+const isUnrestrictedAdmin = computed(() =>
+  curUser.value.userType == UserType.CorpOwmer || curUser.value.userType == UserType.CorpAdmin,
+);
 
 const menuGroups = computed<SysMenuGroup[]>(() => {
   const groups: SysMenuGroup[] = [
@@ -64,11 +67,11 @@ const menuGroups = computed<SysMenuGroup[]>(() => {
     },
     {
       title: "admin.shellMenu.permissionCenter",
-      items: [{ path: "admin", icon: "icon-admin", label: "admin.shellMenu.admin" }],
+      items: [{ path: "admin", icon: "icon-admin", label: "admin.shellMenu.admin", visible: isUnrestrictedAdmin.value }],
     },
     {
       title: "admin.shellMenu.logAudit",
-      items: [{ path: "corp-log", icon: "icon-admin", label: "admin.shellMenu.corpLog" }],
+      items: [{ path: "corp-log", icon: "icon-admin", label: "admin.shellMenu.corpLog", visible: isUnrestrictedAdmin.value }],
     },
     {
       title: "admin.shellMenu.managementTools",

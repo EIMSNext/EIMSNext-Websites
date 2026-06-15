@@ -55,8 +55,8 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 import { ITreeNode, buildDeptTree } from "@eimsnext/components";
-import { Department, Employee, EmployeeRequest, EmployeeStatus, PlatformType } from "@eimsnext/models";
-import { employeeService } from "@eimsnext/services";
+import { Department, Employee, EmployeeRequest, EmployeeStatus, PlatformType, ScopeMode } from "@eimsnext/models";
+import { departmentService, employeeService } from "@eimsnext/services";
 import { useContextStore, useDeptStore } from "@eimsnext/store";
 
 const { t } = useI18n();
@@ -69,9 +69,15 @@ const props = withDefaults(
   defineProps<{
     edit: boolean;
     emp?: Employee;
+    adminScope?: boolean;
+    departmentScopeMode?: ScopeMode;
+    departmentIds?: string[];
   }>(),
   {
     edit: false,
+    adminScope: false,
+    departmentScopeMode: ScopeMode.All,
+    departmentIds: () => [],
   }
 );
 
@@ -114,10 +120,27 @@ const rules = reactive({
 });
 
 onBeforeMount(() => {
-  deptStore.load().then((data: Department[]) => {
-    deptList.value = buildDeptTree(data);
+  const loader = props.adminScope
+    ? departmentService.query<Department>("adminScope=true")
+    : deptStore.load();
+  loader.then((data: Department[]) => {
+    deptList.value = filterManageableDepartments(buildDeptTree(data));
   });
 });
+
+const filterManageableDepartments = (nodes: ITreeNode[]) => {
+  if (props.departmentScopeMode !== ScopeMode.Partial || props.departmentIds.length === 0) return nodes;
+
+  const allowedIds = new Set(props.departmentIds);
+  const filterNode = (node: ITreeNode): ITreeNode | undefined => {
+    const children = node.children?.map(filterNode).filter((child): child is ITreeNode => !!child) || [];
+    if (allowedIds.has(node.id)) return { ...node, children };
+    if (children.length > 0) return { ...node, disabled: true, children };
+    return undefined;
+  };
+
+  return nodes.map(filterNode).filter((node): node is ITreeNode => !!node);
+};
 
 const emit = defineEmits(["cancel", "ok"]);
 const cancel = () => {

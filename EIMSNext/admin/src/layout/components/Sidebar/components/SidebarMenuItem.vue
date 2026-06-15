@@ -24,12 +24,12 @@
       </template>
 
       <Draggable v-if="item.subMenus" :list="item.subMenus" item-key="menuId" tag="div" data-menu-type="submenu"
-        :group="dragGroup" filter=".more-wrapper, .more-wrapper *" :prevent-on-filter="false" :move="handleSubMenuMove"
+        :group="dragGroup" filter=".more-wrapper, .more-wrapper *" :prevent-on-filter="false" :disabled="!canManage" :move="handleSubMenuMove"
         ghost-class="menu-drag-ghost" :animation="180" @start="handleSubMenuDragStart" @end="handleDragEnd"
         @change="handleSubMenuChange">
         <template #item="{ element }">
           <div class="menu-drag-item">
-            <SidebarMenuItem :item="element" :app-id="appId" @editForm="emit('editForm', $event)"
+            <SidebarMenuItem :item="element" :app-id="appId" :can-manage="canManage" @editForm="emit('editForm', $event)"
               @editMenu="emit('editMenu', $event)" @editGroup="emit('editGroup', $event)"
               @deleteMenu="emit('deleteMenu', $event)" :on-group-drop="onGroupDrop" :can-drop-to-group="canDropToGroup"
               :on-drag-start="onDragStart" :on-drag-end="onDragEnd" @menusChanged="emit('menusChanged')" />
@@ -72,8 +72,7 @@ defineOptions({
 });
 
 import { getAppIconColor, getFormIcon } from "@/utils/common";
-import { useUserStore } from "@eimsnext/store";
-import { AppMenu, FormType, UserType } from "@eimsnext/models";
+import { AppMenu, FormType } from "@eimsnext/models";
 import { ConfirmResult, EtConfirm } from "@eimsnext/components";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
@@ -84,6 +83,7 @@ const { t } = useI18n();
 const props = defineProps<{
   item: AppMenu;
   appId: string;
+  canManage?: boolean;
   onGroupDrop?: (groupMenu: AppMenu) => boolean;
   canDropToGroup?: (groupMenu: AppMenu | undefined, eventTarget: EventTarget | null) => boolean;
   onDragStart?: (menu: AppMenu) => void;
@@ -91,13 +91,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "menusChanged"]);
-const userStore = useUserStore();
-const curUser = toRef(userStore.currentUser);
 const systemStore = useSystemStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
-const canManage = computed(
-  () => curUser.value.userType == UserType.CorpOwmer || curUser.value.userType == UserType.CorpAdmin,
-);
+const canManage = computed(() => !!props.canManage);
 const dragGroup = { name: "app-menu", pull: true, put: true };
 const groupIndex = computed(() => `group-${props.item.menuId}`);
 const subMenuRef = ref();
@@ -118,22 +114,28 @@ const routeTo = computed(() => ({
 }));
 
 function editForm(formId?: string, type?: FormType) {
+  if (!canManage.value) return;
+
   if (formId && type !== undefined) {
     emit("editForm", { id: formId, type });
   }
 }
 
 function handleSubMenuChange() {
+  if (!canManage.value) return;
   emit("menusChanged");
 }
 
 function handleGroupDrop() {
+  if (!canManage.value) return;
   if (props.onGroupDrop?.(props.item)) {
     props.onDragEnd?.();
   }
 }
 
 function handleSubMenuDragStart(event: { oldIndex?: number }) {
+  if (!canManage.value) return;
+
   if (event.oldIndex === undefined) return;
 
   const menu = props.item.subMenus?.[event.oldIndex];
@@ -143,6 +145,7 @@ function handleSubMenuDragStart(event: { oldIndex?: number }) {
 }
 
 function handleSubMenuMove(event: { relatedContext?: { element?: AppMenu }; originalEvent?: { target?: EventTarget | null } }) {
+  if (!canManage.value) return false;
   return !props.canDropToGroup?.(event.relatedContext?.element, event.originalEvent?.target ?? null);
 }
 
@@ -151,6 +154,8 @@ function handleDragEnd() {
 }
 
 async function deleteGroup(menu: AppMenu) {
+  if (!canManage.value) return;
+
   const menuType = getMenuType(menu.menuType);
   if (menuType === FormType.Group && menu.subMenus && menu.subMenus.length > 0) {
     ElMessage.warning(t("admin.misc.childMenuDeleteBlocked"));

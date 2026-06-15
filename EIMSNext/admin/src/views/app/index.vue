@@ -14,7 +14,7 @@
           <div class="empty-title">{{ $t("admin.appPage.createPlaceholder") }}</div>
           <!-- <el-link target="_blank">{{ $t("admin.myApp") }}</el-link> -->
         </div>
-        <div class="creator-container">
+        <div v-if="canManageCurrentApp" class="creator-container">
           <div class="creator-item" @click="createForm(false, false)">
             <div class="tip-icon generic">
               <div class="create-icon generic"></div>
@@ -38,6 +38,7 @@
             <div class="tip-desc">{{ $t("admin.appPage.newLedgerDesc") }}</div>
           </div>
         </div>
+        <el-empty v-else :description="$t('common.noPermission')" />
       </div>
     </div>
   </Layout>
@@ -50,6 +51,7 @@ import FormEdit from "@/components/FormEdit/index.vue";
 import { AppDef, FormDef, FormDefRequest, FormType } from "@eimsnext/models";
 import { formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
+import { useAdminPermissions } from "@/composables/useAdminPermissions";
 const { t } = useI18n();
 
 const newForm = ref<FormDef>();
@@ -62,11 +64,14 @@ let appId = route.params.appId.toString();
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
 const isLedger = ref(false);
+const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
+const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
 
 const app = ref<AppDef>();
 
 onBeforeMount(async () => {
   await contextStore.setAppId(appId);
+  await loadAdminPermissions();
   appStore.get(contextStore.appId).then((res) => (app.value = res));
   if (formStore.items.length > 0) {
     const path = `/app/${appId}/form/${formStore.items[0].id}`;
@@ -75,6 +80,8 @@ onBeforeMount(async () => {
 });
 
 const createForm = (usingFlow: boolean, ledger: boolean) => {
+  if (!canManageCurrentApp.value) return;
+
   usingWorkflow.value = usingFlow;
   isLedger.value = ledger;
 
