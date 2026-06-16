@@ -132,14 +132,14 @@ import {
   ITableColumn,
   SystemField,
 } from "@eimsnext/models";
-import { formDataService, IDynamicFindOptions, IFormDataPermissionScopeResponse } from "@eimsnext/services";
+import { dashboardPublicService, formDataService, IDynamicFindOptions, IFormDataPermissionScopeResponse } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
 import { useI18n } from "vue-i18n";
 import { toDynamicFindOptions } from "@eimsnext/components";
 import DashSort from "../components/DashSort.vue";
 import FormDataView from "@/views/form/components/FormDataView.vue";
 import DetailTableRowPreview from "./DetailTableRowPreview.vue";
-import { buildDetailTableColumns, detailTableSettingValidate, IDetailTableSetting } from "./type";
+import { buildDetailTableColumns, buildPublicDetailTableColumns, detailTableSettingValidate, IDetailTableSetting } from "./type";
 
 const { t } = useI18n();
 
@@ -154,6 +154,8 @@ const props = withDefaults(
     showHeader?: boolean;
     designerMode?: boolean;
     externalFilter?: IConditionList;
+    publicToken?: string;
+    publicItemId?: string;
   }>(),
   {
     showHeader: true,
@@ -234,6 +236,21 @@ const loadFormContext = async () => {
     formDef.value = undefined;
     columns.value = [];
     sortFields.value = [];
+    noAccessFieldPerms.value = [];
+    return;
+  }
+
+  if (props.publicToken) {
+    formDef.value = {
+      id: props.setting.datasource.id,
+      appId: "",
+      name: props.setting.datasource.label || props.title,
+      isLedger: false,
+      usingWorkflow: false,
+      content: { items: [] },
+    } as unknown as FormDef;
+    columns.value = buildPublicDetailTableColumns(props.setting.displayFields || []);
+    sortFields.value = props.setting.displayFields || [];
     noAccessFieldPerms.value = [];
     return;
   }
@@ -367,7 +384,9 @@ const loadCount = async () => {
     return;
   }
 
-  const count = await formDataService.countByOptions(buildQueryOptions(0, 0));
+  const count = props.publicToken && props.publicItemId
+    ? await dashboardPublicService.countData(props.publicToken, props.publicItemId, buildQueryOptions(0, 0))
+    : await formDataService.countByOptions(buildQueryOptions(0, 0));
   rawTotal.value = count;
   displayTotal.value = getVisibleTotal(count);
 
@@ -394,7 +413,9 @@ const loadRows = async () => {
   }
 
   const take = props.setting.showTop ? Math.min(pageSize.value, remaining) : pageSize.value;
-  rows.value = await formDataService.query<FormData>(buildQueryOptions(skip, take));
+  rows.value = props.publicToken && props.publicItemId
+    ? await dashboardPublicService.queryData(props.publicToken, props.publicItemId, buildQueryOptions(skip, take))
+    : await formDataService.query<FormData>(buildQueryOptions(skip, take));
   processRows();
 };
 
@@ -432,6 +453,9 @@ const formatCellValue = (row: Record<string, any>, column: ITableColumn) => {
 
 const handleRowClick = (row: Record<string, any>) => {
   if (props.designerMode) {
+    return;
+  }
+  if (props.publicToken) {
     return;
   }
 

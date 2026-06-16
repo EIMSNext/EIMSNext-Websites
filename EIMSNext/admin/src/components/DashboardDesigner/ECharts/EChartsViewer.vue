@@ -49,7 +49,7 @@
 import { ref, watch } from "vue";
 import echarts from "@/plugins/echarts";
 import { chartSettingValidate, ChartType, getChartSort, IChartSetting } from "./type";
-import { AggCalcRequest, AggregateFun, aggregateService } from "@eimsnext/services";
+import { AggCalcRequest, AggregateFun, aggregateService, dashboardPublicService } from "@eimsnext/services";
 import { convertToFieldArray } from "@eimsnext/utils";
 import { IConditionList, ISortItem, ISortList, toDynamicFilter } from "@eimsnext/components";
 import DashSort from "../components/DashSort.vue";
@@ -68,6 +68,8 @@ const props = withDefaults(
     showHeader?: boolean;
     designerMode?: boolean;
     externalFilter?: IConditionList;
+    publicToken?: string;
+    publicItemId?: string;
   }>(),
   {
     showHeader: true,
@@ -118,7 +120,9 @@ const getChartOpts = async (setting: IChartSetting) => {
     sort: getChartSort(setting),
     take: setting.takeEnable ? setting.take : -1,
   };
-  let aggResult = await aggregateService.calucate(aggRequest);
+  let aggResult = props.publicToken && props.publicItemId
+    ? await dashboardPublicService.calculate(props.publicToken, props.publicItemId, aggRequest)
+    : await aggregateService.calucate(aggRequest);
   let ds = convertToFieldArray(aggResult);
   switch (chartType) {
     case ChartType.VBar: // 垂直柱状图

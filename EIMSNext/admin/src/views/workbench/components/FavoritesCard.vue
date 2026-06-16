@@ -38,6 +38,8 @@ import {
   useWorkbenchStore,
   WORKBENCH_FAVORITES_CHANGED_EVENT,
 } from "@/store";
+import { useAppStore } from "@eimsnext/store";
+import { resolveAppEntryPath } from "@/utils/appEntry";
 
 defineOptions({
   name: "WorkbenchFavoritesCard",
@@ -53,6 +55,7 @@ defineEmits<{
 
 const router = useRouter();
 const contextStore = useContextStore();
+const appStore = useAppStore();
 const workbenchStore = useWorkbenchStore();
 const favorites = ref<WorkbenchFavorite[]>([]);
 
@@ -74,7 +77,8 @@ const openItem = async (item: WorkbenchFavorite) => {
   }
 
   if (item.targetType === "app") {
-    router.push(`/app/${item.targetId}/mytasks`);
+    const app = await appStore.get(item.targetId);
+    router.push(app ? resolveAppEntryPath(app) : `/app/${item.targetId}/mytasks`);
     return;
   }
 

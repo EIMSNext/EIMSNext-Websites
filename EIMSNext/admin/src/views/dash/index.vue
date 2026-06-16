@@ -66,6 +66,9 @@ const state = reactive<IGridLayoutState>({
 const colNum = ref(24);
 const colWidth = ref(150);
 const rowHeight = ref(10);
+const dashboard = ref<DashboardDef>();
+const refreshTimer = ref<number>();
+const { isFullscreen } = useFullscreen();
 
 const { chartFilters, rebuildChartFilters, handleFilterChange } = useChartFilterLinkage(state);
 
@@ -87,7 +90,9 @@ const getMaxHeight = (item: IGridLayoutItem) => {
   return 60;
 };
 
-dashboardDefService.get<DashboardDef>(dashId).then((dash) => {
+const loadDashboard = async () => {
+  const dash = await dashboardDefService.get<DashboardDef>(dashId);
+  dashboard.value = dash;
   try {
     const parsedLayout = JSON.parse(dash.layout) || [];
     state.layout.splice(0, state.layout.length);
@@ -95,21 +100,39 @@ dashboardDefService.get<DashboardDef>(dashId).then((dash) => {
 
     state.items = {};
 
-    dashboardItemDefService
-      .query<DashboardItemDef>(`$filter=appid eq '${dash.appId}'&DashboardId=${dash.id}`)
-      .then((itemDefs) => {
-        if (itemDefs && itemDefs.length > 0) {
-          itemDefs.forEach((x) => {
-            state.items[x.layoutId] = x;
-          });
-          rebuildChartFilters();
-        }
+    const itemDefs = await dashboardItemDefService.query<DashboardItemDef>(`$filter=appid eq '${dash.appId}'&DashboardId=${dash.id}`);
+    if (itemDefs && itemDefs.length > 0) {
+      itemDefs.forEach((x) => {
+        state.items[x.layoutId] = x;
       });
+      rebuildChartFilters();
+    }
   } catch (e) {
     console.error("布局JSON解析失败：", e);
     state.layout.splice(0, state.layout.length); // 解析失败则清空布局
   }
-});
+};
+
+function clearRefreshTimer() {
+  if (refreshTimer.value) {
+    window.clearInterval(refreshTimer.value);
+    refreshTimer.value = undefined;
+  }
+}
+
+function setupRefreshTimer() {
+  clearRefreshTimer();
+  if (!isFullscreen.value || !dashboard.value?.autoRefreshEnabled) {
+    return;
+  }
+
+  const minutes = dashboard.value.autoRefreshIntervalMinutes || 15;
+  refreshTimer.value = window.setInterval(loadDashboard, minutes * 60 * 1000);
+}
+
+watch([isFullscreen, dashboard], setupRefreshTimer);
+onMounted(loadDashboard);
+onBeforeUnmount(clearRefreshTimer);
 </script>
 <style lang="scss" scoped>
 .dash-edit-layout {

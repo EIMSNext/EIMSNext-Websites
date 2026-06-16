@@ -7,6 +7,7 @@ export interface AppDefRequest extends IdBase {
   icon?: string;
   iconColor?: string;
   sortIndex?: number;
+  homeEntryId?: string;
 }
 
 export interface AppDef extends CorpModelBase {
@@ -17,6 +18,7 @@ export interface AppDef extends CorpModelBase {
   iconColor?: string;
   groupId?: string;
   sortIndex: number;
+  homeEntryId?: string;
   appMenus: AppMenu[];
 }
 

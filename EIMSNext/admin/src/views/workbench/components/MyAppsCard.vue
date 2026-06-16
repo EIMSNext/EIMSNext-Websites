@@ -71,6 +71,7 @@ import { ConfirmResult, EtConfirm } from "@eimsnext/components";
 import { appDefService } from "@eimsnext/services";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
 import { useWorkbenchStore } from "@/store";
+import { resolveAppEntryPath } from "@/utils/appEntry";
 const { t } = useI18n();
 
 const router = useRouter();
@@ -118,8 +119,7 @@ const handleSaved = async () => {
 
 const gotoApp = async (app: AppDef) => {
   await contextStore.setAppId(app.id);
-  const path = "/app/" + app.id + "/mytasks";
-  router.push(path);
+  router.push(resolveAppEntryPath(app));
 };
 
 const toggleFavorite = async (app: AppDef) => {

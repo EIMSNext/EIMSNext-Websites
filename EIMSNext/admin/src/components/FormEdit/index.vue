@@ -7,7 +7,7 @@
       <el-tabs v-model="activeName" class="nav-tabs" :before-leave="tabChanging">
         <el-tab-pane :label="t('admin.formEdit.design')" name="formedit" />
         <el-tab-pane v-if="usingFlow" :label="t('admin.formEdit.workflow')" name="workflow" />
-        <el-tab-pane :label="t('admin.formEdit.advanced')" name="advance" />
+        <el-tab-pane :label="t('admin.formEdit.extension')" name="extension" />
         <el-tab-pane :label="t('admin.formEdit.publish')" name="publish" />
       </el-tabs>
     </template>
@@ -17,7 +17,7 @@
     <div v-if="usingFlow && loadedTabs.workflow" v-show="activeName == 'workflow'" class="main-content-container">
       <WorkflowDesigner ref="wfDesigner" :appId="formDef.appId" :formId="formDef.id" />
     </div>
-    <div v-if="loadedTabs.advance" v-show="activeName == 'advance'" class="main-content-container">
+    <div v-if="loadedTabs.extension" v-show="activeName == 'extension'" class="main-content-container">
       <Advanced :formDef="formDefRef!"></Advanced>
     </div>
     <div v-if="loadedTabs.publish" v-show="activeName == 'publish'" class="main-content-container">
@@ -68,7 +68,7 @@ const activeName = ref("formedit");
 const loadedTabs = ref<Record<string, boolean>>({
   formedit: true,
   workflow: false,
-  advance: false,
+  extension: false,
   publish: false,
 });
 

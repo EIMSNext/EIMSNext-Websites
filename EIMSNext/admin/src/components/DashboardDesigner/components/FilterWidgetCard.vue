@@ -9,9 +9,9 @@
         v-else-if="isMemberType"
         :model-value="memberValue"
         :multiple="isMultiple"
-        :editable="true"
+        :editable="!publicToken"
         :empty-text="isDepartmentType ? t('comp.emptyDept') : t('comp.emptyEmp')"
-        @editTag="showMemberDialog = true"
+        @editTag="openMemberDialog"
       />
 
       <div v-else-if="showRangeMode" class="range-wrapper">
@@ -66,6 +66,7 @@ defineOptions({
 
 const props = defineProps<{
   itemDef: DashboardItemDef;
+  publicToken?: string;
 }>();
 
 const emit = defineEmits(["change"]);
@@ -103,6 +104,14 @@ const emitRangeValue = () => emitValue([...rangeValue.value]);
 const memberSelected = (tags: ISelectedTag[]) => {
   memberValue.value = tags;
   emitValue(isMultiple.value ? tags : (tags[0] ? [tags[0]] : []));
+};
+
+const openMemberDialog = () => {
+  if (props.publicToken) {
+    return;
+  }
+
+  showMemberDialog.value = true;
 };
 
 onMounted(async () => {

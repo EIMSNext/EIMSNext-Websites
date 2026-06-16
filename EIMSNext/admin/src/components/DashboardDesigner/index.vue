@@ -3,11 +3,18 @@
     <template #title>
       <el-input v-model="dashDefRef.name" class="title-editor" />
     </template>
+    <template #top-center>
+      <el-tabs v-model="activeTab" class="nav-tabs">
+        <el-tab-pane :label="t('admin.dashboard.design')" name="design" />
+        <el-tab-pane :label="t('admin.dashboard.extension')" name="extension" />
+        <el-tab-pane :label="t('admin.dashboard.publish')" name="publish" />
+      </el-tabs>
+    </template>
     <template #top-right>
       <el-button @click="onSave">{{ t("common.save") }}</el-button>
       <el-button @click="onPreview">{{ t("common.preview") }}</el-button>
     </template>
-    <el-container class="design-container">
+    <el-container v-show="activeTab === 'design'" class="design-container">
       <el-aside width="180px" class="left-aside">
         <div class="dash-designer-menu">
           <div class="menu-wrapper">
@@ -227,6 +234,8 @@
         </div>
       </el-main>
     </el-container>
+    <ExtensionSettings v-if="activeTab === 'extension'" :dash-def="dashDefRef" @updated="handleDashUpdated" />
+    <PublishSettings v-if="activeTab === 'publish'" :dash-def="dashDefRef" @updated="handleDashUpdated" />
   </EtDrawer>
   <DataSourceDialog v-model="showDataSourceDialog" :appId="dashDef.appId" :dataSource="dataSource"
     @cancel="handleSourceCancel" @ok="handleSourceOk"></DataSourceDialog>
@@ -255,6 +264,8 @@ import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services
 import EChartsDesigner from "./ECharts/EChartsDesigner.vue";
 import FilterDesigner from "./FilterDesigner/FilterDesigner.vue";
 import DetailTableDesigner from "./DetailTable/DetailTableDesigner.vue";
+import ExtensionSettings from "./ExtensionSettings.vue";
+import PublishSettings from "./PublishSettings.vue";
 import { useI18n } from "vue-i18n";
 import { useFormStore } from "@eimsnext/store";
 import { IDashboardBindingCandidate, IDashboardChartTarget } from "./FilterDesigner/type";
@@ -276,6 +287,7 @@ const formStore = useFormStore();
 const dashDefRef = ref<DashboardDef>(props.dashDef);
 const dashItemDefRef = ref<DashboardItemDef>();
 const gridRef = ref<any>();
+const activeTab = ref<"design" | "extension" | "publish">("design");
 
 const hoverMenu = ref(false);
 const hoverMenuType = ref<DashItemType | "">("");
@@ -491,16 +503,21 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
 const onSave = async () => {
   var layout = JSON.stringify(state.layout);
 
-  let req = {
-    id: props.dashDef.id,
-    appId: props.dashDef.appId,
-    name: props.dashDef.name,
+  let req: DashboardDefRequest = {
+    id: dashDefRef.value.id,
+    appId: dashDefRef.value.appId,
+    name: dashDefRef.value.name,
     layout: layout,
   };
 
   let resp = await dashboardDefService.patch<DashboardDef>(req.id, req);
   dashDefRef.value = resp;
   contextStore.setAppChanged(); //reload 菜单
+};
+
+const handleDashUpdated = (dash: DashboardDef) => {
+  dashDefRef.value = { ...dash };
+  contextStore.setAppChanged();
 };
 
 const onPreview = () => { };
@@ -568,6 +585,27 @@ watch(
 .design-container {
   height: 100%;
   display: flex;
+}
+
+.title-editor {
+  width: var(--et-size-260);
+}
+
+:global(.top-nav-bar) .nav-tabs {
+  height: var(--et-size-60);
+}
+
+:global(.top-nav-bar) .nav-tabs :deep(.el-tabs__header) {
+  margin: 0;
+}
+
+:global(.top-nav-bar) .nav-tabs :deep(.el-tabs__nav) {
+  align-items: center;
+  height: var(--et-size-60);
+}
+
+:global(.top-nav-bar) .nav-tabs :deep(.el-tabs__content) {
+  display: none;
 }
 
 .left-aside {

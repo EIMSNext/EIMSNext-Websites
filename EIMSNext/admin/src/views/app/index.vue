@@ -52,6 +52,7 @@ import { AppDef, FormDef, FormDefRequest, FormType } from "@eimsnext/models";
 import { formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
+import { resolveAppEntryPath } from "@/utils/appEntry";
 const { t } = useI18n();
 
 const newForm = ref<FormDef>();
@@ -72,10 +73,14 @@ const app = ref<AppDef>();
 onBeforeMount(async () => {
   await contextStore.setAppId(appId);
   await loadAdminPermissions();
-  appStore.get(contextStore.appId).then((res) => (app.value = res));
-  if (formStore.items.length > 0) {
-    const path = `/app/${appId}/form/${formStore.items[0].id}`;
-    router.push(path);
+  const resolvedApp = await appStore.get(contextStore.appId, false);
+  app.value = resolvedApp;
+  if (resolvedApp) {
+    const path = resolveAppEntryPath(resolvedApp);
+    if (path !== route.fullPath) {
+      router.replace(path);
+      return;
+    }
   }
 });
 

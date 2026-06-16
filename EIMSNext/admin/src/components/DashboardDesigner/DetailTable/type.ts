@@ -96,3 +96,14 @@ export const buildDetailTableColumns = (
       } as ITableColumn;
     });
 };
+
+export const buildPublicDetailTableColumns = (displayFields: IFormFieldDef[]): ITableColumn[] => {
+  return (displayFields || []).map((field) => ({
+    field: field.field,
+    title: field.label,
+    type: field.type,
+    format: field.format,
+    width: field.field === SystemField.DataTitle ? 180 : 120,
+    oriField: field.field,
+  }) as ITableColumn);
+};

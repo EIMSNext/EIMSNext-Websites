@@ -154,6 +154,11 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/app/:appId",
+    component: () => import("@/views/app/index.vue"),
+    meta: { hidden: true, requiresAuth: true },
+  },
+  {
     path: "/app/:appId/dash/:dashId",
     component: AppLayout,
     children: [
@@ -290,11 +295,11 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  // {
-  //   path: "/app/:appId",
-  //   component: () => import("@/views/app/index.vue"),
-  //   meta: { hidden: true, requiresAuth: true },
-  // },
+  {
+    path: "/dash/public/:token",
+    component: () => import("@/views/dash/public.vue"),
+    meta: { hidden: true },
+  },
   {
     path: "/",
     redirect: "/workbench",

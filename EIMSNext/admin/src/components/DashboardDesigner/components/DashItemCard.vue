@@ -22,13 +22,27 @@
     </div>
     <div class="container-content-wrapper" :class="{ interactive: isInteractiveContent }">
       <template v-if="itemDef.itemType == DashItemType.Chart && chartSetting && chartSettingValidate(chartSetting)">
-        <e-charts-viewer :setting="chartSetting" :title="itemTitle" :show-header="isView" :external-filter="externalFilter" />
+        <e-charts-viewer
+          :setting="chartSetting"
+          :title="itemTitle"
+          :show-header="isView"
+          :external-filter="externalFilter"
+          :public-token="publicToken"
+          :public-item-id="itemDef.id"
+        />
       </template>
       <template v-else-if="itemDef.itemType == DashItemType.DetailTable && detailTableSetting && detailTableSettingValidate(detailTableSetting)">
-        <DetailTableViewer :setting="detailTableSetting" :title="itemTitle" :show-header="isView" :external-filter="externalFilter" />
+        <DetailTableViewer
+          :setting="detailTableSetting"
+          :title="itemTitle"
+          :show-header="isView"
+          :external-filter="externalFilter"
+          :public-token="publicToken"
+          :public-item-id="itemDef.id"
+        />
       </template>
       <template v-else-if="itemDef.itemType == DashItemType.Filter">
-        <FilterWidgetCard :item-def="itemDef" @change="onFilterValueChanged" />
+        <FilterWidgetCard :item-def="itemDef" :public-token="publicToken" @change="onFilterValueChanged" />
       </template>
       <template v-else>
         <el-empty class="et-dash-empty">
@@ -62,6 +76,7 @@ const props = withDefaults(
     height?: number;
     width?: number;
     externalFilter?: any;
+    publicToken?: string;
   }>(),
   {
     isView: false,
