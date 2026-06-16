@@ -1,6 +1,6 @@
 <template>
-  <MobilePage :title="t('mobile.workspace.title')" @back="goBack">
-    <div class="workspace-content">
+  <MobilePage :title="t('mobile.workbench.title')" @back="goBack">
+    <div class="workbench-content">
       <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
         <MobileCard class="todo-card" @click="goToMyTasks">
           <div class="todo-main">
@@ -8,7 +8,7 @@
               <van-icon name="clock-o" size="28" />
             </div>
             <div>
-              <div class="todo-title">{{ t("mobile.workspace.todo") }}</div>
+              <div class="todo-title">{{ t("mobile.workbench.todo") }}</div>
               <div class="todo-count">{{ todoCount }}</div>
             </div>
           </div>
@@ -30,7 +30,7 @@
           </div>
         </MobileCard>
 
-        <div class="section-title">{{ t("mobile.workspace.myApps") }}</div>
+        <div class="section-title">{{ t("mobile.workbench.myApps") }}</div>
         <div class="app-grid">
           <MobileCard
             v-for="app in apps"
@@ -91,7 +91,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.workspace-content {
+.workbench-content {
   padding: 12px;
 }
 

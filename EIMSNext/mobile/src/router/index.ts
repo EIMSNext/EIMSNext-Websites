@@ -14,9 +14,9 @@ const routes: RouteRecordRaw[] = [
     redirect: '/login'
   },
   {
-    path: '/workspace',
-    name: 'Workspace',
-    component: () => import('@/components/Workspace.vue'),
+    path: '/workbench',
+    name: 'Workbench',
+    component: () => import('@/components/Workbench.vue'),
     meta: { title: '工作台', requireAuth: true }
   },
   {

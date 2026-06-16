@@ -1,5 +1,10 @@
 <template>
   <div class="navbar__right">
+    <div class="workbench-trigger" @click="router.push('/workbench/customize')">
+      <div class="appstore-entry">
+        <et-icon icon="el-Monitor" size="18" /><span>自定义工作台</span>
+      </div>
+    </div>
     <div class="appstore-trigger" @click="settingStore.appStoreVisible = true">
       <div class="appstore-entry">
         <et-icon icon="icon-appdefault" size="18" /><span>{{ $t("admin.shell.appCenter") }}</span>
@@ -31,6 +36,7 @@ import { useSettingsStore } from "@/store";
 import UserProfile from "./UserProfile.vue";
 import AppStoreDrawer from "@/views/appstore/components/AppStoreDrawer.vue";
 
+const router = useRouter();
 const settingStore = useSettingsStore();
 </script>
 
@@ -58,7 +64,8 @@ const settingStore = useSettingsStore();
   }
 }
 
-.navbar__right .appstore-trigger {
+.navbar__right .appstore-trigger,
+.navbar__right .workbench-trigger {
   flex-shrink: 0;
   padding: 0 12px;
 }

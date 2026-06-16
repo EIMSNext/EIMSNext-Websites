@@ -73,7 +73,7 @@ const handleLogin = async () => {
   try {
     await mobileAuthService.login(loginData.value)
     showToast('登录成功')
-    router.replace('/workspace')
+    router.replace('/workbench')
   } catch {
     showToast('登录失败')
   } finally {

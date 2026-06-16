@@ -374,7 +374,7 @@ const close = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push("/workspace");
+    router.push("/workbench");
   }
 };
 

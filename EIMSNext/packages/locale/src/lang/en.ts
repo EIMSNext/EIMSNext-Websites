@@ -376,7 +376,7 @@ export default {
     developer: "EIMSNext",
     version: "Version",
     status: "Status",
-    workspace: "Workspace",
+    workbench: "Workbench",
     exportFormat: "Export Format",
     exportColumns: "Export Columns",
     selectColumn: "Please select at least one column",
@@ -476,7 +476,7 @@ export default {
       acceptInvite: "Accept Invitation",
       rejectInvite: "Decline Invitation",
       createCorp: "Create Team",
-      createCorpTip: "Best for first-time users. You'll enter the workspace immediately after creation.",
+      createCorpTip: "Best for first-time users. You'll enter the workbench immediately after creation.",
       corpName: "Team Name",
       corpNamePlaceholder: "Please enter team name",
       corpIntro: "Team Description",
@@ -681,7 +681,7 @@ export default {
       triggerPrefix: "Trigger",
     },
     shell: {
-      workspace: "Workspace",
+      workbench: "Workbench",
       knowledgeBase: "Knowledge Base",
       comingSoon: "Coming Soon",
       openPlatform: "Open Platform",
@@ -1075,11 +1075,11 @@ export default {
     appStore: {
       appDetail: "App Detail",
       installTemplate: "Install Template",
-      installDesc: "After installation, you will enter the workspace and can continue configuring forms, permissions, and workflows.",
+      installDesc: "After installation, you will enter the workbench and can continue configuring forms, permissions, and workflows.",
       templateIntro: "Template Intro",
       author: "Author",
       title: "App Store",
-      subtitle: "Browse templates by business scenario and industry. Install and configure in workspace.",
+      subtitle: "Browse templates by business scenario and industry. Install and configure in workbench.",
       totalTemplates: "Total Templates",
       featuredTemplates: "Featured Templates",
       industries: "Industries Covered",
@@ -2181,8 +2181,8 @@ export default {
     select: "Select language",
   },
   mobile: {
-    workspace: {
-      title: "Workspace",
+    workbench: {
+      title: "Workbench",
       todo: "Todo",
       myApps: "My Apps",
     },

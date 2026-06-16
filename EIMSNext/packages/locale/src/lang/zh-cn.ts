@@ -376,7 +376,7 @@ export default {
     developer: "EIMSNext",
     version: "版本",
     status: "状态",
-    workspace: "工作台",
+    workbench: "工作台",
     exportFormat: "导出格式",
     exportColumns: "导出列",
     selectColumn: "请至少选择一列",
@@ -734,7 +734,7 @@ export default {
       triggerPrefix: "触发",
     },
     shell: {
-      workspace: "工作台",
+      workbench: "工作台",
       knowledgeBase: "知识库",
       comingSoon: "敬请期待",
       openPlatform: "开放平台",
@@ -2161,7 +2161,7 @@ export default {
     select: "选择多语言",
   },
   mobile: {
-    workspace: {
+    workbench: {
       title: "工作台",
       todo: "待办",
       myApps: "我的应用",

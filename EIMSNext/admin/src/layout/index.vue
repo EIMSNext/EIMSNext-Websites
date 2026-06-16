@@ -6,10 +6,10 @@
       </el-header>
       <el-container class="layout-main-shell">
         <el-aside width="45px" class="main-left-menu">
-          <el-tooltip :content="t('admin.workspace')" placement="right" :hide-after="0">
-            <router-link custom :to="{ path: '/workspace' }" v-slot="{ navigate }">
+          <el-tooltip :content="t('admin.workbench')" placement="right" :hide-after="0">
+            <router-link custom :to="{ path: '/workbench' }" v-slot="{ navigate }">
               <div class="main-left-menu-item" @click="navigate">
-                <!-- <AppIcon :app="workspaceApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
+                <!-- <AppIcon :app="workbenchApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
                 <et-icon icon="homepage" size="18px" />
               </div>
             </router-link>
@@ -62,8 +62,8 @@ defineOptions({
   name: "Layout",
 });
 
-const workspaceApp: AppDef = {
-  id: "workspace",
+const workbenchApp: AppDef = {
+  id: "workbench",
   name: "工作台",
   icon: "homepage",
   sortIndex: -2,

@@ -113,9 +113,15 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true, requiresAuth: true },
   },
   {
-    name: "workspace",
-    path: "/workspace",
-    component: () => import("@/views/workspace/index.vue"),
+    name: "workbench-customize",
+    path: "/workbench/customize",
+    component: () => import("@/views/workbench/customize.vue"),
+    meta: { hidden: true, requiresAuth: true },
+  },
+  {
+    name: "workbench",
+    path: "/workbench",
+    component: () => import("@/views/workbench/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
   {
@@ -291,7 +297,7 @@ export const constantRoutes: RouteRecordRaw[] = [
   // },
   {
     path: "/",
-    redirect: "/workspace",
+    redirect: "/workbench",
   },
   {
     path: "/profile",

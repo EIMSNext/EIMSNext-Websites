@@ -42,6 +42,13 @@
   <router-link v-else custom :to="routeTo" v-slot="{ navigate }">
     <el-menu-item :index="routeTo.path" :class="{ 'pl-15px': !isSidebarOpened }" @click="() => navigate()">
       <SidebarMenuItemTitle :icon="getFormIcon(item)" :title="item.title" :iconColor="getAppIconColor(item)" />
+      <span
+        class="favorite-wrapper"
+        :class="{ active: isFavorite }"
+        @click.stop="toggleFavorite"
+      >
+        <et-icon icon="el-star" />
+      </span>
       <span v-if="canManage" class="more-wrapper" @click.stop>
         <el-dropdown placement="bottom-start" size="large" trigger="click">
           <et-icon icon="el-More" @click.prevent="" />
@@ -76,7 +83,7 @@ import { AppMenu, FormType } from "@eimsnext/models";
 import { ConfirmResult, EtConfirm } from "@eimsnext/components";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
-import { useSystemStore } from "@/store";
+import { useSystemStore, useWorkbenchStore } from "@/store";
 import Draggable from "vuedraggable";
 
 const { t } = useI18n();
@@ -92,6 +99,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "menusChanged"]);
 const systemStore = useSystemStore();
+const workbenchStore = useWorkbenchStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
 const canManage = computed(() => !!props.canManage);
 const dragGroup = { name: "app-menu", pull: true, put: true };
@@ -106,12 +114,26 @@ const getMenuType = (menuType: FormType | number | undefined): FormType => {
 };
 
 const currentMenuType = computed(() => getMenuType(props.item.menuType));
+const isFavorite = computed(() =>
+  workbenchStore.isFavorite(
+    currentMenuType.value === FormType.Dashboard ? "dashboard" : "form",
+    props.item.menuId
+  )
+);
 const routeTo = computed(() => ({
   path:
     currentMenuType.value === FormType.Dashboard
       ? `/app/${props.appId}/dash/${props.item.menuId}`
       : `/app/${props.appId}/form/${props.item.menuId}`,
 }));
+
+const toggleFavorite = async () => {
+  await workbenchStore.loadFavorites();
+  await workbenchStore.toggleFavorite({
+    targetType: currentMenuType.value === FormType.Dashboard ? "dashboard" : "form",
+    targetId: props.item.menuId,
+  });
+};
 
 function editForm(formId?: string, type?: FormType) {
   if (!canManage.value) return;
@@ -176,6 +198,9 @@ async function deleteGroup(menu: AppMenu) {
   }
 }
 
+onMounted(() => {
+  workbenchStore.loadFavorites();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -194,6 +219,10 @@ async function deleteGroup(menu: AppMenu) {
   .more-wrapper {
     visibility: visible;
   }
+
+  .favorite-wrapper {
+    visibility: visible;
+  }
 }
 
 .more-wrapper {
@@ -201,6 +230,19 @@ async function deleteGroup(menu: AppMenu) {
   right: var(--et-space-10);
   display: flex;
   visibility: hidden;
+}
+
+.favorite-wrapper {
+  position: absolute;
+  right: 38px;
+  display: flex;
+  color: var(--et-text-tertiary);
+  visibility: hidden;
+}
+
+.favorite-wrapper.active {
+  color: var(--et-color-warning);
+  visibility: visible;
 }
 
 .sidebar-menu-dropdown {

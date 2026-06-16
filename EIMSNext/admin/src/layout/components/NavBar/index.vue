@@ -8,11 +8,11 @@
           </div>
         </template>
         <div class="platform-popover">
-          <router-link class="platform-item" to="/workspace">
-            <div class="platform-icon platform-icon--workspace">
+          <router-link class="platform-item" to="/workbench">
+            <div class="platform-icon platform-icon--workbench">
               <et-icon icon="homepage" size="24" />
             </div>
-            <div class="platform-title">{{ $t("admin.shell.workspace") }}</div>
+            <div class="platform-title">{{ $t("admin.shell.workbench") }}</div>
           </router-link>
           <div class="platform-item platform-item--disabled">
             <div class="platform-icon platform-icon--knowledge">
@@ -102,7 +102,7 @@
   border-radius: 8px;
 }
 
-.platform-icon--workspace {
+.platform-icon--workbench {
   background: color-mix(in srgb, #34d399 18%, white);
   color: #059669;
 }

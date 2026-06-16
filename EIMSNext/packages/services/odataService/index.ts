@@ -26,3 +26,6 @@ export * from "./dashboardDefService";
 export * from "./dashboardItemDefService";
 export * from "./exportLogService";
 export * from "./workflowHelper";
+export * from "./workbenchConfigService";
+export * from "./workbenchFavoriteService";
+export * from "./workbenchRecentVisitService";

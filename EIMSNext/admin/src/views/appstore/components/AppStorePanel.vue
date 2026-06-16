@@ -205,7 +205,7 @@ function handleInstallSuccess() {
   detailVisible.value = false;
   selectedId.value = "";
   emit("close");
-  router.push("/workspace");
+  router.push("/workbench");
 }
 
 onMounted(loadProfiles);
