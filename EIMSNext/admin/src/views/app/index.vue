@@ -46,10 +46,10 @@
 <script lang="ts" setup>
 import Layout from "@/layout/index.vue";
 import { useRoute, useRouter } from "vue-router";
-import { useAppStore, useFormStore, useContextStore } from "@eimsnext/store";
+import { useAppStore, useFormStore, useContextStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
-import { AppDef, FormDef, FormDefRequest, FormType } from "@eimsnext/models";
-import { formDefService } from "@eimsnext/services";
+import { AppDef, FormDef, FormDefRequest, UserType } from "@eimsnext/models";
+import { formDefService, systemService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
 import { resolveAppEntryPath } from "@/utils/appEntry";
@@ -60,6 +60,7 @@ const router = useRouter();
 const appStore = useAppStore();
 const formStore = useFormStore();
 const contextStore = useContextStore();
+const userStore = useUserStore();
 const route = useRoute();
 let appId = route.params.appId.toString();
 const showFormEditor = ref(false);
@@ -76,13 +77,29 @@ onBeforeMount(async () => {
   const resolvedApp = await appStore.get(contextStore.appId, false);
   app.value = resolvedApp;
   if (resolvedApp) {
-    const path = resolveAppEntryPath(resolvedApp);
+    const visibleMenuIds = await getVisibleMenuIds(contextStore.appId);
+    const path = resolveAppEntryPath(resolvedApp, visibleMenuIds);
     if (path !== route.fullPath) {
       router.replace(path);
       return;
     }
   }
 });
+
+async function getVisibleMenuIds(appId: string) {
+  const unrestrictedUserTypes = [
+    UserType.System,
+    UserType.Client,
+    UserType.CorpOwmer,
+    UserType.CorpAdmin,
+  ];
+  if (unrestrictedUserTypes.includes(userStore.currentUser.userType)) {
+    return undefined;
+  }
+
+  const perms = await systemService.getAppMenuPerms(appId);
+  return perms.map((item: { id: string }) => item.id);
+}
 
 const createForm = (usingFlow: boolean, ledger: boolean) => {
   if (!canManageCurrentApp.value) return;

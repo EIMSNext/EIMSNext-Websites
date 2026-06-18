@@ -1,7 +1,7 @@
 <template>
   <el-select
     :value="value"
-    :placeholder="placeholder"
+    :placeholder="computedPlaceholder"
     style="width: 100%"
     @change="handleChange"
     :loading="loading"
@@ -16,11 +16,12 @@
 </template>
 
 <script>
-import { accessToken, appSetting } from "@eimsnext/utils";
 import fetch from "@eimsnext/form-render-core/src/frame/fetch";
+import { useContextStore, useFormStore } from "@eimsnext/store";
 
 export default {
   name: 'FormSelect',
+  inject: ['designer'],
   props: {
     value: {
       type: String,
@@ -28,7 +29,11 @@ export default {
     },
     placeholder: {
       type: String,
-      default: '请选择表单'
+      default: ''
+    },
+    sourceScope: {
+      type: String,
+      default: 'currentApp'
     }
   },
   data() {
@@ -40,24 +45,36 @@ export default {
   mounted() {
     this.fetchFormList();
   },
+  computed: {
+    computedPlaceholder() {
+      return this.placeholder || this.designer?.setupState?.t?.('dataflow.selectForm') || 'Select a form';
+    }
+  },
   methods: {
-    fetchFormList() {
+    async fetchFormList() {
       this.loading = true;
       try {
-        // 从URL中获取应用ID和当前表单ID
-        const url = window.location.href;
-        console.log('当前URL:', url);
-        const match = url.match(/\/app\/(.*?)\/form\/(.*?)(?:\/|$)/);
-        const appId = match ? match[1] : '';
-        const currentFormId = match ? match[2] : '';
+        const appId = useContextStore().appId || this.designer?.setupState?.appId || '';
+        const currentFormId = this.designer?.setupState?.formId || '';
         
         if (!appId) {
-          console.error('无法获取应用ID');
+          console.error('Unable to get app ID');
           this.loading = false;
           return;
         }
         
-        // 直接使用完整的API地址
+        if (this.sourceScope === 'crossApp') {
+          const list = await useFormStore().loadFormsIncludeCross(appId);
+          this.formList = list
+            .filter(item => item.id !== currentFormId)
+            .map(item => ({
+              label: item.name,
+              value: item.id
+            }));
+          this.loading = false;
+          return;
+        }
+
         const apiUrl = window.appSetting?.apiUrl || '';
         if (!apiUrl) {
           this.loading = false;
@@ -88,12 +105,12 @@ export default {
             this.loading = false;
           },
           onError: (error) => {
-            console.error('获取表单列表失败:', error);
+            console.error('Failed to load form list:', error);
             this.loading = false;
           }
         });
       } catch (error) {
-        console.error('获取表单列表失败:', error);
+        console.error('Failed to load form list:', error);
         this.loading = false;
       }
     },

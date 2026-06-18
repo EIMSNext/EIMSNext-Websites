@@ -1,7 +1,7 @@
 import { uniqueId8 } from "@eimsnext/form-render-core";
 import { localeProps } from "../../utils";
 
-const label = "选择数据";
+const label = "Data Select";
 const name = "dataselect";
 
 export default {
@@ -20,10 +20,10 @@ export default {
       info: "",
       $required: false,
       props: {
-        placeholder: "选择数据",
+        placeholder: t("com.dataselect.selectData"),
         dataSource: "",
         selectionProcess: {
-          buttonText: "选择数据",
+          buttonText: t("com.dataselect.selectData"),
           tableFields: [],
         },
         displayConfig: {
@@ -40,9 +40,10 @@ export default {
       {
         type: "FormSelect",
         field: "dataSource",
-        title: "数据源",
+        title: t("com.dataselect.dataSource"),
         props: {
-          placeholder: "请选择表单",
+          placeholder: t("dataflow.selectForm"),
+          sourceScope: "crossApp",
         },
         control: [
           {
@@ -54,22 +55,22 @@ export default {
             condition: "notEmpty",
             value: "",
             rule: [
-              { type: "GroupLabel", props: { title: "数据选择过程" } },
+              { type: "GroupLabel", props: { title: t("com.dataselect.selectionProcess") } },
               {
                 type: "SelectionProcessConfig",
                 field: "selectionProcess",
                 title: "",
                 props: {
-                  btn: "设置",
+                  btn: t("admin.appAdmin.set"),
                 },
               },
-              { type: "GroupLabel", props: { title: "数据选择后" } },
+              { type: "GroupLabel", props: { title: t("com.dataselect.afterSelection") } },
               {
                 type: "DisplayFieldsConfig",
                 field: "displayConfig",
                 title: "",
                 props: {
-                  btn: "设置显示字段",
+                  btn: t("com.dataselect.setDisplayFields"),
                 },
               },
               {
@@ -77,7 +78,7 @@ export default {
                 field: "fillConfig",
                 title: "",
                 props: {
-                  btn: "填充规则设置",
+                  btn: t("com.dataselect.fillRuleSettings"),
                 },
               },
             ],

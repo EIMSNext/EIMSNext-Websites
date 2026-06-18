@@ -4,11 +4,7 @@ import { useStorage } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export default function createStore<T extends IIdentity>(
-  id: string,
-  url: string,
-  initData: T[] = []
-) {
+export default function createStore<T extends IIdentity>(id: string, url: string, initData: T[] = []) {
   return defineStore(id, () => {
     const loading = ref(false);
     const items = useStorage<T[]>(id, initData, sessionStorage);

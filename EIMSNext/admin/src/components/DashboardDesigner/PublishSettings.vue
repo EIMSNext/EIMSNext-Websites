@@ -121,7 +121,7 @@ watch(
 
 async function loadApp() {
   app.value = await appStore.get(props.dashDef.appId, false);
-  isHomeEntry.value = app.value?.homeEntryId === props.dashDef.id;
+  isHomeEntry.value = app.value?.homeEntryIds?.includes(props.dashDef.id) || false;
 }
 
 async function saveDashboard() {
@@ -141,12 +141,16 @@ async function saveDashboard() {
 async function saveHomeEntry(value: string | number | boolean) {
   if (!app.value) return;
 
+  const entryIds = app.value.homeEntryIds || [];
+  const nextIds = Boolean(value)
+    ? Array.from(new Set([...entryIds, props.dashDef.id]))
+    : entryIds.filter((id) => id !== props.dashDef.id);
   const updated = await appDefService.patch<AppDef>(app.value.id, {
     id: app.value.id,
-    homeEntryId: Boolean(value) ? props.dashDef.id : "",
+    homeEntryIds: nextIds,
   });
   app.value = updated;
-  isHomeEntry.value = updated.homeEntryId === props.dashDef.id;
+  isHomeEntry.value = updated.homeEntryIds?.includes(props.dashDef.id) || false;
   appStore.update(updated);
   contextStore.setAppChanged();
   ElMessage.success(t("common.saveSuccess"));

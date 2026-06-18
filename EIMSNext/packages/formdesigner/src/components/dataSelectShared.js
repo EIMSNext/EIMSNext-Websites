@@ -1,5 +1,5 @@
 import { uniqueId8 } from "@eimsnext/form-render-core";
-import { useFormStore } from "@eimsnext/store";
+import { useContextStore, useFormStore } from "@eimsnext/store";
 import { FieldType } from "@eimsnext/models";
 import { buildDataSelectFields, findDataSelectField, normalizeDataSelectField } from "@eimsnext/components";
 
@@ -87,15 +87,19 @@ export const getCurrentFormFields = (designer, currentField, contextRule) => {
   return fields;
 };
 
-export const loadSourceFormFields = async (formId) => {
+export const loadSourceFormFields = async (formId, targetAppId) => {
   if (!formId) return [];
+  const appId = targetAppId || useContextStore().appId;
   const formStore = useFormStore();
+  if (appId) {
+    await formStore.loadFormsIncludeCross(appId);
+  }
   const form = await formStore.get(formId);
   return buildDataSelectFields(form, true);
 };
 
-export const normalizeSelectionProcess = (value) => ({
-  buttonText: value?.buttonText || "选择数据",
+export const normalizeSelectionProcess = (value, t) => ({
+  buttonText: value?.buttonText || t?.("com.dataselect.selectData") || "Select data",
   tableFields: (value?.tableFields || []).map(normalizeDataSelectField).filter(Boolean),
 });
 
@@ -142,8 +146,9 @@ export const createRuleFromField = (designer, field) => {
   }
 
   const props = {};
+  const t = designer?.setupState?.t;
   if (["input", "textarea", "number", "timestamp"].includes(menu.name)) {
-    props.placeholder = `请输入${field.label}`;
+    props.placeholder = t?.("com.dataselect.inputPlaceholder", { label: field.label }) || `Enter ${field.label}`;
   }
 
   return {

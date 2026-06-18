@@ -1,6 +1,6 @@
 import { AppDef, AppMenu, FormType } from "@eimsnext/models";
 
-function normalizeMenuType(menuType: FormType | number | undefined): FormType {
+export function normalizeMenuType(menuType: FormType | number | undefined): FormType {
   if (menuType === undefined) return FormType.Form;
   if (typeof menuType === "string") return menuType as FormType;
   return String(menuType) as FormType;
@@ -23,19 +23,23 @@ export function findAppMenu(menus: AppMenu[] = [], menuId?: string): AppMenu | u
   return undefined;
 }
 
-export function resolveAppEntryPath(app: AppDef): string {
-  const menu = findAppMenu(app.appMenus, app.homeEntryId);
-  if (!menu) {
-    return `/app/${app.id}/mytasks`;
-  }
+export function resolveAppEntryPath(app: AppDef, visibleMenuIds?: string[] | Set<string>): string {
+  const visibleSet = Array.isArray(visibleMenuIds) ? new Set(visibleMenuIds) : visibleMenuIds;
 
-  const menuType = normalizeMenuType(menu.menuType);
-  if (menuType === FormType.Dashboard) {
-    return `/app/${app.id}/dash/${menu.menuId}`;
-  }
+  for (const entryId of app.homeEntryIds || []) {
+    if (visibleSet && !visibleSet.has(entryId)) {
+      continue;
+    }
 
-  if (menuType === FormType.Form) {
-    return `/app/${app.id}/form/${menu.menuId}`;
+    const menu = findAppMenu(app.appMenus, entryId);
+    if (!menu) {
+      continue;
+    }
+
+    const menuType = normalizeMenuType(menu.menuType);
+    if (menuType === FormType.Dashboard) {
+      return `/app/${app.id}/dash/${menu.menuId}`;
+    }
   }
 
   return `/app/${app.id}/mytasks`;

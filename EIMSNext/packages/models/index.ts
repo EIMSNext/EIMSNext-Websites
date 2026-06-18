@@ -2,6 +2,7 @@ export * from "./dto/user";
 export * from "./dto/modelBase";
 export * from "./dto/department";
 export * from "./dto/appDef";
+export * from "./dto/crossBinding";
 export * from "./dto/formDef";
 export * from "./dto/adminGroup";
 export * from "./dto/auditLog";

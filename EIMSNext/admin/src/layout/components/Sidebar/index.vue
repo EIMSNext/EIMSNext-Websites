@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-sidebar">
     <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
       :isLedger="isLedger" @close="console.log('[Sidebar] FormEdit closed'); showFormEditor = false" />
     <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
@@ -109,6 +109,17 @@
         @menusChanged="saveMenus"
       />
     </el-scrollbar>
+    <router-link
+      v-if="canManageCurrentApp"
+      custom
+      :to="{ path: `/app/${contextStore.appId}/admin` }"
+      v-slot="{ navigate }"
+    >
+      <div class="app-admin-entry" :class="{ collapsed: !isSidebarOpened }" @click="navigate">
+        <et-icon icon="icon-settings" size="15px" />
+        <span v-if="isSidebarOpened">{{ t("admin.appAdmin.title") }}</span>
+      </div>
+    </router-link>
   </div>
 </template>
 
@@ -131,14 +142,9 @@ import FormEdit from "@/components/FormEdit/index.vue";
 import { appDefService, dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
+import { normalizeMenuType } from "@/utils/appEntry";
 import { ElMessage } from "element-plus";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
-
-const getMenuType = (menuType: FormType | number | undefined): FormType => {
-  if (menuType === undefined) return FormType.Form;
-  if (typeof menuType === 'string') return menuType as FormType;
-  return String(menuType) as FormType;
-};
 
 const { t } = useI18n();
 
@@ -337,7 +343,7 @@ const saveMenus = async () => {
 const deleteMenu = async (menu: AppMenu) => {
   if (!canManageCurrentApp.value) return;
 
-  const menuType = getMenuType(menu.menuType);
+  const menuType = normalizeMenuType(menu.menuType);
   if (menuType === FormType.Form) {
     formStore.remove(menu.menuId);
     contextStore.setAppChanged();
@@ -372,6 +378,33 @@ const createFolder = () => {
   position: absolute;
   top: var(--et-space-10);
   right: var(--et-space-0);
+}
+
+.app-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+:deep(.el-scrollbar) {
+  flex: 1;
+  min-height: 0;
+}
+
+.app-admin-entry {
+  align-items: center;
+  border-top: 1px solid var(--et-border-color-light);
+  color: var(--et-text-primary);
+  cursor: pointer;
+  display: flex;
+  gap: var(--et-space-8);
+  height: var(--et-size-44);
+  padding: 0 var(--et-space-16);
+
+  &.collapsed {
+    justify-content: center;
+    padding: 0;
+  }
 }
 
 .app-title {

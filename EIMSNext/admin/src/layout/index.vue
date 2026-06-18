@@ -30,7 +30,7 @@
           <template v-for="app in appsRef">
             <template v-if="app.id != 'system'">
               <el-tooltip :content="app.name" placement="right" :hide-after="0">
-                <router-link custom :to="{ path: resolveAppEntryPath(app) }" v-slot="{ navigate }">
+                <router-link custom :to="{ path: `/app/${app.id}` }" v-slot="{ navigate }">
                   <div class="main-left-menu-item" @click="navigate">
                     <AppIcon :app="app" iconSize="12px" style="width: 22px; height: 22px" />
                   </div>
@@ -56,7 +56,6 @@ import NavBar from "./components/NavBar/index.vue";
 import defaultSettings from "@/settings";
 import { useI18n } from "vue-i18n";
 import { AppDef, UserType } from "@eimsnext/models";
-import { resolveAppEntryPath } from "@/utils/appEntry";
 const { t } = useI18n();
 
 defineOptions({

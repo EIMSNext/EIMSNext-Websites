@@ -3,7 +3,7 @@
     <el-badge type="warning" is-dot :hidden="!config.mappings.length">
       <el-button class="_fd-plain-button" plain @click="openDialog">
         <slot>
-          {{ btn || '填充规则设置' }}
+          {{ btn || t('com.dataselect.fillRuleSettings') }}
         </slot>
       </el-button>
     </el-badge>
@@ -11,7 +11,7 @@
     <el-dialog
       v-model="visible"
       class="_fd-fill-fields-dialog _fd-config-dialog"
-      :title="title || '填充规则设置'"
+      :title="title || t('com.dataselect.fillRuleSettings')"
       destroy-on-close
       :close-on-click-modal="false"
       append-to-body
@@ -19,31 +19,31 @@
     >
       <div v-if="step === 1" class="fill-step-layout">
         <div class="fill-step-left">
-          <div class="step-title">1.选择字段</div>
+          <div class="step-title">{{ t('com.dataselect.selectFieldsStep') }}</div>
           <DataSelectFieldPicker
             v-model="selectedSourceFields"
             :fields="sourceFields"
             :show-trigger="false"
             :default-expanded="true"
-            search-placeholder="搜索"
+            :search-placeholder="t('comp.dataSelectFieldPicker.searchFields')"
           />
         </div>
         <div class="fill-step-right">
-          <div class="step-title">2.字段值如何处理</div>
+          <div class="step-title">{{ t('com.dataselect.fieldValueHandlingStep') }}</div>
           <el-select v-model="actionType" class="action-select">
-            <el-option label="填充到新字段" value="new" />
-            <el-option label="填充到已有字段" value="existing" />
+            <el-option :label="t('com.dataselect.fillToNewFields')" value="new" />
+            <el-option :label="t('com.dataselect.fillToExistingFields')" value="existing" />
           </el-select>
           <div class="action-desc">
             {{ actionType === 'new'
-              ? '自动在表单中添加同类型新字段并构建填充映射'
-              : '将所选字段值填充到表单已有字段中，需要设置对应关系' }}
+              ? t('com.dataselect.fillToNewFieldsDesc')
+              : t('com.dataselect.fillToExistingFieldsDesc') }}
           </div>
         </div>
       </div>
 
       <div v-else class="fill-step-two">
-        <div class="mapping-desc">选择数据后，将按以下规则将所选字段的值填充到当前表单字段。</div>
+        <div class="mapping-desc">{{ t('com.dataselect.fillMappingDesc') }}</div>
         <div class="mapping-add-row">
           <el-popover
             v-model:visible="sourceFieldPickerVisible"
@@ -53,7 +53,7 @@
             popper-class="_fd-fill-fields-source-picker"
           >
             <template #reference>
-              <el-button text type="primary">+ 选择字段</el-button>
+              <el-button text type="primary">{{ `+ ${t('common.selectField')}` }}</el-button>
             </template>
             <DataSelectFieldPicker
               v-model="pendingSourceField"
@@ -63,7 +63,7 @@
               :default-expanded="true"
               :show-select-all="false"
               :show-indicator="false"
-              search-placeholder="搜索字段"
+              :search-placeholder="t('comp.dataSelectFieldPicker.searchFields')"
               @change="handleSourceFieldPick"
             />
           </el-popover>
@@ -74,7 +74,7 @@
             <div class="mapping-source">
               <el-input :model-value="mapping.sourceField.label" disabled />
             </div>
-            <div class="mapping-text">的值填充到</div>
+            <div class="mapping-text">{{ t('com.dataselect.fillValueTo') }}</div>
             <div class="mapping-target">
               <FieldSelect
                 :model-value="toFieldSelectValue(mapping.targetField)"
@@ -83,16 +83,16 @@
                 @update:model-value="(field) => handleFieldSelect(index, field)"
               />
             </div>
-            <el-button text type="danger" @click="removeMapping(index)">删除</el-button>
+            <el-button text type="danger" @click="removeMapping(index)">{{ t('common.delete') }}</el-button>
           </div>
         </div>
       </div>
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="handleCancel">取消</el-button>
-          <el-button v-if="step === 2 && canReturnStepOne" @click="step = 1">上一步</el-button>
-          <el-button type="primary" @click="handleConfirm">{{ step === 1 ? '下一步' : '完成' }}</el-button>
+          <el-button @click="handleCancel">{{ t('props.cancel') }}</el-button>
+          <el-button v-if="step === 2 && canReturnStepOne" @click="step = 1">{{ t('com.dataselect.prevStep') }}</el-button>
+          <el-button type="primary" @click="handleConfirm">{{ step === 1 ? t('com.dataselect.nextStep') : t('com.dataselect.finish') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -101,6 +101,7 @@
 
 <script>
 import { defineComponent, nextTick } from 'vue';
+import { ElMessage } from 'element-plus';
 import { DataSelectFieldPicker, FieldSelect } from '@eimsnext/components';
 import {
   buildMappingsFromFields,
@@ -139,11 +140,17 @@ export default defineComponent({
     };
   },
   computed: {
+    t() {
+      return this.designer.setupState.t;
+    },
     activeRule() {
       return this.designer.setupState.activeRule;
     },
     selectedForm() {
       return this.activeRule?.props?.dataSource || '';
+    },
+    targetAppId() {
+      return this.designer.setupState.appId || '';
     },
     designerFormId() {
       return this.designer.setupState.formId;
@@ -167,7 +174,7 @@ export default defineComponent({
   methods: {
     async openDialog() {
       this.config = normalizeFillConfig(this.modelValue);
-      this.sourceFields = await loadSourceFormFields(this.selectedForm);
+      this.sourceFields = await loadSourceFormFields(this.selectedForm, this.targetAppId);
       this.currentFormFields = getCurrentFormFields(this.designer, this.activeRule?.field, this.activeRule);
       this.selectedSourceFields = this.config.mappings.map((item) => item.sourceField);
       this.editableMappings = normalizeFillConfig(this.config).mappings;
@@ -232,7 +239,7 @@ export default defineComponent({
     async handleConfirm() {
       if (this.step === 1) {
         if (!this.selectedSourceFields.length) {
-          ElMessage.warning('请先选择字段');
+          ElMessage.warning(this.t('com.dataselect.selectFieldFirst'));
           return;
         }
 

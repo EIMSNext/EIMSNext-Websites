@@ -20,6 +20,7 @@ export interface FormDef extends CorpModelBase {
   isLedger: boolean;
   usingWorkflow: boolean;
   formSettings?: FormSettings;
+  external?: boolean;
 }
 
 export interface FormSettings {

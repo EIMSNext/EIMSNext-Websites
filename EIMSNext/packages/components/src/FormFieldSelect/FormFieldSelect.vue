@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { useFormStore } from "@eimsnext/store";
 import { IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
-import { ref, watch, computed, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { FieldType } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
 
@@ -41,6 +41,8 @@ const props = withDefaults(
   defineProps<{
     modelValue: IFormFieldDef;
     formId: string; // 当前选择的表单ID
+    sourceScope?: "currentApp" | "crossApp";
+    targetAppId?: string;
   }>(),
   {
     modelValue: () => ({
@@ -85,7 +87,9 @@ const loadFields = async () => {
   
   try {
     loading.value = true;
-    // 加载指定表单
+    if (props.sourceScope === "crossApp" && props.targetAppId) {
+      await formStore.loadFormsIncludeCross(props.targetAppId);
+    }
     const form = await formStore.get(props.formId);
     
     if (!form) {
