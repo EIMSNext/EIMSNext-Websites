@@ -56,11 +56,13 @@ const props = withDefaults(
     def: FormContent;
     data?: FormData;
     isView?: boolean;
+    isPublic?: boolean;
     actions?: FormActionSettings;
     fieldPerms?: IFieldPerm[];
   }>(),
   {
     isView: false,
+    isPublic: false,
   }
 );
 

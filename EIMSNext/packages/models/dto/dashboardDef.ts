@@ -9,8 +9,6 @@ export interface DashboardDefRequest extends IdBase {
   autoRefreshIntervalMinutes?: number;
   memberPublishEnabled?: boolean;
   publishMembers?: Member[];
-  publicEnabled?: boolean;
-  publicToken?: string;
 }
 
 export interface DashboardDef extends CorpModelBase {
@@ -21,6 +19,4 @@ export interface DashboardDef extends CorpModelBase {
   autoRefreshIntervalMinutes?: number;
   memberPublishEnabled?: boolean;
   publishMembers?: Member[];
-  publicEnabled?: boolean;
-  publicToken?: string;
 }

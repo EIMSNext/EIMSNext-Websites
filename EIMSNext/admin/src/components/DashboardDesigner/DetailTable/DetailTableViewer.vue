@@ -122,9 +122,12 @@
 </template>
 
 <script setup lang="ts">
-import { buildFieldListItems, buildSortFieldListItems, findFieldDef, flattenDataItem, formatFormValue, IConditionList, IFieldSortList } from "@eimsnext/components";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { buildFieldListItems, buildSortFieldListItems, findFieldDef, flattenDataItem, formatFormValue, IConditionList, IFieldSortList, toDynamicFilter } from "@eimsnext/components";
 import {
   DataPerms,
+  DashboardItemDef,
+  FieldType,
   FlowStatus,
   FormData,
   FormDef,
@@ -132,14 +135,13 @@ import {
   ITableColumn,
   SystemField,
 } from "@eimsnext/models";
-import { dashboardPublicService, formDataService, IDynamicFindOptions, IFormDataPermissionScopeResponse } from "@eimsnext/services";
+import { AggCalcRequest, aggregateService, formDataService, IFormDataPermissionScopeResponse } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
 import { useI18n } from "vue-i18n";
-import { toDynamicFindOptions } from "@eimsnext/components";
 import DashSort from "../components/DashSort.vue";
 import FormDataView from "@/views/form/components/FormDataView.vue";
 import DetailTableRowPreview from "./DetailTableRowPreview.vue";
-import { buildDetailTableColumns, buildPublicDetailTableColumns, detailTableSettingValidate, IDetailTableSetting } from "./type";
+import { buildDetailTableColumns, detailTableSettingValidate, IDetailTableSetting } from "./type";
 
 const { t } = useI18n();
 
@@ -154,8 +156,8 @@ const props = withDefaults(
     showHeader?: boolean;
     designerMode?: boolean;
     externalFilter?: IConditionList;
-    publicToken?: string;
-    publicItemId?: string;
+    isPublic?: boolean;
+    itemDef?: DashboardItemDef;
   }>(),
   {
     showHeader: true,
@@ -231,26 +233,28 @@ const buildNoAccessFieldPerms = (form: FormDef): IFieldPerm[] => {
     }));
 };
 
+const buildAggRequest = (skip: number, take: number): AggCalcRequest => {
+  const mergedFilter = mergeFilter(props.setting.filter, props.externalFilter);
+  return {
+    dataSource: props.setting.datasource,
+    dimensions: [],
+    metrics: [],
+    filter: mergedFilter ? toDynamicFilter(mergedFilter) : undefined,
+    sort: props.setting.sort?.items
+      ? props.setting.sort.items.map((s) => ({ id: s.field.field, type: FieldType.Input, dir: s.sort }))
+      : undefined,
+    skip,
+    take,
+    itemId: props.itemDef?.id,
+    displayFields: props.isPublic ? (props.setting.displayFields || []).map((f: any) => f.field) : undefined,
+  };
+};
+
 const loadFormContext = async () => {
   if (!props.setting.datasource?.id) {
     formDef.value = undefined;
     columns.value = [];
     sortFields.value = [];
-    noAccessFieldPerms.value = [];
-    return;
-  }
-
-  if (props.publicToken) {
-    formDef.value = {
-      id: props.setting.datasource.id,
-      appId: "",
-      name: props.setting.datasource.label || props.title,
-      isLedger: false,
-      usingWorkflow: false,
-      content: { items: [] },
-    } as unknown as FormDef;
-    columns.value = buildPublicDetailTableColumns(props.setting.displayFields || []);
-    sortFields.value = props.setting.displayFields || [];
     noAccessFieldPerms.value = [];
     return;
   }
@@ -264,10 +268,21 @@ const loadFormContext = async () => {
     return;
   }
 
-  columns.value = buildDetailTableColumns(form, props.setting.displayFields || [], t);
-  sortFields.value = buildSortFieldListItems(form.id, form.content?.items || [], !!form.usingWorkflow, undefined, { t } as any)
-    .map((item) => item.data)
-    .filter(Boolean);
+  if (props.isPublic) {
+    columns.value = (props.setting.displayFields || []).map((f: any) => ({
+      field: f.field,
+      oriField: f.oriField,
+      title: f.title,
+      type: f.type,
+      width: f.width,
+    }));
+    sortFields.value = props.setting.displayFields || [];
+  } else {
+    columns.value = buildDetailTableColumns(form, props.setting.displayFields || [], t);
+    sortFields.value = buildSortFieldListItems(form.id, form.content?.items || [], !!form.usingWorkflow, undefined, { t } as any)
+      .map((item) => item.data)
+      .filter(Boolean);
+  }
   noAccessFieldPerms.value = buildNoAccessFieldPerms(form);
 };
 
@@ -297,21 +312,7 @@ const mergeFilter = (ownFilter?: IConditionList, externalFilter?: IConditionList
   } as IConditionList;
 };
 
-const buildQueryOptions = (skip: number, take: number): IDynamicFindOptions => {
-  const filter = mergeFilter(props.setting.filter, props.externalFilter) || { id: "", rel: "and", items: [] };
-  const sort = props.setting.sort || ({ items: [] } as IFieldSortList);
-  return toDynamicFindOptions(
-    [],
-    filter,
-    sort,
-    skip,
-    take,
-    { field: "formId", type: "none", op: "eq", value: props.setting.datasource.id },
-    props.setting.inheritDataActionPerms
-      ? { formId: props.setting.datasource.id, inheritMemberPermissions: true }
-      : undefined,
-  );
-};
+const buildQueryOptions = null; // (legacy formDataService path removed — use buildAggRequest)
 
 const getVisibleTotal = (total: number) => {
   if (!props.setting.showTop) {
@@ -384,9 +385,8 @@ const loadCount = async () => {
     return;
   }
 
-  const count = props.publicToken && props.publicItemId
-    ? await dashboardPublicService.countData(props.publicToken, props.publicItemId, buildQueryOptions(0, 0))
-    : await formDataService.countByOptions(buildQueryOptions(0, 0));
+  const req = buildAggRequest(0, 0);
+  const count = await aggregateService.count(req);
   rawTotal.value = count;
   displayTotal.value = getVisibleTotal(count);
 
@@ -397,7 +397,7 @@ const loadCount = async () => {
 };
 
 const loadRows = async () => {
-  if (!props.setting.datasource?.id || !formDef.value) {
+  if (!props.setting.datasource?.id) {
     rows.value = [];
     flattedRows.value = [];
     return;
@@ -413,9 +413,12 @@ const loadRows = async () => {
   }
 
   const take = props.setting.showTop ? Math.min(pageSize.value, remaining) : pageSize.value;
-  rows.value = props.publicToken && props.publicItemId
-    ? await dashboardPublicService.queryData(props.publicToken, props.publicItemId, buildQueryOptions(skip, take))
-    : await formDataService.query<FormData>(buildQueryOptions(skip, take));
+  const data = await aggregateService.calucate(buildAggRequest(skip, take));
+  rows.value = (data || []).map((d: any) => ({
+    id: d.id,
+    formId: d.formId,
+    data: d.data || {},
+  } as FormData));
   processRows();
 };
 
@@ -455,7 +458,7 @@ const handleRowClick = (row: Record<string, any>) => {
   if (props.designerMode) {
     return;
   }
-  if (props.publicToken) {
+  if (props.isPublic) {
     return;
   }
 
@@ -535,8 +538,16 @@ watch(
   async () => {
     if (!formDef.value && props.setting.datasource?.id) {
       await loadFormContext();
-    } else if (formDef.value) {
+    } else if (formDef.value && !props.isPublic) {
       columns.value = buildDetailTableColumns(formDef.value, props.setting.displayFields || [], t);
+    } else if (props.isPublic) {
+      columns.value = (props.setting.displayFields || []).map((f: any) => ({
+        field: f.field,
+        oriField: f.oriField,
+        title: f.title,
+        type: f.type,
+        width: f.width,
+      }));
     }
 
     pageSize.value = props.setting.pageSize || 20;
@@ -550,9 +561,28 @@ watch(
   () => props.externalFilter,
   async () => {
     pageNum.value = 1;
-    await reloadData();
+    // count 已根据 conditions 变化触发，这里只重查 calucate
+    await loadRows();
   },
   { deep: true },
+);
+
+const queryContext = computed(() => ({
+  datasource: props.setting.datasource,
+  filter: props.setting.filter,
+  externalFilter: props.externalFilter,
+  itemId: props.itemDef?.id,
+}));
+
+watch(
+  queryContext,
+  async () => {
+    if (!props.setting.datasource?.id) return;
+    await loadCount();
+    pageNum.value = 1;
+    await loadRows();
+  },
+  { deep: true, immediate: false },
 );
 
 onMounted(() => {

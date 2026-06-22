@@ -72,7 +72,7 @@ export enum UserType {
   /// <summary>
   /// 匿名用户
   /// </summary>
-  Anonymous = 32768,
+  Public = 32768,
 
   /// <summary>
   /// 用户已被禁用

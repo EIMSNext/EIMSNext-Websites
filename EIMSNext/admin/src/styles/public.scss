@@ -1,0 +1,103 @@
+// 公开页面共享样式
+
+.public-page {
+  min-height: 100vh;
+  background: var(--et-bg-page, #f5f7fa);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.public-toolbar {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  display: flex;
+  gap: 8px;
+}
+
+.public-content {
+  flex: 1;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.public-loading,
+.public-not-found {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--et-text-secondary, #909399);
+}
+
+.public-not-found {
+  min-height: 100vh;
+}
+
+.access-code-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.access-code-card {
+  background: var(--et-bg-container, #fff);
+  box-shadow: var(--et-shadow-md, 0 2px 12px 0 rgba(0, 0, 0, 0.1));
+  border-radius: 6px;
+  padding: 24px;
+  max-width: 480px;
+  width: 100%;
+
+  h3 {
+    color: var(--et-text-primary, #303133);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+
+  .el-input {
+    margin-bottom: 12px;
+  }
+
+  .access-code-error {
+    color: var(--el-color-danger, #f56c6c);
+    font-size: 12px;
+    margin: 8px 0 0;
+  }
+}
+
+.public-submit-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 40px;
+  text-align: center;
+
+  .success-icon {
+    font-size: 64px;
+    color: var(--el-color-success, #67c23a);
+    margin-bottom: 16px;
+  }
+
+  .success-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--et-text-primary, #303133);
+    margin-bottom: 8px;
+  }
+
+  .success-desc {
+    font-size: 14px;
+    color: var(--et-text-secondary, #909399);
+    margin-bottom: 24px;
+  }
+}

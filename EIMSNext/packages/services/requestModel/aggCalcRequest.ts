@@ -8,6 +8,9 @@ export interface AggCalcRequest {
   filter?: IDynamicFilter;
   sort?: IAgSortItem[];
   take?: number;
+  skip?: number;
+  itemId?: string;
+  displayFields?: string[];
 }
 
 export interface IAgDatasource {

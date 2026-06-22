@@ -334,8 +334,23 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/dash/public/:token",
-    component: () => import("@/views/dash/public.vue"),
+    path: "/public/dash/:dashboardId",
+    component: () => import("@/views/public/DashLink.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/public/form/:formId/submit",
+    component: () => import("@/views/public/FormLink.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/public/form/:formId/query",
+    component: () => import("@/views/public/QueryLink.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/public/form/:formId/data/:dataId",
+    component: () => import("@/views/public/DataLink.vue"),
     meta: { hidden: true },
   },
   {

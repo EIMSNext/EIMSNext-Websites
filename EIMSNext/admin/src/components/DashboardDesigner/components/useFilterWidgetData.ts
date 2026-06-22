@@ -6,11 +6,11 @@ import {
 } from "@eimsnext/components";
 import { DashboardFilterSetting, DashboardItemDef, FieldType } from "@eimsnext/models";
 import { useDeptStore, useUserStore } from "@eimsnext/store";
-import { dashboardPublicService, IFormDataFilterOptionItem, formDataService } from "@eimsnext/services";
+import { IFormDataFilterOptionItem, formDataService } from "@eimsnext/services";
 import { DashboardConditionFieldType, getDashboardConditionFieldType, isDashboardMultiValueType } from "../fieldType";
 import { useI18n } from "vue-i18n";
 
-export function useFilterWidgetData(props: { itemDef: DashboardItemDef; publicToken?: string }) {
+export function useFilterWidgetData(props: { itemDef: DashboardItemDef; isPublic?: boolean }) {
   const { t } = useI18n();
   const userStore = useUserStore();
   const deptStore = useDeptStore();
@@ -64,7 +64,7 @@ export function useFilterWidgetData(props: { itemDef: DashboardItemDef; publicTo
   }));
 
   const resolveDynamicDefault = async () => {
-    if (props.publicToken) {
+    if (props.isPublic) {
       return [];
     }
 
@@ -133,9 +133,7 @@ export function useFilterWidgetData(props: { itemDef: DashboardItemDef; publicTo
       fieldType: binding.field.type,
       limit: 50,
     };
-    const resp = props.publicToken
-      ? await dashboardPublicService.getFilterOptions(props.publicToken, props.itemDef.id, request)
-      : await formDataService.getFilterOptions(request);
+    const resp = await formDataService.getFilterOptions(request);
     options.value = resp.items || [];
   };
 

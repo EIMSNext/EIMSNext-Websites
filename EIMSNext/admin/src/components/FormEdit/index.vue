@@ -21,7 +21,7 @@
       <Advanced :formDef="formDefRef!"></Advanced>
     </div>
     <div v-if="loadedTabs.publish" v-show="activeName == 'publish'" class="main-content-container">
-      <Publish :formDef="formDefRef!"></Publish>
+      <Publish ref="publishRef" :formDef="formDefRef!"></Publish>
     </div>
   </et-drawer>
 </template>
@@ -58,6 +58,7 @@ const formStore = useFormStore();
 const contextStore = useContextStore();
 const formBuilder = ref<InstanceType<typeof FormBuilder>>();
 const wfDesigner = ref<{ isDirty: () => boolean; save: () => void }>();
+const publishRef = ref<{ beforeClose: () => Promise<boolean> }>();
 const systemStore = useSystemStore();
 const locale = computed(() => systemStore.locale);
 
@@ -238,6 +239,10 @@ const askSave = async (tabName: string): Promise<boolean> => {
 const emit = defineEmits(["close"]);
 
 async function beforeClose() {
+  if (publishRef.value?.beforeClose) {
+    const ok = await publishRef.value.beforeClose();
+    if (!ok) return false;
+  }
   return await askSave(activeName.value);
 }
 

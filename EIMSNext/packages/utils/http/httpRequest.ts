@@ -71,7 +71,9 @@ export class HttpRequest {
   }
 
   request<T = any>(config: HttpRequestConfig) {
-    if (config.withToken !== false) {
+    if (config.token) {
+      config.headers.Authorization = `Bearer ${config.token}`;
+    } else if (config.withToken !== false) {
       const token = accessToken.get();
       // console.log("token", token);
       if (token) config.headers.Authorization = `Bearer ${token}`;

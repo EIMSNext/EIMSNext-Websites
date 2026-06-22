@@ -49,8 +49,9 @@
 import { ref, watch } from "vue";
 import echarts from "@/plugins/echarts";
 import { chartSettingValidate, ChartType, getChartSort, IChartSetting } from "./type";
-import { AggCalcRequest, AggregateFun, aggregateService, dashboardPublicService } from "@eimsnext/services";
+import { AggCalcRequest, AggregateFun, aggregateService } from "@eimsnext/services";
 import { convertToFieldArray } from "@eimsnext/utils";
+import { DashboardItemDef } from "@eimsnext/models";
 import { IConditionList, ISortItem, ISortList, toDynamicFilter } from "@eimsnext/components";
 import DashSort from "../components/DashSort.vue";
 import { useI18n } from "vue-i18n";
@@ -68,8 +69,8 @@ const props = withDefaults(
     showHeader?: boolean;
     designerMode?: boolean;
     externalFilter?: IConditionList;
-    publicToken?: string;
-    publicItemId?: string;
+    isPublic?: boolean;
+    itemDef?: DashboardItemDef;
   }>(),
   {
     showHeader: true,
@@ -119,10 +120,9 @@ const getChartOpts = async (setting: IChartSetting) => {
     filter: mergedFilter ? toDynamicFilter(mergedFilter) : undefined,
     sort: getChartSort(setting),
     take: setting.takeEnable ? setting.take : -1,
+    itemId: props.itemDef?.id,
   };
-  let aggResult = props.publicToken && props.publicItemId
-    ? await dashboardPublicService.calculate(props.publicToken, props.publicItemId, aggRequest)
-    : await aggregateService.calucate(aggRequest);
+  let aggResult = await aggregateService.calucate(aggRequest);
   let ds = convertToFieldArray(aggResult);
   switch (chartType) {
     case ChartType.VBar: // 垂直柱状图
@@ -205,7 +205,7 @@ const getChartOpts = async (setting: IChartSetting) => {
         };
       }
 
-      chartOpts.value = opt;
+      chartOpts.value = applyChartTheme(opt);
       break;
     case ChartType.HBar: // 水平柱状图（x/y轴类型互换）
       opt = {
@@ -241,7 +241,7 @@ const getChartOpts = async (setting: IChartSetting) => {
           series: series,
         };
       }
-      chartOpts.value = opt;
+      chartOpts.value = applyChartTheme(opt);
       break;
     case ChartType.Line: // 折线图
       opt = {
@@ -269,7 +269,7 @@ const getChartOpts = async (setting: IChartSetting) => {
         opt.series[0]["step"] = "start";
       }
 
-      chartOpts.value = opt;
+      chartOpts.value = applyChartTheme(opt);
       break;
     case ChartType.Pie: // 饼图（无需x/y轴，避免多余配置导致报错）
       let serie = { type: "pie", radius: "50%", data: [] as any[] };
@@ -301,7 +301,7 @@ const getChartOpts = async (setting: IChartSetting) => {
         opt.series[0]["center"] = ["50%", "50%"];
         opt.series[0]["roseType"] = "area";
       }
-      chartOpts.value = opt;
+      chartOpts.value = applyChartTheme(opt);
       break;
     default:
       chartOpts.value = undefined;
@@ -328,6 +328,40 @@ const setSort = (sort: ISortList) => {
   props.setting.sort = sort;
 };
 
+const isDark = ref(typeof document !== "undefined" && document.documentElement.classList.contains("dark"));
+
+const applyChartTheme = (opt: echarts.EChartsCoreOption | undefined): echarts.EChartsCoreOption | undefined => {
+  if (!opt) return opt;
+  const textColor = isDark.value ? "#E5EAF3" : "#303133";
+  const axisColor = isDark.value ? "#6B7280" : "#DCDFE6";
+  const splitLineColor = isDark.value ? "#374151" : "#EBEEF5";
+  const tooltipBg = isDark.value ? "rgba(50,50,50,0.95)" : "rgba(255,255,255,0.95)";
+  const tooltipText = isDark.value ? "#E5EAF3" : "#303133";
+
+  return {
+    backgroundColor: "transparent",
+    textStyle: { color: textColor },
+    title: { textStyle: { color: textColor }, subtextStyle: { color: textColor } },
+    legend: { textStyle: { color: textColor } },
+    tooltip: {
+      backgroundColor: tooltipBg,
+      borderColor: tooltipBg,
+      textStyle: { color: tooltipText },
+    },
+    xAxis: {
+      axisLine: { lineStyle: { color: axisColor } },
+      axisLabel: { color: textColor },
+      splitLine: { lineStyle: { color: splitLineColor } },
+    },
+    yAxis: {
+      axisLine: { lineStyle: { color: axisColor } },
+      axisLabel: { color: textColor },
+      splitLine: { lineStyle: { color: splitLineColor } },
+    },
+    ...opt,
+  };
+};
+
 watch(
   () => props.setting,
   async (newVal) => {
@@ -350,6 +384,23 @@ watch(
   },
   { deep: true }
 );
+
+watch(isDark, async () => {
+  if (props.setting) await getChartOpts(props.setting);
+});
+
+let darkObserver: MutationObserver | undefined;
+onMounted(() => {
+  if (typeof document === "undefined") return;
+  darkObserver = new MutationObserver(() => {
+    isDark.value = document.documentElement.classList.contains("dark");
+  });
+  darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+});
+
+onUnmounted(() => {
+  darkObserver?.disconnect();
+});
 </script>
 
 <style lang="scss" scoped>

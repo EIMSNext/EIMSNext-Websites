@@ -32,8 +32,18 @@
         <span>{{ t("admin.dashboard.publicPublishDesc") }}</span>
       </div>
       <div class="settings-card__body">
-        <el-switch v-model="localDash.publicEnabled" @change="saveDashboard" />
-        <div v-if="localDash.publicEnabled" class="public-links">
+        <el-switch v-model="publicDashboard.enabled" @change="savePublicSetting" />
+        <div v-if="publicDashboard.enabled" class="public-links">
+          <div class="field-label">{{ t("admin.dashboard.publicExpireTime") }}</div>
+          <el-date-picker
+            v-model="publicDashboard.expireTime"
+            type="datetime"
+            value-format="x"
+            :placeholder="t('admin.dashboard.publicNoExpire')"
+            clearable
+            class="public-expire-picker"
+            @change="savePublicSetting"
+          />
           <div class="field-label">{{ t("admin.dashboard.visitLink") }}</div>
           <el-input :model-value="publicUrl" readonly>
             <template #append>
@@ -70,9 +80,9 @@
 </template>
 
 <script setup lang="ts">
-import { AppDef, DashboardDef, Member, MemberType } from "@eimsnext/models";
+import { AppDef, DashboardDef, Member, MemberType, PublicDashboardSetting, PublicSetting, PublicTargetType } from "@eimsnext/models";
 import { ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
-import { appDefService, dashboardDefService } from "@eimsnext/services";
+import { appDefService, dashboardDefService, publicSettingService } from "@eimsnext/services";
 import { useAppStore, useContextStore } from "@eimsnext/store";
 import { DataItemType } from "@eimsnext/components/src/common";
 import { ElMessage } from "element-plus";
@@ -94,6 +104,8 @@ const app = ref<AppDef>();
 const publishTags = ref<ISelectedTag[]>([]);
 const showMemberDialog = ref(false);
 const showEmbedDialog = ref(false);
+const publicSetting = ref<PublicSetting>();
+const publicDashboard = ref<PublicDashboardSetting>({});
 
 const memberOptions = {
   showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
@@ -104,8 +116,7 @@ const memberOptions = {
 const isHomeEntry = ref(false);
 
 const publicUrl = computed(() => {
-  const token = localDash.value.publicToken || "";
-  return `${window.location.origin}${window.location.pathname}#/dash/public/${token}`;
+  return `${window.location.origin}${window.location.pathname}#/public/dash/${localDash.value.id}`;
 });
 const embedCode = computed(() => `<iframe width="100%" height="100%" style="border: none;" src="${publicUrl.value}"></iframe>`);
 
@@ -115,6 +126,7 @@ watch(
     localDash.value = { ...value };
     publishTags.value = membersToTags(value.publishMembers || []);
     loadApp();
+    loadPublicSetting();
   },
   { immediate: true },
 );
@@ -129,12 +141,38 @@ async function saveDashboard() {
     id: localDash.value.id,
     memberPublishEnabled: localDash.value.memberPublishEnabled,
     publishMembers: tagsToMembers(publishTags.value),
-    publicEnabled: localDash.value.publicEnabled,
-    publicToken: localDash.value.publicToken,
   });
   localDash.value = updated;
   publishTags.value = membersToTags(updated.publishMembers || []);
   emit("updated", updated);
+  ElMessage.success(t("common.saveSuccess"));
+}
+
+async function loadPublicSetting() {
+  const dashId = props.dashDef.id;
+  const settings = await publicSettingService.query<PublicSetting>(
+    `$filter=targetType eq ${PublicTargetType.Dashboard} and targetId eq '${escapeODataString(dashId)}'&$top=1`,
+  );
+  publicSetting.value = settings[0];
+  publicDashboard.value = { ...(settings[0]?.dashboard || {}) };
+}
+
+async function savePublicSetting() {
+  const payload = {
+    id: publicSetting.value?.id || "",
+    appId: localDash.value.appId,
+    targetType: PublicTargetType.Dashboard,
+    targetId: localDash.value.id,
+    dashboard: {
+      ...publicDashboard.value,
+    },
+  };
+
+  const saved = publicSetting.value?.id
+    ? await publicSettingService.patch<PublicSetting>(publicSetting.value.id, payload)
+    : await publicSettingService.post<PublicSetting>(payload);
+  publicSetting.value = saved;
+  publicDashboard.value = { ...(saved.dashboard || {}) };
   ElMessage.success(t("common.saveSuccess"));
 }
 
@@ -205,6 +243,10 @@ function dataItemTypeToMemberType(type: DataItemType): MemberType {
   if (type === DataItemType.Employee) return MemberType.Employee;
   return MemberType.None;
 }
+
+function escapeODataString(value: string) {
+  return value.replace(/'/g, "''");
+}
 </script>
 
 <style scoped lang="scss">
@@ -273,6 +315,11 @@ function dataItemTypeToMemberType(type: DataItemType): MemberType {
 .public-links {
   margin-top: var(--et-space-14);
   width: 560px;
+}
+
+.public-expire-picker {
+  margin-bottom: var(--et-space-14);
+  width: 100%;
 }
 
 .embed-dialog {

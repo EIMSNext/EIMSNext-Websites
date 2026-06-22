@@ -4,7 +4,6 @@ import {
   IFormDataFilterOptionsRequest,
   IFormDataFilterOptionsResponse,
   IFormDataPermissionScopeResponse,
-  IDynamicFindOptions,
 } from "../requestModel";
 
 export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
@@ -18,10 +17,6 @@ export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
 
   getFilterOptions(data: IFormDataFilterOptionsRequest): Promise<IFormDataFilterOptionsResponse> {
     return this.http().api.post<IFormDataFilterOptionsResponse>(`/FormData/filter/options`, data);
-  }
-
-  countByOptions(query?: IDynamicFindOptions): Promise<number> {
-    return this.http().api.count(`/FormData/$count/options`, query);
   }
 
   getPermissionScope(dataId: string, formId: string): Promise<IFormDataPermissionScopeResponse> {

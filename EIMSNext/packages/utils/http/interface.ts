@@ -32,6 +32,11 @@ export class HttpInterceptors<T = AxiosResponse> {
 export interface HttpRequestConfig<T = AxiosResponse>
   extends InternalAxiosRequestConfig {
   withToken?: boolean;
+  /**
+   * 自定义 token 覆盖。设置后优先使用此 token，不读取全局 accessToken。
+   * 用于公开页面等需要页面级 token 隔离的场景。
+   */
+  token?: string;
   interceptors?: HttpInterceptors<T>;
 }
 

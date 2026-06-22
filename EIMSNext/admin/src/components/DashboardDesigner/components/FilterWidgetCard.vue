@@ -9,7 +9,7 @@
         v-else-if="isMemberType"
         :model-value="memberValue"
         :multiple="isMultiple"
-        :editable="!publicToken"
+        :editable="!isPublic"
         :empty-text="isDepartmentType ? t('comp.emptyDept') : t('comp.emptyEmp')"
         @editTag="openMemberDialog"
       />
@@ -66,7 +66,7 @@ defineOptions({
 
 const props = defineProps<{
   itemDef: DashboardItemDef;
-  publicToken?: string;
+  isPublic?: boolean;
 }>();
 
 const emit = defineEmits(["change"]);
@@ -107,7 +107,7 @@ const memberSelected = (tags: ISelectedTag[]) => {
 };
 
 const openMemberDialog = () => {
-  if (props.publicToken) {
+  if (props.isPublic) {
     return;
   }
 

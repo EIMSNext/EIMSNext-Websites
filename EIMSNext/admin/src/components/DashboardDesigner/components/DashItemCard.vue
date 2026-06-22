@@ -27,8 +27,8 @@
           :title="itemTitle"
           :show-header="isView"
           :external-filter="externalFilter"
-          :public-token="publicToken"
-          :public-item-id="itemDef.id"
+          :is-public="isPublic"
+          :item-def="itemDef"
         />
       </template>
       <template v-else-if="itemDef.itemType == DashItemType.DetailTable && detailTableSetting && detailTableSettingValidate(detailTableSetting)">
@@ -37,12 +37,12 @@
           :title="itemTitle"
           :show-header="isView"
           :external-filter="externalFilter"
-          :public-token="publicToken"
-          :public-item-id="itemDef.id"
+          :is-public="isPublic"
+          :item-def="itemDef"
         />
       </template>
       <template v-else-if="itemDef.itemType == DashItemType.Filter">
-        <FilterWidgetCard :item-def="itemDef" :public-token="publicToken" @change="onFilterValueChanged" />
+        <FilterWidgetCard :item-def="itemDef" :is-public="isPublic" @change="onFilterValueChanged" />
       </template>
       <template v-else>
         <el-empty class="et-dash-empty">
@@ -73,13 +73,14 @@ const props = withDefaults(
   defineProps<{
     itemDef: DashboardItemDef;
     isView?: boolean;
+    isPublic?: boolean;
     height?: number;
     width?: number;
     externalFilter?: any;
-    publicToken?: string;
   }>(),
   {
     isView: false,
+    isPublic: false,
   }
 );
 
