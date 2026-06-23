@@ -193,7 +193,7 @@ async function save() {
   updated.form = updated.form || ({} as any);
   updated.form.queryLink = { ...querylink.value };
   if (!accessCodeInput.value && !querylink.value.accessCodeHash) {
-    querylink.value.accessCodeEnabled = false;
+    updated.form.queryLink.accessCodeEnabled = false;
   }
   await publicSettingService.patch<PublicSetting>(updated.id, {
     id: updated.id,

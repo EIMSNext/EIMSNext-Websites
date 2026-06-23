@@ -51,9 +51,9 @@ import {
   PublicSetting,
 } from "@eimsnext/models";
 import FormView from "@/components/FormView/index.vue";
-import { AccessCodeInvalidError, PublicNotFound, bootstrapWithToken, toAccessCodeError, usePublicHttp } from "./shared";
+import { PublicNotFound, bootstrapWithToken, toAccessCodeError, usePublicHttp, type PublicHttp } from "./shared";
 import { IFieldPerm } from "@eimsnext/models";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 defineOptions({ name: "PublicDataView" });
@@ -68,8 +68,11 @@ const props = withDefaults(
     hasNext?: boolean;
     preloadedFormDef?: FormDef;
     preloadedSetting?: PublicSetting;
+    publicHttp?: PublicHttp;
+    scope?: PublicScope;
+    allowedFields?: string[];
   }>(),
-  { mode: "page", hasPrev: false, hasNext: false }
+  { mode: "page", hasPrev: false, hasNext: false, scope: PublicScope.DataLink }
 );
 
 const emit = defineEmits<{
@@ -82,8 +85,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const publicHttp = usePublicHttp();
-const { token: publicToken } = publicHttp;
+const ownPublicHttp = usePublicHttp();
+const activePublicHttp = computed(() => props.publicHttp ?? ownPublicHttp);
 
 const formDef = ref<FormDef>(props.preloadedFormDef as FormDef);
 const data = ref<FormData | undefined>(props.initialData);
@@ -94,6 +97,9 @@ const loading = ref(false);
 const formViewKey = ref("");
 
 const fieldPerms = computed<IFieldPerm[] | undefined>(() => {
+  if (props.allowedFields?.length) {
+    return props.allowedFields.map((field) => ({ id: field, visible: true, editable: false }));
+  }
   if (!setting.value) return undefined;
   const fields = setting.value.form?.dataLink?.fields;
   if (!fields?.length) return undefined;
@@ -114,8 +120,9 @@ async function load() {
   if (!props.formId || !props.dataId) return;
   loading.value = true;
   try {
-    if (!publicToken.value) {
-      await bootstrapWithToken(publicHttp, props.formId, PublicScope.DataLink);
+    const publicHttp = activePublicHttp.value;
+    if (!publicHttp.token.value) {
+      await bootstrapWithToken(publicHttp, props.formId, props.scope);
     }
     if (!formDef.value) {
       formDef.value = await publicHttp.odata.get<FormDef>("FormDef", props.formId);
@@ -133,9 +140,11 @@ async function load() {
       };
     }
     if (formDef.value) {
-      const allowed = (setting.value?.form?.dataLink?.fields || [])
-        .filter((f) => f.visible !== false)
-        .map((f) => f.field);
+      const allowed = props.allowedFields?.length
+        ? props.allowedFields
+        : (setting.value?.form?.dataLink?.fields || [])
+          .filter((f) => f.visible !== false)
+          .map((f) => f.field);
       renderContent.value = buildPublicContent(formDef.value.content || new FormContent(), allowed.length ? allowed : undefined);
       refreshFormKey();
     }

@@ -13,6 +13,9 @@
         <strong>{{ t("publicpublish.extlink") }}</strong>
         <span class="extlink-sub">{{ t("publicpublish.extlinkManage") }}</span>
       </div>
+      <div class="extlink-toggle">
+        <el-switch v-model="formlink.extLink!.enabled" @change="markDirty" />
+      </div>
       <div v-for="ext in formlink.extLink?.values || []" :key="ext" class="extlink-row">
         <span class="ext-name">{{ ext }}</span>
         <el-input :model-value="buildExtUrl(ext)" readonly />
@@ -158,6 +161,7 @@ watch(
       viewOwnData: setting.form?.formLink?.viewOwnData ?? false,
       editOwnData: setting.form?.formLink?.editOwnData ?? false,
     };
+    showExtlink.value = formlink.value.extLink?.enabled ?? false;
     isDirtyState.value = false;
   },
   { immediate: true, deep: true },
@@ -261,6 +265,10 @@ defineExpose({
     color: var(--et-text-secondary);
     font-size: var(--et-font-size-12);
   }
+}
+
+.extlink-toggle {
+  margin-bottom: var(--et-space-12);
 }
 
 .extlink-row {

@@ -31,6 +31,7 @@
       mode="page"
       :form-id="formId"
       :data-id="dataId"
+      :public-http="publicHttp"
     />
   </div>
 </template>
@@ -92,6 +93,9 @@ async function submitAccessCode() {
   accessCodeSubmitting.value = true;
   try {
     await bootstrap(accessCodeInput.value);
+    if (!accessCodeGate.value) {
+      accessCodeInput.value = "";
+    }
   } finally {
     accessCodeSubmitting.value = false;
   }

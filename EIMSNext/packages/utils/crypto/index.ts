@@ -7,10 +7,5 @@ export async function sha256(input: string): Promise<string> {
       .join("");
   }
 
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash << 5) - hash + input.charCodeAt(i);
-    hash |= 0;
-  }
-  return hash.toString(16).padStart(8, "0");
+  throw new Error("SHA-256 is unavailable in this browser context");
 }

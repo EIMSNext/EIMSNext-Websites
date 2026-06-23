@@ -7,10 +7,10 @@
  */
 export enum PublicScope {
   None = 0,
-  FormLink = 1,
-  DataLink = 2,
-  QueryLink = 4,
-  DashLink = 8,
+  DashLink = 1,
+  FormLink = 2,
+  DataLink = 4,
+  QueryLink = 8,
 }
 
 export interface PublicSettingRequest extends IdBase {

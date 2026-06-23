@@ -104,6 +104,9 @@
         :initial-data="currentDetail"
         :preloaded-form-def="formDef"
         :preloaded-setting="publicSetting"
+        :public-http="publicHttp"
+        :scope="PublicScope.QueryLink"
+        :allowed-fields="detailFields"
         :has-prev="currentDetailIndex > 0"
         :has-next="currentDetailIndex < listRows.length - 1"
         @prev="goPrevDetail"
@@ -117,10 +120,7 @@
 <script setup lang="ts">
 import { Loading } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
-import {
-  AggCalcRequest,
-  IDynamicFilter,
-} from "@eimsnext/services";
+import type { IDynamicFindOptions, IDynamicFilter } from "@eimsnext/services";
 import {
   FieldDef,
   FieldType,
@@ -175,6 +175,7 @@ const displayFields = computed(() => {
   const configured = resolveFields(publicSetting.value?.form?.queryLink?.displayFields || []);
   return configured.length ? configured : ordinaryFields.value.slice(0, 5);
 });
+const detailFields = computed(() => displayFields.value.map((field) => field.field));
 
 const currentDetail = computed(() => listRows.value[currentDetailIndex.value]);
 
@@ -240,15 +241,13 @@ async function loadListData() {
   if (!formId.value) return;
   queryLoading.value = true;
   try {
-    const aggRequest = buildAggRequest();
-    const dataRequest = { ...aggRequest, skip: aggRequest.skip, take: aggRequest.take };
-    const countReq = { ...aggRequest, skip: 0, take: 0 };
+    const queryRequest = buildQueryRequest();
     const [total, result] = await Promise.all([
-      publicHttp.api.post<number>("/aggregate/$count", countReq),
-      publicHttp.api.post<FormData[]>("/aggregate/calucate", dataRequest),
+      publicHttp.api.post<number>("/FormData/$count", queryRequest.filter),
+      publicHttp.api.post<{ value: FormData[] }>("/FormData/$query", queryRequest),
     ]);
     listTotal.value = total || 0;
-    listRows.value = (result || []).map((d: any) => ({
+    listRows.value = (result?.value || []).map((d: any) => ({
       id: d.id,
       formId: d.formId,
       appId: d.appId,
@@ -265,7 +264,7 @@ async function loadListData() {
   }
 }
 
-function buildAggRequest(): AggCalcRequest {
+function buildQueryRequest(): IDynamicFindOptions {
   const filters: IDynamicFilter[] = [{ field: "formId", op: "eq", value: formId.value }];
   queryFields.value.forEach((field) => {
     const value = queryValues.value[field.field];
@@ -274,14 +273,8 @@ function buildAggRequest(): AggCalcRequest {
     }
   });
 
-  const displayFieldsValue = displayFields.value.map((f) => `data.${f.field}`);
-
   return {
-    dataSource: { id: formId.value, type: 0 },
-    dimensions: [],
-    metrics: [],
     filter: { rel: "and", items: filters },
-    displayFields: displayFieldsValue,
     skip: (listPage.value - 1) * listPageSize,
     take: listPageSize,
   };
