@@ -1,7 +1,7 @@
 <template>
-  <MobilePage :title="isAdd ? '新增数据' : '数据详情'" @back="goBack">
+  <MobilePage :title="isAdd ? t('mobile.formData.addTitle') : t('mobile.formData.detailTitle')" @back="goBack">
     <div class="detail-page">
-      <div v-if="loading" class="loading-wrap">加载中...</div>
+      <div v-if="loading" class="loading-wrap">{{ t("common.loading") }}</div>
       <div v-else class="detail-card mobile-card">
         <div class="detail-title">{{ formDef?.name }}</div>
 
@@ -18,7 +18,7 @@
 
     <template #footer>
       <div v-if="isAdd || editing" class="detail-footer-actions">
-        <van-button block type="primary" :loading="saving" @click="handleSave">保存</van-button>
+        <van-button block type="primary" :loading="saving" @click="handleSave">{{ t("common.save") }}</van-button>
       </div>
     </template>
   </MobilePage>
@@ -28,6 +28,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { showToast } from "vant";
+import { useI18n } from "vue-i18n";
 import type { FormDef } from "@eimsnext/models";
 import MobileFormRenderer from "@/components/form/MobileFormRenderer.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
@@ -35,6 +36,7 @@ import { formDataServiceMobile, formServiceMobile } from "@/services/mobileServi
 
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
 const formId = route.params.formId as string;
 const dataId = route.params.dataId as string | undefined;
 
@@ -62,10 +64,10 @@ const handleSave = async () => {
     } else if (dataId) {
       await formDataServiceMobile.put(dataId, formData.value);
     }
-    showToast("保存成功");
+    showToast(t("common.saveSuccess"));
     router.back();
   } catch {
-    showToast("保存失败");
+    showToast(t("common.saveFailed"));
   } finally {
     saving.value = false;
   }

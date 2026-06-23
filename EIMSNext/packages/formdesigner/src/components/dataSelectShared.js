@@ -99,7 +99,7 @@ export const loadSourceFormFields = async (formId, targetAppId) => {
 };
 
 export const normalizeSelectionProcess = (value, t) => ({
-  buttonText: value?.buttonText || t?.("com.dataselect.selectData") || "Select data",
+  buttonText: value?.buttonText || t?.("com.dataselect.selectData") || "选择数据",
   tableFields: (value?.tableFields || []).map(normalizeDataSelectField).filter(Boolean),
 });
 

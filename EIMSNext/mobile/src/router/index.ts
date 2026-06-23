@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'Login',
     component: () => import('@/components/Login.vue'),
-    meta: { title: '登录' }
+    meta: { titleKey: 'mobile.login.title' }
   },
   {
     path: '/',
@@ -17,43 +17,43 @@ const routes: RouteRecordRaw[] = [
     path: '/workbench',
     name: 'Workbench',
     component: () => import('@/components/Workbench.vue'),
-    meta: { title: '工作台', requireAuth: true }
+    meta: { titleKey: 'mobile.workbench.title', requireAuth: true }
   },
   {
     path: '/app/:appId',
     name: 'FormList',
     component: () => import('@/components/FormList.vue'),
-    meta: { title: '表单', requireAuth: true }
+    meta: { titleKey: 'mobile.formList.fallbackTitle', requireAuth: true }
   },
   {
     path: '/app/:appId/form/:formId',
     name: 'FormDataList',
     component: () => import('@/components/FormDataList.vue'),
-    meta: { title: '数据', requireAuth: true }
+    meta: { titleKey: 'admin.formListView.dataList', requireAuth: true }
   },
   {
     path: '/app/:appId/form/:formId/add',
     name: 'FormDataAdd',
     component: () => import('@/components/FormDataView.vue'),
-    meta: { title: '新增', requireAuth: true, isAdd: true }
+    meta: { titleKey: 'mobile.formData.addTitle', requireAuth: true, isAdd: true }
   },
   {
     path: '/app/:appId/form/:formId/:dataId',
     name: 'FormDataView',
     component: () => import('@/components/FormDataView.vue'),
-    meta: { title: '详情', requireAuth: true }
+    meta: { titleKey: 'mobile.formData.detailTitle', requireAuth: true }
   },
   {
     path: '/wftodo',
     name: 'WorkflowTabs',
     component: () => import('@/components/WorkflowTabs.vue'),
-    meta: { title: '流程中心', requireAuth: true }
+    meta: { titleKey: 'mobile.workflow.title', requireAuth: true }
   },
   {
     path: '/wftodo/:taskId',
     name: 'WfApproval',
     component: () => import('@/components/WfApproval.vue'),
-    meta: { title: '审批', requireAuth: true }
+    meta: { titleKey: 'mobile.approval.title', requireAuth: true }
   }
 ]
 

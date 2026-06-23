@@ -115,8 +115,8 @@ onMounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #e8f3ff;
-  color: #1677ff;
+  background: var(--et-bg-primary-soft);
+  color: var(--et-color-primary);
 }
 
 .todo-title {

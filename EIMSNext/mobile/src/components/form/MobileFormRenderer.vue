@@ -7,11 +7,12 @@
       :option="option"
     />
   </div>
-  <div v-else class="renderer-loading">加载表单中...</div>
+  <div v-else class="renderer-loading">{{ t("mobile.formData.formLoading") }}</div>
 </template>
 
 <script setup lang="ts">
 import { getCurrentInstance, onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   rule: unknown[];
@@ -23,6 +24,7 @@ const emit = defineEmits<{
   "update:modelValue": [value: Record<string, unknown>];
 }>();
 
+const { t } = useI18n();
 const ready = ref(false);
 const innerValue = ref<Record<string, unknown>>(props.modelValue || {});
 

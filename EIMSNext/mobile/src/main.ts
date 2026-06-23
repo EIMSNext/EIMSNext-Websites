@@ -1,5 +1,5 @@
 import { createApp } from "vue";
-import { setupHttp } from "@eimsnext/utils";
+import { applyTheme, generateThemeColors, setupHttp, toggleDarkMode } from "@eimsnext/utils";
 import { createI18n } from "vue-i18n";
 import { En, ZhCn } from "@eimsnext/locale";
 import { Locale } from "vant";
@@ -19,7 +19,10 @@ const initHttp = () => {
 const initTheme = () => {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const theme = localStorage.getItem("mobile-theme") || (prefersDark ? "dark" : "light");
-  document.documentElement.classList.toggle("dark", theme === "dark");
+  const themeColor = localStorage.getItem("themeColor") || "#4080ff";
+
+  toggleDarkMode(theme === "dark");
+  applyTheme(generateThemeColors(themeColor));
 };
 
 const initI18n = () => {

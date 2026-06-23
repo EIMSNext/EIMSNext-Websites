@@ -31,7 +31,7 @@
           <WorkbenchWidgetRenderer :item="item" />
         </grid-item>
       </grid-layout>
-      <div v-else class="workbench-loading">工作台加载中...</div>
+      <div v-else class="workbench-loading">{{ t("admin.workbench.loading") }}</div>
     </div>
   </Layout>
 </template>
@@ -46,6 +46,7 @@ import {
   useWorkbenchStore,
 } from "@/store";
 import WorkbenchWidgetRenderer from "./components/WorkbenchWidgetRenderer.vue";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "Workbench",
@@ -53,6 +54,7 @@ defineOptions({
 });
 
 const workbenchStore = useWorkbenchStore();
+const { t } = useI18n();
 const { layout, loading } = storeToRefs(workbenchStore);
 const runtimeLayout = ref<WorkbenchLayoutItem[]>([]);
 

@@ -9,7 +9,7 @@
           <van-icon :name="isDark ? 'moon-o' : 'sun-o'" />
         </div>
         <div class="lang-switch" @click="toggleLang">
-          <span>{{ currentLang === 'zh-CN' ? '中文' : 'EN' }}</span>
+          <span>{{ nextLangLabel }}</span>
         </div>
       </div>
     </div>
@@ -19,20 +19,20 @@
           <van-field
             v-model="loginData.username"
             name="username"
-            placeholder="请输入用户名"
-            :rules="[{ required: true, message: '请输入用户名' }]"
+            :placeholder="t('mobile.login.usernamePlaceholder')"
+            :rules="[{ required: true, message: t('mobile.login.usernameRequired') }]"
           />
           <van-field
             v-model="loginData.password"
             type="password"
             name="password"
-            placeholder="请输入密码"
-            :rules="[{ required: true, message: '请输入密码' }]"
+            :placeholder="t('mobile.login.passwordPlaceholder')"
+            :rules="[{ required: true, message: t('mobile.login.passwordRequired') }]"
           />
         </van-cell-group>
         <div class="login-btn">
           <van-button round block type="primary" native-type="submit" :loading="loading">
-            登录
+            {{ t("mobile.login.submit") }}
           </van-button>
         </div>
       </van-form>
@@ -41,15 +41,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { showToast } from 'vant'
+import { Locale, showToast } from 'vant'
+import enUS from 'vant/es/locale/lang/en-US'
+import zhCN from 'vant/es/locale/lang/zh-CN'
+import { useI18n } from 'vue-i18n'
 import type { LoginRequest } from '@eimsnext/services'
 import { mobileAuthService } from '@/services/mobileService'
+import { toggleDarkMode } from '@eimsnext/utils'
 
 const router = useRouter()
+const { t, locale } = useI18n()
 
-const currentLang = ref('zh-CN')
+const currentLang = ref(locale.value === 'en' ? 'en' : 'zh-CN')
 const loading = ref(false)
 const isDark = ref(document.documentElement.classList.contains('dark'))
 const loginData = ref<LoginRequest>({
@@ -58,13 +63,25 @@ const loginData = ref<LoginRequest>({
   grant_type: 'password'
 })
 
+const nextLangLabel = computed(() =>
+  currentLang.value === 'zh-CN' ? 'EN' : '中文'
+)
+
+const setVantLocale = (lang: string) => {
+  Locale.use(lang === 'en' ? 'en-US' : 'zh-CN', lang === 'en' ? enUS : zhCN)
+}
+
 const toggleLang = () => {
-  currentLang.value = currentLang.value === 'zh-CN' ? 'en-US' : 'zh-CN'
+  const nextLang = currentLang.value === 'zh-CN' ? 'en' : 'zh-CN'
+  currentLang.value = nextLang
+  locale.value = nextLang
+  localStorage.setItem('language', nextLang)
+  setVantLocale(nextLang)
 }
 
 const toggleTheme = () => {
   isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
+  toggleDarkMode(isDark.value)
   localStorage.setItem('mobile-theme', isDark.value ? 'dark' : 'light')
 }
 
@@ -72,10 +89,10 @@ const handleLogin = async () => {
   loading.value = true
   try {
     await mobileAuthService.login(loginData.value)
-    showToast('登录成功')
+    showToast(t('mobile.login.success'))
     router.replace('/workbench')
   } catch {
-    showToast('登录失败')
+    showToast(t('mobile.login.failed'))
   } finally {
     loading.value = false
   }

@@ -1,5 +1,5 @@
 <template>
-  <et-card title="最近使用" class="workbench-list-card">
+  <et-card :title="t('admin.workbench.recent')" class="workbench-list-card">
     <div v-if="recent.length" class="workbench-list">
       <div v-for="item in recent" :key="`${item.targetType}:${item.targetId}`" class="workbench-list-item" @click="openItem(item)">
         <div class="workbench-list-icon" :style="{ backgroundColor: item.iconColor || 'var(--et-color-info)' }">
@@ -12,7 +12,7 @@
       </div>
     </div>
     <div v-else class="workbench-empty">
-      无需统一配置，系统自动展示各成员最近访问的表单/仪表盘
+      {{ t("admin.workbench.recentEmpty") }}
     </div>
   </et-card>
 </template>
@@ -21,12 +21,14 @@
 import type { WorkbenchRecentVisit, WorkbenchTargetType } from "@eimsnext/models";
 import { useContextStore } from "@eimsnext/store";
 import { workbenchRecentVisitService } from "@eimsnext/services";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "WorkbenchRecentCard",
 });
 
 const router = useRouter();
+const { t } = useI18n();
 const contextStore = useContextStore();
 const recent = ref<WorkbenchRecentVisit[]>([]);
 
@@ -36,7 +38,7 @@ const defaultIcon = (targetType: WorkbenchTargetType) => {
 };
 
 const formatTime = (timestamp?: number) => {
-  if (!timestamp) return "刚刚访问";
+  if (!timestamp) return t("admin.workbench.justVisited");
   const date = new Date(timestamp);
   const now = new Date();
   const sameDay = date.toDateString() === now.toDateString();

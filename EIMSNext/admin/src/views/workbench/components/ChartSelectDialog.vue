@@ -1,6 +1,6 @@
 <template>
-  <el-dialog v-model="visible" title="添加图表" width="520px" destroy-on-close>
-    <el-input v-model="keyword" clearable placeholder="输入名称来搜索">
+  <el-dialog v-model="visible" :title="t('admin.workbench.addChart')" width="520px" destroy-on-close>
+    <el-input v-model="keyword" clearable :placeholder="t('admin.appAdmin.searchByName')">
       <template #prefix>
         <et-icon icon="el-search" />
       </template>
@@ -33,14 +33,15 @@
       </el-tree>
     </el-scrollbar>
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :disabled="!selected" @click="confirm">确定</el-button>
+      <el-button @click="visible = false">{{ t("common.cancel") }}</el-button>
+      <el-button type="primary" :disabled="!selected" @click="confirm">{{ t("common.ok") }}</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { useWorkbenchStore } from "@/store";
+import { useI18n } from "vue-i18n";
 
 interface ChartTreeNode {
   id: string;
@@ -67,6 +68,7 @@ const emit = defineEmits<{
 }>();
 
 const workbenchStore = useWorkbenchStore();
+const { t } = useI18n();
 const { catalog } = storeToRefs(workbenchStore);
 const treeRef = ref();
 const keyword = ref("");

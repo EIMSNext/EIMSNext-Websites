@@ -6,7 +6,7 @@
       </el-header>
       <el-container class="layout-main-shell">
         <el-aside width="45px" class="main-left-menu">
-          <el-tooltip :content="t('admin.workbench')" placement="right" :hide-after="0">
+          <el-tooltip :content="t('admin.workbench.title')" placement="right" :hide-after="0">
             <router-link custom :to="{ path: '/workbench' }" v-slot="{ navigate }">
               <div class="main-left-menu-item" @click="navigate">
                 <!-- <AppIcon :app="workbenchApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
@@ -64,14 +64,14 @@ defineOptions({
 
 const workbenchApp: AppDef = {
   id: "workbench",
-  name: "工作台",
+  name: t("admin.workbench.title"),
   icon: "homepage",
   sortIndex: -2,
   appMenus: [],
 };
 const systemApp: AppDef = {
   id: "system",
-  name: "系统设置",
+  name: t("route.system"),
   icon: "icon-settings",
   sortIndex: -1,
   appMenus: [],

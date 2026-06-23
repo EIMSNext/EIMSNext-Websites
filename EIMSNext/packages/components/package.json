@@ -16,6 +16,7 @@
   "author": "",
   "license": "",
   "dependencies": {
+    "@eimsnext/utils": "workspace:*",
     "dayjs": "^1.11.20"
   }
 }

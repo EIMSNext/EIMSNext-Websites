@@ -3,7 +3,7 @@
     @ok="handleSaved"></AddEditApp>
   <et-card :title="t('admin.myApp')">
     <template #action>
-      <el-button v-if="canCreateApp" icon="plus" @click="createApp">
+      <el-button v-if="canCreateApp" type="primary" icon="plus" @click="createApp">
         {{ t("admin.newApp") }}
       </el-button>
     </template>

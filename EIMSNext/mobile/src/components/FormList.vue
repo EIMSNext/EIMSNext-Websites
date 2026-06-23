@@ -122,7 +122,7 @@ onMounted(() => {
   height: 36px;
   border-radius: 10px;
   background: var(--mobile-bg-page);
-  color: #1677ff;
+  color: var(--et-color-primary);
 }
 
 .form-name {

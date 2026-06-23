@@ -330,7 +330,7 @@ const actionRules: FormRules = {
           return;
         }
         if (!isStrongPassword(value)) {
-          callback(new Error(getPasswordStrengthMessage(t("admin.profile.newPassword"))));
+          callback(new Error(getPasswordStrengthMessage(t("admin.profile.newPassword"), t)));
           return;
         }
         callback();

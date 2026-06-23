@@ -198,7 +198,7 @@ const registerRules = computed<FormRules>(() => ({
           return;
         }
         if (!isStrongPassword(value)) {
-          callback(new Error(getPasswordStrengthMessage(t("register.passwordLabel"))));
+          callback(new Error(getPasswordStrengthMessage(t("register.passwordLabel"), t)));
           return;
         }
         callback();

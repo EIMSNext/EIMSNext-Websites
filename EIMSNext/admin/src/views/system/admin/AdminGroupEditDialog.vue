@@ -8,11 +8,11 @@
     @ok="save"
   >
     <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
-      <el-form-item label="名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入名称" />
+      <el-form-item :label="t('common.name')" prop="name">
+        <el-input v-model="formData.name" :placeholder="t('common.namePlaceholder')" />
       </el-form-item>
-      <el-form-item label="描述">
-        <el-input v-model="formData.description" type="textarea" placeholder="请输入描述" />
+      <el-form-item :label="t('common.description')">
+        <el-input v-model="formData.description" type="textarea" :placeholder="t('common.descriptionPlaceholder')" />
       </el-form-item>
     </el-form>
   </et-dialog>
@@ -21,6 +21,7 @@
 <script setup lang="ts">
 import { AdminGroup, AdminGroupType } from "@eimsnext/models";
 import { FormInstance, FormRules } from "element-plus";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "AdminGroupEditDialog",
@@ -33,6 +34,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
+const { t } = useI18n();
 const formRef = ref<FormInstance>();
 const formData = ref({
   name: "",
@@ -40,12 +42,12 @@ const formData = ref({
 });
 
 const title = computed(() => {
-  if (props.group) return "编辑";
-  return props.type === AdminGroupType.Folder ? "新增管理分组" : "新增管理组";
+  if (props.group) return t("common.edit");
+  return props.type === AdminGroupType.Folder ? t("admin.adminGroup.addFolder") : t("admin.adminGroup.addGroup");
 });
 
 const rules: FormRules = {
-  name: [{ required: true, message: "请输入名称", trigger: "blur" }],
+  name: [{ required: true, message: t("common.nameRequired"), trigger: "blur" }],
 };
 
 watch(

@@ -6,9 +6,9 @@
           <el-button link @click="router.push('/workbench')">
             <et-icon icon="el-arrowLeft" />
           </el-button>
-          <span>自定义工作台</span>
+          <span>{{ t("admin.workbench.customize") }}</span>
         </div>
-        <el-link type="primary" :underline="false">如何自定义工作台？</el-link>
+        <el-link type="primary" :underline="false">{{ t("admin.workbench.help") }}</el-link>
         <div class="header-actions">
           <el-button-group>
             <el-button type="primary" plain>
@@ -20,16 +20,16 @@
           </el-button-group>
           <el-button disabled>
             <et-icon icon="el-document" />
-            页面样式
+            {{ t("admin.workbench.pageStyle") }}
           </el-button>
-          <el-button @click="preview">预览</el-button>
-          <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+          <el-button @click="preview">{{ t("common.preview") }}</el-button>
+          <el-button type="primary" :loading="saving" @click="save">{{ t("common.save") }}</el-button>
         </div>
       </div>
 
       <div class="designer-body">
         <aside class="component-panel">
-          <div class="panel-title">页面组件</div>
+          <div class="panel-title">{{ t("admin.workbench.pageComponents") }}</div>
           <div
             v-for="component in enabledComponents"
             :key="component.type"
@@ -115,6 +115,7 @@ import {
 import WorkbenchWidgetRenderer from "./components/WorkbenchWidgetRenderer.vue";
 import AddFavoriteDialog from "./components/AddFavoriteDialog.vue";
 import ChartSelectDialog from "./components/ChartSelectDialog.vue";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "WorkbenchCustomize",
@@ -122,6 +123,7 @@ defineOptions({
 });
 
 const router = useRouter();
+const { t } = useI18n();
 const workbenchStore = useWorkbenchStore();
 const { layout } = storeToRefs(workbenchStore);
 const editableLayout = ref<WorkbenchLayoutItem[]>([]);
@@ -130,22 +132,22 @@ const showFavoriteDialog = ref(false);
 const showChartDialog = ref(false);
 const activeChartItem = ref<WorkbenchLayoutItem>();
 
-const enabledComponents: { type: WorkbenchWidgetType; label: string; icon: string }[] = [
-  { type: "flowCenter", label: "流程中心", icon: "icon-flow" },
-  { type: "myApps", label: "我的应用", icon: "icon-appdefault" },
-  { type: "chartBoard", label: "图表看板", icon: "el-DataAnalysis" },
-  { type: "recent", label: "最近使用", icon: "el-clock" },
-  { type: "favorites", label: "我的收藏", icon: "el-star" },
-];
+const enabledComponents = computed<{ type: WorkbenchWidgetType; label: string; icon: string }[]>(() => [
+  { type: "flowCenter", label: t("admin.flowcenter"), icon: "icon-flow" },
+  { type: "myApps", label: t("admin.myApp"), icon: "icon-appdefault" },
+  { type: "chartBoard", label: t("admin.workbench.chartBoard"), icon: "el-DataAnalysis" },
+  { type: "recent", label: t("admin.workbench.recent"), icon: "el-clock" },
+  { type: "favorites", label: t("admin.workbench.favorites"), icon: "el-star" },
+]);
 
-const disabledComponents = [
-  { label: "快捷入口", icon: "el-link" },
-  { label: "富文本", icon: "el-document" },
-  { label: "轮播图", icon: "el-picture" },
-  { label: "我的图表", icon: "el-DataAnalysis" },
-  { label: "外部应用", icon: "el-OfficeBuilding" },
-  { label: "问候语", icon: "el-MagicStick" },
-];
+const disabledComponents = computed(() => [
+  { label: t("admin.workbench.quickLink"), icon: "el-link" },
+  { label: t("admin.workbench.richText"), icon: "el-document" },
+  { label: t("admin.workbench.carousel"), icon: "el-picture" },
+  { label: t("admin.workbench.myChart"), icon: "el-DataAnalysis" },
+  { label: t("admin.workbench.externalApp"), icon: "el-OfficeBuilding" },
+  { label: t("admin.workbench.greeting"), icon: "el-MagicStick" },
+]);
 
 const oneOffTypes: WorkbenchWidgetType[] = ["flowCenter", "myApps", "recent", "favorites"];
 
@@ -220,7 +222,7 @@ const save = async () => {
   try {
     await workbenchStore.saveLayout(editableLayout.value);
     syncLayout();
-    ElMessage.success("保存成功");
+    ElMessage.success(t("common.saveSuccess"));
   } finally {
     saving.value = false;
   }

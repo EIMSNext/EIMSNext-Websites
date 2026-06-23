@@ -345,7 +345,7 @@ export default defineComponent({
                 return col.render(scope, h, resolveComponent, this.formCreateInject.api);
             } else if (col.format === 'tag') {
                 return h(resolveComponent('el-tag'), {disableTransitions: true}, () => [this.deepGet(scope.row, col.prop, '')]);
-            } else if (col.format === 'image' || col.label === '图片') {
+            } else if (col.format === 'image' || col.label === (this.formCreateInject.t('props.image') || '图片')) {
                 // 直接解析图片数据，生成img标签
                 return h('div', {
                     class: '_fc-data-table-img-list'
@@ -410,7 +410,7 @@ export default defineComponent({
                     
                     // 如果没有生成图片，显示占位符
                     if (imgs.length === 0) {
-                        return h('span', { style: { color: '#909399', fontSize: '12px' } }, '暂无图片');
+                        return h('span', { style: { color: '#909399', fontSize: '12px' } }, this.formCreateInject.t('com.dataTable.noImage') || '暂无图片');
                     }
                     
                     return imgs;

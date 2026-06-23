@@ -47,7 +47,7 @@ export default {
   },
   computed: {
     computedPlaceholder() {
-      return this.placeholder || this.designer?.setupState?.t?.('dataflow.selectForm') || 'Select a form';
+      return this.placeholder || this.designer?.setupState?.t?.('dataflow.selectForm') || '选择表单';
     }
   },
   methods: {

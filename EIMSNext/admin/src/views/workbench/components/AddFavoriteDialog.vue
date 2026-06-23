@@ -1,6 +1,6 @@
 <template>
-  <el-dialog v-model="visible" title="添加收藏" width="640px" destroy-on-close>
-    <el-input v-model="keyword" clearable placeholder="输入名称来搜索">
+  <el-dialog v-model="visible" :title="t('admin.workbench.addFavorite')" width="640px" destroy-on-close>
+    <el-input v-model="keyword" clearable :placeholder="t('admin.appAdmin.searchByName')">
       <template #prefix>
         <et-icon icon="el-search" />
       </template>
@@ -17,8 +17,8 @@
       />
     </el-scrollbar>
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="saving" @click="confirm">确定</el-button>
+      <el-button @click="visible = false">{{ t("common.cancel") }}</el-button>
+      <el-button type="primary" :loading="saving" @click="confirm">{{ t("common.ok") }}</el-button>
     </template>
   </el-dialog>
 </template>
@@ -26,6 +26,7 @@
 <script setup lang="ts">
 import type { WorkbenchCatalogMenu, WorkbenchTargetRequest, WorkbenchTargetType } from "@eimsnext/models";
 import { useWorkbenchStore } from "@/store";
+import { useI18n } from "vue-i18n";
 
 interface FavoriteTreeNode {
   id: string;
@@ -49,6 +50,7 @@ const emit = defineEmits<{
 }>();
 
 const workbenchStore = useWorkbenchStore();
+const { t } = useI18n();
 const { catalog } = storeToRefs(workbenchStore);
 const treeRef = ref();
 const keyword = ref("");

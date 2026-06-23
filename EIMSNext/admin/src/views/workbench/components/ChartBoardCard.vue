@@ -1,14 +1,14 @@
 <template>
   <div class="chart-board-card">
     <DashItemCard v-if="chartItem" :item-def="chartItem" :is-view="true" />
-    <et-card v-else title="图表看板" class="chart-board-empty-card">
+    <et-card v-else :title="t('admin.workbench.chartBoard')" class="chart-board-empty-card">
       <div class="chart-board-empty">
-        <template v-if="loading">图表加载中...</template>
+        <template v-if="loading">{{ t("admin.workbench.chartLoading") }}</template>
         <template v-else>
           <i class="x-icon iconfont-fx-pc icon-info-o"></i>
-          <div>{{ errorText || "未配置图表" }}</div>
+          <div>{{ errorText || t("admin.workbench.chartNotConfigured") }}</div>
           <el-button v-if="editable" class="mt-3" type="primary" @click.stop="$emit('configure')">
-            选择图表
+            {{ t("admin.workbench.chooseChart") }}
           </el-button>
         </template>
       </div>
@@ -20,6 +20,7 @@
 import type { WorkbenchChartItem, WorkbenchLayoutItem } from "@eimsnext/models";
 import { workbenchService } from "@eimsnext/services";
 import DashItemCard from "@/components/DashboardDesigner/components/DashItemCard.vue";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "WorkbenchChartBoardCard",
@@ -29,6 +30,7 @@ const props = defineProps<{
   item: WorkbenchLayoutItem;
   editable?: boolean;
 }>();
+const { t } = useI18n();
 
 defineEmits<{
   (e: "configure"): void;
@@ -51,7 +53,7 @@ const loadChart = async () => {
   try {
     chartItem.value = await workbenchService.getChartItem(dashboardItemId);
   } catch {
-    errorText.value = "组件配置异常";
+    errorText.value = t("admin.dashItem.invalidConfig");
   } finally {
     loading.value = false;
   }

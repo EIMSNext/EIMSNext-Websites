@@ -1,7 +1,7 @@
 <template>
-  <et-card title="我的收藏" class="workbench-list-card">
+  <et-card :title="t('admin.workbench.favorites')" class="workbench-list-card">
     <template v-if="editable" #action>
-      <el-button link type="primary" @click.stop="$emit('add')">添加收藏</el-button>
+      <el-button link type="primary" @click.stop="$emit('add')">{{ t("admin.workbench.addFavorite") }}</el-button>
     </template>
     <div v-if="favorites.length" class="workbench-list">
       <div v-for="item in favorites" :key="`${item.targetType}:${item.targetId}`" class="workbench-list-item" @click="openItem(item)">
@@ -19,13 +19,13 @@
           type="danger"
           @click.stop="removeItem(item)"
         >
-          删除
+          {{ t("common.delete") }}
         </el-button>
       </div>
     </div>
     <div v-else class="workbench-empty">
-      <div>无需统一配置，由成员自行收藏常用的应用/表单/仪表盘/知识库文档</div>
-      <el-button v-if="editable" class="mt-3" type="primary" link @click.stop="$emit('add')">添加收藏</el-button>
+      <div>{{ t("admin.workbench.favoritesEmpty") }}</div>
+      <el-button v-if="editable" class="mt-3" type="primary" link @click.stop="$emit('add')">{{ t("admin.workbench.addFavorite") }}</el-button>
     </div>
   </et-card>
 </template>
@@ -40,6 +40,7 @@ import {
 } from "@/store";
 import { useAppStore } from "@eimsnext/store";
 import { resolveAppEntryPath } from "@/utils/appEntry";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "WorkbenchFavoritesCard",
@@ -54,6 +55,7 @@ defineEmits<{
 }>();
 
 const router = useRouter();
+const { t } = useI18n();
 const contextStore = useContextStore();
 const appStore = useAppStore();
 const workbenchStore = useWorkbenchStore();
@@ -66,9 +68,9 @@ const defaultIcon = (targetType: WorkbenchTargetType) => {
 };
 
 const typeText = (targetType: WorkbenchTargetType) => {
-  if (targetType === "app") return "应用";
-  if (targetType === "dashboard") return "仪表盘";
-  return "表单";
+  if (targetType === "app") return t("common.app");
+  if (targetType === "dashboard") return t("common.dashboard");
+  return t("common.form");
 };
 
 const openItem = async (item: WorkbenchFavorite) => {

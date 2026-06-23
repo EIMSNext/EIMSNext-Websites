@@ -10,6 +10,7 @@ import {
   type HttpRequestConfig,
 } from "@eimsnext/utils";
 import { PublicScope } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
 
 // =============================================================
 // 1. 业务异常
@@ -28,10 +29,14 @@ export class AccessCodeInvalidError extends Error {
 
 export const PublicNotFound = defineComponent({
   name: "PublicNotFound",
-  setup() {
+  props: {
+    description: String,
+  },
+  setup(props) {
+    const { t } = useI18n();
     return () =>
       h("div", { class: "public-not-found" }, [
-        h(ElEmpty, { description: "页面不存在或已失效" }),
+        h(ElEmpty, { description: props.description || t("admin.public.notFound") }),
       ]);
   },
 });

@@ -4,13 +4,13 @@
       <span class="widget-title">{{ widgetTitle }}</span>
       <div class="widget-actions">
         <el-button v-if="item.type === 'favorites'" link type="primary" @click="$emit('add-favorite')">
-          添加
+          {{ t("common.add") }}
         </el-button>
         <el-button v-if="item.type === 'chartBoard'" link type="primary" @click="$emit('configure-chart')">
-          配置
+          {{ t("common.configure") }}
         </el-button>
         <el-button v-if="!item.locked" link type="danger" @click="$emit('remove')">
-          删除
+          {{ t("common.delete") }}
         </el-button>
       </div>
     </div>
@@ -35,6 +35,7 @@ import MyTasksCard from "./MyTasksCard.vue";
 import FavoritesCard from "./FavoritesCard.vue";
 import RecentCard from "./RecentCard.vue";
 import ChartBoardCard from "./ChartBoardCard.vue";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "WorkbenchWidgetRenderer",
@@ -44,6 +45,7 @@ const props = defineProps<{
   item: WorkbenchLayoutItem;
   editable?: boolean;
 }>();
+const { t } = useI18n();
 
 defineEmits<{
   (e: "remove"): void;
@@ -53,15 +55,15 @@ defineEmits<{
 
 const widgetTitle = computed(() => {
   if (props.item.type === "chartBoard") {
-    return props.item.config?.title || "图表看板";
+    return props.item.config?.title || t("admin.workbench.chartBoard");
   }
   const titleMap: Record<string, string> = {
-    flowCenter: "流程中心",
-    myApps: "我的应用",
-    recent: "最近使用",
-    favorites: "我的收藏",
+    flowCenter: t("admin.flowcenter"),
+    myApps: t("admin.myApp"),
+    recent: t("admin.workbench.recent"),
+    favorites: t("admin.workbench.favorites"),
   };
-  return titleMap[props.item.type] || "组件";
+  return titleMap[props.item.type] || t("common.component");
 });
 </script>
 

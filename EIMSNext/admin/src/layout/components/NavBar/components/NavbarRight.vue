@@ -2,7 +2,7 @@
   <div class="navbar__right">
     <div class="workbench-trigger" @click="router.push('/workbench/customize')">
       <div class="appstore-entry">
-        <et-icon icon="el-Monitor" size="18" /><span>自定义工作台</span>
+        <et-icon icon="el-Monitor" size="18" /><span>{{ $t("admin.workbench.customize") }}</span>
       </div>
     </div>
     <div class="appstore-trigger" @click="settingStore.appStoreVisible = true">
