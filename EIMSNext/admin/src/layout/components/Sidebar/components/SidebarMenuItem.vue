@@ -24,12 +24,12 @@
       </template>
 
       <Draggable v-if="item.subMenus" :list="item.subMenus" item-key="menuId" tag="div" data-menu-type="submenu"
-        :group="dragGroup" filter=".more-wrapper, .more-wrapper *" :prevent-on-filter="false" :disabled="!canManage" :move="handleSubMenuMove"
+        :group="dragGroup" filter=".more-wrapper, .more-wrapper *" :prevent-on-filter="false" :disabled="!canManage || !sortable" :move="handleSubMenuMove"
         ghost-class="menu-drag-ghost" :animation="180" @start="handleSubMenuDragStart" @end="handleDragEnd"
         @change="handleSubMenuChange">
         <template #item="{ element }">
           <div class="menu-drag-item">
-            <SidebarMenuItem :item="element" :app-id="appId" :can-manage="canManage" @editForm="emit('editForm', $event)"
+            <SidebarMenuItem :item="element" :app-id="appId" :can-manage="canManage" :sortable="sortable" @editForm="emit('editForm', $event)"
               @editMenu="emit('editMenu', $event)" @editGroup="emit('editGroup', $event)"
               @deleteMenu="emit('deleteMenu', $event)" :on-group-drop="onGroupDrop" :can-drop-to-group="canDropToGroup"
               :on-drag-start="onDragStart" :on-drag-end="onDragEnd" @menusChanged="emit('menusChanged')" />
@@ -91,6 +91,7 @@ const props = defineProps<{
   item: AppMenu;
   appId: string;
   canManage?: boolean;
+  sortable?: boolean;
   onGroupDrop?: (groupMenu: AppMenu) => boolean;
   canDropToGroup?: (groupMenu: AppMenu | undefined, eventTarget: EventTarget | null) => boolean;
   onDragStart?: (menu: AppMenu) => void;
@@ -102,6 +103,7 @@ const systemStore = useSystemStore();
 const workbenchStore = useWorkbenchStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
 const canManage = computed(() => !!props.canManage);
+const sortable = computed(() => props.sortable !== false);
 const dragGroup = { name: "app-menu", pull: true, put: true };
 const groupIndex = computed(() => `group-${props.item.menuId}`);
 const subMenuRef = ref();
@@ -144,19 +146,19 @@ function editForm(formId?: string, type?: FormType) {
 }
 
 function handleSubMenuChange() {
-  if (!canManage.value) return;
+  if (!canManage.value || !sortable.value) return;
   emit("menusChanged");
 }
 
 function handleGroupDrop() {
-  if (!canManage.value) return;
+  if (!canManage.value || !sortable.value) return;
   if (props.onGroupDrop?.(props.item)) {
     props.onDragEnd?.();
   }
 }
 
 function handleSubMenuDragStart(event: { oldIndex?: number }) {
-  if (!canManage.value) return;
+  if (!canManage.value || !sortable.value) return;
 
   if (event.oldIndex === undefined) return;
 
@@ -167,7 +169,7 @@ function handleSubMenuDragStart(event: { oldIndex?: number }) {
 }
 
 function handleSubMenuMove(event: { relatedContext?: { element?: AppMenu }; originalEvent?: { target?: EventTarget | null } }) {
-  if (!canManage.value) return false;
+  if (!canManage.value || !sortable.value) return false;
   return !props.canDropToGroup?.(event.relatedContext?.element, event.originalEvent?.target ?? null);
 }
 

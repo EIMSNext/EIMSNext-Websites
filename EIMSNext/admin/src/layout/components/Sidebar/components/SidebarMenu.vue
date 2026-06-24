@@ -19,7 +19,7 @@
       :group="dragGroup"
       filter=".more-wrapper, .more-wrapper *"
       :prevent-on-filter="false"
-      :disabled="!canManage"
+      :disabled="!canManage || !sortable"
       :move="handleRootMove"
       ghost-class="menu-drag-ghost"
       :animation="180"
@@ -33,6 +33,7 @@
             :item="element"
             :app-id="appId"
             :can-manage="canManage"
+            :sortable="sortable"
             @editForm="emit('editForm', $event.id, $event.type)"
              @editMenu="emit('editMenu', $event)"
              @editGroup="emit('editGroup', $event)"
@@ -63,6 +64,7 @@ const props = defineProps<{
   appId: string;
   menuList: AppMenu[];
   canManage?: boolean;
+  sortable?: boolean;
 }>();
 
 const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "menusChanged"]);
@@ -70,6 +72,7 @@ const currentRoute = useRoute();
 const systemStore = useSystemStore();
 const dragGroup = { name: "app-menu", pull: true, put: true };
 const draggingMenu = ref<AppMenu>();
+const sortable = computed(() => props.sortable !== false);
 
 const getMenuType = (menuType: FormType | number | undefined): FormType => {
   if (menuType === undefined) return FormType.Form;
@@ -86,6 +89,7 @@ const clearDraggingMenu = () => {
 };
 
 const handleRootDragStart = (event: { oldIndex?: number }) => {
+  if (!sortable.value) return;
   if (event.oldIndex === undefined) return;
 
   const menu = props.menuList[event.oldIndex];
@@ -95,6 +99,7 @@ const handleRootDragStart = (event: { oldIndex?: number }) => {
 };
 
 const canDropToGroupTitle = (groupMenu: AppMenu | undefined, eventTarget: EventTarget | null): boolean => {
+  if (!sortable.value) return false;
   const sourceMenu = draggingMenu.value;
   if (!sourceMenu || !groupMenu) return false;
   if (getMenuType(groupMenu.menuType) !== FormType.Group) return false;
@@ -103,6 +108,7 @@ const canDropToGroupTitle = (groupMenu: AppMenu | undefined, eventTarget: EventT
 };
 
 const handleRootMove = (event: { relatedContext?: { element?: AppMenu }; originalEvent?: { target?: EventTarget | null } }) => {
+  if (!sortable.value) return false;
   return !canDropToGroupTitle(event.relatedContext?.element, event.originalEvent?.target ?? null);
 };
 
@@ -131,6 +137,7 @@ const findMenuEntry = (
 };
 
 const moveMenuToGroup = (groupMenu: AppMenu): boolean => {
+  if (!sortable.value) return false;
   const sourceMenu = draggingMenu.value;
   if (!sourceMenu || sourceMenu.menuId === groupMenu.menuId) return false;
   if (getMenuType(groupMenu.menuType) !== FormType.Group) return false;

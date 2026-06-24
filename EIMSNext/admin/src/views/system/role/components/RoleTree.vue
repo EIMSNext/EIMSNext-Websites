@@ -165,7 +165,7 @@ const loadData = () => {
   let roleGroups: RoleGroup[] = [];
   let roles: Role[] = [];
   Promise.all([
-    roleGroupService.query<RoleGroup>().then((data) => {
+    roleGroupService.query<RoleGroup>(props.adminScope ? "adminScope=true" : "").then((data) => {
       roleGroups = data;
     }),
     roleService.query<Role>(props.adminScope ? "adminScope=true" : "").then((data) => {

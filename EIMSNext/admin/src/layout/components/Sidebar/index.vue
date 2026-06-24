@@ -102,6 +102,7 @@
         :app-id="contextStore.appId"
         :menu-list="filteredAppMenus"
         :can-manage="canManageCurrentApp"
+        :sortable="!menuFilterText.trim()"
         @editForm="editForm"
         @editMenu="openEditMenu"
         @editGroup="openEditGroup"
