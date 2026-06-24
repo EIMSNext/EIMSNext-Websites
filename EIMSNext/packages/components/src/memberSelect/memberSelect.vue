@@ -888,6 +888,7 @@ const singleDeptChecked = (data: ITreeNode, val: string) => {
         value: data.value,
         label: data.data?.name || data.label,
         type: DataItemType.Department,
+        cascadedDept: orgCascade.value,
         data: data.data,
       },
     ];
@@ -1183,6 +1184,7 @@ const updateDeptTags = (
           value: data.value,
           label: data.data?.name || data.label,
           type: DataItemType.Department,
+          cascadedDept: orgCascade.value,
           data: data.data,
         });
       }
@@ -1203,6 +1205,7 @@ const updateDeptTags = (
           value: data.value,
           label: data.data?.name || data.label,
           type: DataItemType.Department,
+          cascadedDept: orgCascade.value,
           data: data.data,
         },
       ];
@@ -1242,12 +1245,18 @@ const updateCascadeStatus = (data: ITreeNode) => {
 };
 const cascadeChanged = (val: boolean) => {
   orgCascade.value = val;
+  tagsRef.value = tagsRef.value.map((tag) =>
+    tag.type === DataItemType.Department
+      ? { ...tag, cascadedDept: val }
+      : tag,
+  );
   if (deptData.value) {
     if (val) updateCascadeStatus(deptData.value[0]);
     else {
       setNodeChecked(DataItemType.Department, deptData.value);
     }
   }
+  emit("update:modelValue", tagsRef.value);
 };
 const getNodeIconColor = (node: ITreeNode) => {
   switch (node.type) {
