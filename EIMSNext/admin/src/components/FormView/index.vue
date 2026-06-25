@@ -175,6 +175,19 @@ const handleCustomAction = (action: FormCustomAction) => {
   const data: any = fcInst.value.fapi.formData();
   emit("action", action.key, data);
 };
+
+function setValues(values: Record<string, any>) {
+  fcInst.value?.fapi?.setValue(values);
+}
+
+function getFormData(includeIgnored = false) {
+  return fcInst.value?.fapi?.formData(includeIgnored === true) || {};
+}
+
+defineExpose({
+  setValues,
+  getFormData,
+});
 </script>
 <style lang="scss" scoped>
 .form-wrapper {

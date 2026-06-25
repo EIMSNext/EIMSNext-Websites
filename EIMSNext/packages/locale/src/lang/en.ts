@@ -3945,6 +3945,7 @@ export default {
 
     wechatGateTitle: "Please open in WeChat",
     wechatGateDesc: "Use WeChat browser on desktop, or scan QR code on mobile",
+    wechatOpenIdRequired: "Failed to acquire WeChat OpenId. Please reopen from the WeChat entry and submit again.",
     formNotAvailable: "Form not available",
     submitNotEnabled: "Public submit is not enabled",
     missingDataId: "Missing data ID",

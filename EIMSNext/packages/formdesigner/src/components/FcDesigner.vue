@@ -1139,6 +1139,7 @@ export default defineComponent({
       _t = useLocale(locale).t;
     }
     const t = (...args) => _t(...args);
+    const publicSystemFields = ["wxopenid", "wxnickname", "wxavator", "ext"];
 
     const tidyRuleConfig = (orgRule, configRule, ...args) => {
       if (configRule) {
@@ -1177,6 +1178,7 @@ export default defineComponent({
       activePage: null,
       activeRule: null,
       children: ref([]),
+      publicSystemRules: [],
       treeInfo: [],
       menuList: menu.value || createMenu({ t }),
       dragRuleList: {},
@@ -1491,6 +1493,109 @@ export default defineComponent({
     const methods = {
       setFormId(formId) {
         data.formId = formId;
+      },
+      isPublicSystemRule(rule) {
+        return (
+          !!rule &&
+          rule.source === "public" &&
+          publicSystemFields.indexOf(`${rule.field || rule.systemKind || ""}`.toLowerCase()) > -1
+        );
+      },
+      collectPublicSystemRules(rules, result = []) {
+        if (!Array.isArray(rules)) {
+          return result;
+        }
+        rules.forEach((rule) => {
+          if (!rule || is.String(rule)) {
+            return;
+          }
+          if (methods.isPublicSystemRule(rule)) {
+            result.push(deepCopy(rule));
+            return;
+          }
+          methods.collectPublicSystemRules(rule.children, result);
+          if (rule.props?.columns) {
+            rule.props.columns.forEach((column) => {
+              methods.collectPublicSystemRules(column.rule, result);
+            });
+          }
+        });
+        return result;
+      },
+      removePublicSystemRules(rules) {
+        if (!Array.isArray(rules)) {
+          return [];
+        }
+        return rules.reduce((result, rule) => {
+          if (!rule || is.String(rule)) {
+            result.push(rule);
+            return result;
+          }
+          if (methods.isPublicSystemRule(rule)) {
+            return result;
+          }
+
+          const next = { ...rule };
+          if (Array.isArray(next.children)) {
+            next.children = methods.removePublicSystemRules(next.children);
+          }
+          if (next.props?.columns) {
+            next.props = {
+              ...next.props,
+              columns: next.props.columns.map((column) => ({
+                ...column,
+                rule: Array.isArray(column.rule)
+                  ? methods.removePublicSystemRules(column.rule)
+                  : column.rule,
+              })),
+            };
+          }
+          result.push(next);
+          return result;
+        }, []);
+      },
+      rememberPublicSystemRules(rules, replace = false) {
+        const collected = methods.collectPublicSystemRules(rules);
+        if (replace) {
+          data.publicSystemRules = [];
+        }
+        methods.mergePublicSystemRules(data.publicSystemRules, collected);
+      },
+      mergePublicSystemRules(target, rules) {
+        const fields = new Set();
+        methods.collectFields(target, fields);
+        rules.forEach((rule) => {
+          const field = `${rule?.field || rule?.systemKind || ""}`.toLowerCase();
+          if (!field || fields.has(field)) {
+            return;
+          }
+          target.push(deepCopy(rule));
+          fields.add(field);
+        });
+      },
+      collectFields(rules, fields = new Set()) {
+        if (!Array.isArray(rules)) {
+          return fields;
+        }
+        rules.forEach((rule) => {
+          if (!rule || is.String(rule)) {
+            return;
+          }
+          const field = `${rule.field || rule.systemKind || ""}`.toLowerCase();
+          field && fields.add(field);
+          methods.collectFields(rule.children, fields);
+          if (rule.props?.columns) {
+            rule.props.columns.forEach((column) => {
+              methods.collectFields(column.rule, fields);
+            });
+          }
+        });
+        return fields;
+      },
+      mergePublicSystemRulesForOutput(rules) {
+        const next = Array.isArray(rules) ? deepCopy(rules) : [];
+        methods.mergePublicSystemRules(next, data.publicSystemRules);
+        return next;
       },
       setDevice(device) {
         data.device = device;
@@ -1911,7 +2016,9 @@ export default defineComponent({
         copyTextToClipboard(this.$refs.previewCode.innerText);
       },
       getPageRule() {
-        return methods.parseRule(deepCopy(data.children));
+        return methods.mergePublicSystemRulesForOutput(
+          methods.parseRule(deepCopy(data.children))
+        );
       },
       getPageJson() {
         return designerForm.toJson(methods.getPageRule());
@@ -1931,7 +2038,7 @@ export default defineComponent({
         } else {
           rule = methods.getPageRule();
         }
-        return rule;
+        return methods.mergePublicSystemRulesForOutput(rule);
       },
       getJson() {
         return designerForm.toJson(methods.getRule());
@@ -2017,9 +2124,14 @@ export default defineComponent({
         if (!rules) {
           rules = [];
         }
+        const parsedRules = is.String(rules)
+          ? designerForm.parseJson(rules)
+          : deepCopy(rules);
+        methods.rememberPublicSystemRules(parsedRules, !partFlag);
+        const visualRules = methods.removePublicSystemRules(parsedRules);
         !partFlag && methods.initPage();
         const loadRule = methods.loadRule(
-          is.String(rules) ? designerForm.parseJson(rules) : deepCopy(rules)
+          visualRules
         );
         const children = [];
         loadRule.forEach((item) => {

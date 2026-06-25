@@ -235,7 +235,7 @@ export default {
   },
   methods: {
     onSave() {
-      const rule = this.mergePublicSystemFields(this.$refs.designer.getJson());
+      const rule = this.$refs.designer.getJson();
       const options = this.$refs.designer.getOptionsJson();
 
       // console.log("form des data", rule, options);
@@ -245,54 +245,6 @@ export default {
 
       this.$emit("save", content);
       this.resetDirty(content);
-    },
-    isPublicSystemRule(rule) {
-      return rule && rule.source === "public";
-    },
-    collectPublicSystemRules(rules, result = []) {
-      if (!Array.isArray(rules)) return result;
-      rules.forEach((rule) => {
-        if (this.isPublicSystemRule(rule)) {
-          result.push(rule);
-        }
-        if (Array.isArray(rule?.children)) {
-          this.collectPublicSystemRules(rule.children, result);
-        }
-      });
-      return result;
-    },
-    removePublicSystemRules(rules) {
-      if (!Array.isArray(rules)) return rules;
-      return rules
-        .filter((rule) => !this.isPublicSystemRule(rule))
-        .map((rule) => {
-          if (Array.isArray(rule?.children)) {
-            return { ...rule, children: this.removePublicSystemRules(rule.children) };
-          }
-          return rule;
-        });
-    },
-    mergePublicSystemFields(rule) {
-      const oldRules = this.formDef?.content?.layout ? JSON.parse(this.formDef.content.layout) : [];
-      const publicRules = this.collectPublicSystemRules(oldRules);
-      if (!publicRules.length) return rule;
-
-      const existing = new Set();
-      const collectFields = (rules) => {
-        if (!Array.isArray(rules)) return;
-        rules.forEach((item) => {
-          if (item?.field) existing.add(item.field);
-          if (Array.isArray(item?.children)) collectFields(item.children);
-        });
-      };
-      collectFields(rule);
-
-      publicRules.forEach((item) => {
-        if (item?.field && !existing.has(item.field)) {
-          rule.push(item);
-        }
-      });
-      return rule;
     },
     onCancel() {
       this.$refs.designer.setRule(JSON.parse(this.oldLayout));
@@ -405,7 +357,7 @@ export default {
         this.$refs.designer.setFormId(this.formDef.id);
 
         if (this.formDef.content.layout) {
-          this.$refs.designer.setRule(this.removePublicSystemRules(JSON.parse(this.formDef.content.layout)));
+          this.$refs.designer.setRule(JSON.parse(this.formDef.content.layout));
         }
       if (this.formDef.content.options) {
         this.$refs.designer.setOptions(this.formDef.content.options);

@@ -3852,15 +3852,16 @@ export default {
 
     datalinkFields: "可见字段",
     allFieldsDefault: "默认全部字段",
-    visibleFieldsTip: "不选择时按全部普通字段可见；public 系统字段不会在设计器和公开页面展示",
+    visibleFieldsTip: "不选择时全部可用字段可见；public 系统字段可在此选择",
 
     queryPageSettings: "查询页面设置",
     queryFields: "查询字段",
     displayFields: "显示字段",
-    top5FieldsDefault: "默认前 5 个普通字段",
+    top5FieldsDefault: "默认前 5 个可用字段",
 
     wechatGateTitle: "请在微信中打开",
     wechatGateDesc: "使用微信浏览器在电脑上填写，或微信扫码后在手机上填写",
+    wechatOpenIdRequired: "微信 OpenId 获取失败，请通过微信入口重新打开后提交",
     formNotAvailable: "公开表单不可访问",
     submitNotEnabled: "公开填写未开启",
     missingDataId: "缺少数据ID",

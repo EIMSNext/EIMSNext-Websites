@@ -92,6 +92,7 @@ import {
 import { publicSettingService } from "@eimsnext/services";
 import { sha256 } from "@eimsnext/utils";
 import LimitSection from "./LimitSection.vue";
+import { isPublicSystemFieldDef } from "@/views/public/publicSystemFields";
 
 const { t } = useI18n();
 
@@ -159,12 +160,14 @@ function openUrl(url: string) {
 function flattenFields(fields: FieldDef[]) {
   const result: { field: string; title: string }[] = [];
   fields.forEach((field) => {
-    if (field.source === "public" || field.hidden || isOrgField(field.type)) {
+    const publicSystemField = isPublicSystemFieldDef(field);
+    if ((!publicSystemField && field.hidden) || isOrgField(field.type)) {
       return;
     }
     if (field.type === FieldType.TableForm && field.columns?.length) {
       field.columns.forEach((sub) => {
-        if (sub.source !== "public" && !sub.hidden && !isOrgField(sub.type)) {
+        const publicSystemSubField = isPublicSystemFieldDef(sub);
+        if ((publicSystemSubField || !sub.hidden) && !isOrgField(sub.type)) {
           result.push({ field: `${field.field}>${sub.field}`, title: `${field.title}.${sub.title}` });
         }
       });

@@ -111,7 +111,7 @@ export class AuthClient {
     url: string,
     data: any,
     contentType: ContentType = ContentType.JSON,
-    withToken?: true,
+    withToken?: boolean,
   ) {
     url = getAuthUrl(url, false);
     let headers = new AxiosHeaders();

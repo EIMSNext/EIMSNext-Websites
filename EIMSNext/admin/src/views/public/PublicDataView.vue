@@ -52,6 +52,7 @@ import {
 } from "@eimsnext/models";
 import FormView from "@/components/FormView/index.vue";
 import { PublicNotFound, bootstrapWithToken, toAccessCodeError, usePublicHttp, type PublicHttp } from "./shared";
+import { isPublicSystemFieldDef } from "./publicSystemFields";
 import { IFieldPerm } from "@eimsnext/models";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -194,14 +195,22 @@ function filterPublicRules(rules: any[], allowed?: Set<string>, parentField?: st
   return rules
     .filter((rule) => {
       if (!rule) return false;
-      if (rule.source === "public" || rule.hidden) return false;
+      const publicSystemField = isPublicSystemFieldDef(rule);
+      if (!publicSystemField && rule.hidden) return false;
       if (isOrgField(rule.type)) return false;
       if (!allowed || !rule.field || rule.type === FieldType.TableForm) return true;
       const key = parentField ? `${parentField}>${rule.field}` : rule.field;
       return allowed.has(key.toLowerCase());
     })
     .map((rule) => {
-      const next = { ...rule };
+      const next = isPublicSystemFieldDef(rule)
+        ? {
+            ...rule,
+            hidden: false,
+            display: true,
+            props: { ...(rule.props || {}), disabled: true },
+          }
+        : { ...rule };
       if (Array.isArray(next.children)) {
         next.children = filterPublicRules(next.children, allowed, parentField);
       }

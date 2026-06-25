@@ -138,6 +138,7 @@ import {
   usePublicHttp,
 } from "./shared";
 import PublicDataView from "./PublicDataView.vue";
+import { isPublicSystemFieldDef } from "./publicSystemFields";
 import { ref, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -332,10 +333,12 @@ function resolveFields(fields: string[]): FieldDef[] {
 function flattenFields(fields: FieldDef[]): FieldDef[] {
   const result: FieldDef[] = [];
   fields.forEach((field) => {
-    if (field.source === "public" || field.hidden || isOrgField(field.type)) return;
+    const publicSystemField = isPublicSystemFieldDef(field);
+    if ((!publicSystemField && field.hidden) || isOrgField(field.type)) return;
     if (field.type === FieldType.TableForm && field.columns?.length) {
       field.columns.forEach((sub) => {
-        if (sub.source !== "public" && !sub.hidden && !isOrgField(sub.type)) {
+        const publicSystemSubField = isPublicSystemFieldDef(sub);
+        if ((publicSystemSubField || !sub.hidden) && !isOrgField(sub.type)) {
           result.push({ ...sub, field: `${field.field}>${sub.field}`, title: `${field.title}.${sub.title}` });
         }
       });
