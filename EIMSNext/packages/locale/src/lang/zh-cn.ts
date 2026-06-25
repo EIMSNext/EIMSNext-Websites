@@ -3852,7 +3852,7 @@ export default {
 
     datalinkFields: "可见字段",
     allFieldsDefault: "默认全部字段",
-    visibleFieldsTip: "不选择时全部可用字段可见；public 系统字段可在此选择",
+    visibleFieldsTip: "不选择时全部可用字段可见",
 
     queryPageSettings: "查询页面设置",
     queryFields: "查询字段",

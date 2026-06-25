@@ -52,7 +52,7 @@ import {
 } from "@eimsnext/models";
 import FormView from "@/components/FormView/index.vue";
 import { PublicNotFound, bootstrapWithToken, toAccessCodeError, usePublicHttp, type PublicHttp } from "./shared";
-import { isPublicSystemFieldDef } from "./publicSystemFields";
+import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
 import { IFieldPerm } from "@eimsnext/models";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";

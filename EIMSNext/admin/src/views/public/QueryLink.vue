@@ -138,7 +138,7 @@ import {
   usePublicHttp,
 } from "./shared";
 import PublicDataView from "./PublicDataView.vue";
-import { isPublicSystemFieldDef } from "./publicSystemFields";
+import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
 import { ref, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 

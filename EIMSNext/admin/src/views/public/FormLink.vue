@@ -84,6 +84,7 @@ import {
   toAccessCodeError,
   usePublicHttp,
 } from "./shared";
+import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
 import { http } from "@eimsnext/utils";
 import { h, nextTick, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -389,7 +390,7 @@ function filterPublicRules(rules: any[], allowed?: Set<string>, parentField?: st
 }
 
 function isPublicSystemRule(rule: any) {
-  return rule?.source === "public" && ["wxopenid", "wxnickname", "wxavator", "ext"].includes(`${rule.field || ""}`.toLowerCase());
+  return isPublicSystemFieldDef(rule);
 }
 
 function hasValue(value: any) {

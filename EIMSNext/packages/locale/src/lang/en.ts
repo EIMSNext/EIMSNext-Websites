@@ -3936,12 +3936,12 @@ export default {
 
     datalinkFields: "Visible Fields",
     allFieldsDefault: "All Fields by Default",
-    visibleFieldsTip: "When not selected, all regular fields are visible. Public system fields are hidden.",
+    visibleFieldsTip: "When not selected, all available fields are visible.",
 
     queryPageSettings: "Query Page Settings",
     queryFields: "Query Fields",
     displayFields: "Display Fields",
-    top5FieldsDefault: "Default to first 5 regular fields",
+    top5FieldsDefault: "Default to first 5 available fields",
 
     wechatGateTitle: "Please open in WeChat",
     wechatGateDesc: "Use WeChat browser on desktop, or scan QR code on mobile",

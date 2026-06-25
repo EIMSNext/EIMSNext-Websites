@@ -9,8 +9,6 @@ export function isPublicSystemField(field?: string) {
 export function isPublicSystemFieldDef(field?: Pick<FieldDef, "field" | "source" | "systemKind">) {
   if (!field) return false;
   const name = `${field.field || field.systemKind || ""}`.toLowerCase();
-  return (
-    publicSystemFields.includes(name) &&
-    (field.source === "public" || field.systemKind === field.field || isPublicSystemField(field.systemKind))
-  );
+  const source = `${field.source || ""}`.toLowerCase();
+  return publicSystemFields.includes(name) && (source === "public" || isPublicSystemField(field.systemKind));
 }

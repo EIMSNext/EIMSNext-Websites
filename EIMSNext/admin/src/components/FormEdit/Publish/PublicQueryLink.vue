@@ -92,7 +92,7 @@ import {
 import { publicSettingService } from "@eimsnext/services";
 import { sha256 } from "@eimsnext/utils";
 import LimitSection from "./LimitSection.vue";
-import { isPublicSystemFieldDef } from "@/views/public/publicSystemFields";
+import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
 
 const { t } = useI18n();
 
