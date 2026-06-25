@@ -50,6 +50,7 @@ import { useI18n } from 'vue-i18n'
 import type { LoginRequest } from '@eimsnext/services'
 import { mobileAuthService } from '@/services/mobileService'
 import { toggleDarkMode } from '@eimsnext/utils'
+import { useUserStoreHook } from '@eimsnext/store'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -89,8 +90,14 @@ const handleLogin = async () => {
   loading.value = true
   try {
     await mobileAuthService.login(loginData.value)
+    try {
+      await useUserStoreHook().initialize(true)
+    } catch (e) {
+      console.warn('mobile login: userStore.initialize failed', e)
+    }
     showToast(t('mobile.login.success'))
-    router.replace('/workbench')
+    const redirect = (router.currentRoute.value.query.redirect as string) || '/workbench'
+    router.replace(redirect)
   } catch {
     showToast(t('mobile.login.failed'))
   } finally {
