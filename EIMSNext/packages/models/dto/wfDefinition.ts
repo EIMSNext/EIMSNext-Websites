@@ -54,6 +54,17 @@ export interface TransferSetting {
   candidates?: ApprovalCandidate[];
 }
 
+export enum ReturnTargetMode {
+  Previous = 0,
+  Start = 1,
+  Specified = 2,
+}
+
+export interface ReturnSetting {
+  targetMode?: ReturnTargetMode;
+  targetNodeId?: string;
+}
+
 export interface NotifySetting {
   channels?: NotifyChannel;
   candidates?: ApprovalCandidate[];
@@ -65,6 +76,7 @@ export interface ExpireSetting {
   timeUnit?: TimeUnit;
   notifySetting?: NotifySetting;
   transferSetting?: TransferSetting;
+  returnSetting?: ReturnSetting;
 }
 
 export enum WfNoApproverActionType {

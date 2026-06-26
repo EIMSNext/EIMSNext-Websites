@@ -779,12 +779,24 @@ export interface ITransferSetting {
   candidates?: IApprovalCandidate[];
 }
 
+export enum ReturnTargetMode {
+  Previous = 0,
+  Start = 1,
+  Specified = 2,
+}
+
+export interface IReturnSetting {
+  targetMode?: ReturnTargetMode;
+  targetNodeId?: string;
+}
+
 export interface IExpireSetting {
   actionType?: WfExpireActionType;
   timeValue?: number;
   timeUnit?: TimeUnit;
   notifySetting?: INotifySetting;
   transferSetting?: ITransferSetting;
+  returnSetting?: IReturnSetting;
 }
 
 export function createWorkflowData(t: Translator): IFlowData {
