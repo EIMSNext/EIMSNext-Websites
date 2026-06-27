@@ -104,6 +104,9 @@ export interface IFlowLogState {
   isNodeExecuted?: (nodeData: IFlowNodeData) => boolean;
   isLineExecuted?: (nodeData: IFlowNodeData, branchItemData?: IFlowNodeData) => boolean;
   isBranchExecuted?: (branchItemData: IFlowNodeData) => boolean;
+  isNodeFailed?: (nodeData: IFlowNodeData) => boolean;
+  isLineFailed?: (nodeData: IFlowNodeData, branchItemData?: IFlowNodeData) => boolean;
+  isBranchFailed?: (branchItemData: IFlowNodeData) => boolean;
   onNodeClick?: (nodeData: IFlowNodeData) => void;
 }
 export interface IFlowNodeDragData {

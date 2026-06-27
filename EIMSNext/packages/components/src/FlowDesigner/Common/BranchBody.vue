@@ -37,7 +37,7 @@
         :data-index="index"
       />
     </div>
-    <div class="branch-foot">
+    <div class="branch-foot" :class="{ 'log-executed': isExecuted, 'log-failed': isFailed }">
       <AddNodeButton
         v-if="!flowContext.structureReadonly"
         :p-node-datas="pNodeDatas"
@@ -71,6 +71,16 @@ const props = defineProps<{
 }>();
 const flowContext = inject<IFlowContext>("flowContext")!;
 const canPaste = computed(() => flowContext.clonedData.nodeType === FlowNodeType.BranchItem);
+const isExecuted = computed(() => {
+  if (!flowContext.logState) return false;
+  if (flowContext.logState.isNodeExecuted?.(props.nodeData)) return true;
+  return props.nodeData.childNodes?.some(hasExecutedNode) ?? false;
+});
+const isFailed = computed(() => {
+  if (!flowContext.logState) return false;
+  if (flowContext.logState.isNodeFailed?.(props.nodeData)) return true;
+  return props.nodeData.childNodes?.some(hasFailedNode) ?? false;
+});
 
 const addBranchItem = () => {
   const newBranchItem = createFlowNode(FlowNodeType.BranchItem, t);
@@ -91,6 +101,22 @@ function addNewNode(pNodeDatas: IFlowNodeData[], newBranchItem: IFlowNodeData) {
     childNodes.push(newBranchItem, lastBranchItem);
     newBranchItem.prevId = props.nodeData.id;
   });
+}
+
+function hasExecutedNode(node: IFlowNodeData): boolean {
+  if (flowContext.logState?.executedNodeIds.has(node.id) || flowContext.logState?.failedNodeIds.has(node.id)) {
+    return true;
+  }
+
+  return node.childNodes?.some(hasExecutedNode) ?? false;
+}
+
+function hasFailedNode(node: IFlowNodeData): boolean {
+  if (flowContext.logState?.failedNodeIds.has(node.id)) {
+    return true;
+  }
+
+  return node.childNodes?.some(hasFailedNode) ?? false;
 }
 </script>
 

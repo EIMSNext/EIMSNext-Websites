@@ -88,7 +88,7 @@
           <template v-if="selectedNode">
             <div class="node-detail-title">
               <div>
-                <span :class="['node-status-mark', selectedLog?.success === false ? 'failed' : 'success']"></span>
+                <span :class="['node-status-mark', `is-${selectedNodeStatus}`]"></span>
                 <strong>{{ selectedNode.name }}</strong>
                 <span class="node-type">{{ selectedLog?.nodeName && selectedLog.nodeName !== selectedNode.name ? selectedLog.nodeName : "" }}</span>
               </div>
@@ -188,6 +188,21 @@ const logState = reactive<IFlowLogState>({
   isBranchExecuted,
   onNodeClick: selectNode,
 });
+(logState as IFlowLogState & {
+  isNodeFailed?: typeof isNodeFailed;
+  isLineFailed?: typeof isLineFailed;
+  isBranchFailed?: typeof isBranchFailed;
+}).isNodeFailed = isNodeFailed;
+(logState as IFlowLogState & {
+  isNodeFailed?: typeof isNodeFailed;
+  isLineFailed?: typeof isLineFailed;
+  isBranchFailed?: typeof isBranchFailed;
+}).isLineFailed = isLineFailed;
+(logState as IFlowLogState & {
+  isNodeFailed?: typeof isNodeFailed;
+  isLineFailed?: typeof isLineFailed;
+  isBranchFailed?: typeof isBranchFailed;
+}).isBranchFailed = isBranchFailed;
 const flowContext = reactive<IFlowContext>({
   definitionId: props.flowDef.id,
   appId: props.formDef.appId,
@@ -210,6 +225,12 @@ const nodeLogMap = computed(() => {
     if (item.nodeId) map.set(item.nodeId, item);
   });
   return map;
+});
+
+const selectedNodeStatus = computed<"success" | "failed" | "pending">(() => {
+  if (selectedLog.value?.success === true) return "success";
+  if (selectedLog.value?.success === false) return "failed";
+  return "pending";
 });
 
 function createFlowData() {
@@ -264,7 +285,7 @@ async function openRunDetail(run: DfRunLog) {
     logState.executedNodeIds = new Set(detail.value.executedNodeIds);
     logState.failedNodeIds = new Set(detail.value.failedNodeIds);
     syncFlowContext();
-    selectNode(flowData.value.startNode);
+    selectNode(getDefaultSelectedNode());
   } finally {
     detailLoading.value = false;
   }
@@ -283,6 +304,21 @@ function selectNode(node: IFlowNodeData) {
   selectedNode.value = node;
   selectedLog.value = nodeLogMap.value.get(node.id);
   flowContext.activeData = node;
+}
+
+function findFirstNodeByIds(ids: string[]) {
+  for (const id of ids) {
+    const node = getFlowNodeById(flowData.value, id);
+    if (node) return node;
+  }
+}
+
+function getDefaultSelectedNode() {
+  return (
+    findFirstNodeByIds(detail.value?.failedNodeIds || []) ||
+    findFirstNodeByIds(detail.value?.executedNodeIds || []) ||
+    flowData.value.startNode
+  );
 }
 
 function viewNodeConfig() {
@@ -332,6 +368,29 @@ function isLineExecuted(node: IFlowNodeData, branchItemData?: IFlowNodeData): bo
 
 function isBranchExecuted(branchItemData: IFlowNodeData): boolean {
   return branchItemData.childNodes?.some(isNodeExecuted) ?? false;
+}
+
+function isNodeFailed(node: IFlowNodeData): boolean {
+  if (logState.failedNodeIds.has(node.id)) return true;
+  if (node.nodeType === FlowNodeType.Branch || node.nodeType === FlowNodeType.Branch2) {
+    return node.childNodes?.some(isBranchFailed) ?? false;
+  }
+  if (node.nodeType === FlowNodeType.BranchItem) return isBranchFailed(node);
+  return node.childNodes?.some(isNodeFailed) ?? false;
+}
+
+function isLineFailed(node: IFlowNodeData, branchItemData?: IFlowNodeData): boolean {
+  if (branchItemData) return isBranchFailed(branchItemData);
+  if (node.nodeType === FlowNodeType.Branch || node.nodeType === FlowNodeType.Branch2) {
+    return node.childNodes?.some(isBranchFailed) ?? false;
+  }
+
+  const nextNode = node.nextId ? getFlowNodeById(flowData.value, node.nextId) : undefined;
+  return nextNode ? isNodeFailed(nextNode) : false;
+}
+
+function isBranchFailed(branchItemData: IFlowNodeData): boolean {
+  return branchItemData.childNodes?.some(isNodeFailed) ?? false;
 }
 
 onBeforeMount(loadRuns);
@@ -456,9 +515,13 @@ onBeforeMount(loadRuns);
   height: var(--et-size-10);
   border-radius: var(--et-radius-round);
   margin-right: var(--et-space-8);
-  background: var(--et-color-success);
+  background: var(--et-text-disabled);
 
-  &.failed {
+  &.is-success {
+    background: var(--et-color-success);
+  }
+
+  &.is-failed {
     background: var(--et-color-danger);
   }
 }

@@ -56,6 +56,7 @@ export default {
     close: "Close",
     preview: "Preview",
     enable: "Enable",
+    disabled: "Disabled",
     copy: "Copy",
     copySuccess: "Copied!",
     copySuffix: "_Copy",

@@ -57,6 +57,10 @@
                       <el-icon><CopyDocument /></el-icon>
                       {{ t("common.copy") }}
                     </el-dropdown-item>
+                    <el-dropdown-item :command="view.disabled ? 'enable' : 'disable'">
+                      <el-icon><Lock /></el-icon>
+                      {{ view.disabled ? t("common.enable") : t("common.disabled") }}
+                    </el-dropdown-item>
                     <el-dropdown-item command="delete" class="danger-item">
                       <el-icon><Delete /></el-icon>
                       {{ t("common.delete") }}
@@ -80,6 +84,9 @@
             <div class="view-card-footer">
               <el-icon><Lock /></el-icon>
               {{ scopeText(view) }}
+              <el-tag size="small" :type="view.disabled ? 'info' : 'success'" effect="light">
+                {{ view.disabled ? t("common.disabled") : t("common.enable") }}
+              </el-tag>
             </div>
           </div>
         </div>
@@ -158,12 +165,26 @@ const handleCommand = async (command: string, view: FormListView) => {
     showScope.value = true;
   } else if (command === "copy") {
     const request: FormListViewRequest = {
-      ...view,
       id: "",
+      appId: view.appId,
+      formId: view.formId,
       name: t("admin.formListView.copiedName", { name: view.name }),
+      pcType: view.pcType,
+      mobileType: view.mobileType,
       sortIndex: nextSortIndex.value,
+      authGroupIds: [...(view.authGroupIds || [])],
+      settings: view.settings,
+      defaultFilter: view.defaultFilter,
+      defaultSort: view.defaultSort,
+      disabled: false,
     };
     await formListViewService.post<FormListViewRequest>(request);
+    await loadViews();
+  } else if (command === "enable" || command === "disable") {
+    await formListViewService.patch<FormListViewRequest>(view.id, {
+      id: view.id,
+      disabled: command === "disable",
+    });
     await loadViews();
   } else if (command === "delete") {
     showDeleteConfirm.value = true;
@@ -295,6 +316,10 @@ onBeforeMount(async () => {
   padding: 0 var(--et-space-12);
   color: var(--et-text-secondary);
   font-size: var(--et-font-size-13);
+
+  .el-tag {
+    margin-left: auto;
+  }
 }
 
 .danger-item {

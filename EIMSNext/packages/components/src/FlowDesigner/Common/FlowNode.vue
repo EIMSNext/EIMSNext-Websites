@@ -9,6 +9,7 @@
       'log-executed': isLogExecuted,
       'log-failed': isLogFailed,
       'log-line-executed': isLogLineExecuted,
+      'log-line-failed': isLogLineFailed,
     }"
     :draggable="canDrag"
     @dragstart="dragStart"
@@ -105,7 +106,11 @@ const isDragging = ref(false);
 const isDragOver = ref(false);
 const dragOverPosition = ref<"before" | "after">("before");
 const isActived = computed(() => flowContext.activeData.id === props.nodeData.id);
-const isLogFailed = computed(() => flowContext.logState?.failedNodeIds.has(props.nodeData.id) ?? false);
+const isLogFailed = computed(() => {
+  if (!flowContext.logState) return false;
+  if (flowContext.logState.isNodeFailed?.(props.nodeData)) return true;
+  return flowContext.logState.failedNodeIds.has(props.nodeData.id);
+});
 const isLogExecuted = computed(() => {
   if (!flowContext.logState) return false;
   if (flowContext.logState.executedNodeIds.has(props.nodeData.id)) return true;
@@ -128,6 +133,15 @@ const isLogLineExecuted = computed(() => {
   if (!nextId) return false;
   const nextNode = getFlowNodeById(flowContext.flowData, nextId);
   return nextNode ? isNodeOrBranchExecuted(nextNode) : false;
+});
+const isLogLineFailed = computed(() => {
+  if (!flowContext.logState) return false;
+  if (flowContext.logState.isLineFailed?.(props.nodeData, props.branchItemData)) return true;
+  if (props.branchItemData && isBranchItemFailed(props.branchItemData)) return true;
+  const nextId = props.nodeData.nextId;
+  if (!nextId) return false;
+  const nextNode = getFlowNodeById(flowContext.flowData, nextId);
+  return nextNode ? isNodeOrBranchFailed(nextNode) : false;
 });
 const canDrag = computed(
   () =>
@@ -195,6 +209,11 @@ const isBranchItemExecuted = (branchItem: IFlowNodeData) => {
   return branchItem.childNodes?.some(isNodeOrBranchExecuted) ?? false;
 };
 
+const isBranchItemFailed = (branchItem: IFlowNodeData) => {
+  if (flowContext.logState?.isBranchFailed?.(branchItem)) return true;
+  return branchItem.childNodes?.some(isNodeOrBranchFailed) ?? false;
+};
+
 const isNodeOrBranchExecuted = (node: IFlowNodeData): boolean => {
   if (flowContext.logState?.executedNodeIds.has(node.id) || flowContext.logState?.failedNodeIds.has(node.id)) {
     return true;
@@ -209,6 +228,22 @@ const isNodeOrBranchExecuted = (node: IFlowNodeData): boolean => {
   }
 
   return node.childNodes?.some(isNodeOrBranchExecuted) ?? false;
+};
+
+const isNodeOrBranchFailed = (node: IFlowNodeData): boolean => {
+  if (flowContext.logState?.failedNodeIds.has(node.id)) {
+    return true;
+  }
+
+  if (node.nodeType === FlowNodeType.Branch || node.nodeType === FlowNodeType.Branch2) {
+    return node.childNodes?.some(isBranchItemFailed) ?? false;
+  }
+
+  if (node.nodeType === FlowNodeType.BranchItem) {
+    return isBranchItemFailed(node);
+  }
+
+  return node.childNodes?.some(isNodeOrBranchFailed) ?? false;
 };
 
 const dragStart = (event: DragEvent) => {

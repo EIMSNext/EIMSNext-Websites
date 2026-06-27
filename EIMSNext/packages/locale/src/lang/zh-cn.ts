@@ -57,6 +57,7 @@ export default {
     close: "关闭",
     preview: "预览",
     enable: "启用",
+    disabled: "禁用",
     copy: "复制",
     copySuccess: "已复制!",
     copySuffix: "_拷贝",
