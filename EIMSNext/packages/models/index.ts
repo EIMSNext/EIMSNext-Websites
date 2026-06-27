@@ -8,6 +8,8 @@ export * from "./dto/adminGroup";
 export * from "./dto/auditLog";
 export * from "./dto/authGroup";
 export * from "./dto/client";
+export * from "./dto/clientGrant";
+export * from "./dto/resourceConfig";
 export * from "./dto/corporate";
 export * from "./dto/dfRunLog";
 export * from "./dto/employee";

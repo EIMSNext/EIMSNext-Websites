@@ -2,6 +2,8 @@ export * from "./adminGroupService";
 export * from "./appDefService";
 export * from "./auditLogService";
 export * from "./authGroupService";
+export * from "./clientGrantService";
+export * from "./clientService";
 export * from "./crossBindingService";
 export * from "./dfRunLogService";
 export * from "./corporateService";
