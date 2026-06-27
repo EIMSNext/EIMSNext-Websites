@@ -863,6 +863,7 @@ export default {
     publish: {
       internal: "内部发布",
       public: "公开发布",
+      view: "视图",
     },
     internalPublish: {
       desc: "设置成员权限，成员登录后根据权限访问",

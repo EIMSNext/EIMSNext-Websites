@@ -810,6 +810,7 @@ export default {
     publish: {
       internal: "Internal Publish",
       public: "Public Publish",
+      view: "Views",
     },
     internalPublish: {
       desc: "Configure member permissions. Members access after login according to permissions.",
