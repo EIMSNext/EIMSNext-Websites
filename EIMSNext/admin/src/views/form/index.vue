@@ -35,7 +35,7 @@
     <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
       :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
-        <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms"
+        <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms" :authGroupId="curAuthGrp?.id"
           @ok="handleViewOk"></FormDataView>
       </div>
     </et-dialog>

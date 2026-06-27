@@ -3,7 +3,8 @@ import { accessToken } from "@eimsnext/utils";
 import router from "@/router";
 import { usePermissionStore } from "@/store";
 import { useUserStore, useAppStore } from "@eimsnext/store";
-import { AppMenu } from "@eimsnext/models";
+import { AppMenu, WorkbenchRecentVisit, WorkbenchRecentVisitRequest } from "@eimsnext/models";
+import { workbenchRecentVisitService } from "@eimsnext/services";
 
 export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
@@ -27,7 +28,7 @@ export function setupPermission() {
         }
 
         if (!needsCorpOnboarding && to.path === "/corp-onboarding") {
-          next({ path: "/workspace", replace: true });
+          next({ path: "/workbench", replace: true });
           return;
         }
 
@@ -92,7 +93,9 @@ export function setupPermission() {
   });
 
   // 后置守卫，保证每次路由跳转结束时关闭进度条
-  router.afterEach(() => {});
+  router.afterEach((to) => {
+    recordWorkbenchRecent(to);
+  });
 }
 
 function findMenu(menus: AppMenu[], menuId: string): AppMenu | undefined {
@@ -110,6 +113,49 @@ function findMenu(menus: AppMenu[], menuId: string): AppMenu | undefined {
   }
 
   return undefined;
+}
+
+function firstRouteParam(value: unknown) {
+  if (Array.isArray(value)) return value[0] as string | undefined;
+  return value as string | undefined;
+}
+
+function recordWorkbenchRecent(to: RouteLocationNormalized) {
+  const appId = firstRouteParam(to.params.appId);
+  const formId = firstRouteParam(to.params.formId);
+  const dashId = firstRouteParam(to.params.dashId);
+
+  if (!appId || (!formId && !dashId)) {
+    return;
+  }
+
+  const targetType: WorkbenchRecentVisitRequest["targetType"] = dashId ? "dashboard" : "form";
+  const targetId = dashId || formId!;
+
+  (async () => {
+    const query = `$filter=targetType eq '${escapeODataString(targetType)}' and targetId eq '${escapeODataString(targetId)}'&$top=1`;
+    const records = await workbenchRecentVisitService.query<WorkbenchRecentVisit>(query);
+    if (records[0]) {
+      await workbenchRecentVisitService.patch<WorkbenchRecentVisit>(records[0].id, {
+        id: records[0].id,
+        targetType,
+        targetId,
+      });
+      return;
+    }
+
+    await workbenchRecentVisitService.post<WorkbenchRecentVisit>({
+      id: "",
+      targetType,
+      targetId,
+    });
+  })().catch(() => {
+    // 最近使用是弱依赖，记录失败不影响正常跳转。
+  });
+}
+
+function escapeODataString(value: string) {
+  return value.replace(/'/g, "''");
 }
 
 // 重定向到登录页

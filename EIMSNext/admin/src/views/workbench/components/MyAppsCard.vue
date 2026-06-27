@@ -3,7 +3,7 @@
     @ok="handleSaved"></AddEditApp>
   <et-card :title="t('admin.myApp')">
     <template #action>
-      <el-button v-if="canCreateApp" icon="plus" @click="createApp">
+      <el-button v-if="canCreateApp" type="primary" icon="plus" @click="createApp">
         {{ t("admin.newApp") }}
       </el-button>
     </template>
@@ -25,7 +25,11 @@
                         <div class="app-title">{{ app.name }}</div>
                       </div>
                     </div>
-                    <div class="favorite-icon">
+                    <div
+                      class="favorite-icon"
+                      :class="{ active: workbenchStore.isFavorite('app', app.id) }"
+                      @click.stop="toggleFavorite(app)"
+                    >
                       <et-icon icon="el-star" size="large"></et-icon>
                     </div>
                     <div v-if="canShowAppActions(app)" class="setting-icon">
@@ -66,11 +70,14 @@ import { useI18n } from "vue-i18n";
 import { ConfirmResult, EtConfirm } from "@eimsnext/components";
 import { appDefService } from "@eimsnext/services";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
+import { useWorkbenchStore } from "@/store";
+import { resolveAppEntryPath } from "@/utils/appEntry";
 const { t } = useI18n();
 
 const router = useRouter();
 const appStore = useAppStore();
 const contextStore = useContextStore();
+const workbenchStore = useWorkbenchStore();
 const { items: appsRef } = storeToRefs(appStore);
 const showAddEditDialog = ref(false);
 const isEditMode = ref(false);
@@ -112,9 +119,17 @@ const handleSaved = async () => {
 
 const gotoApp = async (app: AppDef) => {
   await contextStore.setAppId(app.id);
-  const path = "/app/" + app.id + "/mytasks";
-  router.push(path);
+  router.push(resolveAppEntryPath(app));
 };
+
+const toggleFavorite = async (app: AppDef) => {
+  await workbenchStore.loadFavorites();
+  await workbenchStore.toggleFavorite({
+    targetType: "app",
+    targetId: app.id,
+  });
+};
+
 const handleDeleteClick = async (app: AppDef) => {
   if (!canDeleteApp(app)) return;
 
@@ -132,6 +147,7 @@ const handleDeleteClick = async (app: AppDef) => {
 
 onMounted(async () => {
   await refreshAdminPermissions();
+  await workbenchStore.loadFavorites();
 });
 </script>
 <style lang="scss" scoped>
@@ -224,6 +240,11 @@ onMounted(async () => {
             line-height: var(--et-line-height-16);
             position: absolute;
             visibility: hidden;
+
+            &.active {
+              color: var(--et-color-warning);
+              visibility: visible;
+            }
           }
 
           .setting-btn {

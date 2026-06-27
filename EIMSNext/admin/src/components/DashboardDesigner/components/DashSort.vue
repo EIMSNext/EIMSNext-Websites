@@ -22,7 +22,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 defineOptions({
-  name: "DataSort",
+  name: "DashSort",
 });
 
 const props = withDefaults(

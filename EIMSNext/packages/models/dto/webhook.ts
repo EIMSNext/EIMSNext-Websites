@@ -3,8 +3,10 @@
 export interface WebhookRequest extends IdBase {
   appId?: string;
   formId?: string;
+  name?: string;
   url?: string;
   secret?: string;
+  remark?: string;
   triggers?: WebHookTrigger;
   disabled: boolean;
 }
@@ -12,8 +14,10 @@ export interface WebhookRequest extends IdBase {
 export interface Webhook extends CorpModelBase {
   appId: string;
   formId: string;
+  name?: string;
   url: string;
   secret: string;
+  remark?: string;
   triggers?: WebHookTrigger;
   disabled: boolean;
 }

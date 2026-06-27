@@ -3,6 +3,7 @@ import { ExportResponse, FormData, FormDataChangeLog, FormDataExportRequest, For
 import {
   IFormDataFilterOptionsRequest,
   IFormDataFilterOptionsResponse,
+  IFormDataPermissionScopeResponse,
 } from "../requestModel";
 
 export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
@@ -16,6 +17,10 @@ export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
 
   getFilterOptions(data: IFormDataFilterOptionsRequest): Promise<IFormDataFilterOptionsResponse> {
     return this.http().api.post<IFormDataFilterOptionsResponse>(`/FormData/filter/options`, data);
+  }
+
+  getPermissionScope(dataId: string, formId: string): Promise<IFormDataPermissionScopeResponse> {
+    return this.http().api.get<IFormDataPermissionScopeResponse>(`/FormData/${dataId}/permission-scope`, { formId });
   }
 
   async getChangeLogs(dataId: string, skip = 0, top = 20, authGroupId?: string): Promise<FormDataChangeLog[]> {

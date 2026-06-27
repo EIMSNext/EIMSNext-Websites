@@ -353,12 +353,12 @@ export default {
     this.isgod =
       process.env.NODE_ENV === "development" || this.$route.query.god === "cn";
 
-    if (this.formDef && this.formDef.content) {
-      this.$refs.designer.setFormId(this.formDef.id);
+      if (this.formDef && this.formDef.content) {
+        this.$refs.designer.setFormId(this.formDef.id);
 
-      if (this.formDef.content.layout) {
-        this.$refs.designer.setRule(this.formDef.content.layout);
-      }
+        if (this.formDef.content.layout) {
+          this.$refs.designer.setRule(JSON.parse(this.formDef.content.layout));
+        }
       if (this.formDef.content.options) {
         this.$refs.designer.setOptions(this.formDef.content.options);
       }

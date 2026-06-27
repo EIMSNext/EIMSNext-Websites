@@ -255,7 +255,7 @@ export const useTagsViewStore = defineStore("tagsView", () => {
     } else {
       // now the default is to redirect to the home page if there is no tags-view,
       // you can adjust it according to your needs.
-      if (view?.name === "workspace") {
+      if (view?.name === "workbench") {
         // to reload home page
         router.replace("/redirect" + view.fullPath);
       } else {

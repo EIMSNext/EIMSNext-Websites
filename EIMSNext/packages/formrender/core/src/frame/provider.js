@@ -415,7 +415,7 @@ const fetch = function (fc) {
             if (check()) return;
             (
               onError ||
-              ((e) => err(e.message || "fetch fail " + _option.action))
+              ((e) => err(e.message || "获取数据失败 " + _option.action))
             )(e, rule, api);
           },
         };

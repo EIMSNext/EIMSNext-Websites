@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-sidebar">
     <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
       :isLedger="isLedger" @close="console.log('[Sidebar] FormEdit closed'); showFormEditor = false" />
     <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
@@ -64,7 +64,7 @@
       </el-menu>
     </div>
     <div v-if="isSidebarOpened" class="form-action">
-      <el-input>
+      <el-input v-model="menuFilterText" clearable :placeholder="t('common.search')">
         <template #prefix>
           <et-icon icon="el-search" size="14px"></et-icon>
         </template>
@@ -100,8 +100,9 @@
     <el-scrollbar>
       <SidebarMenu
         :app-id="contextStore.appId"
-        :menu-list="appMenus"
+        :menu-list="filteredAppMenus"
         :can-manage="canManageCurrentApp"
+        :sortable="!menuFilterText.trim()"
         @editForm="editForm"
         @editMenu="openEditMenu"
         @editGroup="openEditGroup"
@@ -109,6 +110,17 @@
         @menusChanged="saveMenus"
       />
     </el-scrollbar>
+    <router-link
+      v-if="canManageCurrentApp"
+      custom
+      :to="{ path: `/app/${contextStore.appId}/admin` }"
+      v-slot="{ navigate }"
+    >
+      <div class="app-admin-entry" :class="{ collapsed: !isSidebarOpened }" @click="navigate">
+        <et-icon icon="icon-settings" size="15px" />
+        <span v-if="isSidebarOpened">{{ t("admin.appAdmin.title") }}</span>
+      </div>
+    </router-link>
   </div>
 </template>
 
@@ -131,16 +143,28 @@ import FormEdit from "@/components/FormEdit/index.vue";
 import { appDefService, dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
+import { normalizeMenuType } from "@/utils/appEntry";
 import { ElMessage } from "element-plus";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
 
-const getMenuType = (menuType: FormType | number | undefined): FormType => {
-  if (menuType === undefined) return FormType.Form;
-  if (typeof menuType === 'string') return menuType as FormType;
-  return String(menuType) as FormType;
-};
-
 const { t } = useI18n();
+
+const menuFilterText = ref("");
+const filteredAppMenus = computed(() => {
+  const keyword = menuFilterText.value.trim().toLowerCase();
+  if (!keyword) return appMenus.value;
+
+  const matchMenu = (m: AppMenu): AppMenu | null => {
+    const title = (m.title ?? "").toString().toLowerCase();
+    const matchedSub = (m.subMenus || []).map(matchMenu).filter((x): x is AppMenu => x !== null);
+    if (title.includes(keyword) || matchedSub.length > 0) {
+      return { ...m, subMenus: matchedSub };
+    }
+    return null;
+  };
+
+  return appMenus.value.map(matchMenu).filter((x): x is AppMenu => x !== null);
+});
 
 const newForm = ref<FormDef>();
 const showFormEditor = ref(false);
@@ -320,7 +344,7 @@ const saveMenus = async () => {
 const deleteMenu = async (menu: AppMenu) => {
   if (!canManageCurrentApp.value) return;
 
-  const menuType = getMenuType(menu.menuType);
+  const menuType = normalizeMenuType(menu.menuType);
   if (menuType === FormType.Form) {
     formStore.remove(menu.menuId);
     contextStore.setAppChanged();
@@ -337,7 +361,7 @@ const deleteMenu = async (menu: AppMenu) => {
     const updated = await appDefService.deleteGroup({ appId: contextStore.appId, menuId: menu.menuId });
     handleAppUpdated(updated);
   } catch (error: any) {
-    ElMessage.warning(error?.message || "当前分组下存在子菜单，不能删除");
+    ElMessage.warning(error?.message || t("admin.misc.childMenuDeleteBlocked"));
   }
 };
 
@@ -355,6 +379,33 @@ const createFolder = () => {
   position: absolute;
   top: var(--et-space-10);
   right: var(--et-space-0);
+}
+
+.app-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+:deep(.el-scrollbar) {
+  flex: 1;
+  min-height: 0;
+}
+
+.app-admin-entry {
+  align-items: center;
+  border-top: 1px solid var(--et-border-color-light);
+  color: var(--et-text-primary);
+  cursor: pointer;
+  display: flex;
+  gap: var(--et-space-8);
+  height: var(--et-size-44);
+  padding: 0 var(--et-space-16);
+
+  &.collapsed {
+    justify-content: center;
+    padding: 0;
+  }
 }
 
 .app-title {

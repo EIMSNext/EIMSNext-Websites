@@ -67,6 +67,7 @@ const props = withDefaults(
     dataId: string;
     dataPerms?: DataPerms;
     fieldPerms?: IFieldPerm[];
+    authGroupId?: string;
   }>(),
   {}
 );
@@ -266,7 +267,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
         await workflowService.withdraw({
           dataId: props.dataId,
         });
-        const data = await formDataService.get<FormData>(props.dataId);
+        const data = await formDataService.get<FormData>(props.dataId, props.authGroupId ? { authGroupId: props.authGroupId } : undefined);
         formData.value = data;
         actionStatus.value = { canWithdraw: false, canUrge: false };
         editDisabled.value = false;
@@ -375,7 +376,7 @@ onBeforeMount(async () => {
     await loadPrintDefs(form.id);
   }
 
-  let data = await formDataService.get<FormData>(props.dataId);
+  let data = await formDataService.get<FormData>(props.dataId, props.authGroupId ? { authGroupId: props.authGroupId } : undefined);
   if (data) {
     formData.value = data;
     const workflowLocked = !!(formDef.value?.usingWorkflow && formData.value.flowStatus != FlowStatus.Draft);

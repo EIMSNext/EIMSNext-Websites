@@ -33,14 +33,6 @@
               {{ formatDepartments(scope.row as Employee) }}
             </template>
           </el-table-column>
-              <!-- <el-table-column label="操作" fixed="right" width="150">
-              <template #default="scope">
-                <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
-                </el-button>
-                <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
-                </el-button>
-              </template>
-</el-table-column> -->
             </el-table>
           </div>
           <div class="pagination-container">
@@ -98,7 +90,7 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { AdminPermissionSnapshot, DataPerms, Employee, FieldType, Role, ScopeMode, UserType } from "@eimsnext/models";
+import { AdminPermissionSnapshot, Employee, FieldType, Role, ScopeMode, UserType } from "@eimsnext/models";
 import { SortDirection, employeeService, roleService, systemService } from "@eimsnext/services";
 import { useUserStore } from "@eimsnext/store";
 import buildQuery from "odata-query";

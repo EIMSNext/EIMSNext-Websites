@@ -2,15 +2,50 @@ $et-prefix: "et";
 
 :root {
   --et-color-primary: #4080ff;
-  --et-color-primary-hover: #5c97ff;
-  --et-color-primary-active: #2664d9;
+  --et-color-primary-hover: #79a6ff;
+  --et-color-primary-active: #3366cc;
   --et-color-primary-outline: rgb(64 128 255 / 20%);
+  --et-color-primary-light-1: #538dff;
+  --et-color-primary-light-2: #6699ff;
+  --et-color-primary-light-3: var(--et-color-primary-hover);
+  --et-color-primary-light-4: #8cb3ff;
+  --et-color-primary-light-5: #a0c0ff;
+  --et-color-primary-light-6: #b3ccff;
+  --et-color-primary-light-7: #c6d9ff;
+  --et-color-primary-light-8: #d9e6ff;
+  --et-color-primary-light-9: #ecf2ff;
+  --et-color-primary-dark-2: var(--et-color-primary-active);
   --et-bg-primary-soft: rgb(64 128 255 / 10%);
   --et-text-on-primary: #ffffff;
 
-  --et-color-secondary: #2f7deb;
-  --et-color-secondary-hover: #4d91ef;
-  --et-color-secondary-active: #2466c6;
+  --el-color-primary: var(--et-color-primary);
+  --el-color-primary-rgb: 64, 128, 255;
+  --el-color-primary-light-1: var(--et-color-primary-light-1);
+  --el-color-primary-light-2: var(--et-color-primary-light-2);
+  --el-color-primary-light-3: var(--et-color-primary-light-3);
+  --el-color-primary-light-4: var(--et-color-primary-light-4);
+  --el-color-primary-light-5: var(--et-color-primary-light-5);
+  --el-color-primary-light-6: var(--et-color-primary-light-6);
+  --el-color-primary-light-7: var(--et-color-primary-light-7);
+  --el-color-primary-light-8: var(--et-color-primary-light-8);
+  --el-color-primary-light-9: var(--et-color-primary-light-9);
+  --el-color-primary-dark-2: var(--et-color-primary-dark-2);
+  --el-button-outline-color: var(--el-color-primary-light-5);
+  --el-menu-active-color: var(--et-color-primary);
+  --el-menu-hover-text-color: var(--et-color-primary);
+  --el-menu-hover-bg-color: var(--el-color-primary-light-9);
+  --van-primary-color: var(--et-color-primary);
+  --van-button-primary-background: var(--et-color-primary);
+  --van-button-primary-border-color: var(--et-color-primary);
+  --van-button-primary-color: var(--et-text-on-primary);
+  --van-tabs-default-color: var(--et-color-primary);
+  --van-tabs-bottom-bar-color: var(--et-color-primary);
+  --van-tab-active-text-color: var(--et-color-primary);
+  --van-active-color: var(--et-bg-primary-soft);
+
+  --et-color-secondary: #3b76eb;
+  --et-color-secondary-hover: #578fff;
+  --et-color-secondary-active: #3469d1;
   --et-color-success: #23c343;
   --et-color-warning: #f0a800;
   --et-color-danger: #eb5050;
@@ -179,4 +214,63 @@ $et-prefix: "et";
   --et-overlay-color: rgb(0 0 0 / 45%);
   --et-overlay-color-strong: rgb(0 0 0 / 60%);
   --et-blur-overlay: blur(8px);
+}
+
+.el-button--primary {
+  --el-button-text-color: var(--et-text-on-primary);
+  --el-button-bg-color: var(--et-color-primary);
+  --el-button-border-color: var(--et-color-primary);
+  --el-button-outline-color: var(--el-color-primary-light-5);
+  --el-button-hover-text-color: var(--et-text-on-primary);
+  --el-button-hover-bg-color: var(--et-color-primary-hover);
+  --el-button-hover-border-color: var(--et-color-primary-hover);
+  --el-button-hover-link-text-color: var(--et-color-primary-hover);
+  --el-button-active-color: var(--et-color-primary-active);
+  --el-button-active-text-color: var(--et-text-on-primary);
+  --el-button-active-bg-color: var(--et-color-primary-active);
+  --el-button-active-border-color: var(--et-color-primary-active);
+  --el-button-disabled-text-color: var(--et-text-on-primary);
+  --el-button-disabled-bg-color: var(--el-color-primary-light-5);
+  --el-button-disabled-border-color: var(--el-color-primary-light-5);
+}
+
+.el-button--primary.is-plain,
+.el-button--primary.is-text,
+.el-button--primary.is-link {
+  --el-button-text-color: var(--et-color-primary);
+  --el-button-bg-color: var(--el-color-primary-light-9);
+  --el-button-border-color: var(--el-color-primary-light-5);
+  --el-button-hover-text-color: var(--et-color-primary-hover);
+  --el-button-hover-bg-color: var(--el-color-primary-light-9);
+  --el-button-hover-border-color: var(--et-color-primary-hover);
+  --el-button-hover-link-text-color: var(--et-color-primary-hover);
+  --el-button-active-color: var(--et-color-primary-active);
+  --el-button-active-text-color: var(--et-color-primary-active);
+  --el-button-active-bg-color: var(--el-color-primary-light-9);
+  --el-button-active-border-color: var(--et-color-primary-active);
+}
+
+.el-button--primary.is-plain:not(.is-disabled):hover {
+  --el-button-hover-text-color: var(--et-text-on-primary);
+  --el-button-hover-bg-color: var(--et-color-primary);
+  --el-button-hover-border-color: var(--et-color-primary);
+}
+
+.el-button--primary.is-link,
+.el-button--primary.is-text {
+  --el-button-bg-color: transparent;
+  --el-button-border-color: transparent;
+  --el-button-hover-bg-color: transparent;
+  --el-button-hover-border-color: transparent;
+  --el-button-active-bg-color: transparent;
+  --el-button-active-border-color: transparent;
+}
+
+.el-tabs__active-bar {
+  background-color: var(--et-color-primary);
+}
+
+.el-tabs__item.is-active,
+.el-tabs__item:hover {
+  color: var(--et-color-primary);
 }

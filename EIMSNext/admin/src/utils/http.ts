@@ -2,6 +2,9 @@ import type { App } from "vue";
 import { type AxiosResponse } from "axios";
 import { ElMessage } from "element-plus";
 import { http, setupHttp } from "@eimsnext/utils";
+import { En, ZhCn } from "@eimsnext/locale";
+
+const systemErrorText = () => (localStorage.getItem("language") === "en" ? En : ZhCn).common.systemError;
 
 export default {
   install(app: App<Element>) {
@@ -9,10 +12,10 @@ export default {
       const response = error?.response;
       if (response) {
         const data = response.data || {};
-        const display = data.message || data.msg || "系统出错";
+        const display = data.message || data.msg || systemErrorText();
         ElMessage.error(display);
       } else {
-        ElMessage.error(error?.message || error?.msg || "系统出错");
+        ElMessage.error(error?.message || error?.msg || systemErrorText());
       }
     });
     app.provide("http", http);

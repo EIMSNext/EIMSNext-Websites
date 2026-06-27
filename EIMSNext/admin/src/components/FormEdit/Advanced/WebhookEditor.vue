@@ -2,12 +2,16 @@
   <div class="api-config-pane">
     <div class="config-content">
       <div class="config-pane">
+        <div class="pane-label">{{ t("common.name") }}</div>
+        <div class="pane-row">
+          <el-input v-model="hook.name" class="pane-row-stretch" autocomplete="new-password" />
+        </div>
         <div class="pane-label">{{ t("admin.webhook.serverUrl") }}</div>
         <div class="pane-row">
           <el-input v-model="hook.url" class="pane-row-stretch" autocomplete="new-password" />
           <el-button type="primary" class="btn-test" :loading="testing" @click="testConnection">{{ t("admin.webhook.testConnection") }}</el-button>
         </div>
-        <div class="pane-label">Secret</div>
+        <div class="pane-label">{{ t("common.secret") }}</div>
         <div class="pane-row">
           <el-input v-model="hook.secret" class="pane-row-stretch" autocomplete="new-password" />
           <el-button type="primary" class="btn-test" @click="generateSecret">{{ t("admin.webhook.generateSecret") }}</el-button>
@@ -60,6 +64,10 @@
               </el-checkbox>
             </div>
           </div>
+        </div>
+        <div class="pane-label">{{ t("common.remark") }}</div>
+        <div class="pane-row">
+          <el-input v-model="hook.remark" type="textarea" :rows="4" class="pane-row-stretch" />
         </div>
       </div>
       <div class="btn-pane"><el-button type="primary" @click="save">{{ t("common.save") }}</el-button></div>
@@ -127,10 +135,12 @@ const buildWebhookRequest = (): WebhookRequest => ({
   id: hook.value.id,
   appId: props.formDef.appId,
   formId: props.formDef.id,
+  name: hook.value.name,
   url: hook.value.url,
   secret: hook.value.secret,
+  remark: hook.value.remark,
   triggers: hook.value.triggers,
-  disabled: false,
+  disabled: hook.value.disabled ?? false,
 });
 
 const resolveRequestErrorMessage = (error: unknown, fallback: string) => {

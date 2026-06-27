@@ -1,6 +1,6 @@
 <template>
   <div class="icon-picker" style="width: 315px">
-    <div class="color-bar" aria-label="颜色">
+    <div class="color-bar" :aria-label="$t('comp.appIconSelect.color')">
       <span v-for="c in colorOptions" :key="c.value" class="color-chip" :aria-pressed="selectedColor === c.value"
         :style="{ backgroundColor: c.value }" @click="selectColor(c.value)" />
     </div>

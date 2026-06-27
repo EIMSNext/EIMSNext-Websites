@@ -203,7 +203,7 @@ function isClosable(tag: TagView) {
 function isFirstView() {
   try {
     return (
-      selectedTag.value.path === "/workspace" ||
+      selectedTag.value.path === "/workbench" ||
       selectedTag.value.fullPath === tagsViewStore.visitedViews[1].fullPath
     );
   } catch (err) {

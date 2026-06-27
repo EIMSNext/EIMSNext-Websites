@@ -3,14 +3,21 @@ import axios from "axios";
 import qs from "qs";
 import { ContentType, HttpRequestConfig } from "./interface";
 import accessToken from "./token";
+import { bus } from "../eventBus";
 
 export class HttpRequest {
   private axiosInstance: AxiosInstance;
+  private currentPath: () => string = () => (typeof window !== "undefined" ? window.location.pathname + window.location.search : "/");
+  private isHandling401 = false;
 
   constructor(config: HttpRequestConfig) {
     this.axiosInstance = axios.create(config);
 
     this.setupInterceptors(config);
+  }
+
+  setCurrentPathGetter(fn: () => string) {
+    this.currentPath = fn;
   }
 
   getAxios(): AxiosInstance {
@@ -51,6 +58,10 @@ export class HttpRequest {
       (error: AxiosError) => {
         console.log("axios response error", error);
 
+        if (error?.response?.status === 401 && !this.isAuthEndpoint(error.config?.url)) {
+          this.handleUnauthorized();
+        }
+
         if (error && config.interceptors?.errorHandler) {
           config.interceptors?.errorHandler(error);
         }
@@ -71,7 +82,9 @@ export class HttpRequest {
   }
 
   request<T = any>(config: HttpRequestConfig) {
-    if (config.withToken !== false) {
+    if (config.token) {
+      config.headers.Authorization = `Bearer ${config.token}`;
+    } else if (config.withToken !== false) {
       const token = accessToken.get();
       // console.log("token", token);
       if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -131,6 +144,29 @@ export class HttpRequest {
   //     data: qs.stringify(config.data, { arrayFormat: "brackets" }),
   //   };
   // }
+
+  private isAuthEndpoint(url?: string): boolean {
+    if (!url) return false;
+    return /connect\/token|public\/challenge|public\/token/i.test(url);
+  }
+
+  private handleUnauthorized() {
+    if (this.isHandling401) return;
+    this.isHandling401 = true;
+    try {
+      accessToken.clear();
+      const path = this.currentPath();
+      bus.emit("auth:logout", { reason: "401", path });
+      if (typeof window !== "undefined" && path !== "/login" && !path.startsWith("/login?")) {
+        const redirect = encodeURIComponent(path);
+        window.location.assign(`/login?redirect=${redirect}`);
+      }
+    } catch (e) {
+      console.error("401 handler error", e);
+    } finally {
+      // 跨请求保活:不清,避免再次进入
+    }
+  }
   // get<T = any>(
   //   config: CustomAxiosRequestConfig
   // ): Promise<[Error | AxiosError | undefined, ApiResult<T> | undefined]> {

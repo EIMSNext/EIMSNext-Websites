@@ -17,15 +17,32 @@
         </div>
       </div>
       <div class="header-title">
-        <span class="title-text item-text">{{ t("admin.untitledChart") }}</span>
+        <span class="title-text item-text">{{ itemTitle }}</span>
       </div>
     </div>
-    <div class="container-content-wrapper">
+    <div class="container-content-wrapper" :class="{ interactive: isInteractiveContent }">
       <template v-if="itemDef.itemType == DashItemType.Chart && chartSetting && chartSettingValidate(chartSetting)">
-        <e-charts-viewer :setting="chartSetting" :title="itemDef.name" :show-header="isView" :external-filter="externalFilter" />
+        <e-charts-viewer
+          :setting="chartSetting"
+          :title="itemTitle"
+          :show-header="isView"
+          :external-filter="externalFilter"
+          :is-public="isPublic"
+          :item-def="itemDef"
+        />
+      </template>
+      <template v-else-if="itemDef.itemType == DashItemType.DetailTable && detailTableSetting && detailTableSettingValidate(detailTableSetting)">
+        <DetailTableViewer
+          :setting="detailTableSetting"
+          :title="itemTitle"
+          :show-header="isView"
+          :external-filter="externalFilter"
+          :is-public="isPublic"
+          :item-def="itemDef"
+        />
       </template>
       <template v-else-if="itemDef.itemType == DashItemType.Filter">
-        <FilterWidgetCard :item-def="itemDef" @change="onFilterValueChanged" />
+        <FilterWidgetCard :item-def="itemDef" :is-public="isPublic" @change="onFilterValueChanged" />
       </template>
       <template v-else>
         <el-empty class="et-dash-empty">
@@ -44,6 +61,8 @@ import { useLocale } from "element-plus";
 import { chartSettingValidate, IChartSetting } from "../ECharts/type";
 import EChartsViewer from "../ECharts/EChartsViewer.vue";
 import FilterWidgetCard from "./FilterWidgetCard.vue";
+import DetailTableViewer from "../DetailTable/DetailTableViewer.vue";
+import { detailTableSettingValidate, IDetailTableSetting, parseDetailTableSetting } from "../DetailTable/type";
 const { t } = useLocale();
 
 defineOptions({
@@ -54,16 +73,56 @@ const props = withDefaults(
   defineProps<{
     itemDef: DashboardItemDef;
     isView?: boolean;
+    isPublic?: boolean;
     height?: number;
     width?: number;
     externalFilter?: any;
   }>(),
   {
     isView: false,
+    isPublic: false,
   }
 );
 
-const chartSetting = ref<IChartSetting>(JSON.parse(props.itemDef.details));
+const chartSetting = computed<IChartSetting | undefined>(() => {
+  if (props.itemDef.itemType != DashItemType.Chart) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(props.itemDef.details || "{}") as IChartSetting;
+  } catch {
+    return undefined;
+  }
+});
+
+const detailTableSetting = computed<IDetailTableSetting | undefined>(() => {
+  if (props.itemDef.itemType != DashItemType.DetailTable) {
+    return undefined;
+  }
+
+  return parseDetailTableSetting(props.itemDef.details);
+});
+
+const itemTitle = computed(() => {
+  if (props.itemDef.name) {
+    return props.itemDef.name;
+  }
+
+  if (props.itemDef.itemType == DashItemType.DetailTable) {
+    return t("admin.untitledDetailTable");
+  }
+
+  if (props.itemDef.itemType == DashItemType.Filter) {
+    return t("admin.dashboardDesigner.filterWidgetName");
+  }
+
+  return t("admin.untitledChart");
+});
+
+const isInteractiveContent = computed(() => {
+  return props.isView && [DashItemType.Filter, DashItemType.DetailTable].includes(props.itemDef.itemType);
+});
 
 const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change"]);
 const onHide = () => {
@@ -221,6 +280,10 @@ const onFilterValueChanged = (payload: { itemId: string; value: any }) => {
     overflow: hidden;
     pointer-events: none;
     box-sizing: border-box;
+
+    &.interactive {
+      pointer-events: auto;
+    }
 
     .et-dash-empty {
       position: absolute;

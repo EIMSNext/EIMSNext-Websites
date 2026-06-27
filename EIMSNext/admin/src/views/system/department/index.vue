@@ -49,14 +49,6 @@
                 <el-button link type="danger" @click.stop="reviewSingle(scope.row, false)">{{ $t("admin.department.reject") }}</el-button>
               </template>
             </el-table-column>
-              <!-- <el-table-column label="操作" fixed="right" width="150">
-                <template #default="scope">
-                  <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
-                  </el-button>
-                  <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
-                  </el-button>
-                </template>
-</el-table-column> -->
             </el-table>
           </div>
           <div class="pagination-container">
@@ -142,7 +134,7 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { AdminPermissionSnapshot, DataPerms, Department, Employee, FieldType, PlatformType, ScopeMode, UserType } from "@eimsnext/models";
+import { AdminPermissionSnapshot, Department, Employee, FieldType, PlatformType, ScopeMode, UserType } from "@eimsnext/models";
 import {
   SortDirection,
   employeeService,

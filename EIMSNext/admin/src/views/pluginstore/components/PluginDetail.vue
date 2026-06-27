@@ -248,8 +248,8 @@ function openLink(url?: string) {
 }
 
 .status-badge.official {
-  background: #2563eb;
-  color: #fff;
+  background: var(--et-color-primary);
+  color: var(--et-text-on-primary);
 }
 
 .status-badge.hot {

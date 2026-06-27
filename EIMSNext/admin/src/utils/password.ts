@@ -28,6 +28,11 @@ export function isStrongPassword(password: string): boolean {
   return state.hasLength && state.hasCategoryCount;
 }
 
-export function getPasswordStrengthMessage(label = "密码"): string {
-  return `${label}需为8-30位，且包含大写字母、小写字母、数字、特殊字符中的至少三种`;
+export function getPasswordStrengthMessage(
+  label = "密码",
+  t?: (key: string, params?: Record<string, string>) => string,
+): string {
+  return t
+    ? t("common.passwordStrength", { label })
+    : `${label}需为8-30位，且包含大写字母、小写字母、数字、特殊字符中的至少三种`;
 }

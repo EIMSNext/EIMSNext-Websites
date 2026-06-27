@@ -22,10 +22,10 @@ export interface IDashboardBindingCandidate {
   fields: IFormFieldDef[];
 }
 
-export const createDefaultFilterSetting = (): DashboardFilterSetting => ({
+export const createDefaultFilterSetting = (name = "筛选组件"): DashboardFilterSetting => ({
   version: 1,
   kind: "filter-widget",
-  name: "筛选组件",
+  name,
   targetChartIds: [],
   bindings: [],
   filterMode: "options",

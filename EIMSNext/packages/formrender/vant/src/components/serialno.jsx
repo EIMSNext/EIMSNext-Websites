@@ -10,7 +10,7 @@ export default defineComponent({
     },
     placeholder: {
       type: String,
-      default: "自动生成,无需填写",
+      default: "",
     },
     disabled: {
       type: Boolean,
@@ -35,10 +35,11 @@ export default defineComponent({
         ? !!props.preview
         : !!props.formCreateInject?.preview
     );
+    const placeholder = computed(() => props.placeholder || props.formCreateInject?.t("com.serialno.placeholder") || "自动生成,无需填写");
     return () => (
       <van-field
         modelValue={props.modelValue ?? ""}
-        placeholder={props.placeholder}
+        placeholder={placeholder.value}
         readonly
         disabled={props.disabled || isPreview.value}
         {...attrs}

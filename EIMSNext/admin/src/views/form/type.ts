@@ -10,16 +10,9 @@ import {
 } from "@eimsnext/models";
 import { Dictionary } from "@eimsnext/utils";
 
-export interface ITableColumn {
-  field: string;
-  title: string;
-  type: string;
-  format?: string;
-  width?: number;
-  children?: ITableColumn[];
-  mergeField?: string;
-  oriField: string;
-}
+import { ITableColumn } from "@eimsnext/models";
+
+export type { ITableColumn };
 export function buildColumns(
   fields: FieldDef[],
   usingWf: boolean,

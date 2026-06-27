@@ -41,7 +41,7 @@ export default defineComponent({
     },
     placeholder: {
       type: String,
-      default: "选择数据",
+      default: "",
     },
     disabled: {
       type: Boolean,
@@ -58,7 +58,7 @@ export default defineComponent({
     selectionProcess: {
       type: Object,
       default: () => ({
-        buttonText: "选择数据",
+        buttonText: "",
         tableFields: [],
       }),
     },
@@ -91,6 +91,7 @@ export default defineComponent({
     const pageSize = ref(20);
     const total = ref(0);
     const filterConfig = ref({ id: "", rel: "and", items: [] });
+    const t = (key) => props.formCreateInject?.t?.(key) || "";
 
     const isPreviewMode = computed(() => {
       if (props.preview !== undefined) {
@@ -130,7 +131,7 @@ export default defineComponent({
 
     const fetchFormData = async (page = 1, size = pageSize.value) => {
       if (!props.dataSource) {
-        error.value = "请先选择数据源";
+        error.value = t("com.dataselect.sourceRequired") || "请先选择数据源";
         formData.value = [];
         total.value = 0;
         return;
@@ -151,7 +152,7 @@ export default defineComponent({
         formData.value = data.map((item) => mergeDataSelectRecord(item));
         total.value = data.length;
       } catch (err) {
-        error.value = "获取表单数据失败，请重试";
+        error.value = t("com.dataselect.fetchFailed") || "获取表单数据失败，请重试";
         console.error("获取表单数据失败:", err);
       } finally {
         loading.value = false;
@@ -243,7 +244,7 @@ export default defineComponent({
       return displayFields.value.map((field) => {
         const value = valueMap.get(field.label) || "";
         return {
-          label: field.label || "未知字段",
+          label: field.label || t("com.dataselect.unknownField") || "未知字段",
           value,
           empty: value === "",
         };
@@ -253,7 +254,7 @@ export default defineComponent({
     return () => {
       const editable = !(props.disabled || isPreviewMode.value);
       const emptyText =
-        props.selectionProcess?.buttonText || props.placeholder || "选择数据";
+        props.selectionProcess?.buttonText || props.placeholder || t("com.dataselect.selectData") || "选择数据";
 
       return (
         <div class="_fc-form-selected-data-wrap">
@@ -316,7 +317,7 @@ export default defineComponent({
             {{
               header: () => (
                 <div class="form-selected-data-dialog-header">
-                  <div class="form-selected-data-dialog-title">选择数据</div>
+                  <div class="form-selected-data-dialog-title">{t("com.dataselect.selectData") || "选择数据"}</div>
                 </div>
               ),
               default: () => (
@@ -341,21 +342,21 @@ export default defineComponent({
                     onPageSizeChange={handlePageSizeChange}
                     onFilter={handleFilter}
                   >
-                    {{ title: () => "选择数据" }}
+                    {{ title: () => t("com.dataselect.selectData") || "选择数据" }}
                   </DataSelectTablePanel>
                 </div>
               ),
               footer: () => (
                 <div class="form-selected-data-dialog-footer">
                   <ElButton onClick={() => (showDialog.value = false)}>
-                    取消
+                    {t("common.cancel") || "取消"}
                   </ElButton>
                   <ElButton
                     type="primary"
                     disabled={!selectedRecord.value}
                     onClick={handleConfirm}
                   >
-                    确定
+                    {t("common.ok") || "确定"}
                   </ElButton>
                 </div>
               ),

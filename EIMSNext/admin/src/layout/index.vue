@@ -6,10 +6,10 @@
       </el-header>
       <el-container class="layout-main-shell">
         <el-aside width="45px" class="main-left-menu">
-          <el-tooltip :content="t('admin.workspace')" placement="right" :hide-after="0">
-            <router-link custom :to="{ path: '/workspace' }" v-slot="{ navigate }">
+          <el-tooltip :content="t('admin.workbench.title')" placement="right" :hide-after="0">
+            <router-link custom :to="{ path: '/workbench' }" v-slot="{ navigate }">
               <div class="main-left-menu-item" @click="navigate">
-                <!-- <AppIcon :app="workspaceApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
+                <!-- <AppIcon :app="workbenchApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
                 <et-icon icon="homepage" size="18px" />
               </div>
             </router-link>
@@ -30,7 +30,7 @@
           <template v-for="app in appsRef">
             <template v-if="app.id != 'system'">
               <el-tooltip :content="app.name" placement="right" :hide-after="0">
-                <router-link custom :to="{ path: `/app/${app.id}/mytasks` }" v-slot="{ navigate }">
+                <router-link custom :to="{ path: `/app/${app.id}` }" v-slot="{ navigate }">
                   <div class="main-left-menu-item" @click="navigate">
                     <AppIcon :app="app" iconSize="12px" style="width: 22px; height: 22px" />
                   </div>
@@ -62,16 +62,16 @@ defineOptions({
   name: "Layout",
 });
 
-const workspaceApp: AppDef = {
-  id: "workspace",
-  name: "工作台",
+const workbenchApp: AppDef = {
+  id: "workbench",
+  name: t("admin.workbench.title"),
   icon: "homepage",
   sortIndex: -2,
   appMenus: [],
 };
 const systemApp: AppDef = {
   id: "system",
-  name: "系统设置",
+  name: t("route.system"),
   icon: "icon-settings",
   sortIndex: -1,
   appMenus: [],

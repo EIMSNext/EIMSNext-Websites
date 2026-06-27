@@ -126,7 +126,7 @@ export default defineComponent({
                 <IconUpload />
               </ElIcon>
             ) : (
-              <ElButton type="primary">点击上传</ElButton>
+              <ElButton type="primary">{this.formCreateInject?.t("comp.dragger.clickToUpload") || "点击上传"}</ElButton>
             ))}
         </ElUpload>
         <ElDialog

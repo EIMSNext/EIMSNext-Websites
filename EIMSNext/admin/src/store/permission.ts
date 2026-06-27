@@ -10,6 +10,7 @@ import {
 import router from "@/router";
 import { AppMenu, FormType, UserType } from "@eimsnext/models";
 import { systemService } from "@eimsnext/services";
+import { bus } from "@eimsnext/utils";
 
 const getMenuType = (menuType: FormType | number | undefined): FormType => {
   if (menuType === undefined) return FormType.Form;
@@ -132,6 +133,10 @@ export const usePermissionStore = defineStore("permission", () => {
     appMenus.value = [];
     isRoutesLoaded.value = false;
   };
+
+  bus.on("auth:logout", () => {
+    resetRouter();
+  });
 
   return {
     routes,

@@ -1,7 +1,7 @@
 <template>
   <et-dialog
     :model-value="modelValue"
-    title="应用列表"
+    :title="t('admin.appSelect.title')"
     width="680px"
     destroy-on-close
     @cancel="cancel"
@@ -9,10 +9,10 @@
   >
     <div class="app-select">
       <div class="app-select-left">
-        <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable placeholder="搜索" />
+        <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable :placeholder="t('common.search')" />
         <div class="select-all-row">
           <el-checkbox :model-value="allFilteredChecked" :indeterminate="isIndeterminate" @change="toggleAll">
-            全选
+            {{ t("common.selectAll") }}
           </el-checkbox>
         </div>
         <div class="app-list">
@@ -49,6 +49,7 @@
 <script setup lang="ts">
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { AppDef } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "AdminAppSelectDialog",
@@ -61,6 +62,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
+const { t } = useI18n();
 const keyword = ref("");
 const selectedIds = ref<string[]>([]);
 
@@ -90,7 +92,7 @@ const filteredApps = computed(() => {
 const groupedApps = computed(() => {
   const map = new Map<string, AppDef[]>();
   filteredApps.value.forEach((app) => {
-    const groupName = app.groupId || "其他";
+    const groupName = app.groupId || t("common.other");
     if (!map.has(groupName)) map.set(groupName, []);
     map.get(groupName)!.push(app);
   });

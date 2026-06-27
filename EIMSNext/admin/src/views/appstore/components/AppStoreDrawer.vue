@@ -1,6 +1,6 @@
 <template>
   <et-drawer v-model="visible" @close="visible = false">
-    <template #title>应用中心</template>
+    <template #title>{{ t("admin.shell.appCenter") }}</template>
     <div class="appstore-wrapper">
     <AppStorePanel @close="visible = false" />
     </div>
@@ -10,10 +10,12 @@
 <script setup lang="ts">
 import { useSettingsStore } from "@/store";
 import AppStorePanel from "./AppStorePanel.vue";
+import { useI18n } from "vue-i18n";
 
 defineOptions({ name: "AppStoreDrawer" });
 
 const settingStore = useSettingsStore();
+const { t } = useI18n();
 
 const visible = computed({
   get: () => settingStore.appStoreVisible,

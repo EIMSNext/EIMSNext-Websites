@@ -22,4 +22,5 @@ export enum DashItemType {
   Chart = "chart",
   Comp = "comp",
   Filter = "filter",
+  DetailTable = "detailTable",
 }

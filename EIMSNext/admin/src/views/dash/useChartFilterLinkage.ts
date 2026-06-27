@@ -1,47 +1,48 @@
 import { reactive } from "vue";
-import { DashboardDef, DashboardFilterSetting, DashboardItemDef, DashItemType } from "@eimsnext/models";
+import { DashboardDef, DashboardFilterSetting, DashboardItemDef, DashItemType, IGridLayoutState } from "@eimsnext/models";
 import { IConditionList } from "@eimsnext/components";
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
-import { IGridLayoutState } from "@/components/DashboardDesigner/type";
 
 export function useChartFilterLinkage(state: IGridLayoutState) {
   const filterValues = reactive<Record<string, any>>({});
   const chartFilters = reactive<Record<string, IConditionList | undefined>>({});
 
-  const buildFilterCondition = (filterItem: DashboardItemDef, value: any): Array<{ chartId: string; filter: IConditionList }> => {
+  const buildFilterCondition = (filterItem: DashboardItemDef, value: any): Array<{ targetId: string; filter: IConditionList }> => {
     const setting = JSON.parse(filterItem.details || "{}") as DashboardFilterSetting;
     if (!setting.bindings?.length || value == null || value === "") {
       return [];
     }
 
-    return setting.targetChartIds.map((chartId) => {
-      const chart = Object.values(state.items).find((item) => item.id == chartId);
-      if (!chart) {
+    const filters = setting.targetChartIds.map((targetId): { targetId: string; filter: IConditionList } | undefined => {
+      const target = Object.values(state.items).find((item) => item.id == targetId);
+      if (!target) {
         return undefined;
       }
 
-      const details = JSON.parse(chart.details || "{}");
+      const details = JSON.parse(target.details || "{}");
       const binding = setting.bindings.find((item) => item.dataSourceId == details.datasource?.id && item.field);
       if (!binding?.field) {
         return undefined;
       }
 
       return {
-        chartId,
+        targetId,
         filter: {
-          id: `${filterItem.id}_${chartId}`,
+          id: `${filterItem.id}_${targetId}`,
           rel: "and",
           items: [
             {
-              id: `${filterItem.id}_${chartId}_field`,
+              id: `${filterItem.id}_${targetId}_field`,
               field: binding.field as any,
               op: setting.operator,
               value: { type: "custom", value },
             },
           ],
-        },
+        } as IConditionList,
       };
-    }).filter(Boolean) as Array<{ chartId: string; filter: IConditionList }>;
+    });
+
+    return filters.filter((item): item is { targetId: string; filter: IConditionList } => item !== undefined);
   };
 
   const rebuildChartFilters = () => {
@@ -51,10 +52,10 @@ export function useChartFilterLinkage(state: IGridLayoutState) {
       .forEach((filterItem) => {
         const filterValue = filterValues[filterItem.id];
         const filters = buildFilterCondition(filterItem, filterValue);
-        filters.forEach(({ chartId, filter }) => {
-          const existing = chartFilters[chartId];
-          chartFilters[chartId] = existing
-            ? { id: `${chartId}_merged`, rel: "and", items: [existing, filter] }
+        filters.forEach(({ targetId, filter }) => {
+          const existing = chartFilters[targetId];
+          chartFilters[targetId] = existing
+            ? { id: `${targetId}_merged`, rel: "and", items: [existing, filter] }
             : filter;
         });
       });

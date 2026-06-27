@@ -20,6 +20,7 @@ export interface FormDef extends CorpModelBase {
   isLedger: boolean;
   usingWorkflow: boolean;
   formSettings?: FormSettings;
+  external?: boolean;
 }
 
 export interface FormSettings {
@@ -47,6 +48,9 @@ export class FieldDef {
   i18n?: string;
   columns?: FieldDef[];
   props?: FieldProp;
+  hidden?: boolean;
+  source?: string;
+  systemKind?: string;
 }
 export interface FieldProp {
   format?: string;
@@ -95,7 +99,7 @@ export enum FieldType {
   // Location = "location",
   ImageUpload = "imageupload",
   FileUpload = "fileupload",
-  // Signature = "signature",
+  Signature = "signature",
   TableForm = "tableform",
   Employee1 = "employee1",
   Employee2 = "employee2",

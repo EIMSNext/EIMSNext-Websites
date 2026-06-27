@@ -360,12 +360,14 @@ watch(showPdfPreview, (visible) => {
 onBeforeMount(async () => {
   const formId = route.params.formId.toString();
   const dataId = route.params.dataId.toString();
+  const authGroupId = (route.query.authGroupId as string) || undefined;
+  const queryParams = authGroupId ? { authGroupId } : undefined;
   loading.value = true;
 
   try {
     const [form, data, logs, dataLogs] = await Promise.all([
       formStore.get(formId),
-      formDataService.get<FormData>(dataId),
+      formDataService.get<FormData>(dataId, queryParams),
       wfApprovalLogService.query<WfApprovalLog>(
         buildQuery({
           filter: { formId, dataId },
@@ -373,7 +375,7 @@ onBeforeMount(async () => {
           top: 20,
         })
       ),
-      formDataService.getChangeLogs(dataId, 0, 20),
+      formDataService.getChangeLogs(dataId, 0, 20, authGroupId),
     ]);
 
     if (form) {

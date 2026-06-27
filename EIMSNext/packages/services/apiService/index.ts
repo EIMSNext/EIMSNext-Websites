@@ -10,3 +10,4 @@ export * from "./customPrintService";
 export * from "./workflowService";
 export * from "./corpOnboardingService";
 export * from "./dataflowSampleService";
+export * from "./workbenchService";

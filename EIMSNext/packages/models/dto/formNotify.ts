@@ -1,4 +1,4 @@
-﻿import { CorpModelBase, IdBase } from "./modelBase";
+import { CorpModelBase, IdBase } from "./modelBase";
 
 export enum TimerOffsetDirection {
   Before = 0,
@@ -15,6 +15,7 @@ export enum TimerOffsetUnit {
 export interface FormNotifyRequest extends IdBase {
   appId?: string;
   formId?: string;
+  targetType?: NotifyTargetType;
   triggerMode?: FormNotifyTriggerMode;
   timeField?: string;
   fixedTime?: string;
@@ -40,6 +41,7 @@ export interface FormNotifyRequest extends IdBase {
 export interface FormNotify extends CorpModelBase {
   appId: string;
   formId: string;
+  targetType?: NotifyTargetType;
   triggerMode: FormNotifyTriggerMode;
   timeField?: string;
   fixedTime?: string;
@@ -69,6 +71,11 @@ export enum FormNotifyTriggerMode {
   TimeFieldScheduled = "3",
 }
 
+export enum NotifyTargetType {
+  Form = "0",
+  Dashboard = "1",
+}
+
 export enum TimerRepeatType {
   Once = "0",
   Daily = "1",
@@ -78,6 +85,7 @@ export enum TimerRepeatType {
   Yearly = "5",
   Custom = "6",
 }
+
 export enum NotifyChannel {
   None = 0,
   System = 1,

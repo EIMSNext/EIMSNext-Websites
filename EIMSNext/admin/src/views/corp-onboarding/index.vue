@@ -139,7 +139,7 @@ async function createCorporate() {
     });
     ElMessage.success(t("admin.corpOnboarding.messages.createSuccess"));
     await userStore.initialize(true);
-    await router.replace("/workspace");
+    await router.replace("/workbench");
   } finally {
     creating.value = false;
   }
@@ -164,7 +164,7 @@ async function handleInviteDecision(accepted: boolean) {
     if (accepted) {
       ElMessage.success(t("admin.corpOnboarding.messages.inviteAccepted"));
       await userStore.initialize(true);
-      await router.replace("/workspace");
+      await router.replace("/workbench");
       return;
     }
 

@@ -3,20 +3,21 @@
     <!-- 表单选择 -->
     <div class="form-select-item">
       <div class="el-form-item__label"><span>{{ t('props.form') }}</span></div>
-      <form-select-by-id v-model="source.formId" :appId="contextStore.appId" :options="{ exclude: [formId] }"
+      <form-select-by-id v-model="source.formId" :appId="contextStore.appId" :target-app-id="contextStore.appId"
+        source-scope="crossApp" :options="{ exclude: [formId] }"
         @change="onFormChange" />
     </div>
 
     <!-- Label字段选择 -->
     <div class="field-select-item">
       <div class="el-form-item__label"><span>{{ t('props.labelField') }}</span></div>
-      <form-field-select v-model="source.label" :form-id="source.formId" />
+      <form-field-select v-model="source.label" :form-id="source.formId" :target-app-id="contextStore.appId" source-scope="crossApp" />
     </div>
 
     <!-- Value字段选择 -->
     <div class="field-select-item">
       <div class="el-form-item__label"><span>{{ t('props.valueField') }}</span></div>
-      <form-field-select v-model="source.value" :form-id="source.formId" />
+      <form-field-select v-model="source.value" :form-id="source.formId" :target-app-id="contextStore.appId" source-scope="crossApp" />
     </div>
   </div>
 </template>

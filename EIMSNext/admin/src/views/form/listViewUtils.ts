@@ -159,10 +159,10 @@ export const findFieldDef = (formDef: FormDef, field: string, t?: (key: string) 
   }
 
   const label = (key: string, fallback: string) => t ? t(key) : fallback;
-  if (field === SystemField.DataTitle) return getDataTitle(label("comp.fieldBlock.systemFields.dataTitle", "Data Title"));
-  if (field === SystemField.FlowStatus) return getFlowStatus(label("comp.fieldBlock.systemFields.flowStatus", "Flow Status"));
-  if (field === SystemField.CreateBy) return getCreateBy(label("comp.fieldBlock.systemFields.createBy", "Submitter"));
-  if (field === SystemField.CreateTime) return getCreateTime(label("comp.fieldBlock.systemFields.createTime", "Submit Time"));
+  if (field === SystemField.DataTitle) return getDataTitle(label("comp.fieldBlock.systemFields.dataTitle", "数据标题"));
+  if (field === SystemField.FlowStatus) return getFlowStatus(label("comp.fieldBlock.systemFields.flowStatus", "流程状态"));
+  if (field === SystemField.CreateBy) return getCreateBy(label("comp.fieldBlock.systemFields.createBy", "提交人"));
+  if (field === SystemField.CreateTime) return getCreateTime(label("comp.fieldBlock.systemFields.createTime", "提交时间"));
 
   return undefined;
 };

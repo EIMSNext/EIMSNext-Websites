@@ -210,7 +210,9 @@ const props = defineProps<{
 const userStore = useUserStore();
 const deptStore = useDeptStore();
 
-const setting = reactive<DashboardFilterSetting>(createDefaultFilterSetting());
+const createLocalizedDefaultSetting = () => createDefaultFilterSetting(t("admin.dashboardDesigner.filterWidgetName"));
+
+const setting = reactive<DashboardFilterSetting>(createLocalizedDefaultSetting());
 const dynamicDefaultType = ref<"currentUser" | "currentDept" | "today" | "thisWeek" | "thisMonth">("currentUser");
 const currentOptions = ref<IFormDataFilterOptionItem[]>([]);
 const showMemberDialog = ref(false);
@@ -223,7 +225,7 @@ const memberLimitTags = ref<ISelectedTag[]>([]);
 
 const initSettingFromItemDef = (itemDef: DashboardItemDef) => {
   const parsed = JSON.parse(itemDef.details || "{}");
-  const fresh = isFilterSetting(parsed) ? cloneDeep(parsed) : createDefaultFilterSetting();
+  const fresh = isFilterSetting(parsed) ? cloneDeep(parsed) : createLocalizedDefaultSetting();
   Object.assign(setting, fresh);
   dynamicDefaultType.value = fresh.dynamicDefault?.type || "currentUser";
   currentOptions.value = [];

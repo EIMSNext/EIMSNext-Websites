@@ -3,6 +3,7 @@ import type { App } from "vue";
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
 
 const AppLayout = () => import("@/layout/applayout/index.vue");
+const AppAdminLayout = () => import("@/layout/appadminlayout/index.vue");
 export const SysLayout = () => import("@/layout/syslayout/index.vue");
 const TodoLayout = () => import("@/layout/todolayout/index.vue");
 const OpenPlatformLayout = () => import("@/layout/openplatform/index.vue");
@@ -113,9 +114,15 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true, requiresAuth: true },
   },
   {
-    name: "workspace",
-    path: "/workspace",
-    component: () => import("@/views/workspace/index.vue"),
+    name: "workbench-customize",
+    path: "/workbench/customize",
+    component: () => import("@/views/workbench/customize.vue"),
+    meta: { hidden: true, requiresAuth: true },
+  },
+  {
+    name: "workbench",
+    path: "/workbench",
+    component: () => import("@/views/workbench/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
   {
@@ -144,6 +151,48 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "404",
         component: () => import("@/views/error/404.vue"),
         meta: { hidden: true },
+      },
+    ],
+  },
+  {
+    path: "/app/:appId",
+    component: () => import("@/views/app/index.vue"),
+    meta: { hidden: true, requiresAuth: true },
+  },
+  {
+    path: "/app/:appId/admin",
+    component: AppAdminLayout,
+    redirect: (to) => ({ path: `/app/${to.params.appId}/admin/permissions` }),
+    children: [
+      {
+        path: "permissions",
+        component: () => import("@/views/app-admin/permissions.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "cross-binding",
+        component: () => import("@/views/app-admin/cross-binding.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "settings",
+        component: () => import("@/views/app-admin/settings.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "aggregate",
+        component: () => import("@/views/app-admin/aggregate.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "assistant",
+        component: () => import("@/views/app-admin/assistant.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "webhook",
+        component: () => import("@/views/app-admin/webhook.vue"),
+        meta: { hidden: true, requiresAuth: true },
       },
     ],
   },
@@ -284,14 +333,29 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  // {
-  //   path: "/app/:appId",
-  //   component: () => import("@/views/app/index.vue"),
-  //   meta: { hidden: true, requiresAuth: true },
-  // },
+  {
+    path: "/public/dash/:dashboardId",
+    component: () => import("@/views/public/DashLink.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/public/form/:formId/submit",
+    component: () => import("@/views/public/FormLink.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/public/form/:formId/query",
+    component: () => import("@/views/public/QueryLink.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/public/form/:formId/data/:dataId",
+    component: () => import("@/views/public/DataLink.vue"),
+    meta: { hidden: true },
+  },
   {
     path: "/",
-    redirect: "/workspace",
+    redirect: "/workbench",
   },
   {
     path: "/profile",
