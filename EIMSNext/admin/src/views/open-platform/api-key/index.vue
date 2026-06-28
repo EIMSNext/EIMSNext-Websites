@@ -3,20 +3,20 @@
     <section class="page-card">
       <header class="page-header">
         <div class="header-text">
-          <h2 class="title">{{ $t("admin.openPlatform.apiKeyMgmt.title") }}</h2>
-          <p class="tip">{{ $t("admin.openPlatform.apiKeyMgmt.tip") }}</p>
+          <h2 class="title">{{ $t("admin.apiKeyMgmt.title") }}</h2>
+          <p class="tip">{{ $t("admin.apiKeyMgmt.tip") }}</p>
         </div>
       </header>
 
       <div class="toolbar">
         <el-button type="primary" @click="openCreate">
-          {{ $t("admin.openPlatform.apiKeyMgmt.create") }}
+          {{ $t("admin.apiKeyMgmt.create") }}
         </el-button>
         <div class="spacer" />
         <el-input
           v-model="keyword"
           clearable
-          :placeholder="$t('admin.openPlatform.apiKeyMgmt.searchPlaceholder')"
+          :placeholder="$t('admin.apiKeyMgmt.searchPlaceholder')"
           style="width: 280px"
           @input="onSearch"
         >
@@ -27,44 +27,44 @@
       </div>
 
       <el-table v-loading="loading" :data="filteredItems" class="api-key-table">
-        <el-table-column :label="$t('admin.openPlatform.apiKeyMgmt.cols.createdAt')" width="120">
+        <el-table-column :label="$t('admin.apiKeyMgmt.cols.createdAt')" width="120">
           <template #default="scope">
             {{ formatDate(scope.row.createTime) }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.openPlatform.apiKeyMgmt.cols.name')" min-width="160">
+        <el-table-column :label="$t('admin.apiKeyMgmt.cols.name')" min-width="160">
           <template #default="scope">
-            {{ scope.row.clientName || "-" }}
+            {{ scope.row.name || "-" }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.openPlatform.apiKeyMgmt.cols.clientId')" min-width="260">
+        <el-table-column :label="$t('admin.apiKeyMgmt.cols.clientId')" min-width="260">
           <template #default="scope">
             <div class="client-id-cell">
-              <code class="client-id-mono">{{ maskClientId(scope.row.clientId) }}</code>
-              <el-button link size="small" @click="copyText(scope.row.clientId)">
+              <code class="client-id-mono">{{ maskClientId(scope.row.id) }}</code>
+              <el-button link size="small" @click="copyText(scope.row.id)">
                 <et-icon icon="el-DocumentCopy" />
               </el-button>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.openPlatform.apiKeyMgmt.cols.appScope')" width="180">
+        <el-table-column :label="$t('admin.apiKeyMgmt.cols.appScope')" width="180">
           <template #default="scope">
             <el-tag size="small" type="info">{{ appScopeLabel(scope.row) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.openPlatform.apiKeyMgmt.cols.apiScope')" width="180">
+        <el-table-column :label="$t('admin.apiKeyMgmt.cols.apiScope')" width="180">
           <template #default="scope">
             <el-tag size="small" type="info">{{ apiScopeLabel(scope.row) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.openPlatform.apiKeyMgmt.cols.ipWhitelist')" width="140">
+        <el-table-column :label="$t('admin.apiKeyMgmt.cols.ipWhitelist')" width="140">
           <template #default="scope">
             <el-tag size="small" :type="ipWhitelistCount(scope.row) ? 'warning' : 'info'">
               {{ ipWhitelistLabel(scope.row) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.openPlatform.apiKeyMgmt.cols.status')" width="100">
+        <el-table-column :label="$t('admin.apiKeyMgmt.cols.status')" width="100">
           <template #default="scope">
             <el-switch
               :model-value="scope.row.enabled"
@@ -72,7 +72,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.openPlatform.apiKeyMgmt.cols.action')" width="180" fixed="right">
+        <el-table-column :label="$t('admin.apiKeyMgmt.cols.action')" width="180" fixed="right">
           <template #default="scope">
             <el-button link type="primary" size="small" @click="openEdit(scope.row)">
               {{ $t("common.edit") }}
@@ -88,17 +88,17 @@
     <!-- Create / Edit dialog -->
     <el-dialog
       v-model="dialogVisible"
-      :title="editing ? editing.clientName || $t('admin.openPlatform.apiKeyMgmt.title') : $t('admin.openPlatform.apiKeyMgmt.create')"
+      :title="editing ? editing.name || $t('admin.apiKeyMgmt.title') : $t('admin.apiKeyMgmt.create')"
       width="640px"
       :close-on-click-modal="false"
       @closed="onDialogClosed"
     >
       <el-form label-width="120px" label-position="right">
-        <el-form-item :label="$t('admin.openPlatform.apiKeyMgmt.form.name')">
-          <el-input v-model="form.clientName" maxlength="60" show-word-limit />
+        <el-form-item :label="$t('admin.apiKeyMgmt.form.name')">
+          <el-input v-model="form.name" maxlength="60" show-word-limit />
         </el-form-item>
 
-        <el-form-item :label="$t('admin.openPlatform.apiKeyMgmt.form.clientId')">
+        <el-form-item :label="$t('admin.apiKeyMgmt.form.clientId')">
           <el-input v-model="form.clientId" readonly>
             <template #append>
               <el-button @click="copyText(form.clientId || '')">
@@ -108,7 +108,7 @@
           </el-input>
         </el-form-item>
 
-        <el-form-item :label="$t('admin.openPlatform.apiKeyMgmt.form.clientSecret')">
+        <el-form-item :label="$t('admin.apiKeyMgmt.form.clientSecret')">
           <el-input
             v-model="form.clientSecret"
             :type="form.showSecret ? 'text' : 'password'"
@@ -121,54 +121,27 @@
               </el-button>
             </template>
             <template #append>
+              <el-button :disabled="!editing" @click="revealSecret">
+                {{ $t("admin.apiKeyMgmt.revealSecret") }}
+              </el-button>
               <el-button :disabled="!editing" @click="generateSecret">
-                {{ $t("admin.openPlatform.apiKeyMgmt.generate") }}
+                {{ $t("admin.apiKeyMgmt.generateSecret") }}
               </el-button>
             </template>
           </el-input>
         </el-form-item>
 
-        <el-form-item :label="$t('admin.openPlatform.apiKeyMgmt.form.clientSecret')">
-          <el-input
-            v-model="form.clientSecret"
-            :type="form.showSecret ? 'text' : 'password'"
-            :readonly="!editing"
-            :placeholder="form.secretHint || ''"
-          >
-            <template #prepend>
-              <el-button @click="form.showSecret = !form.showSecret">
-                <et-icon :icon="form.showSecret ? 'el-Hide' : 'el-View'" />
-              </el-button>
-            </template>
-            <template #append>
-              <el-button :disabled="!editing" @click="generateSecret">
-                {{ $t("admin.openPlatform.apiKeyMgmt.generate") }}
-              </el-button>
-            </template>
-          </el-input>
-        </el-form-item>
-
-        <el-form-item :label="$t('admin.openPlatform.apiKeyMgmt.form.apiKey')">
-          <el-input v-model="form.apiKey" readonly>
-            <template #append>
-              <el-button :disabled="!editing" @click="generateApiKey">
-                {{ $t("admin.openPlatform.apiKeyMgmt.generate") }}
-              </el-button>
-            </template>
-          </el-input>
-        </el-form-item>
-
-        <el-form-item :label="$t('admin.openPlatform.apiKeyMgmt.form.appScope.all')">
+        <el-form-item :label="$t('admin.apiKeyMgmt.form.appScope.all')">
           <el-radio-group v-model="form.appScope">
-            <el-radio value="all">{{ $t("admin.openPlatform.apiKeyMgmt.form.appScope.all") }}</el-radio>
+            <el-radio value="all">{{ $t("admin.apiKeyMgmt.form.appScope.all") }}</el-radio>
             <el-radio value="partial">
-              {{ $t("admin.openPlatform.apiKeyMgmt.form.appScope.partial") }}
+              {{ $t("admin.apiKeyMgmt.form.appScope.partial") }}
               <span v-if="form.appScope === 'partial'">({{ form.appIds.length }})</span>
             </el-radio>
           </el-radio-group>
           <div v-if="form.appScope === 'partial'" class="partial-block">
             <el-button @click="openAppSelectDialog">
-              {{ $t("admin.openPlatform.apiKeyMgmt.form.appScope.selectApp") }}
+              {{ $t("admin.apiKeyMgmt.form.appScope.selectApp") }}
             </el-button>
             <div class="ip-tags">
               <el-tag
@@ -178,17 +151,17 @@
                 @close="form.appIds = form.appIds.filter((x) => x !== id)"
               >{{ id }}</el-tag>
               <span v-if="form.appIds.length === 0" class="muted">
-                {{ $t("admin.openPlatform.apiKeyMgmt.appSelectDialog.search") }}
+                {{ $t("admin.apiKeyMgmt.appSelectDialog.search") }}
               </span>
             </div>
           </div>
         </el-form-item>
 
-        <el-form-item :label="$t('admin.openPlatform.apiKeyMgmt.form.apiScope.all')">
+        <el-form-item :label="$t('admin.apiKeyMgmt.form.apiScope.all')">
           <el-radio-group v-model="form.apiScope">
-            <el-radio value="all">{{ $t("admin.openPlatform.apiKeyMgmt.form.apiScope.all") }}</el-radio>
+            <el-radio value="all">{{ $t("admin.apiKeyMgmt.form.apiScope.all") }}</el-radio>
             <el-radio value="partial">
-              {{ $t("admin.openPlatform.apiKeyMgmt.form.apiScope.partial") }}
+              {{ $t("admin.apiKeyMgmt.form.apiScope.partial") }}
               <span v-if="form.apiScope === 'partial'">
                 ({{ form.resourceActions.length }})
               </span>
@@ -196,7 +169,7 @@
           </el-radio-group>
           <div v-if="form.apiScope === 'partial'" class="api-scope-block">
             <el-button @click="openApiScopeDialog">
-              {{ $t("admin.openPlatform.apiKeyMgmt.form.apiScope.selectApi") }}
+              {{ $t("admin.apiKeyMgmt.form.apiScope.selectApi") }}
             </el-button>
             <div class="api-scope-summary">
               <el-tag
@@ -206,21 +179,21 @@
                 type="success"
               >{{ resourceLabel(ra.resource) }} · {{ actionsLabel(ra.actions) }}</el-tag>
               <span v-if="form.resourceActions.length === 0" class="muted">
-                {{ $t("admin.openPlatform.apiKeyMgmt.apiScopeDialog.noSelection") }}
+                {{ $t("admin.apiKeyMgmt.apiScopeDialog.noSelection") }}
               </span>
             </div>
           </div>
         </el-form-item>
 
-        <el-form-item :label="$t('admin.openPlatform.apiKeyMgmt.form.ipWhitelist')">
+        <el-form-item :label="$t('admin.apiKeyMgmt.form.ipWhitelist')">
           <div class="ip-editor">
             <el-input
               v-model="ipInput"
-              :placeholder="$t('admin.openPlatform.apiKeyMgmt.form.ipPlaceholder')"
+              :placeholder="$t('admin.apiKeyMgmt.form.ipPlaceholder')"
               @keyup.enter="addIp"
             >
               <template #append>
-                <el-button @click="addIp">{{ $t("admin.openPlatform.apiKeyMgmt.form.addIp") }}</el-button>
+                <el-button @click="addIp">{{ $t("admin.apiKeyMgmt.form.addIp") }}</el-button>
               </template>
             </el-input>
             <div class="ip-tags">
@@ -231,11 +204,11 @@
                 @close="form.ipWhitelist = form.ipWhitelist.filter((x) => x !== ip)"
               >{{ ip }}</el-tag>
             </div>
-            <p class="ip-help">{{ $t("admin.openPlatform.apiKeyMgmt.form.ipHelp") }}</p>
+            <p class="ip-help">{{ $t("admin.apiKeyMgmt.form.ipHelp") }}</p>
           </div>
         </el-form-item>
 
-        <el-form-item :label="$t('admin.openPlatform.apiKeyMgmt.form.recentUpdate')">
+        <el-form-item :label="$t('admin.apiKeyMgmt.form.recentUpdate')">
           <span class="muted">
             <span v-if="editing?.updateBy">
               {{ editing.updateBy.label || editing.updateBy.value }} ·
@@ -244,7 +217,7 @@
               {{ editing.createBy.label || editing.createBy.value }} ·
             </span>
             <span v-else>-</span>
-            {{ $t("admin.openPlatform.apiKeyMgmt.form.lastUpdate") }}：
+            {{ $t("admin.apiKeyMgmt.form.lastUpdate") }}：
             {{ editing ? formatDate(editing.updateTime || editing.createTime) : "-" }}
           </span>
         </el-form-item>
@@ -253,7 +226,7 @@
       <template #footer>
         <el-button @click="dialogVisible = false">{{ $t("common.cancel") }}</el-button>
         <el-button type="primary" :loading="saving" @click="save">
-          {{ $t("admin.openPlatform.apiKeyMgmt.form.save") }}
+          {{ $t("admin.apiKeyMgmt.form.save") }}
         </el-button>
       </template>
     </el-dialog>
@@ -281,7 +254,6 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { useI18n } from "vue-i18n";
 import {
   type Client,
-  type ClientCredentials,
   type ClientGrant,
   type ResourceActionGrant,
   type ResourceCode,
@@ -310,10 +282,9 @@ const editing = ref<Client | null>(null);
 const blankForm = () => ({
   clientId: "",
   clientSecret: "",
-  apiKey: "",
   showSecret: false,
   secretHint: "",
-  clientName: "",
+  name: "",
   appScope: "all" as "all" | "partial",
   appIds: [] as string[],
   apiScope: "all" as "all" | "partial",
@@ -335,8 +306,8 @@ const filteredItems = computed(() => {
   if (!k) return items.value;
   return items.value.filter(
     (it) =>
-      (it.clientName || "").toLowerCase().includes(k) ||
-      (it.clientId || "").toLowerCase().includes(k),
+      (it.name || "").toLowerCase().includes(k) ||
+      (it.id || "").toLowerCase().includes(k),
   );
 });
 
@@ -359,9 +330,9 @@ async function copyText(text: string) {
   if (!text) return;
   try {
     await navigator.clipboard.writeText(text);
-    ElMessage.success(t("admin.openPlatform.apiKeyMgmt.copySuccess"));
+    ElMessage.success(t("admin.apiKeyMgmt.copySuccess"));
   } catch {
-    ElMessage.error("Copy failed");
+    ElMessage.error(t("admin.apiKeyMgmt.copyFailed"));
   }
 }
 
@@ -371,16 +342,16 @@ function onSearch() {
 
 function appScopeLabel(row: Client): string {
   const g = grants.value[row.id];
-  if (!g) return t("admin.openPlatform.apiKeyMgmt.scope.allApps");
-  if (g.appScope === "all") return t("admin.openPlatform.apiKeyMgmt.scope.allApps");
-  return t("admin.openPlatform.apiKeyMgmt.scope.partialApps", { n: g.appIds?.length ?? 0 });
+  if (!g) return t("admin.apiKeyMgmt.scope.allApps");
+  if (g.appScope === "all") return t("admin.apiKeyMgmt.scope.allApps");
+  return t("admin.apiKeyMgmt.scope.partialApps", { n: g.appIds?.length ?? 0 });
 }
 
 function apiScopeLabel(row: Client): string {
   const g = grants.value[row.id];
-  if (!g) return t("admin.openPlatform.apiKeyMgmt.scope.allApis");
-  if (g.apiScope === "all") return t("admin.openPlatform.apiKeyMgmt.scope.allApis");
-  return t("admin.openPlatform.apiKeyMgmt.scope.partialApis", { n: g.resourceActions?.length ?? 0 });
+  if (!g) return t("admin.apiKeyMgmt.scope.allApis");
+  if (g.apiScope === "all") return t("admin.apiKeyMgmt.scope.allApis");
+  return t("admin.apiKeyMgmt.scope.partialApis", { n: g.resourceActions?.length ?? 0 });
 }
 
 function ipWhitelistCount(row: Client): number {
@@ -388,22 +359,30 @@ function ipWhitelistCount(row: Client): number {
 }
 function ipWhitelistLabel(row: Client): string {
   const n = ipWhitelistCount(row);
-  if (n === 0) return t("admin.openPlatform.apiKeyMgmt.scope.noIp");
-  return t("admin.openPlatform.apiKeyMgmt.scope.ipCount", { n });
+  if (n === 0) return t("admin.apiKeyMgmt.scope.noIp");
+  return t("admin.apiKeyMgmt.scope.ipCount", { n });
+}
+
+function i18nValue(path: string, fallback: string): string {
+  const value = t(path);
+  return value === path ? fallback : value;
+}
+
+function resourceKey(code: ResourceCode): string {
+  return code.replace(/\./g, "_");
 }
 
 function resourceLabel(code: ResourceCode): string {
-  const r = Resources.find((x) => x.code === code);
-  return r?.label ?? code;
+  return i18nValue(`admin.apiKeyMgmt.resources.${resourceKey(code)}`, code);
 }
 
 function actionsLabel(actions: number): string {
   const parts: string[] = [];
-  if (actions & ResourceActionFlag.Read) parts.push(t("admin.openPlatform.apiKeyMgmt.actions.read"));
-  if (actions & ResourceActionFlag.Add) parts.push(t("admin.openPlatform.apiKeyMgmt.actions.add"));
-  if (actions & ResourceActionFlag.Edit) parts.push(t("admin.openPlatform.apiKeyMgmt.actions.edit"));
-  if (actions & ResourceActionFlag.Delete) parts.push(t("admin.openPlatform.apiKeyMgmt.actions.delete"));
-  if (actions & ResourceActionFlag.Import) parts.push(t("admin.openPlatform.apiKeyMgmt.actions.import"));
+  if (actions & ResourceActionFlag.Read) parts.push(t("admin.apiKeyMgmt.actions.read"));
+  if (actions & ResourceActionFlag.Add) parts.push(t("admin.apiKeyMgmt.actions.add"));
+  if (actions & ResourceActionFlag.Edit) parts.push(t("admin.apiKeyMgmt.actions.edit"));
+  if (actions & ResourceActionFlag.Delete) parts.push(t("admin.apiKeyMgmt.actions.delete"));
+  if (actions & ResourceActionFlag.Import) parts.push(t("admin.apiKeyMgmt.actions.import"));
   return parts.length === 0 ? "-" : parts.join(" / ");
 }
 
@@ -418,7 +397,7 @@ async function load() {
     await Promise.all(
       list.map(async (c) => {
         const g = await clientGrantService
-          .query<ClientGrant>(`?$filter=clientId eq '${encodeURIComponent(c.clientId)}'`)
+          .query<ClientGrant>(`?$filter=clientId eq '${encodeURIComponent(c.id)}'`)
           .then((arr) => arr[0] ?? null)
           .catch(() => null);
         grants.value = { ...grants.value, [c.id]: g };
@@ -435,19 +414,30 @@ function onDialogClosed() {
   appIdInput.value = "";
 }
 
-function openCreate() {
-  editing.value = null;
-  Object.assign(form, blankForm());
-  dialogVisible.value = true;
+async function openCreate() {
+  saving.value = true;
+  try {
+    const created = await clientService.post<Client>({
+      id: "",
+      name: t("admin.apiKeyMgmt.defaultClientName"),
+      enabled: true,
+    });
+    ElMessage.success(t("common.saveSuccess"));
+    await load();
+    openEdit(items.value.find((x) => x.id === created.id) ?? created);
+  } catch (e: any) {
+    ElMessage.error(e?.message ?? t("admin.apiKeyMgmt.operationFailed"));
+  } finally {
+    saving.value = false;
+  }
 }
 
 function openEdit(row: Client) {
   editing.value = row;
   const g = grants.value[row.id];
   Object.assign(form, blankForm(), {
-    clientId: row.clientId,
-    apiKey: row.apiKey,
-    clientName: row.clientName ?? "",
+    clientId: row.id,
+    name: row.name ?? "",
     appScope: (g?.appScope ?? "all") as "all" | "partial",
     appIds: [...(g?.appIds ?? [])],
     apiScope: (g?.apiScope ?? "all") as "all" | "partial",
@@ -455,45 +445,21 @@ function openEdit(row: Client) {
     ipWhitelist: [...(g?.ipWhitelist ?? [])],
     clientSecret: "",
     showSecret: false,
-    secretHint: t("admin.openPlatform.apiKeyMgmt.form.secretHiddenHint"),
+    secretHint: t("admin.apiKeyMgmt.secretHiddenHint"),
   });
   dialogVisible.value = true;
 }
 
 async function save() {
+  if (!editing.value) return;
+
   saving.value = true;
   try {
-    if (!editing.value) {
-      const creds: ClientCredentials = await clientService.create({
-        id: "",
-        clientName: form.clientName,
-        enabled: true,
-        requireClientSecret: true,
-        allowedGrantTypes: ["client_credentials"],
-        allowedScopes: ["api.readwrite"],
-        identityTokenLifetime: 28800,
-        accessTokenLifetime: 28800,
-      });
-      ElMessage.success(creds.clientId);
-      // 用 clientId 找一下数据库 id
-      await load();
-      const created = items.value.find((x) => x.clientId === creds.clientId);
-      if (created) {
-        await saveGrant(created.id, creds.clientId);
-      }
-    } else {
-      await clientService.updateById(editing.value.id, {
-        id: editing.value.id,
-        clientName: form.clientName,
-        enabled: editing.value.enabled,
-        requireClientSecret: editing.value.requireClientSecret,
-        allowedGrantTypes: editing.value.allowedGrantTypes,
-        allowedScopes: editing.value.allowedScopes,
-        identityTokenLifetime: editing.value.identityTokenLifetime,
-        accessTokenLifetime: editing.value.accessTokenLifetime,
-      });
-      await saveGrant(editing.value.id, editing.value.clientId);
-    }
+    await clientService.patch<Client>(editing.value.id, {
+      id: editing.value.id,
+      name: form.name,
+    });
+    await saveGrant(editing.value.id);
     dialogVisible.value = false;
     ElMessage.success(t("common.saveSuccess"));
     await load();
@@ -502,12 +468,13 @@ async function save() {
   }
 }
 
-async function saveGrant(entityId: string, clientId: string) {
+async function saveGrant(clientId: string) {
+  const entityId = clientId;
   const existing = grants.value[entityId];
   const dto: ClientGrant = {
     id: existing?.id ?? "",
     clientId,
-    name: form.clientName,
+    name: form.name,
     appScope: form.appScope,
     appIds: form.appScope === "partial" ? [...form.appIds] : [],
     apiScope: form.apiScope,
@@ -530,26 +497,20 @@ async function toggleEnabled(row: Client, on: boolean) {
   try {
     await clientService.patch<Client>(row.id, {
       id: row.id,
-      clientName: row.clientName ?? "",
       enabled: on,
-      requireClientSecret: row.requireClientSecret ?? true,
-      allowedGrantTypes: row.allowedGrantTypes ?? [],
-      allowedScopes: row.allowedScopes ?? [],
-      identityTokenLifetime: row.identityTokenLifetime ?? 28800,
-      accessTokenLifetime: row.accessTokenLifetime ?? 28800,
     });
     row.enabled = on;
     ElMessage.success(t("common.saveSuccess"));
   } catch (e: any) {
-    ElMessage.error(e?.message ?? "Failed");
+    ElMessage.error(e?.message ?? t("admin.apiKeyMgmt.operationFailed"));
   }
 }
 
 async function removeItem(row: Client) {
   try {
     await ElMessageBox.confirm(
-      t("admin.openPlatform.apiKeyMgmt.confirm.deleteContent"),
-      t("admin.openPlatform.apiKeyMgmt.confirm.deleteTitle"),
+      t("admin.apiKeyMgmt.confirm.deleteContent"),
+      t("admin.apiKeyMgmt.confirm.deleteTitle"),
       { type: "warning" },
     );
   } catch {
@@ -560,31 +521,43 @@ async function removeItem(row: Client) {
     ElMessage.success(t("common.deleteSuccess"));
     await load();
   } catch (e: any) {
-    ElMessage.error(e?.message ?? "Failed");
+    ElMessage.error(e?.message ?? t("admin.apiKeyMgmt.operationFailed"));
   }
 }
 
-  async function generateSecret() {
-    if (!editing.value) return;
-    try {
-      await ElMessageBox.confirm(
-        t("admin.openPlatform.apiKeyMgmt.confirm.generateSecretContent"),
-        t("admin.openPlatform.apiKeyMgmt.confirm.generateSecretTitle"),
-        { type: "warning" },
-      );
-    } catch {
-      return;
-    }
-    try {
-      const creds = await clientService.generateSecret(editing.value.id);
-      form.clientSecret = creds.clientSecret;
-      form.showSecret = true;
-      form.secretHint = t("admin.openPlatform.apiKeyMgmt.form.secretHiddenHint");
-      ElMessage.success(t("admin.openPlatform.apiKeyMgmt.copySuccess"));
-    } catch (e: any) {
-      ElMessage.error(e?.message ?? "Failed");
-    }
+async function revealSecret() {
+  if (!editing.value) return;
+  try {
+    const creds = await clientService.reveal(editing.value.id);
+    form.clientSecret = creds.clientSecret;
+    form.showSecret = !!creds.clientSecret;
+    form.secretHint = creds.clientSecret ? "" : t("admin.apiKeyMgmt.secretHiddenHint");
+  } catch (e: any) {
+    ElMessage.error(e?.message ?? t("admin.apiKeyMgmt.operationFailed"));
   }
+}
+
+async function generateSecret() {
+  if (!editing.value) return;
+  try {
+    await ElMessageBox.confirm(
+      t("admin.apiKeyMgmt.confirm.generateSecretContent"),
+      t("admin.apiKeyMgmt.confirm.generateSecretTitle"),
+      { type: "warning" },
+    );
+  } catch {
+    return;
+  }
+  try {
+    const creds = await clientService.generateSecret(editing.value.id);
+    form.clientSecret = creds.clientSecret;
+    form.showSecret = true;
+    form.secretHint = "";
+    ElMessage.success(t("common.saveSuccess"));
+  } catch (e: any) {
+    ElMessage.error(e?.message ?? t("admin.apiKeyMgmt.operationFailed"));
+  }
+}
 
 function addIp() {
   const v = (form.ipInput || "").trim();
@@ -610,26 +583,6 @@ function openApiScopeDialog() {
 
 function openAppSelectDialog() {
   appSelectDialogVisible.value = true;
-}
-
-async function generateApiKey() {
-  if (!editing.value) return;
-  try {
-    await ElMessageBox.confirm(
-      t("admin.openPlatform.apiKeyMgmt.confirm.generateApiKeyContent"),
-      t("admin.openPlatform.apiKeyMgmt.confirm.generateApiKeyTitle"),
-      { type: "warning" },
-    );
-  } catch {
-    return;
-  }
-  try {
-    const creds = await clientService.generateApiKey(editing.value.id);
-    form.apiKey = creds.apiKey;
-    ElMessage.success(t("admin.openPlatform.apiKeyMgmt.copySuccess"));
-  } catch (e: any) {
-    ElMessage.error(e?.message ?? "Failed");
-  }
 }
 
 onMounted(load);

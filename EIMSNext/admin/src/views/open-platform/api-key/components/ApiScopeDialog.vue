@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="modelValue"
-    :title="t('admin.openPlatform.apiKeyMgmt.apiScopeDialog.title')"
+    :title="t('admin.apiKeyMgmt.apiScopeDialog.title')"
     width="780px"
     :close-on-click-modal="false"
     @update:model-value="(v: boolean) => emit('update:modelValue', v)"
@@ -11,7 +11,7 @@
       <div class="top-row">
         <el-input
           v-model="search"
-          :placeholder="t('admin.openPlatform.apiKeyMgmt.apiScopeDialog.search')"
+          :placeholder="t('admin.apiKeyMgmt.apiScopeDialog.search')"
           clearable
         >
           <template #prefix>
@@ -48,14 +48,14 @@
               @click="selectResource(r.code)"
             >
               <et-icon :icon="resourceIcon(r.code)" />
-              <span class="resource-label">{{ r.label }}</span>
+              <span class="resource-label">{{ resourceLabel(r.code) }}</span>
             </div>
           </div>
         </div>
 
         <div class="right">
           <div v-if="!activeResource" class="empty">
-            {{ t("admin.openPlatform.apiKeyMgmt.apiScopeDialog.noSelection") }}
+            {{ t("admin.apiKeyMgmt.apiScopeDialog.noSelection") }}
           </div>
           <div v-else class="action-list">
             <div class="resource-title">
@@ -66,7 +66,7 @@
               :key="act.key"
               v-model="actionSwitch[act.key]"
               class="action-switch"
-              :active-text="act.label"
+              :active-text="actionLabel(activeResource.code, act.key)"
               @change="onActionChange"
             />
             <p v-if="actionHint" class="hint">{{ actionHint }}</p>
@@ -120,7 +120,9 @@ const actionHint = computed<string | null>(() => {
   const r = activeResource.value;
   if (!r) return null;
   for (const a of r.actions) {
-    if (actionSwitch[a.key] && a.hint) return a.hint;
+    if (!actionSwitch[a.key]) continue;
+    const hint = actionHintLabel(r.code, a.key);
+    if (hint) return hint;
   }
   return null;
 });
@@ -132,9 +134,9 @@ const filteredResources = computed(() => {
   if (!k) return Resources;
   return Resources.filter(
     (r) =>
-      r.label.toLowerCase().includes(k) ||
+      resourceLabel(r.code).toLowerCase().includes(k) ||
       r.code.toLowerCase().includes(k) ||
-      r.actions.some((a) => a.label.toLowerCase().includes(k)),
+      r.actions.some((a) => actionLabel(r.code, a.key).toLowerCase().includes(k)),
   );
 });
 
@@ -145,14 +147,32 @@ const groupedResources = computed(() => {
     groups[r.group].push(r);
   }
   return [
-    { key: "通讯录", title: t("admin.openPlatform.apiKeyMgmt.apiScopeDialog.groups.contacts"), items: groups["通讯录"] ?? [] },
-    { key: "应用",   title: t("admin.openPlatform.apiKeyMgmt.apiScopeDialog.groups.apps"),     items: groups["应用"]   ?? [] },
-    { key: "工作流", title: t("admin.openPlatform.apiKeyMgmt.apiScopeDialog.groups.workflow"), items: groups["工作流"] ?? [] },
+    { key: "contacts", title: t("admin.apiKeyMgmt.apiScopeDialog.groups.contacts"), items: groups["通讯录"] ?? [] },
+    { key: "apps",     title: t("admin.apiKeyMgmt.apiScopeDialog.groups.apps"),     items: groups["应用"]   ?? [] },
+    { key: "workflow", title: t("admin.apiKeyMgmt.apiScopeDialog.groups.workflow"), items: groups["工作流"] ?? [] },
   ];
 });
 
+function i18nValue(path: string, fallback: string): string {
+  const value = t(path);
+  return value === path ? fallback : value;
+}
+
+function resourceKey(code: ResourceCode): string {
+  return code.replace(/\./g, "_");
+}
+
 function resourceLabel(code: ResourceCode): string {
-  return Resources.find((r) => r.code === code)?.label ?? code;
+  return i18nValue(`admin.apiKeyMgmt.resources.${resourceKey(code)}`, code);
+}
+
+function actionLabel(resource: ResourceCode, key: string): string {
+  const fallback = i18nValue(`admin.apiKeyMgmt.actions.${key}`, key);
+  return i18nValue(`admin.apiKeyMgmt.resourceActions.${resourceKey(resource)}.${key}`, fallback);
+}
+
+function actionHintLabel(resource: ResourceCode, key: string): string {
+  return i18nValue(`admin.apiKeyMgmt.actionHints.${resourceKey(resource)}.${key}`, "");
 }
 
 function resourceIcon(code: ResourceCode): string {

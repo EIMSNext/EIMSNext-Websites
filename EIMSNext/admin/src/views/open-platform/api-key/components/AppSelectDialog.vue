@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="modelValue"
-    :title="t('admin.openPlatform.apiKeyMgmt.appSelectDialog.title')"
+    :title="t('admin.apiKeyMgmt.appSelectDialog.title')"
     width="640px"
     :close-on-click-modal="false"
     @update:model-value="(v: boolean) => emit('update:modelValue', v)"
@@ -9,7 +9,7 @@
     <div class="app-select-dialog">
       <el-input
         v-model="search"
-        :placeholder="t('admin.openPlatform.apiKeyMgmt.appSelectDialog.search')"
+        :placeholder="t('admin.apiKeyMgmt.appSelectDialog.search')"
         clearable
         style="margin-bottom: 12px"
       >
@@ -24,7 +24,7 @@
         :indeterminate="indeterminate"
         @change="onSelectAll"
       >
-        {{ t("admin.openPlatform.apiKeyMgmt.appSelectDialog.selectAll") }}
+        {{ t("admin.apiKeyMgmt.appSelectDialog.selectAll") }}
       </el-checkbox>
 
       <div v-for="group in groupedApps" :key="group.key" class="group-block">
@@ -126,8 +126,8 @@ const groupedApps = computed(() => {
     groups[a.group].push(a);
   }
   return [
-    { key: "通讯录", title: t("admin.openPlatform.apiKeyMgmt.appSelectDialog.groupContacts"), items: groups["通讯录"] ?? [] },
-    { key: "其他",   title: t("admin.openPlatform.apiKeyMgmt.appSelectDialog.groupOthers"),  items: groups["其他"]   ?? [] },
+    { key: "通讯录", title: t("admin.apiKeyMgmt.appSelectDialog.groupContacts"), items: groups["通讯录"] ?? [] },
+    { key: "其他",   title: t("admin.apiKeyMgmt.appSelectDialog.groupOthers"),  items: groups["其他"]   ?? [] },
   ];
 });
 
