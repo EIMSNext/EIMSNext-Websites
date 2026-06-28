@@ -562,7 +562,7 @@ watch(
         state.items = {};
 
         let itemDefs = await dashboardItemDefService.query<DashboardItemDef>(
-          `$filter=appid eq '${newVal.appId}'&DashboardId=${newVal.id}`
+          `?$filter=appId eq '${newVal.appId}' and dashboardId eq ${newVal.id}`
         );
         if (itemDefs && itemDefs.length > 0) {
           itemDefs.forEach((x) => {

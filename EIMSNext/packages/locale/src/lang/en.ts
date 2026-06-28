@@ -441,6 +441,9 @@ export default {
       myChart: "My Chart",
       externalApp: "External App",
       greeting: "Greeting",
+      comingSoon: "Coming soon",
+      unsavedChanges: "You have unsaved changes. Leave anyway?",
+      invalidFavorite: "This favorite is invalid and cannot be opened",
     },
     exportFormat: "Export Format",
     exportColumns: "Export Columns",
@@ -460,6 +463,9 @@ export default {
     deleteFormConfirm_Title: "Are you sure you want to delete {0}?",
     deleteFormConfirm_Content:
       "If you delete it, the records will be cleared and cannot be restored.",
+    deleteAppConfirm_Title: "Are you sure you want to delete {0}?",
+    deleteAppConfirm_Content:
+      "Deleting the app will also remove all its forms, flows, dashboards, and data. This action cannot be undone.",
     flowcenter: "Flow Center",
     untitledForm: "Untitled Form",
     untitledDashboard: "Untitled Dashboard",

@@ -159,7 +159,7 @@ async function loadDashboard() {
   state.items = {};
   const items = await publicHttp.odata.query<DashboardItemDef>(
     "DashboardItemDef",
-    `$filter=appid eq '${dash.appId}'&DashboardId=${dash.id}`,
+    `?$filter=appId eq '${dash.appId}' and dashboardId eq ${dash.id}`,
   );
   (items || []).forEach((item: DashboardItemDef) => {
     state.items[item.layoutId] = item;
