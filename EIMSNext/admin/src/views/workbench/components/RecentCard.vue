@@ -40,6 +40,7 @@ const defaultIcon = (targetType: WorkbenchTargetType) => {
 const formatTime = (timestamp?: number) => {
   if (!timestamp) return t("admin.workbench.justVisited");
   const date = new Date(timestamp);
+  if (isNaN(date.getTime())) return t("admin.workbench.justVisited");
   const now = new Date();
   const sameDay = date.toDateString() === now.toDateString();
   return sameDay

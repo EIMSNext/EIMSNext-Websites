@@ -75,9 +75,11 @@ const widgetTitle = computed(() => {
 
   &.editable {
     cursor: move;
-    padding-top: var(--et-size-26);
 
-    :deep(.et-card),
+    :deep(.et-card) {
+      pointer-events: none;
+      padding-top: calc(var(--et-card-padding, var(--et-space-16)) + var(--et-size-26));
+    }
     :deep(.chart-board-card) {
       pointer-events: none;
     }

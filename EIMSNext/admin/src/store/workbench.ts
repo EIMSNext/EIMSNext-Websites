@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import type {
   WorkbenchCatalogApp,
   WorkbenchConfig,
@@ -89,7 +90,7 @@ export const createWorkbenchWidget = (
   overrides: Partial<WorkbenchLayoutItem> = {}
 ): WorkbenchLayoutItem => {
   const defaultItem = createDefaultWorkbenchLayout().find((x) => x.type === type);
-  const id = `${type}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+  const id = `${type}_${nanoid(8)}`;
 
   return {
     i: type === "flowCenter" || type === "myApps" ? type : id,
@@ -126,13 +127,14 @@ export const normalizeWorkbenchLayout = (layout: WorkbenchLayoutItem[]) => {
       return normalized;
     });
 
-  const maxY = next.reduce((value, item) => Math.max(value, item.y + item.h), 0);
+  let cursorY = next.reduce((value, item) => Math.max(value, item.y + item.h), 0);
   const defaults = createDefaultWorkbenchLayout();
 
-  FIXED_WORKBENCH_WIDGETS.forEach((type, index) => {
+  FIXED_WORKBENCH_WIDGETS.forEach((type) => {
     if (!next.some((item) => item.type === type)) {
       const item = defaults.find((x) => x.type === type)!;
-      next.push({ ...item, y: maxY + index * item.h });
+      next.push({ ...item, y: cursorY });
+      cursorY += item.h;
     }
   });
 
@@ -222,7 +224,7 @@ export const useWorkbenchStore = defineStore("workbench", () => {
   }
 
   async function refreshFavorites(force = false) {
-    if (favoriteLoadTask && !force) return favoriteLoadTask;
+    if (favoriteLoadTask) return favoriteLoadTask;
     if (favoritesLoaded.value && !force) return;
 
     favoriteLoadTask = (async () => {
@@ -281,9 +283,14 @@ export const useWorkbenchStore = defineStore("workbench", () => {
     }
   }
 
+  const CATALOG_TTL = 60_000;
+  let catalogLoadedAt = 0;
+
   async function loadCatalog(force = false) {
-    if (catalog.value.length > 0 && !force) return;
+    const fresh = Date.now() - catalogLoadedAt < CATALOG_TTL;
+    if (catalog.value.length > 0 && !force && fresh) return;
     catalog.value = await workbenchService.getCatalog();
+    catalogLoadedAt = Date.now();
   }
 
   return {

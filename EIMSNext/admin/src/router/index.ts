@@ -117,7 +117,11 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: "workbench-customize",
     path: "/workbench/customize",
     component: () => import("@/views/workbench/customize.vue"),
-    meta: { hidden: true, requiresAuth: true },
+    meta: {
+      hidden: true,
+      requiresAuth: true,
+      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
+    },
   },
   {
     name: "workbench",

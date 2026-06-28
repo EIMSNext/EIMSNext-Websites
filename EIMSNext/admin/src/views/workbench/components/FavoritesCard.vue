@@ -33,7 +33,6 @@
 <script setup lang="ts">
 import type { WorkbenchFavorite, WorkbenchTargetType } from "@eimsnext/models";
 import { useContextStore } from "@eimsnext/store";
-import { workbenchFavoriteService } from "@eimsnext/services";
 import {
   useWorkbenchStore,
   WORKBENCH_FAVORITES_CHANGED_EVENT,
@@ -85,23 +84,28 @@ const openItem = async (item: WorkbenchFavorite) => {
   }
 
   if (item.targetType === "dashboard") {
+    if (!item.appId) {
+      ElMessage.error(t("admin.workbench.invalidFavorite"));
+      return;
+    }
     router.push(`/app/${item.appId}/dash/${item.targetId}`);
     return;
   }
 
+  if (!item.appId) {
+    ElMessage.error(t("admin.workbench.invalidFavorite"));
+    return;
+  }
   router.push(`/app/${item.appId}/form/${item.targetId}`);
 };
 
 const removeItem = async (item: WorkbenchFavorite) => {
-  await workbenchFavoriteService.delete(item.id);
-  await loadFavorites();
-  await workbenchStore.loadFavorites(true);
+  await workbenchStore.removeFavorite({ targetType: item.targetType, targetId: item.targetId });
 };
 
 const loadFavorites = async () => {
-  favorites.value = await workbenchFavoriteService.query<WorkbenchFavorite>(
-    "$orderby=sortIndex asc,createTime desc"
-  );
+  await workbenchStore.refreshFavorites();
+  favorites.value = workbenchStore.favorites;
 };
 
 onMounted(() => {
@@ -179,6 +183,10 @@ onBeforeUnmount(() => {
 
 .workbench-list-action {
   opacity: 0;
+}
+
+.editable .workbench-list-action {
+  opacity: 1;
 }
 
 .workbench-empty {

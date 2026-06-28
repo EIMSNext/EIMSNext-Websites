@@ -24,9 +24,9 @@
             <span>{{ data.label }}</span>
             <el-radio
               v-if="data.kind === 'chart'"
-              :model-value="selected?.dashboardItemId"
+              :model-value="selected?.dashboardItemId === data.dashboardItemId"
               :value="data.dashboardItemId"
-              @click.stop="handleNodeClick(data)"
+              @click.stop.prevent="handleNodeClick(data)"
             />
           </div>
         </template>
