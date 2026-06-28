@@ -514,6 +514,7 @@ const formulaInfo: Record<string, string> = {
   OR: 'OR(false, false) = false, OR(false, true) = true',
   IF: 'IF(false, 1, 0) = 0, IF(true, 1, 0) = 1',
   IN: 'IN([1,2,3,4], 4) = true, IN([1,2,3,4], 5) = false',
+  NIN: 'NIN([1,2,3,4], 4) = false, NIN([1,2,3,4], 5) = true',
   DEFAULT: 'DEFAULT("#FF7271", "#000") = "#FF7271", DEFAULT("", "#000") = "", DEFAULT(null, "#000") = "#000"',
   CASE: 'CASE(IN([1,2,3,4], 5), 1, IN([1,2,3,4], 2), 2) = 2',
   COLUMN:
@@ -572,7 +573,7 @@ const formulaTree: IFormulaGroupMeta[] = [
   },
   {
     key: "collection",
-    children: ["IN", "LEN", "UNION", "COLUMN", "VALUE", "INTERSECTIONSET", "LIST"],
+    children: ["IN", "NIN", "LEN", "UNION", "COLUMN", "VALUE", "INTERSECTIONSET", "LIST"],
   },
   {
     key: "condition",

@@ -2445,6 +2445,7 @@ export default {
     OR: 'Link expressions with "OR", return true when one expression is true, otherwise return false',
     IF: "Check whether a condition is met, return the second parameter if it is met, otherwise return the third parameter",
     IN: "Check whether the second parameter is in the collection",
+    NIN: "Check whether the second parameter is not in the collection",
     DEFAULT:
       "Check the first parameter, return the second parameter if it is empty, otherwise return the first parameter",
     CASE: "Check whether one or more conditions are met and return the first value that meets the conditions",
