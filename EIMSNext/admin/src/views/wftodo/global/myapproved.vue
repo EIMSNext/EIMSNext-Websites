@@ -19,7 +19,10 @@ const route = useRoute();
 const appStore = useAppStore();
 
 const selectedApp = ref<AppDef | null>(null);
-const filter = ref({ nodeType: 2 });
+const filter = ref({
+  nodeType: { ne: 1 },
+  result: { ne: 7 },
+});
 
 // 监听路由参数变化
 watch(

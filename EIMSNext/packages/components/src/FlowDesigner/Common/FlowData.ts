@@ -664,7 +664,6 @@ export enum ApproveMode {
   None,
   OrSign,
   CounterSign,
-  AutoSign,
 }
 export enum ApproverType {
   Normal = 0,
