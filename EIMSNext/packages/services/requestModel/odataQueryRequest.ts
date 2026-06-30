@@ -16,6 +16,9 @@ export interface IDynamicFindOptions {
   skip: number;
   take: number;
   scope?: IDataScope;
+  keyword?: string;
+  searchFields?: string[];
+  includeDeleted?: boolean;
 }
 
 export interface IDynamicField {

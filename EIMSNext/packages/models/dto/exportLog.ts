@@ -54,6 +54,9 @@ export interface FormDataExportRequest {
   formId: string;
   filter?: any;
   authGroupId?: string;
+  keyword?: string;
+  searchFields?: string[];
+  includeDeleted?: boolean;
 }
 
 export interface ExportResponse {

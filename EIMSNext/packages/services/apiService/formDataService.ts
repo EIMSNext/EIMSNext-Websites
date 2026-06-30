@@ -1,6 +1,7 @@
 import { ApiServiceBase } from "../interface";
 import { ExportResponse, FormData, FormDataChangeLog, FormDataExportRequest, FormDataRequest } from "@eimsnext/models";
 import {
+  BatchDeleteRequest,
   IFormDataFilterOptionsRequest,
   IFormDataFilterOptionsResponse,
   IFormDataPermissionScopeResponse,
@@ -13,6 +14,10 @@ export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
 
   export(data: FormDataExportRequest): Promise<ExportResponse> {
     return this.http().api.post<ExportResponse>(`/FormData/Export`, data);
+  }
+
+  countByOptions(query: any): Promise<number> {
+    return this.http().api.post<number>(`/FormData/query/$count`, query);
   }
 
   getFilterOptions(data: IFormDataFilterOptionsRequest): Promise<IFormDataFilterOptionsResponse> {
@@ -36,6 +41,14 @@ export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
     if (authGroupId) params.authGroupId = authGroupId;
 
     return this.http().api.get<number>(`/FormData/${dataId}/changelog/$count`, params);
+  }
+
+  restore(data: BatchDeleteRequest): Promise<void> {
+    return this.http().api.post<void>(`/FormData/manage/restore`, data);
+  }
+
+  purge(data: BatchDeleteRequest): Promise<void> {
+    return this.http().api.delete<void>(`/FormData/manage/purge`, data, true);
   }
 }
 

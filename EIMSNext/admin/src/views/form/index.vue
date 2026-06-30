@@ -51,7 +51,18 @@
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
-    <et-toolbar class="form-list-toolbar" :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+    <div class="toolbar-head">
+      <et-toolbar class="form-list-toolbar" :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+      <FormDataSearchBar
+        :keyword="searchState.keyword"
+        :selected-fields="searchState.selectedFields"
+        :fields="searchableFields"
+        :disabled="searchableFields.length === 0"
+        @update:keyword="searchState.keyword = $event"
+        @update:selected-fields="searchState.selectedFields = $event"
+        @search="handleSearch"
+      />
+    </div>
     <div v-if="availableViews.length > 0" class="view-tabs">
       <button
         v-for="view in availableViews"
@@ -132,6 +143,7 @@ import { getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
 import Pagination from "../../components/Pagination/index.vue";
 import { useI18n } from "vue-i18n";
 import FormListViewRenderer from "./components/FormListViewRenderer.vue";
+import FormDataSearchBar from "./components/FormDataSearchBar.vue";
 import {
   createDefaultFormListView,
   getViewDisplayFields,
@@ -139,7 +151,19 @@ import {
   parseSort,
   parseViewSettings,
 } from "./listViewUtils";
+import {
+  type FormDataSearchState,
+  filterSearchableFields,
+  normalizeSelectedSearchFields,
+  resolveSearchFields,
+} from "./searchUtils";
 const { t } = useI18n();
+
+type FormDataQueryOptions = IDynamicFindOptions & {
+  keyword?: string;
+  searchFields?: string[];
+  includeDeleted?: boolean;
+};
 
 const displayItemCount = 3; //最多显示3条明细
 const showAddDialog = ref(false);
@@ -161,6 +185,10 @@ const listViews = ref<FormListView[]>([]);
 const curListView = ref<FormListView>();
 const curListViewSettings = ref<FormListViewSettings>({});
 const listViewDisplayFields = ref<FormListViewField[]>([]);
+const searchState = reactive<FormDataSearchState>({
+  keyword: "",
+  selectedFields: [],
+});
 const userStore = useUserStore();
 const { currentUser } = userStore;
 
@@ -331,6 +359,9 @@ const submitExport = async () => {
       formId,
       filter: queryParams.value.filter,
       authGroupId: curAuthGrp.value?.id,
+      keyword: queryParams.value.keyword,
+      searchFields: queryParams.value.searchFields,
+      includeDeleted: false,
     });
 
     showExportDialog.value = false;
@@ -376,7 +407,7 @@ const loadFormContext = async () => {
 
 void loadFormContext();
 
-const queryParams = ref<IDynamicFindOptions>({
+const queryParams = ref<FormDataQueryOptions>({
   skip: 0,
   take: 20,
 });
@@ -396,6 +427,7 @@ const showDetailsDialog = ref(false);
 const checkedDatas = ref<any[]>([]);
 const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
 const selectedExportColumnKeys = ref<string[]>([]);
+const searchableFields = computed(() => filterSearchableFields(fieldList.value));
 
 const exportColumns = computed<ExportColumn[]>(() => buildExportColumns());
 
@@ -418,6 +450,7 @@ const applyCurrentView = (preferredViewId?: string) => {
     type: field.type,
     isSubField: field.isSubField,
   }));
+  searchState.selectedFields = normalizeSelectedSearchFields(searchState.selectedFields, filterSearchableFields(displayFields));
   condList.value = parseCondition(nextView.defaultFilter);
   sortList.value = parseSort(formId, nextView.defaultSort, t);
   pageNum.value = 1;
@@ -486,13 +519,16 @@ const setField = (fields: IFormFieldDef[]) => {
     undefined,
     t
   );
+  searchState.selectedFields = normalizeSelectedSearchFields(searchState.selectedFields, searchableFields.value);
   updateQueryParams();
   handleQuery();
 };
 
 const updateQueryParams = () => {
   const queryFields = curListView.value?.pcType === FormListViewType.Table ? fieldList.value : [];
-  queryParams.value = toDynamicFindOptions(
+  const resolvedSearchFields = resolveSearchFields(searchState, searchableFields.value);
+  queryParams.value = {
+    ...toDynamicFindOptions(
     queryFields,
     condList.value,
     sortList.value,
@@ -500,7 +536,11 @@ const updateQueryParams = () => {
     pageSize.value,
     { field: "formId", type: "none", op: "eq", value: formDef.value!.id },
     { authGroupId: curAuthGrp.value?.id }
-  );
+  ),
+  };
+  queryParams.value.keyword = searchState.keyword.trim();
+  queryParams.value.searchFields = resolvedSearchFields;
+  queryParams.value.includeDeleted = false;
 };
 
 const handleQuery = () => {
@@ -509,12 +549,12 @@ const handleQuery = () => {
 };
 
 const loadCount = () => {
-  formDataService.count(queryParams.value.filter).then((cnt: number) => {
+  formDataService.dynamicCount(queryParams.value).then((cnt: number) => {
     totalRef.value = cnt;
   });
 };
 const loadData = () => {
-  formDataService.query<FormData>(queryParams.value).then((res: FormData[]) => {
+  formDataService.dynamicQuery<FormData>(queryParams.value).then((res: FormData[]) => {
     dataRef.value = res;
     processData();
   });
@@ -527,6 +567,12 @@ const pageChanged = (curPage: number, pSize: number) => {
 };
 const onDataSaved = () => {
   showAddDialog.value = false;
+  pageNum.value = 1;
+  updateQueryParams();
+  handleQuery();
+};
+
+const handleSearch = () => {
   pageNum.value = 1;
   updateQueryParams();
   handleQuery();
@@ -789,6 +835,13 @@ onUnmounted(() => {
   background: var(--et-bg-container);
 }
 
+.toolbar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--et-space-12);
+}
+
 .view-tab {
   display: inline-flex;
   align-items: center;
@@ -874,6 +927,13 @@ onUnmounted(() => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   max-height: 280px;
   overflow: auto;
+}
+
+@media (max-width: 1280px) {
+  .toolbar-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 :deep(.table-image-thumb) {
