@@ -63,6 +63,23 @@
         @search="handleSearch"
       />
     </div>
+    <FormDraftDrawer
+      v-if="formDef"
+      v-model="showDraftDrawer"
+      :title="t('admin.formList.draftBox')"
+      :description="t('admin.formList.draftBoxDesc')"
+      :empty-title="t('admin.formList.draftEmpty')"
+      :empty-desc="t('admin.formList.draftEmptyDesc')"
+      :rows="draftRows"
+      :page="draftPageNum"
+      :page-size="draftPageSize"
+      :has-next="draftHasNext"
+      :form-def="formDef"
+      @refresh="refreshDrafts"
+      @page-change="draftPageChanged"
+      @select="openDraft"
+      @delete="deleteDraft"
+    />
     <div v-if="availableViews.length > 0" class="view-tabs">
       <button
         v-for="view in availableViews"
@@ -142,6 +159,7 @@ import {
 import { getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
 import Pagination from "../../components/Pagination/index.vue";
 import { useI18n } from "vue-i18n";
+import FormDraftDrawer from "./components/FormDraftDrawer.vue";
 import FormListViewRenderer from "./components/FormListViewRenderer.vue";
 import FormDataSearchBar from "./components/FormDataSearchBar.vue";
 import {
@@ -157,6 +175,7 @@ import {
   normalizeSelectedSearchFields,
   resolveSearchFields,
 } from "./searchUtils";
+import { createDraftFilter, createNonDraftFilter } from "./draftUtils";
 const { t } = useI18n();
 
 type FormDataQueryOptions = IDynamicFindOptions & {
@@ -169,6 +188,7 @@ const displayItemCount = 3; //最多显示3条明细
 const showAddDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const showExportDialog = ref(false);
+const showDraftDrawer = ref(false);
 const exporting = ref(false);
 const columns = ref<ITableColumn[]>([]);
 const route = useRoute();
@@ -311,6 +331,20 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
+      text: "admin.formList.draftBox",
+      class: "data-filter",
+      command: "draft",
+      visible: true,
+      icon: "el-document",
+      onCommand: () => {
+        showDraftDrawer.value = true;
+        void refreshDrafts();
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
       text: "common.refresh",
       class: "data-filter",
       command: "refresh",
@@ -331,6 +365,10 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
           showDeleteConfirmDialog.value = true;
         }
       }
+      break;
+    case "draft":
+      showDraftDrawer.value = true;
+      void refreshDrafts();
       break;
   }
 };
@@ -411,9 +449,16 @@ const queryParams = ref<FormDataQueryOptions>({
   skip: 0,
   take: 20,
 });
+const draftQueryParams = ref<FormDataQueryOptions>({
+  skip: 0,
+  take: 20,
+});
 
 const totalRef = ref(0);
 const dataRef = ref<FormData[]>();
+const draftRows = ref<FormData[]>([]);
+const draftTotalRef = ref(0);
+const draftHasNext = computed(() => draftPageNum.value * draftPageSize.value < draftTotalRef.value);
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and", items: [] });
 const showSort = ref(false);
@@ -422,6 +467,8 @@ const showField = ref(false);
 const fieldList = ref<IFormFieldDef[]>([]);
 const pageNum = ref(1);
 const pageSize = ref(20);
+const draftPageNum = ref(1);
+const draftPageSize = ref(20);
 const selectedData = ref<FormData>();
 const showDetailsDialog = ref(false);
 const checkedDatas = ref<any[]>([]);
@@ -534,7 +581,7 @@ const updateQueryParams = () => {
     sortList.value,
     (pageNum.value - 1) * pageSize.value,
     pageSize.value,
-    { field: "formId", type: "none", op: "eq", value: formDef.value!.id },
+    createNonDraftFilter(formDef.value!.id),
     { authGroupId: curAuthGrp.value?.id }
   ),
   };
@@ -543,9 +590,20 @@ const updateQueryParams = () => {
   queryParams.value.includeDeleted = false;
 };
 
+const updateDraftQueryParams = () => {
+  draftQueryParams.value = {
+    skip: (draftPageNum.value - 1) * draftPageSize.value,
+    take: draftPageSize.value,
+    filter: createDraftFilter(formDef.value!.id, "self", currentUser.empId),
+    includeDeleted: false,
+    scope: curAuthGrp.value?.id ? { authGroupId: curAuthGrp.value.id } : undefined,
+  };
+};
+
 const handleQuery = () => {
   loadCount();
   loadData();
+  void refreshDraftCount();
 };
 
 const loadCount = () => {
@@ -559,17 +617,39 @@ const loadData = () => {
     processData();
   });
 };
+const loadDraftCount = async () => {
+  draftTotalRef.value = await formDataService.dynamicCount(draftQueryParams.value);
+};
+const loadDraftRows = async () => {
+  draftRows.value = await formDataService.dynamicQuery<FormData>(draftQueryParams.value);
+};
+const refreshDraftCount = async () => {
+  if (!formDef.value) return;
+  updateDraftQueryParams();
+  await loadDraftCount();
+};
+const refreshDrafts = async () => {
+  if (!formDef.value) return;
+  updateDraftQueryParams();
+  await Promise.all([loadDraftCount(), loadDraftRows()]);
+};
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
   pageSize.value = pSize;
   updateQueryParams();
   loadData();
 };
+const draftPageChanged = async (curPage: number, pSize: number) => {
+  draftPageNum.value = curPage;
+  draftPageSize.value = pSize;
+  await refreshDrafts();
+};
 const onDataSaved = () => {
   showAddDialog.value = false;
   pageNum.value = 1;
   updateQueryParams();
   handleQuery();
+  void refreshDrafts();
 };
 
 const handleSearch = () => {
@@ -676,8 +756,17 @@ const showDetails = (row: FormData) => {
   selectedData.value = row;
   showDetailsDialog.value = true;
 };
+const openDraft = (row: FormData) => {
+  selectedData.value = row;
+  showDetailsDialog.value = true;
+};
+const deleteDraft = async (row: FormData) => {
+  await formDataService.delete(row.id);
+  await Promise.all([refreshDrafts(), Promise.resolve(handleQuery())]);
+};
 const handleViewOk = () => {
   loadData();
+  void refreshDrafts();
   showDetailsDialog.value = false;
 };
 //#region Flat Data
@@ -788,12 +877,14 @@ const handleDataSaved = (payload: { formId: string }) => {
   pageNum.value = 1;
   updateQueryParams();
   handleQuery();
+  void refreshDrafts();
 };
 const handleDataDeleted = (payload: { formId: string }) => {
   if (payload.formId !== formId) return;
   pageNum.value = 1;
   updateQueryParams();
   handleQuery();
+  void refreshDrafts();
 };
 
 onMounted(() => {

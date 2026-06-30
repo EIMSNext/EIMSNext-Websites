@@ -113,11 +113,17 @@
         <div class="page-title">{{ t("admin.formEdit.dataManageTitle") }}</div>
         <div class="page-desc">{{ t("admin.formEdit.dataManageDesc") }}</div>
       </div>
-      <el-button class="trash-button" @click="showTrashDrawer = true">
-        <et-icon icon="el-delete" />
-        {{ t("admin.formEdit.dataManageTrash") }}
-        <span v-if="trashTotalRef > 0" class="trash-count">{{ trashTotalRef }}</span>
-      </el-button>
+      <div class="page-head-actions">
+        <el-button class="draft-button" @click="showDraftDrawer = true">
+          <et-icon icon="el-document" />
+          {{ t("admin.formEdit.dataManageDraft") }}
+        </el-button>
+        <el-button class="trash-button" @click="showTrashDrawer = true">
+          <et-icon icon="el-delete" />
+          {{ t("admin.formEdit.dataManageTrash") }}
+          <span v-if="trashTotalRef > 0" class="trash-count">{{ trashTotalRef }}</span>
+        </el-button>
+      </div>
     </div>
 
     <div class="toolbar-head">
@@ -149,6 +155,23 @@
       />
       <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
     </div>
+
+    <FormDraftDrawer
+      v-model="showDraftDrawer"
+      :title="t('admin.formEdit.dataManageDraftTitle')"
+      :description="t('admin.formEdit.dataManageDraftDesc')"
+      :empty-title="t('admin.formEdit.dataManageDraftEmpty')"
+      :empty-desc="t('admin.formEdit.dataManageDraftEmptyDesc')"
+      :rows="draftRows"
+      :page="draftPageNum"
+      :page-size="draftPageSize"
+      :has-next="draftHasNext"
+      :form-def="formDef"
+      @refresh="refreshDrafts"
+      @page-change="draftPageChanged"
+      @select="openDraft"
+      @delete="deleteDraft"
+    />
 
     <el-drawer
       v-model="showTrashDrawer"
@@ -255,6 +278,7 @@ import DataField from "@/views/form/components/DataField.vue";
 import DataFilter from "@/views/form/components/DataFilter.vue";
 import DataSort from "@/views/form/components/DataSort.vue";
 import FormDataView from "@/views/form/components/FormDataView.vue";
+import FormDraftDrawer from "@/views/form/components/FormDraftDrawer.vue";
 import Pagination from "@/components/Pagination/index.vue";
 import FormListViewRenderer from "@/views/form/components/FormListViewRenderer.vue";
 import FormDataSearchBar from "@/views/form/components/FormDataSearchBar.vue";
@@ -274,6 +298,7 @@ import {
   normalizeSelectedSearchFields,
   resolveSearchFields,
 } from "@/views/form/searchUtils";
+import { createDraftFilter, createNonDraftFilter } from "@/views/form/draftUtils";
 
 type FormDataQueryOptions = IDynamicFindOptions & {
   keyword?: string;
@@ -301,6 +326,7 @@ const showRestoreConfirmDialog = ref(false);
 const showPurgeConfirmDialog = ref(false);
 const showDetailsDialog = ref(false);
 const showTrashDrawer = ref(false);
+const showDraftDrawer = ref(false);
 const showFilter = ref(false);
 const showSort = ref(false);
 const showField = ref(false);
@@ -314,12 +340,17 @@ const checkedDatas = ref<FormData[]>([]);
 const trashCheckedDatas = ref<FormData[]>([]);
 
 const dataRef = ref<FormData[]>([]);
+const draftRows = ref<FormData[]>([]);
 const trashRows = ref<FormData[]>([]);
 
 const totalRef = ref(0);
+const draftTotalRef = ref(0);
 const trashTotalRef = ref(0);
+const draftHasNext = computed(() => draftPageNum.value * draftPageSize.value < draftTotalRef.value);
 const pageNum = ref(1);
 const pageSize = ref(20);
+const draftPageNum = ref(1);
+const draftPageSize = ref(20);
 const trashPageNum = ref(1);
 const trashPageSize = ref(20);
 
@@ -359,6 +390,10 @@ const queryParams = ref<FormDataQueryOptions>({
   skip: 0,
   take: 20,
 });
+const draftQueryParams = ref<FormDataQueryOptions>({
+  skip: 0,
+  take: 20,
+});
 
 const trashQueryParams = ref<FormDataQueryOptions>({
   skip: 0,
@@ -375,6 +410,13 @@ watch(showTrashDrawer, (value) => {
     trashPageNum.value = 1;
     updateTrashQueryParams();
     void loadTrash();
+  }
+});
+
+watch(showDraftDrawer, (value) => {
+  if (value) {
+    draftPageNum.value = 1;
+    void refreshDrafts();
   }
 });
 
@@ -484,7 +526,9 @@ const rightBars = ref<ToolbarItem[]>([
 const toolbarHandler = (cmd: string) => {
   if (cmd === "delete" && checkedDatas.value.length > 0) {
     showDeleteConfirmDialog.value = true;
+    return;
   }
+
 };
 
 const columns = computed<ITableColumn[]>(() =>
@@ -520,7 +564,7 @@ const buildFormDataQuery = (options: QueryBuilderOptions): FormDataQueryOptions 
               { field: "deleteFlag", type: "none", op: "eq", value: true },
             ],
           }
-        : { field: "formId", type: "none", op: "eq", value: props.formDef.id },
+        : createNonDraftFilter(props.formDef.id),
       { formId: props.formDef.id, inheritMemberPermissions: true },
     ),
     keyword: options.keyword.trim(),
@@ -555,6 +599,16 @@ const updateTrashQueryParams = () => {
   });
 };
 
+const updateDraftQueryParams = () => {
+  draftQueryParams.value = {
+    skip: (draftPageNum.value - 1) * draftPageSize.value,
+    take: draftPageSize.value,
+    filter: createDraftFilter(props.formDef.id, "anonymous"),
+    includeDeleted: false,
+    scope: { formId: props.formDef.id, inheritMemberPermissions: true },
+  };
+};
+
 const loadCount = async () => {
   totalRef.value = await formDataService.dynamicCount(queryParams.value);
 };
@@ -567,16 +621,34 @@ const loadTrashCount = async () => {
   trashTotalRef.value = await formDataService.dynamicCount(trashQueryParams.value);
 };
 
+const loadDraftCount = async () => {
+  draftTotalRef.value = await formDataService.dynamicCount(draftQueryParams.value);
+};
+
+const loadDraftRows = async () => {
+  draftRows.value = await formDataService.dynamicQuery<FormData>(draftQueryParams.value);
+};
+
 const loadTrashRows = async () => {
   trashRows.value = await formDataService.dynamicQuery<FormData>(trashQueryParams.value);
 };
 
 const handleQuery = async () => {
-  await Promise.all([loadCount(), loadData(), refreshTrashCount()]);
+  await Promise.all([loadCount(), loadData(), refreshTrashCount(), refreshDraftCount()]);
 };
 
 const loadTrash = async () => {
   await Promise.all([loadTrashCount(), loadTrashRows()]);
+};
+
+const refreshDraftCount = async () => {
+  updateDraftQueryParams();
+  await loadDraftCount();
+};
+
+const refreshDrafts = async () => {
+  updateDraftQueryParams();
+  await Promise.all([loadDraftCount(), loadDraftRows()]);
 };
 
 const refreshTrashCount = async () => {
@@ -623,12 +695,22 @@ const execPurge = async () => {
 
 const restoreOne = async (row: FormData) => {
   await formDataService.restore({ keys: [row.id] });
-  await Promise.all([handleQuery(), loadTrash()]);
+  await Promise.all([handleQuery(), loadTrash(), showDraftDrawer.value ? refreshDrafts() : Promise.resolve()]);
 };
 
 const purgeOne = async (row: FormData) => {
   await formDataService.purge({ keys: [row.id] });
   await Promise.all([handleQuery(), loadTrash()]);
+};
+
+const openDraft = (row: FormData) => {
+  selectedData.value = row;
+  showDetailsDialog.value = true;
+};
+
+const deleteDraft = async (row: FormData) => {
+  await formDataService.delete(row.id);
+  await Promise.all([handleQuery(), refreshDrafts(), showTrashDrawer.value ? loadTrash() : Promise.resolve()]);
 };
 
 const setFilter = (filter: IConditionList) => {
@@ -656,7 +738,7 @@ const showDetails = (row: FormData) => {
 
 const handleViewOk = async () => {
   showDetailsDialog.value = false;
-  await Promise.all([handleQuery(), showTrashDrawer.value ? loadTrash() : Promise.resolve()]);
+  await Promise.all([handleQuery(), showTrashDrawer.value ? loadTrash() : Promise.resolve(), showDraftDrawer.value ? refreshDrafts() : Promise.resolve()]);
 };
 
 const onDataSaved = async () => {
@@ -693,6 +775,12 @@ const handleTrashSearch = async () => {
 const refreshTrash = async () => {
   updateTrashQueryParams();
   await loadTrash();
+};
+
+const draftPageChanged = async (curPage: number, pSize: number) => {
+  draftPageNum.value = curPage;
+  draftPageSize.value = pSize;
+  await refreshDrafts();
 };
 
 const exportCurrentData = async () => {
@@ -732,6 +820,7 @@ const buildExportColumns = (): ExportColumn[] => {
 const idBasedSpanMethod = () => undefined;
 
 updateQueryParams();
+updateDraftQueryParams();
 updateTrashQueryParams();
 void handleQuery();
 </script>
