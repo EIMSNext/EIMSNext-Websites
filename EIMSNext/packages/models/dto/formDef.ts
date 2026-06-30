@@ -8,7 +8,6 @@ export interface FormDefRequest extends IdBase {
   appId?: string;
   name?: string;
   content?: FormContent;
-  isLedger?: boolean;
   usingWorkflow?: boolean;
   formSettings?: FormSettings;
 }
@@ -17,7 +16,6 @@ export interface FormDef extends CorpModelBase {
   name: string;
   appId: string;
   content?: FormContent;
-  isLedger: boolean;
   usingWorkflow: boolean;
   formSettings?: FormSettings;
   external?: boolean;

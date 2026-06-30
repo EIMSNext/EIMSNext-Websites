@@ -498,8 +498,6 @@ export default {
       newFormDesc: "适用于数据上报、问卷调研等业务。",
       newFlowForm: "新建流程表单",
       newFlowFormDesc: "适用于有特定流程，需要不同成员分步骤填写数据的业务。",
-      newLedger: "新建数据台账",
-      newLedgerDesc: "用于财务台账，库存台账等持续使用业务",
     },
     appStore: {
       appDetail: "应用详情",
@@ -766,7 +764,6 @@ export default {
     newApp: "创建新应用",
     editNameAndIcon: "修改名称和图标",
     newForm: "创建普通表单",
-    newLedgerForm: "创建台账表单",
     newFlowForm: "创建流程表单",
     newDashboard: "创建仪表盘",
     newGroup: "创建分组",

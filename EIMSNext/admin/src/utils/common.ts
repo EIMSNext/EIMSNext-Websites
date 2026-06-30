@@ -76,8 +76,7 @@ export function getFormIcon(form?: AppMenu) {
           let formdef = formStore.items.find((x) => x.id == form.menuId);
 
           if (formdef) {
-            if (formdef.isLedger) icon = "icon-ledgerdefault";
-            else if (formdef.usingWorkflow) icon = "icon-flowdefault";
+            if (formdef.usingWorkflow) icon = "icon-flowdefault";
           }
         }
         break;

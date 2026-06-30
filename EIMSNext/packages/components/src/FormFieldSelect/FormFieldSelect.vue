@@ -106,7 +106,7 @@ const loadFields = async () => {
       if (field.type === FieldType.TableForm && field.columns) {
         // 如果是子表单，遍历子表单的列
         field.columns.forEach(subField => {
-          const fieldDef = toFormFieldDef(form.id, subField, field, form.id, !form.isLedger);
+          const fieldDef = toFormFieldDef(form.id, subField, field, form.id);
           fieldOptions.push({
             id: buildFieldId(form.id, fieldDef.field),
             label: fieldDef.label,
@@ -115,7 +115,7 @@ const loadFields = async () => {
         });
       } else {
         // 普通字段
-        const fieldDef = toFormFieldDef(form.id, field, undefined, form.id, !form.isLedger);
+        const fieldDef = toFormFieldDef(form.id, field, undefined, form.id);
         fieldOptions.push({
           id: buildFieldId(form.id, fieldDef.field),
           label: fieldDef.label,

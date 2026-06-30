@@ -105,7 +105,6 @@
       :dashboard-item-id="activeChartItem?.config?.dashboardItemId"
       @select="handleChartSelected"
     />
-  </Layout>
 </template>
 
 <script setup lang="ts">

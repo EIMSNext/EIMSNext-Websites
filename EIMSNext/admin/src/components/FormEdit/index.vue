@@ -51,7 +51,6 @@ const props = defineProps<{
   modelValue: boolean;
   formDef: FormDef;
   usingFlow: boolean;
-  isLedger: boolean;
 }>();
 
 const formStore = useFormStore();

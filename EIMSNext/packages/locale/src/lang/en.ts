@@ -456,7 +456,6 @@ export default {
     newApp: "New App",
     editNameAndIcon: "Edit Name & Icon",
     newForm: "New Form",
-    newLedgerForm: "New Ledger",
     newFlowForm: "New Workflow Form",
     newDashboard: "New Dashboard",
     newGroup: "New Group",
@@ -563,8 +562,6 @@ export default {
       newFormDesc: "For data submission, surveys, and similar business scenarios.",
       newFlowForm: "New Workflow Form",
       newFlowFormDesc: "For business scenarios that require a process and step-by-step data entry by different members.",
-      newLedger: "New Data Ledger",
-      newLedgerDesc: "For finance ledgers, inventory ledgers, and other continuously used business data.",
     },
     apiKeyMgmt: {
       title: "API Key",

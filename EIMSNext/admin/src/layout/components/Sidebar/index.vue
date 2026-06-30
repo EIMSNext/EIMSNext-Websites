@@ -1,7 +1,12 @@
 <template>
   <div class="app-sidebar">
-    <form-edit v-if="showFormEditor && newForm" v-model="showFormEditor" :form-def="newForm!" :usingFlow="usingWorkflow"
-      :isLedger="isLedger" @close="console.log('[Sidebar] FormEdit closed'); showFormEditor = false" />
+    <form-edit
+      v-if="showFormEditor && newForm"
+      v-model="showFormEditor"
+      :form-def="newForm!"
+      :usingFlow="usingWorkflow"
+      @close="console.log('[Sidebar] FormEdit closed'); showFormEditor = false"
+    />
     <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
     <EditFormIcon
       v-if="showMenuEditor && editingMenu"
@@ -77,14 +82,11 @@
           </el-button>
           <template #dropdown>
             <el-dropdown-menu class="sidebar-dropdown-menu">
-              <el-dropdown-item @click="createForm(false, false)">
+              <el-dropdown-item @click="createForm(false)">
                 {{ t("admin.newForm") }}
               </el-dropdown-item>
-              <el-dropdown-item @click="createForm(true, false)">
+              <el-dropdown-item @click="createForm(true)">
                 {{ t("admin.newFlowForm") }}
-              </el-dropdown-item>
-              <el-dropdown-item @click="createForm(false, true)">
-                {{ t("admin.newLedgerForm") }}
               </el-dropdown-item>
               <el-divider class="sidebar-divider" />
               <el-dropdown-item @click="createDashboard">
@@ -169,7 +171,6 @@ const filteredAppMenus = computed(() => {
 const newForm = ref<FormDef>();
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
-const isLedger = ref(false);
 
 const newDash = ref<DashboardDef>();
 const showDshEditor = ref(false);
@@ -233,11 +234,10 @@ onBeforeUnmount(() => {
   }
 });
 
-const createForm = (usingFlow: boolean, ledger: boolean) => {
+const createForm = (usingFlow: boolean) => {
   if (!canManageCurrentApp.value) return;
 
   usingWorkflow.value = usingFlow;
-  isLedger.value = ledger;
 
   //直接创建，防止工作流/数据流等设置报错
   let req: FormDefRequest = {
@@ -250,7 +250,6 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
         '{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":false,"innerText":"提交"}}',
     },
     usingWorkflow: usingFlow,
-    isLedger: ledger,
   };
 
   formDefService.post<FormDef>(req).then((resp) => {
@@ -270,7 +269,6 @@ const editForm = async (formId: string, type: FormType) => {
     if (form) {
       newForm.value = form;
       usingWorkflow.value = form.usingWorkflow;
-      isLedger.value = form.isLedger;
 
       showFormEditor.value = true;
     }

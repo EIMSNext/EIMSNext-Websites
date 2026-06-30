@@ -11,7 +11,6 @@ const initForms: FormDef[] = [
     appId: "system",
     id: "employee",
     name: "Employee",
-    isLedger: true,
     usingWorkflow: false,
     external: false,
     content: {
