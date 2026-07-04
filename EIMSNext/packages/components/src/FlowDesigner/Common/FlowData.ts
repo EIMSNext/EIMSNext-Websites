@@ -884,7 +884,6 @@ export interface PluginMeta {
   singleResult: boolean;
   pluginId: string;
   pluginName?: string;
-  pluginVersion?: string;
   functionId: string;
   functionName?: string;
   fieldSettings: PluginFieldSetting[];

@@ -34,11 +34,38 @@
           <el-option :label="t('comp.value_Empty')" value="Empty" />
         </el-select>
 
+        <el-input-number
+          v-if="getSetting(field.key).value.type === 'Custom' && isNumberCustomField(field)"
+          :model-value="getCustomNumberValue(field)"
+          class="plugin-value-input"
+          controls-position="right"
+          @change="onCustomNumberChanged(field, $event)"
+        />
+
+        <el-date-picker
+          v-else-if="getSetting(field.key).value.type === 'Custom' && isTimestampCustomField(field)"
+          :model-value="getCustomTimestampValue(field)"
+          class="plugin-value-input"
+          type="datetime"
+          value-format="x"
+          @change="onCustomTimestampChanged(field, $event)"
+        />
+
         <el-input
-          v-if="getSetting(field.key).value.type === 'Custom'"
+          v-else-if="getSetting(field.key).value.type === 'Custom' && !isJsonCustomField(field)"
           v-model="getSetting(field.key).value.value"
           class="plugin-value-input"
           @change="syncFieldSetting(field)"
+        />
+
+        <el-input
+          v-else-if="getSetting(field.key).value.type === 'Custom'"
+          :model-value="getCustomJsonText(field)"
+          class="plugin-value-input"
+          type="textarea"
+          :autosize="{ minRows: 2, maxRows: 6 }"
+          :placeholder="getCustomJsonPlaceholder(field)"
+          @change="onCustomJsonChanged(field, String($event))"
         />
 
         <el-select
@@ -121,6 +148,7 @@ import { type IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
 import type { INodeForm } from "@/NodeFieldList/type";
 import { getPrevNodes } from "./type";
 import MetaItemHeader from "../Common/MetaItemHeader.vue";
+import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -137,18 +165,27 @@ const nodes = ref<INodeForm[]>([]);
 const pluginId = ref("");
 const functionId = ref("");
 const mappedFieldKeys = reactive<Record<string, string>>({});
+const customValueTexts = reactive<Record<string, string>>({});
 const resultFields = ref<PluginResultFieldSetting[]>([]);
 
 const resultTypeOptions = computed(() => [
-  { label: t("comp.pluginNode.resultTypes.input"), value: FieldType.Input },
-  { label: t("comp.pluginNode.resultTypes.textarea"), value: FieldType.TextArea },
-  { label: t("comp.pluginNode.resultTypes.number"), value: FieldType.Number },
-  { label: t("comp.pluginNode.resultTypes.timestamp"), value: FieldType.TimeStamp },
-  { label: t("comp.pluginNode.resultTypes.select1"), value: FieldType.Select1 },
-  { label: t("comp.pluginNode.resultTypes.employee1"), value: FieldType.Employee1 },
-  { label: t("comp.pluginNode.resultTypes.department1"), value: FieldType.Department1 },
-  { label: t("comp.pluginNode.resultTypes.fileUpload"), value: FieldType.FileUpload },
-  { label: t("comp.pluginNode.resultTypes.imageUpload"), value: FieldType.ImageUpload },
+  { label: "comp.pluginNode.resultTypes.input", value: FieldType.Input },
+  { label: "comp.pluginNode.resultTypes.textarea", value: FieldType.TextArea },
+  { label: "comp.pluginNode.resultTypes.number", value: FieldType.Number },
+  { label: "comp.pluginNode.resultTypes.timestamp", value: FieldType.TimeStamp },
+  { label: "comp.pluginNode.resultTypes.radio", value: FieldType.Radio },
+  { label: "comp.pluginNode.resultTypes.checkbox", value: FieldType.CheckBox },
+  { label: "comp.pluginNode.resultTypes.select1", value: FieldType.Select1 },
+  { label: "comp.pluginNode.resultTypes.select2", value: FieldType.Select2 },
+  { label: "comp.pluginNode.resultTypes.employee1", value: FieldType.Employee1 },
+  { label: "comp.pluginNode.resultTypes.employee2", value: FieldType.Employee2 },
+  { label: "comp.pluginNode.resultTypes.department1", value: FieldType.Department1 },
+  { label: "comp.pluginNode.resultTypes.department2", value: FieldType.Department2 },
+  { label: "comp.pluginNode.resultTypes.fileUpload", value: FieldType.FileUpload },
+  { label: "comp.pluginNode.resultTypes.imageUpload", value: FieldType.ImageUpload },
+  { label: "comp.pluginNode.resultTypes.signature", value: FieldType.Signature },
+  { label: "comp.pluginNode.resultTypes.tableForm", value: FieldType.TableForm },
+  { label: "comp.pluginNode.resultTypes.serialNo", value: FieldType.SerialNo },
 ]);
 
 const selectedPlugin = computed(() => plugins.value.find((x) => x.pluginId === pluginId.value));
@@ -171,6 +208,7 @@ const init = async () => {
       mappedFieldKeys[item.fieldKey] = candidateKey(item.value.fieldValue);
     }
   }
+  selectedFunction.value?.inputFields.forEach((field) => syncFieldSetting(field));
 
   ready.value = true;
 };
@@ -193,13 +231,13 @@ const onPluginChanged = () => {
   const plugin = selectedPlugin.value;
   activeData.value.metadata.pluginMeta!.pluginId = pluginId.value;
   activeData.value.metadata.pluginMeta!.pluginName = plugin?.name;
-  activeData.value.metadata.pluginMeta!.pluginVersion = plugin?.version;
   activeData.value.metadata.pluginMeta!.functionId = "";
   activeData.value.metadata.pluginMeta!.functionName = undefined;
   activeData.value.metadata.pluginMeta!.fieldSettings = [];
   activeData.value.metadata.pluginMeta!.resultFields = [];
   resultFields.value = activeData.value.metadata.pluginMeta!.resultFields;
   clearMappedFieldKeys();
+  clearCustomValueTexts();
   functionId.value = "";
 };
 
@@ -212,19 +250,26 @@ const onFunctionChanged = () => {
     fieldKey: field.key,
     fieldName: field.name,
     fieldType: field.fieldType,
-    value: { type: field.allowCustomValue ? "Custom" : field.allowFieldMapping ? "Field" : "Empty", value: "" },
+    value: {
+      type: field.allowCustomValue ? "Custom" : field.allowFieldMapping ? "Field" : "Empty",
+      value: field.allowCustomValue ? getDefaultCustomValue(field) : undefined,
+    },
   }));
   activeData.value.metadata.pluginMeta!.resultFields = [];
   resultFields.value = activeData.value.metadata.pluginMeta!.resultFields;
+  clearCustomValueTexts();
 };
 
-const syncFieldSetting = (field: { key: string; name: string; fieldType: string }) => {
+const syncFieldSetting = (field: PluginFieldDesc) => {
   const setting = getSetting(field.key);
   setting.fieldName = field.name;
   setting.fieldType = field.fieldType;
   if (setting.value.type !== "Field") {
     delete setting.value.fieldValue;
     delete mappedFieldKeys[field.key];
+  }
+  if (setting.value.type === "Custom" && isJsonCustomField(field) && (setting.value.value === "" || setting.value.value === undefined)) {
+    setting.value.value = getDefaultCustomValue(field);
   }
 };
 
@@ -339,6 +384,119 @@ const clearMappedFieldKeys = () => {
   Object.keys(mappedFieldKeys).forEach((key) => {
     delete mappedFieldKeys[key];
   });
+};
+
+const clearCustomValueTexts = () => {
+  Object.keys(customValueTexts).forEach((key) => {
+    delete customValueTexts[key];
+  });
+};
+
+const isJsonCustomField = (field: PluginFieldDesc) => {
+  return isMultipleCustomField(field) || [
+    FieldType.Employee1,
+    FieldType.Department1,
+  ].includes(field.fieldType as FieldType);
+};
+
+const isMultipleCustomField = (field: PluginFieldDesc) => {
+  return field.multiple || [
+    FieldType.CheckBox,
+    FieldType.Select2,
+    FieldType.Employee2,
+    FieldType.Department2,
+    FieldType.TableForm,
+  ].includes(field.fieldType as FieldType);
+};
+
+const isNumberCustomField = (field: PluginFieldDesc) => field.fieldType === FieldType.Number;
+
+const isTimestampCustomField = (field: PluginFieldDesc) => field.fieldType === FieldType.TimeStamp;
+
+const getDefaultCustomValue = (field: PluginFieldDesc) => {
+  if (isNumberCustomField(field) || isTimestampCustomField(field)) {
+    return null;
+  }
+
+  if (!isJsonCustomField(field)) {
+    return "";
+  }
+
+  return isMultipleCustomField(field) ? [] : {};
+};
+
+const getCustomNumberValue = (field: PluginFieldDesc) => {
+  const value = getSetting(field.key).value.value;
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+};
+
+const onCustomNumberChanged = (field: PluginFieldDesc, value: number | undefined) => {
+  const setting = getSetting(field.key);
+  setting.value.value = typeof value === "number" && Number.isFinite(value) ? value : null;
+  syncFieldSetting(field);
+};
+
+const getCustomTimestampValue = (field: PluginFieldDesc) => {
+  const value = getSetting(field.key).value.value;
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+};
+
+const onCustomTimestampChanged = (field: PluginFieldDesc, value: string | number | Date | undefined | null) => {
+  const setting = getSetting(field.key);
+  setting.value.value = normalizeTimestampValue(value);
+  syncFieldSetting(field);
+};
+
+const normalizeTimestampValue = (value: string | number | Date | undefined | null) => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (value instanceof Date) {
+    const timestamp = value.getTime();
+    return Number.isFinite(timestamp) ? timestamp : null;
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    const timestamp = Number(value);
+    return Number.isFinite(timestamp) ? timestamp : null;
+  }
+
+  return null;
+};
+
+const getCustomJsonText = (field: PluginFieldDesc) => {
+  if (customValueTexts[field.key] !== undefined) {
+    return customValueTexts[field.key];
+  }
+
+  const rawValue = getSetting(field.key).value.value;
+  const value = rawValue === "" ? getDefaultCustomValue(field) : rawValue ?? getDefaultCustomValue(field);
+  return JSON.stringify(value, null, 2);
+};
+
+const getCustomJsonPlaceholder = (field: PluginFieldDesc) => {
+  return isMultipleCustomField(field)
+    ? t("comp.pluginNode.customJsonArrayPlaceholder")
+    : t("comp.pluginNode.customJsonObjectPlaceholder");
+};
+
+const onCustomJsonChanged = (field: PluginFieldDesc, text: string) => {
+  customValueTexts[field.key] = text;
+  try {
+    const parsed = text.trim() ? JSON.parse(text) : getDefaultCustomValue(field);
+    const shouldBeArray = isMultipleCustomField(field);
+    if (shouldBeArray !== Array.isArray(parsed)) {
+      ElMessage.error(shouldBeArray ? t("comp.pluginNode.customJsonArrayRequired") : t("comp.pluginNode.customJsonObjectRequired"));
+      return;
+    }
+
+    const setting = getSetting(field.key);
+    setting.value.value = parsed;
+    syncFieldSetting(field);
+  } catch {
+    ElMessage.error(t("comp.pluginNode.invalidJsonValue"));
+  }
 };
 
 const buildNodeFieldCandidates = (node: INodeForm): IFormFieldDef[] => {

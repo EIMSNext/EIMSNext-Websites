@@ -14,7 +14,6 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="version" :label="$t('admin.openPlatform.version')" width="120" />
         <el-table-column prop="status" :label="$t('admin.openPlatform.status')" width="130" />
         <el-table-column :label="$t('admin.openPlatform.enable')" width="140">
           <template #default="scope">

@@ -5,6 +5,7 @@ export interface PluginFieldDesc {
   required: boolean;
   allowCustomValue: boolean;
   allowFieldMapping: boolean;
+  multiple: boolean;
   description?: string;
   compatibleFieldTypes: string[];
 }
@@ -21,6 +22,7 @@ export interface PluginResultFieldDesc {
   key: string;
   name: string;
   fieldType: string;
+  multiple: boolean;
   description?: string;
 }
 

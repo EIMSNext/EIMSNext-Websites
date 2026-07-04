@@ -39,9 +39,10 @@
           <el-table-column prop="currentVersion" :label="$t('admin.pluginManage.currentVersion')" width="120" />
           <el-table-column :label="$t('admin.pluginManage.unloadResult')" width="120">
             <template #default="scope">
-              <el-tag :type="scope.row.unloadedOldVersion ? 'success' : 'warning'">
+              <el-tag v-if="scope.row.updated && scope.row.previousVersion" :type="scope.row.unloadedOldVersion ? 'success' : 'warning'">
                 {{ scope.row.unloadedOldVersion ? $t('admin.pluginManage.released') : $t('admin.pluginManage.stillReferenced') }}
               </el-tag>
+              <span v-else>-</span>
             </template>
           </el-table-column>
           <el-table-column prop="message" :label="$t('admin.pluginManage.info')" min-width="220" />

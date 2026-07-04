@@ -1,5 +1,5 @@
 import { CorpModelBase, ModelBase } from "./modelBase";
-import { PluginFieldDesc } from "./plugin";
+import { PluginFieldDesc, PluginResultFieldDesc } from "./plugin";
 
 export interface PluginPricingPlan {
   id: string;
@@ -53,12 +53,11 @@ export interface PluginProfileFunction {
   name: string;
   description?: string;
   inputFields?: PluginFieldDesc[];
+  resultFields?: PluginResultFieldDesc[];
 }
 
 export interface PluginInstall extends CorpModelBase {
-  pluginProfileId: string;
   pluginId: string;
-  version: string;
   name: string;
   summary?: string;
   icon?: string;

@@ -167,8 +167,7 @@ function openDetail(item: PluginProfile) {
 }
 
 function onDetailInstalled() {
-  const found = profileItems.value.find((p) => p.id === selectedProfileId.value);
-  if (found) found.installed = true;
+  loadProfiles();
 }
 
 onMounted(loadProfiles);
