@@ -93,15 +93,29 @@ export async function getPrevNodes(
           break;
         case FlowNodeType.Plugin:
           node.singleResult = prevNode.metadata.pluginMeta?.singleResult ?? true;
-          node.outputFields = (prevNode.metadata.pluginMeta?.resultFields ?? []).map((field) => ({
-            formId: currentNodeId,
-            field: field.fieldKey,
-            label: field.fieldName,
-            type: field.fieldType as FieldType,
-            isSubField: false,
-            nodeId: currentNodeId,
-            singleResultNode: true,
-          } satisfies IFormFieldDef));
+          node.outputFields = (prevNode.metadata.pluginMeta?.resultFields ?? []).flatMap((field) => {
+            const parent = {
+              formId: currentNodeId,
+              field: field.fieldKey,
+              label: field.fieldName,
+              type: field.fieldType as FieldType,
+              isSubField: false,
+              nodeId: currentNodeId,
+              singleResultNode: true,
+            } satisfies IFormFieldDef;
+            const subFields = field.fieldType === FieldType.TableForm
+              ? (field.subFields ?? []).map((subField) => ({
+                formId: currentNodeId,
+                field: `${field.fieldKey}>${subField.fieldKey}`,
+                label: `${field.fieldName} > ${subField.fieldName}`,
+                type: subField.fieldType as FieldType,
+                isSubField: true,
+                nodeId: currentNodeId,
+                singleResultNode: true,
+              } satisfies IFormFieldDef))
+              : [];
+            return [parent, ...subFields];
+          });
           break;
       }
       if (formId) {

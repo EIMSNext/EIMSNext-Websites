@@ -1,4 +1,4 @@
-import formCreate from '@eimsnext/form-render/element-plus';
+import formCreate from '@eimsnext/form-render-elplus';
 import DataTable from '../components/dataTable/DataTable.vue';
 import Table from '../components/table/Table.vue';
 import Value from '../components/value/Value.vue';

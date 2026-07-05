@@ -1,5 +1,5 @@
-import { Api, Options, Rule } from "@eimsnext/form-render/element-plus";
-import FormCreate from "@eimsnext/form-render/element-plus";
+import { Api, Options, Rule } from "@eimsnext/form-render-elplus";
+import FormCreate from "@eimsnext/form-render-elplus";
 import {
   Component,
   Plugin,

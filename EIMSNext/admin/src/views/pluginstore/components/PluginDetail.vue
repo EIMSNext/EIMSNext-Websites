@@ -76,14 +76,14 @@
                   <div class="function-desc">{{ fn.description || $t("admin.plugin.noDescription") }}</div>
                   <div class="function-fields">
                     <span class="function-field-label">{{ $t("admin.plugin.functionInputs") }}</span>
-                    <span v-for="field in fn.inputFields || []" :key="field.key" class="function-field-tag">
+                    <span v-for="field in flattenPluginFields(fn.inputFields || [])" :key="field.key" class="function-field-tag">
                       {{ field.name }}
                     </span>
                     <span v-if="!(fn.inputFields || []).length" class="function-field-tag muted">{{ $t("admin.plugin.noInputFields") }}</span>
                   </div>
                   <div class="function-fields">
                     <span class="function-field-label">{{ $t("admin.plugin.functionOutputs") }}</span>
-                    <span v-for="field in fn.resultFields || []" :key="field.key" class="function-field-tag output">
+                    <span v-for="field in flattenPluginFields(fn.resultFields || [])" :key="field.key" class="function-field-tag output">
                       {{ field.name }}
                     </span>
                     <span v-if="!(fn.resultFields || []).length" class="function-field-tag muted">{{ $t("admin.plugin.noResultFields") }}</span>
@@ -189,6 +189,16 @@ async function install() {
 function openLink(url?: string) {
   if (!url) return;
   window.open(url, "_blank");
+}
+
+function flattenPluginFields(fields: Array<{ key: string; name: string; subFields?: Array<{ key: string; name: string }> }>) {
+  return fields.flatMap((field) => {
+    const subFields = field.subFields?.map((subField) => ({
+      key: `${field.key}>${subField.key}`,
+      name: `${field.name} > ${subField.name}`,
+    })) ?? [];
+    return subFields.length ? subFields : [{ key: field.key, name: field.name }];
+  });
 }
 </script>
 <style scoped lang="scss">

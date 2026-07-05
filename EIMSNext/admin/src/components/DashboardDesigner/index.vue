@@ -245,8 +245,7 @@
     :chart-targets="chartTargets" :binding-candidates="bindingCandidates" />
 </template>
 <script setup lang="ts">
-import { EtDrawer } from "@eimsnext/components/src/drawer";
-import { buildFieldListItems, IFormFieldDef } from "@eimsnext/components";
+import { buildFieldListItems, EtDrawer, IFormFieldDef } from "@eimsnext/components";
 import DashItemCard from "./components/DashItemCard.vue";
 import { IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
 import { uniqueId } from "@eimsnext/utils";

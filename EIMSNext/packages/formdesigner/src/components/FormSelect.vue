@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import fetch from "@eimsnext/form-render-core/src/frame/fetch";
+import { fetch } from "@eimsnext/form-render-core";
 import { useContextStore, useFormStore } from "@eimsnext/store";
 
 export default {

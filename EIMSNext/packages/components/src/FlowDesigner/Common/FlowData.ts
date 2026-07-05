@@ -604,6 +604,7 @@ function cleanupPluginDependencies(
   validNodeIds: Set<string>
 ) {
   fieldSettings?.forEach((setting) => {
+    cleanupPluginDependencies(setting.subFieldSettings, validNodeIds);
     if (
       setting.value.fieldValue &&
       !isValidDependency(setting.value.fieldValue.nodeId, validNodeIds)
@@ -894,17 +895,20 @@ export interface PluginFieldSetting {
   fieldKey: string;
   fieldName?: string;
   fieldType: string;
+  required?: boolean;
   value: {
     type: string;
     value?: any;
     fieldValue?: IFormFieldDef;
   };
+  subFieldSettings?: PluginFieldSetting[];
 }
 
 export interface PluginResultFieldSetting {
   fieldKey: string;
   fieldName: string;
   fieldType: string;
+  subFields?: PluginResultFieldSetting[];
 }
 
 export enum EventType {

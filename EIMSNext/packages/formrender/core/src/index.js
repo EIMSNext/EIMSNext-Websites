@@ -38,6 +38,7 @@ import {
   err,
 } from "./utils";
 import { fragment, FcSubForm } from "./components";
+import fetch from "./frame/fetch";
 
 export {
   FormCreateFactory,
@@ -50,6 +51,7 @@ export {
   invoke,
   fragment,
   FcSubForm,
+  fetch,
   debounce,
   toArray,
   toString,

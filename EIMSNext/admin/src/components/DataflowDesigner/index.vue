@@ -22,6 +22,8 @@ import {
   FlowNodeType,
   IFlowContext,
   IFlowData,
+  IFlowNodeData,
+  collectPluginFieldValidationErrors,
   createFlowNode,
   createDataflowData,
   EtConfirm,
@@ -30,7 +32,7 @@ import {
 } from "@eimsnext/components";
 import { FlowType, EventSourceType, WfDefinition, WfDefinitionRequest } from "@eimsnext/models";
 import { wfDefinitionService } from "@eimsnext/services";
-import { useLocale } from "element-plus";
+import { ElMessage, useLocale } from "element-plus";
 const { t } = useLocale();
 
 enum FormulaFieldValueType {
@@ -157,7 +159,34 @@ const getMissingFieldValidation = () => {
   return errors;
 };
 
+const getPluginConfigValidation = () => {
+  const errors: { nodeId: string; nodeName: string; label: string }[] = [];
+  const visitNode = (node: IFlowNodeData) => {
+    if (node.nodeType === FlowNodeType.Plugin) {
+      collectPluginFieldValidationErrors(node, node.metadata.pluginMeta?.fieldSettings)
+        .forEach((error) => errors.push({
+          nodeId: error.node.id,
+          nodeName: error.node.name,
+          label: error.label,
+        }));
+    }
+
+    node.conditionData && visitNode(node.conditionData);
+    node.childNodes?.forEach(visitNode);
+  };
+
+  [flowData.value.startNode, ...flowData.value.nodes, flowData.value.endNode].forEach(visitNode);
+  return errors;
+};
+
 const save = async () => {
+  const pluginConfigErrors = getPluginConfigValidation();
+  if (pluginConfigErrors.length > 0) {
+    const error = pluginConfigErrors[0];
+    ElMessage.error(t("dataflow.pluginConfigInvalidContent", { node: error.nodeName, field: error.label }));
+    return;
+  }
+
   const formulaErrors = getFormulaValidation();
   if (formulaErrors.length > 0) {
     const confirm = await EtConfirm.showDialog(

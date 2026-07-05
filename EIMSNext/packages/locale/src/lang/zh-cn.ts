@@ -329,6 +329,8 @@ export default {
       otherCompatibleFieldsGroup: "其他兼容字段",
       mainTableFieldsGroup: "主表字段",
       subTableFieldsGroup: "子表字段",
+      subTableSourceMismatch: "同一个插件子表只能选择主表字段或同一个来源子表的字段",
+      mainFieldCannotMapSubField: "插件主字段不能选择子表字段",
       customJsonObjectPlaceholder: "请输入 JSON 对象，例如 {\"value\":\"A\",\"label\":\"选项A\"}",
       customJsonArrayPlaceholder: "请输入 JSON 数组，例如 [{\"value\":\"A\",\"label\":\"选项A\"}]",
       invalidJsonValue: "自定义值不是合法 JSON",
@@ -1861,6 +1863,7 @@ export default {
     formulaSaveDisabledTitle: "存在不可用公式",
     formulaSaveDisabledContent:
       "存在无法确定数据来源的公式字段，保存后该智能助手将自动禁用。你可以确认保存并禁用，或取消后继续修改。",
+    pluginConfigInvalidContent: "插件节点“{node}”的字段“{field}”配置不完整或子表来源不一致，请检查后再保存。",
     pluginName: "执行插件",
     pluginFunction: "插件功能",
     scheduleTrigger: "定时触发",

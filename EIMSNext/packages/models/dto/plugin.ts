@@ -8,6 +8,7 @@ export interface PluginFieldDesc {
   multiple: boolean;
   description?: string;
   compatibleFieldTypes: string[];
+  subFields?: PluginFieldDesc[];
 }
 
 export interface FunctionDesc {
@@ -24,6 +25,7 @@ export interface PluginResultFieldDesc {
   fieldType: string;
   multiple: boolean;
   description?: string;
+  subFields?: PluginResultFieldDesc[];
 }
 
 export interface PluginRuntimeInfo {

@@ -278,6 +278,8 @@ export default {
       otherCompatibleFieldsGroup: "Other Compatible Fields",
       mainTableFieldsGroup: "Main Table Fields",
       subTableFieldsGroup: "Subtable Fields",
+      subTableSourceMismatch: "A plugin subtable can only use main-table fields or fields from the same source subtable",
+      mainFieldCannotMapSubField: "A plugin main field cannot map a subtable field",
       customJsonObjectPlaceholder: "Enter a JSON object, for example {\"value\":\"A\",\"label\":\"Option A\"}",
       customJsonArrayPlaceholder: "Enter a JSON array, for example [{\"value\":\"A\",\"label\":\"Option A\"}]",
       invalidJsonValue: "Custom value is not valid JSON",
@@ -1862,6 +1864,8 @@ export default {
     formulaSaveDisabledTitle: "Invalid formulas detected",
     formulaSaveDisabledContent:
       "Some formula fields do not have a resolvable data source. Saving will disable this dataflow. Confirm to save as disabled, or cancel and continue editing.",
+    pluginConfigInvalidContent:
+      "Plugin node \"{node}\" has an incomplete field mapping or mixed subtable sources at \"{field}\". Please fix it before saving.",
     pluginName: "Plugin",
     pluginFunction: "Function",
     scheduleTrigger: "Scheduled Trigger",

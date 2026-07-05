@@ -160,8 +160,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 import { useUserStore, useDeptStore } from "@eimsnext/store";
-import { EtDrawer } from "@eimsnext/components/src/drawer";
 import {
+  EtDrawer,
   IFormFieldDef,
   MemberSelectDialog,
   MemberTabs,
