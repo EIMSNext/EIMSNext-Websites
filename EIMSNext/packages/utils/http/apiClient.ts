@@ -55,6 +55,12 @@ export class ApiClient {
     return this.httpRequest.post<T>({ url, data, headers, withToken });
   }
 
+  postForm<T = any>(url: string, data: FormData, withToken?: true) {
+    url = this.formatUrl(url);
+    let headers = new AxiosHeaders();
+    return this.httpRequest.post<T>({ url, data, headers, withToken });
+  }
+
   put<T = any>(url: string, data: any, withToken?: true) {
     url = this.formatUrl(url);
     let headers = new AxiosHeaders();

@@ -28,6 +28,14 @@
           @submit="onDataSaved"></AddFormData>
       </div>
     </et-dialog>
+    <FormDataImportDialog
+      v-if="formDef"
+      v-model="showImportDialog"
+      :form-def="formDef"
+      :auth-group-id="curAuthGrp?.id"
+      :field-perms="fieldPerms"
+      @imported="handleQuery"
+    />
     <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')"
       :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
       <div>{{ t("common.message.deleteConfirm_Content", [checkedDatas.length]) }}</div>
@@ -162,6 +170,7 @@ import { useI18n } from "vue-i18n";
 import FormDraftDrawer from "./components/FormDraftDrawer.vue";
 import FormListViewRenderer from "./components/FormListViewRenderer.vue";
 import FormDataSearchBar from "./components/FormDataSearchBar.vue";
+import FormDataImportDialog from "./components/FormDataImportDialog.vue";
 import {
   createDefaultFormListView,
   getViewDisplayFields,
@@ -188,6 +197,7 @@ const displayItemCount = 3; //最多显示3条明细
 const showAddDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const showExportDialog = ref(false);
+const showImportDialog = ref(false);
 const showDraftDrawer = ref(false);
 const exporting = ref(false);
 const columns = ref<ITableColumn[]>([]);
@@ -214,6 +224,7 @@ const { currentUser } = userStore;
 
 const dataPerms = computed(() => getAuthGroupDataPerms(curAuthGrp.value));
 const canAdd = computed(() => hasDataPerm(currentUser.userType, DataPerms.AddNew, dataPerms.value));
+const canImport = computed(() => hasDataPerm(currentUser.userType, DataPerms.Import, dataPerms.value));
 const canRemove = computed(() =>
   hasDataPerm(currentUser.userType, DataPerms.Remove, dataPerms.value)
 );
@@ -268,7 +279,18 @@ const leftBars = ref<ToolbarItem[]>([
       disabled: true,
     },
   },
-  // { type: "button", config: { text: "导入", command: "upload", icon: "el-upload" } },
+  {
+    type: "button",
+    config: {
+      text: "common.import",
+      command: "import",
+      visible: canImport,
+      icon: "el-upload",
+      onCommand: () => {
+        showImportDialog.value = true;
+      },
+    },
+  },
   // { type: "button", config: { text: "导出", command: "download", icon: "el-download" } }
 ]);
 

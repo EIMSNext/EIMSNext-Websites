@@ -12,8 +12,11 @@ export type ResourceCode =
   | "workflow.instance"
   | "workflow.task";
 
-/** 资源上的 5 个标准动作（与后端 `Operation` 位掩码对齐）。 */
-export const ResourceActionFlag = {
+/**
+ * 5 个标准动作（与后端 EIMSNext.Common.Operation 位掩码一一对应）。
+ * 注意：本文件位定义必须与后端 Core/EIMSNext.Common/Enums.cs 同步。
+ */
+export const Operation = {
   Read: 1 << 0,
   Add: 1 << 1,
   Edit: 1 << 2,
@@ -27,7 +30,7 @@ export const ResourceActionFlag = {
  */
 export interface ResourceActionGrant {
   resource: ResourceCode;
-  /** 位掩码数值；用 ResourceActionFlag | 运算组合。 */
+  /** 位掩码数值；用 Operation | 运算组合。 */
   actions: number;
 }
 

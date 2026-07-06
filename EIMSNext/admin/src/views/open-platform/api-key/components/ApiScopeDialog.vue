@@ -91,7 +91,6 @@ import {
   type ResourceCode,
   type ResourceSpec,
   Resources,
-  ResourceActionFlag,
 } from "@eimsnext/models";
 
 const { t } = useI18n();
@@ -147,9 +146,9 @@ const groupedResources = computed(() => {
     groups[r.group].push(r);
   }
   return [
-    { key: "contacts", title: t("admin.apiKeyMgmt.apiScopeDialog.groups.contacts"), items: groups["通讯录"] ?? [] },
-    { key: "apps",     title: t("admin.apiKeyMgmt.apiScopeDialog.groups.apps"),     items: groups["应用"]   ?? [] },
-    { key: "workflow", title: t("admin.apiKeyMgmt.apiScopeDialog.groups.workflow"), items: groups["工作流"] ?? [] },
+    { key: "contacts", title: t("admin.apiKeyMgmt.apiScopeDialog.groups.contacts"), items: groups["contacts"] ?? [] },
+    { key: "apps",     title: t("admin.apiKeyMgmt.apiScopeDialog.groups.apps"),     items: groups["apps"]     ?? [] },
+    { key: "workflow", title: t("admin.apiKeyMgmt.apiScopeDialog.groups.workflow"), items: groups["workflow"] ?? [] },
   ];
 });
 

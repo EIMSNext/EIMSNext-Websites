@@ -38,4 +38,5 @@ export enum MessageType {
   WfExpireNotify = "2",
   WfUrgeNotify = "3",
   ExportNotify = "4",
+  ImportNotify = "5",
 }

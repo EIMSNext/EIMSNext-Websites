@@ -246,8 +246,12 @@ const createForm = (usingFlow: boolean) => {
     name: t("admin.untitledForm"),
     content: {
       layout: "[]",
-      options:
-        '{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":false,"innerText":"提交"}}',
+      options: JSON.stringify({
+        info: { align: "left" },
+        form: { inline: false, hideRequiredAsterisk: false, labelPosition: "top", size: "default", labelWidth: "auto" },
+        resetBtn: { show: false, innerText: t("common.reset") },
+        submitBtn: { show: false, innerText: t("common.submit") },
+      }),
     },
     usingWorkflow: usingFlow,
   };

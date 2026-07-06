@@ -14,6 +14,12 @@
       </div>
     </et-dialog>
 
+    <FormDataImportDialog
+      v-model="showImportDialog"
+      :form-def="formDef"
+      @imported="handleQuery"
+    />
+
     <EtConfirmDialog
       v-model="showDeleteConfirmDialog"
       :title="t('common.message.deleteConfirm_Title')"
@@ -278,6 +284,7 @@ import DataField from "@/views/form/components/DataField.vue";
 import DataFilter from "@/views/form/components/DataFilter.vue";
 import DataSort from "@/views/form/components/DataSort.vue";
 import FormDataView from "@/views/form/components/FormDataView.vue";
+import FormDataImportDialog from "@/views/form/components/FormDataImportDialog.vue";
 import FormDraftDrawer from "@/views/form/components/FormDraftDrawer.vue";
 import Pagination from "@/components/Pagination/index.vue";
 import FormListViewRenderer from "@/views/form/components/FormListViewRenderer.vue";
@@ -321,6 +328,7 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const showAddDialog = ref(false);
+const showImportDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const showRestoreConfirmDialog = ref(false);
 const showPurgeConfirmDialog = ref(false);
@@ -442,6 +450,18 @@ const leftBars = ref<ToolbarItem[]>([
       icon: "el-delete",
       visible: true,
       disabled: true,
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "common.import",
+      command: "import",
+      icon: "el-upload",
+      visible: true,
+      onCommand: () => {
+        showImportDialog.value = true;
+      },
     },
   },
 ]);

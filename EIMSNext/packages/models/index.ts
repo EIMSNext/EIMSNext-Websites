@@ -36,6 +36,7 @@ export * from "./dto/dashboardDef";
 export * from "./dto/dashboardItemDef";
 export * from "./dto/dashboardFilter";
 export * from "./dto/exportLog";
+export * from "./dto/formDataImport";
 export * from "./dto/plugin";
 export * from "./dto/pluginProfile";
 export * from "./dto/flowManage";

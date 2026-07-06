@@ -97,24 +97,24 @@ watch(
 );
 
 // 简化版 mock 数据：实际项目里应通过 appDefService 拉真实 App 列表
-const allApps: AppItem[] = [
-  { id: "app-001", name: "关联字段应用", group: "通讯录" },
-  { id: "app-002", name: "采购供应链_拷贝", group: "通讯录" },
-  { id: "app-003", name: "门店营运管理", group: "通讯录" },
-  { id: "app-004", name: "e签宝电子签章-次数版_模板", group: "通讯录" },
-  { id: "app-005", name: "企业信息查询", group: "其他" },
-  { id: "app-006", name: "印章及证照管理", group: "其他" },
-  { id: "app-007", name: "印章及证照管理_拷贝", group: "其他" },
-  { id: "app-008", name: "MRP（多计划合并版）", group: "其他" },
-  { id: "app-009", name: "e签宝电子签章-年费版-模板", group: "其他" },
-  { id: "app-010", name: "上上签电子签章", group: "其他" },
-  { id: "app-011", name: "开具数电发票插件-demo", group: "其他" },
-];
+const allApps = computed<AppItem[]>(() => [
+  { id: "app-001", name: "关联字段应用", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts") },
+  { id: "app-002", name: "采购供应链_拷贝", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts") },
+  { id: "app-003", name: "门店营运管理", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts") },
+  { id: "app-004", name: "e签宝电子签章-次数版_模板", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts") },
+  { id: "app-005", name: "企业信息查询", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
+  { id: "app-006", name: "印章及证照管理", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
+  { id: "app-007", name: "印章及证照管理_拷贝", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
+  { id: "app-008", name: "MRP（多计划合并版）", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
+  { id: "app-009", name: "e签宝电子签章-年费版-模板", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
+  { id: "app-010", name: "上上签电子签章", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
+  { id: "app-011", name: "开具数电发票插件-demo", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
+]);
 
 const filteredApps = computed(() => {
   const k = search.value.trim().toLowerCase();
-  if (!k) return allApps;
-  return allApps.filter(
+  if (!k) return allApps.value;
+  return allApps.value.filter(
     (a) => a.id.toLowerCase().includes(k) || a.name.toLowerCase().includes(k),
   );
 });
@@ -126,8 +126,8 @@ const groupedApps = computed(() => {
     groups[a.group].push(a);
   }
   return [
-    { key: "通讯录", title: t("admin.apiKeyMgmt.appSelectDialog.groupContacts"), items: groups["通讯录"] ?? [] },
-    { key: "其他",   title: t("admin.apiKeyMgmt.appSelectDialog.groupOthers"),  items: groups["其他"]   ?? [] },
+    { key: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts"), title: t("admin.apiKeyMgmt.appSelectDialog.groupTitleContacts"), items: groups[t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts")] ?? [] },
+    { key: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers"),   title: t("admin.apiKeyMgmt.appSelectDialog.groupTitleOthers"),   items: groups[t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers")]   ?? [] },
   ];
 });
 

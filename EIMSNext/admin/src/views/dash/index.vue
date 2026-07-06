@@ -49,7 +49,9 @@ import { IGridLayoutItem, IGridLayoutState } from "@eimsnext/models";
 import { DashboardDef, DashboardItemDef } from "@eimsnext/models";
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useChartFilterLinkage } from "./useChartFilterLinkage";
+const { t } = useI18n();
 const route = useRoute();
 
 const dashId = route.params.dashId?.toString() || "";
@@ -108,7 +110,7 @@ const loadDashboard = async () => {
       }
     } catch (e) {
       console.error("加载仪表盘失败：", e);
-      ElMessage.error("加载失败");
+      ElMessage.error(t("admin.dashboardDesigner.loadFailed"));
     } finally {
       loadTask = undefined;
     }

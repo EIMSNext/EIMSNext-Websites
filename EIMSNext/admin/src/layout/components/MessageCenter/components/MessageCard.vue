@@ -11,7 +11,7 @@
         <!-- <div v-if="message.detail" class="message-detail">{{ message.detail }}</div> -->
         <a v-if="message.url" class="download-link" :href="message.url" target="_blank"
           @click="emit('read', message.id)">
-          {{ message.messageType == MessageType.ExportNotify ? t("admin.misc.downloadFile") : t("admin.misc.viewDetails") }}
+          {{ isDownloadMessage ? t("admin.misc.downloadFile") : t("admin.misc.viewDetails") }}
         </a>
       </div>
     </div>
@@ -34,6 +34,10 @@ const emit = defineEmits<{
 }>();
 
 const displayTime = computed(() => dateFormat(props.message.createTime, "YYYY-MM-DD HH:mm:ss"));
+const isDownloadMessage = computed(() =>
+  props.message.messageType == MessageType.ExportNotify ||
+  props.message.messageType == MessageType.ImportNotify
+);
 </script>
 <style scoped lang="scss">
 .message-item {

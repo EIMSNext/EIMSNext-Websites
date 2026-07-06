@@ -258,7 +258,7 @@ import {
   type ResourceActionGrant,
   type ResourceCode,
   Resources,
-  ResourceActionFlag,
+  Operation,
 } from "@eimsnext/models";
 import { clientService, clientGrantService } from "@eimsnext/services";
 import ApiScopeDialog from "./components/ApiScopeDialog.vue";
@@ -378,11 +378,11 @@ function resourceLabel(code: ResourceCode): string {
 
 function actionsLabel(actions: number): string {
   const parts: string[] = [];
-  if (actions & ResourceActionFlag.Read) parts.push(t("admin.apiKeyMgmt.actions.read"));
-  if (actions & ResourceActionFlag.Add) parts.push(t("admin.apiKeyMgmt.actions.add"));
-  if (actions & ResourceActionFlag.Edit) parts.push(t("admin.apiKeyMgmt.actions.edit"));
-  if (actions & ResourceActionFlag.Delete) parts.push(t("admin.apiKeyMgmt.actions.delete"));
-  if (actions & ResourceActionFlag.Import) parts.push(t("admin.apiKeyMgmt.actions.import"));
+  if (actions & Operation.Read) parts.push(t("admin.apiKeyMgmt.actions.read"));
+  if (actions & Operation.Add) parts.push(t("admin.apiKeyMgmt.actions.add"));
+  if (actions & Operation.Edit) parts.push(t("admin.apiKeyMgmt.actions.edit"));
+  if (actions & Operation.Delete) parts.push(t("admin.apiKeyMgmt.actions.delete"));
+  if (actions & Operation.Import) parts.push(t("admin.apiKeyMgmt.actions.import"));
   return parts.length === 0 ? "-" : parts.join(" / ");
 }
 
