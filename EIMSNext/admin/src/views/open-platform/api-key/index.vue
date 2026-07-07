@@ -397,7 +397,7 @@ async function load() {
     await Promise.all(
       list.map(async (c) => {
         const g = await clientGrantService
-          .query<ClientGrant>(`?$filter=clientId eq '${encodeURIComponent(c.id)}'`)
+          .query<ClientGrant>(`?$filter=clientId eq '${escapeODataString(c.id)}'&$top=1`)
           .then((arr) => arr[0] ?? null)
           .catch(() => null);
         grants.value = { ...grants.value, [c.id]: g };
@@ -583,6 +583,10 @@ function openApiScopeDialog() {
 
 function openAppSelectDialog() {
   appSelectDialogVisible.value = true;
+}
+
+function escapeODataString(value: string) {
+  return value.replace(/'/g, "''");
 }
 
 onMounted(load);

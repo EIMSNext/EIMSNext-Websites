@@ -73,9 +73,9 @@
     <template #header>
       <div class="main-title"><span>{{ t("admin.webhook.fieldMap") }}</span></div>
     </template>
-    <div class="alias-drawer-content" style="padding: 16px 20px;">
+    <div class="alias-drawer-content">
       <p>{{ t("admin.webhook.fieldMapPlaceholder") }}</p>
-      <pre style="background:#f6f7f9;border:1px solid #e8eaed;padding:12px;overflow:auto;max-height:320px;">{
+      <pre class="field-map-sample">{
       "{{ t("admin.webhook.sampleField") }}": ["field1", "field2", "field3"]
       }</pre>
     </div>
@@ -86,7 +86,7 @@
     <template #header>
       <div class="main-title"><span>{{ t("admin.webhook.structure") }}</span></div>
     </template>
-    <div class="alias-drawer-content" style="padding: 16px 20px;">
+    <div class="alias-drawer-content">
       <p>{{ t("admin.webhook.structurePlaceholder") }}</p>
     </div>
   </el-drawer>
@@ -280,6 +280,19 @@ onBeforeMount(() => {
   color: var(--et-text-tertiary);
   font-weight: 600;
   padding: 0 6px;
+}
+
+.alias-drawer-content {
+  padding: 16px 20px;
+}
+
+.field-map-sample {
+  max-height: 320px;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--et-border-color-light);
+  background: var(--et-bg-muted);
+  color: var(--et-text-primary);
 }
 
 .alias-drawer-footer {

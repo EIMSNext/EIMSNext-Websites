@@ -73,7 +73,7 @@ const saveDraft = (data: any) => {
     formDataService.post<FormData>(fdata);
 
   request.then((res) => {
-    formData.value = res.data;
+    formData.value = res;
     emit("save", res);
     bus.emit("data:saved", { formId: props.formId });
   });
@@ -101,7 +101,7 @@ const submitData = (data: any) => {
     formDataService.post<FormData>(fdata);
 
   request.then((res) => {
-    formData.value = res.data;
+    formData.value = res;
     emit("submit", res);
     bus.emit("data:saved", { formId: props.formId });
   });

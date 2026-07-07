@@ -51,6 +51,7 @@ import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useChartFilterLinkage } from "./useChartFilterLinkage";
+import { escapeODataString } from "@/utils/odata";
 const { t } = useI18n();
 const route = useRoute();
 
@@ -96,7 +97,7 @@ const loadDashboard = async () => {
         state.items = {};
 
         const itemDefs = await dashboardItemDefService.query<DashboardItemDef>(
-          `?$filter=appId eq '${dash.appId}' and dashboardId eq ${dash.id}`
+          `?$filter=appId eq '${escapeODataString(dash.appId)}' and dashboardId eq '${escapeODataString(dash.id)}'`
         );
         if (itemDefs && itemDefs.length > 0) {
           itemDefs.forEach((x) => {

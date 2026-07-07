@@ -72,6 +72,23 @@ const options = ref(formCreate.parseJson(props.def.options!));
 const dataRef = ref<any>(props.data?.data);
 const visibleCustomActions = computed(() => props.actions?.customActions?.filter((x) => x.visible !== false) || []);
 
+watch(
+  () => props.data?.data,
+  (value) => {
+    const nextValue = value || {};
+    dataRef.value = nextValue;
+
+    const fapi = fcInst.value?.fapi;
+    if (!fapi) return;
+
+    if (typeof fapi.coverValue === "function") {
+      fapi.coverValue(nextValue);
+    } else {
+      fapi.setValue(nextValue);
+    }
+  }
+);
+
 if (props.fieldPerms && props.fieldPerms.length > 0) {
   let layout = formCreate.parseJson(props.def.layout!);
   layout.forEach((x) => {

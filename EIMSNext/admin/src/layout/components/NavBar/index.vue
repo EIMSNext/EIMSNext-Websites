@@ -103,18 +103,18 @@
 }
 
 .platform-icon--workbench {
-  background: color-mix(in srgb, #34d399 18%, white);
-  color: #059669;
+  background: var(--et-bg-success-soft);
+  color: var(--et-color-success);
 }
 
 .platform-icon--knowledge {
-  background: color-mix(in srgb, #f59e0b 18%, white);
-  color: #d97706;
+  background: var(--et-bg-warning-soft);
+  color: var(--et-color-warning);
 }
 
 .platform-icon--open {
-  background: color-mix(in srgb, #4f46e5 18%, white);
-  color: #4338ca;
+  background: var(--et-bg-primary-soft);
+  color: var(--et-color-primary);
 }
 
 .platform-title {

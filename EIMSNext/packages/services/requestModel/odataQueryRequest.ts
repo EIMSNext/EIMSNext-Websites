@@ -40,6 +40,7 @@ export interface IFormDataFilterOptionsRequest {
   fieldType?: string;
   keyword?: string;
   filter?: IDynamicFilter;
+  authGroupId?: string;
   limit?: number;
 }
 

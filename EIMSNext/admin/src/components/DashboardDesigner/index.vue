@@ -270,6 +270,7 @@ import { useFormStore } from "@eimsnext/store";
 import { IDashboardBindingCandidate, IDashboardChartTarget } from "./FilterDesigner/type";
 import { createDefaultDetailTableSetting } from "./DetailTable/type";
 import { useDashboardDragDrop } from "./useDashboardDragDrop";
+import { escapeODataString } from "@/utils/odata";
 const { t } = useI18n();
 
 defineOptions({
@@ -561,7 +562,7 @@ watch(
         state.items = {};
 
         let itemDefs = await dashboardItemDefService.query<DashboardItemDef>(
-          `?$filter=appId eq '${newVal.appId}' and dashboardId eq ${newVal.id}`
+          `?$filter=appId eq '${escapeODataString(newVal.appId)}' and dashboardId eq '${escapeODataString(newVal.id)}'`
         );
         if (itemDefs && itemDefs.length > 0) {
           itemDefs.forEach((x) => {

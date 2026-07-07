@@ -225,6 +225,7 @@ const { currentUser } = userStore;
 const dataPerms = computed(() => getAuthGroupDataPerms(curAuthGrp.value));
 const canAdd = computed(() => hasDataPerm(currentUser.userType, DataPerms.AddNew, dataPerms.value));
 const canImport = computed(() => hasDataPerm(currentUser.userType, DataPerms.Import, dataPerms.value));
+const canExport = computed(() => hasDataPerm(currentUser.userType, DataPerms.Export, dataPerms.value));
 const canRemove = computed(() =>
   hasDataPerm(currentUser.userType, DataPerms.Remove, dataPerms.value)
 );
@@ -343,7 +344,7 @@ const rightBars = ref<ToolbarItem[]>([
       text: "common.export",
       class: "data-filter",
       command: "download",
-      visible: true,
+      visible: canExport,
       icon: "el-download",
       onCommand: () => {
         openExportDialog();

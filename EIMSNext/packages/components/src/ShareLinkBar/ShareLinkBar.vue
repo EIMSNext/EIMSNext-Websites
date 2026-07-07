@@ -91,7 +91,7 @@ const renderQrCode = async () => {
   background: var(--el-bg-color);
   border: 1px solid var(--et-border-color);
   border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--et-shadow-sm);
   display: flex;
   overflow: hidden;
 }
@@ -100,7 +100,7 @@ const renderQrCode = async () => {
   flex: 1;
 
   :deep(.el-input__wrapper) {
-    background: #fff;
+    background: var(--et-bg-container);
     border-radius: 0;
     box-shadow: none;
     min-height: 36px;
@@ -109,7 +109,7 @@ const renderQrCode = async () => {
   }
 
   :deep(.el-input__inner) {
-    color: #1f2937;
+    color: var(--et-text-primary);
     font-size: 13px;
   }
 }
@@ -117,12 +117,12 @@ const renderQrCode = async () => {
 .share-link-actions {
   align-items: center;
   background: var(--el-bg-color);
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid var(--et-border-color);
   display: flex;
 
   .el-button {
     border-radius: 0;
-    color: #4b5563;
+    color: var(--et-text-secondary);
     font-size: 13px;
     height: 36px;
     margin: 0;
@@ -130,11 +130,11 @@ const renderQrCode = async () => {
   }
 
   .el-button + .el-button {
-    border-left: 1px solid #eef2f7;
+    border-left: 1px solid var(--et-border-color-light);
   }
 
   .el-button:hover {
-    background: #f8fafc;
+    background: var(--et-bg-hover);
   }
 }
 

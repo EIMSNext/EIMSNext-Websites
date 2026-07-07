@@ -401,7 +401,7 @@ onBeforeMount(async () => {
   min-width: 1080px;
   min-height: 100%;
   padding: 10px 0;
-  background: linear-gradient(180deg, #f7f8fa 0%, #f4f6f8 100%);
+  background: var(--et-bg-page);
 }
 
 .shared-form-shell {
@@ -411,10 +411,10 @@ onBeforeMount(async () => {
 
 .shared-form-card {
   overflow: hidden;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--et-border-color-light);
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+  background: var(--et-bg-container);
+  box-shadow: var(--et-shadow-lg);
 }
 
 .shared-form-body {
@@ -428,12 +428,12 @@ onBeforeMount(async () => {
   justify-content: space-between;
   align-items: flex-start;
   padding: 20px 24px 16px;
-  border-bottom: 1px solid #edf0f3;
+  border-bottom: 1px solid var(--et-border-color-light);
 }
 
 .shared-form-title {
   margin: 0;
-  color: #0f172a;
+  color: var(--et-text-primary);
   font-size: 18px;
   font-weight: 700;
 }
@@ -442,7 +442,7 @@ onBeforeMount(async () => {
   display: flex;
   gap: 12px;
   margin-top: 6px;
-  color: #94a3b8;
+  color: var(--et-text-tertiary);
   font-size: 12px;
 }
 
@@ -459,17 +459,18 @@ onBeforeMount(async () => {
   width: 24px;
   height: 24px;
   padding: 0;
+  border: 1px solid transparent;
   border-radius: 10px;
-  background: #fff;
-  color: #334155;
+  background: var(--et-bg-container);
+  color: var(--et-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .shared-form-header-action-btn:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-  color: #0f172a;
+  border-color: var(--et-border-color);
+  background: var(--et-bg-hover);
+  color: var(--et-text-primary);
 }
 
 .shared-form-header-action-btn:focus-visible {
@@ -479,12 +480,12 @@ onBeforeMount(async () => {
 
 .shared-form-main-panel {
   min-width: 0;
-  border-right: 1px solid #edf0f3;
+  border-right: 1px solid var(--et-border-color-light);
 }
 
 .shared-form-toolbar-wrap {
   padding: 14px 16px 0;
-  background: #fff;
+  background: var(--et-bg-container);
 }
 
 .shared-form-main {
@@ -500,7 +501,7 @@ onBeforeMount(async () => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #fbfcfd;
+  background: var(--et-bg-page);
 }
 
 .shared-side-tabs {
@@ -508,8 +509,8 @@ onBeforeMount(async () => {
   align-items: center;
   gap: 18px;
   padding: 0 18px;
-  border-bottom: 1px solid #edf0f3;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--et-border-color-light);
+  background: var(--et-bg-muted);
 }
 
 .shared-form-tab {
@@ -521,7 +522,7 @@ onBeforeMount(async () => {
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: #0f172a;
+  color: var(--et-text-primary);
   font-size: 14px;
   cursor: pointer;
 }
@@ -544,13 +545,13 @@ onBeforeMount(async () => {
 }
 
 .shared-side-title {
-  color: #0f172a;
+  color: var(--et-text-primary);
   font-size: 14px;
   font-weight: 700;
 }
 
 .shared-side-extra {
-  color: #94a3b8;
+  color: var(--et-text-tertiary);
   font-size: 12px;
 }
 
@@ -563,9 +564,9 @@ onBeforeMount(async () => {
 .workflow-card {
   margin-bottom: 12px;
   padding: 14px 14px 12px;
-  border: 1px solid #eef2f7;
+  border: 1px solid var(--et-border-color-light);
   border-radius: 10px;
-  background: #fff;
+  background: var(--et-bg-container);
 }
 
 .workflow-card-compact {
@@ -580,14 +581,14 @@ onBeforeMount(async () => {
 }
 
 .workflow-node {
-  color: #111827;
+  color: var(--et-text-primary);
   font-size: 14px;
   font-weight: 700;
 }
 
 .workflow-time {
   flex-shrink: 0;
-  color: #64748b;
+  color: var(--et-text-secondary);
   font-size: 12px;
 }
 
@@ -604,8 +605,8 @@ onBeforeMount(async () => {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #ff6b6b;
-  color: #fff;
+  background: var(--et-color-danger);
+  color: var(--et-text-on-primary);
   font-size: 13px;
   font-weight: 700;
 }
@@ -615,13 +616,13 @@ onBeforeMount(async () => {
 }
 
 .workflow-operator-name {
-  color: #111827;
+  color: var(--et-text-primary);
   font-size: 14px;
 }
 
 .workflow-operator-meta,
 .workflow-comment {
-  color: #64748b;
+  color: var(--et-text-secondary);
   font-size: 12px;
 }
 
@@ -636,7 +637,7 @@ onBeforeMount(async () => {
 
 .change-list {
   margin-top: 12px;
-  border-top: 1px solid #eef2f7;
+  border-top: 1px solid var(--et-border-color-light);
 }
 
 .change-row {
@@ -644,14 +645,14 @@ onBeforeMount(async () => {
 }
 
 .change-field {
-  color: #111827;
+  color: var(--et-text-primary);
   font-size: 13px;
   font-weight: 600;
 }
 
 .change-type {
   margin-left: 6px;
-  color: #64748b;
+  color: var(--et-text-secondary);
   font-size: 12px;
   font-weight: 400;
 }
@@ -661,13 +662,13 @@ onBeforeMount(async () => {
   align-items: center;
   gap: 6px;
   margin-top: 4px;
-  color: #64748b;
+  color: var(--et-text-secondary);
   font-size: 12px;
   word-break: break-all;
 }
 
 .change-arrow {
-  color: #94a3b8;
+  color: var(--et-text-tertiary);
 }
 
 .print-trigger {
@@ -677,10 +678,10 @@ onBeforeMount(async () => {
 :deep(.shared-form-toolbar .toolbar-container) {
   min-height: 48px;
   padding: 8px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--et-border-color);
   border-radius: 8px;
-  background: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  background: var(--et-bg-container);
+  box-shadow: var(--et-shadow-sm);
 }
 
 :deep(.shared-form-toolbar .left-group) {
@@ -698,7 +699,7 @@ onBeforeMount(async () => {
 
 :deep(.shared-form-toolbar .toolbar-item.el-button:not(.is-disabled):hover),
 :deep(.shared-form-toolbar .toolbar-dropdown:not(.is-disabled):hover) {
-  background: #f8fafc;
+  background: var(--et-bg-hover);
 }
 
 :deep(.shared-form-toolbar .toolbar-share-btn) {
@@ -714,7 +715,7 @@ onBeforeMount(async () => {
   right: 0;
   width: 1px;
   height: 14px;
-  background: #dbe2ea;
+  background: var(--et-border-color);
   transform: translateY(-50%);
 }
 
@@ -729,7 +730,7 @@ onBeforeMount(async () => {
 
   .shared-form-main-panel {
     border-right: 0;
-    border-bottom: 1px solid #edf0f3;
+    border-bottom: 1px solid var(--et-border-color-light);
   }
 
   .shared-form-side {
