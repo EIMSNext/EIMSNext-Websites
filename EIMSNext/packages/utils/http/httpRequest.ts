@@ -156,7 +156,7 @@ export class HttpRequest {
 
   private isAuthEndpoint(url?: string): boolean {
     if (!url) return false;
-    return /connect\/token|public\/challenge|public\/token/i.test(url);
+    return /connect\/token|public\/challenge|public\/token|auth\/logout/i.test(url);
   }
 
   private handleUnauthorized() {
