@@ -551,7 +551,7 @@ export default {
         title: "修改失败数据",
         resolved: "已修正",
         cancel: "取消修改",
-        retry: "重新导入",
+        retry: "提交修正数据",
       },
       footer: {
         helpLink: "导入说明和示例",
@@ -575,7 +575,7 @@ export default {
         failure: "数据导入失败",
         statusRefreshFailed: "导入状态刷新失败，请稍后重试",
         detailRowLimit: "单条记录明细行数不能超过 {n} 行",
-        retryRowLimit: "重试数据不能超过 {n} 条",
+        retryRowLimit: "修正数据不能超过 {n} 条",
       },
     },
     pluginManage: {
@@ -3144,9 +3144,9 @@ export default {
     divider: {
       name: "分割线",
       props: {
-        direction: "设置分割线方向",
-        formCreateChild: "设置分割线文案",
-        contentPosition: "设置分割线文案的位置",
+        dividerStyle: "样式",
+        dividerColor: "配色",
+        dividerTitleColor: "标题颜色",
       },
     },
     elTabPane: {

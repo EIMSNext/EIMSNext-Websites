@@ -252,7 +252,7 @@
       </div>
       <template #footer>
         <el-button @click="errorEditorVisible = false">{{ t("formDataImport.errorDialog.cancel") }}</el-button>
-        <el-button type="primary" :loading="retrying" :disabled="!allErrorsResolved" @click="retryImport">{{ t("formDataImport.errorDialog.retry") }}</el-button>
+        <el-button type="primary" :loading="retrying" :disabled="!allErrorsResolved" @click="submitCorrections">{{ t("formDataImport.errorDialog.retry") }}</el-button>
       </template>
     </el-dialog>
   </el-dialog>
@@ -269,7 +269,6 @@ import {
   FormDataImportMappingItem,
   FormDataImportMode,
   FormDataImportPreviewResponse,
-  FormDataImportRowAction,
   FormDataImportSheetPreview,
   FormDataImportStatus,
   FormDataImportStatusResponse,
@@ -775,7 +774,6 @@ async function openErrorEditor() {
   const response = await formDataService.getImportErrors(taskId.value);
   editableRows.value = response.rows.map((row) => ({
     ...row,
-    rowAction: row.rowAction ?? FormDataImportRowAction.Add,
     errors: [...(row.errors || [])],
     data: { ...(row.data || {}) },
   }));
@@ -829,7 +827,7 @@ function setEditableValue(row: FormDataImportEditableErrorRow, field: string, va
   clearFieldErrors(row, field);
 }
 
-async function retryImport() {
+async function submitCorrections() {
   if (!taskId.value || !allErrorsResolved.value) return;
   if (editableRows.value.length === 0 || editableRows.value.length > MAX_EDITABLE_ROWS) {
     ElMessage.warning(t("formDataImport.messages.retryRowLimit", { n: MAX_EDITABLE_ROWS }));
@@ -837,21 +835,21 @@ async function retryImport() {
   }
   retrying.value = true;
   try {
-    await formDataService.retryImport(taskId.value, { rows: editableRows.value });
-    errorEditorVisible.value = false;
+    const response = await formDataService.submitImportCorrections(taskId.value, {
+      rows: editableRows.value.map((row) => ({
+        dataId: row.dataId,
+        data: row.data,
+      })),
+    });
+    editableRows.value = response.rows.map((row) => ({
+      ...row,
+      errors: [...(row.errors || [])],
+      data: { ...(row.data || {}) },
+    }));
+    errorEditorVisible.value = response.failedCount > 0;
     finalNotified.value = false;
-    importStatus.value = {
-      taskId: taskId.value,
-      status: FormDataImportStatus.Pending,
-      totalCount: editableRows.value.length,
-      processedCount: 0,
-      addCount: 0,
-      updateCount: 0,
-      failedCount: 0,
-      canEditErrors: false,
-      editableErrorRowCount: 0,
-    };
-    startPolling();
+    importStatus.value = await formDataService.getImportStatus(taskId.value);
+    notifyFinalStatus(importStatus.value);
   } finally {
     retrying.value = false;
   }

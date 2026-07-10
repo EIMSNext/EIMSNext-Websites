@@ -12,11 +12,6 @@ export enum FormDataImportStatus {
   Failed = 4,
 }
 
-export enum FormDataImportRowAction {
-  Add = 0,
-  Update = 1,
-}
-
 export interface FormDataImportPreviewResponse {
   sheets: FormDataImportSheetPreview[];
 }
@@ -78,9 +73,7 @@ export interface FormDataImportEditableErrorRow {
   recordIndex: number;
   startRowNumber: number;
   endRowNumber?: number;
-  rowAction: FormDataImportRowAction;
-  matchedDataId?: string;
-  matchValue?: string;
+  dataId?: string;
   data: Record<string, any>;
   errors: FormDataImportCellError[];
 }
@@ -90,9 +83,18 @@ export interface FormDataImportEditableErrorsResponse {
 }
 
 export interface FormDataImportRetryRequest {
-  rows: FormDataImportEditableErrorRow[];
+  rows: FormDataImportCorrectionRow[];
 }
 
 export interface FormDataImportRetryResponse {
   taskId: string;
+  addCount: number;
+  updateCount: number;
+  failedCount: number;
+  rows: FormDataImportEditableErrorRow[];
+}
+
+export interface FormDataImportCorrectionRow {
+  dataId?: string;
+  data: Record<string, any>;
 }

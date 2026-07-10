@@ -51,7 +51,7 @@ export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
     return unwrapApiResult(await this.http().api.get<ApiResult<FormDataImportEditableErrorsResponse>>(`/FormData/Import/${id}/Errors`));
   }
 
-  async retryImport(id: string, request: FormDataImportRetryRequest): Promise<FormDataImportRetryResponse> {
+  async submitImportCorrections(id: string, request: FormDataImportRetryRequest): Promise<FormDataImportRetryResponse> {
     return unwrapApiResult(await this.http().api.post<ApiResult<FormDataImportRetryResponse>>(`/FormData/Import/${id}/Retry`, request));
   }
 

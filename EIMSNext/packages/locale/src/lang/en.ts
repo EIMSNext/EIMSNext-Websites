@@ -3176,9 +3176,9 @@ export default {
     divider: {
       name: "Divider",
       props: {
-        direction: "Set the direction of the dividing line",
-        formCreateChild: "Set Content",
-        contentPosition: "Set content position",
+        dividerStyle: "Style",
+        dividerColor: "Color",
+        dividerTitleColor: "Title color",
       },
     },
     elTabPane: {

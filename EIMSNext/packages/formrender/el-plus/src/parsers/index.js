@@ -1,4 +1,5 @@
 import datePicker from './datePicker';
+import divider from './divider';
 import hidden from './hidden';
 import input from './input';
 import slider from './slider';
@@ -8,6 +9,7 @@ import select, { select2, fcSelect } from './select';
 
 export default [
     datePicker,
+    divider,
     hidden,
     input,
     slider,
