@@ -59,6 +59,7 @@ export class AuthClient {
         false,
         `${appSetting.authUrl}/public/token`,
         { scope: String(scope) },
+        appSetting.publicClientId,
       )) as { access_token: string; expires_in: number; [k: string]: any };
     } catch (err: any) {
       if (err?.response?.status === 401) {
@@ -75,12 +76,13 @@ export class AuthClient {
     persist = true,
     endpoint?: string,
     extraFields?: Record<string, string>,
+    clientId = appSetting.clientId,
   ) {
     const payload = {
       username,
       password,
       grant_type,
-      client_id: appSetting.clientId,
+      client_id: clientId,
       ...(extraFields || {}),
     };
     const encrypted = utf8ToBase64(JSON.stringify(payload));
