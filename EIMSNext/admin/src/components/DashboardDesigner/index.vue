@@ -245,8 +245,7 @@
     :chart-targets="chartTargets" :binding-candidates="bindingCandidates" />
 </template>
 <script setup lang="ts">
-import { EtDrawer } from "@eimsnext/components/src/drawer";
-import { buildFieldListItems, IFormFieldDef } from "@eimsnext/components";
+import { buildFieldListItems, EtDrawer, IFormFieldDef } from "@eimsnext/components";
 import DashItemCard from "./components/DashItemCard.vue";
 import { IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
 import { uniqueId } from "@eimsnext/utils";
@@ -271,6 +270,7 @@ import { useFormStore } from "@eimsnext/store";
 import { IDashboardBindingCandidate, IDashboardChartTarget } from "./FilterDesigner/type";
 import { createDefaultDetailTableSetting } from "./DetailTable/type";
 import { useDashboardDragDrop } from "./useDashboardDragDrop";
+import { escapeODataString } from "@/utils/odata";
 const { t } = useI18n();
 
 defineOptions({
@@ -562,7 +562,7 @@ watch(
         state.items = {};
 
         let itemDefs = await dashboardItemDefService.query<DashboardItemDef>(
-          `$filter=appid eq '${newVal.appId}'&DashboardId=${newVal.id}`
+          `?$filter=appId eq '${escapeODataString(newVal.appId)}' and dashboardId eq '${escapeODataString(newVal.id)}'`
         );
         if (itemDefs && itemDefs.length > 0) {
           itemDefs.forEach((x) => {

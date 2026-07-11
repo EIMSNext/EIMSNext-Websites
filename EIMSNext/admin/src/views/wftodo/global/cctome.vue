@@ -18,7 +18,7 @@ const route = useRoute();
 const appStore = useAppStore();
 
 const selectedApp = ref<AppDef | null>(null);
-const filter = ref({ nodeType: 3 });
+const filter = ref({ result: 7 });
 
 // 监听路由参数变化
 watch(

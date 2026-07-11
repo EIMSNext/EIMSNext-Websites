@@ -25,7 +25,6 @@
         :h="item.h"
         :i="item.i"
         :key="item.i"
-        @container-resized="containerResizedEvent"
         :minW="getMinWidth(item)"
         :minH="getMinHeight(item)"
         :maxW="60"
@@ -35,8 +34,6 @@
         <DashItemCard
           v-if="state.items[item.i]"
           :item-def="state.items[item.i]"
-          :height="item.h"
-          :width="item.w"
           :is-view="true"
           :external-filter="chartFilters[state.items[item.i].id]"
           @filter-change="handleFilterChange"
@@ -52,10 +49,13 @@ import { IGridLayoutItem, IGridLayoutState } from "@eimsnext/models";
 import { DashboardDef, DashboardItemDef } from "@eimsnext/models";
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useChartFilterLinkage } from "./useChartFilterLinkage";
+import { escapeODataString } from "@/utils/odata";
+const { t } = useI18n();
 const route = useRoute();
 
-const dashId = route.params.dashId.toString();
+const dashId = route.params.dashId?.toString() || "";
 
 const state = reactive<IGridLayoutState>({
   layout: [],
@@ -68,17 +68,10 @@ const colWidth = ref(150);
 const rowHeight = ref(10);
 const dashboard = ref<DashboardDef>();
 const refreshTimer = ref<number>();
+let loadTask: Promise<void> | undefined;
 const { isFullscreen } = useFullscreen();
 
 const { chartFilters, rebuildChartFilters, handleFilterChange } = useChartFilterLinkage(state);
-
-const containerResizedEvent = (
-  i: string | number,
-  newH: number,
-  newW: number,
-  newHPx: number,
-  newWPx: number
-) => {};
 
 const getMinWidth = (item: IGridLayoutItem) => {
   return 6;
@@ -91,26 +84,39 @@ const getMaxHeight = (item: IGridLayoutItem) => {
 };
 
 const loadDashboard = async () => {
-  const dash = await dashboardDefService.get<DashboardDef>(dashId);
-  dashboard.value = dash;
-  try {
-    const parsedLayout = JSON.parse(dash.layout) || [];
-    state.layout.splice(0, state.layout.length);
-    state.layout.push(...parsedLayout);
+  if (loadTask) return loadTask;
+  loadTask = (async () => {
+    try {
+      const dash = await dashboardDefService.get<DashboardDef>(dashId);
+      dashboard.value = dash;
+      try {
+        const parsedLayout = JSON.parse(dash.layout) || [];
+        state.layout.splice(0, state.layout.length);
+        state.layout.push(...parsedLayout);
 
-    state.items = {};
+        state.items = {};
 
-    const itemDefs = await dashboardItemDefService.query<DashboardItemDef>(`$filter=appid eq '${dash.appId}'&DashboardId=${dash.id}`);
-    if (itemDefs && itemDefs.length > 0) {
-      itemDefs.forEach((x) => {
-        state.items[x.layoutId] = x;
-      });
-      rebuildChartFilters();
+        const itemDefs = await dashboardItemDefService.query<DashboardItemDef>(
+          `?$filter=appId eq '${escapeODataString(dash.appId)}' and dashboardId eq '${escapeODataString(dash.id)}'`
+        );
+        if (itemDefs && itemDefs.length > 0) {
+          itemDefs.forEach((x) => {
+            state.items[x.layoutId] = x;
+          });
+          rebuildChartFilters();
+        }
+      } catch (e) {
+        console.error("布局JSON解析失败：", e);
+        state.layout.splice(0, state.layout.length);
+      }
+    } catch (e) {
+      console.error("加载仪表盘失败：", e);
+      ElMessage.error(t("admin.dashboardDesigner.loadFailed"));
+    } finally {
+      loadTask = undefined;
     }
-  } catch (e) {
-    console.error("布局JSON解析失败：", e);
-    state.layout.splice(0, state.layout.length); // 解析失败则清空布局
-  }
+  })();
+  return loadTask;
 };
 
 function clearRefreshTimer() {
@@ -127,10 +133,16 @@ function setupRefreshTimer() {
   }
 
   const minutes = dashboard.value.autoRefreshIntervalMinutes || 15;
-  refreshTimer.value = window.setInterval(loadDashboard, minutes * 60 * 1000);
+  refreshTimer.value = window.setInterval(() => {
+    if (loadTask) return;
+    loadDashboard();
+  }, minutes * 60 * 1000);
 }
 
-watch([isFullscreen, dashboard], setupRefreshTimer);
+watch(
+  () => [isFullscreen.value, dashboard.value?.autoRefreshEnabled, dashboard.value?.autoRefreshIntervalMinutes] as const,
+  setupRefreshTimer
+);
 onMounted(loadDashboard);
 onBeforeUnmount(clearRefreshTimer);
 </script>

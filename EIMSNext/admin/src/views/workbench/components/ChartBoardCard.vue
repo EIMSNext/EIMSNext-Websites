@@ -39,9 +39,11 @@ defineEmits<{
 const loading = ref(false);
 const errorText = ref("");
 const chartItem = ref<WorkbenchChartItem>();
+let loadSeq = 0;
 
 const loadChart = async () => {
   const dashboardItemId = props.item.config?.dashboardItemId;
+  const seq = ++loadSeq;
   chartItem.value = undefined;
   errorText.value = "";
 
@@ -51,11 +53,14 @@ const loadChart = async () => {
 
   loading.value = true;
   try {
-    chartItem.value = await workbenchService.getChartItem(dashboardItemId);
+    const result = await workbenchService.getChartItem(dashboardItemId);
+    if (seq !== loadSeq) return;
+    chartItem.value = result;
   } catch {
+    if (seq !== loadSeq) return;
     errorText.value = t("admin.dashItem.invalidConfig");
   } finally {
-    loading.value = false;
+    if (seq === loadSeq) loading.value = false;
   }
 };
 

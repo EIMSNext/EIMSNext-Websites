@@ -7,7 +7,16 @@ import { bus } from "../eventBus";
 
 export class HttpRequest {
   private axiosInstance: AxiosInstance;
-  private currentPath: () => string = () => (typeof window !== "undefined" ? window.location.pathname + window.location.search : "/");
+  private currentPath: () => string = () => {
+    if (typeof window === "undefined") return "/";
+
+    const hash = window.location.hash;
+    if (hash?.startsWith("#")) {
+      return hash.slice(1) || "/";
+    }
+
+    return window.location.pathname + window.location.search;
+  };
   private isHandling401 = false;
 
   constructor(config: HttpRequestConfig) {
@@ -147,7 +156,7 @@ export class HttpRequest {
 
   private isAuthEndpoint(url?: string): boolean {
     if (!url) return false;
-    return /connect\/token|public\/challenge|public\/token/i.test(url);
+    return /connect\/token|public\/challenge|public\/token|auth\/logout/i.test(url);
   }
 
   private handleUnauthorized() {
@@ -159,7 +168,7 @@ export class HttpRequest {
       bus.emit("auth:logout", { reason: "401", path });
       if (typeof window !== "undefined" && path !== "/login" && !path.startsWith("/login?")) {
         const redirect = encodeURIComponent(path);
-        window.location.assign(`/login?redirect=${redirect}`);
+        window.location.assign(`/#/login?redirect=${redirect}`);
       }
     } catch (e) {
       console.error("401 handler error", e);

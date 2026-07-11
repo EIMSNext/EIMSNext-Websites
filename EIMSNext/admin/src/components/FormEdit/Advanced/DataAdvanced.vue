@@ -120,7 +120,6 @@ async function save() {
     appId: props.formDef.appId,
     name: props.formDef.name,
     content: props.formDef.content,
-    isLedger: props.formDef.isLedger,
     usingWorkflow: props.formDef.usingWorkflow,
     formSettings,
   };

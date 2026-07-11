@@ -1,4 +1,4 @@
-import type { AppProfile, AppProfileQueryRequest } from "../../models/dto/appProfile";
+import type { AppProfile, AppProfileQueryRequest } from "@eimsnext/models";
 import { ServiceBase } from "../interface";
 
 export class AppProfileService extends ServiceBase {

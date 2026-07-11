@@ -321,7 +321,7 @@ const saveDraft = (data: any) => {
     : formDataService.post<FormData>(fdata);
 
   request.then((res) => {
-    formData.value = res.data;
+    formData.value = res;
     emit("ok");
     bus.emit("data:saved", { formId: props.formId });
   });
@@ -341,7 +341,7 @@ const submitData = (data: any) => {
     : formDataService.post<FormData>(fdata);
 
   request.then((res) => {
-    formData.value = res.data;
+    formData.value = res;
     emit("ok");
     bus.emit("data:saved", { formId: props.formId });
   });
@@ -403,7 +403,7 @@ onBeforeMount(async () => {
 
 .share-section-secondary {
   margin-top: 8px;
-  border-top: 1px solid #eef2f7;
+  border-top: 1px solid var(--et-border-color-light);
 }
 
 .share-section-title-row {
@@ -414,13 +414,13 @@ onBeforeMount(async () => {
 }
 
 .share-section-title {
-  color: #111827;
+  color: var(--et-text-primary);
   font-size: 15px;
   font-weight: 600;
 }
 
 .share-section-desc {
-  color: #6b7280;
+  color: var(--et-text-secondary);
   font-size: 12px;
 }
 
@@ -431,11 +431,11 @@ onBeforeMount(async () => {
 
 :deep(.share-dialog .el-dialog__header) {
   padding: 14px 20px;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid var(--et-border-color-light);
 }
 
 :deep(.share-dialog .el-dialog__title) {
-  color: #111827;
+  color: var(--et-text-primary);
   font-size: 16px;
   font-weight: 700;
 }
@@ -449,8 +449,8 @@ onBeforeMount(async () => {
 }
 
 :deep(.share-dialog .el-switch.is-disabled .el-switch__core) {
-  background: #d1d5db;
-  border-color: #d1d5db;
+  background: var(--et-fill-color-light);
+  border-color: var(--et-border-color);
 }
 
 :deep(.form-data-toolbar .toolbar-container) {

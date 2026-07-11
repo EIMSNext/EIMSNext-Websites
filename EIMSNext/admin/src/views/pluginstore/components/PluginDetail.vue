@@ -31,7 +31,15 @@
             <div class="hero-side-text">{{ $t("admin.plugin.quickActionsDesc") }}</div>
             <div class="action-row">
               <el-button v-if="profile.helpDocUrl" plain @click="openLink(profile.helpDocUrl)">{{ $t("admin.plugin.usageGuide") }}</el-button>
-              <el-button type="primary" size="large" @click="install">{{ profile.installed ? $t("admin.plugin.reinstall") : $t("admin.plugin.installPlugin") }}</el-button>
+              <el-button
+                type="primary"
+                size="large"
+                :disabled="profile.installed || installing"
+                :loading="installing"
+                @click="install"
+              >
+                {{ profile.installed ? $t("admin.plugin.installed") : $t("admin.plugin.installPlugin") }}
+              </el-button>
             </div>
           </div>
         </section>
@@ -67,10 +75,18 @@
                   <div class="function-name">{{ fn.name }}</div>
                   <div class="function-desc">{{ fn.description || $t("admin.plugin.noDescription") }}</div>
                   <div class="function-fields">
-                    <span v-for="field in fn.inputFields || []" :key="field.key" class="function-field-tag">
+                    <span class="function-field-label">{{ $t("admin.plugin.functionInputs") }}</span>
+                    <span v-for="field in flattenPluginFields(fn.inputFields || [])" :key="field.key" class="function-field-tag">
                       {{ field.name }}
                     </span>
                     <span v-if="!(fn.inputFields || []).length" class="function-field-tag muted">{{ $t("admin.plugin.noInputFields") }}</span>
+                  </div>
+                  <div class="function-fields">
+                    <span class="function-field-label">{{ $t("admin.plugin.functionOutputs") }}</span>
+                    <span v-for="field in flattenPluginFields(fn.resultFields || [])" :key="field.key" class="function-field-tag output">
+                      {{ field.name }}
+                    </span>
+                    <span v-if="!(fn.resultFields || []).length" class="function-field-tag muted">{{ $t("admin.plugin.noResultFields") }}</span>
                   </div>
                 </div>
               </div>
@@ -128,6 +144,7 @@ const emit = defineEmits<{
 
 const profile = ref<PluginProfile | null>(null);
 const activeImage = ref("");
+const installing = ref(false);
 
 const galleryImages = computed(() => {
   const item = profile.value;
@@ -155,7 +172,8 @@ function onOpened() {
 }
 
 async function install() {
-  if (!profile.value) return;
+  if (!profile.value || profile.value.installed || installing.value) return;
+  installing.value = true;
   try {
     await pluginProfileService.install(profile.value.id);
     ElMessage.success(t("admin.plugin.installSuccess"));
@@ -163,12 +181,24 @@ async function install() {
     emit("installed");
   } catch {
     ElMessage.error(t("admin.plugin.installFailed"));
+  } finally {
+    installing.value = false;
   }
 }
 
 function openLink(url?: string) {
   if (!url) return;
   window.open(url, "_blank");
+}
+
+function flattenPluginFields(fields: Array<{ key: string; name: string; subFields?: Array<{ key: string; name: string }> }>) {
+  return fields.flatMap((field) => {
+    const subFields = field.subFields?.map((subField) => ({
+      key: `${field.key}>${subField.key}`,
+      name: `${field.name} > ${subField.name}`,
+    })) ?? [];
+    return subFields.length ? subFields : [{ key: field.key, name: field.name }];
+  });
 }
 </script>
 <style scoped lang="scss">
@@ -446,6 +476,16 @@ function openLink(url?: string) {
   border-radius: 6px;
   background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
   font-size: 11px;
+}
+
+.function-field-label {
+  color: var(--et-text-tertiary);
+  font-size: 11px;
+  line-height: 20px;
+}
+
+.function-field-tag.output {
+  background: color-mix(in srgb, var(--et-color-primary) 12%, var(--et-bg-container));
 }
 
 .function-field-tag.muted {

@@ -38,7 +38,7 @@
               <div class="expire-tip">{{ t("admin.messageCenter.retention") }}</div>
             </div>
             <div class="message-list-footer">
-              <simple-pagination v-model:current-page="currentPage" :total="totalRef"
+              <SimplePagination v-model:current-page="currentPage" :total="totalRef"
                 :page-size="pageSize" @change="loadSystemMessages" />
             </div>
           </div>
@@ -58,6 +58,7 @@ import {
 } from "@eimsnext/services";
 import { MessageCategory, SystemMessage } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
+import SimplePagination from "@/components/SimplePagination/index.vue";
 const { t } = useI18n();
 
 const settingsStore = useSettingsStore();

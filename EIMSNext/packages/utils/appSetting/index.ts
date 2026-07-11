@@ -1,5 +1,6 @@
 export interface IAppSetting {
   clientId: string;
+  publicClientId: string;
   authUrl: string;
   apiUrl: string;
   uploadUrl: string;
@@ -11,6 +12,7 @@ export interface IAppSetting {
 
 class AppSetting implements IAppSetting {
   clientId: string = "EIMSD160507G0401S171201B1014Next";
+  publicClientId: string = "eimsnext.public";
   authUrl: string = "https://auth.eimsnext.com";
   apiUrl: string = "https://api.eimsnext.com";
   uploadUrl: string = "https://file.eimsnext.com";

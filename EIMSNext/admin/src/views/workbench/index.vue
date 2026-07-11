@@ -1,6 +1,16 @@
 <template>
   <Layout>
     <div class="workbench-container">
+      <div class="workbench-toolbar">
+        <el-button
+          v-if="hasCorpAdmin"
+          type="primary"
+          :icon="Setting"
+          @click="router.push('/workbench/customize')"
+        >
+          {{ t("admin.workbench.customize") }}
+        </el-button>
+      </div>
       <grid-layout
         v-if="!loading"
         v-model:layout="runtimeLayout"
@@ -38,7 +48,10 @@
 
 <script setup lang="ts">
 import type { WorkbenchLayoutItem } from "@eimsnext/models";
+import { UserType } from "@eimsnext/models";
+import { useUserStore } from "@eimsnext/store";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
+import { Setting } from "@element-plus/icons-vue";
 import Layout from "@/layout/index.vue";
 import {
   cloneWorkbenchLayout,
@@ -53,10 +66,17 @@ defineOptions({
   inheritAttrs: false,
 });
 
+const router = useRouter();
+const userStore = useUserStore();
 const workbenchStore = useWorkbenchStore();
 const { t } = useI18n();
 const { layout, loading } = storeToRefs(workbenchStore);
 const runtimeLayout = ref<WorkbenchLayoutItem[]>([]);
+
+const hasCorpAdmin = computed(() => {
+  const userType = userStore.currentUser?.userType ?? 0;
+  return (userType & UserType.CorpOwmer) !== 0 || (userType & UserType.CorpAdmin) !== 0;
+});
 
 watch(
   layout,
@@ -70,6 +90,15 @@ onMounted(async () => {
   await workbenchStore.load();
 });
 </script>
+
+<style lang="scss" scoped>
+.workbench-toolbar {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--et-space-12);
+}
+</style>
 
 <style lang="scss" scoped>
 .workbench-container {

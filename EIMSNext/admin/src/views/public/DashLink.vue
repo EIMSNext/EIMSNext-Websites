@@ -90,6 +90,7 @@ import {
 } from "./shared";
 import { ref, reactive, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { escapeODataString } from "@/utils/odata";
 
 defineOptions({ name: "DashLinkView" });
 
@@ -159,7 +160,7 @@ async function loadDashboard() {
   state.items = {};
   const items = await publicHttp.odata.query<DashboardItemDef>(
     "DashboardItemDef",
-    `$filter=appid eq '${dash.appId}'&DashboardId=${dash.id}`,
+    `?$filter=appId eq '${escapeODataString(dash.appId)}' and dashboardId eq '${escapeODataString(dash.id)}'`,
   );
   (items || []).forEach((item: DashboardItemDef) => {
     state.items[item.layoutId] = item;

@@ -1,107 +1,116 @@
 <template>
-  <Layout>
-    <div class="workbench-designer">
-      <div class="designer-header">
-        <div class="header-title">
-          <el-button link @click="router.push('/workbench')">
-            <et-icon icon="el-arrowLeft" />
-          </el-button>
-          <span>{{ t("admin.workbench.customize") }}</span>
-        </div>
-        <el-link type="primary" :underline="false">{{ t("admin.workbench.help") }}</el-link>
-        <div class="header-actions">
-          <el-button-group>
-            <el-button type="primary" plain>
-              <et-icon icon="el-Monitor" />
+    <Layout>
+      <div class="workbench-designer">
+        <div class="designer-header">
+          <div class="header-title">
+            <el-button link @click="back">
+              <et-icon icon="el-arrowLeft" />
             </el-button>
-            <el-button plain>
-              <et-icon icon="el-Iphone" />
+            <span>{{ t("admin.workbench.customize") }}</span>
+          </div>
+          <el-link type="primary" :underline="false">{{ t("admin.workbench.help") }}</el-link>
+          <div class="header-actions">
+            <el-button-group>
+              <el-button type="primary" plain>
+                <et-icon icon="el-Monitor" />
+              </el-button>
+              <el-button plain>
+                <et-icon icon="el-Iphone" />
+              </el-button>
+            </el-button-group>
+            <el-button disabled>
+              <et-icon icon="el-document" />
+              {{ t("admin.workbench.pageStyle") }}
             </el-button>
-          </el-button-group>
-          <el-button disabled>
-            <et-icon icon="el-document" />
-            {{ t("admin.workbench.pageStyle") }}
-          </el-button>
-          <el-button @click="preview">{{ t("common.preview") }}</el-button>
-          <el-button type="primary" :loading="saving" @click="save">{{ t("common.save") }}</el-button>
+            <el-button @click="preview">{{ t("common.preview") }}</el-button>
+            <el-button type="primary" :loading="saving" @click="save">{{ t("common.save") }}</el-button>
+          </div>
         </div>
-      </div>
 
-      <div class="designer-body">
-        <aside class="component-panel">
-          <div class="panel-title">{{ t("admin.workbench.pageComponents") }}</div>
-          <div
-            v-for="component in enabledComponents"
-            :key="component.type"
-            class="component-item"
-            :class="{ disabled: !canAdd(component.type) }"
-            @click="addWidget(component.type)"
-          >
-            <et-icon :icon="component.icon" />
-            <span>{{ component.label }}</span>
-          </div>
-          <div class="panel-separator" />
-          <div v-for="component in disabledComponents" :key="component.label" class="component-item disabled">
-            <et-icon :icon="component.icon" />
-            <span>{{ component.label }}</span>
-          </div>
-        </aside>
-
-        <main class="canvas-wrap">
-          <div class="canvas">
-            <grid-layout
-              v-model:layout="editableLayout"
-              :col-num="24"
-              :row-height="24"
-              :is-draggable="true"
-              :is-resizable="true"
-              :is-mirrored="false"
-              :is-bounded="true"
-              :vertical-compact="true"
-              :margin="[16, 16]"
-              :use-css-transforms="true"
-              :responsive="false"
+        <div class="designer-body">
+          <aside class="component-panel">
+            <div class="panel-title">{{ t("admin.workbench.pageComponents") }}</div>
+            <div
+              v-for="component in enabledComponents"
+              :key="component.type"
+              class="component-item"
+              :class="{ disabled: !canAdd(component.type) }"
+              @click="handleItemClick(component.type)"
             >
-              <grid-item
-                v-for="item in editableLayout"
-                :key="item.i"
-                :x="item.x"
-                :y="item.y"
-                :w="item.w"
-                :h="item.h"
-                :i="item.i"
-                :minW="item.minW || 5"
-                :minH="getMinHeight(item)"
-                :maxW="24"
-                :maxH="getMaxHeight(item)"
-                drag-ignore-from=".no-drag"
-                resize-ignore-from=".no-drag"
-                @resized="handleResized"
+              <et-icon :icon="component.icon" />
+              <span>{{ component.label }}</span>
+            </div>
+            <div class="panel-separator" />
+            <el-tooltip
+              v-for="component in disabledComponents"
+              :key="component.label"
+              :content="t('admin.workbench.comingSoon')"
+              placement="right"
+            >
+              <div class="component-item disabled">
+                <et-icon :icon="component.icon" />
+                <span>{{ component.label }}</span>
+              </div>
+            </el-tooltip>
+          </aside>
+
+          <main class="canvas-wrap">
+            <div class="canvas">
+              <grid-layout
+                v-model:layout="editableLayout"
+                :col-num="24"
+                :row-height="24"
+                :is-draggable="true"
+                :is-resizable="true"
+                :is-mirrored="false"
+                :is-bounded="true"
+                :vertical-compact="true"
+                :margin="[16, 16]"
+                :use-css-transforms="true"
+                :responsive="false"
               >
-                <WorkbenchWidgetRenderer
-                  :item="item"
-                  editable
-                  @remove="removeWidget(item)"
-                  @configure-chart="openChartDialog(item)"
-                  @add-favorite="showFavoriteDialog = true"
-                />
-              </grid-item>
-            </grid-layout>
-          </div>
-        </main>
+                <grid-item
+                  v-for="item in editableLayout"
+                  :key="item.i"
+                  :x="item.x"
+                  :y="item.y"
+                  :w="item.w"
+                  :h="item.h"
+                  :i="item.i"
+                  :minW="item.minW || 5"
+                  :minH="getMinHeight(item)"
+                  :maxW="24"
+                  :maxH="getMaxHeight(item)"
+                  drag-ignore-from=".no-drag"
+                  resize-ignore-from=".no-drag"
+                  @resized="handleResized"
+                >
+                  <WorkbenchWidgetRenderer
+                    :item="item"
+                    editable
+                    @remove="removeWidget(item)"
+                    @configure-chart="openChartDialog(item)"
+                    @add-favorite="showFavoriteDialog = true"
+                  />
+                </grid-item>
+              </grid-layout>
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </Layout>
     <AddFavoriteDialog v-model="showFavoriteDialog" />
     <ChartSelectDialog
       v-model="showChartDialog"
       :dashboard-item-id="activeChartItem?.config?.dashboardItemId"
       @select="handleChartSelected"
     />
-  </Layout>
 </template>
 
 <script setup lang="ts">
 import type { WorkbenchLayoutItem, WorkbenchWidgetType } from "@eimsnext/models";
+import { UserType } from "@eimsnext/models";
+import { useUserStore } from "@eimsnext/store";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
 import Layout from "@/layout/index.vue";
 import {
@@ -124,10 +133,12 @@ defineOptions({
 
 const router = useRouter();
 const { t } = useI18n();
+const userStore = useUserStore();
 const workbenchStore = useWorkbenchStore();
 const { layout } = storeToRefs(workbenchStore);
 const editableLayout = ref<WorkbenchLayoutItem[]>([]);
 const saving = ref(false);
+const isDirty = ref(false);
 const showFavoriteDialog = ref(false);
 const showChartDialog = ref(false);
 const activeChartItem = ref<WorkbenchLayoutItem>();
@@ -149,17 +160,31 @@ const disabledComponents = computed(() => [
   { label: t("admin.workbench.greeting"), icon: "el-MagicStick" },
 ]);
 
-const oneOffTypes: WorkbenchWidgetType[] = ["flowCenter", "myApps", "recent", "favorites"];
+const existingTypes = computed(
+  () => new Set(editableLayout.value.map((item) => item.type))
+);
 
 const canAdd = (type: WorkbenchWidgetType) => {
-  if (type === "flowCenter" || type === "myApps") {
-    return false;
+  if (type === "flowCenter" || type === "myApps") return false;
+  if (type === "recent" || type === "favorites") {
+    return !existingTypes.value.has(type);
   }
-  return !oneOffTypes.includes(type) || !editableLayout.value.some((item) => item.type === type);
+  return true;
 };
 
+const handleItemClick = (type: WorkbenchWidgetType) => {
+  if (!canAdd(type)) return;
+  addWidget(type);
+};
+
+const suppressDirty = ref(false);
 const syncLayout = () => {
-  editableLayout.value = cloneWorkbenchLayout(normalizeWorkbenchLayout(layout.value));
+  const cloned = cloneWorkbenchLayout(normalizeWorkbenchLayout(layout.value));
+  suppressDirty.value = true;
+  editableLayout.value = cloned;
+  nextTick(() => {
+    suppressDirty.value = false;
+  });
 };
 
 const addWidget = (type: WorkbenchWidgetType) => {
@@ -222,7 +247,10 @@ const save = async () => {
   try {
     await workbenchStore.saveLayout(editableLayout.value);
     syncLayout();
+    isDirty.value = false;
     ElMessage.success(t("common.saveSuccess"));
+  } catch (e) {
+    ElMessage.error(t("common.saveFailed"));
   } finally {
     saving.value = false;
   }
@@ -233,11 +261,57 @@ const preview = async () => {
   router.push("/workbench");
 };
 
+const back = async () => {
+  if (isDirty.value) {
+    try {
+      await ElMessageBox.confirm(
+        t("admin.workbench.unsavedChanges"),
+        t("common.confirm"),
+        { type: "warning" }
+      );
+    } catch {
+      return;
+    }
+  }
+  router.push("/workbench");
+};
+
+const beforeUnload = (e: BeforeUnloadEvent) => {
+  if (isDirty.value) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+};
+
 onMounted(async () => {
+  const userType = userStore.currentUser?.userType ?? 0;
+  const isCorpAdmin =
+    (userType & UserType.CorpOwmer) !== 0 || (userType & UserType.CorpAdmin) !== 0;
+  if (!isCorpAdmin) {
+    ElMessage.error(t("admin.errorPage.noPermission"));
+    router.replace("/401");
+    return;
+  }
+
   await workbenchStore.load();
   await workbenchStore.loadCatalog();
   syncLayout();
+
+  window.addEventListener("beforeunload", beforeUnload);
 });
+
+onBeforeUnmount(() => {
+  window.removeEventListener("beforeunload", beforeUnload);
+});
+
+watch(
+  editableLayout,
+  () => {
+    if (suppressDirty.value) return;
+    isDirty.value = true;
+  },
+  { deep: true }
+);
 
 watch(layout, syncLayout, { deep: true });
 </script>

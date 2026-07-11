@@ -5,6 +5,7 @@ import workflowDiagram from "./Workflow/WorkflowDiagram.vue";
 import workflowMetaEditor from "./Workflow/WorkflowMetaEditor.vue";
 import { withInstall } from "../utils/install";
 export * from "./Dataflow/formula";
+export * from "./Dataflow/fieldMappingRules";
 
 const DataflowDiagram = withInstall(dataflowDiagram);
 const DataflowMetaEditor = withInstall(dataflowMetaEditor);

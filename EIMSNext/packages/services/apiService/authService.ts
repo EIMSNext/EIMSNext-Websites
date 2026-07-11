@@ -21,6 +21,10 @@ export class AuthService extends ServiceBase {
     );
   }
 
+  logout() {
+    return this.http().auth.post("/auth/logout", {});
+  }
+
   sendRegCode(request: SendRegCodeRequest) {
     return this.http().auth.post("/auth/sendRegCode", request);
   }

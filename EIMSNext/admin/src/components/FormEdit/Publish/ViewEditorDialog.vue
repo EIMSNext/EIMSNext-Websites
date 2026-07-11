@@ -64,10 +64,6 @@
           </el-form-item>
           <el-collapse model-value="style">
             <el-collapse-item :title="t('admin.formListView.defaultStyle')" name="style">
-              <div class="device-switch">
-                <button type="button" class="active">{{ t("common.device.desktop") }}</button>
-                <button type="button">{{ t("common.device.mobile") }}</button>
-              </div>
               <div class="section-label">{{ t("common.type") }}</div>
               <div class="type-grid">
                 <button
@@ -89,6 +85,7 @@
                     <el-option v-for="field in allFields" :key="field.field" :label="field.label" :value="field.field" />
                   </el-select>
                 </el-form-item>
+                <div class="field-tip">{{ t("publicpublish.allFieldsDefault") }}</div>
                 <el-form-item :label="t('admin.formListView.rowHeight')">
                   <el-segmented v-model="settings.table!.rowHeight" :options="rowHeightOptions" />
                 </el-form-item>
@@ -393,34 +390,17 @@ const cancel = () => {
   gap: var(--et-space-16);
 }
 
-.device-switch {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  height: 32px;
-  padding: 2px;
-  border-radius: var(--et-radius-4);
-  background: var(--et-bg-muted);
-  margin-bottom: var(--et-space-16);
-
-  button {
-    border: 0;
-    background: transparent;
-    color: var(--et-text-secondary);
-    cursor: pointer;
-  }
-
-  .active {
-    border-radius: var(--et-radius-4);
-    background: var(--et-bg-container);
-    color: var(--et-color-primary);
-    font-weight: 600;
-  }
-}
-
 .section-label {
   margin: var(--et-space-12) 0 var(--et-space-8);
   color: var(--et-text-primary);
   font-weight: 600;
+}
+
+.field-tip {
+  margin-top: calc(var(--et-space-8) * -1);
+  margin-bottom: var(--et-space-12);
+  color: var(--et-text-tertiary);
+  font-size: var(--et-font-size-12);
 }
 
 .type-grid {

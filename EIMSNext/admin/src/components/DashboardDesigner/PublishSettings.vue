@@ -81,10 +81,9 @@
 
 <script setup lang="ts">
 import { AppDef, DashboardDef, Member, MemberType, PublicDashboardSetting, PublicSetting, PublicTargetType } from "@eimsnext/models";
-import { ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
+import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
 import { appDefService, dashboardDefService, publicSettingService } from "@eimsnext/services";
 import { useAppStore, useContextStore } from "@eimsnext/store";
-import { DataItemType } from "@eimsnext/components/src/common";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
 

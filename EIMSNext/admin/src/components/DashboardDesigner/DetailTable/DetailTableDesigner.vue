@@ -209,8 +209,7 @@
 
 <script setup lang="ts">
 import Draggable from "vuedraggable";
-import { EtDrawer } from "@eimsnext/components/src/drawer";
-import { buildFieldListItems, buildSortFieldListItems, IConditionList, IFieldSortList, IFormFieldDef } from "@eimsnext/components";
+import { buildFieldListItems, buildSortFieldListItems, EtDrawer, IConditionList, IFieldSortList, IFormFieldDef } from "@eimsnext/components";
 import { DashboardItemDef } from "@eimsnext/models";
 import { dashboardItemDefService } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";

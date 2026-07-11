@@ -13,46 +13,44 @@
         <li class="app-group">
           <div class="group-name">{{ t("common.other") }}</div>
           <ul class="app-items-container">
-            <el-space>
-              <template v-for="app in appsRef">
-                <li v-if="app.id != 'system'" class="app-item">
-                  <div class="item-container">
-                    <div class="item-link" @click="gotoApp(app)">
-                      <div class="app-wrapper">
-                        <div class="app-item-icon">
-                          <AppIcon :app="app" />
-                        </div>
-                        <div class="app-title">{{ app.name }}</div>
+            <template v-for="app in appsRef" :key="app.id">
+              <li v-if="app.id !== SYSTEM_APP_ID" class="app-item">
+                <div class="item-container">
+                  <div class="item-link" @click="gotoApp(app)">
+                    <div class="app-wrapper">
+                      <div class="app-item-icon">
+                        <AppIcon :app="app" />
                       </div>
-                    </div>
-                    <div
-                      class="favorite-icon"
-                      :class="{ active: workbenchStore.isFavorite('app', app.id) }"
-                      @click.stop="toggleFavorite(app)"
-                    >
-                      <et-icon icon="el-star" size="large"></et-icon>
-                    </div>
-                    <div v-if="canShowAppActions(app)" class="setting-icon">
-                      <el-dropdown placement="bottom-start" size="large">
-                        <el-button class="setting-btn">
-                          <et-icon icon="el-setting" size="large"></et-icon>
-                        </el-button>
-                        <template #dropdown>
-                          <el-dropdown-menu class="app-dropdown-menu">
-                            <el-dropdown-item v-if="canManageApp(app)" @click="handleEditClick(app)">
-                              {{ t("admin.editNameAndIcon") }}
-                            </el-dropdown-item>
-                            <el-dropdown-item v-if="canDeleteApp(app)" class="btn-delete" @click="handleDeleteClick(app)">
-                              {{ t("common.delete") }}
-                            </el-dropdown-item>
-                          </el-dropdown-menu>
-                        </template>
-                      </el-dropdown>
+                      <div class="app-title">{{ app.name }}</div>
                     </div>
                   </div>
-                </li>
-              </template>
-            </el-space>
+                  <div
+                    class="favorite-icon"
+                    :class="{ active: workbenchStore.isFavorite('app', app.id) }"
+                    @click.stop="toggleFavorite(app)"
+                  >
+                    <et-icon icon="el-star" size="large"></et-icon>
+                  </div>
+                  <div v-if="canShowAppActions(app)" class="setting-icon">
+                    <el-dropdown placement="bottom-start" size="large">
+                      <el-button class="setting-btn">
+                        <et-icon icon="el-setting" size="large"></et-icon>
+                      </el-button>
+                      <template #dropdown>
+                        <el-dropdown-menu class="app-dropdown-menu">
+                          <el-dropdown-item v-if="canManageApp(app)" @click="handleEditClick(app)">
+                            {{ t("admin.editNameAndIcon") }}
+                          </el-dropdown-item>
+                          <el-dropdown-item v-if="canDeleteApp(app)" class="btn-delete" @click="handleDeleteClick(app)">
+                            {{ t("common.delete") }}
+                          </el-dropdown-item>
+                        </el-dropdown-menu>
+                      </template>
+                    </el-dropdown>
+                  </div>
+                </div>
+              </li>
+            </template>
           </ul>
         </li>
       </ul>
@@ -73,6 +71,8 @@ import { useAdminPermissions } from "@/composables/useAdminPermissions";
 import { useWorkbenchStore } from "@/store";
 import { resolveAppEntryPath } from "@/utils/appEntry";
 const { t } = useI18n();
+
+const SYSTEM_APP_ID = "system";
 
 const router = useRouter();
 const appStore = useAppStore();
@@ -134,8 +134,8 @@ const handleDeleteClick = async (app: AppDef) => {
   if (!canDeleteApp(app)) return;
 
   var confirm = await EtConfirm.showDialog(
-    t("admin.deleteFormConfirm_Content"),
-    { title: t("admin.deleteFormConfirm_Title", [app?.name]) },
+    t("admin.deleteAppConfirm_Content"),
+    { title: t("admin.deleteAppConfirm_Title", [app?.name]) },
     t
   );
   if (confirm == ConfirmResult.Yes) {
@@ -169,19 +169,21 @@ onMounted(async () => {
       }
 
       .app-items-container {
-        padding-top: var(--et-space-4);
+        display: grid;
+        gap: var(--et-space-8);
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        list-style: none;
+        margin: 0;
+        padding: var(--et-space-4) 0 0;
         width: 100%;
 
         .app-item {
           border-radius: var(--et-radius-2);
-          float: left;
-          left: 0;
-          margin: var(--et-space-8) 0;
-          min-width: var(--et-size-172);
-          padding: 0 var(--et-space-6);
+          margin: 0;
+          min-width: 0;
+          padding: 0;
           position: relative;
           text-align: center;
-          width: 16%;
 
           .item-container {
             border: 1px solid transparent;

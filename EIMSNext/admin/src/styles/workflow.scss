@@ -168,6 +168,16 @@
       }
     }
 
+    &.log-line-failed {
+      &:after {
+        background: var(--et-color-danger);
+      }
+
+      .arrow-down {
+        color: var(--et-color-danger);
+      }
+    }
+
     .flow-node {
       position: relative;
       width: var(--et-size-200);
@@ -579,6 +589,16 @@
         }
       }
 
+      &.log-failed {
+        &::before {
+          border-top-color: var(--et-color-danger);
+        }
+
+        &::after {
+          border-bottom-color: var(--et-color-danger);
+        }
+      }
+
       &:first-child {
         &::before {
           margin-left: -1px;
@@ -668,6 +688,14 @@
       bottom: 0;
       left: 50%;
       margin-left: -1px;
+    }
+
+    &.log-executed::after {
+      background: var(--et-color-success);
+    }
+
+    &.log-failed::after {
+      background: var(--et-color-danger);
     }
   }
 }

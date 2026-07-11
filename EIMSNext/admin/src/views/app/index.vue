@@ -4,7 +4,6 @@
     :modelValue="showFormEditor"
     :formDef="newForm!"
     :usingFlow="usingWorkflow"
-    :isLedger="isLedger"
     @close="showFormEditor = false"
   />
   <Layout>
@@ -15,7 +14,7 @@
           <!-- <el-link target="_blank">{{ $t("admin.myApp") }}</el-link> -->
         </div>
         <div v-if="canManageCurrentApp" class="creator-container">
-          <div class="creator-item" @click="createForm(false, false)">
+          <div class="creator-item" @click="createForm(false)">
             <div class="tip-icon generic">
               <div class="create-icon generic"></div>
               <div class="tip-title">{{ $t("admin.appPage.newForm") }}</div>
@@ -23,19 +22,12 @@
             <div class="tip-desc">{{ $t("admin.appPage.newFormDesc") }}</div>
           </div>
 
-          <div class="creator-item" @click="createForm(true, false)">
+          <div class="creator-item" @click="createForm(true)">
             <div class="tip-icon flow">
               <div class="create-icon flow"></div>
               <div class="tip-title">{{ $t("admin.appPage.newFlowForm") }}</div>
             </div>
             <div class="tip-desc">{{ $t("admin.appPage.newFlowFormDesc") }}</div>
-          </div>
-          <div class="creator-item" @click="createForm(false, true)">
-            <div class="tip-icon generic">
-              <div class="create-icon generic"></div>
-              <div class="tip-title">{{ $t("admin.appPage.newLedger") }}</div>
-            </div>
-            <div class="tip-desc">{{ $t("admin.appPage.newLedgerDesc") }}</div>
           </div>
         </div>
         <el-empty v-else :description="$t('common.noPermission')" />
@@ -65,7 +57,6 @@ const route = useRoute();
 let appId = route.params.appId.toString();
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
-const isLedger = ref(false);
 const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
 const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
 
@@ -101,11 +92,10 @@ async function getVisibleMenuIds(appId: string) {
   return perms.map((item: { id: string }) => item.id);
 }
 
-const createForm = (usingFlow: boolean, ledger: boolean) => {
+const createForm = (usingFlow: boolean) => {
   if (!canManageCurrentApp.value) return;
 
   usingWorkflow.value = usingFlow;
-  isLedger.value = ledger;
 
   //直接创建，防止工作流/数据流等设置报错
   let req: FormDefRequest = {
@@ -118,7 +108,6 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
         `{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"${t('common.reset')}"},"submitBtn":{"show":false,"innerText":"${t('common.submit')}"}}`,
     },
     usingWorkflow: usingFlow,
-    isLedger: ledger,
   };
 
   formDefService.post<FormDef>(req).then((resp) => {

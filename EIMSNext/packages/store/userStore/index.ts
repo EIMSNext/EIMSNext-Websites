@@ -59,15 +59,17 @@ export const useUserStore = defineStore("currentuser", () => {
 
   // const switchCorp = () => { }
 
-  const logout = () => {
-    return new Promise<void>((resolve) => {
+  const logout = async () => {
+    try {
+      if (accessToken.get()) {
+        await authService.logout();
+      }
+    } finally {
       accessToken.clear();
       currentUser.value = new CurrentUser();
       initialized.value = false;
       bus.emit("auth:logout");
-
-      resolve();
-    });
+    }
   };
   //getters
   // function get() { return currentUser as Readonly<CurrentUser>; }

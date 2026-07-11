@@ -16,6 +16,9 @@ export interface IDynamicFindOptions {
   skip: number;
   take: number;
   scope?: IDataScope;
+  keyword?: string;
+  searchFields?: string[];
+  includeDeleted?: boolean;
 }
 
 export interface IDynamicField {
@@ -37,6 +40,7 @@ export interface IFormDataFilterOptionsRequest {
   fieldType?: string;
   keyword?: string;
   filter?: IDynamicFilter;
+  authGroupId?: string;
   limit?: number;
 }
 

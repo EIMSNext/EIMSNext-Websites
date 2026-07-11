@@ -28,6 +28,14 @@
           @submit="onDataSaved"></AddFormData>
       </div>
     </et-dialog>
+    <FormDataImportDialog
+      v-if="formDef"
+      v-model="showImportDialog"
+      :form-def="formDef"
+      :auth-group-id="curAuthGrp?.id"
+      :field-perms="fieldPerms"
+      @imported="handleQuery"
+    />
     <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')"
       :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
       <div>{{ t("common.message.deleteConfirm_Content", [checkedDatas.length]) }}</div>
@@ -51,7 +59,35 @@
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
       <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
-    <et-toolbar class="form-list-toolbar" :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+    <div class="toolbar-head">
+      <et-toolbar class="form-list-toolbar" :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+      <FormDataSearchBar
+        :keyword="searchState.keyword"
+        :selected-fields="searchState.selectedFields"
+        :fields="searchableFields"
+        :disabled="searchableFields.length === 0"
+        @update:keyword="searchState.keyword = $event"
+        @update:selected-fields="searchState.selectedFields = $event"
+        @search="handleSearch"
+      />
+    </div>
+    <FormDraftDrawer
+      v-if="formDef"
+      v-model="showDraftDrawer"
+      :title="t('admin.formList.draftBox')"
+      :description="t('admin.formList.draftBoxDesc')"
+      :empty-title="t('admin.formList.draftEmpty')"
+      :empty-desc="t('admin.formList.draftEmptyDesc')"
+      :rows="draftRows"
+      :page="draftPageNum"
+      :page-size="draftPageSize"
+      :has-next="draftHasNext"
+      :form-def="formDef"
+      @refresh="refreshDrafts"
+      @page-change="draftPageChanged"
+      @select="openDraft"
+      @delete="deleteDraft"
+    />
     <div v-if="availableViews.length > 0" class="view-tabs">
       <button
         v-for="view in availableViews"
@@ -131,7 +167,10 @@ import {
 import { getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
 import Pagination from "../../components/Pagination/index.vue";
 import { useI18n } from "vue-i18n";
+import FormDraftDrawer from "./components/FormDraftDrawer.vue";
 import FormListViewRenderer from "./components/FormListViewRenderer.vue";
+import FormDataSearchBar from "./components/FormDataSearchBar.vue";
+import FormDataImportDialog from "./components/FormDataImportDialog.vue";
 import {
   createDefaultFormListView,
   getViewDisplayFields,
@@ -139,12 +178,27 @@ import {
   parseSort,
   parseViewSettings,
 } from "./listViewUtils";
+import {
+  type FormDataSearchState,
+  filterSearchableFields,
+  normalizeSelectedSearchFields,
+  resolveSearchFields,
+} from "./searchUtils";
+import { createDraftFilter, createNonDraftFilter } from "./draftUtils";
 const { t } = useI18n();
+
+type FormDataQueryOptions = IDynamicFindOptions & {
+  keyword?: string;
+  searchFields?: string[];
+  includeDeleted?: boolean;
+};
 
 const displayItemCount = 3; //最多显示3条明细
 const showAddDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
 const showExportDialog = ref(false);
+const showImportDialog = ref(false);
+const showDraftDrawer = ref(false);
 const exporting = ref(false);
 const columns = ref<ITableColumn[]>([]);
 const route = useRoute();
@@ -161,11 +215,17 @@ const listViews = ref<FormListView[]>([]);
 const curListView = ref<FormListView>();
 const curListViewSettings = ref<FormListViewSettings>({});
 const listViewDisplayFields = ref<FormListViewField[]>([]);
+const searchState = reactive<FormDataSearchState>({
+  keyword: "",
+  selectedFields: [],
+});
 const userStore = useUserStore();
 const { currentUser } = userStore;
 
 const dataPerms = computed(() => getAuthGroupDataPerms(curAuthGrp.value));
 const canAdd = computed(() => hasDataPerm(currentUser.userType, DataPerms.AddNew, dataPerms.value));
+const canImport = computed(() => hasDataPerm(currentUser.userType, DataPerms.Import, dataPerms.value));
+const canExport = computed(() => hasDataPerm(currentUser.userType, DataPerms.Export, dataPerms.value));
 const canRemove = computed(() =>
   hasDataPerm(currentUser.userType, DataPerms.Remove, dataPerms.value)
 );
@@ -220,7 +280,18 @@ const leftBars = ref<ToolbarItem[]>([
       disabled: true,
     },
   },
-  // { type: "button", config: { text: "导入", command: "upload", icon: "el-upload" } },
+  {
+    type: "button",
+    config: {
+      text: "common.import",
+      command: "import",
+      visible: canImport,
+      icon: "el-upload",
+      onCommand: () => {
+        showImportDialog.value = true;
+      },
+    },
+  },
   // { type: "button", config: { text: "导出", command: "download", icon: "el-download" } }
 ]);
 
@@ -273,10 +344,24 @@ const rightBars = ref<ToolbarItem[]>([
       text: "common.export",
       class: "data-filter",
       command: "download",
-      visible: true,
+      visible: canExport,
       icon: "el-download",
       onCommand: () => {
         openExportDialog();
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "admin.formList.draftBox",
+      class: "data-filter",
+      command: "draft",
+      visible: true,
+      icon: "el-document",
+      onCommand: () => {
+        showDraftDrawer.value = true;
+        void refreshDrafts();
       },
     },
   },
@@ -303,6 +388,10 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
           showDeleteConfirmDialog.value = true;
         }
       }
+      break;
+    case "draft":
+      showDraftDrawer.value = true;
+      void refreshDrafts();
       break;
   }
 };
@@ -331,6 +420,9 @@ const submitExport = async () => {
       formId,
       filter: queryParams.value.filter,
       authGroupId: curAuthGrp.value?.id,
+      keyword: queryParams.value.keyword,
+      searchFields: queryParams.value.searchFields,
+      includeDeleted: false,
     });
 
     showExportDialog.value = false;
@@ -376,13 +468,20 @@ const loadFormContext = async () => {
 
 void loadFormContext();
 
-const queryParams = ref<IDynamicFindOptions>({
+const queryParams = ref<FormDataQueryOptions>({
+  skip: 0,
+  take: 20,
+});
+const draftQueryParams = ref<FormDataQueryOptions>({
   skip: 0,
   take: 20,
 });
 
 const totalRef = ref(0);
 const dataRef = ref<FormData[]>();
+const draftRows = ref<FormData[]>([]);
+const draftTotalRef = ref(0);
+const draftHasNext = computed(() => draftPageNum.value * draftPageSize.value < draftTotalRef.value);
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and", items: [] });
 const showSort = ref(false);
@@ -391,11 +490,14 @@ const showField = ref(false);
 const fieldList = ref<IFormFieldDef[]>([]);
 const pageNum = ref(1);
 const pageSize = ref(20);
+const draftPageNum = ref(1);
+const draftPageSize = ref(20);
 const selectedData = ref<FormData>();
 const showDetailsDialog = ref(false);
 const checkedDatas = ref<any[]>([]);
 const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
 const selectedExportColumnKeys = ref<string[]>([]);
+const searchableFields = computed(() => filterSearchableFields(fieldList.value));
 
 const exportColumns = computed<ExportColumn[]>(() => buildExportColumns());
 
@@ -418,6 +520,7 @@ const applyCurrentView = (preferredViewId?: string) => {
     type: field.type,
     isSubField: field.isSubField,
   }));
+  searchState.selectedFields = normalizeSelectedSearchFields(searchState.selectedFields, filterSearchableFields(displayFields));
   condList.value = parseCondition(nextView.defaultFilter);
   sortList.value = parseSort(formId, nextView.defaultSort, t);
   pageNum.value = 1;
@@ -486,38 +589,72 @@ const setField = (fields: IFormFieldDef[]) => {
     undefined,
     t
   );
+  searchState.selectedFields = normalizeSelectedSearchFields(searchState.selectedFields, searchableFields.value);
   updateQueryParams();
   handleQuery();
 };
 
 const updateQueryParams = () => {
   const queryFields = curListView.value?.pcType === FormListViewType.Table ? fieldList.value : [];
-  queryParams.value = toDynamicFindOptions(
+  const resolvedSearchFields = resolveSearchFields(searchState, searchableFields.value);
+  queryParams.value = {
+    ...toDynamicFindOptions(
     queryFields,
     condList.value,
     sortList.value,
     (pageNum.value - 1) * pageSize.value,
     pageSize.value,
-    { field: "formId", type: "none", op: "eq", value: formDef.value!.id },
+    createNonDraftFilter(formDef.value!.id),
     { authGroupId: curAuthGrp.value?.id }
-  );
+  ),
+  };
+  queryParams.value.keyword = searchState.keyword.trim();
+  queryParams.value.searchFields = resolvedSearchFields;
+  queryParams.value.includeDeleted = false;
+};
+
+const updateDraftQueryParams = () => {
+  draftQueryParams.value = {
+    skip: (draftPageNum.value - 1) * draftPageSize.value,
+    take: draftPageSize.value,
+    filter: createDraftFilter(formDef.value!.id, "self", currentUser.empId),
+    includeDeleted: false,
+    scope: curAuthGrp.value?.id ? { authGroupId: curAuthGrp.value.id } : undefined,
+  };
 };
 
 const handleQuery = () => {
   loadCount();
   loadData();
+  void refreshDraftCount();
 };
 
 const loadCount = () => {
-  formDataService.count(queryParams.value.filter).then((cnt: number) => {
+  formDataService.dynamicCount(queryParams.value).then((cnt: number) => {
     totalRef.value = cnt;
   });
 };
 const loadData = () => {
-  formDataService.query<FormData>(queryParams.value).then((res: FormData[]) => {
+  formDataService.dynamicQuery<FormData>(queryParams.value).then((res: FormData[]) => {
     dataRef.value = res;
     processData();
   });
+};
+const loadDraftCount = async () => {
+  draftTotalRef.value = await formDataService.dynamicCount(draftQueryParams.value);
+};
+const loadDraftRows = async () => {
+  draftRows.value = await formDataService.dynamicQuery<FormData>(draftQueryParams.value);
+};
+const refreshDraftCount = async () => {
+  if (!formDef.value) return;
+  updateDraftQueryParams();
+  await loadDraftCount();
+};
+const refreshDrafts = async () => {
+  if (!formDef.value) return;
+  updateDraftQueryParams();
+  await Promise.all([loadDraftCount(), loadDraftRows()]);
 };
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
@@ -525,8 +662,20 @@ const pageChanged = (curPage: number, pSize: number) => {
   updateQueryParams();
   loadData();
 };
+const draftPageChanged = async (curPage: number, pSize: number) => {
+  draftPageNum.value = curPage;
+  draftPageSize.value = pSize;
+  await refreshDrafts();
+};
 const onDataSaved = () => {
   showAddDialog.value = false;
+  pageNum.value = 1;
+  updateQueryParams();
+  handleQuery();
+  void refreshDrafts();
+};
+
+const handleSearch = () => {
   pageNum.value = 1;
   updateQueryParams();
   handleQuery();
@@ -630,8 +779,17 @@ const showDetails = (row: FormData) => {
   selectedData.value = row;
   showDetailsDialog.value = true;
 };
+const openDraft = (row: FormData) => {
+  selectedData.value = row;
+  showDetailsDialog.value = true;
+};
+const deleteDraft = async (row: FormData) => {
+  await formDataService.delete(row.id);
+  await Promise.all([refreshDrafts(), Promise.resolve(handleQuery())]);
+};
 const handleViewOk = () => {
   loadData();
+  void refreshDrafts();
   showDetailsDialog.value = false;
 };
 //#region Flat Data
@@ -742,12 +900,14 @@ const handleDataSaved = (payload: { formId: string }) => {
   pageNum.value = 1;
   updateQueryParams();
   handleQuery();
+  void refreshDrafts();
 };
 const handleDataDeleted = (payload: { formId: string }) => {
   if (payload.formId !== formId) return;
   pageNum.value = 1;
   updateQueryParams();
   handleQuery();
+  void refreshDrafts();
 };
 
 onMounted(() => {
@@ -787,6 +947,13 @@ onUnmounted(() => {
   border: 1px solid var(--et-border-color-light);
   border-bottom: 0;
   background: var(--et-bg-container);
+}
+
+.toolbar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--et-space-12);
 }
 
 .view-tab {
@@ -874,6 +1041,13 @@ onUnmounted(() => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   max-height: 280px;
   overflow: auto;
+}
+
+@media (max-width: 1280px) {
+  .toolbar-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 :deep(.table-image-thumb) {

@@ -9,6 +9,7 @@
         <el-tab-pane v-if="usingFlow" :label="t('admin.formEdit.workflow')" name="workflow" />
         <el-tab-pane :label="t('admin.formEdit.extension')" name="extension" />
         <el-tab-pane :label="t('admin.formEdit.publish')" name="publish" />
+        <el-tab-pane :label="t('admin.formEdit.dataManage')" name="datamanage" />
       </el-tabs>
     </template>
     <div v-if="loadedTabs.formedit" v-show="activeName == 'formedit'">
@@ -22,6 +23,9 @@
     </div>
     <div v-if="loadedTabs.publish" v-show="activeName == 'publish'" class="main-content-container">
       <Publish ref="publishRef" :formDef="formDefRef!"></Publish>
+    </div>
+    <div v-if="loadedTabs.datamanage" v-show="activeName == 'datamanage'" class="main-content-container">
+      <DataManage :form-def="formDefRef!" />
     </div>
   </et-drawer>
 </template>
@@ -41,6 +45,7 @@ import { formDefService, systemService } from "@eimsnext/services";
 const WorkflowDesigner = defineAsyncComponent(() => import("../WorkflowDesigner/index.vue"));
 const Advanced = defineAsyncComponent(() => import("./Advanced/index.vue"));
 const Publish = defineAsyncComponent(() => import("./Publish/index.vue"));
+const DataManage = defineAsyncComponent(() => import("./DataManage/index.vue"));
 const { t } = useI18n();
 
 defineOptions({
@@ -51,7 +56,6 @@ const props = defineProps<{
   modelValue: boolean;
   formDef: FormDef;
   usingFlow: boolean;
-  isLedger: boolean;
 }>();
 
 const formStore = useFormStore();
@@ -71,6 +75,7 @@ const loadedTabs = ref<Record<string, boolean>>({
   workflow: false,
   extension: false,
   publish: false,
+  datamanage: false,
 });
 
 watch(activeName, (tabName) => {
@@ -283,7 +288,11 @@ function close() {
 .top-nav-bar .nav-tabs .el-tabs__content {
   display: none;
 }
-
+.top-nav-bar .nav-tabs .el-tabs__item:last-child {
+  margin-left: 46px;
+  overflow: visible;
+  position: relative;
+}
 .top-nav-bar .nav-tabs .el-tabs__item:last-child:after {
   background: var(--et-border-color-light);
   content: "";

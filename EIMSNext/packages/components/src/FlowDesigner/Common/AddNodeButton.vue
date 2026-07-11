@@ -193,7 +193,7 @@ function addNewNode(
   gap: 6px;
   width: 100%;
   padding: 6px 10px;
-  background: #fff;
+  background: var(--et-bg-container, var(--el-bg-color));
   border: 1px solid var(--el-border-color-lighter);
   border-radius: 6px;
   font-size: 13px;

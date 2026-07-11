@@ -17,8 +17,8 @@
       />
     </el-scrollbar>
     <template #footer>
-      <el-button @click="visible = false">{{ t("common.cancel") }}</el-button>
-      <el-button type="primary" :loading="saving" @click="confirm">{{ t("common.ok") }}</el-button>
+      <el-button :disabled="saving" @click="visible = false">{{ t("common.cancel") }}</el-button>
+      <el-button type="primary" :loading="saving" :disabled="saving" @click="confirm">{{ t("common.ok") }}</el-button>
     </template>
   </el-dialog>
 </template>
@@ -103,6 +103,7 @@ const syncCheckedKeys = () => {
 };
 
 const confirm = async () => {
+  if (saving.value) return;
   const nodes = (treeRef.value?.getCheckedNodes(false, false) || []) as FavoriteTreeNode[];
   const targets = nodes
     .filter((node) => node.targetType && node.targetId)
@@ -120,19 +121,23 @@ const confirm = async () => {
     const favoritesToRemove = workbenchStore.favorites.filter(
       (favorite) => !selectedKeys.has(`${favorite.targetType}:${favorite.targetId}`)
     );
-    for (const favorite of favoritesToRemove) {
-      await workbenchStore.removeFavorite({
-        targetType: favorite.targetType,
-        targetId: favorite.targetId,
-      });
-    }
+    const targetsToAdd = targets.filter(
+      (target) => !workbenchStore.isFavorite(target.targetType, target.targetId)
+    );
 
-    for (const target of targets) {
-      if (!workbenchStore.isFavorite(target.targetType, target.targetId)) {
-        await workbenchStore.addFavorite(target);
-      }
-    }
+    await Promise.all([
+      ...favoritesToRemove.map((favorite) =>
+        workbenchStore.removeFavorite({
+          targetType: favorite.targetType,
+          targetId: favorite.targetId,
+        })
+      ),
+      ...targetsToAdd.map((target) => workbenchStore.addFavorite(target)),
+    ]);
     visible.value = false;
+  } catch (e) {
+    console.error("保存收藏失败：", e);
+    ElMessage.error(t("common.saveFailed"));
   } finally {
     saving.value = false;
   }

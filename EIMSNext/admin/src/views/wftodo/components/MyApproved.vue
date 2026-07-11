@@ -8,6 +8,9 @@ defineOptions({
 
 import WfApprovalLogs from './WfApprovalLogs.vue';
 
-const filter = { nodeType: 7 }
+const filter = {
+  nodeType: { ne: 1 },
+  result: { ne: 7 },
+}
 
 </script>

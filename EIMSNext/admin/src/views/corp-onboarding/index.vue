@@ -188,13 +188,13 @@ async function logout() {
 .corp-onboarding-page {
   min-height: 100vh;
   padding: 24px;
-  background: #f5f7fa;
+  background: var(--et-bg-page);
 }
 
 .page-card,
 .panel-card {
-  background: #fff;
-  border: 1px solid #e8edf3;
+  background: var(--et-bg-container);
+  border: 1px solid var(--et-border-color-light);
   border-radius: 16px;
 }
 
@@ -214,25 +214,25 @@ async function logout() {
   h1 {
     margin: 0 0 8px;
     font-size: 24px;
-    color: #303133;
+    color: var(--et-text-primary);
   }
 
   p {
     margin: 0;
-    color: #606266;
+    color: var(--et-text-secondary);
   }
 }
 
 .corp-description,
 .apply-hint {
-  color: #606266;
+  color: var(--et-text-secondary);
 }
 
 .apply-hint {
   margin-top: 16px;
   padding: 12px;
   border-radius: 8px;
-  background: #fdf6ec;
+  background: var(--et-bg-warning-soft);
 }
 
 .content-grid {
@@ -257,13 +257,13 @@ async function logout() {
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--et-text-primary);
   margin-bottom: 8px;
 }
 
 .section-tip {
   margin-bottom: 16px;
-  color: #909399;
+  color: var(--et-text-tertiary);
   font-size: 13px;
 }
 
@@ -284,7 +284,7 @@ async function logout() {
   justify-content: space-between;
   gap: 16px;
   padding: 16px;
-  border: 1px solid #ebeef5;
+  border: 1px solid var(--et-border-color-light);
   border-radius: 12px;
 }
 
@@ -301,14 +301,14 @@ async function logout() {
 
 .corp-name {
   font-weight: 600;
-  color: #303133;
+  color: var(--et-text-primary);
 }
 
 .corp-code {
   padding: 2px 8px;
   border-radius: 999px;
-  background: #f4f4f5;
-  color: #606266;
+  background: var(--et-bg-muted);
+  color: var(--et-text-secondary);
   font-size: 12px;
 }
 

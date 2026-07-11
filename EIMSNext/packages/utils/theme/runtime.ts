@@ -2,6 +2,35 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function normalizeRgbChannel(value: string) {
+  const trimmed = value.trim();
+  if (trimmed.endsWith("%")) {
+    const percentage = Number(trimmed.slice(0, -1));
+    return Number.isFinite(percentage) ? Math.round(clamp(percentage, 0, 100) * 2.55) : undefined;
+  }
+
+  const channel = Number(trimmed);
+  return Number.isFinite(channel) ? Math.round(clamp(channel, 0, 255)) : undefined;
+}
+
+function rgbStringToHex(color: string) {
+  const match = color.match(/^rgba?\((.+)\)$/i);
+  if (!match) return undefined;
+
+  const channels = match[1]
+    .replace(/\s*\/.*$/, "")
+    .split(/[\s,]+/)
+    .filter(Boolean)
+    .slice(0, 3)
+    .map(normalizeRgbChannel);
+
+  if (channels.length !== 3 || channels.some((item) => item === undefined)) {
+    return undefined;
+  }
+
+  return rgbToHex(channels[0]!, channels[1]!, channels[2]!);
+}
+
 function normalizeHex(hex: string) {
   const color = hex.trim();
   if (/^#[0-9a-f]{6}$/i.test(color)) {
@@ -11,6 +40,11 @@ function normalizeHex(hex: string) {
   if (/^#[0-9a-f]{3}$/i.test(color)) {
     const [, r, g, b] = color;
     return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+
+  const rgbHex = rgbStringToHex(color);
+  if (rgbHex) {
+    return rgbHex;
   }
 
   return "#4080ff";

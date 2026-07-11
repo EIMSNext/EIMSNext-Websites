@@ -104,6 +104,9 @@ export interface IFlowLogState {
   isNodeExecuted?: (nodeData: IFlowNodeData) => boolean;
   isLineExecuted?: (nodeData: IFlowNodeData, branchItemData?: IFlowNodeData) => boolean;
   isBranchExecuted?: (branchItemData: IFlowNodeData) => boolean;
+  isNodeFailed?: (nodeData: IFlowNodeData) => boolean;
+  isLineFailed?: (nodeData: IFlowNodeData, branchItemData?: IFlowNodeData) => boolean;
+  isBranchFailed?: (branchItemData: IFlowNodeData) => boolean;
   onNodeClick?: (nodeData: IFlowNodeData) => void;
 }
 export interface IFlowNodeDragData {
@@ -601,6 +604,7 @@ function cleanupPluginDependencies(
   validNodeIds: Set<string>
 ) {
   fieldSettings?.forEach((setting) => {
+    cleanupPluginDependencies(setting.subFieldSettings, validNodeIds);
     if (
       setting.value.fieldValue &&
       !isValidDependency(setting.value.fieldValue.nodeId, validNodeIds)
@@ -661,7 +665,6 @@ export enum ApproveMode {
   None,
   OrSign,
   CounterSign,
-  AutoSign,
 }
 export enum ApproverType {
   Normal = 0,
@@ -882,7 +885,6 @@ export interface PluginMeta {
   singleResult: boolean;
   pluginId: string;
   pluginName?: string;
-  pluginVersion?: string;
   functionId: string;
   functionName?: string;
   fieldSettings: PluginFieldSetting[];
@@ -893,17 +895,20 @@ export interface PluginFieldSetting {
   fieldKey: string;
   fieldName?: string;
   fieldType: string;
+  required?: boolean;
   value: {
     type: string;
     value?: any;
     fieldValue?: IFormFieldDef;
   };
+  subFieldSettings?: PluginFieldSetting[];
 }
 
 export interface PluginResultFieldSetting {
   fieldKey: string;
   fieldName: string;
   fieldType: string;
+  subFields?: PluginResultFieldSetting[];
 }
 
 export enum EventType {
