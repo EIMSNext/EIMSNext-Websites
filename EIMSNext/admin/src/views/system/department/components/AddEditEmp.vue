@@ -113,16 +113,13 @@ if (props.edit && props.emp) {
     empName: props.emp.empName,
     workPhone: props.emp.workPhone,
     workEmail: props.emp.workEmail,
-    departments: props.emp.departments?.map((x, index) => ({
+    departments: props.emp.empDepts?.map((x, index) => ({
       departmentId: x.id,
-      isManager: x.isManager,
-      sortValue: x.sortValue ?? index,
+      isManager: false,
+      sortValue: index,
     })) ?? [],
   };
-  selectedDepartmentIds.value = props.emp.departments?.map((x) => x.id) ?? [];
-  props.emp.departments?.forEach((x) => {
-    departmentManagers[x.id] = !!x.isManager;
-  });
+  selectedDepartmentIds.value = props.emp.empDepts?.map((x) => x.id) ?? [];
 }
 
 const rules = reactive({

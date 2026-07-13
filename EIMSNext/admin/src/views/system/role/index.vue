@@ -365,7 +365,7 @@ const syncManageToolbar = () => {
     deleteBar.config.disabled =
       !canManageRoleMembers.value ||
       checkedDatas.value.length == 0 ||
-      checkedDatas.value.some((emp: Employee) => (emp.departments ?? []).every((d) => !canManageEmployeeDepartment(d.id)));
+      checkedDatas.value.some((emp: Employee) => (emp.empDepts ?? []).every((d) => !canManageEmployeeDepartment(d.id)));
   }
 };
 const handleRoleQuery = (role?: Role) => {
@@ -408,7 +408,7 @@ const loadData = () => {
 };
 
 const formatDepartments = (employee: Employee) => {
-  return employee.departments?.map((x) => x.name).filter(Boolean).join(", ") ?? "";
+  return employee.empDepts?.map((x) => x.name).filter(Boolean).join(", ") ?? "";
 };
 
 const handleSelectionChange = (selection: any[]) => {

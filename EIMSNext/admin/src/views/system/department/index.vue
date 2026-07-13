@@ -456,7 +456,7 @@ const syncManageToolbar = () => {
   if (deleteBar) {
     deleteBar.config.visible = canManageAnyDepartment;
     deleteBar.config.disabled =
-      checkedDatas.value.length === 0 || checkedDatas.value.some((emp) => (emp.departments ?? []).every((d: { id: string }) => !canManageDepartment(d.id)));
+      checkedDatas.value.length === 0 || checkedDatas.value.some((emp) => (emp.empDepts ?? []).every((d: { id: string }) => !canManageDepartment(d.id)));
   }
 };
 
@@ -464,7 +464,7 @@ const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
   const hasSelection = checkedDatas.value.length > 0;
   leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
-    !hasSelection || checkedDatas.value.some((emp: Employee) => (emp.departments ?? []).every((d) => !canManageDepartment(d.id)));
+    !hasSelection || checkedDatas.value.some((emp: Employee) => (emp.empDepts ?? []).every((d) => !canManageDepartment(d.id)));
   const approveBar = leftBars.value.find((x) => x.config.command == "approve");
   const rejectBar = leftBars.value.find((x) => x.config.command == "reject");
   if (approveBar) approveBar.config.disabled = !hasSelection;
@@ -482,7 +482,7 @@ const edit = (row: Employee, column: any) => {
       selectedEmp.value = row;
       return;
     }
-    if ((row.departments ?? []).some((d) => canManageDepartment(d.id))) {
+    if ((row.empDepts ?? []).some((d) => canManageDepartment(d.id))) {
       editMode.value = true;
       selectedEmp.value = row;
       showAddEditDialog.value = true;
