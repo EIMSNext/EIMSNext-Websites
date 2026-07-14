@@ -113,7 +113,7 @@ const convertMembersToTags = (members?: Member[]): ISelectedTag[] => {
   if (members && members.length > 0)
     return members.map<ISelectedTag>((x) => ({
       id: x.id,
-      code: x.code,
+      value: x.value,
       label: x.label,
       type: convertMemberTypeToTagType(x.type),
       cascadedDept: x.cascadedDept,

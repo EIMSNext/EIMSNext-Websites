@@ -213,7 +213,7 @@ function membersToTags(members: Member[]): ISelectedTag[] {
     id: member.id,
     sourceId: member.id,
     label: member.label,
-    value: member.code,
+    value: member.value,
     type: memberTypeToDataItemType(member.type),
     cascadedDept: member.cascadedDept,
   }));
@@ -222,7 +222,7 @@ function membersToTags(members: Member[]): ISelectedTag[] {
 function tagsToMembers(tags: ISelectedTag[]): Member[] {
   return tags.map((tag) => ({
     id: tag.sourceId || tag.id,
-    code: tag.value,
+    value: tag.value,
     label: tag.label,
     type: dataItemTypeToMemberType(tag.type),
     cascadedDept: tag.cascadedDept ?? false,

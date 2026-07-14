@@ -409,6 +409,29 @@ const loadDepartments = () => options.adminScope
   ? departmentService.query<Department>(adminScopeParam())
   : deptStore.load();
 
+const memberScopeFilter = () => {
+  const departments = options.limit?.depts?.filter((x) => !!x?.id) ?? [];
+  if (departments.length === 0) return "";
+
+  const filters = departments.map((department) => {
+    const id = String(department.id).replaceAll("'", "''");
+    return department.cascadedDept
+      ? `Depts/any(d: contains(d/HeriarchyId, '|${id}|'))`
+      : `Depts/any(d: d/DeptId eq '${id}')`;
+  });
+  return filters.length === 1 ? filters[0] : `(${filters.join(" or ")})`;
+};
+
+const employeeQuery = (query = "") => {
+  const scopeFilter = memberScopeFilter();
+  if (!scopeFilter) return query;
+
+  const params = new URLSearchParams(query);
+  const existingFilter = params.get("$filter");
+  params.set("$filter", existingFilter ? `(${existingFilter}) and (${scopeFilter})` : scopeFilter);
+  return params.toString();
+};
+
 const dynamicGroups = computed<IDynamicMemberGroup[]>(() => {
   const groups: IDynamicMemberGroup[] = [];
   const groupMap = new Map<string, IDynamicMemberGroup>();
@@ -902,9 +925,10 @@ const selectEmpDept = (deptId: string) => {
   empData.value = [];
   selectedEmps.value = [];
 
+  const query = employeeQuery(adminScopeParam());
   const request = deptId && deptId !== "all"
-    ? employeeService.queryByDepartment<Employee>(deptId, false, adminScopeParam())
-    : employeeService.query<Employee>(adminScopeParam());
+    ? employeeService.queryByDepartment<Employee>(deptId, false, query)
+    : employeeService.query<Employee>(query);
 
   request.then((res) => {
     res.forEach((x) => {

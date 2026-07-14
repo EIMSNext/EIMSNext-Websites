@@ -87,7 +87,7 @@ if (newAuthGrp.value.members)
   members.value = newAuthGrp.value.members.map<ISelectedTag>((x) => {
     return {
       id: x.id,
-      code: x.code,
+      value: x.value,
       label: x.label,
       type: convertMemberTypeToTagType(x.type),
       cascadedDept: x.cascadedDept,
@@ -104,6 +104,21 @@ const finishSelect = (tags: ISelectedTag[]) => {
   showMemberDialog.value = false;
 };
 
+const authGroupTypeName = (type: AuthGroupType) => {
+  switch (type) {
+    case AuthGroupType.ManageSelfData:
+      return "ManageSelfData";
+    case AuthGroupType.ViewAllData:
+      return "ViewAllData";
+    case AuthGroupType.ManageAllData:
+      return "ManageAllData";
+    case AuthGroupType.Custom:
+      return "Custom";
+    default:
+      return type;
+  }
+};
+
 const emit = defineEmits(["update:modelValue", "close"]);
 const cancel = () => {
   emit("update:modelValue", false);
@@ -116,7 +131,7 @@ const save = async () => {
     formId: props.formDef.id,
     name: newAuthGrp.value.name,
     desc: newAuthGrp.value.desc,
-    type: newAuthGrp.value.type,
+    type: authGroupTypeName(newAuthGrp.value.type) as AuthGroupType,
     members: members.value.map<Member>((x) => {
       return {
         id: x.id,
