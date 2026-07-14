@@ -231,7 +231,7 @@
         >
           <el-table-column type="selection" width="44" />
           <el-table-column prop="dataTitle" :label="t('comp.fieldBlock.systemFields.dataTitle')" min-width="220" />
-          <el-table-column :label="t('operation')" width="200" fixed="right">
+          <el-table-column :label="t('common.operation')" width="200" fixed="right">
             <template #default="{ row }">
               <div class="trash-row-actions">
                 <el-button link type="primary" @click="restoreOne(row)">{{ t("admin.formEdit.dataManageRestore") }}</el-button>

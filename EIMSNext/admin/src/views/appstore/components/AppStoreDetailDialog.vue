@@ -8,8 +8,8 @@
             <div class="title-copy">
               <div class="title-topline">
                 <h1 class="detail-title">{{ profile.name }}</h1>
-                <span v-if="profile.isOfficial" class="status-badge official">{{ $t("admin.appStore.official") }}</span>
-                <span v-else-if="profile.isHot" class="status-badge hot">{{ $t("admin.appStore.hot") }}</span>
+                <span v-if="profile.isOfficial" class="status-badge official">{{ $t("admin.official") }}</span>
+                <span v-else-if="profile.isHot" class="status-badge hot">{{ $t("admin.hot") }}</span>
               </div>
               <div class="detail-subtitle">{{ profile.summary }}</div>
               <div class="detail-tags">

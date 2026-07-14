@@ -4,7 +4,7 @@
     <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
   <PdfPreview v-model="showPdfPreview" :title="pdfPreviewTitle" :pdf-url="pdfPreviewUrl" />
-  <et-dialog v-model="showShareDialog" class="share-dialog" :title="$t('admin.formData.share')" width="640px" :show-footer="false" append-to-body>
+  <et-dialog v-model="showShareDialog" class="share-dialog" :title="$t('common.share')" width="640px" :show-footer="false" append-to-body>
     <div class="share-dialog-body">
       <div class="share-section">
         <div class="share-section-title-row">
@@ -111,7 +111,7 @@ const leftBars = computed<ToolbarItem[]>(() => {
     {
       type: "button",
       config: {
-        text: t("admin.formData.share"),
+        text: t("common.share"),
         command: "share",
         visible: !inEdit.value,
         icon: "el-share",
@@ -226,7 +226,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       openCustomPrintPreview(printResult);
     }
     else {
-      ElMessage.error(printResult?.message || t("admin.formData.printFailed"))
+      ElMessage.error(printResult?.message || t("common.printFailed"))
     }
 
     return;

@@ -11,7 +11,7 @@
     <template #header>
       <div class="dialog-header">
         <span>{{ title }}</span>
-        <button class="icon-button" type="button" :title="maximized ? t('formDataImport.preview.restore') : t('formDataImport.preview.maximize')" @click="maximized = !maximized">
+        <button class="icon-button" type="button" :title="maximized ? t('admin.formDataImport.preview.restore') : t('admin.formDataImport.preview.maximize')" @click="maximized = !maximized">
           <et-icon :icon="maximized ? 'el-CopyDocument' : 'el-FullScreen'" />
         </button>
       </div>
@@ -19,27 +19,27 @@
 
     <div class="import-shell" :class="{ maximized }">
       <el-steps class="import-steps" :active="activeStep" align-center finish-status="success">
-        <el-step :title="t('formDataImport.steps.selectFile')" />
-        <el-step :title="t('formDataImport.steps.preview')" />
-        <el-step :title="t('formDataImport.steps.config')" />
-        <el-step :title="t('formDataImport.steps.import')" />
+        <el-step :title="t('admin.formDataImport.steps.selectFile')" />
+        <el-step :title="t('admin.formDataImport.steps.preview')" />
+        <el-step :title="t('admin.formDataImport.steps.config')" />
+        <el-step :title="t('admin.formDataImport.steps.import')" />
       </el-steps>
 
       <section v-show="activeStep === 0" class="step-panel">
         <div class="option-row">
-          <span class="option-label">{{ t("formDataImport.options.importMode") }}</span>
+          <span class="option-label">{{ t("admin.formDataImport.options.importMode") }}</span>
           <el-select v-model="importMode" class="mode-select" size="default">
             <el-option v-for="item in importModeOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </div>
 
         <div class="check-row">
-          <el-checkbox v-model="triggerValidation">{{ t("formDataImport.options.triggerValidation") }}</el-checkbox>
-          <el-tooltip :content="t('formDataImport.options.triggerValidationTooltip')">
+          <el-checkbox v-model="triggerValidation">{{ t("admin.formDataImport.options.triggerValidation") }}</el-checkbox>
+          <el-tooltip :content="t('admin.formDataImport.options.triggerValidationTooltip')">
             <et-icon class="hint-icon" icon="el-QuestionFilled" />
           </el-tooltip>
           <el-checkbox v-if="formDef.usingWorkflow" v-model="triggerWorkflow" class="workflow-check">
-            {{ t("formDataImport.options.triggerWorkflow") }}
+            {{ t("admin.formDataImport.options.triggerWorkflow") }}
           </el-checkbox>
         </div>
 
@@ -47,12 +47,12 @@
           <ul>
             <li>
               {{ templateTipParts.before }}
-              <a href="#" @click.prevent.stop="downloadTemplate">{{ t("formDataImport.tips.templateLink") }}</a>
+              <a href="#" @click.prevent.stop="downloadTemplate">{{ t("admin.formDataImport.tips.templateLink") }}</a>
               {{ templateTipParts.after }}
             </li>
-            <li>{{ t("formDataImport.tips.line2") }}</li>
-            <li v-if="formDef.usingWorkflow && triggerWorkflow">{{ t("formDataImport.tips.line3") }}</li>
-            <li>{{ t("formDataImport.tips.line4", { link: t("formDataImport.tips.helpLink") }) }}</li>
+            <li>{{ t("admin.formDataImport.tips.line2") }}</li>
+            <li v-if="formDef.usingWorkflow && triggerWorkflow">{{ t("admin.formDataImport.tips.line3") }}</li>
+            <li>{{ t("admin.formDataImport.tips.line4", { link: t("admin.formDataImport.tips.helpLink") }) }}</li>
           </ul>
         </div>
 
@@ -69,27 +69,27 @@
             <span v-if="selectedFile">{{ selectedFile.name }}</span>
             <span v-else>
               {{ dropPromptParts.before }}
-              <b>{{ t("formDataImport.dropZone.promptAction") }}</b>
+              <b>{{ t("admin.formDataImport.dropZone.promptAction") }}</b>
               {{ dropPromptParts.after }}
             </span>
           </div>
-          <div v-if="previewLoading" class="drop-mask">{{ t("formDataImport.dropZone.loading") }}</div>
+          <div v-if="previewLoading" class="drop-mask">{{ t("admin.formDataImport.dropZone.loading") }}</div>
         </div>
       </section>
 
       <section v-show="activeStep === 1" class="step-panel">
         <div class="preview-toolbar">
           <div class="option-row compact">
-            <span class="option-label">{{ t("formDataImport.preview.sheet") }}</span>
+            <span class="option-label">{{ t("admin.formDataImport.preview.sheet") }}</span>
             <el-select v-model="sheetName" class="sheet-select">
               <el-option v-for="sheet in previewSheets" :key="sheet.name" :label="sheet.name" :value="sheet.name" />
             </el-select>
           </div>
           <div class="option-row compact">
-            <span class="option-label">{{ t("formDataImport.preview.headerRow") }}</span>
+            <span class="option-label">{{ t("admin.formDataImport.preview.headerRow") }}</span>
             <el-input-number v-model="headerRowIndex" :min="1" :max="maxHeaderRow" controls-position="right" />
           </div>
-          <span class="muted-text">{{ t("formDataImport.preview.headerRowNote") }}</span>
+          <span class="muted-text">{{ t("admin.formDataImport.preview.headerRowNote") }}</span>
         </div>
 
         <div class="table-scroll preview-table">
@@ -109,23 +109,23 @@
               </tr>
             </tbody>
           </table>
-          <div v-if="previewRows.length === 0" class="empty-area">{{ t("formDataImport.preview.empty") }}</div>
+          <div v-if="previewRows.length === 0" class="empty-area">{{ t("admin.formDataImport.preview.empty") }}</div>
         </div>
       </section>
 
       <section v-show="activeStep === 2" class="step-panel">
         <div class="mapping-head">
           <div class="option-row compact">
-            <span class="option-label">{{ t("formDataImport.mapping.formName") }}</span>
+            <span class="option-label">{{ t("admin.formDataImport.mapping.formName") }}</span>
             <el-input :model-value="formDef.name" class="readonly-input" disabled />
           </div>
           <div v-if="importMode !== FormDataImportMode.AddOnly" class="option-row compact">
-            <span class="option-label">{{ t("formDataImport.mapping.matchField") }}</span>
-            <el-select v-model="matchField" class="sheet-select" :placeholder="t('formDataImport.mapping.matchFieldPlaceholder')">
+            <span class="option-label">{{ t("admin.formDataImport.mapping.matchField") }}</span>
+            <el-select v-model="matchField" class="sheet-select" :placeholder="t('admin.formDataImport.mapping.matchFieldPlaceholder')">
               <el-option v-for="field in matchableFields" :key="field.field" :label="field.title" :value="field.field" />
             </el-select>
           </div>
-          <div class="mapping-count">{{ t("formDataImport.mapping.count", { mapped: mappedItems.length, total: previewColumns.length }) }}</div>
+          <div class="mapping-count">{{ t("admin.formDataImport.mapping.count", { mapped: mappedItems.length, total: previewColumns.length }) }}</div>
         </div>
 
         <div class="table-scroll mapping-table">
@@ -138,13 +138,13 @@
                 </th>
               </tr>
               <tr>
-                <th class="row-index-cell">{{ t("formDataImport.mapping.fieldHeader") }}</th>
+                <th class="row-index-cell">{{ t("admin.formDataImport.mapping.fieldHeader") }}</th>
                 <th v-for="column in previewColumns" :key="column.index">
                   <el-select
                     :model-value="mappingValues[column.index]"
                     clearable
                     filterable
-                    :placeholder="t('formDataImport.mapping.matchFieldPlaceholder')"
+                    :placeholder="t('admin.formDataImport.mapping.matchFieldPlaceholder')"
                     @change="(value) => setColumnMapping(column.index, value)"
                   >
                     <el-option
@@ -167,7 +167,7 @@
               </tr>
             </tbody>
           </table>
-          <div v-if="previewColumns.length === 0" class="empty-area">{{ t("formDataImport.mapping.empty") }}</div>
+          <div v-if="previewColumns.length === 0" class="empty-area">{{ t("admin.formDataImport.mapping.empty") }}</div>
         </div>
       </section>
 
@@ -177,20 +177,20 @@
             <el-progress :percentage="progressPercent" :show-text="false" />
             <span>{{ progressText }}</span>
           </div>
-          <p class="muted-text">{{ t("formDataImport.result.canCloseHint") }}</p>
+          <p class="muted-text">{{ t("admin.formDataImport.result.canCloseHint") }}</p>
         </template>
 
         <template v-else-if="isImportSuccess">
           <div class="result-icon success"><et-icon icon="el-Check" /></div>
-          <p>{{ t("formDataImport.result.success", { add: importStatus?.addCount || 0, update: importStatus?.updateCount || 0 }) }}</p>
+          <p>{{ t("admin.formDataImport.result.success", { add: importStatus?.addCount || 0, update: importStatus?.updateCount || 0 }) }}</p>
         </template>
 
         <template v-else-if="isImportFailed">
           <div class="result-icon warning"><et-icon icon="el-WarningFilled" /></div>
-          <p>{{ t("formDataImport.result.partial", { add: importStatus?.addCount || 0, update: importStatus?.updateCount || 0, failed: importStatus?.failedCount || 0 }) }}</p>
+          <p>{{ t("admin.formDataImport.result.partial", { add: importStatus?.addCount || 0, update: importStatus?.updateCount || 0, failed: importStatus?.failedCount || 0 }) }}</p>
           <div class="result-actions">
-            <el-button v-if="importStatus?.errorReportDownloadUrl" @click="downloadErrorReport">{{ t("formDataImport.result.downloadReport") }}</el-button>
-            <el-button v-if="importStatus?.canEditErrors" type="primary" @click="openErrorEditor">{{ t("formDataImport.result.editErrors") }}</el-button>
+            <el-button v-if="importStatus?.errorReportDownloadUrl" @click="downloadErrorReport">{{ t("admin.formDataImport.result.downloadReport") }}</el-button>
+            <el-button v-if="importStatus?.canEditErrors" type="primary" @click="openErrorEditor">{{ t("admin.formDataImport.result.editErrors") }}</el-button>
           </div>
           <p v-if="importStatus?.errorMessage" class="error-text">{{ importStatus.errorMessage }}</p>
         </template>
@@ -199,14 +199,14 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <a class="help-link" href="#" @click.prevent>{{ t("formDataImport.footer.helpLink") }}</a>
+        <a class="help-link" href="#" @click.prevent>{{ t("admin.formDataImport.footer.helpLink") }}</a>
         <div class="footer-actions">
-          <el-button v-if="activeStep > 0 && activeStep < 3" @click="activeStep -= 1">{{ t("prevStep") }}</el-button>
-          <el-button v-if="activeStep === 0" type="primary" :disabled="!previewReady" @click="activeStep = 1">{{ t("nextStep") }}</el-button>
-          <el-button v-else-if="activeStep === 1" type="primary" :disabled="previewColumns.length === 0" @click="goMappingStep">{{ t("nextStep") }}</el-button>
-          <el-button v-else-if="activeStep === 2" type="primary" :loading="submitting" :disabled="!canStartImport" @click="startImport">{{ t("formDataImport.footer.startImport") }}</el-button>
-          <el-button v-else-if="activeStep === 3 && !isImportRunning" type="primary" @click="finishDialog">{{ t("formDataImport.footer.finish") }}</el-button>
-          <el-button v-else-if="activeStep === 3" type="primary" :loading="true" disabled>{{ t("formDataImport.footer.importing") }}</el-button>
+          <el-button v-if="activeStep > 0 && activeStep < 3" @click="activeStep -= 1">{{ t("common.prevStep") }}</el-button>
+          <el-button v-if="activeStep === 0" type="primary" :disabled="!previewReady" @click="activeStep = 1">{{ t("common.nextStep") }}</el-button>
+          <el-button v-else-if="activeStep === 1" type="primary" :disabled="previewColumns.length === 0" @click="goMappingStep">{{ t("common.nextStep") }}</el-button>
+          <el-button v-else-if="activeStep === 2" type="primary" :loading="submitting" :disabled="!canStartImport" @click="startImport">{{ t("admin.formDataImport.footer.startImport") }}</el-button>
+          <el-button v-else-if="activeStep === 3 && !isImportRunning" type="primary" @click="finishDialog">{{ t("admin.formDataImport.footer.finish") }}</el-button>
+          <el-button v-else-if="activeStep === 3" type="primary" :loading="true" disabled>{{ t("admin.formDataImport.footer.importing") }}</el-button>
         </div>
       </div>
     </template>
@@ -214,7 +214,7 @@
     <el-dialog
       v-model="errorEditorVisible"
       class="import-error-dialog"
-      :title="t('formDataImport.errorDialog.title')"
+      :title="t('admin.formDataImport.errorDialog.title')"
       width="90%"
       top="7vh"
       append-to-body
@@ -223,10 +223,10 @@
       <div class="error-editor">
         <aside class="error-list">
           <div v-for="row in editableRows" :key="row.recordIndex" class="error-card" :class="{ resolved: row.errors.length === 0 }">
-            <div class="error-row-title">{{ t("formDataImport.result.rowPrefix", { n: row.startRowNumber }) }}</div>
-            <div v-if="row.errors.length === 0" class="resolved-text">{{ t("formDataImport.errorDialog.resolved") }}</div>
+            <div class="error-row-title">{{ t("admin.formDataImport.result.rowPrefix", { n: row.startRowNumber }) }}</div>
+            <div v-if="row.errors.length === 0" class="resolved-text">{{ t("admin.formDataImport.errorDialog.resolved") }}</div>
             <div v-for="(error, index) in row.errors" v-else :key="index" class="error-message">
-              {{ error.fieldTitle || error.field || t("formDataImport.result.errorTextFallback") }}：{{ error.message }}
+              {{ error.fieldTitle || error.field || t("admin.formDataImport.result.errorTextFallback") }}：{{ error.message }}
             </div>
           </div>
         </aside>
@@ -251,8 +251,8 @@
         </div>
       </div>
       <template #footer>
-        <el-button @click="errorEditorVisible = false">{{ t("formDataImport.errorDialog.cancel") }}</el-button>
-        <el-button type="primary" :loading="retrying" :disabled="!allErrorsResolved" @click="submitCorrections">{{ t("formDataImport.errorDialog.retry") }}</el-button>
+        <el-button @click="errorEditorVisible = false">{{ t("admin.formDataImport.errorDialog.cancel") }}</el-button>
+        <el-button type="primary" :loading="retrying" :disabled="!allErrorsResolved" @click="submitCorrections">{{ t("admin.formDataImport.errorDialog.retry") }}</el-button>
       </template>
     </el-dialog>
   </el-dialog>
@@ -307,7 +307,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const title = t("formDataImport.title");
+const title = t("admin.formDataImport.title");
 const MAX_EDITABLE_ROWS = 30;
 const activeStep = ref(0);
 const maximized = ref(false);
@@ -332,9 +332,9 @@ const editableRows = ref<FormDataImportEditableErrorRow[]>([]);
 let pollTimer: ReturnType<typeof setInterval> | undefined;
 
 const importModeOptions = [
-  { label: t("formDataImport.importMode.addOnly"), value: FormDataImportMode.AddOnly },
-  { label: t("formDataImport.importMode.updateOnly"), value: FormDataImportMode.UpdateOnly },
-  { label: t("formDataImport.importMode.upsert"), value: FormDataImportMode.Upsert },
+  { label: t("admin.formDataImport.importMode.addOnly"), value: FormDataImportMode.AddOnly },
+  { label: t("admin.formDataImport.importMode.updateOnly"), value: FormDataImportMode.UpdateOnly },
+  { label: t("admin.formDataImport.importMode.upsert"), value: FormDataImportMode.Upsert },
 ];
 
 const dialogVisible = computed({
@@ -426,8 +426,8 @@ const progressText = computed(() => {
   if (!status) return "0/0";
   return `${status.processedCount}/${status.totalCount}`;
 });
-const templateTipParts = computed(() => splitPlaceholder(t("formDataImport.tips.line1", { link: "__LINK__" }), "__LINK__"));
-const dropPromptParts = computed(() => splitPlaceholder(t("formDataImport.dropZone.prompt", { action: "__ACTION__" }), "__ACTION__"));
+const templateTipParts = computed(() => splitPlaceholder(t("admin.formDataImport.tips.line1", { link: "__LINK__" }), "__LINK__"));
+const dropPromptParts = computed(() => splitPlaceholder(t("admin.formDataImport.dropZone.prompt", { action: "__ACTION__" }), "__ACTION__"));
 const editableFields = computed(() => {
   const mapped = mappedItems.value.length > 0
     ? mappedItems.value.map((item) => item.field)
@@ -570,7 +570,7 @@ async function useFile(file: File) {
   try {
     const result = await formDataService.previewImport(file, props.formDef.id);
     if (!result.sheets || result.sheets.length === 0) {
-      ElMessage.warning(t("formDataImport.sheetNotRead"));
+      ElMessage.warning(t("admin.formDataImport.sheetNotRead"));
       return;
     }
 
@@ -590,13 +590,13 @@ function validateFile(file: File) {
   const isXlsx = name.endsWith(".xlsx");
   const isXls = name.endsWith(".xls");
   if (!isXlsx && !isXls) {
-    ElMessage.warning(t("formDataImport.messages.unsupportedExt"));
+    ElMessage.warning(t("admin.formDataImport.messages.unsupportedExt"));
     return false;
   }
 
   const limit = isXlsx ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
   if (file.size > limit) {
-    ElMessage.warning(isXlsx ? t("formDataImport.messages.xlsxSizeLimit") : t("formDataImport.messages.xlsSizeLimit"));
+    ElMessage.warning(isXlsx ? t("admin.formDataImport.messages.xlsxSizeLimit") : t("admin.formDataImport.messages.xlsSizeLimit"));
     return false;
   }
 
@@ -664,9 +664,9 @@ function goMappingStep() {
 async function startImport() {
   if (!selectedFile.value || !canStartImport.value) {
     if (props.formDef.usingWorkflow && triggerWorkflow.value && dataRowCount.value > 300) {
-      ElMessage.warning(t("formDataImport.messages.workflowRowLimit"));
+      ElMessage.warning(t("admin.formDataImport.messages.workflowRowLimit"));
     } else if (hasMemberOrDepartmentField.value && dataRowCount.value > 10000) {
-      ElMessage.warning(t("formDataImport.messages.orgFieldRowLimit"));
+      ElMessage.warning(t("admin.formDataImport.messages.orgFieldRowLimit"));
     }
     return;
   }
@@ -728,7 +728,7 @@ async function refreshImportStatus() {
     status = await formDataService.getImportStatus(taskId.value);
   } catch {
     stopPolling();
-    ElMessage.error(t("formDataImport.messages.statusRefreshFailed"));
+    ElMessage.error(t("admin.formDataImport.messages.statusRefreshFailed"));
     return;
   }
 
@@ -748,12 +748,12 @@ function notifyFinalStatus(status: FormDataImportStatusResponse) {
   if (finalNotified.value) return;
   finalNotified.value = true;
   if (status.status === FormDataImportStatus.Succeeded) {
-    ElMessage.success(t("formDataImport.messages.success"));
+    ElMessage.success(t("admin.formDataImport.messages.success"));
     emit("imported");
     return;
   }
 
-  ElMessage.error(status.status === FormDataImportStatus.CompletedWithErrors ? t("formDataImport.messages.partialFailure") : t("formDataImport.messages.failure"));
+  ElMessage.error(status.status === FormDataImportStatus.CompletedWithErrors ? t("admin.formDataImport.messages.partialFailure") : t("admin.formDataImport.messages.failure"));
   if (status.addCount > 0 || status.updateCount > 0) {
     emit("imported");
   }
@@ -813,7 +813,7 @@ function setEditableValue(row: FormDataImportEditableErrorRow, field: string, va
     ? [...row.data[parent]]
     : [];
   if (lines.length > MAX_EDITABLE_ROWS) {
-    ElMessage.warning(t("formDataImport.messages.detailRowLimit", { n: MAX_EDITABLE_ROWS }));
+    ElMessage.warning(t("admin.formDataImport.messages.detailRowLimit", { n: MAX_EDITABLE_ROWS }));
     return;
   }
   lines.forEach((line, index) => {
@@ -830,7 +830,7 @@ function setEditableValue(row: FormDataImportEditableErrorRow, field: string, va
 async function submitCorrections() {
   if (!taskId.value || !allErrorsResolved.value) return;
   if (editableRows.value.length === 0 || editableRows.value.length > MAX_EDITABLE_ROWS) {
-    ElMessage.warning(t("formDataImport.messages.retryRowLimit", { n: MAX_EDITABLE_ROWS }));
+    ElMessage.warning(t("admin.formDataImport.messages.retryRowLimit", { n: MAX_EDITABLE_ROWS }));
     return;
   }
   retrying.value = true;
@@ -857,7 +857,7 @@ async function submitCorrections() {
 
 async function downloadTemplate() {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet(t("formDataImport.template.sheetName"));
+  const worksheet = workbook.addWorksheet(t("admin.formDataImport.template.sheetName"));
   const groupRow = worksheet.getRow(1);
   const headerRow = worksheet.getRow(2);
   const fields = importFields.value;
@@ -896,7 +896,7 @@ async function downloadTemplate() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = t("formDataImport.template.fileNamePattern", { formName: props.formDef.name });
+  link.download = t("admin.formDataImport.template.fileNamePattern", { formName: props.formDef.name });
   link.click();
   URL.revokeObjectURL(url);
 }

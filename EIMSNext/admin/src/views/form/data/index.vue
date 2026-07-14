@@ -99,7 +99,7 @@
                       </div>
                       <div class="workflow-operator-content">
                         <div class="workflow-operator-name">
-                          {{ formData?.createBy?.label || $t("admin.formData.unknown") }}
+                          {{ formData?.createBy?.label || $t("common.unknown") }}
                         </div>
                         <div class="workflow-operator-meta">{{ $t("admin.formData.initiator") }}</div>
                       </div>
@@ -248,7 +248,7 @@ const toolbarItems = computed<ToolbarItem[]>(() => {
     {
       type: "button",
       config: {
-        text: t("admin.formData.share"),
+        text: t("common.share"),
         command: "share",
         visible: true,
         icon: "el-share",
@@ -316,7 +316,7 @@ const toolbarHandler = async (cmd: string) => {
     if (printResult?.downloadUrl) {
       openCustomPrintPreview(printResult);
     } else {
-      ElMessage.error(printResult?.message || t("admin.formData.printFailed"));
+      ElMessage.error(printResult?.message || t("common.printFailed"));
     }
     return;
   }

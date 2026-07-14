@@ -48,7 +48,7 @@
           <el-input :model-value="publicUrl" readonly>
             <template #append>
               <el-button @click="copy(publicUrl)">{{ t("common.copy") }}</el-button>
-              <el-button @click="openPublicUrl">{{ t("shareLinkBar.open") }}</el-button>
+              <el-button @click="openPublicUrl">{{ t("comp.shareLinkBar.open") }}</el-button>
               <el-button @click="showEmbedDialog = true">{{ t("admin.dashboard.embedPage") }}</el-button>
             </template>
           </el-input>
@@ -201,7 +201,7 @@ function finishSelectPublishMembers(tags: ISelectedTag[]) {
 
 async function copy(text: string) {
   await navigator.clipboard.writeText(text);
-  ElMessage.success(t("triggerNodeMeta.copied"));
+  ElMessage.success(t("comp.triggerNodeMeta.copied"));
 }
 
 function openPublicUrl() {

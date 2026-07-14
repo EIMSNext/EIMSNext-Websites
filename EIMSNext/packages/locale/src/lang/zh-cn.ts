@@ -15,6 +15,7 @@ export default {
   uploadFail: "上传失败",
   selectedData: "选择了 {length} 个日期",
   dataEmpty: "暂无数据",
+
   //通用
   common: {
     ok: "确定",
@@ -30,13 +31,17 @@ export default {
     save: "保存",
     noSave: "不保存",
     saveAndContinue: "保存并继续",
+    submit: "提交",
+    operation: "操作",
     filter: "筛选",
     sort: "排序",
     fields: "字段",
     refresh: "刷新",
     firstPage: "首页",
     prev: "上一页",
+    prevStep: "上一步",
     next: "下一页",
+    nextStep: "下一步",
     other: "其他",
     notset: "未设置",
     helpDoc: "帮助文档",
@@ -45,6 +50,11 @@ export default {
     draft: "草稿",
     confirm: "确认",
     search: "搜索",
+    copied: "已复制",
+    open: "打开",
+    loadFailed: "加载失败",
+    department: "部门",
+    employee: "员工",
     name: "名称",
     description: "描述",
     component: "组件",
@@ -172,6 +182,10 @@ export default {
   },
   //组件库，com已被设计器占用
   comp: {
+    signaturePad: {
+      tip: "点击添加手写签名",
+      title: "请在虚线框内书写",
+    },
     addEditRoleGroup: {
       groupName: "分组名称",
       groupNamePlaceholder: "请输入分组名称",
@@ -728,8 +742,6 @@ export default {
         title: "应用列表",
         search: "搜索应用",
         selectAll: "全选",
-        groupContacts: "分组",
-        groupOthers: "其他",
       },
       resources: {
         employee: "成员",
@@ -846,10 +858,6 @@ export default {
           title: "应用列表",
           search: "搜索应用",
           selectAll: "全选",
-          groupTitleContacts: "通讯录",
-          groupTitleOthers: "其他",
-          groupKeyContacts: "通讯录",
-          groupKeyOthers: "其他",
         },
         resources: {
           employee: "成员",
@@ -1541,6 +1549,8 @@ export default {
       field: "字段 {name}",
       endsAt: "结束于 {time}",
       once: "仅提醒一次",
+      hour: "小时",
+      minute: "分钟",
       daily: "每天",
       weekly: "每周",
       biWeekly: "每两周",
@@ -4242,6 +4252,13 @@ export default {
     datalinkNotEnabled: "单条公开查看未开启",
     querylinkNotEnabled: "公开查询未开启",
     fieldNotSupported: "外链不支持{type}字段",
+    submitSuccessTitle: "提交成功",
+    submitSuccessDesc: "数据已成功提交",
+    continueAdd: "继续添加",
+    dataNotAvailable: "数据不可访问",
+    changeQueryConditions: "修改查询条件",
+    prev: "上一条",
+    next: "下一条",
 
     unsavedTitle: "内容未保存",
     unsavedMessage: "当前页面有未保存的修改，是否保存后继续？",
