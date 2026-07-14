@@ -23,6 +23,24 @@ export function findAppMenu(menus: AppMenu[] = [], menuId?: string): AppMenu | u
   return undefined;
 }
 
+function findFirstFormMenu(menus: AppMenu[] = [], visibleMenuIds?: Set<string>): AppMenu | undefined {
+  for (const menu of menus) {
+    if (
+      normalizeMenuType(menu.menuType) === FormType.Form &&
+      (!visibleMenuIds || visibleMenuIds.has(menu.menuId))
+    ) {
+      return menu;
+    }
+
+    const matched = findFirstFormMenu(menu.subMenus || [], visibleMenuIds);
+    if (matched) {
+      return matched;
+    }
+  }
+
+  return undefined;
+}
+
 export function resolveAppEntryPath(app: AppDef, visibleMenuIds?: string[] | Set<string>): string {
   const visibleSet = Array.isArray(visibleMenuIds) ? new Set(visibleMenuIds) : visibleMenuIds;
 
@@ -42,5 +60,12 @@ export function resolveAppEntryPath(app: AppDef, visibleMenuIds?: string[] | Set
     }
   }
 
-  return `/app/${app.id}/mytasks`;
+  const firstForm = findFirstFormMenu(app.appMenus, visibleSet);
+  if (firstForm) {
+    return `/app/${app.id}/form/${firstForm.menuId}`;
+  }
+
+  // An app without a valid dashboard entry must stay on its root page so
+  // the empty-app screen can provide the create-form actions.
+  return `/app/${app.id}`;
 }
