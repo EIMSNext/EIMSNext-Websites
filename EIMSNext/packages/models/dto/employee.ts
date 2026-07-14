@@ -23,8 +23,8 @@ export interface DepartmentRef {
 }
 
 export interface EmpDept {
-  id: string;
-  name: string;
+  deptId: string;
+  deptName: string;
 }
 
 export interface Employee extends CorpModelBase {
@@ -36,7 +36,7 @@ export interface Employee extends CorpModelBase {
   workEmail?: string;
   status: number;
   userBound: boolean;
-  empDepts?: EmpDept[];
+  depts?: EmpDept[];
 }
 
 export enum EmployeeStatus {

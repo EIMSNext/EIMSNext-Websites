@@ -773,8 +773,7 @@ onBeforeMount(() => {
         code: userStore.currentUser.empCode!,
         empName: userStore.currentUser.empName!,
         status: 0,
-        userBound: true,
-        empDepts: currentDepartmentId ? [{ id: currentDepartmentId, name: curDeptData.value?.[0]?.label ?? "" }] : [],
+        userBound: true
       };
       curEmpData.value = [employeeToListItem(emp)];
     }

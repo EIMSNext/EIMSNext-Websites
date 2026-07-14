@@ -17,8 +17,8 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
 
     queryByDepartment<T>(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<T[]> {
         const deptFilter = cascadedDept
-            ? `EmpDepts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
-            : `EmpDepts/any(d: d/Id eq '${departmentId}')`;
+            ? `Depts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
+            : `Depts/any(d: d/DeptId eq '${departmentId}')`;
 
         const { body, urlParams } = this.buildDeptQuery(deptFilter, query);
         const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
@@ -27,8 +27,8 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
 
     countByDepartment(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<number> {
         const deptFilter = cascadedDept
-            ? `EmpDepts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
-            : `EmpDepts/any(d: d/Id eq '${departmentId}')`;
+            ? `Depts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
+            : `Depts/any(d: d/DeptId eq '${departmentId}')`;
 
         const { body, urlParams } = this.buildDeptQuery(deptFilter, query);
         const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
