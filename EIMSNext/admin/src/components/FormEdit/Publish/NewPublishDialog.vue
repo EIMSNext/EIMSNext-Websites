@@ -35,6 +35,7 @@
           multiple: true,
           cascadedDept: true,
           showCascade: true,
+          limit,
         }"
         destroy-on-close
         @ok="finishSelect"
@@ -68,7 +69,10 @@ const props = defineProps<{
   modelValue: boolean;
   authGroup?: AuthGroup;
   formDef: FormDef;
+  limit?: { depts?: ISelectedTag[]; roles?: ISelectedTag[] };
 }>();
+
+const limit = computed(() => props.limit);
 
 const newAuthGrp = toRef(
   props.authGroup ?? {

@@ -15,6 +15,7 @@
       v-model="showDialog"
       :authGroup="selectedGrp"
       :formDef="formDef"
+      :limit="limit"
       destroy-on-close
       @close="close"
     />
@@ -63,6 +64,7 @@
         multiple: true,
         cascadedDept: true,
         showCascade: true,
+        limit,
       }"
       destroy-on-close
       @ok="finishSelect"
@@ -93,6 +95,7 @@ defineOptions({
 
 const props = defineProps<{
   formDef: FormDef;
+  limit?: { depts?: ISelectedTag[]; roles?: ISelectedTag[] };
 }>();
 
 const showDialog = ref(false);

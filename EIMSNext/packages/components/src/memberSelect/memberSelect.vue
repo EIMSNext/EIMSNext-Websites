@@ -405,6 +405,15 @@ const dynamicGroupOrder = ["starter", "employeeField", "departmentField", "manag
 
 const isManagerGroup = computed(() => selectedDynamicGroupId.value === "manager");
 const adminScopeParam = () => options.adminScope ? "adminScope=true" : "";
+const filterRolesByScope = (roles: Role[]) => {
+  const allowedRoleIds = new Set(
+    (options.limit?.roles ?? [])
+      .map((role) => role?.id)
+      .filter((id): id is string => !!id),
+  );
+  if (allowedRoleIds.size === 0) return roles;
+  return roles.filter((role) => allowedRoleIds.has(role.id));
+};
 const loadDepartments = () => options.adminScope
   ? departmentService.query<Department>(adminScopeParam())
   : deptStore.load();
@@ -812,7 +821,7 @@ onBeforeMount(() => {
       roleGroups = data;
     }),
     roleService.query<Role>(adminScopeParam()).then((data) => {
-      roles = data;
+      roles = filterRolesByScope(data);
     }),
   ]).then(() => {
     roleData.value = buildRoleTree(roleGroups, roles);
