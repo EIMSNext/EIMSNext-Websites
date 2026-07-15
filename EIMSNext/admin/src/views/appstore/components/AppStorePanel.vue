@@ -6,7 +6,7 @@
         <p class="hero-subtitle">{{ $t("admin.appStore.subtitle") }}</p>
         <div class="hero-stats">
           <div class="hero-stat">
-            <span class="hero-stat-value">{{ profileItems.length }}</span>
+            <span class="hero-stat-value">{{ totalProfiles }}</span>
             <span class="hero-stat-label">{{ $t("admin.appStore.totalTemplates") }}</span>
           </div>
           <div class="hero-stat">
@@ -31,7 +31,7 @@
       </div>
     </section>
 
-    <div class="market-layout">
+    <div v-loading="loading" class="market-layout">
       <aside class="market-sidebar">
         <div class="sidebar-section">
           <div class="sidebar-section-title">{{ $t("admin.appStore.category") }}</div>
@@ -53,7 +53,13 @@
       </aside>
 
       <main class="market-content">
-        <section class="market-section">
+        <el-result v-if="loadError" icon="error" :title="$t('admin.appStore.loadFailed')">
+          <template #extra>
+            <el-button type="primary" @click="loadProfiles">{{ $t("admin.appStore.retry") }}</el-button>
+          </template>
+        </el-result>
+        <template v-else>
+          <section class="market-section">
           <div class="section-head">
             <div>
               <div class="section-title">{{ $t("admin.appStore.featured") }}</div>
@@ -86,9 +92,9 @@
               </div>
             </div>
           </div>
-        </section>
+          </section>
 
-        <section class="market-section">
+          <section class="market-section">
           <div class="section-head">
             <div>
               <div class="section-title">{{ $t("admin.appStore.allTemplates") }}</div>
@@ -121,7 +127,8 @@
               </div>
             </div>
           </div>
-        </section>
+          </section>
+        </template>
       </main>
     </div>
 
@@ -150,12 +157,18 @@ const keyword = ref("");
 const activeCategory = ref("");
 const activeIndustry = ref("");
 const profileItems = ref<AppProfile[]>([]);
+const totalProfiles = ref(0);
+const loading = ref(false);
+const loadError = ref(false);
+const knownCategories = ref<string[]>([]);
+const knownIndustries = ref<string[]>([]);
+let profileRequestId = 0;
 const featuredStart = ref(0);
 const selectedId = ref("");
 const detailVisible = ref(false);
 
-const categories = computed(() => Array.from(new Set(profileItems.value.map((item: AppProfile) => item.category).filter(Boolean))) as string[]);
-const industries = computed(() => Array.from(new Set(profileItems.value.map((item: AppProfile) => item.industry).filter(Boolean))) as string[]);
+const categories = computed(() => knownCategories.value);
+const industries = computed(() => knownIndustries.value);
 const featuredPool = computed(() => {
   const preferred = profileItems.value.filter((item: AppProfile) => item.isRecommended || item.isOfficial || item.isHot);
   return preferred.length > 0 ? preferred : profileItems.value;
@@ -171,14 +184,31 @@ function coverImage(item: AppProfile) {
 }
 
 async function loadProfiles() {
-  const result = await appProfileService.query({
-    keyword: keyword.value,
-    category: activeCategory.value,
-    industry: activeIndustry.value,
-    take: 60,
-  });
-  profileItems.value = result.items || [];
-  featuredStart.value = 0;
+  const requestId = ++profileRequestId;
+  loading.value = true;
+  loadError.value = false;
+  try {
+    const result = await appProfileService.query({
+      keyword: keyword.value,
+      category: activeCategory.value,
+      industry: activeIndustry.value,
+      take: 60,
+    });
+    if (requestId !== profileRequestId) return;
+    profileItems.value = result.items || [];
+    totalProfiles.value = result.total || 0;
+    knownCategories.value = Array.from(new Set([...knownCategories.value, ...profileItems.value.map(item => item.category).filter(Boolean)])) as string[];
+    knownIndustries.value = Array.from(new Set([...knownIndustries.value, ...profileItems.value.map(item => item.industry).filter(Boolean)])) as string[];
+    featuredStart.value = 0;
+  } catch {
+    if (requestId === profileRequestId) {
+      profileItems.value = [];
+      totalProfiles.value = 0;
+      loadError.value = true;
+    }
+  } finally {
+    if (requestId === profileRequestId) loading.value = false;
+  }
 }
 
 function rotateFeatured() {

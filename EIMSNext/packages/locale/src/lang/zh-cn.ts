@@ -647,6 +647,12 @@ export default {
       generalCategory: "通用模板",
       generalIndustry: "通用行业",
       installs: "安装量",
+      loadFailed: "应用市场加载失败",
+      detailLoadFailed: "应用详情加载失败",
+      retry: "重试",
+      loginRequired: "请先登录后再安装应用",
+      installSuccess: "应用安装成功",
+      installFailed: "应用安装失败",
     },
     plugin: {
       searchPlugin: "搜索插件",

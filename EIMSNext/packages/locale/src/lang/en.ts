@@ -1580,6 +1580,12 @@ export default {
       generalCategory: "General Template",
       generalIndustry: "General Industry",
       installs: "Installs",
+      loadFailed: "Failed to load the app store",
+      detailLoadFailed: "Failed to load app details",
+      retry: "Retry",
+      loginRequired: "Please sign in before installing an app",
+      installSuccess: "App installed successfully",
+      installFailed: "Failed to install app",
     },
     profile: {
       title: "Personal Settings",
