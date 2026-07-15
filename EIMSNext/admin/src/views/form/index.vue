@@ -180,6 +180,7 @@ import {
 } from "./listViewUtils";
 import {
   type FormDataSearchState,
+  buildAllSearchableFields,
   filterSearchableFields,
   normalizeSelectedSearchFields,
   resolveSearchFields,
@@ -497,7 +498,9 @@ const showDetailsDialog = ref(false);
 const checkedDatas = ref<any[]>([]);
 const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
 const selectedExportColumnKeys = ref<string[]>([]);
-const searchableFields = computed(() => filterSearchableFields(fieldList.value));
+const searchableFields = computed(() =>
+  formDef.value ? filterSearchableFields(buildAllSearchableFields(formDef.value, t)) : []
+);
 
 const exportColumns = computed<ExportColumn[]>(() => buildExportColumns());
 
@@ -520,7 +523,7 @@ const applyCurrentView = (preferredViewId?: string) => {
     type: field.type,
     isSubField: field.isSubField,
   }));
-  searchState.selectedFields = normalizeSelectedSearchFields(searchState.selectedFields, filterSearchableFields(displayFields));
+  searchState.selectedFields = normalizeSelectedSearchFields(searchState.selectedFields, searchableFields.value);
   condList.value = parseCondition(nextView.defaultFilter);
   sortList.value = parseSort(formId, nextView.defaultSort, t);
   pageNum.value = 1;
