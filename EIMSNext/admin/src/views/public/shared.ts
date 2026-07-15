@@ -9,6 +9,7 @@ import {
   ODataMetadata,
   type HttpRequestConfig,
 } from "@eimsnext/utils";
+import { appSetting } from "@eimsnext/utils";
 import { PublicScope } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
 
@@ -48,8 +49,8 @@ export const PublicNotFound = defineComponent({
 //    跨 tab 场景：每个 tab 独立 JS 上下文，usePublicHttp() 是新实例，互不影响。
 // =============================================================
 
-const API_BASE = "/api/v1";
-const ODATA_BASE = "/odata/v1";
+const API_BASE = `${appSetting.apiUrl}/api/v1`;
+const ODATA_BASE = `${appSetting.apiUrl}/odata/v1`;
 
 function buildApiUrl(path: string, params?: any): string {
   const url = path.startsWith("http")

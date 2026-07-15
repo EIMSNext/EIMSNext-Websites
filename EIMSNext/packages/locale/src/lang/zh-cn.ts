@@ -4257,7 +4257,7 @@ export default {
     missingDataId: "缺少数据ID",
     datalinkNotEnabled: "单条公开查看未开启",
     querylinkNotEnabled: "公开查询未开启",
-    fieldNotSupported: "外链不支持{type}字段",
+    fieldNotSupported: "公开提交时{type}字段不可编辑",
     submitSuccessTitle: "提交成功",
     submitSuccessDesc: "数据已成功提交",
     continueAdd: "继续添加",

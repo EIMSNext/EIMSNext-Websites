@@ -311,9 +311,25 @@ function onDetailClose() {
 
 function formatCell(row: FormData, field: string) {
   const value = getFieldValue(row.data, field);
-  if (Array.isArray(value)) return value.join(", ");
-  if (value && typeof value === "object") return JSON.stringify(value);
-  return value ?? "";
+  return formatValue(value);
+}
+
+function formatValue(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => formatValue(item))
+      .filter(Boolean)
+      .join(", ");
+  }
+  if (value && typeof value === "object") {
+    const option = value as { label?: unknown; value?: unknown; name?: unknown };
+    if (option.label !== undefined && option.label !== null) return String(option.label);
+    if (option.value !== undefined && option.value !== null) return String(option.value);
+    if (option.name !== undefined && option.name !== null) return String(option.name);
+    return JSON.stringify(value);
+  }
+  return String(value);
 }
 
 function getFieldValue(data: any, field: string) {

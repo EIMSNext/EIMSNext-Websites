@@ -52,13 +52,18 @@ export class AuthClient {
     }
 
     try {
+      const publicScope =
+        typeof scope === "number"
+          ? ({ 1: "DashLink", 2: "FormLink", 4: "DataLink", 8: "QueryLink" } as Record<number, string>)[scope] || String(scope)
+          : scope;
+
       return (await this.exchangeToken(
         `public_${targetId}`,
         password,
         "public",
         false,
         `${appSetting.authUrl}/public/token`,
-        { scope: String(scope) },
+        { scope: String(publicScope) },
         appSetting.publicClientId,
       )) as { access_token: string; expires_in: number; [k: string]: any };
     } catch (err: any) {

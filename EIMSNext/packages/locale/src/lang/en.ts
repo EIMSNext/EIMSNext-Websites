@@ -4342,7 +4342,7 @@ export default {
     missingDataId: "Missing data ID",
     datalinkNotEnabled: "Single view is not enabled",
     querylinkNotEnabled: "Public query is not enabled",
-    fieldNotSupported: "{type} field not supported in external links",
+    fieldNotSupported: "{type} fields cannot be edited in public submissions",
     submitSuccessTitle: "Submitted Successfully",
     submitSuccessDesc: "Data has been submitted successfully",
     continueAdd: "Continue Adding",

@@ -355,13 +355,14 @@ function filterPublicRules(rules: any[], allowed?: Set<string>, parentField?: st
           title: rule.title || rule.field || "",
           type: rule.type,
         } as FieldDef);
-        return false;
+        return true;
       }
       if (!allowed || !rule.field || rule.type === FieldType.TableForm) return true;
       const key = parentField ? `${parentField}>${rule.field}` : rule.field;
       return allowed.has(key.toLowerCase());
     })
     .map((rule) => {
+      const orgField = isOrgField(rule.type);
       const next = isPublicSystemRule(rule)
         ? {
             ...rule,
@@ -369,7 +370,9 @@ function filterPublicRules(rules: any[], allowed?: Set<string>, parentField?: st
             display: false,
             props: { ...(rule.props || {}), disabled: true },
           }
-        : { ...rule };
+        : orgField
+          ? { ...rule, props: { ...(rule.props || {}), disabled: true, readonly: true } }
+          : { ...rule };
       if (Array.isArray(next.children)) {
         next.children = filterPublicRules(next.children, allowed, parentField);
       }
