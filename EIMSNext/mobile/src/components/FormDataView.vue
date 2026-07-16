@@ -30,6 +30,7 @@ import { useRoute, useRouter } from "vue-router";
 import { showToast } from "vant";
 import { useI18n } from "vue-i18n";
 import type { FormDef } from "@eimsnext/models";
+import FormCreateMobile from "@eimsnext/form-render-vant";
 import MobileFormRenderer from "@/components/form/MobileFormRenderer.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
 import { formDataServiceMobile, formServiceMobile } from "@/services/mobileService";
@@ -47,7 +48,15 @@ const formDef = ref<FormDef>();
 const formData = ref<Record<string, unknown>>({});
 
 const isAdd = computed(() => !dataId || Boolean(route.meta.isAdd));
-const renderRule = computed(() => formDef.value?.content?.items || []);
+const renderRule = computed(() => {
+  const layout = formDef.value?.content?.layout;
+  if (!layout) return [];
+  try {
+    return FormCreateMobile.parseJson(layout);
+  } catch {
+    return [];
+  }
+});
 const renderOption = computed(() => ({
   submitBtn: false,
   resetBtn: false,

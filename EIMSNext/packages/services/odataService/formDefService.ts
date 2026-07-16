@@ -7,7 +7,7 @@ export class FormDefService extends ODataServiceBase<FormDef, FormDefRequest> {
   }
 
   getFormsIncludeCross(appId: string): Promise<FormDef[]> {
-    return this.http().api.get<FormDef[]>("/FormDef/GetFormsIncludeCross", { appId });
+    return this.http().api.get<FormDef[]>(`/FormDef/GetFormsIncludeCross?appId=${encodeURIComponent(appId)}`);
   }
 }
 

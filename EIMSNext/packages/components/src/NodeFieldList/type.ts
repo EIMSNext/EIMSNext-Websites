@@ -40,6 +40,7 @@ export interface IFieldLimit {
   limitField?: string;
   limitType?: FieldLimitType;
   fieldPerms?: IFieldPerm[];
+  excludeFieldTypes?: FieldType[];
 }
 export enum FieldLimitType {
   None,

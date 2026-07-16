@@ -98,6 +98,7 @@ export enum FieldType {
   ImageUpload = "imageupload",
   FileUpload = "fileupload",
   Signature = "signature",
+  DataSelect = "dataselect",
   TableForm = "tableform",
   Employee1 = "employee1",
   Employee2 = "employee2",

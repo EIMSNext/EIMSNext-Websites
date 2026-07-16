@@ -62,12 +62,14 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to) => {
   const token = localStorage.getItem(appSetting.tokenKey || 'jat')
   if (to.meta.requireAuth && !token) {
-    next('/login')
-  } else {
-    next()
+    return {
+      path: '/login',
+      query: { redirect: to.fullPath },
+      replace: true
+    }
   }
 })
 

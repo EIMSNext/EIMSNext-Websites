@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { IListItem, IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
-import { IFieldPerm } from "@eimsnext/models";
+import { FieldType, IFieldPerm } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { useI18n } from "vue-i18n";
@@ -56,7 +56,7 @@ onBeforeMount(() => {
         form.usingWorkflow,
         undefined,
         { fieldPerms: props.fieldPerms, t } as any
-      );
+      ).filter((item) => (item.data as IFormFieldDef)?.type !== FieldType.DataSelect);
   });
 });
 </script>

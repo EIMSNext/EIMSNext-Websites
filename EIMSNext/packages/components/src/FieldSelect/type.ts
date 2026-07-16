@@ -118,6 +118,10 @@ export function buildFieldListItems(
     }
   }
   fields.forEach((x: FieldDef) => {
+    if (fieldLimit?.excludeFieldTypes?.includes(x.type)) {
+      return;
+    }
+
     if (x.type == FieldType.TableForm) {
       if (
         (!fieldLimit ||
@@ -127,6 +131,10 @@ export function buildFieldListItems(
         x.columns.length > 0
       ) {
         x.columns.forEach((sub: FieldDef) => {
+          if (fieldLimit?.excludeFieldTypes?.includes(sub.type)) {
+            return;
+          }
+
           var fieldDef: IFormFieldDef = toFormFieldDef(formId, sub, x, nodeId);
           let item: IListItem = {
             id: fieldDef.field,

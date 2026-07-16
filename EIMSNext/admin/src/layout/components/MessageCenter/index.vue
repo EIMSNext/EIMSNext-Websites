@@ -23,18 +23,8 @@
               </div>
             </div>
             <div class="message-list-body">
-              <template v-if="activeMenu === MessageCategory.DataNotify">
-                <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
-                <el-empty v-if="pagedMessages.length === 0" :description="t('admin.messageCenter.empty')" />
-              </template>
-              <template v-if="activeMenu === MessageCategory.FlowNotify">
-                <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
-                <el-empty v-if="pagedMessages.length === 0" :description="t('admin.messageCenter.empty')" />
-              </template>
-              <template v-if="activeMenu === MessageCategory.SystemNotify">
-                <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
-                <el-empty v-if="pagedMessages.length === 0" :description="t('admin.messageCenter.empty')" />
-              </template>
+              <message-card v-for="item in pagedMessages" :key="item.id" :message="item" @read="handleRead" />
+              <el-empty v-if="pagedMessages.length === 0" :description="t('admin.messageCenter.empty')" />
               <div class="expire-tip">{{ t("admin.messageCenter.retention") }}</div>
             </div>
             <div class="message-list-footer">

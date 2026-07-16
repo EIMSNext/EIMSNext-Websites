@@ -80,6 +80,15 @@ export const formatFormValue = (
     return extractImageUrl(normalized);
   }
 
+  if (type === FieldType.DataSelect && Array.isArray(normalized)) {
+    return normalized.map((item: any) => {
+      if (!item || typeof item !== "object") return String(item ?? "");
+      const label = item.label || item.name || "";
+      const itemValue = item.value ?? "";
+      return label ? `${label}: ${itemValue}` : String(itemValue);
+    }).filter(Boolean).join("; ");
+  }
+
   if (type === FieldType.CheckBox || type === FieldType.Select2 || type === FieldType.Employee2 || type === FieldType.Department2) {
     if (Array.isArray(normalized)) {
       return normalized.map((item: any) => item?.label || item?.name || item?.value || item).filter(Boolean).join(", ");

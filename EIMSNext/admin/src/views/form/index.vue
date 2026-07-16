@@ -689,7 +689,8 @@ const selectable = (row: any, index: number) => {
 };
 
 const buildExportColumns = (): ExportColumn[] => {
-  const selectedFields = fieldList.value.length > 0 ? fieldList.value : getAllExportFields();
+  const selectedFields = (fieldList.value.length > 0 ? fieldList.value : getAllExportFields())
+    .filter((field) => field.type !== FieldType.DataSelect);
 
   return selectedFields.map((field) => ({
     key: field.field,
@@ -721,6 +722,10 @@ const getAllExportFields = (): IFormFieldDef[] => {
   }
 
   items.forEach((item) => {
+    if (item.type === FieldType.DataSelect) {
+      return;
+    }
+
     if (item.type === FieldType.TableForm && item.columns?.length) {
       item.columns.forEach((sub) => {
         result.push({

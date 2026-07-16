@@ -4,30 +4,21 @@ import { Tickets } from "@element-plus/icons-vue";
 import { DataSelectTablePanel } from "@eimsnext/components";
 import { formDataService } from "@eimsnext/services";
 import {
-  buildDataSelectDisplayValue,
+  buildDataSelectValue,
   createDataSelectQuery,
   mergeDataSelectRecord,
   normalizeDataSelectField,
+  normalizeDataSelectValue,
   resolveDataSelectValue,
 } from "@eimsnext/components";
 import "./style.css";
 
-const normalizeDisplayTags = (val) => {
-  if (!Array.isArray(val)) {
-    return [];
-  }
-
+const normalizeLegacyDisplayTags = (val) => {
+  if (!Array.isArray(val)) return [];
   return val
-    .map((item) => {
-      if (!item) return null;
-      if (item.label != null && item.value != null) {
-        return {
-          label: String(item.label),
-          value: String(item.value ?? ""),
-        };
-      }
-      return null;
-    })
+    .map((item) => item && item.label != null && item.value != null
+      ? { label: String(item.label), value: String(item.value ?? "") }
+      : null)
     .filter(Boolean);
 };
 
@@ -36,8 +27,8 @@ export default defineComponent({
   inheritAttrs: false,
   props: {
     modelValue: {
-      type: Array,
-      default: () => [],
+      type: [Object, Array],
+      default: null,
     },
     placeholder: {
       type: String,
@@ -82,7 +73,7 @@ export default defineComponent({
   emits: ["update:modelValue", "change"],
   setup(props, { emit }) {
     const showDialog = ref(false);
-    const selectedValue = ref(normalizeDisplayTags(props.modelValue));
+    const selectedValue = ref(normalizeDataSelectValue(props.modelValue));
     const formData = ref([]);
     const loading = ref(false);
     const selectedRecord = ref(null);
@@ -124,7 +115,7 @@ export default defineComponent({
     watch(
       () => props.modelValue,
       (newVal) => {
-        selectedValue.value = normalizeDisplayTags(newVal);
+        selectedValue.value = normalizeDataSelectValue(newVal);
       },
       { immediate: true, deep: true }
     );
@@ -151,6 +142,10 @@ export default defineComponent({
         const data = await formDataService.query(query);
         formData.value = data.map((item) => mergeDataSelectRecord(item));
         total.value = data.length;
+        const selectedId = selectedValue.value?.dataId;
+        selectedRecord.value = selectedId
+          ? formData.value.find((item) => String(item.id || item._id || "") === selectedId) || null
+          : null;
       } catch (err) {
         error.value = t("com.dataselect.fetchFailed") || "获取表单数据失败，请重试";
         console.error("获取表单数据失败:", err);
@@ -199,9 +194,10 @@ export default defineComponent({
         return;
       }
 
-      const selectedData = buildDataSelectDisplayValue(
+      const selectedData = buildDataSelectValue(
         selectedRecord.value,
-        displayFields.value
+        displayFields.value,
+        fillMappings.value,
       );
       await applyMappings(selectedRecord.value);
       selectedValue.value = selectedData;
@@ -235,20 +231,22 @@ export default defineComponent({
     };
 
     const displayRows = computed(() => {
-      const valueMap = new Map(
-        (selectedValue.value || []).map((tag) => [
-          tag.label,
-          String(tag.value ?? ""),
-        ])
-      );
-      return displayFields.value.map((field) => {
-        const value = valueMap.get(field.label) || "";
-        return {
-          label: field.label || t("com.dataselect.unknownField") || "未知字段",
-          value,
-          empty: value === "",
-        };
-      });
+      if (selectedValue.value) {
+        return displayFields.value.map((field) => {
+          const value = resolveDataSelectValue(selectedValue.value.data, field.field);
+          return {
+            label: field.label || t("com.dataselect.unknownField") || "未知字段",
+            value: value == null ? "" : String(value),
+            empty: value == null || value === "",
+          };
+        });
+      }
+
+      return normalizeLegacyDisplayTags(props.modelValue).map((tag) => ({
+        label: tag.label,
+        value: tag.value,
+        empty: tag.value === "",
+      }));
     });
 
     return () => {

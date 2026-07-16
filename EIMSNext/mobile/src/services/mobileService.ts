@@ -51,7 +51,7 @@ export const appServiceMobile = {
 
 export const formServiceMobile = {
   query(appId: string, skip = 0, top = 20): Promise<FormDef[]> {
-    return formDefService.query<FormDef>(buildODataQuery(`appId eq '${appId}'`, skip, top, "sortIndex asc"));
+    return formDefService.query<FormDef>(buildODataQuery(`appId eq '${appId}'`, skip, top, "createTime asc"));
   },
   get(formId: string): Promise<FormDef> {
     return formDefService.get<FormDef>(formId);
