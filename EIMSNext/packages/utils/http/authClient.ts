@@ -30,7 +30,7 @@ export class AuthClient {
   /**
    * 申请公开访问 token。
    * - 不写入全局 accessToken（页面级 token 隔离）
-   * - 401 → 抛 PublicTokenError（accessCode 错误友好提示）
+   * - 401 或 400 invalid_grant → 抛 PublicTokenError（accessCode 错误友好提示）
    * - scope 必传，对应后端 PublicScope 枚举的单选值
    */
   async requestPublicToken(
@@ -67,7 +67,11 @@ export class AuthClient {
         appSetting.publicClientId,
       )) as { access_token: string; expires_in: number; [k: string]: any };
     } catch (err: any) {
-      if (err?.response?.status === 401) {
+      const status = err?.response?.status;
+      const payload = err?.response?.data;
+      const invalidGrant = payload?.error === "invalid_grant" ||
+        String(payload?.error_description || "").includes("公开访问凭证无效");
+      if (status === 401 || (status === 400 && invalidGrant)) {
         throw new PublicTokenError();
       }
       throw err;

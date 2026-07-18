@@ -44,6 +44,19 @@
             class="public-expire-picker"
             @change="savePublicSetting"
           />
+          <div class="access-code-section">
+            <el-checkbox v-model="publicDashboard.accessCodeEnabled" @change="handleAccessCodeEnabled">
+              {{ t("publicpublish.accessCode") }}
+            </el-checkbox>
+            <el-input
+              v-if="publicDashboard.accessCodeEnabled"
+              v-model="accessCodeInput"
+              type="password"
+              show-password
+              :placeholder="t('publicpublish.accessCodePlaceholder')"
+              @blur="savePublicSetting"
+            />
+          </div>
           <div class="field-label">{{ t("admin.dashboard.visitLink") }}</div>
           <el-input :model-value="publicUrl" readonly>
             <template #append>
@@ -86,6 +99,7 @@ import { appDefService, dashboardDefService, publicSettingService } from "@eimsn
 import { useAppStore, useContextStore } from "@eimsnext/store";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
+import { sha256 } from "@eimsnext/utils";
 
 const props = defineProps<{
   dashDef: DashboardDef;
@@ -105,6 +119,7 @@ const showMemberDialog = ref(false);
 const showEmbedDialog = ref(false);
 const publicSetting = ref<PublicSetting>();
 const publicDashboard = ref<PublicDashboardSetting>({});
+const accessCodeInput = ref("");
 
 const memberOptions = {
   showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
@@ -154,9 +169,17 @@ async function loadPublicSetting() {
   );
   publicSetting.value = settings[0];
   publicDashboard.value = { ...(settings[0]?.dashboard || {}) };
+  accessCodeInput.value = "";
 }
 
 async function savePublicSetting() {
+  if (accessCodeInput.value) {
+    publicDashboard.value.accessCodeHash = await sha256(accessCodeInput.value);
+    accessCodeInput.value = "";
+  }
+  if (!publicDashboard.value.accessCodeHash) {
+    publicDashboard.value.accessCodeEnabled = false;
+  }
   const payload = {
     id: publicSetting.value?.id || "",
     appId: localDash.value.appId,
@@ -173,6 +196,12 @@ async function savePublicSetting() {
   publicSetting.value = saved;
   publicDashboard.value = { ...(saved.dashboard || {}) };
   ElMessage.success(t("common.saveSuccess"));
+}
+
+function handleAccessCodeEnabled(value: string | number | boolean) {
+  if (!Boolean(value)) {
+    void savePublicSetting();
+  }
 }
 
 async function saveHomeEntry(value: string | number | boolean) {
@@ -319,6 +348,15 @@ function escapeODataString(value: string) {
 .public-expire-picker {
   margin-bottom: var(--et-space-14);
   width: 100%;
+}
+
+.access-code-section {
+  margin-bottom: var(--et-space-14);
+
+  .el-input {
+    margin-top: var(--et-space-8);
+    width: 100%;
+  }
 }
 
 .embed-dialog {

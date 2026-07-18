@@ -1,5 +1,16 @@
 <template>
   <PdfPreview v-model="showPdfPreview" :title="pdfPreviewTitle" :pdf-url="pdfPreviewUrl" />
+  <et-dialog v-model="showShareDialog" class="share-dialog" :title="$t('common.share')" width="640px" :show-footer="false" append-to-body>
+    <div class="share-dialog-body">
+      <div class="share-section">
+        <div class="share-section-title-row">
+          <div class="share-section-title">{{ $t("admin.formData.enterpriseMembers") }}</div>
+          <div class="share-section-desc">{{ $t("admin.formData.enterpriseMembersDesc") }}</div>
+        </div>
+        <ShareLinkBar :url="shareUrl" />
+      </div>
+    </div>
+  </et-dialog>
   <div class="shared-form-data-page" v-loading="loading">
     <div class="shared-form-shell">
       <div class="shared-form-card">
@@ -171,7 +182,7 @@ import {
   wfApprovalLogService,
 } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
-import { ToolbarItem } from "@eimsnext/components";
+import { ShareLinkBar, ToolbarItem } from "@eimsnext/components";
 import { useTagsViewStore } from "@/store";
 import { useI18n } from "vue-i18n";
 import FormView from "@/components/FormView/index.vue";
@@ -197,9 +208,11 @@ const printConfig = ref(getPrintConfig(false));
 const formPrintData = ref<IPrintData>();
 const printTrigger = ref<HTMLElement | null>(null);
 const showPdfPreview = ref(false);
+const showShareDialog = ref(false);
 const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
 const sideTab = ref<"flow" | "dataLog">("flow");
+const shareUrl = computed(() => `${window.location.origin}/#/app/${route.params.appId}/form/${route.params.formId}/data/${route.params.dataId}`);
 
 const sideTitle = computed(() => {
   return sideTab.value === "flow" ? t("admin.formData.flowDynamic") : t("admin.formData.dataLog");
@@ -323,6 +336,7 @@ const toolbarHandler = async (cmd: string) => {
 
   switch (cmd) {
     case "share":
+      showShareDialog.value = true;
       break;
     case "systemprint":
       setTimeout(() => {

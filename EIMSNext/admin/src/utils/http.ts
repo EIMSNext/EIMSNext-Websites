@@ -12,6 +12,9 @@ export default {
       const response = error?.response;
       if (response) {
         const data = response.data || {};
+        const isPublicAccessCodeFailure =
+          /\/public\/token/i.test(response.config?.url || "") && data.error === "invalid_grant";
+        if (isPublicAccessCodeFailure) return;
         const display = data.message || data.msg || systemErrorText();
         ElMessage.error(display);
       } else {
