@@ -108,7 +108,11 @@ export default function fetch(option) {
   const headers = option.headers || {};
   const token = accessToken.get();
   // console.log("token", token);
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (option.__eimsPublicToken) {
+    headers["Authorization"] = `Bearer ${option.__eimsPublicToken}`;
+  } else if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   Object.keys(headers).forEach((item) => {
     if (headers[item] != null) {

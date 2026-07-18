@@ -41,6 +41,7 @@ export interface IDataSelectQueryOptions {
   page: number;
   pageSize: number;
   filter?: IConditionList;
+  fields?: IDataSelectField[];
 }
 
 export const normalizeDataSelectField = (field: any): IDataSelectField | null => {
@@ -125,7 +126,7 @@ export const buildDataSelectFields = (form?: FormDef, includeSystemFields: boole
   return result;
 };
 
-export const createDataSelectQuery = ({ formId, page, pageSize, filter }: IDataSelectQueryOptions) => {
+export const createDataSelectQuery = ({ formId, page, pageSize, filter, fields }: IDataSelectQueryOptions) => {
   const items: any[] = [
     {
       field: "formId",
@@ -141,6 +142,18 @@ export const createDataSelectQuery = ({ formId, page, pageSize, filter }: IDataS
   }
 
   return {
+    ...(fields?.length
+      ? {
+          select: [
+            { field: "id", visible: true },
+            { field: "appId", visible: true },
+            { field: "formId", visible: true },
+            ...fields
+              .filter((field, index, values) => values.findIndex((item) => item.field === field.field) === index)
+              .map((field) => ({ field: `data.${field.field}`, visible: true })),
+          ],
+        }
+      : {}),
     skip: (page - 1) * pageSize,
     take: pageSize,
     scope: {

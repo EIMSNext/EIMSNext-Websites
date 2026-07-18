@@ -112,6 +112,11 @@ export default defineComponent({
         .filter((mapping) => mapping.sourceField && mapping.targetField);
     });
 
+    const queryFields = computed(() => {
+      return [...tableFields.value, ...displayFields.value, ...fillMappings.value.map((mapping) => mapping.sourceField)]
+        .filter((field, index, fields) => fields.findIndex((item) => item.field === field.field) === index);
+    });
+
     watch(
       () => props.modelValue,
       (newVal) => {
@@ -138,8 +143,17 @@ export default defineComponent({
           page,
           pageSize: size,
           filter: filterConfig.value,
+          fields: queryFields.value,
         });
-        const data = await formDataService.query(query);
+        const body = props.formCreateInject?.api?.fetch
+          ? await props.formCreateInject.api.fetch({
+              action: "/FormData/$query",
+              method: "post",
+              data: query,
+              dataType: "json",
+            })
+          : await formDataService.query(query);
+        const data = Array.isArray(body?.value) ? body.value : Array.isArray(body) ? body : [];
         formData.value = data.map((item) => mergeDataSelectRecord(item));
         total.value = data.length;
         const selectedId = selectedValue.value?.dataId;

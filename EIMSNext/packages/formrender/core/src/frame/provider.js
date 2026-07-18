@@ -248,6 +248,13 @@ const fetch = function (fc) {
           skip: 0,
           take: 1000, // 限制获取的数据量，可根据实际情况调整
           scope: {},
+          select: [
+            { field: "id", visible: true },
+            { field: "appId", visible: true },
+            { field: "formId", visible: true },
+            ...(labelField ? [{ field: `data.${labelField}`, visible: true }] : []),
+            ...(valueField && valueField !== labelField ? [{ field: `data.${valueField}`, visible: true }] : []),
+          ],
           sort: [{ field: "createTime", dir: -1 }],
           filter: {
             rel: "and",
@@ -259,7 +266,7 @@ const fetch = function (fc) {
         };
         
         // 使用form-render-core的fetch函数获取数据，使用POST请求并将查询条件作为data参数发送
-        fc.create.fetch({
+        api.fetch({
           action: url,
           method: 'post',
           data: queryData,

@@ -61,7 +61,7 @@
             :width="item.w"
             :is-view="true"
             :is-public="true"
-            :public-token="publicHttp.token.value"
+            :public-token="publicHttp.token.value || undefined"
             :external-filter="chartFilters[state.items[item.i].id]"
             @filter-change="handleFilterChange"
           />

@@ -53,6 +53,7 @@
         :actions="actions"
         :is-view="false"
         :is-public="true"
+        :public-token="publicToken || undefined"
         @submit="submitData"
       />
     </div>
