@@ -19,7 +19,7 @@
       <WorkflowDesigner ref="wfDesigner" :appId="formDef.appId" :formId="formDef.id" />
     </div>
     <div v-if="loadedTabs.extension" v-show="activeName == 'extension'" class="main-content-container">
-      <Advanced :formDef="formDefRef!"></Advanced>
+      <Advanced :formDef="formDefRef!" :initial-tab="initialAdvancedTab"></Advanced>
     </div>
     <div v-if="loadedTabs.publish" v-show="activeName == 'publish'" class="main-content-container">
       <Publish ref="publishRef" :formDef="formDefRef!"></Publish>
@@ -56,6 +56,8 @@ const props = defineProps<{
   modelValue: boolean;
   formDef: FormDef;
   usingFlow: boolean;
+  initialTab?: string;
+  initialAdvancedTab?: string;
 }>();
 
 const formStore = useFormStore();
@@ -69,7 +71,8 @@ const locale = computed(() => systemStore.locale);
 const formName = ref(props.formDef.name);
 const formDefRef = ref<FormDef>(props.formDef);
 const adminPermissions = ref<AdminPermissionSnapshot>();
-const activeName = ref("formedit");
+const activeName = ref(props.initialTab || "formedit");
+const initialAdvancedTab = computed(() => props.initialAdvancedTab || "advanced-data");
 const loadedTabs = ref<Record<string, boolean>>({
   formedit: true,
   workflow: false,

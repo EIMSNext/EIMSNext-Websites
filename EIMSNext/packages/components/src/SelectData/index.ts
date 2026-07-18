@@ -14,6 +14,7 @@ import {
 import { IConditionList, toDynamicFilter } from "../ConditionList/type";
 import { flowStatusArray } from "../common";
 import dayjs from "dayjs";
+import { appSetting } from "@eimsnext/utils";
 
 export interface IDataSelectField {
   field: string;
@@ -226,7 +227,11 @@ export const stringifyDataSelectValue = (value: any): string => {
   return String(value);
 };
 
-const normalizeAssetUrl = (value: string) => String(value || "").replace(/\\/g, "/");
+const normalizeAssetUrl = (value: string) => {
+  const normalized = String(value || "").replace(/\\/g, "/");
+  if (/^(https?:|data:|blob:|\/\/)/i.test(normalized)) return normalized;
+  return `${appSetting.uploadUrl.replace(/\/$/, "")}/${normalized.replace(/^\/+/, "")}`;
+};
 
 const renderImageValue = (value: any) => {
   if (!value) return "";

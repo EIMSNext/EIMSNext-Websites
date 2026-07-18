@@ -21,6 +21,7 @@ import "vant/lib/index.css";
 // 暗黑模式自定义变量
 import "@/styles/dark/css-vars.css";
 import "@/styles/index.scss";
+import "@/styles/public.scss";
 import "@/styles/workflow.scss";
 
 const app = createApp(App);

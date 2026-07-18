@@ -161,7 +161,7 @@ const getValue = (el: FieldDef, vObj: any): string => {
                     vObj.forEach((item: { url: string }) => {
                         let url = item.url;
                         if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                            url = getAttachmentRootPath() + url;
+                            url = `${getAttachmentRootPath().replace(/\/$/, "")}/${url.replace(/^[/\\]+/, "")}`;
                         }
                         valArray.push(`<span style="padding:1px 2px;"><img src="${url}"alt=""/></span>`);
                     });

@@ -28,6 +28,7 @@
           :show-header="isView"
           :external-filter="externalFilter"
           :is-public="isPublic"
+          :public-token="publicToken"
           :item-def="itemDef"
         />
       </template>
@@ -38,6 +39,7 @@
           :show-header="isView"
           :external-filter="externalFilter"
           :is-public="isPublic"
+          :public-token="publicToken"
           :item-def="itemDef"
         />
       </template>
@@ -74,6 +76,7 @@ const props = withDefaults(
     itemDef: DashboardItemDef;
     isView?: boolean;
     isPublic?: boolean;
+    publicToken?: string;
     height?: number;
     width?: number;
     externalFilter?: any;

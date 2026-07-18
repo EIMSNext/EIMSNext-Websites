@@ -10,6 +10,7 @@ import {
   getFlowStatus,
 } from "@eimsnext/models";
 import dayjs from "dayjs";
+import { appSetting } from "@eimsnext/utils";
 
 export const normalizeValue = (value: any): any => {
   if (Array.isArray(value) && value.length > 0 && Array.isArray(value[0])) {
@@ -24,9 +25,15 @@ export const extractImageUrl = (value: any): string => {
   if (!normalized) return "";
   const first = Array.isArray(normalized) ? normalized[0] : normalized;
   if (!first) return "";
-  if (typeof first === "string") return first.replace(/\\/g, "/");
-  if (typeof first === "object" && first.url) return String(first.url).replace(/\\/g, "/");
+  if (typeof first === "string") return normalizeAssetUrl(first);
+  if (typeof first === "object" && first.url) return normalizeAssetUrl(String(first.url));
   return "";
+};
+
+const normalizeAssetUrl = (value: string): string => {
+  const normalized = value.replace(/\\/g, "/");
+  if (/^(https?:|data:|blob:|\/\/)/i.test(normalized)) return normalized;
+  return `${appSetting.uploadUrl.replace(/\/$/, "")}/${normalized.replace(/^\/+/, "")}`;
 };
 
 export const flattenDataItem = (item: any) => {

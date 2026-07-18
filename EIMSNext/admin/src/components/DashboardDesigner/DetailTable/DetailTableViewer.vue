@@ -142,6 +142,7 @@ import DashSort from "../components/DashSort.vue";
 import FormDataView from "@/views/form/components/FormDataView.vue";
 import DetailTableRowPreview from "./DetailTableRowPreview.vue";
 import { buildDetailTableColumns, detailTableSettingValidate, IDetailTableSetting } from "./type";
+import { usePublicHttp } from "@/views/public/shared";
 
 const { t } = useI18n();
 
@@ -157,6 +158,7 @@ const props = withDefaults(
     designerMode?: boolean;
     externalFilter?: IConditionList;
     isPublic?: boolean;
+    publicToken?: string;
     itemDef?: DashboardItemDef;
   }>(),
   {
@@ -166,6 +168,16 @@ const props = withDefaults(
 );
 
 const formStore = useFormStore();
+const publicHttp = usePublicHttp();
+
+watch(
+  () => props.publicToken,
+  (token) => {
+    publicHttp.token.value = token || null;
+  },
+  { immediate: true },
+);
+
 const formDef = ref<FormDef>();
 const columns = ref<ITableColumn[]>([]);
 const sortFields = ref<any[]>([]);
@@ -259,7 +271,9 @@ const loadFormContext = async () => {
     return;
   }
 
-  const form = await formStore.get(props.setting.datasource.id);
+  const form = props.isPublic && props.publicToken
+    ? await publicHttp.odata.get<FormDef>("FormDef", props.setting.datasource.id)
+    : await formStore.get(props.setting.datasource.id);
   formDef.value = form;
   if (!form) {
     columns.value = [];
@@ -386,7 +400,9 @@ const loadCount = async () => {
   }
 
   const req = buildAggRequest(0, 0);
-  const count = await aggregateService.count(req);
+  const count = props.isPublic && props.publicToken
+    ? await publicHttp.api.post<number>("/aggregate/$count", req)
+    : await aggregateService.count(req);
   rawTotal.value = count;
   displayTotal.value = getVisibleTotal(count);
 
@@ -413,7 +429,9 @@ const loadRows = async () => {
   }
 
   const take = props.setting.showTop ? Math.min(pageSize.value, remaining) : pageSize.value;
-  const data = await aggregateService.calucate(buildAggRequest(skip, take));
+  const data = props.isPublic && props.publicToken
+    ? await publicHttp.api.post<any[]>("/aggregate/calucate", buildAggRequest(skip, take))
+    : await aggregateService.calucate(buildAggRequest(skip, take));
   rows.value = (data || []).map((d: any) => ({
     id: d.id,
     formId: d.formId,

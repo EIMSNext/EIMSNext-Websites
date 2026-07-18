@@ -315,7 +315,14 @@ export function createFlowNode(
         id: uniqueId(),
         nodeType: FlowNodeType.Print,
         name: t("workflow.printNode"),
-        metadata: { printMeta: { singleResult: true } },
+        metadata: {
+          printMeta: {
+            sourceNodeId: "",
+            formId: "",
+            printDefId: "",
+            singleResult: true,
+          },
+        },
       };
     case FlowNodeType.Plugin:
       return {
@@ -879,7 +886,10 @@ export interface QueryManyMeta {
   singleResult: boolean;
 }
 export interface PrintMeta {
-  singleResult: boolean;
+  sourceNodeId: string;
+  formId: string;
+  printDefId: string;
+  singleResult?: boolean;
 }
 export interface PluginMeta {
   singleResult: boolean;

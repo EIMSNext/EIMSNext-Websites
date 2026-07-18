@@ -91,6 +91,26 @@ export async function getPrevNodes(
           formId = prevNode.metadata.queryManyMeta?.formId;
           node.singleResult = false;
           break;
+        case FlowNodeType.Update:
+          formId = prevNode.metadata.updateMeta?.formId;
+          node.singleResult = prevNode.metadata.updateMeta?.singleResult ?? false;
+          break;
+        case FlowNodeType.Delete:
+          formId = prevNode.metadata.deleteMeta?.formId;
+          node.singleResult = prevNode.metadata.deleteMeta?.singleResult ?? false;
+          break;
+        case FlowNodeType.Print:
+          node.singleResult = true;
+          node.outputFields = [{
+            formId: currentNodeId,
+            field: "printFile",
+            label: "打印文件",
+            type: FieldType.FileUpload,
+            isSubField: false,
+            nodeId: currentNodeId,
+            singleResultNode: true,
+          } satisfies IFormFieldDef];
+          break;
         case FlowNodeType.Plugin:
           node.singleResult = prevNode.metadata.pluginMeta?.singleResult ?? true;
           node.outputFields = (prevNode.metadata.pluginMeta?.resultFields ?? []).flatMap((field) => {

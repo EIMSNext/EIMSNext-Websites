@@ -16,7 +16,7 @@ import {
 } from "@eimsnext/models";
 import { IConditionList, IFieldSortList, IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
 import { SortDirection } from "@eimsnext/services";
-import { uniqueId } from "@eimsnext/utils";
+import { appSetting, uniqueId } from "@eimsnext/utils";
 import { dateFormat } from "@/utils/common";
 
 export type FormDataFormatter = (row: Record<string, any>, field: string, value?: any) => string;
@@ -176,9 +176,15 @@ export const extractImageUrl = (value: any): string => {
   if (!normalized) return "";
   const first = Array.isArray(normalized) ? normalized[0] : normalized;
   if (!first) return "";
-  if (typeof first === "string") return first.replace(/\\/g, "/");
-  if (typeof first === "object" && first.url) return String(first.url).replace(/\\/g, "/");
+  if (typeof first === "string") return normalizeAssetUrl(first);
+  if (typeof first === "object" && first.url) return normalizeAssetUrl(String(first.url));
   return "";
+};
+
+const normalizeAssetUrl = (value: string): string => {
+  const normalized = value.replace(/\\/g, "/");
+  if (/^(https?:|data:|blob:|\/\/)/i.test(normalized)) return normalized;
+  return `${appSetting.uploadUrl.replace(/\/$/, "")}/${normalized.replace(/^\/+/, "")}`;
 };
 
 export const formatFormValue = (
