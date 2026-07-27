@@ -2133,6 +2133,8 @@ export default {
     capsLock: "Caps Lock is On",
     rememberMe: "Remember Me",
     forgetPassword: "Forget Password",
+    forgetPasswordHint: "Please contact your organization administrator to reset your password.",
+    backToLogin: "Back to login",
     message: {
       username: {
         required: "Please enter Username",

@@ -2131,6 +2131,8 @@ export default {
     capsLock: "大写锁定已打开",
     rememberMe: "记住我",
     forgetPassword: "忘记密码",
+    forgetPasswordHint: "请联系企业管理员完成密码重置。",
+    backToLogin: "返回登录",
     message: {
       username: {
         required: "请输入用户名",

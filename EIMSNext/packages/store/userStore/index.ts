@@ -64,6 +64,8 @@ export const useUserStore = defineStore("currentuser", () => {
       if (accessToken.get()) {
         await authService.logout();
       }
+    } catch {
+      // Local session cleanup must complete even when the server rejects an expired token.
     } finally {
       accessToken.clear();
       currentUser.value = new CurrentUser();

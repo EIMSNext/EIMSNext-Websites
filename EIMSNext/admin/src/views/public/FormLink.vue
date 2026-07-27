@@ -310,7 +310,7 @@ async function buildPublicSystemValues(): Promise<Record<string, any>> {
       }
     }
   } catch (err: any) {
-    ElMessage.error(err?.response?.data?.errmsg || err?.message || t("publicpublish.wechatOpenIdRequired"));
+    ElMessage.error(err?.response?.data?.message || err?.response?.data?.msg || err?.message || t("publicpublish.wechatOpenIdRequired"));
   }
 
   return values;
