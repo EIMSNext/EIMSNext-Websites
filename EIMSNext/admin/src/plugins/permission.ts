@@ -3,7 +3,7 @@ import { accessToken } from "@eimsnext/utils";
 import router from "@/router";
 import { usePermissionStore } from "@/store";
 import { useUserStore, useAppStore } from "@eimsnext/store";
-import { AppMenu, WorkbenchRecentVisit, WorkbenchRecentVisitRequest } from "@eimsnext/models";
+import { AppMenu, UserType, WorkbenchRecentVisit, WorkbenchRecentVisitRequest } from "@eimsnext/models";
 import { workbenchRecentVisitService } from "@eimsnext/services";
 
 export function setupPermission() {
@@ -21,14 +21,20 @@ export function setupPermission() {
           console.warn("userStore.initialize failed, continuing with cached data");
         }
 
-        const needsCorpOnboarding = !userStore.currentUser.corpId;
+        const isPlatAdmin = userStore.currentUser.userType === UserType.PlatAdmin;
+        const needsCorpOnboarding = !userStore.currentUser.corpId && !isPlatAdmin;
         if (needsCorpOnboarding && to.path !== "/corp-onboarding") {
           next({ path: "/corp-onboarding", replace: true });
           return;
         }
 
         if (!needsCorpOnboarding && to.path === "/corp-onboarding") {
-          next({ path: "/workbench", replace: true });
+          next({ path: isPlatAdmin ? "/platform-admin" : "/workbench", replace: true });
+          return;
+        }
+
+        if (isPlatAdmin && (to.path === "/" || to.path === "/workbench")) {
+          next({ path: "/platform-admin", replace: true });
           return;
         }
 

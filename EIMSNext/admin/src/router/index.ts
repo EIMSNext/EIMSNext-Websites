@@ -135,6 +135,23 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import("@/views/corp-onboarding/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
+  {
+    path: "/platform-admin",
+    component: SysLayout,
+    children: [
+      {
+        path: "",
+        name: "platform-admin",
+        component: () => import("@/views/platform-admin/index.vue"),
+        meta: {
+          title: "admin.platformAdmin.title",
+          hidden: true,
+          requiresAuth: true,
+          allowedUserTypes: [UserType.PlatAdmin],
+        },
+      },
+    ],
+  },
   createTodoRoute("/mytasks", "mytasks", () => import("@/views/wftodo/global/mytasks.vue"), "common.wfProcess.mytasks"),
   createTodoRoute("/mystarted", "mystarted", () => import("@/views/wftodo/global/mystarted.vue"), "common.wfProcess.mystarted"),
   createTodoRoute("/myapproved", "myapproved", () => import("@/views/wftodo/global/myapproved.vue"), "common.wfProcess.myapproved"),
@@ -244,7 +261,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/form/:formId",
-        component: () => import("@/views/form/index.vue"),
+        component: () => import("@/views/form/FormListPage.vue"),
         // name: "form",
         meta: {
           title: "form",

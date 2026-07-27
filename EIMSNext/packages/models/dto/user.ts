@@ -70,6 +70,16 @@ export enum UserType {
   Employee = 64,
 
   /// <summary>
+  /// 无企业用户
+  /// </summary>
+  NoCorp = 128,
+
+  /// <summary>
+  /// 平台管理员
+  /// </summary>
+  PlatAdmin = 256,
+
+  /// <summary>
   /// 匿名用户
   /// </summary>
   Public = 32768,

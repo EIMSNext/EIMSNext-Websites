@@ -29,6 +29,12 @@
             </div>
             <div class="platform-title">{{ $t("admin.shell.openPlatform") }}</div>
           </router-link>
+          <router-link v-if="isPlatAdmin" class="platform-item" to="/platform-admin">
+            <div class="platform-icon platform-icon--admin">
+              <et-icon icon="el-Setting" size="24" />
+            </div>
+            <div class="platform-title">{{ $t("admin.platformAdmin.title") }}</div>
+          </router-link>
         </div>
       </el-popover>
     </div>
@@ -37,7 +43,13 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { UserType } from "@eimsnext/models";
+import { useUserStore } from "@eimsnext/store";
+
+const userStore = useUserStore();
+const isPlatAdmin = computed(() => userStore.currentUser.userType === UserType.PlatAdmin);
+</script>
 
 <style lang="scss" scoped>
 .navbar {
@@ -115,6 +127,11 @@
 .platform-icon--open {
   background: var(--et-bg-primary-soft);
   color: var(--et-color-primary);
+}
+
+.platform-icon--admin {
+  background: var(--et-bg-danger-soft);
+  color: var(--et-color-danger);
 }
 
 .platform-title {

@@ -1,4 +1,12 @@
-import { AdminPermissionSnapshot, CurrentUser, PluginReloadResult, PluginRuntimeInfo } from "@eimsnext/models";
+import {
+  AdminPermissionSnapshot,
+  CurrentUser,
+  ECoinPrice,
+  ECoinPriceBatchItem,
+  PluginPublishRequest,
+  PluginReloadResult,
+  PluginRuntimeInfo,
+} from "@eimsnext/models";
 import { ServiceBase } from "../interface";
 
 export class SystemService extends ServiceBase {
@@ -35,6 +43,14 @@ export class SystemService extends ServiceBase {
 
   reloadPlugin(): Promise<PluginReloadResult> {
     return this.http().api.post<PluginReloadResult>("/system/reloadplugin", {});
+  }
+
+  publishPlugin(request: PluginPublishRequest): Promise<{ id: string; pluginId: string; version: string }> {
+    return this.http().api.post("/system/pluginstore/publish", request);
+  }
+
+  batchUpsertECoinPrices(request: ECoinPriceBatchItem[]): Promise<ECoinPrice[]> {
+    return this.http().api.post("/system/ecoinprice/batch", request);
   }
 }
 

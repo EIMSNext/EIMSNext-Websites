@@ -50,13 +50,21 @@ const userStore = useUserStore();
 const curUser = toRef(userStore.currentUser);
 const route = useRoute();
 const wfbasePath = `/system/`;
-const resolveFullPath = (routePath: string) => wfbasePath + routePath;
+const resolveFullPath = (routePath: string) => routePath.startsWith("/") ? routePath : wfbasePath + routePath;
 const isCorpAdmin = computed(() => curUser.value.userType == UserType.CorpAdmin);
+const isPlatAdmin = computed(() => curUser.value.userType == UserType.PlatAdmin);
 const isUnrestrictedAdmin = computed(() =>
   curUser.value.userType == UserType.CorpOwmer || curUser.value.userType == UserType.CorpAdmin,
 );
 
 const menuGroups = computed<SysMenuGroup[]>(() => {
+  if (isPlatAdmin.value) {
+    return [{
+      title: "admin.platformAdmin.navigation",
+      items: [{ path: "/platform-admin", icon: "el-Setting", label: "admin.platformAdmin.title" }],
+    }];
+  }
+
   const groups: SysMenuGroup[] = [
     {
       title: "admin.shellMenu.contacts",

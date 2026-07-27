@@ -9,6 +9,7 @@ export * from "./dfRunLogService";
 export * from "./corporateService";
 export * from "./departmentService";
 export * from "./employeeService";
+export * from "./eCoinPriceService";
 export * from "./formNotifyService";
 export * from "./formDefService";
 export * from "./formListViewService";
