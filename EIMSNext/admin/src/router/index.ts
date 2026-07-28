@@ -390,6 +390,11 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import("@/views/profile/index.vue"),
     meta: { title: "navbar.profile", icon: "user", hidden: true, requiresAuth: true },
   },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/404",
+    meta: { hidden: true },
+  },
 ];
 
 /**

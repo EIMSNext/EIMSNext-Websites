@@ -19,7 +19,8 @@
         <el-button type="primary" :loading="accessCodeSubmitting" @click="submitAccessCode">
           {{ t("common.confirm") }}
         </el-button>
-        <p v-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
+        <p v-if="accessCodeExpired" class="access-code-error">{{ t("publicpublish.accessCodeExpired") }}</p>
+        <p v-else-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
       </el-card>
     </div>
 
@@ -78,7 +79,7 @@ import {
 import FormView from "@/components/FormView/index.vue";
 import { FormActionSettings } from "@/components/FormView/type";
 import {
-  AccessCodeInvalidError,
+  AccessCodeExpiredError,
   PublicNotFound,
   bootstrapWithToken,
   renderPrintFullscreenToolbar,
@@ -117,6 +118,7 @@ const accessCodeGate = ref(false);
 const accessCodeInput = ref("");
 const accessCodeSubmitting = ref(false);
 const accessCodeError = ref(false);
+const accessCodeExpired = ref(false);
 
 const actions = ref<FormActionSettings>({
   submit: { text: "common.wfProcess.submit", disabled: false },
@@ -155,6 +157,7 @@ async function bootstrap(accessCode?: string) {
   loading.value = true;
   errorText.value = "";
   accessCodeError.value = false;
+  accessCodeExpired.value = false;
   try {
     if (!publicToken.value) {
       await bootstrapWithToken(publicHttp, formId.value, PublicScope.FormLink, accessCode);
@@ -170,7 +173,8 @@ async function bootstrap(accessCode?: string) {
   } catch (err: any) {
     if (toAccessCodeError(err)) {
       accessCodeGate.value = true;
-      accessCodeError.value = !!accessCode;
+      accessCodeExpired.value = err instanceof AccessCodeExpiredError;
+      accessCodeError.value = !!accessCode && !accessCodeExpired.value;
     } else {
       errorText.value = t("publicpublish.formNotAvailable");
       formDef.value = undefined;

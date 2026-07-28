@@ -24,6 +24,13 @@ export class AccessCodeInvalidError extends Error {
   }
 }
 
+export class AccessCodeExpiredError extends AccessCodeInvalidError {
+  constructor(message = "公开访问链接已过期") {
+    super(message);
+    this.name = "AccessCodeExpiredError";
+  }
+}
+
 // =============================================================
 // 2. 404 / 找不到组件
 // =============================================================
@@ -188,7 +195,8 @@ export async function bootstrapWithToken(
     publicHttp.token.value = tokenResult.access_token;
   } catch (err: any) {
     if (err instanceof AccessCodeInvalidError) throw err;
-    if (err?.name === "PublicTokenError" || err?.response?.status === 401) {
+    if (err?.name === "PublicTokenExpiredError") throw new AccessCodeExpiredError();
+    if (err?.name === "PublicTokenError" || err?.response?.status === 401 || err?.response?.status === 429) {
       throw new AccessCodeInvalidError();
     }
     throw err;
@@ -202,7 +210,8 @@ export async function bootstrapWithToken(
 
 export function toAccessCodeError(err: any): AccessCodeInvalidError | null {
   if (err instanceof AccessCodeInvalidError) return err;
-  if (err?.name === "PublicTokenError" || err?.response?.status === 401) {
+  if (err?.name === "PublicTokenExpiredError") return new AccessCodeExpiredError();
+  if (err?.name === "PublicTokenError" || err?.response?.status === 401 || err?.response?.status === 429) {
     return new AccessCodeInvalidError();
   }
   return null;

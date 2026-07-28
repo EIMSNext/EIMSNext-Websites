@@ -244,11 +244,11 @@ export default {
       content.options = options;
 
       this.$emit("save", content);
-      this.resetDirty(content);
     },
     onCancel() {
       this.$refs.designer.setRule(JSON.parse(this.oldLayout));
       this.$refs.designer.setOptions(JSON.parse(this.oldOptions));
+      this.$refs.designer.resetFieldChangeLogs();
     },
     onPreview() {
       this.$refs.designer.openPreview();
@@ -344,6 +344,7 @@ export default {
     resetDirty(content) {
       this.oldLayout = content?.layout ? JSON.stringify(content.layout) : "";
       this.oldOptions = content?.options ? JSON.stringify(content.options) : "";
+      this.$refs.designer.setFieldChangeLogs(content?.fieldChangeLogs || []);
     },
   },
   beforeCreate() {
@@ -362,6 +363,7 @@ export default {
       if (this.formDef.content.options) {
         this.$refs.designer.setOptions(this.formDef.content.options);
       }
+      this.$refs.designer.setFieldChangeLogs(this.formDef.content.fieldChangeLogs || []);
 
       this.oldLayout = JSON.stringify(this.$refs.designer.getJson());
       this.oldOptions = JSON.stringify(this.$refs.designer.getOptionsJson());

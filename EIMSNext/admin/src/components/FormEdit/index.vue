@@ -197,7 +197,7 @@ const onSave = async (content: FormContent) => {
 
   let resp = await formDefService.patch<FormDef>(req.id, req);
   formDefRef.value = resp;
-  formBuilder.value?.resetDirty(scopedContent);
+  formBuilder.value?.resetDirty(resp.content);
   formStore.update(resp);
   contextStore.setAppChanged(); //reload 菜单
 

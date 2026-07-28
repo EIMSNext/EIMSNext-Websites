@@ -337,6 +337,16 @@
                   </template>
                 </el-tree>
               </el-main>
+              <el-footer
+                v-show="activeMenuTab === 'menu'"
+                height="46px"
+                class="_fc-field-recycle-entry"
+              >
+                <el-button text @click="fieldRecycleVisible = true">
+                  <et-icon icon="el-RefreshLeft" />
+                  <span>{{ t("designer.fieldRecycle.title") }}</span>
+                </el-button>
+              </el-footer>
             </el-container>
           </el-aside>
           <el-container class="_fc-m">
@@ -862,11 +872,43 @@
           </el-dialog>
         </el-container>
       </el-main>
+      <FieldRecycleBin
+        v-model="fieldRecycleVisible"
+        :logs="fieldChangeLogs"
+        :loading="fieldRecycleLoading"
+        :t="t"
+        @restore="restoreFieldChangeLogs"
+        @purge="purgeFieldChangeLogs"
+        @clear="clearFieldChangeLogs"
+      />
     </el-config-provider>
   </el-container>
 </template>
 
-<style></style>
+<style>
+._fc-field-recycle-entry {
+  display: flex;
+  align-items: center;
+  padding: 0 12px !important;
+  border-top: 1px solid var(--fc-line-color-3);
+  background: var(--fc-bg-color-1);
+}
+
+._fc-field-recycle-entry .el-button {
+  width: 100%;
+  height: 34px;
+  justify-content: center;
+  color: var(--fc-text-color-1);
+}
+
+._fc-field-recycle-entry .el-button:hover {
+  color: var(--fc-style-color-1);
+}
+
+._fc-field-recycle-entry .et-icon {
+  margin-right: 6px;
+}
+</style>
 
 <script>
 import {
@@ -887,7 +929,14 @@ import style from "../config/base/style";
 import advanced from "../config/base/advanced";
 import validate from "../config/base/validate";
 import ruleList, { defaultDrag } from "../config";
-import { EtIcon, fieldIcons } from "@eimsnext/components";
+import {
+  ConfirmResult,
+  EtConfirm,
+  EtIcon,
+  fieldIcons,
+  MessageIcon,
+} from "@eimsnext/components";
+import { formDefService } from "@eimsnext/services";
 import fcDraggable from "vuedraggable/src/vuedraggable";
 import createMenu from "../config/menu";
 import {
@@ -927,7 +976,7 @@ import {
   toRefs,
   watch,
 } from "vue";
-import errorMessage from "../utils/message";
+import errorMessage, { message } from "../utils/message";
 import hljs from "../utils/highlight/highlight.min";
 import xml from "../utils/highlight/xml.min";
 import javascript from "../utils/highlight/javascript.min";
@@ -954,6 +1003,7 @@ import SlotsConfig from "./SlotsConfig.vue";
 import QuickLayout from "./QuickLayout.vue";
 import AiChat from "./ai/AiChat.vue";
 import FieldInput from "./FieldInput.vue";
+import FieldRecycleBin from "./FieldRecycleBin.vue";
 
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("xml", xml);
@@ -975,6 +1025,7 @@ export default defineComponent({
     FormList,
     FieldList,
     FieldInput,
+    FieldRecycleBin,
     TypeSelect,
     ConfigTitle,
     VariableConfig,
@@ -1161,6 +1212,10 @@ export default defineComponent({
 
     const data = reactive({
       formId: "",
+      fieldChangeLogs: [],
+      savedFieldChangeLogs: [],
+      fieldRecycleVisible: false,
+      fieldRecycleLoading: false,
       cacheProps: {},
       operation: {
         idx: -1,
@@ -1493,6 +1548,271 @@ export default defineComponent({
     const methods = {
       setFormId(formId) {
         data.formId = formId;
+      },
+      setFieldChangeLogs(logs) {
+        const normalized = deepCopy(Array.isArray(logs) ? logs : []).sort(
+          (a, b) => (b.deletedTime || 0) - (a.deletedTime || 0)
+        );
+        data.fieldChangeLogs = normalized;
+        data.savedFieldChangeLogs = deepCopy(normalized);
+      },
+      getFieldChangeLogs() {
+        return deepCopy(data.fieldChangeLogs);
+      },
+      resetFieldChangeLogs() {
+        data.fieldChangeLogs = deepCopy(data.savedFieldChangeLogs);
+      },
+      parseFieldChangeLog(log) {
+        const separator = (log.fieldId || "").indexOf(">");
+        if (separator < 0) {
+          return {
+            ...log,
+            isSubField: false,
+            fieldId: log.fieldId,
+            fieldLabel: log.fieldLabel,
+          };
+        }
+        const labelSeparator = (log.fieldLabel || "").indexOf(".");
+        return {
+          ...log,
+          isSubField: true,
+          parentFieldId: log.fieldId.slice(0, separator),
+          fieldId: log.fieldId.slice(separator + 1),
+          parentFieldLabel:
+            labelSeparator > -1
+              ? log.fieldLabel.slice(0, labelSeparator)
+              : log.fieldId.slice(0, separator),
+          fieldLabel:
+            labelSeparator > -1
+              ? log.fieldLabel.slice(labelSeparator + 1)
+              : log.fieldLabel,
+        };
+      },
+      findTableFormRule(fieldId) {
+        let found = null;
+        const visit = (rules) => {
+          (rules || []).forEach((rule) => {
+            if (found || !rule || is.String(rule)) return;
+            if (methods.isTableFormRule(rule) && rule.field === fieldId) {
+              found = rule;
+              return;
+            }
+            visit(rule.children);
+          });
+        };
+        visit(data.children);
+        return found;
+      },
+      getCurrentFieldPaths() {
+        const paths = new Set();
+        const visit = (rules, parentFieldId) => {
+          (rules || []).forEach((rule) => {
+            if (!rule || is.String(rule)) return;
+            if (rule.field) {
+              paths.add(
+                parentFieldId ? `${parentFieldId}>${rule.field}` : rule.field
+              );
+            }
+            if (rule.type === "tableform") {
+              (rule.props?.columns || []).forEach((column) => {
+                visit(column.rule, rule.field);
+              });
+              return;
+            }
+            visit(rule.children, parentFieldId);
+          });
+        };
+        visit(methods.getRule());
+        return paths;
+      },
+      validateFieldRestore(logs) {
+        const paths = methods.getCurrentFieldPaths();
+        for (const log of logs) {
+          const parsed = methods.parseFieldChangeLog(log);
+          const fullFieldId = parsed.isSubField
+            ? `${parsed.parentFieldId}>${parsed.fieldId}`
+            : parsed.fieldId;
+          if (!parsed.fieldId || !parsed.fieldLabel) {
+            throw new Error(t("designer.fieldRecycle.invalidRecord"));
+          }
+          if (!data.dragRuleList[parsed.fieldType]) {
+            throw new Error(
+              t("designer.fieldRecycle.unsupportedType", {
+                type: parsed.fieldType,
+              })
+            );
+          }
+          if (paths.has(fullFieldId)) {
+            throw new Error(
+              t("designer.fieldRecycle.fieldExists", { field: fullFieldId })
+            );
+          }
+          if (parsed.isSubField) {
+            const parent = methods.findTableFormRule(parsed.parentFieldId);
+            if (!parent && paths.has(parsed.parentFieldId)) {
+              throw new Error(
+                t("designer.fieldRecycle.parentConflict", {
+                  field: parsed.parentFieldId,
+                })
+              );
+            }
+          }
+        }
+      },
+      createRestoredField(log, parentRule) {
+        const parsed = methods.parseFieldChangeLog(log);
+        const menu = data.dragRuleList[parsed.fieldType];
+        const children = parentRule
+          ? methods.getTableFormRootChildren(parentRule)
+          : data.children;
+        const restored = methods.dragMenu({
+          menu,
+          children,
+          index: children.length,
+          update: {
+            field: parsed.fieldId,
+            title: parsed.fieldLabel,
+          },
+        });
+        if (!restored) {
+          throw new Error(
+            t("designer.fieldRecycle.restoreFailed", {
+              field: log.fieldLabel,
+            })
+          );
+        }
+        return restored;
+      },
+      async restoreFieldChangeLogs(logs) {
+        if (!Array.isArray(logs) || !logs.length) return;
+        const parsedLogs = logs.map((log) => methods.parseFieldChangeLog(log));
+        const needsParentRestore = parsedLogs.some(
+          (log) => log.isSubField && !methods.findTableFormRule(log.parentFieldId)
+        );
+        const content = needsParentRestore
+          ? t("designer.fieldRecycle.restoreCascadeContent")
+          : parsedLogs.every((log) => log.isSubField)
+            ? t("designer.fieldRecycle.restoreSubContent")
+            : t("designer.fieldRecycle.restoreContent");
+        const confirm = await EtConfirm.showDialog(
+          content,
+          {
+            title: t("designer.fieldRecycle.restoreConfirmTitle"),
+            icon: MessageIcon.Warning,
+            showCancel: true,
+          },
+          t
+        );
+        if (confirm !== ConfirmResult.Yes) return;
+
+        const ruleSnapshot = methods.getRule();
+        const logSnapshot = deepCopy(data.fieldChangeLogs);
+        try {
+          methods.validateFieldRestore(logs);
+          const rootLogs = logs.filter(
+            (log) => !methods.parseFieldChangeLog(log).isSubField
+          );
+          const subLogs = logs.filter(
+            (log) => methods.parseFieldChangeLog(log).isSubField
+          );
+
+          rootLogs.forEach((log) => methods.createRestoredField(log));
+          await nextTick();
+
+          const restoredParentIds = new Set(
+            rootLogs
+              .filter((log) => log.fieldType === "tableform")
+              .map((log) => log.fieldId)
+          );
+          for (const log of subLogs) {
+            const parsed = methods.parseFieldChangeLog(log);
+            let parent = methods.findTableFormRule(parsed.parentFieldId);
+            if (!parent) {
+              methods.createRestoredField({
+                fieldId: parsed.parentFieldId,
+                fieldType: "tableform",
+                fieldLabel: parsed.parentFieldLabel,
+              });
+              restoredParentIds.add(parsed.parentFieldId);
+              await nextTick();
+              parent = methods.findTableFormRule(parsed.parentFieldId);
+            }
+            if (!parent) {
+              throw new Error(
+                t("designer.fieldRecycle.restoreFailed", {
+                  field: log.fieldLabel,
+                })
+              );
+            }
+            methods.createRestoredField(log, parent);
+            await nextTick();
+          }
+
+          const restoredIds = new Set(logs.map((log) => log.fieldId));
+          restoredParentIds.forEach((id) => restoredIds.add(id));
+          data.fieldChangeLogs = data.fieldChangeLogs.filter(
+            (log) => !restoredIds.has(log.fieldId)
+          );
+          methods.updateTree();
+          message(t("designer.fieldRecycle.restoreSuccess"), "success");
+        } catch (error) {
+          methods.setRule(ruleSnapshot);
+          data.fieldChangeLogs = logSnapshot;
+          errorMessage(error?.message || t("designer.fieldRecycle.restoreFailed"));
+        }
+      },
+      async purgeFieldChangeLogs(logs) {
+        if (!Array.isArray(logs) || !logs.length) return;
+        const confirm = await EtConfirm.showDialog(
+          t("designer.fieldRecycle.purgeContent"),
+          {
+            title: t("designer.fieldRecycle.purgeConfirmTitle"),
+            icon: MessageIcon.Warning,
+            showCancel: true,
+          },
+          t
+        );
+        if (confirm !== ConfirmResult.Yes) return;
+        await methods.executeFieldChangeLogPurge({
+          fieldIds: logs.map((log) => log.fieldId),
+        });
+      },
+      async clearFieldChangeLogs() {
+        if (!data.fieldChangeLogs.length) return;
+        const confirm = await EtConfirm.showDialog(
+          t("designer.fieldRecycle.clearContent"),
+          {
+            title: t("designer.fieldRecycle.clearConfirmTitle"),
+            icon: MessageIcon.Warning,
+            showCancel: true,
+          },
+          t
+        );
+        if (confirm !== ConfirmResult.Yes) return;
+        await methods.executeFieldChangeLogPurge({ clearAll: true });
+      },
+      async executeFieldChangeLogPurge(request) {
+        if (!data.formId) {
+          errorMessage(t("designer.fieldRecycle.missingForm"));
+          return;
+        }
+        data.fieldRecycleLoading = true;
+        try {
+          await formDefService.purgeFieldChangeLogs(data.formId, request);
+          const ids = new Set(request.fieldIds || []);
+          const filter = request.clearAll
+            ? () => false
+            : (log) => !ids.has(log.fieldId);
+          data.fieldChangeLogs = data.fieldChangeLogs.filter(filter);
+          data.savedFieldChangeLogs = data.savedFieldChangeLogs.filter(filter);
+          message(t("designer.fieldRecycle.purgeSuccess"), "success");
+        } catch (error) {
+          errorMessage(
+            error?.message || t("designer.fieldRecycle.purgeFailed")
+          );
+        } finally {
+          data.fieldRecycleLoading = false;
+        }
       },
       isPublicSystemRule(rule) {
         return (
@@ -3455,10 +3775,10 @@ export default defineComponent({
       },
       dragMenu({ rule, menu, children, index, slot, update }) {
         if (data.inputForm.state) {
-          return;
+          return null;
         }
         if (menu && menu.only && methods.checkOnly(menu)) {
-          return;
+          return null;
         }
         const loadPage = (loadRule) => {
           const tmp = [];
@@ -3529,7 +3849,7 @@ export default defineComponent({
           methods.getTableFormContextByChildren(children) &&
           methods.isTableFormBlockedRule(firstRule)
         ) {
-          return;
+          return null;
         }
         if (update) {
           methods.mergeRule(firstRule, update);
@@ -3563,7 +3883,7 @@ export default defineComponent({
               methods.triggerActive(firstRule);
             });
           }
-          return;
+          return firstRule;
         }
         if (tableFormContext) {
           const columnWrappers = methods.createTableFormColumns(rules);
@@ -3585,7 +3905,7 @@ export default defineComponent({
               methods.triggerActive(firstRule);
             });
           }
-          return;
+          return firstRule;
         }
         children.splice(index, 0, ...rules);
         if (dragRule && dragRule.formOptions) {
@@ -3605,6 +3925,7 @@ export default defineComponent({
             methods.triggerActive(firstRule);
           });
         }
+        return firstRule;
       },
       mergeRule(rule, update) {
         Object.keys(update).forEach((k) => {

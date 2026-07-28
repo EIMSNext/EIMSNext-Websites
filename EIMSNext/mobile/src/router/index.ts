@@ -54,6 +54,12 @@ const routes: RouteRecordRaw[] = [
     name: 'WfApproval',
     component: () => import('@/components/WfApproval.vue'),
     meta: { titleKey: 'mobile.approval.title', requireAuth: true }
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/components/NotFound.vue'),
+    meta: { titleKey: 'mobile.notFound.title' }
   }
 ]
 

@@ -1,4 +1,4 @@
-import { CorpModelBase, IdBase } from "./modelBase";
+import { CorpModelBase, IdBase, Operator } from "./modelBase";
 export enum FormType {
   Form = "0",
   Dashboard = "1",
@@ -38,6 +38,14 @@ export class FormContent {
   layout?: string;
   options?: string;
   items?: FieldDef[];
+  fieldChangeLogs?: FieldChangeLog[];
+}
+export interface FieldChangeLog {
+  fieldId: string;
+  fieldType: FieldType;
+  fieldLabel: string;
+  deletedBy?: Operator;
+  deletedTime: number;
 }
 export class FieldDef {
   field: string = "";

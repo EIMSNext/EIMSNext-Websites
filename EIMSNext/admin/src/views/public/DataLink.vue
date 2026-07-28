@@ -19,7 +19,8 @@
         <el-button type="primary" :loading="accessCodeSubmitting" @click="submitAccessCode">
           {{ t("common.confirm") }}
         </el-button>
-        <p v-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
+        <p v-if="accessCodeExpired" class="access-code-error">{{ t("publicpublish.accessCodeExpired") }}</p>
+        <p v-else-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
       </el-card>
     </div>
 
@@ -39,7 +40,7 @@
 <script setup lang="ts">
 import { Loading } from "@element-plus/icons-vue";
 import { PublicScope } from "@eimsnext/models";
-import { PublicNotFound, bootstrapWithToken, renderPrintFullscreenToolbar, toAccessCodeError, usePublicHttp } from "./shared";
+import { AccessCodeExpiredError, PublicNotFound, bootstrapWithToken, renderPrintFullscreenToolbar, toAccessCodeError, usePublicHttp } from "./shared";
 import PublicDataView from "./PublicDataView.vue";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -56,6 +57,7 @@ const accessCodeGate = ref(false);
 const accessCodeInput = ref("");
 const accessCodeSubmitting = ref(false);
 const accessCodeError = ref(false);
+const accessCodeExpired = ref(false);
 
 const publicHttp = usePublicHttp();
 
@@ -73,6 +75,7 @@ watch(
 async function bootstrap(accessCode?: string) {
   loading.value = true;
   accessCodeError.value = false;
+  accessCodeExpired.value = false;
   try {
     if (!publicHttp.token.value) {
       await bootstrapWithToken(publicHttp, formId.value, PublicScope.DataLink, accessCode);
@@ -81,7 +84,8 @@ async function bootstrap(accessCode?: string) {
   } catch (err: any) {
     if (toAccessCodeError(err)) {
       accessCodeGate.value = true;
-      accessCodeError.value = !!accessCode;
+      accessCodeExpired.value = err instanceof AccessCodeExpiredError;
+      accessCodeError.value = !!accessCode && !accessCodeExpired.value;
     }
   } finally {
     loading.value = false;
