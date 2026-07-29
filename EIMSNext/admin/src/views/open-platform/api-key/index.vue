@@ -463,6 +463,8 @@ async function save() {
     dialogVisible.value = false;
     ElMessage.success(t("common.saveSuccess"));
     await load();
+  } catch (e: any) {
+    ElMessage.error(e?.message ?? t("admin.apiKeyMgmt.operationFailed"));
   } finally {
     saving.value = false;
   }
