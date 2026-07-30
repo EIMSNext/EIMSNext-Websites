@@ -9,6 +9,10 @@ import DatePicker from './datePicker';
 import TimePicker from './timePicker';
 import Group from './group';
 import SerialNo from './serialno';
+import Number from './number';
+import DataSelect from './dataSelect';
+import { DepartmentSelect, EmployeeSelect } from './organizationSelect';
+import { Collapse, Tabs } from './layout';
 import IconWarning from './icon/IconWarning.vue';
 
 export default [
@@ -24,4 +28,10 @@ export default [
     Group,
     SerialNo,
     Uploader,
+    Number,
+    DepartmentSelect,
+    EmployeeSelect,
+    DataSelect,
+    Tabs,
+    Collapse,
 ]

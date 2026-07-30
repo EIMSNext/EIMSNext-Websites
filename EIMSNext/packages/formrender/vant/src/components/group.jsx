@@ -19,6 +19,14 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    addable: {
+      type: Boolean,
+      default: true,
+    },
+    deletable: {
+      type: Boolean,
+      default: true,
+    },
     max: {
       type: Number,
       default: 0,
@@ -57,6 +65,8 @@ export default defineComponent({
       cacheRule: {},
       cacheValue: {},
       sort: [],
+      syncingModelValue: false,
+      pendingLocalModelValue: null,
       form: markRaw(this.formCreateInject.form.$form()),
     };
   },
@@ -94,6 +104,13 @@ export default defineComponent({
     modelValue: {
       handler(n) {
         n = n || [];
+        const serialized = JSON.stringify(n);
+        if (serialized === this.pendingLocalModelValue) {
+          this.pendingLocalModelValue = null;
+          return;
+        }
+        this.pendingLocalModelValue = null;
+        this.syncingModelValue = true;
         let keys = this.sort,
           total = keys.length,
           len = total - n.length;
@@ -114,6 +131,11 @@ export default defineComponent({
             this.setValue(keys[i], n[i]);
           });
         }
+        nextTick(() => {
+          nextTick(() => {
+            this.syncingModelValue = false;
+          });
+        });
       },
       deep: true,
     },
@@ -126,10 +148,12 @@ export default defineComponent({
       this.cacheValue[k] = JSON.stringify(val);
     },
     input(value) {
+      this.pendingLocalModelValue = JSON.stringify(value);
       this.$emit("update:modelValue", value);
       this.$emit("change", value);
     },
     formData(key, formData) {
+      if (this.syncingModelValue) return;
       const cacheRule = this.cacheRule;
       const keys = this.sort;
       if (keys.filter(k => cacheRule[k] && cacheRule[k].$f).length !== keys.length) {
@@ -153,7 +177,11 @@ export default defineComponent({
       ) {
         return;
       }
-      this.cacheRule[key].$f && this.cacheRule[key].$f.coverValue(value);
+      const api = this.cacheRule[key].$f;
+      if (api) {
+        api.setValue(value);
+      }
+      this.cacheRule[key].version += 1;
       this.cache(key, value);
     },
     addRule(i, emit) {
@@ -173,7 +201,7 @@ export default defineComponent({
         );
       }
       this.parse && this.parse({ rule, options, index: this.sort.length });
-      this.cacheRule[++this.len] = { rule, options };
+      this.cacheRule[++this.len] = { rule, options, version: 0 };
       if (emit) {
         nextTick(() =>
           this.$emit("add", rule, Object.keys(this.cacheRule).length - 1)
@@ -183,6 +211,11 @@ export default defineComponent({
     add$f(i, key, $f) {
       this.cacheRule[key].$f = $f;
       nextTick(() => {
+        const value = this.modelValue[i];
+        $f.setValue(
+          this.field ? { [this.field]: this._value(value) } : value || {},
+        );
+        $f.refresh();
         this.$emit("itemMounted", $f, Object.keys(this.cacheRule).indexOf(key));
       });
     },
@@ -195,7 +228,11 @@ export default defineComponent({
       }
     },
     add(i) {
-      if (this.disabled || false === this.onBeforeAdd(this.modelValue)) {
+      if (
+        this.disabled ||
+        !this.addable ||
+        false === this.onBeforeAdd(this.modelValue)
+      ) {
         return;
       }
       const value = [...this.modelValue];
@@ -207,6 +244,7 @@ export default defineComponent({
     del(index, key) {
       if (
         this.disabled ||
+        !this.deletable ||
         false === this.onBeforeRemove(this.modelValue, index)
       ) {
         return;
@@ -271,10 +309,10 @@ export default defineComponent({
         });
       }
       const btn = [];
-      if ((!this.max || total < this.max) && total === index + 1) {
+      if (this.addable && (!this.max || total < this.max) && total === index + 1) {
         btn.push(this.addIcon(key));
       }
-      if (total > this.min) {
+      if (this.deletable && total > this.min) {
         btn.push(this.delIcon(index, key));
       }
       if (this.sortBtn && index) {
@@ -324,21 +362,21 @@ export default defineComponent({
             add: this.add,
           })
         ) : (
-          <div
+          this.addable ? <div
             key={"a_def"}
             class="_fc-m-group-plus-minus _fc-m-group-add fc-clock"
             onClick={this.add}
-          />
+          /> : null
         )
       ) : (
         keys.map((key, index) => {
-          const { rule, options } = this.cacheRule[key];
+          const { rule, options, version } = this.cacheRule[key];
           const btn =
             button && !disabled ? this.makeIcon(keys.length, index, key) : [];
           return (
             <div class="_fc-m-group-container" key={key}>
               <Type
-                key={key}
+                key={`${key}-${version}`}
                 {...{
                   disabled,
                   "onUpdate:modelValue": (formData) =>
