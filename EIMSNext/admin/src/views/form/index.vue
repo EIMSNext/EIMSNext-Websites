@@ -98,7 +98,7 @@
         @click="switchView(view.id)"
       >
         <span class="view-tab-icon"></span>
-        {{ view.name }}
+        {{ getViewName(view) }}
       </button>
     </div>
     <div class="data-list data-list-full-height">
@@ -543,6 +543,9 @@ const applyCurrentView = (preferredViewId?: string) => {
 const switchView = (viewId: string) => {
   applyCurrentView(viewId);
 };
+
+const getViewName = (view: { id: string; name?: string }) =>
+  view.id === "__default" ? t("admin.formListView.defaultView") : view.name;
 
 const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
