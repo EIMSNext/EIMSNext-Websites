@@ -33,12 +33,12 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { showToast } from "vant";
 import { useI18n } from "vue-i18n";
-import { FlowStatus, type NodeActionConfig, type NodeActionType, type WfTodo } from "@eimsnext/models";
+import { FlowStatus, type WorkflowNodeAction, type WorkflowNodeActionType, type WfTodo } from "@eimsnext/models";
 import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
 import { formDataServiceMobile, todoServiceMobile } from "@/services/mobileService";
 
-type MobileActionKey = NodeActionType | "withdraw" | "urge";
+type MobileActionKey = WorkflowNodeActionType | "withdraw" | "urge";
 
 const router = useRouter();
 const route = useRoute();
@@ -49,11 +49,11 @@ const loading = ref(false);
 const approving = ref(false);
 const pendingKey = ref("");
 const task = ref<WfTodo>();
-const nodeActions = ref<NodeActionConfig[]>([]);
+const nodeActions = ref<WorkflowNodeAction[]>([]);
 const actionStatus = ref({ canWithdraw: false, canUrge: false });
 const flowStatus = ref<FlowStatus>();
 
-const getNodeActionText = (actionType: NodeActionType) => {
+const getNodeActionText = (actionType: WorkflowNodeActionType) => {
   const key = `mobile.approvalActions.${actionType}`;
   const label = t(key);
   return label === key ? t("mobile.approvalActions.default") : label;
@@ -87,7 +87,7 @@ const goBack = () => router.back();
 
 const getComment = (title: string) => window.prompt(t("mobile.approval.commentPrompt", { action: title }), "") || "";
 
-const chooseCandidate = (actionType: "addSign" | "transfer") => {
+const chooseCandidate = (actionType: "addsign" | "transfer") => {
   const candidates = nodeActions.value.find((x) => x.actionType === actionType)?.candidates || [];
   if (!candidates.length) {
     showToast(t("mobile.approval.noCandidates"));
@@ -153,8 +153,8 @@ const runAction = async (key: MobileActionKey) => {
         router.back();
         break;
       }
-      case "addSign": {
-        const targetEmployeeId = chooseCandidate("addSign");
+      case "addsign": {
+        const targetEmployeeId = chooseCandidate("addsign");
         if (!targetEmployeeId) return;
         await todoServiceMobile.addSign(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, targetEmployeeId, getComment(t("mobile.approvalActions.addSign")));
         showToast(t("mobile.approval.addSigned"));
@@ -188,7 +188,7 @@ const loadTask = async () => {
     const data = await formDataServiceMobile.get(task.value.dataId);
     flowStatus.value = data.flowStatus;
     actionStatus.value = await todoServiceMobile.getActionStatus(task.value.dataId, task.value.wfInstanceId);
-    nodeActions.value = await todoServiceMobile.getNodeActions(task.value.formId, task.value.approveNodeId);
+    nodeActions.value = await todoServiceMobile.getNodeActions(task.value.dataId, task.value.wfInstanceId);
   }
   loading.value = false;
 };

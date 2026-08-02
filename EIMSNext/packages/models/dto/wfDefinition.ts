@@ -123,6 +123,15 @@ export interface NodeActionConfig {
   candidates?: ApprovalCandidate[];
 }
 
+export type WorkflowNodeActionType = "submit" | "return" | "reject" | "draft" | "addsign" | "transfer";
+
+export interface WorkflowNodeAction {
+  actionType: WorkflowNodeActionType;
+  enabled?: boolean;
+  text?: string;
+  candidates?: ApprovalCandidate[];
+}
+
 export enum ApproverType {
   Normal = 0,
   ByLevel = 1,

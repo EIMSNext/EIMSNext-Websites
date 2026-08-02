@@ -30,7 +30,7 @@ export default {
       $required: false,
       props: {
         action: "/upload",
-        uploadType: "image",
+        uploadType: "file",
         listType: "picture-card",
         multiple: true,
         autoUpload: true,

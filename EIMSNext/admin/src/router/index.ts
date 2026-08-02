@@ -28,12 +28,13 @@ interface OpenPlatformRouteDef {
   path: string;
   component: () => Promise<any>;
   title?: string;
+  allowedUserTypes?: UserType[];
 }
 
 const openPlatformRoutes: OpenPlatformRouteDef[] = [
   { path: "pluginstore",   component: () => import("@/views/pluginstore/index.vue"),                title: "pluginstore" },
   { path: "plugin-manage", component: () => import("@/views/open-platform/plugin-manage/index.vue"), title: "plugin-manage" },
-  { path: "api-key",       component: () => import("@/views/open-platform/api-key/index.vue"),       title: "api-key" },
+  { path: "api-key",       component: () => import("@/views/open-platform/api-key/index.vue"),       title: "api-key", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "api-log",       component: () => import("@/views/open-platform/api-log/index.vue"),       title: "api-log" },
   { path: "docs",          component: () => import("@/views/open-platform/docs/index.vue"),          title: "open-platform-docs" },
 ];
@@ -59,7 +60,7 @@ function createOpenPlatformRoutes(defs: OpenPlatformRouteDef[]): RouteRecordRaw[
     children: [{
       path: "",
       component: d.component,
-      meta: { title: d.title, keepAlive: true, requiresAuth: true },
+      meta: { title: d.title, keepAlive: true, requiresAuth: true, allowedUserTypes: d.allowedUserTypes },
     }],
   }));
 }

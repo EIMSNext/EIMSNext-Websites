@@ -2863,7 +2863,7 @@ export default {
       return: "回退",
       reject: "驳回",
       draft: "暂存",
-      addSign: "加签",
+      addsign: "加签",
       transfer: "转交",
       withdraw: "撤回",
       urge: "催办",

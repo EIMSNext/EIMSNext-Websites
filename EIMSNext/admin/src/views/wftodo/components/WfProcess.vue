@@ -50,17 +50,15 @@ defineOptions({
 });
 
 import { computed, onMounted, ref } from "vue";
-import buildQuery from "odata-query";
 import {
   FormData as FormData_2,
   FormContent,
   WfTodo,
   WorkflowActionStatus,
-  WfDefinition,
   FlowStatus,
 } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
-import { formDataService, workflowService, wfDefinitionService } from "@eimsnext/services";
+import { formDataService, workflowService } from "@eimsnext/services";
 import { FormActionSettings, FormCustomAction } from "@/components/FormView/type";
 import { useI18n } from "vue-i18n";
 import { ISelectedTag, MemberTabs, DataItemType } from "@eimsnext/components";
@@ -82,8 +80,8 @@ const props = withDefaults(
   {}
 );
 
-type PendingActionKey = "submit" | "reject" | "return" | "addSign" | "transfer" | "draft";
-type NodeActionType = "submit" | "return" | "reject" | "draft" | "addSign" | "transfer";
+type PendingActionKey = "submit" | "reject" | "return" | "addsign" | "transfer" | "draft";
+type NodeActionType = "submit" | "return" | "reject" | "draft" | "addsign" | "transfer";
 type NodeActionConfig = {
   actionType: NodeActionType;
   enabled?: boolean;
@@ -122,7 +120,7 @@ const dialogTitle = computed(() => {
       return t("common.wfProcess.reject");
     case "return":
       return t("workflow.nodeActionReturn");
-    case "addSign":
+    case "addsign":
       return t("workflow.nodeActionAddSign");
     case "transfer":
       return t("workflow.nodeActionTransfer");
@@ -131,7 +129,7 @@ const dialogTitle = computed(() => {
   }
 });
 
-const needsMemberSelection = computed(() => pendingActionKey.value === "addSign" || pendingActionKey.value === "transfer");
+const needsMemberSelection = computed(() => pendingActionKey.value === "addsign" || pendingActionKey.value === "transfer");
 const needsNodeSelection = computed(() => pendingActionKey.value === "return");
 
 const emit = defineEmits(["update:modelValue", "cancel", "submit", "processed"]);
@@ -196,7 +194,7 @@ const buildCustomActions = () => {
   addAction("return", "return", "default", false);
   addAction("reject", "reject", "default");
   addAction("draft", "draft", "default", false);
-  addAction("addSign", "addSign", "default", false);
+  addAction("addsign", "addsign", "default", false);
   addAction("transfer", "transfer", "default", false);
 
   actions.value = {
@@ -216,7 +214,7 @@ const getDefaultActionText = (actionType: NodeActionType) => {
       return "common.wfProcess.reject";
     case "draft":
       return "common.wfProcess.saveDraft";
-    case "addSign":
+    case "addsign":
       return "workflow.nodeActionAddSign";
     case "transfer":
       return "workflow.nodeActionTransfer";
@@ -226,40 +224,7 @@ const getDefaultActionText = (actionType: NodeActionType) => {
 };
 
 const loadNodeActions = async () => {
-  const query = buildQuery({
-    filter: { ExternalId: props.todo.formId, flowType: "0", isCurrent: true },
-    top: 1,
-  });
-  const defs = await wfDefinitionService.query<WfDefinition>(query);
-  const def = defs[0];
-  if (!def?.content) {
-    nodeActionConfigs.value = [];
-    return;
-  }
-
-  const content = JSON.parse(def.content);
-  const nodes = [content.startNode, ...(content.nodes || [])];
-  const findNode = (items: any[]): any => {
-    for (const item of items) {
-      if (!item) {
-        continue;
-      }
-      if (item.id === props.todo.approveNodeId) {
-        return item;
-      }
-      if (item.conditionData?.id === props.todo.approveNodeId) {
-        return item.conditionData;
-      }
-      const childMatch = findNode(item.childNodes || []);
-      if (childMatch) {
-        return childMatch;
-      }
-    }
-    return undefined;
-  };
-
-  const currentNode = findNode(nodes);
-  nodeActionConfigs.value = currentNode?.metadata?.approveMeta?.nodeActions || [];
+  nodeActionConfigs.value = await workflowService.getNodeActions(props.todo.dataId, props.todo.wfInstanceId);
 };
 
 const handleAction = async (key: string, data: any) => {
@@ -277,9 +242,9 @@ const handleAction = async (key: string, data: any) => {
       comment.value = "";
       showCommentDialog.value = true;
       break;
-    case "addSign":
+    case "addsign":
     case "transfer": {
-      const actionType: NodeActionType = key === "addSign" ? "addSign" : "transfer";
+      const actionType: NodeActionType = key === "addsign" ? "addsign" : "transfer";
       const actionConfig = getNodeAction(actionType);
       selectedTargetTags.value = (actionConfig?.candidates || []).slice(0, 1).map(convertCandidateToTag);
       pendingActionKey.value = key as PendingActionKey;
@@ -337,7 +302,7 @@ const confirmAction = async () => {
           comment: comment.value,
         });
         break;
-      case "addSign":
+      case "addsign":
         if (!getSelectedEmployeeId()) {
           return;
         }

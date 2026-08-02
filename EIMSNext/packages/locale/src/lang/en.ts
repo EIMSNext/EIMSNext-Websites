@@ -2884,7 +2884,7 @@ export default {
       return: "Return",
       reject: "Reject",
       draft: "Save Draft",
-      addSign: "Add Sign",
+      addsign: "Add Sign",
       transfer: "Transfer",
       withdraw: "Withdraw",
       urge: "Urge",

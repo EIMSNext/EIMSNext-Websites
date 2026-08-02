@@ -18,7 +18,14 @@
 
     <template #footer>
       <div v-if="isAdd || editing" class="detail-footer-actions">
-        <van-button block type="primary" :loading="saving" @click="handleSave">{{ t("common.save") }}</van-button>
+        <van-button block :loading="saving" @click="handleSave">{{ t("common.save") }}</van-button>
+        <van-button
+          v-if="isAdd && formDef?.usingWorkflow"
+          block
+          type="primary"
+          :loading="saving"
+          @click="handleSubmit"
+        >{{ t("common.submit") }}</van-button>
       </div>
     </template>
   </MobilePage>
@@ -29,7 +36,7 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { showToast } from "vant";
 import { useI18n } from "vue-i18n";
-import type { FormDef } from "@eimsnext/models";
+import { DataAction, type FormData, type FormDef } from "@eimsnext/models";
 import FormCreateMobile from "@eimsnext/form-render-vant";
 import MobileFormRenderer from "@/components/form/MobileFormRenderer.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
@@ -46,6 +53,7 @@ const saving = ref(false);
 const editing = ref(true);
 const formDef = ref<FormDef>();
 const formData = ref<Record<string, unknown>>({});
+const currentData = ref<FormData>();
 
 const isAdd = computed(() => !dataId || Boolean(route.meta.isAdd));
 const renderRule = computed(() => {
@@ -65,13 +73,13 @@ const renderOption = computed(() => ({
 
 const goBack = () => router.back();
 
-const handleSave = async () => {
+const handleSave = async (action = DataAction.Save) => {
   saving.value = true;
   try {
-    if (isAdd.value) {
-      await formDataServiceMobile.post(formId, formData.value);
-    } else if (dataId) {
-      await formDataServiceMobile.put(dataId, formData.value);
+    if (isAdd.value && formDef.value) {
+      await formDataServiceMobile.post(formDef.value, formData.value, action);
+    } else if (currentData.value) {
+      await formDataServiceMobile.put(currentData.value, formData.value);
     }
     showToast(t("common.saveSuccess"));
     router.back();
@@ -82,11 +90,14 @@ const handleSave = async () => {
   }
 };
 
+const handleSubmit = () => handleSave(DataAction.Submit);
+
 const loadData = async () => {
   loading.value = true;
   formDef.value = await formServiceMobile.get(formId);
   if (!isAdd.value && dataId) {
     const data = await formDataServiceMobile.get(dataId);
+    currentData.value = data;
     formData.value = data.data || {};
   }
   loading.value = false;

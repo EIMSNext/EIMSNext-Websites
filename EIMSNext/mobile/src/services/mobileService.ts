@@ -1,4 +1,5 @@
 import {
+  DataAction,
   ApproveAction,
   type AppDef,
   type FormData,
@@ -14,7 +15,6 @@ import {
   systemService,
   wfTodoService,
   workflowService,
-  getNodeActions,
 } from "@eimsnext/services";
 import type { LoginRequest } from "@eimsnext/services";
 import { ODataQueryRequest } from "@eimsnext/services";
@@ -79,11 +79,23 @@ export const formDataServiceMobile = {
   get(dataId: string): Promise<FormData> {
     return formDataService.get<FormData>(dataId);
   },
-  post(formId: string, data: Record<string, unknown>): Promise<FormData> {
-    return formDataService.post<FormData>({ formId, data } as never);
+  post(form: FormDef, data: Record<string, unknown>, action: DataAction): Promise<FormData> {
+    return formDataService.post<FormData>({
+      id: "",
+      appId: form.appId,
+      formId: form.id,
+      data,
+      action,
+    } as never);
   },
-  put(dataId: string, data: Record<string, unknown>): Promise<FormData> {
-    return formDataService.put<FormData>(dataId, data as never);
+  put(entity: FormData, data: Record<string, unknown>): Promise<FormData> {
+    return formDataService.put<FormData>(entity.id, {
+      id: entity.id,
+      appId: entity.appId,
+      formId: entity.formId,
+      data,
+      action: DataAction.Save,
+    } as never);
   },
 };
 
@@ -129,8 +141,8 @@ export const todoServiceMobile = {
   getReturnNodes(dataId: string, wfInstanceId?: string) {
     return workflowService.getReturnNodes(dataId, wfInstanceId);
   },
-  getNodeActions(formId: string, approveNodeId: string) {
-    return getNodeActions(formId, approveNodeId);
+  getNodeActions(dataId: string, wfInstanceId: string) {
+    return workflowService.getNodeActions(dataId, wfInstanceId);
   },
 };
 
