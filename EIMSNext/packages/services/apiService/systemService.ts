@@ -26,6 +26,10 @@ export class SystemService extends ServiceBase {
     return this.http().api.post<any>("/system/SwitchCorp", { corpId: corpId });
   }
 
+  updateAvatar(avatar: string): Promise<{ avatar: string }> {
+    return this.http().api.post<{ avatar: string }>("/system/updateavatar", { avatar });
+  }
+
   updateSecret(clientId: string, secret: string): Promise<any> {
     return this.http().api.post<any>("/system/updateSecret", {
       clientId: clientId,
