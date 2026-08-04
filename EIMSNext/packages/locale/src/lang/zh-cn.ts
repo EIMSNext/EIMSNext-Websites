@@ -42,6 +42,7 @@ export default {
     prevStep: "上一步",
     next: "下一页",
     nextStep: "下一步",
+    back: "返回",
     other: "其他",
     notset: "未设置",
     helpDoc: "帮助文档",

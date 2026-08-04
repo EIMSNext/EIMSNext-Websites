@@ -41,6 +41,7 @@ export default {
     prevStep: "Previous",
     next: "Next page",
     nextStep: "Next",
+    back: "Back",
     other: "Other",
     notset: "Not Set",
     helpDoc: "Help Docs",
