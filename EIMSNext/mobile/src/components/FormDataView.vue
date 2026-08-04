@@ -2,6 +2,9 @@
   <MobilePage :title="isAdd ? t('mobile.formData.addTitle') : t('mobile.formData.detailTitle')" @back="goBack">
     <div class="detail-page">
       <div v-if="loading" class="loading-wrap">{{ t("common.loading") }}</div>
+      <van-empty v-else-if="loadError" image="error" :description="t('admin.formData.dataNotAvailable')">
+        <van-button size="small" @click="goBack">{{ t("common.back") }}</van-button>
+      </van-empty>
       <div v-else class="detail-card mobile-card">
         <div class="detail-title">{{ formDef?.name }}</div>
 
@@ -54,6 +57,7 @@ const editing = ref(true);
 const formDef = ref<FormDef>();
 const formData = ref<Record<string, unknown>>({});
 const currentData = ref<FormData>();
+const loadError = ref(false);
 
 const isAdd = computed(() => !dataId || Boolean(route.meta.isAdd));
 const renderRule = computed(() => {
@@ -94,13 +98,21 @@ const handleSubmit = () => handleSave(DataAction.Submit);
 
 const loadData = async () => {
   loading.value = true;
-  formDef.value = await formServiceMobile.get(formId);
-  if (!isAdd.value && dataId) {
-    const data = await formDataServiceMobile.get(dataId);
-    currentData.value = data;
-    formData.value = data.data || {};
+  loadError.value = false;
+  try {
+    formDef.value = await formServiceMobile.get(formId);
+    if (!formDef.value) throw new Error("Form definition is unavailable");
+    if (!isAdd.value && dataId) {
+      const data = await formDataServiceMobile.get(dataId);
+      if (!data) throw new Error("Form data is unavailable");
+      currentData.value = data;
+      formData.value = data.data || {};
+    }
+  } catch {
+    loadError.value = true;
+  } finally {
+    loading.value = false;
   }
-  loading.value = false;
 };
 
 onMounted(() => {

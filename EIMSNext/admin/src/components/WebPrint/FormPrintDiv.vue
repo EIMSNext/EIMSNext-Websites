@@ -11,7 +11,8 @@ import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { IPrintData } from './type';
 import { FieldDef, FieldType, SystemField } from '@eimsnext/models';
-import { dateFormat, getAttachmentRootPath, getObjectType } from '@/utils/common';
+import { dateFormat, getObjectType } from '@/utils/common';
+import { getFileFullUrl } from '@eimsnext/utils';
 
 const { t } = useI18n();
 
@@ -43,6 +44,20 @@ const el = ref<HTMLElement | null>(null);
 const printHtml = ref("");
 const displayFields = ref<Record<string, boolean>>({})
 const fieldValues = ref<IFieldValue[]>([])
+
+const escapeHtml = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+}[char]!));
+
+const renderValueHtml = (value: string | undefined, type: string) => {
+    if (type === FieldType.ImageUpload) return value || "";
+    const escaped = escapeHtml(value);
+    return type === "textarea" ? `<pre>${escaped}</pre>` : escaped;
+};
 
 // 核心方法：生成表格HTML
 const generateTableHtml = () => {
@@ -159,11 +174,8 @@ const getValue = (el: FieldDef, vObj: any): string => {
                     break;
                 case FieldType.ImageUpload:
                     vObj.forEach((item: { url: string }) => {
-                        let url = item.url;
-                        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                            url = `${getAttachmentRootPath().replace(/\/$/, "")}/${url.replace(/^[/\\]+/, "")}`;
-                        }
-                        valArray.push(`<span style="padding:1px 2px;"><img src="${url}"alt=""/></span>`);
+                        const url = getFileFullUrl(item.url);
+                        valArray.push(`<span style="padding:1px 2px;"><img src="${escapeHtml(url)}" alt="" /></span>`);
                     });
                     dValue = '<div style="display: -webkit-box; display: flex;">' + valArray.join("") + "</div>";
                     break;
@@ -200,7 +212,7 @@ const getValue = (el: FieldDef, vObj: any): string => {
                     dValue = el.props?.format ? vObj.toFixed(el.props.format) : vObj.toString()
                     break;
                 case "textarea":
-                    dValue = `<pre>${vObj || ""}</pre>`;
+                    dValue = vObj.toString();
                     break;
                 case "timestamp":
                     dValue = dateFormat(vObj, el.props?.format);
@@ -235,7 +247,7 @@ const generateHtml = () => {
         return;
     }
 
-    let pHtml = `<div class="print-title">${props.title}</div>`;
+    let pHtml = `<div class="print-title">${escapeHtml(props.title)}</div>`;
     const sysFields: string[] = [SystemField.CreateBy, SystemField.CreateTime, SystemField.UpdateTime]
     const ignoreFields = [SystemField.CreateBy, SystemField.CreateTime, SystemField.UpdateTime, "wxavatar", "wxname", "openid"];
 
@@ -322,12 +334,12 @@ const generateHtml = () => {
                 const endColCount = Math.min(colCount, t * subColLimit);
                 const currentChildren = el.items![0].fieldValues?.slice(startColCount, endColCount) || [];
 
-                tableStr += `<table><tbody><tr><td class="print-center" colspan="${currentChildren.length}">${el.label}</td></tr>`;
+                tableStr += `<table><tbody><tr><td class="print-center" colspan="${currentChildren.length}">${escapeHtml(el.label)}</td></tr>`;
 
                 // 表头
                 let subTh = "<tr>";
                 currentChildren.forEach((sub) => {
-                    subTh += `<td>${sub.label}</td>`;
+                    subTh += `<td>${escapeHtml(sub.label)}</td>`;
                 });
                 subTh += "</tr>";
 
@@ -336,7 +348,7 @@ const generateHtml = () => {
                 (el.items || []).forEach((row: Record<string, any>) => {
                     subTr += "<tr>";
                     currentChildren.forEach((sub) => {
-                        subTr += `<td>${sub.value}</td>`;
+                        subTr += `<td>${renderValueHtml(sub.value, sub.type)}</td>`;
                     });
                     subTr += "</tr>";
                 });
@@ -350,7 +362,7 @@ const generateHtml = () => {
                 tableRendering = true;
                 tableStr += '<table class="et-print-body"><tbody>';
             }
-            tableStr += `<tr><td colspan="1">${el.label}</td><td colspan="3">${el.value}</td></tr>`;
+            tableStr += `<tr><td colspan="1">${escapeHtml(el.label)}</td><td colspan="3">${renderValueHtml(el.value, el.type)}</td></tr>`;
         }
     });
 

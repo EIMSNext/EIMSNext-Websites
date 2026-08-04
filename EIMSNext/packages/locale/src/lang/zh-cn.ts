@@ -53,6 +53,7 @@ export default {
     copied: "已复制",
     open: "打开",
     loadFailed: "加载失败",
+    retry: "重试",
     department: "部门",
     employee: "员工",
     name: "名称",

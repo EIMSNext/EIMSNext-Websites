@@ -102,21 +102,28 @@
       </button>
     </div>
     <div class="data-list data-list-full-height">
-      <FormListViewRenderer
-        v-if="formDef && curListView"
-        :form-def="formDef"
-        :view="curListView"
-        :settings="curListViewSettings"
-        :rows="dataRef || []"
-        :columns="columns"
-        :flatted-data="flattedData"
-        :span-method="idBasedSpanMethod"
-        :selectable="selectable"
-        :display-fields="listViewDisplayFields"
-        @selection-change="selectionChanged"
-        @row-click="showDetails"
-      />
-      <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
+      <el-result v-if="listLoadError" icon="error" :title="$t('common.loadFailed')">
+        <template #extra>
+          <el-button type="primary" @click="handleQuery">{{ $t("common.retry") }}</el-button>
+        </template>
+      </el-result>
+      <template v-else>
+        <FormListViewRenderer
+          v-if="formDef && curListView"
+          :form-def="formDef"
+          :view="curListView"
+          :settings="curListViewSettings"
+          :rows="dataRef || []"
+          :columns="columns"
+          :flatted-data="flattedData"
+          :span-method="idBasedSpanMethod"
+          :selectable="selectable"
+          :display-fields="listViewDisplayFields"
+          @selection-change="selectionChanged"
+          @row-click="showDetails"
+        />
+        <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
+      </template>
     </div>
   </div>
 </template>
@@ -480,6 +487,7 @@ const draftQueryParams = ref<FormDataQueryOptions>({
 
 const totalRef = ref(0);
 const dataRef = ref<FormData[]>();
+const listLoadError = ref(false);
 const draftRows = ref<FormData[]>([]);
 const draftTotalRef = ref(0);
 const draftHasNext = computed(() => draftPageNum.value * draftPageSize.value < draftTotalRef.value);
@@ -630,6 +638,7 @@ const updateDraftQueryParams = () => {
 };
 
 const handleQuery = () => {
+  listLoadError.value = false;
   loadCount();
   loadData();
   void refreshDraftCount();
@@ -638,12 +647,19 @@ const handleQuery = () => {
 const loadCount = () => {
   formDataService.dynamicCount(queryParams.value).then((cnt: number) => {
     totalRef.value = cnt;
+  }).catch(() => {
+    totalRef.value = 0;
+    dataRef.value = [];
+    listLoadError.value = true;
   });
 };
 const loadData = () => {
   formDataService.dynamicQuery<FormData>(queryParams.value).then((res: FormData[]) => {
     dataRef.value = res;
     processData();
+  }).catch(() => {
+    dataRef.value = [];
+    listLoadError.value = true;
   });
 };
 const loadDraftCount = async () => {

@@ -52,6 +52,7 @@ export default {
     copied: "Copied",
     open: "Open",
     loadFailed: "Load failed",
+    retry: "Retry",
     department: "Department",
     employee: "Employee",
     name: "Name",
