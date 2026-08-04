@@ -488,6 +488,7 @@ export default {
     empCode: "员工编码",
     formData: {
       formDetail: "表单详情",
+      dataNotAvailable: "数据不可访问",
       exitFullscreen: "退出全屏",
       fullscreen: "全屏显示",
       flowDynamic: "流程动态",

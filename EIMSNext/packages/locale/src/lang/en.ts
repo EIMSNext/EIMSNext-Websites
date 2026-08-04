@@ -552,6 +552,7 @@ export default {
     },
     formData: {
       formDetail: "Form Detail",
+      dataNotAvailable: "Data not available",
       exitFullscreen: "Exit Fullscreen",
       fullscreen: "Fullscreen",
       flowDynamic: "Flow Activity",

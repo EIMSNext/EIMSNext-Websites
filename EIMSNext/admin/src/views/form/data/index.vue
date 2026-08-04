@@ -12,7 +12,12 @@
     </div>
   </et-dialog>
   <div class="shared-form-data-page" v-loading="loading">
-    <div class="shared-form-shell">
+    <el-result v-if="loadError" icon="error" :title="$t('admin.formData.dataNotAvailable')">
+      <template #extra>
+        <el-button @click="returnToList">{{ $t("common.back") }}</el-button>
+      </template>
+    </el-result>
+    <div v-else class="shared-form-shell">
       <div class="shared-form-card">
         <div class="shared-form-header">
           <div>
@@ -172,7 +177,7 @@ defineOptions({
 });
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { DataChangeType, FormDataChangeLog, FormDef, FormData, PrintDef, WfApprovalLog } from "@eimsnext/models";
 import {
   customPrintService,
@@ -195,6 +200,7 @@ const PdfPreview = defineAsyncComponent(() => import("@/components/PrintDesigner
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 const formStore = useFormStore();
 const tagsViewStore = useTagsViewStore();
 const { isFullscreen, toggle } = useFullscreen();
@@ -204,6 +210,7 @@ const approvalLogs = ref<WfApprovalLog[]>([]);
 const changeLogs = ref<FormDataChangeLog[]>([]);
 const customPrintTemplates = ref<PrintDef[]>([]);
 const loading = ref(false);
+const loadError = ref(false);
 const printConfig = ref(getPrintConfig(false));
 const formPrintData = ref<IPrintData>();
 const printTrigger = ref<HTMLElement | null>(null);
@@ -213,6 +220,7 @@ const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
 const sideTab = ref<"flow" | "dataLog">("flow");
 const shareUrl = computed(() => `${window.location.origin}/#/app/${route.params.appId}/form/${route.params.formId}/data/${route.params.dataId}`);
+const returnToList = () => router.replace(`/app/${route.params.appId}/form/${route.params.formId}`);
 
 const sideTitle = computed(() => {
   return sideTab.value === "flow" ? t("admin.formData.flowDynamic") : t("admin.formData.dataLog");
@@ -404,6 +412,8 @@ onBeforeMount(async () => {
 
     approvalLogs.value = logs || [];
     changeLogs.value = dataLogs || [];
+  } catch {
+    loadError.value = true;
   } finally {
     loading.value = false;
   }
