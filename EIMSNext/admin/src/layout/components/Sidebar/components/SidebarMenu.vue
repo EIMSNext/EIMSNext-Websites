@@ -81,6 +81,7 @@ const getMenuType = (menuType: FormType | number | undefined): FormType => {
 };
 
 const setDraggingMenu = (menu: AppMenu) => {
+  if (menu.editable === false) return;
   draggingMenu.value = menu;
 };
 
@@ -102,13 +103,15 @@ const canDropToGroupTitle = (groupMenu: AppMenu | undefined, eventTarget: EventT
   if (!sortable.value) return false;
   const sourceMenu = draggingMenu.value;
   if (!sourceMenu || !groupMenu) return false;
+  if (sourceMenu.editable === false || groupMenu.editable === false) return false;
   if (getMenuType(groupMenu.menuType) !== FormType.Group) return false;
   if (getMenuType(sourceMenu.menuType) === FormType.Group) return false;
   return eventTarget instanceof HTMLElement && !!eventTarget.closest(".group-drop-target");
 };
 
-const handleRootMove = (event: { relatedContext?: { element?: AppMenu }; originalEvent?: { target?: EventTarget | null } }) => {
+const handleRootMove = (event: { draggedContext?: { element?: AppMenu }; relatedContext?: { element?: AppMenu }; originalEvent?: { target?: EventTarget | null } }) => {
   if (!sortable.value) return false;
+  if (event.draggedContext?.element?.editable === false) return false;
   return !canDropToGroupTitle(event.relatedContext?.element, event.originalEvent?.target ?? null);
 };
 
@@ -140,6 +143,7 @@ const moveMenuToGroup = (groupMenu: AppMenu): boolean => {
   if (!sortable.value) return false;
   const sourceMenu = draggingMenu.value;
   if (!sourceMenu || sourceMenu.menuId === groupMenu.menuId) return false;
+  if (sourceMenu.editable === false || groupMenu.editable === false) return false;
   if (getMenuType(groupMenu.menuType) !== FormType.Group) return false;
   if (getMenuType(sourceMenu.menuType) === FormType.Group) return false;
   if (containsMenu(sourceMenu, groupMenu.menuId)) return false;

@@ -28,12 +28,13 @@ interface OpenPlatformRouteDef {
   path: string;
   component: () => Promise<any>;
   title?: string;
+  allowedUserTypes?: UserType[];
 }
 
 const openPlatformRoutes: OpenPlatformRouteDef[] = [
   { path: "pluginstore",   component: () => import("@/views/pluginstore/index.vue"),                title: "pluginstore" },
   { path: "plugin-manage", component: () => import("@/views/open-platform/plugin-manage/index.vue"), title: "plugin-manage" },
-  { path: "api-key",       component: () => import("@/views/open-platform/api-key/index.vue"),       title: "api-key" },
+  { path: "api-key",       component: () => import("@/views/open-platform/api-key/index.vue"),       title: "api-key", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "api-log",       component: () => import("@/views/open-platform/api-log/index.vue"),       title: "api-log" },
   { path: "docs",          component: () => import("@/views/open-platform/docs/index.vue"),          title: "open-platform-docs" },
 ];
@@ -59,7 +60,7 @@ function createOpenPlatformRoutes(defs: OpenPlatformRouteDef[]): RouteRecordRaw[
     children: [{
       path: "",
       component: d.component,
-      meta: { title: d.title, keepAlive: true, requiresAuth: true },
+      meta: { title: d.title, keepAlive: true, requiresAuth: true, allowedUserTypes: d.allowedUserTypes },
     }],
   }));
 }
@@ -93,6 +94,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: "login",
     path: "/login",
     component: () => import("@/views/login/index.vue"),
+    meta: { hidden: true },
+  },
+  {
+    name: "forget-password",
+    path: "/forget-password",
+    component: () => import("@/views/login/forget-password.vue"),
     meta: { hidden: true },
   },
   {
@@ -134,6 +141,23 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/corp-onboarding",
     component: () => import("@/views/corp-onboarding/index.vue"),
     meta: { hidden: true, requiresAuth: true },
+  },
+  {
+    path: "/platform-admin",
+    component: SysLayout,
+    children: [
+      {
+        path: "",
+        name: "platform-admin",
+        component: () => import("@/views/platform-admin/index.vue"),
+        meta: {
+          title: "admin.platformAdmin.title",
+          hidden: true,
+          requiresAuth: true,
+          allowedUserTypes: [UserType.PlatAdmin],
+        },
+      },
+    ],
   },
   createTodoRoute("/mytasks", "mytasks", () => import("@/views/wftodo/global/mytasks.vue"), "common.wfProcess.mytasks"),
   createTodoRoute("/mystarted", "mystarted", () => import("@/views/wftodo/global/mystarted.vue"), "common.wfProcess.mystarted"),
@@ -244,7 +268,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/form/:formId",
-        component: () => import("@/views/form/index.vue"),
+        component: () => import("@/views/form/FormListPage.vue"),
         // name: "form",
         meta: {
           title: "form",
@@ -366,6 +390,11 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: "Profile",
     component: () => import("@/views/profile/index.vue"),
     meta: { title: "navbar.profile", icon: "user", hidden: true, requiresAuth: true },
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/404",
+    meta: { hidden: true },
   },
 ];
 

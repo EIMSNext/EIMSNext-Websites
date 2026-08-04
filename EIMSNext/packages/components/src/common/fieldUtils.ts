@@ -10,6 +10,7 @@ import {
   getFlowStatus,
 } from "@eimsnext/models";
 import dayjs from "dayjs";
+import { getFileFullUrl } from "@eimsnext/utils";
 
 export const normalizeValue = (value: any): any => {
   if (Array.isArray(value) && value.length > 0 && Array.isArray(value[0])) {
@@ -24,8 +25,8 @@ export const extractImageUrl = (value: any): string => {
   if (!normalized) return "";
   const first = Array.isArray(normalized) ? normalized[0] : normalized;
   if (!first) return "";
-  if (typeof first === "string") return first.replace(/\\/g, "/");
-  if (typeof first === "object" && first.url) return String(first.url).replace(/\\/g, "/");
+  if (typeof first === "string") return getFileFullUrl(first);
+  if (typeof first === "object" && first.url) return getFileFullUrl(String(first.url));
   return "";
 };
 
@@ -78,6 +79,15 @@ export const formatFormValue = (
 
   if (type === FieldType.ImageUpload) {
     return extractImageUrl(normalized);
+  }
+
+  if (type === FieldType.DataSelect && Array.isArray(normalized)) {
+    return normalized.map((item: any) => {
+      if (!item || typeof item !== "object") return String(item ?? "");
+      const label = item.label || item.name || "";
+      const itemValue = item.value ?? "";
+      return label ? `${label}: ${itemValue}` : String(itemValue);
+    }).filter(Boolean).join("; ");
   }
 
   if (type === FieldType.CheckBox || type === FieldType.Select2 || type === FieldType.Employee2 || type === FieldType.Department2) {

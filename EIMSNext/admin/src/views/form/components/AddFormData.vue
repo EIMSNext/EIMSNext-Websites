@@ -14,6 +14,7 @@ import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { bus } from "@eimsnext/utils";
 import { FormActionSettings } from "@/components/FormView/type";
+import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
@@ -58,7 +59,13 @@ const cancel = () => {
   emit("update:modelValue", false);
   emit("cancel");
 };
-const saveDraft = (data: any) => {
+const restoreActions = () => {
+  if (actions.value.draft) actions.value.draft.disabled = false;
+  if (actions.value.submit) actions.value.submit.disabled = false;
+  if (actions.value.reset) actions.value.reset.disabled = false;
+};
+
+const saveDraft = async (data: any) => {
   let fdata: FormDataRequest = {
     action: DataAction.Save,
     id: props.data?.id ?? "",
@@ -68,17 +75,18 @@ const saveDraft = (data: any) => {
   };
 
   // 根据是否有props.data?.id判断是新增还是编辑
-  const request = props.data?.id ?
-    formDataService.put<FormData>(props.data.id, fdata) :
-    formDataService.post<FormData>(fdata);
-
-  request.then((res) => {
+  try {
+    const res = props.data?.id ?
+      await formDataService.put<FormData>(props.data.id, fdata) :
+      await formDataService.post<FormData>(fdata);
     formData.value = res;
     emit("save", res);
     bus.emit("data:saved", { formId: props.formId });
-  });
-};;
-const submitData = (data: any) => {
+  } catch {
+    ElMessage.error(t("common.saveFailed"));
+  }
+};
+const submitData = async (data: any) => {
   if (actions.value.draft)
     actions.value.draft.disabled = true
 
@@ -96,14 +104,16 @@ const submitData = (data: any) => {
     data: data,
   };
   // 根据是否有props.data?.id判断是新增还是编辑
-  const request = props.data?.id ?
-    formDataService.put<FormData>(props.data.id, fdata) :
-    formDataService.post<FormData>(fdata);
-
-  request.then((res) => {
+  try {
+    const res = props.data?.id ?
+      await formDataService.put<FormData>(props.data.id, fdata) :
+      await formDataService.post<FormData>(fdata);
     formData.value = res;
     emit("submit", res);
     bus.emit("data:saved", { formId: props.formId });
-  });
+  } catch {
+    ElMessage.error(t("common.saveFailed"));
+    restoreActions();
+  }
 };
 </script>

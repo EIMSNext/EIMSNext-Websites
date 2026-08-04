@@ -208,3 +208,124 @@
 ._fc-m-group-add._fc-m-group-plus-minus::after {
   width: 50%;
 }
+
+.fc-select-popup,
+.fc-organization-popup,
+.fc-data-select-popup {
+  display: flex;
+  flex-direction: column;
+  max-height: min(82vh, 720px);
+  overflow: hidden;
+}
+
+.fc-select-options,
+.fc-mobile-popup-content {
+  min-height: 160px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.fc-select-popup-footer,
+.fc-mobile-popup-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--van-border-color, #ebedf0);
+  background: var(--van-background-2, #fff);
+}
+
+.fc-select-popup-footer .van-button {
+  width: 100%;
+}
+
+.fc-mobile-popup-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--van-border-color, #ebedf0);
+  background: var(--van-background-2, #fff);
+}
+
+.fc-mobile-popup-content > .van-loading {
+  padding: 40px 0;
+}
+
+.fc-data-select-mobile {
+  width: 100%;
+}
+
+.fc-data-select-display {
+  margin: 8px 0 0;
+}
+
+.fc-data-select-record {
+  margin: 8px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--van-border-color, #ebedf0);
+  border-radius: 6px;
+  background: var(--van-background-2, #fff);
+}
+
+.fc-data-select-record.is-selected {
+  border-color: var(--van-primary-color, #1989fa);
+  box-shadow: 0 0 0 1px var(--van-primary-color, #1989fa);
+}
+
+.fc-data-select-record-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 36%) minmax(0, 1fr);
+  gap: 10px;
+  padding: 4px 0;
+  color: var(--van-text-color-2, #969799);
+}
+
+.fc-data-select-record-row strong {
+  overflow-wrap: anywhere;
+  color: var(--van-text-color, #323233);
+  font-weight: 500;
+}
+
+.fc-data-select-popup > .van-pagination {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+}
+
+.form-create-m .van-divider.fc-divider-enhanced {
+  --fc-divider-color: #c8cdd4;
+  --fc-divider-title-color: #141e31;
+  margin: 12px 16px;
+  color: var(--fc-divider-title-color);
+  border-color: var(--fc-divider-color);
+}
+
+.form-create-m .fc-divider-style-dash {
+  border-style: dashed;
+}
+
+.form-create-m .fc-divider-style-plain {
+  border-color: transparent;
+}
+
+.form-create-m .fc-divider-style-solidFull,
+.form-create-m .fc-divider-style-pillFill,
+.form-create-m .fc-divider-style-centerTab {
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--fc-divider-color) 18%, transparent);
+}
+
+.form-create-m .fc-divider-style-sideBar {
+  justify-content: flex-start;
+  border-left: 4px solid var(--fc-divider-color);
+  padding-left: 10px;
+}
+
+.form-create-m .van-tabs,
+.form-create-m .van-collapse {
+  width: 100%;
+}

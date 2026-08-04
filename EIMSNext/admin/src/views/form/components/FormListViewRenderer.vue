@@ -25,14 +25,21 @@
               :label="sub.title"
               :width="sub.width"
               :resizable="true"
-              :dangerouslyUseHTMLString="true"
             />
           </el-table-column>
         </template>
         <template v-else>
           <el-table-column :prop="col.field" :label="col.title" :width="col.width" show-overflow-tooltip :resizable="true">
             <template #default="scope">
-              <div v-html="formatTableHtml(scope.row, col.field)"></div>
+              <template v-if="isImageColumn(col)">
+                <img
+                  v-for="url in getImageUrls(scope.row, col.field)"
+                  :key="url"
+                  :src="url"
+                  class="table-image-thumb table-image-thumb-spaced"
+                />
+              </template>
+              <span v-else>{{ formatCell(scope.row, col.field) }}</span>
             </template>
           </el-table-column>
         </template>
@@ -153,19 +160,12 @@ const formatCell = (row: any, field: string, value?: any) => {
   return formatFormValue(value ?? row[field], fieldDef, getFlowStatusName);
 };
 
-const formatTableHtml = (row: any, field: string) => {
-  const col = getColumnSetting(field);
-  if (col?.type === "imageupload") {
-    const value = row[field];
-    const list = Array.isArray(value) ? value : [value];
-    return list
-      .map((item) => extractImageUrl(item))
-      .filter(Boolean)
-      .map((url) => `<img src="${url}" class="table-image-thumb table-image-thumb-spaced" />`)
-      .join("");
-  }
+const isImageColumn = (col: any) => col?.type === "imageupload";
 
-  return formatCell(row, field);
+const getImageUrls = (row: any, field: string): string[] => {
+  const value = row[field];
+  const list = Array.isArray(value) ? value : [value];
+  return list.map((item) => extractImageUrl(item)).filter(Boolean);
 };
 
 const tableFormatter = (row: any, column: any, cellValue: any) => formatCell(row, column.property, cellValue);

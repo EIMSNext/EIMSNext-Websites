@@ -43,6 +43,11 @@ export class HttpRequest {
         if (config.headers["Content-Type"] == ContentType.FORM_URLENCODED) {
           config.data = qs.stringify(config.data);
         }
+        if (typeof config.headers.set === "function") {
+          config.headers.set("X-Requested-With", "XMLHttpRequest");
+        } else {
+          config.headers["X-Requested-With"] = config.headers["X-Requested-With"] || "XMLHttpRequest";
+        }
         // console.log("request config", config);
         //TODO：处理多语言
         return config;

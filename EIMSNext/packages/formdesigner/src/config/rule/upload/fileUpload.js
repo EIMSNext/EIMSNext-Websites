@@ -30,14 +30,14 @@ export default {
       $required: false,
       props: {
         action: "/upload",
-        uploadType: "image",
+        uploadType: "file",
         listType: "picture-card",
         multiple: true,
         autoUpload: true,
         accept:
           ".pdf,.doc,.docx,.xml,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         onSuccess:
-          "$FNX:const res = $inject.args[0];\nconst file = $inject.args[1];\n\nfile.url = res.value[0].url;\nfile.value = {id:res.value[0].id, name:res.value[0].fileName,url:res.value[0].url};",
+          "$FNX:const res = $inject.args[0];\nconst file = $inject.args[1];\nconst uploaded = res.value[0];\n\nfile.value = {id:uploaded.id, name:uploaded.fileName, url:uploaded.savePath};",
       },
     };
   },

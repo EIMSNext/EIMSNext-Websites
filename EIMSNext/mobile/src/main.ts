@@ -5,6 +5,8 @@ import { En, ZhCn } from "@eimsnext/locale";
 import { Locale } from "vant";
 import enUS from "vant/es/locale/lang/en-US";
 import zhCN from "vant/es/locale/lang/zh-CN";
+import FormCreateMobile from "@eimsnext/form-render-vant";
+import installFormCreateMobile from "@eimsnext/form-render-vant/auto-import";
 import App from "./App.vue";
 import router from "./router";
 import "vant/es/toast/style";
@@ -43,6 +45,8 @@ initHttp();
 initTheme();
 
 const app = createApp(App);
+FormCreateMobile.use(installFormCreateMobile);
+app.use(FormCreateMobile);
 app.use(initI18n());
 app.use(router);
 app.mount("#app");

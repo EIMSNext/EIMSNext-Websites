@@ -40,6 +40,7 @@ export interface IFieldLimit {
   limitField?: string;
   limitType?: FieldLimitType;
   fieldPerms?: IFieldPerm[];
+  excludeFieldTypes?: FieldType[];
 }
 export enum FieldLimitType {
   None,
@@ -130,16 +131,21 @@ export function buildNodeFieldTree(
     const nodeForm = forms.find((x) => x.nodeId == pNode.id);
     const outputFields = nodeForm?.outputFields ?? [];
     if (outputFields.length > 0) {
-      outputFields.forEach((fieldDef) => {
-        if (!setting.matchType || isFieldTypeMatched(fieldDataType, fieldDef.type)) {
+      outputFields.forEach((sourceFieldDef) => {
+        const isMultiResultSubField =
+          fieldDef?.isSubField && !singleResult && sourceFieldDef.isSubField;
+        if (
+          !isMultiResultSubField &&
+          (!setting.matchType || isFieldTypeMatched(fieldDataType, sourceFieldDef.type))
+        ) {
           const node: ITreeNode = {
-            id: `${pNode.id}-${fieldDef.field}`,
-            value: fieldDef.field,
-            label: fieldDef.label,
+            id: `${pNode.id}-${sourceFieldDef.field}`,
+            value: sourceFieldDef.field,
+            label: sourceFieldDef.label,
             type: DataItemType.Field,
             children: [],
-            data: fieldDef,
-            icon: getFieldIcon(fieldDef.type),
+            data: sourceFieldDef,
+            icon: getFieldIcon(sourceFieldDef.type),
           };
           if (!pNode.children) pNode.children = [];
           pNode.children.push(node);
@@ -311,6 +317,10 @@ export function buildNodeFieldTree(
           if (x.type == FieldType.TableForm) {
             if (x.columns) {
               x.columns.forEach((sub: FieldDef) => {
+                // A multi-result subfield cannot be matched to a target subfield.
+                // The supported multi-result-to-subtable path only maps master fields.
+                if (fieldDef?.isSubField && !singleResult) return;
+
                 //sub fields
                 if (
                   !setting.matchType ||

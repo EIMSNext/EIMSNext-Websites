@@ -55,6 +55,7 @@ import { DashboardItemDef } from "@eimsnext/models";
 import { IConditionList, ISortItem, ISortList, toDynamicFilter } from "@eimsnext/components";
 import DashSort from "../components/DashSort.vue";
 import { useI18n } from "vue-i18n";
+import { usePublicHttp } from "@/views/public/shared";
 
 const { t } = useI18n();
 
@@ -70,6 +71,7 @@ const props = withDefaults(
     designerMode?: boolean;
     externalFilter?: IConditionList;
     isPublic?: boolean;
+    publicToken?: string;
     itemDef?: DashboardItemDef;
   }>(),
   {
@@ -79,6 +81,15 @@ const props = withDefaults(
 );
 
 const chartOpts = ref<echarts.EChartsCoreOption>();
+const publicHttp = usePublicHttp();
+
+watch(
+  () => props.publicToken,
+  (token) => {
+    publicHttp.token.value = token || null;
+  },
+  { immediate: true },
+);
 
 const mergeFilter = (ownFilter?: IConditionList, externalFilter?: IConditionList) => {
   const items: IConditionList[] = [];
@@ -122,7 +133,9 @@ const getChartOpts = async (setting: IChartSetting) => {
     take: setting.takeEnable ? setting.take : -1,
     itemId: props.itemDef?.id,
   };
-  let aggResult = await aggregateService.calucate(aggRequest);
+  const aggResult = props.isPublic && props.publicToken
+    ? await publicHttp.api.post<any[]>("/aggregate/calucate", aggRequest)
+    : await aggregateService.calucate(aggRequest);
   let ds = convertToFieldArray(aggResult);
   switch (chartType) {
     case ChartType.VBar: // 垂直柱状图

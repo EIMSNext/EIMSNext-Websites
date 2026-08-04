@@ -57,6 +57,12 @@
           <QueryManyNodeMeta></QueryManyNodeMeta>
         </div>
         <div
+          v-if="nodeType == FlowNodeType.Print"
+          class="attr-item has-padding"
+        >
+          <PrintNodeMeta></PrintNodeMeta>
+        </div>
+        <div
           v-if="nodeType == FlowNodeType.Plugin"
           class="attr-item has-padding"
         >
@@ -83,6 +89,7 @@ import UpdateNodeMeta from "./UpdateNodeMeta.vue";
 import DeleteNodeMeta from "./DeleteNodeMeta.vue";
 import QueryOneNodeMeta from "./QueryOneNodeMeta.vue";
 import QueryManyNodeMeta from "./QueryManyNodeMeta.vue";
+import PrintNodeMeta from "./PrintNodeMeta.vue";
 import PluginNodeMeta from "./PluginNodeMeta.vue";
 import DfConditionNodeMeta from "./DfConditionNodeMeta.vue";
 import { useLocale } from "element-plus";

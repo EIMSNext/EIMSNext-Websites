@@ -1,4 +1,5 @@
 import { toArray, getSlot } from "@eimsnext/form-render-core";
+import { getFileFullUrl } from "@eimsnext/utils";
 import "./style.css";
 import { defineComponent } from "vue";
 import IconUpload from "./IconUpload.vue";
@@ -15,7 +16,7 @@ function parseFile(file, i) {
   };
 }
 function parseUpload(file) {
-  return { ...file, file, value: file };
+  return { ...file, url: getFileFullUrl(file.url), file, value: file };
 }
 
 function getFileName(file) {
@@ -85,6 +86,18 @@ export default defineComponent({
     handleChange(file, fileList) {
       this.$emit("change", ...arguments);
       if (file.status === "success") {
+        const uploaded = file.response?.value?.[0] || file.response?.data?.[0];
+        if (uploaded) {
+          const value = {
+            ...uploaded,
+            name: uploaded.name || uploaded.fileName,
+            url: uploaded.savePath || uploaded.url,
+            thumbUrl: uploaded.thumbPath || uploaded.thumbUrl,
+          };
+          file.value = value;
+          file.url = getFileFullUrl(value.url);
+          if (value.thumbUrl) file.thumbUrl = getFileFullUrl(value.thumbUrl);
+        }
         this.update(fileList);
       }
     },

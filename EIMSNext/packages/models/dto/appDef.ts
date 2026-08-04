@@ -29,6 +29,9 @@ export interface AppMenu {
   iconColor?: string;
   menuType?: FormType;
   sortIndex?: number;
+  editable?: boolean | null;
+  deletable?: boolean | null;
+  listComponent?: string | null;
   subMenus?: AppMenu[];
 }
 

@@ -405,9 +405,41 @@ const dynamicGroupOrder = ["starter", "employeeField", "departmentField", "manag
 
 const isManagerGroup = computed(() => selectedDynamicGroupId.value === "manager");
 const adminScopeParam = () => options.adminScope ? "adminScope=true" : "";
+const filterRolesByScope = (roles: Role[]) => {
+  const allowedRoleIds = new Set(
+    (options.limit?.roles ?? [])
+      .map((role) => role?.id)
+      .filter((id): id is string => !!id),
+  );
+  if (allowedRoleIds.size === 0) return roles;
+  return roles.filter((role) => allowedRoleIds.has(role.id));
+};
 const loadDepartments = () => options.adminScope
   ? departmentService.query<Department>(adminScopeParam())
   : deptStore.load();
+
+const memberScopeFilter = () => {
+  const departments = options.limit?.depts?.filter((x) => !!x?.id) ?? [];
+  if (departments.length === 0) return "";
+
+  const filters = departments.map((department) => {
+    const id = String(department.id).replaceAll("'", "''");
+    return department.cascadedDept
+      ? `Depts/any(d: contains(d/HeriarchyId, '|${id}|'))`
+      : `Depts/any(d: d/DeptId eq '${id}')`;
+  });
+  return filters.length === 1 ? filters[0] : `(${filters.join(" or ")})`;
+};
+
+const employeeQuery = (query = "") => {
+  const scopeFilter = memberScopeFilter();
+  if (!scopeFilter) return query;
+
+  const params = new URLSearchParams(query);
+  const existingFilter = params.get("$filter");
+  params.set("$filter", existingFilter ? `(${existingFilter}) and (${scopeFilter})` : scopeFilter);
+  return params.toString();
+};
 
 const dynamicGroups = computed<IDynamicMemberGroup[]>(() => {
   const groups: IDynamicMemberGroup[] = [];
@@ -773,8 +805,7 @@ onBeforeMount(() => {
         code: userStore.currentUser.empCode!,
         empName: userStore.currentUser.empName!,
         status: 0,
-        userBound: true,
-        departments: currentDepartmentId ? [{ id: currentDepartmentId, name: curDeptData.value?.[0]?.label ?? "" }] : [],
+        userBound: true
       };
       curEmpData.value = [employeeToListItem(emp)];
     }
@@ -790,7 +821,7 @@ onBeforeMount(() => {
       roleGroups = data;
     }),
     roleService.query<Role>(adminScopeParam()).then((data) => {
-      roles = data;
+      roles = filterRolesByScope(data);
     }),
   ]).then(() => {
     roleData.value = buildRoleTree(roleGroups, roles);
@@ -903,9 +934,10 @@ const selectEmpDept = (deptId: string) => {
   empData.value = [];
   selectedEmps.value = [];
 
+  const query = employeeQuery(adminScopeParam());
   const request = deptId && deptId !== "all"
-    ? employeeService.queryByDepartment<Employee>(deptId, false, adminScopeParam())
-    : employeeService.query<Employee>(adminScopeParam());
+    ? employeeService.queryByDepartment<Employee>(deptId, false, query)
+    : employeeService.query<Employee>(query);
 
   request.then((res) => {
     res.forEach((x) => {

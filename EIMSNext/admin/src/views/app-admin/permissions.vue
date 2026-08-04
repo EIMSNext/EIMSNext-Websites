@@ -26,7 +26,12 @@
             <span>{{ t("admin.appAdmin.configPermissions") }}</span>
             <small>{{ t("admin.appAdmin.configDesc") }}</small>
           </div>
-          <InternalPublish v-if="selectedForm" :key="selectedForm.id" :form-def="selectedForm" />
+          <InternalPublish
+            v-if="selectedForm"
+            :key="selectedForm.id"
+            :form-def="selectedForm"
+            :limit="publishMemberLimit"
+          />
           <div v-else-if="selectedDashboard" class="dashboard-permission">
             <div class="setting-row">
               <div>
@@ -57,14 +62,15 @@
 import InternalPublish from "@/components/FormEdit/Publish/InternalPublish.vue";
 import { convertMemberTypeToTagType, convertTagTypeToMemberType } from "@/components/FormEdit/Publish/type";
 import {
+  AdminPermissionSnapshot,
   DashboardDef,
   DashboardDefRequest,
   FormDef,
   FormType,
   Member,
 } from "@eimsnext/models";
-import { ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
-import { appDefService, dashboardDefService } from "@eimsnext/services";
+import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
+import { appDefService, dashboardDefService, systemService } from "@eimsnext/services";
 import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
 import { ElMessage } from "element-plus";
 import { AppMenuItem, flattenAppMenus } from "./utils";
@@ -82,12 +88,25 @@ const selectedDashboard = ref<DashboardDef>();
 const dashboardTags = ref<ISelectedTag[]>([]);
 const dashboardPublishEnabled = ref(false);
 const showMemberDialog = ref(false);
+const adminPermissions = ref<AdminPermissionSnapshot>();
 
 const memberOptions = {
   showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
   cascadedDept: true,
   showCascade: true,
 };
+
+const publishMemberLimit = computed(() => {
+  const permissions = adminPermissions.value;
+  if (!permissions?.isNormalAdmin || permissions.appRoleScopeMode !== "1") return undefined;
+  return {
+    roles: permissions.appRoleIds.map((id) => ({
+      id,
+      label: id,
+      type: DataItemType.Role,
+    })),
+  };
+});
 
 const filteredItems = computed(() => {
   const text = keyword.value.trim().toLowerCase();
@@ -96,6 +115,7 @@ const filteredItems = computed(() => {
 });
 
 async function loadItems() {
+  adminPermissions.value = await systemService.getAdminPermissions();
   const app = await appStore.get(contextStore.appId, false);
   items.value = flattenAppMenus(app?.appMenus || []).filter((item) => item.type === FormType.Form || item.type === FormType.Dashboard);
   if (!selectedItem.value && items.value.length > 0) {
@@ -140,7 +160,7 @@ function membersToTags(members: Member[]): ISelectedTag[] {
     id: member.id,
     sourceId: member.id,
     label: member.label,
-    value: member.code,
+    value: member.value,
     type: convertMemberTypeToTagType(member.type),
     cascadedDept: member.cascadedDept,
   }));
@@ -149,7 +169,7 @@ function membersToTags(members: Member[]): ISelectedTag[] {
 function tagsToMembers(tags: ISelectedTag[]): Member[] {
   return tags.map((tag) => ({
     id: tag.sourceId || tag.id,
-    code: tag.value,
+    value: tag.value,
     label: tag.label,
     type: convertTagTypeToMemberType(tag.type),
     cascadedDept: tag.cascadedDept ?? false,

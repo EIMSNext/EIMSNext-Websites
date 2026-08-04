@@ -13,6 +13,13 @@ export class PublicTokenError extends Error {
   }
 }
 
+export class PublicTokenExpiredError extends PublicTokenError {
+  constructor(message = "公开访问链接已过期") {
+    super(message);
+    this.name = "PublicTokenExpiredError";
+  }
+}
+
 export class AuthClient {
   private httpRequest: HttpRequest;
   constructor(request: HttpRequest) {
@@ -30,7 +37,7 @@ export class AuthClient {
   /**
    * 申请公开访问 token。
    * - 不写入全局 accessToken（页面级 token 隔离）
-   * - 401 → 抛 PublicTokenError（accessCode 错误友好提示）
+   * - 401、429 或 400 invalid_grant → 抛 PublicTokenError（accessCode 错误友好提示）
    * - scope 必传，对应后端 PublicScope 枚举的单选值
    */
   async requestPublicToken(
@@ -52,17 +59,31 @@ export class AuthClient {
     }
 
     try {
+      const publicScope =
+        typeof scope === "number"
+          ? ({ 1: "DashLink", 2: "FormLink", 4: "DataLink", 8: "QueryLink" } as Record<number, string>)[scope] || String(scope)
+          : scope;
+
       return (await this.exchangeToken(
         `public_${targetId}`,
         password,
         "public",
         false,
         `${appSetting.authUrl}/public/token`,
-        { scope: String(scope) },
+        { scope: String(publicScope) },
         appSetting.publicClientId,
       )) as { access_token: string; expires_in: number; [k: string]: any };
     } catch (err: any) {
-      if (err?.response?.status === 401) {
+      const status = err?.response?.status;
+      const payload = err?.response?.data;
+      const invalidGrant = payload?.error === "invalid_grant" ||
+        String(payload?.error_description || "").includes("公开访问凭证无效");
+      const expired = payload?.error === "invalid_grant" &&
+        String(payload?.error_description || "").includes("公开访问链接已过期");
+      if (expired) {
+        throw new PublicTokenExpiredError();
+      }
+      if (status === 401 || status === 429 || (status === 400 && invalidGrant)) {
         throw new PublicTokenError();
       }
       throw err;

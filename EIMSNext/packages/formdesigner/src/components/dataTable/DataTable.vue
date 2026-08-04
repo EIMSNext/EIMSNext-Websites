@@ -1,5 +1,6 @@
 <script>
 import {parseFn} from '@eimsnext/form-render-core';
+import {getFileFullUrl} from '@eimsnext/utils';
 import {defineComponent, h, resolveComponent, resolveDirective, withDirectives} from 'vue';
 
 export default defineComponent({
@@ -384,10 +385,10 @@ export default defineComponent({
                             // 如果是对象，提取url或src属性作为图片地址
                             imgUrl = item.url || item.src || '';
                             // 将反斜杠转换为正斜杠
-                            imgUrl = imgUrl.replace(/\\/g, '/');
+                            imgUrl = getFileFullUrl(imgUrl);
                         } else if (typeof item === 'string') {
                             // 如果是字符串，直接作为图片地址
-                            imgUrl = item.replace(/\\/g, '/');
+                            imgUrl = getFileFullUrl(item);
                         }
                         
                         // 只有URL不为空时才生成img标签
@@ -460,6 +461,7 @@ export default defineComponent({
         })
     }
 });
+
 </script>
 
 <style>

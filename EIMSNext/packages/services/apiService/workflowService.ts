@@ -12,6 +12,7 @@ import {
   UrgeRequest,
   WithdrawRequest,
   WorkflowActionStatus,
+  WorkflowNodeAction,
 } from "@eimsnext/models";
 import { ServiceBase } from "../interface";
 
@@ -61,6 +62,11 @@ export class WorkflowService extends ServiceBase {
       ? `?dataId=${encodeURIComponent(dataId)}&wfInstanceId=${encodeURIComponent(wfInstanceId)}`
       : `?dataId=${encodeURIComponent(dataId)}`;
     return this.http().api.get<WorkflowActionStatus>(`${this.getUrl(this.modelName(), "ActionStatus")}${query}`);
+  }
+
+  getNodeActions(dataId: string, wfInstanceId: string) {
+    const query = `?dataId=${encodeURIComponent(dataId)}&wfInstanceId=${encodeURIComponent(wfInstanceId)}`;
+    return this.http().api.get<WorkflowNodeAction[]>(`${this.getUrl(this.modelName(), "NodeActions")}${query}`);
   }
 
   getReturnNodes(dataId: string, wfInstanceId?: string) {

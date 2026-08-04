@@ -16,10 +16,13 @@ import {
 } from "@eimsnext/models";
 import { IConditionList, IFieldSortList, IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
 import { SortDirection } from "@eimsnext/services";
-import { uniqueId } from "@eimsnext/utils";
+import { getFileFullUrl, uniqueId } from "@eimsnext/utils";
 import { dateFormat } from "@/utils/common";
 
 export type FormDataFormatter = (row: Record<string, any>, field: string, value?: any) => string;
+
+export const isListDisplayableField = (field?: Pick<IFormFieldDef, "type"> | null) =>
+  !!field && field.type !== FieldType.DataSelect;
 
 export const createEmptyCondition = (): IConditionList => ({
   id: uniqueId(),
@@ -106,11 +109,12 @@ export const toFormFields = (formId: string, fields?: FormListViewField[]): IFor
     label: field.label,
     type: field.type,
     isSubField: field.isSubField,
-  }));
+  })).filter(isListDisplayableField);
 
 export const buildAllViewFields = (formDef: FormDef, t: (key: string) => string): IFormFieldDef[] => {
   return buildFieldListItems(formDef.id, formDef.content?.items || [], formDef.usingWorkflow, undefined, { t } as any)
-    .map((item) => item.data as IFormFieldDef);
+    .map((item) => item.data as IFormFieldDef)
+    .filter(isListDisplayableField);
 };
 
 export const getViewDisplayFields = (
@@ -172,8 +176,8 @@ export const extractImageUrl = (value: any): string => {
   if (!normalized) return "";
   const first = Array.isArray(normalized) ? normalized[0] : normalized;
   if (!first) return "";
-  if (typeof first === "string") return first.replace(/\\/g, "/");
-  if (typeof first === "object" && first.url) return String(first.url).replace(/\\/g, "/");
+  if (typeof first === "string") return getFileFullUrl(first);
+  if (typeof first === "object" && first.url) return getFileFullUrl(String(first.url));
   return "";
 };
 
@@ -194,6 +198,15 @@ export const formatFormValue = (
 
   if (type === FieldType.ImageUpload) {
     return extractImageUrl(normalized);
+  }
+
+  if (type === FieldType.DataSelect && Array.isArray(normalized)) {
+    return normalized.map((item) => {
+      if (!item || typeof item !== "object") return String(item ?? "");
+      const label = item.label || item.name || "";
+      const itemValue = item.value ?? "";
+      return label ? `${label}: ${itemValue}` : String(itemValue);
+    }).filter(Boolean).join("; ");
   }
 
   if (type === FieldType.CheckBox || type === FieldType.Select2 || type === FieldType.Employee2 || type === FieldType.Department2) {

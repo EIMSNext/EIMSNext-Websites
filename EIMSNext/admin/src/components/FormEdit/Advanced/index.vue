@@ -34,9 +34,10 @@ defineOptions({
 
 const props = defineProps<{
   formDef: FormDef;
+  initialTab?: string;
 }>();
 
-const activeName = ref("advanced-data");
+const activeName = ref(props.initialTab || "advanced-data");
 
 const handleClick = (_tab: TabsPaneContext, _event: Event) => {};
 </script>

@@ -98,25 +98,32 @@
         @click="switchView(view.id)"
       >
         <span class="view-tab-icon"></span>
-        {{ view.name }}
+        {{ getViewName(view) }}
       </button>
     </div>
     <div class="data-list data-list-full-height">
-      <FormListViewRenderer
-        v-if="formDef && curListView"
-        :form-def="formDef"
-        :view="curListView"
-        :settings="curListViewSettings"
-        :rows="dataRef || []"
-        :columns="columns"
-        :flatted-data="flattedData"
-        :span-method="idBasedSpanMethod"
-        :selectable="selectable"
-        :display-fields="listViewDisplayFields"
-        @selection-change="selectionChanged"
-        @row-click="showDetails"
-      />
-      <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
+      <el-result v-if="listLoadError" icon="error" :title="$t('common.loadFailed')">
+        <template #extra>
+          <el-button type="primary" @click="handleQuery">{{ $t("common.retry") }}</el-button>
+        </template>
+      </el-result>
+      <template v-else>
+        <FormListViewRenderer
+          v-if="formDef && curListView"
+          :form-def="formDef"
+          :view="curListView"
+          :settings="curListViewSettings"
+          :rows="dataRef || []"
+          :columns="columns"
+          :flatted-data="flattedData"
+          :span-method="idBasedSpanMethod"
+          :selectable="selectable"
+          :display-fields="listViewDisplayFields"
+          @selection-change="selectionChanged"
+          @row-click="showDetails"
+        />
+        <pagination :total="totalRef" :pageSize="pageSize" @change="pageChanged" />
+      </template>
     </div>
   </div>
 </template>
@@ -180,6 +187,7 @@ import {
 } from "./listViewUtils";
 import {
   type FormDataSearchState,
+  buildAllSearchableFields,
   filterSearchableFields,
   normalizeSelectedSearchFields,
   resolveSearchFields,
@@ -479,6 +487,7 @@ const draftQueryParams = ref<FormDataQueryOptions>({
 
 const totalRef = ref(0);
 const dataRef = ref<FormData[]>();
+const listLoadError = ref(false);
 const draftRows = ref<FormData[]>([]);
 const draftTotalRef = ref(0);
 const draftHasNext = computed(() => draftPageNum.value * draftPageSize.value < draftTotalRef.value);
@@ -497,7 +506,9 @@ const showDetailsDialog = ref(false);
 const checkedDatas = ref<any[]>([]);
 const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
 const selectedExportColumnKeys = ref<string[]>([]);
-const searchableFields = computed(() => filterSearchableFields(fieldList.value));
+const searchableFields = computed(() =>
+  formDef.value ? filterSearchableFields(buildAllSearchableFields(formDef.value, t)) : []
+);
 
 const exportColumns = computed<ExportColumn[]>(() => buildExportColumns());
 
@@ -520,7 +531,7 @@ const applyCurrentView = (preferredViewId?: string) => {
     type: field.type,
     isSubField: field.isSubField,
   }));
-  searchState.selectedFields = normalizeSelectedSearchFields(searchState.selectedFields, filterSearchableFields(displayFields));
+  searchState.selectedFields = normalizeSelectedSearchFields(searchState.selectedFields, searchableFields.value);
   condList.value = parseCondition(nextView.defaultFilter);
   sortList.value = parseSort(formId, nextView.defaultSort, t);
   pageNum.value = 1;
@@ -540,6 +551,9 @@ const applyCurrentView = (preferredViewId?: string) => {
 const switchView = (viewId: string) => {
   applyCurrentView(viewId);
 };
+
+const getViewName = (view: { id: string; name?: string }) =>
+  view.id === "__default" ? t("admin.formListView.defaultView") : view.name;
 
 const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
@@ -624,6 +638,7 @@ const updateDraftQueryParams = () => {
 };
 
 const handleQuery = () => {
+  listLoadError.value = false;
   loadCount();
   loadData();
   void refreshDraftCount();
@@ -632,12 +647,19 @@ const handleQuery = () => {
 const loadCount = () => {
   formDataService.dynamicCount(queryParams.value).then((cnt: number) => {
     totalRef.value = cnt;
+  }).catch(() => {
+    totalRef.value = 0;
+    dataRef.value = [];
+    listLoadError.value = true;
   });
 };
 const loadData = () => {
   formDataService.dynamicQuery<FormData>(queryParams.value).then((res: FormData[]) => {
     dataRef.value = res;
     processData();
+  }).catch(() => {
+    dataRef.value = [];
+    listLoadError.value = true;
   });
 };
 const loadDraftCount = async () => {
@@ -686,7 +708,8 @@ const selectable = (row: any, index: number) => {
 };
 
 const buildExportColumns = (): ExportColumn[] => {
-  const selectedFields = fieldList.value.length > 0 ? fieldList.value : getAllExportFields();
+  const selectedFields = (fieldList.value.length > 0 ? fieldList.value : getAllExportFields())
+    .filter((field) => field.type !== FieldType.DataSelect);
 
   return selectedFields.map((field) => ({
     key: field.field,
@@ -718,6 +741,10 @@ const getAllExportFields = (): IFormFieldDef[] => {
   }
 
   items.forEach((item) => {
+    if (item.type === FieldType.DataSelect) {
+      return;
+    }
+
     if (item.type === FieldType.TableForm && item.columns?.length) {
       item.columns.forEach((sub) => {
         result.push({

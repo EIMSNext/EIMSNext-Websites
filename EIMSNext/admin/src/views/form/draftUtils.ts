@@ -21,7 +21,7 @@ export function createDraftFilter(formId: string, scope: DraftScope, currentEmpI
 
   if (scope === "self") {
     items.push({
-      field: "createBy.empId",
+      field: "createBy._id",
       type: "none",
       op: "eq",
       value: currentEmpId || "__no_employee__",

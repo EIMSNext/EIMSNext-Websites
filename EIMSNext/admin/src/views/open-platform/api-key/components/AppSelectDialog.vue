@@ -27,23 +27,21 @@
         {{ t("admin.apiKeyMgmt.appSelectDialog.selectAll") }}
       </el-checkbox>
 
-      <div v-for="group in groupedApps" :key="group.key" class="group-block">
-        <div class="group-title">{{ group.title }}</div>
-        <el-checkbox-group v-model="selectedIds" class="app-list">
-          <el-checkbox
-            v-for="app in group.items"
-            :key="app.id"
-            :value="app.id"
-            :label="app.id"
-            class="app-row"
-          >
-            <div class="app-cell">
-              <et-icon icon="el-Grid" />
-              <span>{{ app.name }}</span>
-            </div>
-          </el-checkbox>
-        </el-checkbox-group>
-      </div>
+      <div v-if="loading" class="loading-area">{{ t("common.loading") }}</div>
+      <el-checkbox-group v-else v-model="selectedIds" class="app-list">
+        <el-checkbox
+          v-for="app in filteredApps"
+          :key="app.id"
+          :value="app.id"
+          :label="app.id"
+          class="app-row"
+        >
+          <div class="app-cell">
+            <et-icon icon="el-Grid" />
+            <span>{{ app.name }}</span>
+          </div>
+        </el-checkbox>
+      </el-checkbox-group>
 
       <div v-if="selectedIds.length > 0" class="selected-row">
         <el-tag
@@ -66,14 +64,10 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { appDefService } from "@eimsnext/services";
+import type { AppDef } from "@eimsnext/models";
 
 const { t } = useI18n();
-
-interface AppItem {
-  id: string;
-  name: string;
-  group: string;
-}
 
 const props = defineProps<{
   modelValue: boolean;
@@ -87,6 +81,8 @@ const emit = defineEmits<{
 
 const search = ref("");
 const selectedIds = ref<string[]>([...props.value]);
+const allApps = ref<AppDef[]>([]);
+const loading = ref(false);
 
 // 同步外部 value 变化
 watch(
@@ -96,39 +92,23 @@ watch(
   },
 );
 
-// 简化版 mock 数据：实际项目里应通过 appDefService 拉真实 App 列表
-const allApps = computed<AppItem[]>(() => [
-  { id: "app-001", name: "关联字段应用", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts") },
-  { id: "app-002", name: "采购供应链_拷贝", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts") },
-  { id: "app-003", name: "门店营运管理", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts") },
-  { id: "app-004", name: "e签宝电子签章-次数版_模板", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts") },
-  { id: "app-005", name: "企业信息查询", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
-  { id: "app-006", name: "印章及证照管理", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
-  { id: "app-007", name: "印章及证照管理_拷贝", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
-  { id: "app-008", name: "MRP（多计划合并版）", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
-  { id: "app-009", name: "e签宝电子签章-年费版-模板", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
-  { id: "app-010", name: "上上签电子签章", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
-  { id: "app-011", name: "开具数电发票插件-demo", group: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers") },
-]);
+onMounted(async () => {
+  loading.value = true;
+  try {
+    allApps.value = await appDefService.query<AppDef>("$orderby=sortIndex asc");
+  } catch (e) {
+    console.error("Failed to load apps", e);
+  } finally {
+    loading.value = false;
+  }
+});
 
 const filteredApps = computed(() => {
   const k = search.value.trim().toLowerCase();
   if (!k) return allApps.value;
   return allApps.value.filter(
-    (a) => a.id.toLowerCase().includes(k) || a.name.toLowerCase().includes(k),
+    (a) => a.id?.toLowerCase().includes(k) || a.name?.toLowerCase().includes(k),
   );
-});
-
-const groupedApps = computed(() => {
-  const groups: Record<string, AppItem[]> = {};
-  for (const a of filteredApps.value) {
-    if (!groups[a.group]) groups[a.group] = [];
-    groups[a.group].push(a);
-  }
-  return [
-    { key: t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts"), title: t("admin.apiKeyMgmt.appSelectDialog.groupTitleContacts"), items: groups[t("admin.apiKeyMgmt.appSelectDialog.groupKeyContacts")] ?? [] },
-    { key: t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers"),   title: t("admin.apiKeyMgmt.appSelectDialog.groupTitleOthers"),   items: groups[t("admin.apiKeyMgmt.appSelectDialog.groupKeyOthers")]   ?? [] },
-  ];
 });
 
 const selectAll = computed({
@@ -168,20 +148,15 @@ function confirm() {
   gap: 8px;
 }
 
+.loading-area {
+  padding: 24px;
+  text-align: center;
+  color: var(--et-text-secondary);
+}
+
 .select-all {
   padding: 6px 0;
   border-bottom: 1px solid var(--et-border-color-light);
-  margin-bottom: 4px;
-}
-
-.group-block + .group-block {
-  margin-top: 8px;
-}
-
-.group-title {
-  font-size: 12px;
-  color: var(--et-text-secondary);
-  font-weight: 600;
   margin-bottom: 4px;
 }
 

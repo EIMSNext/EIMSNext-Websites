@@ -34,7 +34,7 @@
           <TriggerTimeSettings
             v-model="scheduleSettings"
             class="notify-time-settings"
-            :field-options="[]"
+            :field-options="emptyFieldOptions"
             :allow-mode-switch="false"
           />
         </div>
@@ -117,6 +117,7 @@ const refreshOptions = computed(() => [
   { label: `1${t("admin.notifyTime.hour")}`, value: 60 },
   { label: `3${t("admin.notifyTime.hour")}`, value: 180 },
 ]);
+const emptyFieldOptions: never[] = [];
 
 const localDash = ref<DashboardDef>({ ...props.dashDef, autoRefreshIntervalMinutes: props.dashDef.autoRefreshIntervalMinutes || 15 });
 const notify = ref<FormNotify>();

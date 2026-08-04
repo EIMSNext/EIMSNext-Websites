@@ -371,6 +371,11 @@ const fieldValueChanging = async (
   let allowed = true;
 
   if (field.isSubField) {
+    // Multi-result subfields are intentionally not valid sources for a target
+    // subfield. Only a single-result node can provide the row-level value.
+    if (newVal.isSubField && newVal.singleResultNode === false) {
+      return false;
+    }
   } else {
     if (!newVal.singleResultNode || newVal.isSubField) {
       if (

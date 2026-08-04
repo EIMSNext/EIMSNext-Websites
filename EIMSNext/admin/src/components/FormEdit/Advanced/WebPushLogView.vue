@@ -16,9 +16,9 @@
           <el-table-column :formatter="formatter" :label="t('admin.webhook.log.pushEvent')" width="150" prop="triggerType" />
           <el-table-column :formatter="formatter" :label="t('admin.webhook.log.pushResult')" width="100" prop="success">
             <template #default="scope">
-              <div
-                v-html="formatter(scope.row, { property: 'success' }, scope.row['success'])"
-              ></div>
+              <span :class="{ 'webhook-log-failed': !scope.row.success }">
+                {{ formatter(scope.row, { property: 'success' }, scope.row['success']) }}
+              </span>
             </template>
           </el-table-column>
           <el-table-column :label="t('admin.webhook.log.pushDetail')" fixed="right" width="150">
@@ -144,7 +144,7 @@ const formatter = (row: any, column: any, cellValue: any) => {
     return dateFormat(cellValue, "YYYY-MM-DD HH:mm:ss");
 
   if (column.property == "success")
-    return cellValue == true ? t("admin.webhook.log.successText") : `<span style='color:var(--et-color-danger)'>${t("admin.webhook.log.failedText")}</span>`;
+    return cellValue == true ? t("admin.webhook.log.successText") : t("admin.webhook.log.failedText");
 
   if (column.property == "triggerType") {
     let split = cellValue.toString().split(".");
@@ -223,5 +223,9 @@ watch(
       margin-top: var(--et-space-10);
     }
   }
+}
+
+.webhook-log-failed {
+  color: var(--et-color-danger);
 }
 </style>

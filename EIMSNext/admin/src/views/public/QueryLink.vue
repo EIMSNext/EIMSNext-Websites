@@ -19,7 +19,8 @@
         <el-button type="primary" :loading="accessCodeSubmitting" @click="submitAccessCode">
           {{ t("common.confirm") }}
         </el-button>
-        <p v-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
+        <p v-if="accessCodeExpired" class="access-code-error">{{ t("publicpublish.accessCodeExpired") }}</p>
+        <p v-else-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
       </el-card>
     </div>
 
@@ -131,6 +132,7 @@ import {
   PublicSetting,
 } from "@eimsnext/models";
 import {
+  AccessCodeExpiredError,
   PublicNotFound,
   bootstrapWithToken,
   renderPrintFullscreenToolbar,
@@ -157,6 +159,7 @@ const accessCodeGate = ref(false);
 const accessCodeInput = ref("");
 const accessCodeSubmitting = ref(false);
 const accessCodeError = ref(false);
+const accessCodeExpired = ref(false);
 
 const formDef = ref<FormDef>();
 const publicSetting = ref<PublicSetting>();
@@ -194,6 +197,7 @@ watch(
 async function bootstrap(accessCode?: string) {
   loading.value = true;
   accessCodeError.value = false;
+  accessCodeExpired.value = false;
   try {
     if (!publicHttp.token.value) {
       await bootstrapWithToken(publicHttp, formId.value, PublicScope.QueryLink, accessCode);
@@ -208,7 +212,8 @@ async function bootstrap(accessCode?: string) {
   } catch (err: any) {
     if (toAccessCodeError(err)) {
       accessCodeGate.value = true;
-      accessCodeError.value = !!accessCode;
+      accessCodeExpired.value = err instanceof AccessCodeExpiredError;
+      accessCodeError.value = !!accessCode && !accessCodeExpired.value;
     } else {
       formDef.value = undefined;
     }
@@ -311,9 +316,25 @@ function onDetailClose() {
 
 function formatCell(row: FormData, field: string) {
   const value = getFieldValue(row.data, field);
-  if (Array.isArray(value)) return value.join(", ");
-  if (value && typeof value === "object") return JSON.stringify(value);
-  return value ?? "";
+  return formatValue(value);
+}
+
+function formatValue(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => formatValue(item))
+      .filter(Boolean)
+      .join(", ");
+  }
+  if (value && typeof value === "object") {
+    const option = value as { label?: unknown; value?: unknown; name?: unknown };
+    if (option.label !== undefined && option.label !== null) return String(option.label);
+    if (option.value !== undefined && option.value !== null) return String(option.value);
+    if (option.name !== undefined && option.name !== null) return String(option.name);
+    return JSON.stringify(value);
+  }
+  return String(value);
 }
 
 function getFieldValue(data: any, field: string) {

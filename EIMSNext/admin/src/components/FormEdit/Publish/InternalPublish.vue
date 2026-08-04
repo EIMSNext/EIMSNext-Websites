@@ -15,6 +15,7 @@
       v-model="showDialog"
       :authGroup="selectedGrp"
       :formDef="formDef"
+      :limit="limit"
       destroy-on-close
       @close="close"
     />
@@ -63,6 +64,7 @@
         multiple: true,
         cascadedDept: true,
         showCascade: true,
+        limit,
       }"
       destroy-on-close
       @ok="finishSelect"
@@ -93,6 +95,7 @@ defineOptions({
 
 const props = defineProps<{
   formDef: FormDef;
+  limit?: { depts?: ISelectedTag[]; roles?: ISelectedTag[] };
 }>();
 
 const showDialog = ref(false);
@@ -113,7 +116,7 @@ const convertMembersToTags = (members?: Member[]): ISelectedTag[] => {
   if (members && members.length > 0)
     return members.map<ISelectedTag>((x) => ({
       id: x.id,
-      code: x.code,
+      value: x.value,
       label: x.label,
       type: convertMemberTypeToTagType(x.type),
       cascadedDept: x.cascadedDept,

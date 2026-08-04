@@ -520,7 +520,10 @@ const handleDashUpdated = (dash: DashboardDef) => {
   contextStore.setAppChanged();
 };
 
-const onPreview = () => { };
+const onPreview = async () => {
+  await onSave();
+  close();
+};
 
 const emit = defineEmits(["update:modelValue", "close"]);
 const close = () => {

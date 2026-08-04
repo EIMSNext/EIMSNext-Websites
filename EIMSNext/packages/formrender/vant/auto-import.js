@@ -19,7 +19,18 @@ import {
     Stepper,
     Switch,
     TimePicker,
-    Uploader
+    Uploader,
+    Search,
+    Icon,
+    Loading,
+    Empty,
+    CellGroup,
+    Pagination,
+    Divider,
+    Tabs,
+    Tab,
+    Collapse,
+    CollapseItem
 } from 'vant';
 
 export default function install(formCreate) {
@@ -45,6 +56,17 @@ export default function install(formCreate) {
         app.component(Switch.name) || app.use(Switch);
         app.component(TimePicker.name) || app.use(TimePicker);
         app.component(Uploader.name) || app.use(Uploader);
+        app.component(Search.name) || app.use(Search);
+        app.component(Icon.name) || app.use(Icon);
+        app.component(Loading.name) || app.use(Loading);
+        app.component(Empty.name) || app.use(Empty);
+        app.component(CellGroup.name) || app.use(CellGroup);
+        app.component(Pagination.name) || app.use(Pagination);
+        app.component(Divider.name) || app.use(Divider);
+        app.component(Tabs.name) || app.use(Tabs);
+        app.component(Tab.name) || app.use(Tab);
+        app.component(Collapse.name) || app.use(Collapse);
+        app.component(CollapseItem.name) || app.use(CollapseItem);
     });
 
 }

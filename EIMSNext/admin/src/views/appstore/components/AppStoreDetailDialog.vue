@@ -1,6 +1,7 @@
 <template>
   <et-dialog :model-value="modelValue" :title="$t('admin.appStore.appDetail')" :show-footer="false" width="60%" @close="close">
-    <div v-if="profile" class="appstore-detail">
+    <div v-loading="loading">
+      <div v-if="profile" class="appstore-detail">
       <section class="detail-hero">
         <div class="detail-hero-main">
           <div class="title-row">
@@ -8,8 +9,8 @@
             <div class="title-copy">
               <div class="title-topline">
                 <h1 class="detail-title">{{ profile.name }}</h1>
-                <span v-if="profile.isOfficial" class="status-badge official">{{ $t("admin.appStore.official") }}</span>
-                <span v-else-if="profile.isHot" class="status-badge hot">{{ $t("admin.appStore.hot") }}</span>
+                <span v-if="profile.isOfficial" class="status-badge official">{{ $t("admin.official") }}</span>
+                <span v-else-if="profile.isHot" class="status-badge hot">{{ $t("admin.hot") }}</span>
               </div>
               <div class="detail-subtitle">{{ profile.summary }}</div>
               <div class="detail-tags">
@@ -64,6 +65,12 @@
           </div>
         </aside>
       </section>
+      </div>
+      <el-result v-else-if="loadError" icon="error" :title="$t('admin.appStore.detailLoadFailed')">
+        <template #extra>
+          <el-button type="primary" @click="loadDetail">{{ $t("admin.appStore.retry") }}</el-button>
+        </template>
+      </el-result>
     </div>
   </et-dialog>
 </template>
@@ -73,6 +80,9 @@ import type { AppProfile } from "@eimsnext/models";
 import { appProfileService } from "@eimsnext/services";
 import { useAppDefStore, useContextStore } from "@eimsnext/store";
 import { accessToken } from "@eimsnext/utils";
+import { ElMessage } from "element-plus";
+import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 defineOptions({ name: "AppStoreDetailDialog" });
 
@@ -88,9 +98,14 @@ const emit = defineEmits<{
 
 const appDefStore = useAppDefStore();
 const contextStore = useContextStore();
+const route = useRoute();
+const router = useRouter();
 const profile = ref<AppProfile>();
 const activeImage = ref("");
 const installing = ref(false);
+const loading = ref(false);
+const loadError = ref(false);
+let detailRequestId = 0;
 
 const galleryImages = computed(() => {
   const item = profile.value;
@@ -100,13 +115,31 @@ const galleryImages = computed(() => {
 });
 
 function close() {
+  detailRequestId += 1;
+  profile.value = undefined;
+  activeImage.value = "";
+  loadError.value = false;
+  loading.value = false;
   emit("update:modelValue", false);
 }
 
 async function loadDetail() {
   if (!props.appId) return;
-  profile.value = await appProfileService.get(props.appId);
-  activeImage.value = galleryImages.value[0] || "";
+  const requestId = ++detailRequestId;
+  profile.value = undefined;
+  activeImage.value = "";
+  loadError.value = false;
+  loading.value = true;
+  try {
+    const result = await appProfileService.get(props.appId);
+    if (requestId !== detailRequestId) return;
+    profile.value = result;
+    activeImage.value = galleryImages.value[0] || "";
+  } catch {
+    if (requestId === detailRequestId) loadError.value = true;
+  } finally {
+    if (requestId === detailRequestId) loading.value = false;
+  }
 }
 
 watch(() => props.modelValue, (val) => {
@@ -115,19 +148,29 @@ watch(() => props.modelValue, (val) => {
 
 async function install() {
   if (!props.appId) return;
-  if (!accessToken.isLoggedIn()) return;
+  if (!accessToken.isLoggedIn()) {
+    ElMessage.warning(t("admin.appStore.loginRequired"));
+    close();
+    await router.push(`/login?redirect=${encodeURIComponent(route.fullPath)}`);
+    return;
+  }
 
   installing.value = true;
   try {
     const result = await appProfileService.install(props.appId);
     await appDefStore.load("", false);
     await contextStore.setAppId(result.appId, false);
+    ElMessage.success(t("admin.appStore.installSuccess"));
     emit("install-success");
     close();
+  } catch {
+    ElMessage.error(t("admin.appStore.installFailed"));
   } finally {
     installing.value = false;
   }
 }
+
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

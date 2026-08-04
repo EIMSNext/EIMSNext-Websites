@@ -27,7 +27,7 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     avatar?: string;
-    label: string;
+    label?: string;
     bgColor?: string;
     size?: string;
   }>(),
@@ -44,7 +44,7 @@ const handleImgError = (e: Event) => {
 };
 
 const formatFirstChar = () => {
-  const pureText = props.label.trim();
+  const pureText = props.label?.trim() ?? "";
   return pureText.charAt(0).toUpperCase();
 };
 </script>

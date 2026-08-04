@@ -19,7 +19,8 @@
         <el-button type="primary" :loading="accessCodeSubmitting" @click="submitAccessCode">
           {{ t("common.confirm") }}
         </el-button>
-        <p v-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
+        <p v-if="accessCodeExpired" class="access-code-error">{{ t("publicpublish.accessCodeExpired") }}</p>
+        <p v-else-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
       </el-card>
     </div>
 
@@ -61,6 +62,7 @@
             :width="item.w"
             :is-view="true"
             :is-public="true"
+            :public-token="publicHttp.token.value || undefined"
             :external-filter="chartFilters[state.items[item.i].id]"
             @filter-change="handleFilterChange"
           />
@@ -82,6 +84,7 @@ import {
 import DashItemCard from "@/components/DashboardDesigner/components/DashItemCard.vue";
 import { useChartFilterLinkage } from "@/views/dash/useChartFilterLinkage";
 import {
+  AccessCodeExpiredError,
   PublicNotFound,
   bootstrapWithToken,
   renderPrintFullscreenToolbar,
@@ -106,6 +109,7 @@ const accessCodeGate = ref(false);
 const accessCodeInput = ref("");
 const accessCodeSubmitting = ref(false);
 const accessCodeError = ref(false);
+const accessCodeExpired = ref(false);
 const state = reactive<IGridLayoutState>({
   layout: [],
   items: {},
@@ -134,6 +138,7 @@ watch(
 async function bootstrap(accessCode?: string) {
   loading.value = true;
   accessCodeError.value = false;
+  accessCodeExpired.value = false;
   try {
     if (!publicHttp.token.value) {
       await bootstrapWithToken(publicHttp, dashboardId.value, PublicScope.DashLink, accessCode);
@@ -143,7 +148,8 @@ async function bootstrap(accessCode?: string) {
   } catch (err: any) {
     if (toAccessCodeError(err)) {
       accessCodeGate.value = true;
-      accessCodeError.value = !!accessCode;
+      accessCodeExpired.value = err instanceof AccessCodeExpiredError;
+      accessCodeError.value = !!accessCode && !accessCodeExpired.value;
     } else {
       dashboard.value = undefined;
     }

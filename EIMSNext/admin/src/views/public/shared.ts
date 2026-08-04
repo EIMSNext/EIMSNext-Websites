@@ -9,6 +9,7 @@ import {
   ODataMetadata,
   type HttpRequestConfig,
 } from "@eimsnext/utils";
+import { appSetting } from "@eimsnext/utils";
 import { PublicScope } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
 
@@ -20,6 +21,13 @@ export class AccessCodeInvalidError extends Error {
   constructor(message = "访问密码错误") {
     super(message);
     this.name = "AccessCodeInvalidError";
+  }
+}
+
+export class AccessCodeExpiredError extends AccessCodeInvalidError {
+  constructor(message = "公开访问链接已过期") {
+    super(message);
+    this.name = "AccessCodeExpiredError";
   }
 }
 
@@ -48,8 +56,8 @@ export const PublicNotFound = defineComponent({
 //    跨 tab 场景：每个 tab 独立 JS 上下文，usePublicHttp() 是新实例，互不影响。
 // =============================================================
 
-const API_BASE = "/api/v1";
-const ODATA_BASE = "/odata/v1";
+const API_BASE = `${appSetting.apiUrl}/api/v1`;
+const ODATA_BASE = `${appSetting.apiUrl}/odata/v1`;
 
 function buildApiUrl(path: string, params?: any): string {
   const url = path.startsWith("http")
@@ -187,7 +195,8 @@ export async function bootstrapWithToken(
     publicHttp.token.value = tokenResult.access_token;
   } catch (err: any) {
     if (err instanceof AccessCodeInvalidError) throw err;
-    if (err?.name === "PublicTokenError" || err?.response?.status === 401) {
+    if (err?.name === "PublicTokenExpiredError") throw new AccessCodeExpiredError();
+    if (err?.name === "PublicTokenError" || err?.response?.status === 401 || err?.response?.status === 429) {
       throw new AccessCodeInvalidError();
     }
     throw err;
@@ -201,7 +210,8 @@ export async function bootstrapWithToken(
 
 export function toAccessCodeError(err: any): AccessCodeInvalidError | null {
   if (err instanceof AccessCodeInvalidError) return err;
-  if (err?.name === "PublicTokenError" || err?.response?.status === 401) {
+  if (err?.name === "PublicTokenExpiredError") return new AccessCodeExpiredError();
+  if (err?.name === "PublicTokenError" || err?.response?.status === 401 || err?.response?.status === 429) {
     return new AccessCodeInvalidError();
   }
   return null;

@@ -50,4 +50,11 @@ export function getUploadUrl(url: string, ver: string = "v1") {
     : `${appSetting.uploadUrl}/api/${ver}${url}`;
 }
 
+export function getFileFullUrl(value: string | null | undefined): string {
+  if (!value) return "";
+  const normalized = String(value).replace(/\\/g, "/");
+  if (/^(https?:|data:|blob:|\/\/)/i.test(normalized)) return normalized;
+  return `${appSetting.uploadUrl.replace(/\/$/, "")}/${normalized.replace(/^\/+/, "")}`;
+}
+
 export const appSetting = new AppSetting();

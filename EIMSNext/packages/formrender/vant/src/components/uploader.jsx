@@ -1,5 +1,6 @@
 import { defineComponent, ref, toRef, watch } from "vue";
 import { toArray } from "@eimsnext/form-render-core";
+import { getFileFullUrl } from "@eimsnext/utils";
 
 const NAME = "fcUploader";
 
@@ -16,7 +17,7 @@ function parseFile(file, i) {
   };
 }
 function parseUpload(file) {
-  return { ...file, file, value: file };
+  return { ...file, url: getFileFullUrl(file.url), file, value: file };
 }
 
 function getFileName(file) {
@@ -90,6 +91,17 @@ export default defineComponent({
             })
             .then((res) => {
               file.status = "success";
+              const uploaded = res?.value?.[0] || res?.data?.[0];
+              if (uploaded) {
+                const value = {
+                  ...uploaded,
+                  name: uploaded.name || uploaded.fileName,
+                  url: uploaded.savePath || uploaded.url,
+                  thumbUrl: uploaded.thumbPath || uploaded.thumbUrl,
+                };
+                file.value = value;
+                file.url = getFileFullUrl(value.url);
+              }
               props.onSuccess && props.onSuccess(res, file);
               uploadValue();
             })

@@ -1,15 +1,6 @@
 import { CorpModelBase, ModelBase } from "./modelBase";
 import { PluginFieldDesc, PluginResultFieldDesc } from "./plugin";
 
-export interface PluginPricingPlan {
-  id: string;
-  name: string;
-  price: number;
-  durationDays: number;
-  unit?: string;
-  isTrial?: boolean;
-}
-
 export interface PluginProfileQueryRequest {
   keyword?: string;
   category?: string;
@@ -42,7 +33,6 @@ export interface PluginProfile extends ModelBase {
   publishedAt?: string;
   helpDocUrl?: string;
   templateUrl?: string;
-  pricingPlans?: PluginPricingPlan[];
   functions?: PluginProfileFunction[];
   installed?: boolean;
   installEnabled?: boolean;

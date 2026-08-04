@@ -1,6 +1,7 @@
 import { IFormFieldDef } from "@eimsnext/components";
 import {
   FieldDef,
+  FieldType,
   IFieldPerm,
   SystemField,
   getDataTitle,
@@ -74,6 +75,10 @@ export function buildColumns(
   }
 
   fields.forEach((x) => {
+    if (x.type === FieldType.DataSelect) {
+      return;
+    }
+
     if (
       dispalyAll ||
       displayFields.find((d) => d.field == x.field) ||
@@ -138,6 +143,10 @@ function buildSubColumns(
   const columns: ITableColumn[] = [];
   if (dispalyAll || subDisplayFields) {
     fields.forEach((x) => {
+      if (x.type === FieldType.DataSelect) {
+        return;
+      }
+
       if (dispalyAll || subDisplayFields?.find((d) => d.field == x.field)) {
         let col: ITableColumn = {
           field: x.field,

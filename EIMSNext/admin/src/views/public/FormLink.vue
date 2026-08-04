@@ -19,7 +19,8 @@
         <el-button type="primary" :loading="accessCodeSubmitting" @click="submitAccessCode">
           {{ t("common.confirm") }}
         </el-button>
-        <p v-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
+        <p v-if="accessCodeExpired" class="access-code-error">{{ t("publicpublish.accessCodeExpired") }}</p>
+        <p v-else-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
       </el-card>
     </div>
 
@@ -53,6 +54,7 @@
         :actions="actions"
         :is-view="false"
         :is-public="true"
+        :public-token="publicToken || undefined"
         @submit="submitData"
       />
     </div>
@@ -77,7 +79,7 @@ import {
 import FormView from "@/components/FormView/index.vue";
 import { FormActionSettings } from "@/components/FormView/type";
 import {
-  AccessCodeInvalidError,
+  AccessCodeExpiredError,
   PublicNotFound,
   bootstrapWithToken,
   renderPrintFullscreenToolbar,
@@ -116,6 +118,7 @@ const accessCodeGate = ref(false);
 const accessCodeInput = ref("");
 const accessCodeSubmitting = ref(false);
 const accessCodeError = ref(false);
+const accessCodeExpired = ref(false);
 
 const actions = ref<FormActionSettings>({
   submit: { text: "common.wfProcess.submit", disabled: false },
@@ -154,6 +157,7 @@ async function bootstrap(accessCode?: string) {
   loading.value = true;
   errorText.value = "";
   accessCodeError.value = false;
+  accessCodeExpired.value = false;
   try {
     if (!publicToken.value) {
       await bootstrapWithToken(publicHttp, formId.value, PublicScope.FormLink, accessCode);
@@ -169,7 +173,8 @@ async function bootstrap(accessCode?: string) {
   } catch (err: any) {
     if (toAccessCodeError(err)) {
       accessCodeGate.value = true;
-      accessCodeError.value = !!accessCode;
+      accessCodeExpired.value = err instanceof AccessCodeExpiredError;
+      accessCodeError.value = !!accessCode && !accessCodeExpired.value;
     } else {
       errorText.value = t("publicpublish.formNotAvailable");
       formDef.value = undefined;
@@ -309,7 +314,7 @@ async function buildPublicSystemValues(): Promise<Record<string, any>> {
       }
     }
   } catch (err: any) {
-    ElMessage.error(err?.response?.data?.errmsg || err?.message || t("publicpublish.wechatOpenIdRequired"));
+    ElMessage.error(err?.response?.data?.message || err?.response?.data?.msg || err?.message || t("publicpublish.wechatOpenIdRequired"));
   }
 
   return values;
@@ -355,13 +360,14 @@ function filterPublicRules(rules: any[], allowed?: Set<string>, parentField?: st
           title: rule.title || rule.field || "",
           type: rule.type,
         } as FieldDef);
-        return false;
+        return true;
       }
       if (!allowed || !rule.field || rule.type === FieldType.TableForm) return true;
       const key = parentField ? `${parentField}>${rule.field}` : rule.field;
       return allowed.has(key.toLowerCase());
     })
     .map((rule) => {
+      const orgField = isOrgField(rule.type);
       const next = isPublicSystemRule(rule)
         ? {
             ...rule,
@@ -369,7 +375,9 @@ function filterPublicRules(rules: any[], allowed?: Set<string>, parentField?: st
             display: false,
             props: { ...(rule.props || {}), disabled: true },
           }
-        : { ...rule };
+        : orgField
+          ? { ...rule, props: { ...(rule.props || {}), disabled: true, readonly: true } }
+          : { ...rule };
       if (Array.isArray(next.children)) {
         next.children = filterPublicRules(next.children, allowed, parentField);
       }

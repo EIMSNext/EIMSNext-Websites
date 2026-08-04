@@ -30,8 +30,8 @@ export interface PublicSetting extends CorpModelBase {
 }
 
 export enum PublicTargetType {
-  Form = 0,
-  Dashboard = 1,
+  Form = "0",
+  Dashboard = "1",
 }
 
 export interface PublicPublishSection {

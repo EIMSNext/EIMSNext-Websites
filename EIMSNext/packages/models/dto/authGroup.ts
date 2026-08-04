@@ -35,7 +35,7 @@ export enum AuthGroupType {
 
 export interface Member {
   id: string;
-  code?: string;
+  value?: string;
   label: string;
   type: MemberType;
   cascadedDept: boolean;

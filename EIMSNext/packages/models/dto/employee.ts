@@ -22,6 +22,11 @@ export interface DepartmentRef {
   sortValue?: number;
 }
 
+export interface EmpDept {
+  deptId: string;
+  deptName: string;
+}
+
 export interface Employee extends CorpModelBase {
   code: string;
   empName: string;
@@ -31,7 +36,7 @@ export interface Employee extends CorpModelBase {
   workEmail?: string;
   status: number;
   userBound: boolean;
-  departments?: DepartmentRef[];
+  depts?: EmpDept[];
 }
 
 export enum EmployeeStatus {

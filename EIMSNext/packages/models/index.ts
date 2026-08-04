@@ -39,6 +39,7 @@ export * from "./dto/exportLog";
 export * from "./dto/formDataImport";
 export * from "./dto/plugin";
 export * from "./dto/pluginProfile";
+export * from "./dto/platformAdmin";
 export * from "./dto/flowManage";
 export * from "./dto/dataflow";
 export * from "./dto/tableColumn";

@@ -4,7 +4,7 @@
     <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
   <PdfPreview v-model="showPdfPreview" :title="pdfPreviewTitle" :pdf-url="pdfPreviewUrl" />
-  <et-dialog v-model="showShareDialog" class="share-dialog" :title="$t('admin.formData.share')" width="640px" :show-footer="false" append-to-body>
+  <et-dialog v-model="showShareDialog" class="share-dialog" :title="$t('common.share')" width="640px" :show-footer="false" append-to-body>
     <div class="share-dialog-body">
       <div class="share-section">
         <div class="share-section-title-row">
@@ -22,9 +22,14 @@
       </div> -->
     </div>
   </et-dialog>
-  <et-toolbar class="form-data-toolbar" type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
-  <FormView v-if="formDef && formData" :def="formDef.content!" :data="formData" :isView="isView" :actions="actions"
-    :fieldPerms="fieldPerms" class="editdata" @draft="saveDraft" @submit="submitData"></FormView>
+  <el-result v-if="loadError" icon="error" :title="t('admin.formData.dataNotAvailable')">
+    <template #extra><el-button @click="returnToList">{{ t("common.back") }}</el-button></template>
+  </el-result>
+  <template v-else>
+    <et-toolbar class="form-data-toolbar" type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
+    <FormView v-if="formDef && formData" :def="formDef.content!" :data="formData" :isView="isView" :actions="actions"
+      :fieldPerms="fieldPerms" class="editdata" @draft="saveDraft" @submit="submitData"></FormView>
+  </template>
   <div ref="printTrigger" v-print="printConfig" class="print-trigger">
     <FormPrintDiv v-model="printConfig.showPrintDiv" :title="formDef?.name" :printData="formPrintData"></FormPrintDiv>
   </div>
@@ -35,7 +40,7 @@ defineOptions({
 });
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   FormData,
   FormDataRequest,
@@ -85,6 +90,8 @@ const externalShareEnabled = ref(false);
 const userStore = useUserStore();
 const { currentUser } = userStore;
 const route = useRoute();
+const router = useRouter();
+const loadError = ref(false);
 
 const canEdit = computed(() => hasDataPerm(currentUser.userType, DataPerms.Edit, props.dataPerms));
 const canRemove = computed(() =>
@@ -100,6 +107,7 @@ const showPdfPreview = ref(false);
 const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
 const shareUrl = computed(() => `${window.location.origin}/#/app/${route.params.appId}/form/${props.formId}/data/${props.dataId}`);
+const returnToList = () => router.replace(`/app/${route.params.appId}/form/${props.formId}`);
 
 const inEdit = computed(() => isEditing.value);
 const editDisabled = ref(false);
@@ -111,7 +119,7 @@ const leftBars = computed<ToolbarItem[]>(() => {
     {
       type: "button",
       config: {
-        text: t("admin.formData.share"),
+        text: t("common.share"),
         command: "share",
         visible: !inEdit.value,
         icon: "el-share",
@@ -226,7 +234,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       openCustomPrintPreview(printResult);
     }
     else {
-      ElMessage.error(printResult?.message || t("admin.formData.printFailed"))
+      ElMessage.error(printResult?.message || t("common.printFailed"))
     }
 
     return;
@@ -370,21 +378,20 @@ watch(showPdfPreview, (visible) => {
 });
 
 onBeforeMount(async () => {
-  let form = await formStore.get(props.formId);
-  if (form) {
+  try {
+    const form = await formStore.get(props.formId);
+    if (!form) throw new Error("Form definition is unavailable");
     formDef.value = form;
     await loadPrintDefs(form.id);
-  }
-
-  let data = await formDataService.get<FormData>(props.dataId, props.authGroupId ? { authGroupId: props.authGroupId } : undefined);
-  if (data) {
+    const data = await formDataService.get<FormData>(props.dataId, props.authGroupId ? { authGroupId: props.authGroupId } : undefined);
+    if (!data) throw new Error("Form data is unavailable");
     formData.value = data;
     const workflowLocked = !!(formDef.value?.usingWorkflow && formData.value.flowStatus != FlowStatus.Draft);
     editDisabled.value = workflowLocked;
     deleteDisabled.value = workflowLocked;
-
-    const status = await workflowService.getActionStatus(props.dataId);
-    actionStatus.value = status;
+    actionStatus.value = await workflowService.getActionStatus(props.dataId);
+  } catch {
+    loadError.value = true;
   }
 });
 </script>

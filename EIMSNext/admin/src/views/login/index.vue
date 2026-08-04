@@ -33,13 +33,14 @@
                       name="password" size="large" show-password @keyup="checkCapslock"
                       @keyup.enter="handleLoginSubmit" />
                   </div>
+                  <div v-if="isCapslock" class="capslock-tip">{{ t("login.capsLock") }}</div>
                 </div>
                 <div class="login-options">
                   <el-checkbox>
                     {{ t("login.rememberMe") }}
                   </el-checkbox>
 
-                  <el-link type="primary" underline="never" class="forget-password" href="/forget-password"
+                  <el-link type="primary" underline="never" class="forget-password" href="/#/forget-password"
                     target="_self">
                     {{ t("login.forgetPassword") }}
                   </el-link>
@@ -143,6 +144,9 @@ async function handleLoginSubmit() {
 
           const { path, queryParams } = parseRedirect();
           router.push({ path: path, query: queryParams });
+        })
+        .catch(() => {
+          // The HTTP interceptor displays the server's business error.
         })
         .finally(() => {
           loading.value = false;
@@ -289,6 +293,13 @@ function checkCapslock(event: KeyboardEvent) {
 
       .login-form > .login-form-item.first-item {
         margin-top: 0;
+      }
+
+      .capslock-tip {
+        color: var(--el-color-warning);
+        font-size: var(--et-font-size-12);
+        line-height: var(--et-line-height-18);
+        margin-top: var(--et-space-6);
       }
 
       .login-options {

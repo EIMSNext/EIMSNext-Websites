@@ -27,7 +27,14 @@
               <div class="row-content">
                 <user-avatar size="24px" :avatar="userStore.currentUser.avatar"
                   :label="userStore.currentUser.empName" />
-                <el-link type="primary" underline="never" class="link-btn">{{ $t("admin.profile.edit") }}</el-link>
+                <el-upload
+                  class="avatar-upload"
+                  accept="image/gif,image/jpeg,image/png,image/webp"
+                  :show-file-list="false"
+                  :http-request="uploadAvatar"
+                >
+                  <el-link type="primary" underline="never" class="link-btn">{{ $t("admin.profile.edit") }}</el-link>
+                </el-upload>
               </div>
             </div>
             <div class="panel-row">
@@ -219,6 +226,7 @@ import { authProfileService, systemService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
+import { http } from "@eimsnext/utils";
 import { getPasswordStrengthMessage, getPasswordStrengthState, isStrongPassword } from "@/utils/password";
 
 type DialogMode = "change-password" | "change-phone" | "bind-phone" | "change-email" | "bind-email" | "unbind-phone" | "unbind-email";
@@ -536,6 +544,26 @@ const sendActionCode = async (type: "phone" | "email") => {
 const refreshCurrentUser = async () => {
   const currentUser = await systemService.getCurrentUser();
   Object.assign(userStore.currentUser, currentUser);
+};
+
+const uploadAvatar = async (option: any) => {
+  const formData = new FormData();
+  formData.append("file", option.file);
+
+  try {
+    const result = await http.upload.upload("/upload/avatar", formData, undefined, true);
+    const avatar = result?.avatar ?? result?.value?.avatar ?? result?.data?.avatar;
+    if (!avatar) {
+      throw new Error("头像上传失败");
+    }
+
+    await systemService.updateAvatar(avatar);
+    await refreshCurrentUser();
+    option.onSuccess?.(result);
+    ElMessage.success(t("common.saveSuccess"));
+  } catch (error) {
+    option.onError?.(error);
+  }
 };
 
 const maskPhone = (value?: string) => {

@@ -217,7 +217,11 @@ watch(registerType, () => {
 
 async function handleSendCode() {
   const field = registerType.value === "phone" ? "phone" : "email";
-  await registerFormRef.value?.validateField(field);
+  try {
+    await registerFormRef.value?.validateField(field);
+  } catch {
+    return;
+  }
 
   const target = registerType.value === "phone" ? registerForm.phone : registerForm.email;
   await authService.sendRegCode({

@@ -13,6 +13,7 @@ export enum MemberTabs {
 
 export interface IMemberLimit {
   depts?: ISelectedTag[];
+  roles?: ISelectedTag[];
 }
 
 export interface IMemberSelectOptions {

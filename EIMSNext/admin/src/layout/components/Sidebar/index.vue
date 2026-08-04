@@ -5,6 +5,8 @@
       v-model="showFormEditor"
       :form-def="newForm!"
       :usingFlow="usingWorkflow"
+      :initial-tab="formEditInitialTab"
+      :initial-advanced-tab="formEditInitialAdvancedTab"
       @close="console.log('[Sidebar] FormEdit closed'); showFormEditor = false"
     />
     <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
@@ -148,6 +150,7 @@ import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
 import { normalizeMenuType } from "@/utils/appEntry";
 import { ElMessage } from "element-plus";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
+import { useRoute, useRouter } from "vue-router";
 
 const { t } = useI18n();
 
@@ -171,6 +174,29 @@ const filteredAppMenus = computed(() => {
 const newForm = ref<FormDef>();
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
+const formEditInitialTab = ref("formedit");
+const formEditInitialAdvancedTab = ref("advanced-data");
+
+type FormEditTarget = {
+  outerTab: "formedit" | "workflow" | "extension" | "publish" | "datamanage";
+  advancedTab?: string;
+};
+
+const formEditTargets: Record<string, FormEditTarget> = {
+  formedit: { outerTab: "formedit" },
+  workflow: { outerTab: "workflow" },
+  "ext-data": { outerTab: "extension", advancedTab: "advanced-data" },
+  "ext-notify": { outerTab: "extension", advancedTab: "notify" },
+  "ext-print": { outerTab: "extension", advancedTab: "print" },
+  "ext-dataflow": { outerTab: "extension", advancedTab: "dataflow" },
+  "ext-webhook": { outerTab: "extension", advancedTab: "webpush" },
+  publish: { outerTab: "publish" },
+  datamanage: { outerTab: "datamanage" },
+};
+
+function resolveFormEditTarget(tab?: string): FormEditTarget {
+  return formEditTargets[tab || "formedit"] || formEditTargets.formedit;
+}
 
 const newDash = ref<DashboardDef>();
 const showDshEditor = ref(false);
@@ -184,6 +210,8 @@ const { appMenus } = storeToRefs(permissionStore);
 const appStore = useAppStore();
 const formStore = useFormStore();
 const contextStore = useContextStore();
+const route = useRoute();
+const router = useRouter();
 const appId = toRef(contextStore.appId);
 const app = ref<AppDef>();
 const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
@@ -265,7 +293,7 @@ const createForm = (usingFlow: boolean) => {
   });
 };
 
-const editForm = async (formId: string, type: FormType) => {
+const editForm = async (formId: string, type: FormType, target: FormEditTarget = formEditTargets.formedit) => {
   if (!canManageCurrentApp.value) return;
 
   if (type == FormType.Form) {
@@ -273,6 +301,10 @@ const editForm = async (formId: string, type: FormType) => {
     if (form) {
       newForm.value = form;
       usingWorkflow.value = form.usingWorkflow;
+      formEditInitialTab.value = target.outerTab === "workflow" && !form.usingWorkflow
+        ? "formedit"
+        : target.outerTab;
+      formEditInitialAdvancedTab.value = target.advancedTab || "advanced-data";
 
       showFormEditor.value = true;
     }
@@ -284,6 +316,17 @@ const editForm = async (formId: string, type: FormType) => {
     }
   }
 };
+
+watch(
+  () => [route.query.mode, route.query.tab, route.params.formId, route.params.appId, contextStore.appId],
+  async ([mode, tab, formId, appId]) => {
+    if (mode !== "editform" || !formId || appId !== contextStore.appId) return;
+    const tabName = Array.isArray(tab) ? tab[0] : tab;
+    await editForm(String(formId), FormType.Form, resolveFormEditTarget(tabName ?? undefined));
+    await router.replace({ query: { ...route.query, mode: undefined, tab: undefined } });
+  },
+  { immediate: true },
+);
 
 const createDashboard = () => {
   if (!canManageCurrentApp.value) return;

@@ -16,11 +16,23 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
     }
 
     queryByDepartment<T>(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<T[]> {
-        return this.http().odata.query<T>(this.departmentModelName(departmentId, cascadedDept), query);
+        const deptFilter = cascadedDept
+            ? `Depts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
+            : `Depts/any(d: d/DeptId eq '${departmentId}')`;
+
+        const { body, urlParams } = this.buildDeptQuery(deptFilter, query);
+        const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
+        return this.http().odata.query<T>(url, body);
     }
 
     countByDepartment(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<number> {
-        return this.http().odata.count(this.departmentModelName(departmentId, cascadedDept), query);
+        const deptFilter = cascadedDept
+            ? `Depts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
+            : `Depts/any(d: d/DeptId eq '${departmentId}')`;
+
+        const { body, urlParams } = this.buildDeptQuery(deptFilter, query);
+        const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
+        return this.http().odata.count(url, body);
     }
 
     reviewJoinCorporate(data: ReviewJoinCorporateRequest): Promise<{ success: boolean }> {
@@ -31,15 +43,33 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
         return this.http().api.post<{ success: boolean }>("/employee/acceptinvite", data);
     }
 
-    private departmentModelName(departmentId: string, cascadedDept: boolean) {
-        const query = new URLSearchParams({
-            departmentId,
-            cascadedDept: `${cascadedDept}`,
-        });
-        return `${this.modelName()}?${query.toString()}`;
+    private buildDeptQuery(deptFilter: string, query?: string): { body: string; urlParams: string } {
+        const urlParams = new URLSearchParams();
+        const bodyParams = new URLSearchParams();
+
+        if (query) {
+            const params = new URLSearchParams(query);
+            for (const [key, value] of params.entries()) {
+                if (key === "adminScope") {
+                    urlParams.set(key, value);
+                } else {
+                    bodyParams.set(key, value);
+                }
+            }
+        }
+
+        const existingFilter = bodyParams.get("$filter");
+        const combinedFilter = existingFilter
+            ? `(${existingFilter}) and (${deptFilter})`
+            : deptFilter;
+        bodyParams.set("$filter", combinedFilter);
+
+        return {
+            body: bodyParams.toString(),
+            urlParams: urlParams.toString(),
+        };
     }
 }
 
 const employeeService = new EmployeeService()
 export { employeeService }
-

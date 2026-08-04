@@ -193,7 +193,7 @@ export const useWorkbenchStore = defineStore("workbench", () => {
       loading.value = true;
       try {
         const configs = await workbenchConfigService.query<WorkbenchConfig>(
-          "$top=1&$orderby=updateTime desc"
+          "$top=1&$orderby=createTime desc"
         );
         config.value = configs[0];
         pageStyle.value = config.value?.pageStyle || "";

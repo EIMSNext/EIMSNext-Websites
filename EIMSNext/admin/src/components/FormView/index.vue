@@ -57,6 +57,7 @@ const props = withDefaults(
     data?: FormData;
     isView?: boolean;
     isPublic?: boolean;
+    publicToken?: string;
     actions?: FormActionSettings;
     fieldPerms?: IFieldPerm[];
   }>(),
@@ -68,7 +69,21 @@ const props = withDefaults(
 
 const fcInst = ref<any>(null);
 const rules = ref(formCreate.parseJson(props.def.layout!));
-const options = ref(formCreate.parseJson(props.def.options!));
+const parsedOptions: any = formCreate.parseJson(props.def.options!);
+if (props.isPublic && props.publicToken) {
+  const originalBeforeFetch = parsedOptions.beforeFetch;
+  parsedOptions.beforeFetch = async (request: any, context: any) => {
+    if (typeof originalBeforeFetch === "function") {
+      await originalBeforeFetch(request, context);
+    }
+    request.__eimsPublicToken = props.publicToken;
+    request.headers = {
+      ...(request.headers || {}),
+      Authorization: `Bearer ${props.publicToken}`,
+    };
+  };
+}
+const options = ref(parsedOptions);
 const dataRef = ref<any>(props.data?.data);
 const visibleCustomActions = computed(() => props.actions?.customActions?.filter((x) => x.visible !== false) || []);
 
