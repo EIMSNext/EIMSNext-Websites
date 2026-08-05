@@ -93,6 +93,7 @@ export default {
     saveSuccess: "保存成功",
     saveFailed: "保存失败",
     deleteSuccess: "删除成功",
+    deleteFailed: "删除失败",
     printFailed: "打印失败",
     systemError: "系统出错",
     passwordStrength: "{label}需为8-30位，且包含大写字母、小写字母、数字、特殊字符中的至少三种",
@@ -1397,6 +1398,7 @@ export default {
       filterWidgetName: "筛选组件",
       layoutParseFailed: "布局JSON解析失败：",
       loadFailed: "加载失败",
+      notAvailable: "仪表盘不可访问",
     },
     dashboardChartDesigner: {
       save: "保存",

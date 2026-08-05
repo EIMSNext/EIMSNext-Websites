@@ -92,6 +92,7 @@ export default {
     saveSuccess: "Saved successfully",
     saveFailed: "Save failed",
     deleteSuccess: "Deleted successfully",
+    deleteFailed: "Delete failed",
     printFailed: "Print failed",
     systemError: "System error",
     passwordStrength: "{label} must be 8-30 characters and include at least three of uppercase letters, lowercase letters, numbers, and special characters",
@@ -1336,6 +1337,7 @@ export default {
       filterWidgetName: "Filter Widget",
       layoutParseFailed: "Failed to parse layout JSON:",
       loadFailed: "Load failed",
+      notAvailable: "Dashboard unavailable",
     },
     dashboardChartDesigner: {
       save: "Save",

@@ -1,5 +1,6 @@
 <template>
-  <div class="dash-edit-layout custom-scroll">
+  <el-result v-if="loadError" icon="error" :title="t('admin.dashboardDesigner.notAvailable')" />
+  <div v-else class="dash-edit-layout custom-scroll">
     <grid-layout
       ref="gridRef"
       v-model:layout="state.layout"
@@ -67,6 +68,7 @@ const colNum = ref(24);
 const colWidth = ref(150);
 const rowHeight = ref(10);
 const dashboard = ref<DashboardDef>();
+const loadError = ref(false);
 const refreshTimer = ref<number>();
 let loadTask: Promise<void> | undefined;
 const { isFullscreen } = useFullscreen();
@@ -86,6 +88,7 @@ const getMaxHeight = (item: IGridLayoutItem) => {
 const loadDashboard = async () => {
   if (loadTask) return loadTask;
   loadTask = (async () => {
+    loadError.value = false;
     try {
       const dash = await dashboardDefService.get<DashboardDef>(dashId);
       dashboard.value = dash;
@@ -109,9 +112,11 @@ const loadDashboard = async () => {
         console.error("布局JSON解析失败：", e);
         state.layout.splice(0, state.layout.length);
       }
-    } catch (e) {
-      console.error("加载仪表盘失败：", e);
-      ElMessage.error(t("admin.dashboardDesigner.loadFailed"));
+    } catch {
+      dashboard.value = undefined;
+      state.layout.splice(0, state.layout.length);
+      state.items = {};
+      loadError.value = true;
     } finally {
       loadTask = undefined;
     }

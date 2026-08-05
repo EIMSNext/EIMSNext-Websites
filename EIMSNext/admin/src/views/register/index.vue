@@ -23,8 +23,8 @@
             </div>
 
             <el-radio-group v-model="registerType" class="register-switch">
-              <el-radio-button label="phone">{{ t("register.phoneTab") }}</el-radio-button>
-              <el-radio-button label="email">{{ t("register.emailTab") }}</el-radio-button>
+              <el-radio-button value="phone">{{ t("register.phoneTab") }}</el-radio-button>
+              <el-radio-button value="email">{{ t("register.emailTab") }}</el-radio-button>
             </el-radio-group>
 
             <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules" @submit.prevent>
@@ -36,19 +36,20 @@
                     </el-select>
                     <el-form-item prop="phone" class="inline-form-item">
                       <el-input v-model="registerForm.phone" :placeholder="t('register.phonePlaceholder')" name="phone"
-                        size="large" maxlength="11" />
+                        size="large" maxlength="11" :validate-event="false" />
                     </el-form-item>
                   </div>
                   <div v-else class="login-form-item first-item">
                     <el-form-item prop="email">
                       <el-input v-model="registerForm.email" :placeholder="t('register.emailPlaceholder')" name="email"
-                        size="large" />
+                        size="large" :validate-event="false" />
                     </el-form-item>
                   </div>
 
                   <div class="login-form-item code-form-item">
                     <el-form-item prop="code">
-                      <el-input v-model="registerForm.code" :placeholder="t('register.codePlaceholder')" size="large">
+                      <el-input v-model="registerForm.code" :placeholder="t('register.codePlaceholder')" size="large"
+                        :validate-event="false">
                         <template #append>
                           <el-button link type="primary" class="code-btn" :disabled="sendCodeDisabled"
                             @click="handleSendCode">
@@ -65,8 +66,8 @@
                         popper-class="register-password-popover">
                         <template #reference>
                           <el-input v-model="registerForm.password" :placeholder="t('register.passwordPlaceholder')"
-                            type="password" name="password" size="large" show-password @focus="showPasswordTips = true"
-                            @blur="showPasswordTips = false" />
+                            type="password" name="password" size="large" show-password :validate-event="false"
+                            @focus="showPasswordTips = true" @blur="showPasswordTips = false" />
                         </template>
                         <div class="password-tip-list">
                           <div class="password-tip-item" :class="{ passed: passwordState.hasLength }">
@@ -233,36 +234,37 @@ async function handleSendCode() {
 }
 
 async function handleRegisterSubmit() {
-  registerFormRef.value?.validate(async (valid: boolean) => {
-    if (!valid) {
-      return;
-    }
+  const valid = await registerFormRef.value?.validate().catch(() => false);
+  if (!valid) {
+    return;
+  }
 
-    loading.value = true;
-    try {
-      await authService.register({
-        type: registerType.value,
-        phone: registerType.value === "phone" ? registerForm.phone : undefined,
-        email: registerType.value === "email" ? registerForm.email : undefined,
-        code: registerForm.code,
-        password: registerForm.password,
-      });
+  loading.value = true;
+  try {
+    await authService.register({
+      type: registerType.value,
+      phone: registerType.value === "phone" ? registerForm.phone : undefined,
+      email: registerType.value === "email" ? registerForm.email : undefined,
+      code: registerForm.code,
+      password: registerForm.password,
+    });
 
-      const username = registerType.value === "phone" ? registerForm.phone : registerForm.email;
-      const loginData: LoginRequest = {
-        username,
-        password: registerForm.password,
-        grant_type: "password",
-      };
-      await userStore.login(loginData);
-      await userStore.initialize(true);
+    const username = registerType.value === "phone" ? registerForm.phone : registerForm.email;
+    const loginData: LoginRequest = {
+      username,
+      password: registerForm.password,
+      grant_type: "password",
+    };
+    await userStore.login(loginData);
+    await userStore.initialize(true);
 
-      const { path, queryParams } = parseRedirect();
-      router.push({ path, query: queryParams });
-    } finally {
-      loading.value = false;
-    }
-  });
+    const { path, queryParams } = parseRedirect();
+    router.push({ path, query: queryParams });
+  } catch {
+    // The shared HTTP error handler presents the registration failure message.
+  } finally {
+    loading.value = false;
+  }
 }
 
 function parseRedirect(): { path: string; queryParams: Record<string, string> } {

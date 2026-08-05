@@ -560,14 +560,15 @@ const selectionChanged = (rows: any[]) => {
   leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
     checkedDatas.value.length == 0;
 };
-const execDelete = () => {
-  formDataService
-    .delete("batch", { keys: checkedDatas.value.map((x) => x[SystemField.Id]) })
-    .then(() => {
+const execDelete = async () => {
+  try {
+    await formDataService.delete("batch", { keys: checkedDatas.value.map((x) => x[SystemField.Id]) });
       showDeleteConfirmDialog.value = false;
       checkedDatas.value = [];
-      handleQuery();
-    });
+      await handleQuery();
+  } catch {
+    ElMessage.error(t("common.deleteFailed"));
+  }
 };
 
 const setFilter = (filter: IConditionList) => {
@@ -811,8 +812,12 @@ const openDraft = (row: FormData) => {
   showDetailsDialog.value = true;
 };
 const deleteDraft = async (row: FormData) => {
-  await formDataService.delete(row.id);
-  await Promise.all([refreshDrafts(), Promise.resolve(handleQuery())]);
+  try {
+    await formDataService.delete(row.id);
+    await Promise.all([refreshDrafts(), Promise.resolve(handleQuery())]);
+  } catch {
+    ElMessage.error(t("common.deleteFailed"));
+  }
 };
 const handleViewOk = () => {
   loadData();

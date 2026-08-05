@@ -57,6 +57,7 @@
         <el-table
           v-loading="loading"
           :data="tableData"
+          :row-key="getRowKey"
           height="100%"
           class="flow-manage-table"
           show-overflow-tooltip
@@ -123,6 +124,8 @@ const memberOptions = computed(() => ({
 
 const formatDateTime = (value?: number) => dateFormat(value, "YYYY-MM-DD HH:mm:ss") || "-";
 
+const getRowKey = (row: FlowManageTodoItem) => `${row.wfInstanceId}:${row.approveNodeId}`;
+
 const handleQuery = async () => {
   loading.value = true;
   try {
@@ -131,13 +134,18 @@ const handleQuery = async () => {
       pageNum: pageNum.value,
       pageSize: pageSize.value,
     });
-    tableData.value = result.items || [];
-    totalRef.value = result.total || 0;
+    tableData.value = result?.items ?? [];
+    totalRef.value = result?.total ?? 0;
     checkedRows.value = checkedRows.value.filter((checked) =>
       tableData.value.some(
         (item) => item.wfInstanceId === checked.wfInstanceId && item.approveNodeId === checked.approveNodeId
       )
     );
+  } catch {
+    tableData.value = [];
+    totalRef.value = 0;
+    checkedRows.value = [];
+    ElMessage.error(t("common.loadFailed"));
   } finally {
     loading.value = false;
   }

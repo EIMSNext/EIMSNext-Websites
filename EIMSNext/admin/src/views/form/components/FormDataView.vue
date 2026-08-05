@@ -302,11 +302,14 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       break;
   }
 };
-const execDelete = () => {
-  formDataService.delete(props.dataId).then(() => {
+const execDelete = async () => {
+  try {
+    await formDataService.delete(props.dataId);
     emit("ok");
     bus.emit("data:deleted", { formId: props.formId });
-  });
+  } catch {
+    ElMessage.error(t("common.deleteFailed"));
+  }
 };
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
@@ -314,7 +317,7 @@ const cancel = () => {
   emit("update:modelValue", false);
   emit("cancel");
 };
-const saveDraft = (data: any) => {
+const saveDraft = async (data: any) => {
   let fdata: FormDataRequest = {
     action: DataAction.Save,
     id: props.dataId,
@@ -324,17 +327,18 @@ const saveDraft = (data: any) => {
   };
 
   // 根据是否有dataId判断是新增还是编辑，编辑时使用put方法
-  const request = props.dataId
-    ? formDataService.put<FormData>(props.dataId, fdata)
-    : formDataService.post<FormData>(fdata);
-
-  request.then((res) => {
+  try {
+    const res = props.dataId
+      ? await formDataService.put<FormData>(props.dataId, fdata)
+      : await formDataService.post<FormData>(fdata);
     formData.value = res;
     emit("ok");
     bus.emit("data:saved", { formId: props.formId });
-  });
+  } catch {
+    ElMessage.error(t("common.saveFailed"));
+  }
 };
-const submitData = (data: any) => {
+const submitData = async (data: any) => {
   let fdata: FormDataRequest = {
     action: DataAction.Submit,
     id: props.dataId,
@@ -344,15 +348,16 @@ const submitData = (data: any) => {
   };
 
   // 根据是否有dataId判断是新增还是编辑，编辑时使用put方法
-  const request = props.dataId
-    ? formDataService.put<FormData>(props.dataId, fdata)
-    : formDataService.post<FormData>(fdata);
-
-  request.then((res) => {
+  try {
+    const res = props.dataId
+      ? await formDataService.put<FormData>(props.dataId, fdata)
+      : await formDataService.post<FormData>(fdata);
     formData.value = res;
     emit("ok");
     bus.emit("data:saved", { formId: props.formId });
-  });
+  } catch {
+    ElMessage.error(t("common.saveFailed"));
+  }
 };
 
 const generatePrintData = () => {
