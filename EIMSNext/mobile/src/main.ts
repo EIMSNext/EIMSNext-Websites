@@ -9,7 +9,7 @@ import FormCreateMobile from "@eimsnext/form-render-vant";
 import installFormCreateMobile from "@eimsnext/form-render-vant/auto-import";
 import App from "./App.vue";
 import router from "./router";
-import "vant/es/toast/style";
+import "vant/lib/index.css";
 import "./styles/index.scss";
 
 const initHttp = () => {

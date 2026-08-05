@@ -57,10 +57,12 @@ export default defineComponent({
         ? ""
         : parseValue(props.modelValue).format(displayFormat.value),
     );
-    const dateRange = computed(() => ({
-      minDate: props.minDate ? parseValue(props.minDate).toDate() : undefined,
-      maxDate: props.maxDate ? parseValue(props.maxDate).toDate() : undefined,
-    }));
+    const dateRange = computed(() => {
+      const range = {};
+      if (props.minDate) range.minDate = parseValue(props.minDate).toDate();
+      if (props.maxDate) range.maxDate = parseValue(props.maxDate).toDate();
+      return range;
+    });
 
     const syncPicker = () => {
       const current = parseValue(props.modelValue);
@@ -84,9 +86,11 @@ export default defineComponent({
       return value.format(props.valueFormat || displayFormat.value);
     };
 
-    const confirm = () => {
+    const confirm = (event) => {
       const current = parseValue(props.modelValue);
-      const [year, month = "01", date = "01"] = dateValue.value;
+      const values = Array.isArray(event?.selectedValues) ? event.selectedValues : dateValue.value;
+      if (values.length !== columnsType.value.length) return;
+      const [year, month = "01", date = "01"] = values;
       const [hour = "00", minute = "00", second = "00"] = timeValue.value;
       const next = dayjs(current)
         .year(Number(year))
@@ -97,9 +101,9 @@ export default defineComponent({
         .second(isDateTime.value ? Number(second) : 0)
         .millisecond(0);
       const value = serialize(next);
+      show.value = false;
       emit("update:modelValue", value);
       emit("change", value);
-      show.value = false;
     };
 
     const clear = (event) => {
@@ -154,8 +158,15 @@ export default defineComponent({
             {...this.dateRange}
             columnsType={this.columnsType}
             modelValue={this.dateValue}
-            onUpdate:modelValue={(value) => (this.dateValue = value)}
-            onConfirm={this.confirm}
+            onUpdate:modelValue={(value) => {
+              if (Array.isArray(value) && value.length === this.columnsType.length) {
+                this.dateValue = value;
+              }
+            }}
+            onConfirm={(event) => {
+              this.confirm(event);
+              this.show = false;
+            }}
             onCancel={() => (this.show = false)}
             v-slots={
               this.isDateTime

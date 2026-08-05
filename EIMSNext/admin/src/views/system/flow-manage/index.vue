@@ -166,6 +166,30 @@ const handleSelectionChange = (rows: FlowManageTodoItem[]) => {
   checkedRows.value = rows;
 };
 
+const showBatchActionResult = async (
+  results: PromiseSettledResult<unknown>[],
+  actionName: string,
+) => {
+  const failedDataIds = results
+    .map((result, index) => (result.status === "rejected" ? checkedRows.value[index]?.dataId || "-" : null))
+    .filter((dataId): dataId is string => dataId !== null);
+
+  if (failedDataIds.length === 0) {
+    ElMessage.success(t("admin.flowManage.batchSuccess", { action: actionName }));
+    return;
+  }
+
+  await ElMessageBox.alert(
+    t("admin.flowManage.batchPartial", {
+      success: results.length - failedDataIds.length,
+      failed: failedDataIds.length,
+      details: failedDataIds.join(", "),
+    }),
+    t("admin.flowManage.batchResultTitle", { action: actionName }),
+    { type: "warning" },
+  );
+};
+
 const handleTerminate = async () => {
   if (checkedRows.value.length === 0) {
     return;
@@ -179,7 +203,7 @@ const handleTerminate = async () => {
 
   actionLoading.value = true;
   try {
-    await Promise.all(
+    const results = await Promise.allSettled(
       checkedRows.value.map((row) =>
         workflowService.terminate({
           wfInstanceId: row.wfInstanceId,
@@ -187,7 +211,7 @@ const handleTerminate = async () => {
         })
       )
     );
-    ElMessage.success(t("admin.flowManage.terminateSuccess"));
+    await showBatchActionResult(results, t("admin.flowManage.terminate"));
     checkedRows.value = [];
     await handleQuery();
   } finally {
@@ -231,7 +255,7 @@ const submitChangeApprover = async () => {
 
   actionLoading.value = true;
   try {
-    await Promise.all(
+    const results = await Promise.allSettled(
       checkedRows.value.map((row) =>
         workflowService.changeApprover({
           wfInstanceId: row.wfInstanceId,
@@ -242,7 +266,7 @@ const submitChangeApprover = async () => {
         })
       )
     );
-    ElMessage.success(t("admin.flowManage.approverUpdated"));
+    await showBatchActionResult(results, t("admin.flowManage.changeApprover"));
     closeApproverDialog();
     checkedRows.value = [];
     await handleQuery();

@@ -21,7 +21,7 @@ const systemRoutes: SystemRouteDef[] = [
   { path: "admin",       component: () => import("@/views/system/admin/index.vue"),       title: "admin",       allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "corp-log",    component: () => import("@/views/system/corp-log/index.vue"),    title: "corp-log",    allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "flow-manage", component: () => import("@/views/system/flow-manage/index.vue"), title: "flow-manage", allowedUserTypes: [UserType.CorpAdmin] },
-  { path: "plugin",      component: () => import("@/views/system/plugin/index.vue"),      title: "plugin",      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "plugin",      component: () => import("@/views/system/plugin/index.vue"),      title: "plugin",      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.PlatAdmin] },
 ];
 
 interface OpenPlatformRouteDef {

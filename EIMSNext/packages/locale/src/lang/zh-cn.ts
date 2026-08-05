@@ -54,6 +54,7 @@ export default {
     copied: "已复制",
     open: "打开",
     loadFailed: "加载失败",
+    operationFailed: "操作失败",
     retry: "重试",
     department: "部门",
     employee: "员工",
@@ -1645,6 +1646,9 @@ export default {
       terminateSuccess: "流程已废弃",
       selectNewApprover: "请选择新的审批人",
       approverUpdated: "审批人已更新",
+      batchSuccess: "{action}成功",
+      batchResultTitle: "{action}结果",
+      batchPartial: "成功 {success} 条，失败 {failed} 条。失败数据ID：{details}",
     },
     profile: {
       title: "个人设置",

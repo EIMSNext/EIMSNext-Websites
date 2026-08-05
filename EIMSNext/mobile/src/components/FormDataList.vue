@@ -1,52 +1,58 @@
 <template>
   <MobilePage :title="form?.name || t('admin.formListView.dataList')" @back="goBack">
     <template #right>
-      <van-icon name="plus" @click="goToAdd" />
+      <van-icon v-if="form && !loadError" name="plus" @click="goToAdd" />
     </template>
 
     <div class="data-page">
-      <div class="table-toolbar mobile-card">
-        <div class="toolbar-tip">{{ currentView?.name || t("admin.formListView.defaultView") }}</div>
-      </div>
+      <van-empty v-if="loadError" image="error" :description="t('admin.formData.dataNotAvailable')">
+        <van-button size="small" @click="initialize">{{ t("common.retry") }}</van-button>
+      </van-empty>
 
-      <div v-if="mobileType === MobileFormListViewType.Table" class="data-table-wrapper mobile-card">
-        <div class="table-scroll-area">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
-                  {{ col.title }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in dataList" :key="row.id" @click="goToDetail(row)">
-                <td v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
-                  {{ formatCell(row, col.field) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <template v-else>
+        <div class="table-toolbar mobile-card">
+          <div class="toolbar-tip">{{ currentView?.name || t("admin.formListView.defaultView") }}</div>
         </div>
-        <div v-if="!loading && dataList.length === 0" class="empty-tip">{{ t("common.noData") }}</div>
-      </div>
 
-      <div v-else class="mobile-card-list">
-        <div v-for="row in dataList" :key="row.id" class="mobile-data-card mobile-card" @click="goToDetail(row)">
-          <div class="card-title">{{ cardTitle(row) }}</div>
-          <div class="card-fields" :class="`cols-${mobileSettings.fieldColumns || 1}`">
-            <div v-for="col in columns" :key="col.field" class="card-field">
-              <span class="field-label">{{ col.title }}</span>
-              <span class="field-value">{{ formatCell(row, col.field) || "--" }}</span>
+        <div v-if="mobileType === MobileFormListViewType.Table" class="data-table-wrapper mobile-card">
+          <div class="table-scroll-area">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
+                    {{ col.title }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in dataList" :key="row.id" @click="goToDetail(row)">
+                  <td v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
+                    {{ formatCell(row, col.field) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="!loading && dataList.length === 0" class="empty-tip">{{ t("common.noData") }}</div>
+        </div>
+
+        <div v-else class="mobile-card-list">
+          <div v-for="row in dataList" :key="row.id" class="mobile-data-card mobile-card" @click="goToDetail(row)">
+            <div class="card-title">{{ cardTitle(row) }}</div>
+            <div class="card-fields" :class="`cols-${mobileSettings.fieldColumns || 1}`">
+              <div v-for="col in columns" :key="col.field" class="card-field">
+                <span class="field-label">{{ col.title }}</span>
+                <span class="field-value">{{ formatCell(row, col.field) || "--" }}</span>
+              </div>
             </div>
           </div>
+          <div v-if="!loading && dataList.length === 0" class="empty-tip mobile-card">{{ t("common.noData") }}</div>
         </div>
-        <div v-if="!loading && dataList.length === 0" class="empty-tip mobile-card">{{ t("common.noData") }}</div>
-      </div>
+      </template>
     </div>
 
     <template #footer>
-      <div class="pagination-wrap">
+      <div v-if="!loadError" class="pagination-wrap">
         <van-pagination v-model="currentPage" :total-items="total" :items-per-page="pageSize" mode="simple" @change="loadData" />
       </div>
     </template>
@@ -87,6 +93,7 @@ const currentView = ref<FormListView>();
 const dataList = ref<FormData[]>([]);
 const columns = ref<{ field: string; title: string; width: number }[]>([]);
 const mobileSettings = ref<FormListViewMobileSettings>({ fieldColumns: 1 });
+const loadError = ref(false);
 
 const goBack = () => router.back();
 const goToAdd = () => router.push(`/app/${appId}/form/${formId}/add`);
@@ -114,16 +121,31 @@ const loadForm = async () => {
 
 const loadData = async () => {
   loading.value = true;
-  const skip = (currentPage.value - 1) * pageSize.value;
-  const filter = buildFilter();
-  const sort = buildSort();
-  const [list, count] = await Promise.all([
-    formDataServiceMobile.query(formId, skip, pageSize.value, filter, sort),
-    formDataServiceMobile.count(formId, filter),
-  ]);
-  dataList.value = list;
-  total.value = count;
-  loading.value = false;
+  try {
+    const skip = (currentPage.value - 1) * pageSize.value;
+    const filter = buildFilter();
+    const sort = buildSort();
+    const [list, count] = await Promise.all([
+      formDataServiceMobile.query(formId, skip, pageSize.value, filter, sort),
+      formDataServiceMobile.count(formId, filter),
+    ]);
+    dataList.value = list;
+    total.value = count;
+  } catch {
+    loadError.value = true;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const initialize = async () => {
+  loadError.value = false;
+  try {
+    await loadForm();
+    await loadData();
+  } catch {
+    loadError.value = true;
+  }
 };
 
 const formatCell = (row: FormData, field: string) => {
@@ -205,7 +227,7 @@ const imageText = (value: any) => {
 };
 
 onMounted(() => {
-  void loadForm().then(loadData);
+  void initialize();
 });
 </script>
 

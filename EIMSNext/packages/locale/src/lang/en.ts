@@ -53,6 +53,7 @@ export default {
     copied: "Copied",
     open: "Open",
     loadFailed: "Load failed",
+    operationFailed: "Operation failed",
     retry: "Retry",
     department: "Department",
     employee: "Employee",
@@ -1612,6 +1613,9 @@ export default {
       terminateSuccess: "Flow terminated",
       selectNewApprover: "Please select a new approver",
       approverUpdated: "Approver updated",
+      batchSuccess: "{action} succeeded",
+      batchResultTitle: "{action} result",
+      batchPartial: "Succeeded: {success}; failed: {failed}. Failed data IDs: {details}",
     },
     appStore: {
       appDetail: "App Detail",

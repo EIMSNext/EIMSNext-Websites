@@ -2,6 +2,9 @@
   <MobilePage :title="task?.formName || t('mobile.approval.title')" @back="goBack">
     <div class="approval-page">
       <div v-if="loading" class="approval-loading">{{ t("common.loading") }}</div>
+      <van-empty v-else-if="loadError" image="error" :description="t('admin.formData.dataNotAvailable')">
+        <van-button size="small" @click="loadTask">{{ t("common.retry") }}</van-button>
+      </van-empty>
       <MobileCard v-else-if="task" class="approval-card">
         <div class="approval-title">{{ task.formName }}</div>
         <div class="approval-meta">{{ t("mobile.approval.currentNode") }}{{ task.approveNodeName }}</div>
@@ -12,7 +15,7 @@
     </div>
 
     <template #footer>
-      <div class="approval-actions">
+      <div v-if="task && !loadError" class="approval-actions">
         <van-button
           v-for="action in visibleActions"
           :key="action.key"
@@ -52,6 +55,7 @@ const task = ref<WfTodo>();
 const nodeActions = ref<WorkflowNodeAction[]>([]);
 const actionStatus = ref({ canWithdraw: false, canUrge: false });
 const flowStatus = ref<FlowStatus>();
+const loadError = ref(false);
 
 const getNodeActionText = (actionType: WorkflowNodeActionType) => {
   const key = `mobile.approvalActions.${actionType}`;
@@ -183,14 +187,29 @@ const runAction = async (key: MobileActionKey) => {
 
 const loadTask = async () => {
   loading.value = true;
-  task.value = await todoServiceMobile.get(taskId);
-  if (task.value) {
-    const data = await formDataServiceMobile.get(task.value.dataId);
+  loadError.value = false;
+  try {
+    const loadedTask = await todoServiceMobile.get(taskId);
+    if (!loadedTask) throw new Error("Workflow task is unavailable");
+    task.value = loadedTask;
+
+    const [data, status, actions] = await Promise.all([
+      formDataServiceMobile.get(loadedTask.dataId),
+      todoServiceMobile.getActionStatus(loadedTask.dataId, loadedTask.wfInstanceId),
+      todoServiceMobile.getNodeActions(loadedTask.dataId, loadedTask.wfInstanceId),
+    ]);
     flowStatus.value = data.flowStatus;
-    actionStatus.value = await todoServiceMobile.getActionStatus(task.value.dataId, task.value.wfInstanceId);
-    nodeActions.value = await todoServiceMobile.getNodeActions(task.value.dataId, task.value.wfInstanceId);
+    actionStatus.value = status;
+    nodeActions.value = actions;
+  } catch {
+    task.value = undefined;
+    nodeActions.value = [];
+    actionStatus.value = { canWithdraw: false, canUrge: false };
+    flowStatus.value = undefined;
+    loadError.value = true;
+  } finally {
+    loading.value = false;
   }
-  loading.value = false;
 };
 
 onMounted(() => {

@@ -8,6 +8,9 @@
   <div class="workflow-list-wrap">
     <van-pull-refresh v-model="refreshing" @refresh="load">
       <div v-if="loading" class="workflow-empty">{{ t('common.loading') }}</div>
+      <van-empty v-else-if="loadError" image="error" :description="t('admin.formData.dataNotAvailable')">
+        <van-button size="small" @click="load">{{ t('common.retry') }}</van-button>
+      </van-empty>
       <div v-else-if="list.length === 0" class="workflow-empty">{{ t('common.noData') }}</div>
       <div v-else class="workflow-list">
         <MobileCard
@@ -54,9 +57,11 @@ const currentTab = ref(props.activeTab);
 const refreshing = ref(false);
 const loading = ref(false);
 const list = ref<WfTodo[]>([]);
+const loadError = ref(false);
 
 const load = async () => {
   loading.value = true;
+  loadError.value = false;
   try {
     if (currentTab.value === "todo") {
       list.value = await todoServiceMobile.query(props.appId || undefined, 0, 20);
@@ -67,6 +72,9 @@ const load = async () => {
     } else {
       list.value = await workflowServiceMobile.getCced(props.appId || undefined, 0, 20);
     }
+  } catch {
+    list.value = [];
+    loadError.value = true;
   } finally {
     loading.value = false;
     refreshing.value = false;
