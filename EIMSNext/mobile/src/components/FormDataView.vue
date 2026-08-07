@@ -21,7 +21,7 @@
 
     <template #footer>
       <div v-if="isAdd || editing" class="detail-footer-actions">
-        <van-button block :loading="saving" @click="handleSave">{{ t("common.save") }}</van-button>
+        <van-button block :loading="saving" @click="() => handleSave()">{{ t("common.save") }}</van-button>
         <van-button
           v-if="isAdd && formDef?.usingWorkflow"
           block

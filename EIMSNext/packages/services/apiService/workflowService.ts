@@ -77,8 +77,7 @@ export class WorkflowService extends ServiceBase {
   }
 
   async queryManageTodos(params: FlowManageQueryRequest): Promise<FlowManageTodoQueryResult> {
-    const result = await this.http().api.get<{ data: FlowManageTodoQueryResult }>(this.getUrl(this.modelName(), "ManageTodos"), params);
-    return result.data;
+    return this.http().api.get<FlowManageTodoQueryResult>(this.getUrl(this.modelName(), "ManageTodos"), params);
   }
 
   terminate(data: TerminateWorkflowRequest): Promise<any> {

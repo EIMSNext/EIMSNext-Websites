@@ -223,6 +223,14 @@ const hasAppTodo = computed(() => appTodoCount.value > 0);
 const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
 let appTodoTimer: ReturnType<typeof setInterval> | null = null;
 
+const loadCurrentApp = async () => {
+  try {
+    app.value = await appStore.get(contextStore.appId, true, true, { silentError: true });
+  } catch {
+    app.value = undefined;
+  }
+};
+
 // 展开/收缩菜单
 function toggleSideBar() {
   systemStore.toggleSidebar();
@@ -231,7 +239,7 @@ function toggleSideBar() {
 watch(
   () => contextStore.appId,
   () => {
-    appStore.get(contextStore.appId).then((res) => (app.value = res));
+    void loadCurrentApp();
   },
   { immediate: true }
 );

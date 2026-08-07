@@ -90,7 +90,7 @@ const loadDashboard = async () => {
   loadTask = (async () => {
     loadError.value = false;
     try {
-      const dash = await dashboardDefService.get<DashboardDef>(dashId);
+      const dash = await dashboardDefService.get<DashboardDef>(dashId, undefined, { silentError: true });
       dashboard.value = dash;
       try {
         const parsedLayout = JSON.parse(dash.layout) || [];

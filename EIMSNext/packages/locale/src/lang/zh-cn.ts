@@ -800,6 +800,8 @@ export default {
       apiKeyDesc: "后续将在此接入开放平台密钥管理，统一查看密钥、权限范围、更新时间和调用约束。",
       installedPlugins: "已安装插件",
       plugin: "插件",
+      status: "状态",
+      enable: "启用",
       action: "操作",
       uninstall: "卸载",
       // === 密钥管理 (Client) ===

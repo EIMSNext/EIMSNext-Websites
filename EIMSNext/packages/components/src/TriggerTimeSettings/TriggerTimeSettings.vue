@@ -219,7 +219,7 @@ const monthWeekday = ref(1);
 const currentFieldHasMinute = computed(() => hasMinutePrecision(localValue.value.field?.fieldFormat));
 const showCustomRepeatConfig = computed(() => localValue.value.repeatType === TimerRepeatType.Custom);
 
-const customStartTimeInput = computed<string | undefined>({
+const customStartTimeInput = computed<number | undefined>({
   get: () => toInputValue(localValue.value.custom?.startTime),
   set: (value) => {
     if (!localValue.value.custom) {
@@ -241,7 +241,7 @@ const fixedTimeInput = computed<string | undefined>({
   },
 });
 
-const endTimeInput = computed<string | undefined>({
+const endTimeInput = computed<number | undefined>({
   get: () => {
     const value = localValue.value.mode === TriggerTimeMode.Custom
       ? localValue.value.custom?.endTime
@@ -351,10 +351,10 @@ function emitChange() {
 }
 
 function toInputValue(value?: number) {
-  return value == null ? undefined : `${value}`;
+  return value;
 }
 
-function toTimestamp(value?: string) {
+function toTimestamp(value?: string | number) {
   if (!value) {
     return undefined;
   }

@@ -1,6 +1,7 @@
 import { Operator } from "./modelBase";
 
 export interface FlowManageTodoItem {
+  todoId: string;
   wfInstanceId: string;
   dataId: string;
   formName: string;

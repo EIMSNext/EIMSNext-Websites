@@ -12,11 +12,7 @@ import router from "./router";
 import "vant/lib/index.css";
 import "./styles/index.scss";
 
-const initHttp = () => {
-  setupHttp((error) => {
-    console.error("mobile http error", error);
-  });
-};
+const initHttp = () => setupHttp();
 
 const initTheme = () => {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;

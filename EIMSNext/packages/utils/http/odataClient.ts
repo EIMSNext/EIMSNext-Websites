@@ -12,7 +12,7 @@ export class ODataClient {
     this.httpRequest = request;
   }
 
-  get<T = any>(url: string, id: string, data?: any) {
+  get<T = any>(url: string, id: string, data?: any, options?: { silentError?: boolean }) {
     url = this.formatUrl<T>(url, id);
     if (data) {
       let qStr =
@@ -21,7 +21,7 @@ export class ODataClient {
       url = `${url}${qMark}${qStr}`;
     }
     let headers = this.getAxiosHeaders();
-    return this.httpRequest.get<T>({ url, headers, withToken: true });
+    return this.httpRequest.get<T>({ url, headers, withToken: true, silentError: options?.silentError });
   }
 
   count(url: string, data?: any) {

@@ -802,6 +802,8 @@ export default {
       apiKeyDesc: "Open platform key management will be added here later, including keys, scopes, update times, and call constraints.",
       installedPlugins: "Installed Plugins",
       plugin: "Plugin",
+      status: "Status",
+      enable: "Enabled",
       action: "Action",
       uninstall: "Uninstall",
       apiKeyMgmt: {

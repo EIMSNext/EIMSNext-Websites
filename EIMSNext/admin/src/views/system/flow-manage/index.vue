@@ -124,7 +124,7 @@ const memberOptions = computed(() => ({
 
 const formatDateTime = (value?: number) => dateFormat(value, "YYYY-MM-DD HH:mm:ss") || "-";
 
-const getRowKey = (row: FlowManageTodoItem) => `${row.wfInstanceId}:${row.approveNodeId}`;
+const getRowKey = (row: FlowManageTodoItem) => row.todoId;
 
 const handleQuery = async () => {
   loading.value = true;

@@ -14,7 +14,7 @@ export class ApiClient {
   get<T = any>(url: string, data?: any, withToken?: true) {
     url = this.formatUrl(url);
     let headers = new AxiosHeaders();
-    return this.httpRequest.get<T>({ url, data, headers, withToken });
+    return this.httpRequest.get<T>({ url, params: data, headers, withToken });
   }
 
   count(url: string, data?: any) {

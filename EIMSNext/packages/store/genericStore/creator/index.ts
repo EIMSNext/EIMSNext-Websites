@@ -4,6 +4,10 @@ import { useStorage } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
+type StoreGetOptions = {
+  silentError?: boolean;
+};
+
 export default function createStore<T extends IIdentity>(id: string, url: string, initData: T[] = []) {
   return defineStore(id, () => {
     const loading = ref(false);
@@ -36,7 +40,8 @@ export default function createStore<T extends IIdentity>(id: string, url: string
     const get = (
       id: string,
       fromCache: boolean = true,
-      saveToCache: boolean = true
+      saveToCache: boolean = true,
+      options?: StoreGetOptions,
     ): Promise<T | undefined> => {
       return new Promise<T | undefined>((resolve, reject) => {
         if (id) {
@@ -46,7 +51,7 @@ export default function createStore<T extends IIdentity>(id: string, url: string
           } else {
             loading.value = true;
             http.odata
-              .get<T>(url, id)
+              .get<T>(url, id, undefined, options)
               .then((res) => {
                 if (saveToCache) {
                   update(res);

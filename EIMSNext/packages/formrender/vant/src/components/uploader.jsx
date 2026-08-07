@@ -1,6 +1,6 @@
 import { defineComponent, ref, toRef, watch } from "vue";
 import { toArray } from "@eimsnext/form-render-core";
-import { getFileFullUrl } from "@eimsnext/utils";
+import { appSetting, getFileFullUrl } from "@eimsnext/utils";
 
 const NAME = "fcUploader";
 
@@ -25,6 +25,19 @@ function parseUpload(file) {
 
 function getFileName(file) {
   return ("" + file).split("/").pop();
+}
+
+function toStoredFileValue(value) {
+  if (typeof value === "string") {
+    const baseUrl = appSetting.uploadUrl.replace(/\/+$/, "");
+    return baseUrl && value.startsWith(`${baseUrl}/`) ? value.slice(baseUrl.length + 1) : value;
+  }
+
+  if (value && typeof value === "object" && value.url) {
+    return { ...value, url: toStoredFileValue(value.url) };
+  }
+
+  return value;
 }
 
 export default defineComponent({
@@ -61,7 +74,7 @@ export default defineComponent({
 
     const uploadValue = () => {
       let files = fileList.value
-        .map((v) => v.value ?? v.url)
+        .map((v) => toStoredFileValue(v.value ?? v.url))
         .filter((url) => url !== undefined);
       _.emit(
         "update:modelValue",
