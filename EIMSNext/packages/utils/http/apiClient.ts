@@ -11,10 +11,10 @@ export class ApiClient {
     this.httpRequest = request;
   }
 
-  get<T = any>(url: string, data?: any, withToken?: true) {
+  get<T = any>(url: string, data?: any, withToken?: true, options?: { silentError?: boolean }) {
     url = this.formatUrl(url);
     let headers = new AxiosHeaders();
-    return this.httpRequest.get<T>({ url, params: data, headers, withToken });
+    return this.httpRequest.get<T>({ url, params: data, headers, withToken, silentError: options?.silentError });
   }
 
   count(url: string, data?: any) {

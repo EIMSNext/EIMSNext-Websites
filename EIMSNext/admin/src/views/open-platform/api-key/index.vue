@@ -111,6 +111,7 @@
         <el-form-item :label="$t('admin.apiKeyMgmt.form.clientSecret')">
           <el-input
             v-model="form.clientSecret"
+            class="client-secret-input"
             :type="form.showSecret ? 'text' : 'password'"
             :readonly="!editing"
             :placeholder="form.secretHint || ''"
@@ -646,6 +647,15 @@ onMounted(load);
     font-size: 13px;
     color: var(--et-text-primary);
   }
+}
+
+:deep(.client-secret-input .el-input-group__append) {
+  display: flex;
+  padding: 0;
+}
+
+:deep(.client-secret-input .el-input-group__append .el-button) {
+  margin: 0;
 }
 
 .ip-editor {

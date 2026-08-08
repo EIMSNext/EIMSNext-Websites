@@ -389,7 +389,7 @@ onBeforeMount(async () => {
   try {
     const [form, data, logs, dataLogs] = await Promise.all([
       formStore.get(formId),
-      formDataService.get<FormData>(dataId, queryParams),
+      formDataService.get<FormData>(dataId, queryParams, { silentError: true }),
       wfApprovalLogService.query<WfApprovalLog>(
         buildQuery({
           filter: { formId, dataId },
@@ -397,7 +397,7 @@ onBeforeMount(async () => {
           top: 20,
         })
       ),
-      formDataService.getChangeLogs(dataId, 0, 20, authGroupId),
+      formDataService.getChangeLogs(dataId, 0, 20, authGroupId, { silentError: true }),
     ]);
 
     if (form) {

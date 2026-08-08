@@ -67,11 +67,22 @@ export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
     return this.http().api.get<IFormDataPermissionScopeResponse>(`/FormData/${dataId}/permission-scope`, { formId });
   }
 
-  async getChangeLogs(dataId: string, skip = 0, top = 20, authGroupId?: string): Promise<FormDataChangeLog[]> {
+  async getChangeLogs(
+    dataId: string,
+    skip = 0,
+    top = 20,
+    authGroupId?: string,
+    options?: { silentError?: boolean }
+  ): Promise<FormDataChangeLog[]> {
     const params: Record<string, unknown> = { skip, top };
     if (authGroupId) params.authGroupId = authGroupId;
 
-    const result = await this.http().api.get<{ value: FormDataChangeLog[] }>(`/FormData/${dataId}/changelog`, params);
+    const result = await this.http().api.get<{ value: FormDataChangeLog[] }>(
+      `/FormData/${dataId}/changelog`,
+      params,
+      true,
+      options
+    );
     return result.value;
   }
 
