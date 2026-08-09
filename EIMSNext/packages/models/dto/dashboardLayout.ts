@@ -17,6 +17,10 @@ export interface IGridLayoutItem {
   inEdit?: boolean;
   drag?: boolean;
   type?: DashItemType;
+  /** Layout container that owns this item. Root-level items omit this value. */
+  parentLayoutId?: string;
+  /** Active tab identifier when the parent layout container uses tabs. */
+  tabId?: string;
 }
 
 export interface IGridLayoutState {

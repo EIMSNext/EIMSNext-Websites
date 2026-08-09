@@ -1,5 +1,20 @@
 <template>
-  <div class="layout-grid-item">
+  <LayoutContainerCard
+    v-if="itemDef.itemType === DashItemType.LayoutContainer"
+    :item-def="itemDef"
+    :layout="layout"
+    :items="items"
+    :is-view="isView"
+    :is-public="isPublic"
+    :public-token="publicToken"
+    :external-filters="externalFilters"
+    @update-layout="emit('update-layout', $event)"
+    @update-setting="(...args) => emit('update-setting', ...args)"
+    @edit="emit('edit', $event)"
+    @delete="emit('delete', $event)"
+    @filter-change="onFilterValueChanged"
+  />
+  <div v-else class="layout-grid-item">
     <div class="container-group-drag-handle"></div>
     <div v-if="!isView" class="container-header">
       <div class="header-action-container">
@@ -65,6 +80,8 @@ import EChartsViewer from "../ECharts/EChartsViewer.vue";
 import FilterWidgetCard from "./FilterWidgetCard.vue";
 import DetailTableViewer from "../DetailTable/DetailTableViewer.vue";
 import { detailTableSettingValidate, IDetailTableSetting, parseDetailTableSetting } from "../DetailTable/type";
+import LayoutContainerCard from "../LayoutContainer/LayoutContainerCard.vue";
+import { IGridLayoutItem } from "@eimsnext/models";
 const { t } = useLocale();
 
 defineOptions({
@@ -80,10 +97,16 @@ const props = withDefaults(
     height?: number;
     width?: number;
     externalFilter?: any;
+    externalFilters?: Record<string, any>;
+    layout?: IGridLayoutItem[];
+    items?: Record<string, DashboardItemDef>;
   }>(),
   {
     isView: false,
     isPublic: false,
+    externalFilters: () => ({}),
+    layout: () => [],
+    items: () => ({}),
   }
 );
 
@@ -127,7 +150,7 @@ const isInteractiveContent = computed(() => {
   return props.isView && [DashItemType.Filter, DashItemType.DetailTable].includes(props.itemDef.itemType);
 });
 
-const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change"]);
+const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change", "update-layout", "update-setting"]);
 const onHide = () => {
   emit("hide", props.itemDef);
 };
