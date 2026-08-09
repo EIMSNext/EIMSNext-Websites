@@ -73,7 +73,7 @@ export const getCurrentFormFields = (designer, currentField, contextRule) => {
   const formId = designer?.setupState?.formId || "";
   walkRules(getCurrentContextRules(designer, contextRule), (rule) => {
     if (!rule.field || !rule.title) return;
-    if (rule.field === currentField || rule.type === "dataselect") return;
+    if (rule.field === currentField || rule.type === "dataselect" || rule.type === "query") return;
     const fieldType = RULE_TYPE_FIELD_MAP[rule.type] || rule.type || FieldType.None;
     fields.push({
       formId,

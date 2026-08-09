@@ -31,6 +31,7 @@ const props = defineProps<{
   formId: string;
   fieldLimit?: IFieldLimit;
   fields?: IFormFieldDef[];
+  useFields?: boolean;
 }>();
 
 const formStore = useFormStore();
@@ -80,7 +81,7 @@ const onInput = (val: string) => {
 watch(
   [() => props.formId, () => props.fieldLimit, () => props.fields],
   ([newFormId]) => {
-    if (customFieldList.value.length > 0) {
+    if (props.useFields || customFieldList.value.length > 0) {
       fieldList.value = appendMissingSelectedField(customFieldList.value);
       return;
     }

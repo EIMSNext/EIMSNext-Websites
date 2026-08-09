@@ -55,6 +55,7 @@
         :nodes="nodes"
         :fieldBuildSetting="valueBuildSetting"
         :operator="op"
+        :allow-field-value="allowFieldValue"
         @change="onInput"
       ></ConditionValue>
     </div>
@@ -90,6 +91,7 @@ const props = defineProps<{
   condType: ConditionType;
   fieldBuildSetting: IFieldBuildSetting;
   valueBuildSetting: IFieldBuildSetting;
+  allowFieldValue?: boolean;
   nodes?: INodeForm[];
 }>();
 

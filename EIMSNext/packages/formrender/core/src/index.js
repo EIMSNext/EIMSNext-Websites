@@ -36,6 +36,12 @@ import {
   format,
   tip,
   err,
+  createFormDataQuery,
+  mergeFormDataRecord,
+  normalizeQueryField,
+  resolveFormDataValue,
+  resolveQueryFilter,
+  stringifyFormDataValue,
 } from "./utils";
 import { fragment, FcSubForm } from "./components";
 import fetch from "./frame/fetch";
@@ -85,4 +91,10 @@ export {
   format,
   tip,
   err,
+  createFormDataQuery,
+  mergeFormDataRecord,
+  normalizeQueryField,
+  resolveFormDataValue,
+  resolveQueryFilter,
+  stringifyFormDataValue,
 };

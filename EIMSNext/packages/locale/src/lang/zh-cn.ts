@@ -3931,6 +3931,22 @@ export default {
         disabled: "禁用",
       },
     },
+    query: {
+      name: "查询",
+      dataSource: "查询表",
+      selectForm: "请选择表单",
+      resultDisplay: "查询结果的展示效果",
+      resultCount: "查询数据条数",
+      single: "单条",
+      multiple: "多条",
+      displayFields: "显示哪些字段",
+      setDisplayFields: "设置显示字段",
+      filter: "展示哪些数据",
+      addFilter: "添加过滤条件",
+      invalidConfig: "此项配置有误，请检查字段属性",
+      fetchFailed: "查询数据失败，请重试",
+      props: {},
+    },
     tableform: {
       name: "子表单",
       event: {

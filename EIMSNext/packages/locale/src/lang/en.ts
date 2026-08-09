@@ -3991,6 +3991,22 @@ export default {
         disabled: "Disabled",
       },
     },
+    query: {
+      name: "Query",
+      dataSource: "Query form",
+      selectForm: "Select a form",
+      resultDisplay: "Query result display",
+      resultCount: "Result count",
+      single: "Single",
+      multiple: "Multiple",
+      displayFields: "Fields to display",
+      setDisplayFields: "Set display fields",
+      filter: "Data to display",
+      addFilter: "Add filter condition",
+      invalidConfig: "This component is not configured. Check its field settings.",
+      fetchFailed: "Failed to query data. Please try again.",
+      props: {},
+    },
     tableform: {
       name: "Sub Form",
       event: {

@@ -11,6 +11,7 @@ import Group from './group';
 import SerialNo from './serialno';
 import Number from './number';
 import DataSelect from './dataSelect';
+import Query from './query';
 import { DepartmentSelect, EmployeeSelect } from './organizationSelect';
 import { Collapse, Tabs } from './layout';
 import IconWarning from './icon/IconWarning.vue';
@@ -32,6 +33,7 @@ export default [
     DepartmentSelect,
     EmployeeSelect,
     DataSelect,
+    Query,
     Tabs,
     Collapse,
 ]

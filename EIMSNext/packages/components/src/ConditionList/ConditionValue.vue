@@ -1,6 +1,6 @@
 <template>
   <div class="cond-value">
-    <div v-if="nodes && nodes.length > 0" class="value-type">
+    <div v-if="allowFieldValue || (nodes && nodes.length > 0)" class="value-type">
       <el-select size="default" default-first-option v-model="condValueType" @change="onValueTypeChange">
         <el-option v-for="opt in condValueTypes" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
       </el-select>
@@ -16,6 +16,7 @@
           v-model="condFieldValue"
           :formId="fieldDef?.formId || ''"
           :fields="fieldBuildSetting.fields"
+          :use-fields="fieldBuildSetting.fields !== undefined"
           :fieldLimit="fieldBuildSetting.fieldLimit"
           @change="onValueChange"
         />
@@ -134,6 +135,7 @@ const props = defineProps<{
   nodes?: INodeForm[];
   fieldDef?: IFormFieldDef;
   operator?: string;
+  allowFieldValue?: boolean;
 }>();
 
 const dataType = computed(() => {

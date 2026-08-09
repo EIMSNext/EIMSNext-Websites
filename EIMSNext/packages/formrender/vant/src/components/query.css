@@ -1,0 +1,28 @@
+.fc-mobile-query-state {
+  margin: 8px 16px;
+  padding: 10px 12px;
+  color: var(--van-danger-color);
+  background: var(--van-background-2);
+  border-radius: 4px;
+}
+
+.fc-mobile-query-loading {
+  display: flex;
+  justify-content: center;
+  padding: 22px 0;
+}
+
+.fc-mobile-query-empty {
+  padding: 4px 0;
+}
+
+.fc-mobile-query-single,
+.fc-mobile-query-record {
+  margin-top: 8px;
+}
+
+.fc-mobile-query-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
