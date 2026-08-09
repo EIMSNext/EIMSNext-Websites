@@ -36,6 +36,12 @@ export default defineComponent({
     const fields = computed(() => normalizeFields(props.displayConfig?.fields));
     const configured = computed(() => !!props.dataSource && fields.value.length > 0);
     const isMultiple = computed(() => props.resultMode === "multiple");
+    const currentFormData = () => {
+      const api = props.formCreateInject?.api;
+      return typeof api?.formData === "function"
+        ? api.formData()
+        : props.formCreateInject?.form || {};
+    };
 
     const load = async () => {
       const currentRequest = ++requestId;
@@ -52,7 +58,7 @@ export default defineComponent({
           formId: props.dataSource,
           page: 1,
           pageSize: isMultiple.value ? 20 : 1,
-          filter: resolveQueryFilter(props.filterConfig, props.formCreateInject?.form),
+          filter: resolveQueryFilter(props.filterConfig, currentFormData()),
           fields: fields.value,
         });
         const body = props.formCreateInject?.api?.fetch
@@ -77,7 +83,7 @@ export default defineComponent({
     };
 
     watch(
-      () => [props.dataSource, props.resultMode, props.displayConfig, props.filterConfig, props.formCreateInject?.form],
+      () => [props.dataSource, props.resultMode, props.displayConfig, props.filterConfig, currentFormData()],
       load,
       { deep: true, immediate: true },
     );
