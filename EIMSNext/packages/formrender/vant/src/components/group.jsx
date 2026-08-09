@@ -4,7 +4,7 @@ import {
   deepCopy,
   extend,
 } from "@eimsnext/form-render-core";
-import { defineComponent, markRaw, nextTick, watch } from "vue";
+import { defineComponent, markRaw, nextTick, reactive, watch } from "vue";
 
 const NAME = "fcGroup";
 
@@ -107,9 +107,18 @@ export default defineComponent({
         const serialized = JSON.stringify(n);
         if (serialized === this.pendingLocalModelValue) {
           this.pendingLocalModelValue = null;
+          const lengthDelta = n.length - this.sort.length;
+          if (lengthDelta > 0) {
+            for (let i = 0; i < lengthDelta; i += 1) {
+              this.addRule(this.sort.length + i, true);
+            }
+          } else if (lengthDelta < 0) {
+            for (let i = 0; i < -lengthDelta; i += 1) {
+              this.removeRule(this.sort[this.sort.length - i - 1]);
+            }
+          }
           return;
         }
-        this.pendingLocalModelValue = null;
         this.syncingModelValue = true;
         let keys = this.sort,
           total = keys.length,
@@ -185,7 +194,7 @@ export default defineComponent({
       this.cache(key, value);
     },
     addRule(i, emit) {
-      const rule = this.formCreateInject.form.copyRules(this.rule || []);
+      const rule = reactive(this.formCreateInject.form.copyRules(this.rule || []));
       const options = this.options
         ? { ...this.options }
         : {
@@ -385,6 +394,7 @@ export default defineComponent({
                     this.emitEvent(name, args, index, key),
                   "onUpdate:api": ($f) => this.add$f(index, key, $f),
                   inFor: true,
+                  subForm: false,
                   modelValue: this.field
                     ? { [this.field]: this._value(this.modelValue[index]) }
                     : this.modelValue[index],

@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { showToast } from "vant";
 import { useI18n } from "vue-i18n";
@@ -64,7 +64,7 @@ const renderRule = computed(() => {
   const layout = formDef.value?.content?.layout;
   if (!layout) return [];
   try {
-    return FormCreateMobile.parseJson(layout);
+    return reactive(FormCreateMobile.parseJson(layout));
   } catch {
     return [];
   }
