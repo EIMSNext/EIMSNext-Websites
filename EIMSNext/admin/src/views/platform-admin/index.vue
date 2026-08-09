@@ -22,6 +22,64 @@
         </el-form>
       </el-tab-pane>
 
+      <el-tab-pane name="app-package" :label="t('admin.platformAdmin.appPackage')">
+        <el-form class="publish-app-form" label-position="top" @submit.prevent>
+          <el-form-item :label="t('admin.platformAdmin.appProfileId')" required>
+            <el-input v-model="packageProfileId" :placeholder="t('admin.platformAdmin.appProfileIdPlaceholder')" />
+          </el-form-item>
+          <div class="form-actions">
+            <el-button type="primary" :icon="Download" :loading="packageExporting" :disabled="!packageProfileId.trim()" @click="exportAppPackage">
+              {{ t("admin.platformAdmin.exportPackage") }}
+            </el-button>
+          </div>
+
+          <el-form-item :label="t('admin.platformAdmin.importPackage')" class="package-import-field">
+            <el-upload
+              class="package-upload"
+              drag
+              accept=".eimsapp"
+              :auto-upload="false"
+              :show-file-list="false"
+              :on-change="selectPackageFile"
+            >
+              <et-icon icon="el-UploadFilled" size="28px" />
+              <div class="el-upload__text">{{ t("admin.platformAdmin.selectPackage") }}</div>
+              <template #tip><div class="el-upload__tip">{{ t("admin.platformAdmin.packageLimit") }}</div></template>
+            </el-upload>
+          </el-form-item>
+
+          <div v-if="packageFile" class="package-file-row">
+            <span>{{ packageFile.name }}</span>
+            <div class="package-file-actions">
+              <el-button :loading="packagePreviewing" @click="previewAppPackage">{{ t("admin.platformAdmin.previewPackage") }}</el-button>
+              <el-button type="danger" :loading="packageImporting" :disabled="!packagePreview" @click="importAppPackage">
+                {{ t("admin.platformAdmin.confirmImport") }}
+              </el-button>
+            </div>
+          </div>
+
+          <template v-if="packagePreview">
+            <el-alert
+              class="package-preview-alert"
+              :title="t('admin.platformAdmin.packagePreviewTitle', { action: profileActionText })"
+              type="warning"
+              :closable="false"
+              show-icon
+            />
+            <el-descriptions class="package-summary" :column="2" border>
+              <el-descriptions-item :label="t('admin.platformAdmin.appProfileId')">{{ packagePreview.appProfileId }}</el-descriptions-item>
+              <el-descriptions-item :label="t('admin.platformAdmin.templateId')">{{ packagePreview.templateId }}</el-descriptions-item>
+            </el-descriptions>
+            <el-table :data="packagePreview.resources" class="package-preview-table" size="small">
+              <el-table-column prop="resource" :label="t('admin.platformAdmin.resource')" min-width="200" />
+              <el-table-column prop="createCount" :label="t('admin.platformAdmin.createCount')" width="110" />
+              <el-table-column prop="updateCount" :label="t('admin.platformAdmin.updateCount')" width="110" />
+              <el-table-column prop="deleteCount" :label="t('admin.platformAdmin.deleteCount')" width="110" />
+            </el-table>
+          </template>
+        </el-form>
+      </el-tab-pane>
+
       <el-tab-pane name="plugins" :label="t('admin.platformAdmin.pluginPublish')">
         <el-form class="publish-form" label-position="top" @submit.prevent>
           <div class="form-grid">
@@ -170,12 +228,13 @@ import {
   ECoinChargeType,
   ECoinPrice,
   ECoinTargetType,
+  AppPackagePreview,
   PluginPublishRequest,
   PluginRuntimeInfo,
 } from "@eimsnext/models";
-import { appDefService, eCoinPriceService, systemService } from "@eimsnext/services";
-import { Check, Plus, Refresh, Search, Upload } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
+import { appDefService, appPackageService, eCoinPriceService, systemService } from "@eimsnext/services";
+import { Check, Download, Plus, Refresh, Search, Upload } from "@element-plus/icons-vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { useI18n } from "vue-i18n";
 
 interface EditablePrice {
@@ -195,6 +254,12 @@ const { t } = useI18n();
 const activeTab = ref("apps");
 const publishAppId = ref("");
 const publishingApp = ref(false);
+const packageProfileId = ref("");
+const packageFile = ref<File>();
+const packagePreview = ref<AppPackagePreview>();
+const packageExporting = ref(false);
+const packagePreviewing = ref(false);
+const packageImporting = ref(false);
 const runtimePlugins = ref<PluginRuntimeInfo[]>([]);
 const pluginPublishing = ref(false);
 const pluginTags = ref("");
@@ -220,6 +285,9 @@ const pricePageSize = ref(20);
 
 const selectedRuntime = computed(() => runtimePlugins.value.find((x) => x.pluginId === pluginForm.pluginId));
 const activeLoading = computed(() => activeTab.value === "prices" ? priceLoading.value : false);
+const profileActionText = computed(() => packagePreview.value?.profileExists
+  ? t("admin.platformAdmin.keepProfile")
+  : t("admin.platformAdmin.createProfile"));
 const targetOptions = computed(() => [
   { value: ECoinTargetType.SMS, label: "SMS" },
   { value: ECoinTargetType.EMail, label: "EMail" },
@@ -268,6 +336,59 @@ const doPublishApp = async () => {
     publishAppId.value = "";
   } finally {
     publishingApp.value = false;
+  }
+};
+
+const exportAppPackage = async () => {
+  const profileId = packageProfileId.value.trim();
+  if (!profileId) return;
+  packageExporting.value = true;
+  try {
+    const blob = await appPackageService.exportPackage(profileId);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `app-package-${profileId}.eimsapp`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    ElMessage.success(t("admin.platformAdmin.exportSuccess"));
+  } finally {
+    packageExporting.value = false;
+  }
+};
+
+const selectPackageFile = (file: { raw?: File }) => {
+  packageFile.value = file.raw;
+  packagePreview.value = undefined;
+};
+
+const previewAppPackage = async () => {
+  if (!packageFile.value) return;
+  packagePreviewing.value = true;
+  try {
+    packagePreview.value = await appPackageService.preview(packageFile.value);
+  } finally {
+    packagePreviewing.value = false;
+  }
+};
+
+const importAppPackage = async () => {
+  if (!packageFile.value || !packagePreview.value) return;
+  await ElMessageBox.confirm(
+    t("admin.platformAdmin.importConfirmText"),
+    t("admin.platformAdmin.importConfirmTitle"),
+    { type: "warning", confirmButtonText: t("admin.platformAdmin.confirmImport") },
+  );
+  packageImporting.value = true;
+  try {
+    const result = await appPackageService.importPackage(packageFile.value);
+    ElMessage.success(t("admin.platformAdmin.importSuccess", { id: result.appProfileId }));
+    packagePreview.value = undefined;
+    packageFile.value = undefined;
+  } finally {
+    packageImporting.value = false;
   }
 };
 
@@ -372,6 +493,7 @@ const savePrices = async () => {
 
 const refreshActiveTab = () => {
   if (activeTab.value === "plugins") return loadRuntimePlugins();
+  if (activeTab.value === "app-package") return;
   return loadPrices();
 };
 
@@ -458,6 +580,33 @@ onMounted(() => Promise.all([loadRuntimePlugins(), loadPrices()]));
   padding-top: var(--et-space-8);
 }
 
+.package-import-field {
+  margin-top: var(--et-space-24);
+}
+
+.package-upload {
+  width: min(480px, 100%);
+}
+
+.package-file-row,
+.package-file-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--et-space-12);
+}
+
+.package-file-row {
+  justify-content: space-between;
+  padding: var(--et-space-12) 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.package-preview-alert,
+.package-summary,
+.package-preview-table {
+  margin-top: var(--et-space-16);
+}
+
 .form-grid {
   display: grid;
   gap: 0 var(--et-space-16);
@@ -503,6 +652,11 @@ onMounted(() => Promise.all([loadRuntimePlugins(), loadPrices()]));
 
   .toolbar-spacer {
     display: none;
+  }
+
+  .package-file-row {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 </style>

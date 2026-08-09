@@ -61,6 +61,12 @@ export class ApiClient {
     return this.httpRequest.post<T>({ url, data, headers, withToken });
   }
 
+  download(url: string, data?: any, withToken?: true): Promise<Blob> {
+    url = this.formatUrl(url);
+    const headers = new AxiosHeaders();
+    return this.httpRequest.get<Blob>({ url, params: data, headers, withToken, responseType: "blob" });
+  }
+
   put<T = any>(url: string, data: any, withToken?: true) {
     url = this.formatUrl(url);
     let headers = new AxiosHeaders();

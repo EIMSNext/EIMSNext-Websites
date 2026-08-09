@@ -18,6 +18,7 @@ export * from "./dto/formDef";
 export * from "./dto/formListView";
 export * from "./dto/formNotify";
 export * from "./dto/appProfile";
+export * from "./dto/appPackage";
 export * from "./dto/auditLogin";
 export * from "./dto/payment";
 export * from "./dto/printDef";
