@@ -30,7 +30,7 @@
         >
           <div class="draft-card-head">
             <div class="draft-card-title">{{ row.dataTitle || t("admin.formListView.unnamedData") }}</div>
-            <el-button link type="danger" @click.stop="emit('delete', row)">{{ t("common.delete") }}</el-button>
+            <el-button v-if="canDelete" link type="danger" @click.stop="emit('delete', row)">{{ t("common.delete") }}</el-button>
           </div>
           <div class="draft-card-content">
             <div
@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
 import { useI18n } from "vue-i18n";
-import { FormData, FormDef } from "@eimsnext/models";
+import { FormData, FormDef, IFieldPerm } from "@eimsnext/models";
 import SimplePagination from "@/components/SimplePagination/index.vue";
 
 type PreviewItem = {
@@ -73,7 +73,7 @@ type PreviewItem = {
   value: string;
 };
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: boolean;
   title: string;
   description: string;
@@ -84,7 +84,11 @@ const props = defineProps<{
   pageSize: number;
   hasNext: boolean;
   formDef: FormDef;
-}>();
+  fieldPerms?: IFieldPerm[];
+  canDelete?: boolean;
+}>(), {
+  canDelete: true,
+});
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
@@ -110,6 +114,8 @@ const previewItems = (row: FormData): PreviewItem[] => {
 
   for (const field of props.formDef.content?.items || []) {
     if (result.length >= 3) break;
+    if (props.fieldPerms !== undefined &&
+      !props.fieldPerms.some((permission) => permission.id === field.field && permission.visible)) continue;
     const value = values[field.field];
     if (value === null || value === undefined || value === "") continue;
 

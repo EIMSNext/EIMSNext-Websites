@@ -530,7 +530,7 @@ function buildImportFields(items: FieldDef[], fieldPerms?: IFieldPerm[]) {
 }
 
 function canImportField(field: FieldDef, parent?: FieldDef, fieldPerms?: IFieldPerm[]) {
-  if (!fieldPerms || fieldPerms.length === 0) return true;
+  if (fieldPerms === undefined) return true;
   if (parent) {
     const parentPerm = fieldPerms.find((perm) => perm.id === parent.field);
     if (!parentPerm?.visible || !parentPerm.editable) return false;

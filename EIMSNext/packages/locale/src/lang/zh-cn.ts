@@ -1011,6 +1011,7 @@ export default {
     formList: {
       exportDialogTitle: "导出表单数据",
       selectPermGroup: "请选择权限组",
+      adminAllPermissions: "管理员全部权限",
       searchPlaceholder: "搜索数据",
       searchAllFields: "搜索全部字段",
       searchSpecificFields: "搜索指定字段",
@@ -1420,6 +1421,8 @@ export default {
       tools: "工具",
       filterWidget: "筛选组件",
       filterWidgetName: "筛选组件",
+      realTime: "实时时间",
+      timeFormat: "时间格式",
       layoutParseFailed: "布局JSON解析失败：",
       loadFailed: "加载失败",
       notAvailable: "仪表盘不可访问",

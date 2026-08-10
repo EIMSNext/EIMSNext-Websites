@@ -48,6 +48,14 @@ export default defineComponent({
       type: Boolean,
       default: undefined,
     },
+    editable: {
+      type: Boolean,
+      default: true,
+    },
+    initialRowsAreNew: {
+      type: Boolean,
+      default: false,
+    },
     onBeforeRemove: {
       type: Function,
       default: () => {},
@@ -110,7 +118,7 @@ export default defineComponent({
           const lengthDelta = n.length - this.sort.length;
           if (lengthDelta > 0) {
             for (let i = 0; i < lengthDelta; i += 1) {
-              this.addRule(this.sort.length + i, true);
+              this.addRule(this.sort.length + i, true, true);
             }
           } else if (lengthDelta < 0) {
             for (let i = 0; i < -lengthDelta; i += 1) {
@@ -125,7 +133,7 @@ export default defineComponent({
           len = total - n.length;
         if (len < 0) {
           for (let i = len; i < 0; i++) {
-            this.addRule(n.length + i, true);
+            this.addRule(n.length + i, true, false);
           }
           for (let i = 0; i < total; i++) {
             this.setValue(keys[i], n[i]);
@@ -193,7 +201,7 @@ export default defineComponent({
       this.cacheRule[key].version += 1;
       this.cache(key, value);
     },
-    addRule(i, emit) {
+    addRule(i, emit, isNew = false) {
       const rule = reactive(this.formCreateInject.form.copyRules(this.rule || []));
       const options = this.options
         ? { ...this.options }
@@ -210,7 +218,7 @@ export default defineComponent({
         );
       }
       this.parse && this.parse({ rule, options, index: this.sort.length });
-      this.cacheRule[++this.len] = { rule, options, version: 0 };
+      this.cacheRule[++this.len] = { rule, options, version: 0, isNew };
       if (emit) {
         nextTick(() =>
           this.$emit("add", rule, Object.keys(this.cacheRule).length - 1)
@@ -337,7 +345,7 @@ export default defineComponent({
     },
     expandRule(n) {
       for (let i = 0; i < n; i++) {
-        this.addRule(i);
+        this.addRule(i, false, this.initialRowsAreNew);
       }
     },
   },
@@ -351,7 +359,7 @@ export default defineComponent({
     );
     const d = (this.expand || 0) - this.modelValue.length;
     for (let i = 0; i < this.modelValue.length; i++) {
-      this.addRule(i);
+      this.addRule(i, false, this.initialRowsAreNew);
     }
     if (d > 0) {
       this.expandRule(d);
@@ -379,15 +387,16 @@ export default defineComponent({
         )
       ) : (
         keys.map((key, index) => {
-          const { rule, options, version } = this.cacheRule[key];
+          const { rule, options, version, isNew } = this.cacheRule[key];
           const btn =
             button && !disabled ? this.makeIcon(keys.length, index, key) : [];
+          const rowDisabled = disabled || (this.editable === false && !isNew);
           return (
             <div class="_fc-m-group-container" key={key}>
               <Type
                 key={`${key}-${version}`}
                 {...{
-                  disabled,
+                  disabled: rowDisabled,
                   "onUpdate:modelValue": (formData) =>
                     this.formData(key, formData),
                   "onEmit-event": (name, ...args) =>

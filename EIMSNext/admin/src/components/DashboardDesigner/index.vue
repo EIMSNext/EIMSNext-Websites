@@ -118,6 +118,13 @@
                     <div class="line-text">布局容器</div>
                   </div>
                 </div>
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.RealTime)"
+                    @drag="dashItemDrag($event, DashItemType.RealTime)" @dragend="handlePaletteDrop($event, DashItemType.RealTime)" unselectable="on">
+                    <et-icon icon="el-Clock" class="line-icon" />
+                    <div class="line-text">{{ t("admin.dashboardDesigner.realTime") }}</div>
+                  </div>
+                </div>
                 <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Comp" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
                   :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Comp }">
@@ -236,7 +243,8 @@
               <DashItemCard v-if="state.items[item.i]" :item-def="state.items[item.i]" :layout="state.layout" :items="state.items" :height="item.h" :width="item.w"
                 :is-view="false" @hide="handleItemHide(state.items[item.i])" @edit="handleItemEdit(state.items[item.i])"
                 @copy="handleItemCopy(state.items[item.i])" @delete="handleItemDelete(state.items[item.i])"
-                @update-layout="updateNestedLayout" @update-setting="updateContainerSetting" />
+                @update-layout="updateNestedLayout" @update-setting="updateContainerSetting"
+                @update-realtime-setting="updateRealTimeSetting" />
             </grid-item>
           </grid-layout>
         </div>
@@ -280,6 +288,7 @@ import { createDefaultDetailTableSetting } from "./DetailTable/type";
 import { useDashboardDragDrop } from "./useDashboardDragDrop";
 import { escapeODataString } from "@/utils/odata";
 import { createDefaultLayoutContainerSetting, ILayoutContainerSetting, parseLayoutContainerSetting } from "./LayoutContainer/type";
+import { createDefaultRealTimeSetting, IRealTimeSetting } from "./RealTime/type";
 const { t } = useI18n();
 
 defineOptions({
@@ -467,7 +476,9 @@ const handlePaletteDrop = async (e: DragEvent, type: DashItemType) => {
   }
   const layoutId = uniqueId();
   state.layout.push({ ...target, i: layoutId });
-  const details = type === DashItemType.LayoutContainer ? JSON.stringify(createDefaultLayoutContainerSetting()) : "{}";
+  let details = "{}";
+  if (type === DashItemType.LayoutContainer) details = JSON.stringify(createDefaultLayoutContainerSetting());
+  if (type === DashItemType.RealTime) details = JSON.stringify(createDefaultRealTimeSetting());
   await createNewDashItem(type, details, layoutId);
 };
 
@@ -492,6 +503,9 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
       break;
     case DashItemType.LayoutContainer:
       name = "未命名布局容器";
+      break;
+    case DashItemType.RealTime:
+      name = t("admin.dashboardDesigner.realTime");
       break;
     default:
       name = t("admin.untitledChart");
@@ -584,6 +598,13 @@ const updateContainerSetting = async (item: DashboardItemDef, setting: ILayoutCo
     await onSave();
   }
   const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, { id: item.id, name, details: JSON.stringify(setting) });
+  state.items[item.layoutId] = updated;
+};
+const updateRealTimeSetting = async (item: DashboardItemDef, setting: IRealTimeSetting) => {
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    details: JSON.stringify(setting),
+  });
   state.items[item.layoutId] = updated;
 };
 

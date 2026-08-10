@@ -950,6 +950,7 @@ export default {
     formList: {
       exportDialogTitle: "Export Form Data",
       selectPermGroup: "Please select permission group",
+      adminAllPermissions: "Administrator full access",
       searchPlaceholder: "Search data",
       searchAllFields: "Search all fields",
       searchSpecificFields: "Search specific fields",
@@ -1359,6 +1360,8 @@ export default {
       tools: "Tools",
       filterWidget: "Filter Widget",
       filterWidgetName: "Filter Widget",
+      realTime: "Real-time Clock",
+      timeFormat: "Time Format",
       layoutParseFailed: "Failed to parse layout JSON:",
       loadFailed: "Load failed",
       notAvailable: "Dashboard unavailable",

@@ -52,7 +52,7 @@ import {
   PrintDef,
   WorkflowActionStatus,
 } from "@eimsnext/models";
-import { useFormStore, useUserStore } from "@eimsnext/store";
+import { useFormStore } from "@eimsnext/store";
 import { customPrintService, formDataService, PrintRequest, printDefService, workflowService } from "@eimsnext/services";
 import { bus } from "@eimsnext/utils";
 import { FormActionSettings } from "@/components/FormView/type";
@@ -87,15 +87,13 @@ const formData = ref<FormData>();
 const showDeleteConfirmDialog = ref(false);
 const showShareDialog = ref(false);
 const externalShareEnabled = ref(false);
-const userStore = useUserStore();
-const { currentUser } = userStore;
 const route = useRoute();
 const router = useRouter();
 const loadError = ref(false);
 
-const canEdit = computed(() => hasDataPerm(currentUser.userType, DataPerms.Edit, props.dataPerms));
+const canEdit = computed(() => hasDataPerm(DataPerms.Edit, props.dataPerms));
 const canRemove = computed(() =>
-  hasDataPerm(currentUser.userType, DataPerms.Remove, props.dataPerms)
+  hasDataPerm(DataPerms.Remove, props.dataPerms)
 );
 
 const printConfig = ref(getPrintConfig(false));
@@ -245,6 +243,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       showShareDialog.value = true;
       break;
     case "edit":
+      if (!canEdit.value) break;
       isEditing.value = true;
       oriFormData.value = JSON.parse(JSON.stringify(formData.value));
 
@@ -262,6 +261,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       actions.value = {};
       break;
     case "delete":
+      if (!canRemove.value) break;
       showDeleteConfirmDialog.value = true;
       break;
     case "withdraw":
@@ -303,6 +303,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
   }
 };
 const execDelete = async () => {
+  if (!canRemove.value) return;
   try {
     await formDataService.delete(props.dataId);
     emit("ok");
@@ -318,6 +319,7 @@ const cancel = () => {
   emit("cancel");
 };
 const saveDraft = async (data: any) => {
+  if (!canEdit.value) return;
   let fdata: FormDataRequest = {
     action: DataAction.Save,
     id: props.dataId,
@@ -339,6 +341,7 @@ const saveDraft = async (data: any) => {
   }
 };
 const submitData = async (data: any) => {
+  if (!canEdit.value) return;
   let fdata: FormDataRequest = {
     action: DataAction.Submit,
     id: props.dataId,

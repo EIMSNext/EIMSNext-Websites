@@ -49,15 +49,15 @@
     </et-dialog>
     <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataFilter :model-value="condList" :formId="formId" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
+      <DataFilter :model-value="condList" :formId="formId" :field-perms="fieldPerms" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
     </el-popover>
     <el-popover :visible="showSort" :virtual-ref="sortBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataSort :model-value="sortList" :formId="formId" @ok="setSort" @cancel="showSort = false"></DataSort>
+      <DataSort :model-value="sortList" :formId="formId" :field-perms="fieldPerms" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
     <el-popover :visible="showField" :virtual-ref="fieldBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataField :model-value="fieldList" :formId="formId" @ok="setField" @cancel="showField = false"></DataField>
+      <DataField :model-value="fieldList" :formId="formId" :field-perms="fieldPerms" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
     <div class="toolbar-head">
       <et-toolbar class="form-list-toolbar" :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
@@ -83,6 +83,8 @@
       :page-size="draftPageSize"
       :has-next="draftHasNext"
       :form-def="formDef"
+      :field-perms="fieldPerms"
+      :can-delete="canRemove"
       @refresh="refreshDrafts"
       @page-change="draftPageChanged"
       @select="openDraft"
@@ -147,7 +149,6 @@ import {
   getFlowStatus,
   getUpdateTime,
   AuthGroup,
-  UserType,
   IFieldPerm,
   DataPerms,
   FormListView,
@@ -158,6 +159,7 @@ import {
 import { ITableColumn, buildColumns } from "./type";
 import {
   IDynamicFindOptions,
+  IDataScope,
   authGroupService,
   formDataService,
   formListViewService,
@@ -180,6 +182,7 @@ import FormDataSearchBar from "./components/FormDataSearchBar.vue";
 import FormDataImportDialog from "./components/FormDataImportDialog.vue";
 import {
   createDefaultFormListView,
+  buildAllViewFields,
   getViewDisplayFields,
   parseCondition,
   parseSort,
@@ -193,6 +196,7 @@ import {
   resolveSearchFields,
 } from "./searchUtils";
 import { createDraftFilter, createNonDraftFilter } from "./draftUtils";
+import { useAdminPermissions } from "@/composables/useAdminPermissions";
 const { t } = useI18n();
 
 type FormDataQueryOptions = IDynamicFindOptions & {
@@ -219,6 +223,32 @@ const fieldBtnRef = ref();
 const authGrps = ref<AuthGroup[]>([]);
 const curAuthGrp = ref<AuthGroup>();
 const fieldPerms = ref<IFieldPerm[]>();
+const canManageCurrentApp = ref(false);
+const permissionsReady = ref(false);
+const canViewField = (field: string) =>
+  fieldPerms.value === undefined ||
+  fieldPerms.value.some((permission) => permission.id === field && permission.visible);
+const restrictConditionToVisibleFields = (condition: IConditionList): IConditionList | undefined => {
+  if (condition.field?.field && !canViewField(condition.field.field)) return undefined;
+  if (condition.value?.fieldValue?.field && !canViewField(condition.value.fieldValue.field)) return undefined;
+
+  return {
+    ...condition,
+    items: condition.items
+      ?.map(restrictConditionToVisibleFields)
+      .filter((item): item is IConditionList => item !== undefined),
+  };
+};
+const visibleCondition = (condition: IConditionList): IConditionList =>
+  restrictConditionToVisibleFields(condition) ?? { id: condition.id, rel: condition.rel || "and", items: [] };
+const visibleSort = (sort: IFieldSortList): IFieldSortList => ({
+  items: sort.items.filter((item) => canViewField(item.field.field)),
+});
+const currentDataScope = (): IDataScope | undefined => {
+  if (curAuthGrp.value?.id) return { authGroupId: curAuthGrp.value.id };
+  if (usesAdminAllPermissions.value) return undefined;
+  return { formId, inheritMemberPermissions: true };
+};
 const listViews = ref<FormListView[]>([]);
 const curListView = ref<FormListView>();
 const curListViewSettings = ref<FormListViewSettings>({});
@@ -229,13 +259,23 @@ const searchState = reactive<FormDataSearchState>({
 });
 const userStore = useUserStore();
 const { currentUser } = userStore;
+const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
 
-const dataPerms = computed(() => getAuthGroupDataPerms(curAuthGrp.value));
-const canAdd = computed(() => hasDataPerm(currentUser.userType, DataPerms.AddNew, dataPerms.value));
-const canImport = computed(() => hasDataPerm(currentUser.userType, DataPerms.Import, dataPerms.value));
-const canExport = computed(() => hasDataPerm(currentUser.userType, DataPerms.Export, dataPerms.value));
+const usesAdminAllPermissions = computed(
+  () => permissionsReady.value && authGrps.value.length === 0 && canManageCurrentApp.value,
+);
+const dataPerms = computed(() =>
+  curAuthGrp.value
+    ? getAuthGroupDataPerms(curAuthGrp.value)
+    : usesAdminAllPermissions.value
+      ? DataPerms.All
+      : DataPerms.None,
+);
+const canAdd = computed(() => hasDataPerm(DataPerms.AddNew, dataPerms.value));
+const canImport = computed(() => hasDataPerm(DataPerms.Import, dataPerms.value));
+const canExport = computed(() => hasDataPerm(DataPerms.Export, dataPerms.value));
 const canRemove = computed(() =>
-  hasDataPerm(currentUser.userType, DataPerms.Remove, dataPerms.value)
+  hasDataPerm(DataPerms.Remove, dataPerms.value)
 );
 const availableViews = computed(() => {
   if (!formDef.value) return [];
@@ -259,8 +299,11 @@ const leftBars = ref<ToolbarItem[]>([
       showDynamicText: true,
       onCommand: (cmd) => {
         curAuthGrp.value = authGrps.value.find((x) => x.id == cmd);
-        fieldPerms.value = curAuthGrp.value?.fieldPerms;
-
+        fieldPerms.value = curAuthGrp.value ? (curAuthGrp.value.fieldPerms ?? []) : [];
+        showFilter.value = showSort.value = showField.value = false;
+        checkedDatas.value = [];
+        const deleteItem = leftBars.value.find((x) => x.config.command === "delete");
+        if (deleteItem) deleteItem.config.disabled = true;
         applyCurrentView(curListView.value?.id);
       },
     },
@@ -274,7 +317,7 @@ const leftBars = ref<ToolbarItem[]>([
       visible: canAdd,
       icon: "el-plus",
       onCommand: () => {
-        showAddDialog.value = true;
+        if (canAdd.value) showAddDialog.value = true;
       },
     },
   },
@@ -296,7 +339,7 @@ const leftBars = ref<ToolbarItem[]>([
       visible: canImport,
       icon: "el-upload",
       onCommand: () => {
-        showImportDialog.value = true;
+        if (canImport.value) showImportDialog.value = true;
       },
     },
   },
@@ -405,12 +448,14 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
 };
 
 const openExportDialog = () => {
+  if (!canExport.value) return;
   selectedExportColumnKeys.value = exportColumns.value.map((item) => item.key);
   exportFormat.value = ExportFormat.Csv;
   showExportDialog.value = true;
 };
 
 const submitExport = async () => {
+  if (!canExport.value) return;
   const selectedColumns = exportColumns.value.filter((item) =>
     selectedExportColumnKeys.value.includes(item.key)
   );
@@ -446,27 +491,49 @@ const submitExport = async () => {
 };
 
 const loadFormContext = async () => {
+  permissionsReady.value = false;
   const form = await formStore.get(formId);
   if (!form) return;
 
   formDef.value = form;
-  if (userStore.currentUser.userType == UserType.Employee) {
-    const res = await authGroupService.query<AuthGroup>(`$filter=appid eq '${form.appId}' AND formid eq '${form.id}'`);
-    authGrps.value = res;
-    if (res.length > 0) {
-      curAuthGrp.value = res[0];
-      fieldPerms.value = curAuthGrp.value.fieldPerms;
+  await loadAdminPermissions();
+  canManageCurrentApp.value = canManageAppId(form.appId);
 
-      const menuItems: IToolbarItemDropdownItem[] = res.map((x) => {
-        return { text: x.name, command: x.id, visible: true };
-      });
-      menuItems[0].checked = true;
+  const assignedGroups = await authGroupService.getAssigned(form.id);
+  authGrps.value = assignedGroups;
+  curAuthGrp.value = assignedGroups[0];
+  fieldPerms.value = curAuthGrp.value
+    ? (curAuthGrp.value.fieldPerms ?? [])
+    : canManageCurrentApp.value
+      ? undefined
+      : [];
+  permissionsReady.value = true;
 
-      const grpItem = leftBars.value.find((x) => x.config.command == "authgrp");
-      if (grpItem) {
-        grpItem.config.menuItems = menuItems;
-        grpItem.config.visible = true;
-      }
+  const groupItem = leftBars.value.find((x) => x.config.command === "authgrp");
+  if (groupItem) {
+    if (assignedGroups.length > 0) {
+      const menuItems: IToolbarItemDropdownItem[] = assignedGroups.map((group, index) => ({
+        text: group.name,
+        command: group.id,
+        visible: true,
+        checked: index === 0,
+      }));
+      groupItem.config.menuItems = menuItems;
+      groupItem.config.visible = true;
+      groupItem.config.disabled = false;
+    } else if (canManageCurrentApp.value) {
+      groupItem.config.menuItems = [{
+        text: "admin.formList.adminAllPermissions",
+        command: "admin-all",
+        visible: true,
+        checked: true,
+      }];
+      groupItem.config.visible = true;
+      groupItem.config.disabled = true;
+    } else {
+      groupItem.config.menuItems = [];
+      groupItem.config.visible = false;
+      groupItem.config.disabled = true;
     }
   }
 
@@ -507,7 +574,10 @@ const checkedDatas = ref<any[]>([]);
 const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
 const selectedExportColumnKeys = ref<string[]>([]);
 const searchableFields = computed(() =>
-  formDef.value ? filterSearchableFields(buildAllSearchableFields(formDef.value, t)) : []
+  formDef.value
+    ? filterSearchableFields(buildAllSearchableFields(formDef.value, t))
+        .filter((field) => canViewField(field.field))
+    : []
 );
 
 const exportColumns = computed<ExportColumn[]>(() => buildExportColumns());
@@ -523,7 +593,11 @@ const applyCurrentView = (preferredViewId?: string) => {
   curListView.value = nextView;
   curListViewSettings.value = parseViewSettings(nextView.settings);
 
-  const displayFields = getViewDisplayFields(formDef.value, nextView, curListViewSettings.value, t);
+  const requestedFields = getViewDisplayFields(formDef.value, nextView, curListViewSettings.value, t);
+  const sourceFields = requestedFields.length === 0 && fieldPerms.value !== undefined
+    ? buildAllViewFields(formDef.value, t)
+    : requestedFields;
+  const displayFields = sourceFields.filter((field) => canViewField(field.field));
   fieldList.value = displayFields;
   listViewDisplayFields.value = displayFields.map((field) => ({
     field: field.field,
@@ -532,8 +606,8 @@ const applyCurrentView = (preferredViewId?: string) => {
     isSubField: field.isSubField,
   }));
   searchState.selectedFields = normalizeSelectedSearchFields(searchState.selectedFields, searchableFields.value);
-  condList.value = parseCondition(nextView.defaultFilter);
-  sortList.value = parseSort(formId, nextView.defaultSort, t);
+  condList.value = visibleCondition(parseCondition(nextView.defaultFilter));
+  sortList.value = visibleSort(parseSort(formId, nextView.defaultSort, t));
   pageNum.value = 1;
 
   initChildrenField(formDef.value.content?.items || [], fieldList.value, fieldPerms.value);
@@ -561,6 +635,7 @@ const selectionChanged = (rows: any[]) => {
     checkedDatas.value.length == 0;
 };
 const execDelete = async () => {
+  if (!canRemove.value) return;
   try {
     await formDataService.delete("batch", { keys: checkedDatas.value.map((x) => x[SystemField.Id]) });
       showDeleteConfirmDialog.value = false;
@@ -615,12 +690,12 @@ const updateQueryParams = () => {
   queryParams.value = {
     ...toDynamicFindOptions(
     queryFields,
-    condList.value,
-    sortList.value,
+    visibleCondition(condList.value),
+    visibleSort(sortList.value),
     (pageNum.value - 1) * pageSize.value,
     pageSize.value,
     createNonDraftFilter(formDef.value!.id),
-    { authGroupId: curAuthGrp.value?.id }
+    currentDataScope()
   ),
   };
   queryParams.value.keyword = searchState.keyword.trim();
@@ -634,7 +709,7 @@ const updateDraftQueryParams = () => {
     take: draftPageSize.value,
     filter: createDraftFilter(formDef.value!.id, "self", currentUser.empId),
     includeDeleted: false,
-    scope: curAuthGrp.value?.id ? { authGroupId: curAuthGrp.value.id } : undefined,
+    scope: currentDataScope(),
   };
 };
 
@@ -705,12 +780,13 @@ const handleSearch = () => {
 };
 
 const selectable = (row: any, index: number) => {
-  return !formDef.value?.usingWorkflow || row[SystemField.FlowStatus] == FlowStatus.Draft;
+  return canRemove.value &&
+    (!formDef.value?.usingWorkflow || row[SystemField.FlowStatus] == FlowStatus.Draft);
 };
 
 const buildExportColumns = (): ExportColumn[] => {
   const selectedFields = (fieldList.value.length > 0 ? fieldList.value : getAllExportFields())
-    .filter((field) => field.type !== FieldType.DataSelect);
+    .filter((field) => field.type !== FieldType.DataSelect && canViewField(field.field));
 
   return selectedFields.map((field) => ({
     key: field.field,
@@ -812,6 +888,7 @@ const openDraft = (row: FormData) => {
   showDetailsDialog.value = true;
 };
 const deleteDraft = async (row: FormData) => {
+  if (!canRemove.value) return;
   try {
     await formDataService.delete(row.id);
     await Promise.all([refreshDrafts(), Promise.resolve(handleQuery())]);

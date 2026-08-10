@@ -58,12 +58,14 @@ const props = withDefaults(
     isView?: boolean;
     isPublic?: boolean;
     publicToken?: string;
+    isNewData?: boolean;
     actions?: FormActionSettings;
     fieldPerms?: IFieldPerm[];
   }>(),
   {
     isView: false,
     isPublic: false,
+    isNewData: false,
   }
 );
 
@@ -104,15 +106,22 @@ watch(
   }
 );
 
-if (props.fieldPerms && props.fieldPerms.length > 0) {
+if (props.fieldPerms !== undefined) {
   let layout = formCreate.parseJson(props.def.layout!);
   layout.forEach((x) => {
     if (x.type == FieldType.TableForm) {
       let perm = props.fieldPerms?.find((p) => p.id == x.field);
       if (perm) {
-        x.hidden = !perm.visible;
-        if (x.props) x.props = { ...x.props, disabled: !perm.editable };
-        else x.props = { disabled: !perm.editable };
+        x.hidden = x.hidden === true || !perm.visible;
+        const tableProps: Record<string, any> = typeof x.props === "object" ? x.props : {};
+        x.props = {
+          ...tableProps,
+          disabled: tableProps.disabled === true || !perm.editable,
+          addable: tableProps.addable !== false && perm.tableInsert === true,
+          deletable: tableProps.deletable !== false && perm.tableDelete === true,
+          editable: perm.tableEdit === true,
+          initialRowsAreNew: props.isNewData,
+        };
       } else {
         x.hidden = true;
       }
@@ -124,11 +133,16 @@ if (props.fieldPerms && props.fieldPerms.length > 0) {
             let f = c.rule[0];
             let fPerm = props.fieldPerms?.find((p) => p.id == `${x.field}>${f.field}`);
             if (fPerm) {
-              x.hidden = !fPerm.visible;
-              if (f.props) f.props = { ...f.props, disabled: !fPerm.editable };
-              else f.props = { disabled: !fPerm.editable };
+              c.hidden = c.hidden === true || !fPerm.visible;
+              f.hidden = f.hidden === true || !fPerm.visible;
+              const fieldProps: Record<string, any> = typeof f.props === "object" ? f.props : {};
+              f.props = {
+                ...fieldProps,
+                disabled: fieldProps.disabled === true || !fPerm.editable,
+              };
             } else {
-              x.hidden = true;
+              c.hidden = true;
+              f.hidden = true;
             }
           }
         });
@@ -136,9 +150,12 @@ if (props.fieldPerms && props.fieldPerms.length > 0) {
     } else {
       let perm = props.fieldPerms?.find((p) => p.id == x.field);
       if (perm) {
-        x.hidden = !perm.visible;
-        if (x.props) x.props = { ...x.props, disabled: !perm.editable };
-        else x.props = { disabled: !perm.editable };
+        x.hidden = x.hidden === true || !perm.visible;
+        const fieldProps: Record<string, any> = typeof x.props === "object" ? x.props : {};
+        x.props = {
+          ...fieldProps,
+          disabled: fieldProps.disabled === true || !perm.editable,
+        };
       } else {
         x.hidden = true;
       }

@@ -7,7 +7,7 @@
                    @emit-event="$emit"></component>
         <div class="_fc-tf-pro-handle">
             <div>
-                <el-button link type="primary" class="fc-clock" v-if="(!max || max > total) && addable !== false"
+                <el-button link type="primary" class="fc-clock" v-if="!disabled && (!max || max > total) && addable !== false"
                            @click="addRaw(true)"><i class="fc-icon icon-add-circle" style="font-weight: 700;"></i>
                     {{ formCreateInject.t('add') || '添加' }}
                 </el-button>
@@ -55,6 +55,14 @@ export default {
             type: Boolean,
             default: true,
         },
+        editable: {
+            type: Boolean,
+            default: true,
+        },
+        initialRowsAreNew: {
+            type: Boolean,
+            default: false,
+        },
         options: {
             type: Object,
             default: () => reactive(({
@@ -73,6 +81,7 @@ export default {
                 if (this.oldValue === str) {
                     return;
                 }
+                this.newRows = markRaw(new WeakSet());
                 this.chunk = [[]];
                 this.nowPage = 1;
                 this.updateTable();
@@ -106,6 +115,7 @@ export default {
             copyTrs: '',
             oldValue: '',
             nowPage: 1,
+            newRows: markRaw(new WeakSet()),
             indexRule: {
                 type: 'el-table-column',
                 props: {
@@ -123,6 +133,32 @@ export default {
                 return (firstRule.__$title?.value || firstRule.title || firstRule.props?.label || '').trim() || column.label || '';
             }
             return column.label || '';
+        },
+        disableRowRules(rules) {
+            const items = Array.isArray(rules) ? rules : [rules];
+            items.forEach((rule) => {
+                if (!rule || typeof rule !== 'object') {
+                    return;
+                }
+                if (rule.field) {
+                    rule.props = {...(rule.props || {}), disabled: true};
+                }
+                if (Array.isArray(rule.children)) {
+                    this.disableRowRules(rule.children);
+                }
+            });
+        },
+        isRowEditable(rowData) {
+            return this.editable !== false ||
+                this.initialRowsAreNew === true ||
+                (!!rowData && typeof rowData === 'object' && this.newRows.has(rowData));
+        },
+        createRawRule(rowData) {
+            const tr = this.formCreateInject.form.parseJson(this.copy);
+            if (!this.isRowEditable(rowData)) {
+                this.disableRowRules(tr);
+            }
+            return tr;
         },
         paginateArray() {
             const array = this.modelValue || [];
@@ -183,7 +219,7 @@ export default {
             this.trs.splice(0, this.trs.length);
             this.pageData.forEach((data, idx) => {
                 if (!this.trs[idx]) {
-                    this.addRaw();
+                    this.addRaw(false, data);
                 }
                 this.setRawData(idx, data || {});
             });
@@ -195,7 +231,7 @@ export default {
             this.trs.splice(0, this.trs.length);
             this.pageData.forEach((data, idx) => {
                 if (!this.trs[idx]) {
-                    this.addRaw();
+                    this.addRaw(false, data);
                 }
                 this.setRawData(idx, data || {});
             });
@@ -211,24 +247,22 @@ export default {
             this.$emit('delete', idx);
             this.oldValue = '';
         },
-        addRaw(flag) {
+        addRaw(flag, rowData) {
             if (flag && (this.disabled || this.addable === false)) {
                 return;
             }
             if (!flag) {
-                const tr = this.formCreateInject.form.parseJson(this.copy);
-                this.trs.push(tr);
+                this.trs.push(this.createRawRule(rowData));
                 return;
             }
+            const newRow = {};
+            this.newRows.add(newRow);
             if (this.chunk[this.chunk.length - 1].length >= this.limit) {
-                this.chunk.push([{}]);
+                this.chunk.push([newRow]);
             } else {
-                if (flag) {
-                    this.chunk[this.chunk.length - 1].push({});
-                }
+                this.chunk[this.chunk.length - 1].push(newRow);
                 if (flag && this.nowPage === this.chunk.length) {
-                    const tr = this.formCreateInject.form.parseJson(this.copy);
-                    this.trs.push(tr);
+                    this.trs.push(this.createRawRule(newRow));
                 }
             }
             if (flag) {
@@ -240,13 +274,14 @@ export default {
             const _scope = {...scope};
             _scope.row = this.modelValue[scope.$index] || {};
             const prop = btn.prop || [];
+            const permissionDisabled = this.disabled || (btn.key === 'delete' && this.deletable === false);
             const props = {
                 type: btn.type,
                 size: btn.size,
                 round: prop.indexOf('round') > -1,
                 link: prop.indexOf('link') > -1,
                 plain: prop.indexOf('plain') > -1,
-                disabled: prop.indexOf('disabled') > -1 || this.disabled || (btn.key === 'delete' && this.deletable === false),
+                disabled: prop.indexOf('disabled') > -1 || permissionDisabled,
                 onClick: (evt) => {
                     _scope.row = this.modelValue[scope.$index] || {};
                     evt.stopPropagation();
@@ -268,7 +303,7 @@ export default {
                     const fn = parseFn(btn.handle);
                     const res = fn && fn(props, _scope, this.formCreateInject.api);
                     if (typeof res === 'boolean') {
-                        props.disabled = res;
+                        props.disabled = permissionDisabled || res;
                     }
                 }
             } catch (e) {

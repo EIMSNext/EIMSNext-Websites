@@ -84,16 +84,18 @@ const emitChange = () => {
 };
 
 watch(
-  [() => props.formId],
-  async ([newFormId], [oldFormId]) => {
-    if (newFormId && newFormId != oldFormId) {
+  [() => props.formId, () => props.fieldPerms],
+  async ([newFormId]) => {
+    if (newFormId) {
       let form = await formStore.get(newFormId);
       if (form && form.content && form.content.items) {
-        allFields.value = buildSortFieldListItems(newFormId, form.content.items, form.usingWorkflow);
+        allFields.value = buildSortFieldListItems(newFormId, form.content.items, form.usingWorkflow)
+          .filter((item) => props.fieldPerms === undefined ||
+            props.fieldPerms.some((permission) => permission.id === item.id && permission.visible));
       }
     }
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 
 </script>
