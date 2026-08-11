@@ -25,4 +25,6 @@ export enum DashItemType {
   DetailTable = "detailTable",
   LayoutContainer = "layoutContainer",
   RealTime = "realTime",
+  Image = "image",
+  Text = "text",
 }

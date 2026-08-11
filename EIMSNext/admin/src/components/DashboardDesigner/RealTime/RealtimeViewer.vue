@@ -1,5 +1,5 @@
 <template>
-  <div class="realtime-display" :class="{ 'long-format': setting.format.length > 20 }">
+  <div class="realtime-viewer" :class="{ 'long-format': setting.format.length > 20 }">
     <span>{{ displayValue }}</span>
   </div>
 </template>
@@ -35,7 +35,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-.realtime-display {
+.realtime-viewer {
   container-type: inline-size;
   display: flex;
   align-items: center;

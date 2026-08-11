@@ -49,6 +49,8 @@ const emit = defineEmits<{
   "update-layout": [layout: IGridLayoutItem[]];
   "update-setting": [item: DashboardItemDef, setting: ILayoutContainerSetting, name: string];
   "update-realtime-setting": [item: DashboardItemDef, setting: Record<string, any>];
+  "update-image-setting": [item: DashboardItemDef, setting: Record<string, any>];
+  "update-text-setting": [item: DashboardItemDef, setting: Record<string, any>];
   edit: [item: DashboardItemDef];
   delete: [item: DashboardItemDef];
   "filter-change": [payload: { itemId: string; value: any }];
@@ -120,6 +122,8 @@ const ContainerGrid = defineComponent({
           onEdit: (item: DashboardItemDef) => emit("edit", item), onDelete: (item: DashboardItemDef) => emit("delete", item),
           onFilterChange: (payload: { itemId: string; value: any }) => emit("filter-change", payload),
           onUpdateRealtimeSetting: (item: DashboardItemDef, setting: Record<string, any>) => emit("update-realtime-setting", item, setting),
+          onUpdateImageSetting: (item: DashboardItemDef, setting: Record<string, any>) => emit("update-image-setting", item, setting),
+          onUpdateTextSetting: (item: DashboardItemDef, setting: Record<string, any>) => emit("update-text-setting", item, setting),
         }) : null,
       }))
     });

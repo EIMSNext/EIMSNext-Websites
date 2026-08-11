@@ -112,6 +112,20 @@
               <div class="menu-label">组件</div>
               <div class="menu-group">
                 <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Image)"
+                    @drag="dashItemDrag($event, DashItemType.Image)" @dragend="handlePaletteDrop($event, DashItemType.Image)" unselectable="on">
+                    <et-icon icon="el-Picture" class="line-icon" />
+                    <div class="line-text">{{ t("admin.dashboardDesigner.imageComponent") }}</div>
+                  </div>
+                </div>
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Text)"
+                    @drag="dashItemDrag($event, DashItemType.Text)" @dragend="handlePaletteDrop($event, DashItemType.Text)" unselectable="on">
+                    <et-icon icon="el-Document" class="line-icon" />
+                    <div class="line-text">{{ t("admin.dashboardDesigner.textComponent") }}</div>
+                  </div>
+                </div>
+                <div class="menu-line">
                   <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.LayoutContainer)"
                     @drag="dashItemDrag($event, DashItemType.LayoutContainer)" @dragend="handlePaletteDrop($event, DashItemType.LayoutContainer)" unselectable="on">
                     <et-icon icon="el-Grid" class="line-icon" />
@@ -244,7 +258,8 @@
                 :is-view="false" @hide="handleItemHide(state.items[item.i])" @edit="handleItemEdit(state.items[item.i])"
                 @copy="handleItemCopy(state.items[item.i])" @delete="handleItemDelete(state.items[item.i])"
                 @update-layout="updateNestedLayout" @update-setting="updateContainerSetting"
-                @update-realtime-setting="updateRealTimeSetting" />
+                @update-realtime-setting="updateRealTimeSetting" @update-image-setting="updateImageSetting"
+                @update-text-setting="updateTextSetting" />
             </grid-item>
           </grid-layout>
         </div>
@@ -289,6 +304,8 @@ import { useDashboardDragDrop } from "./useDashboardDragDrop";
 import { escapeODataString } from "@/utils/odata";
 import { createDefaultLayoutContainerSetting, ILayoutContainerSetting, parseLayoutContainerSetting } from "./LayoutContainer/type";
 import { createDefaultRealTimeSetting, IRealTimeSetting } from "./RealTime/type";
+import { createDefaultDashboardImageSetting, IDashboardImageSetting } from "./Image/type";
+import { createDefaultDashboardTextSetting, IDashboardTextSetting } from "./Text/type";
 const { t } = useI18n();
 
 defineOptions({
@@ -479,6 +496,8 @@ const handlePaletteDrop = async (e: DragEvent, type: DashItemType) => {
   let details = "{}";
   if (type === DashItemType.LayoutContainer) details = JSON.stringify(createDefaultLayoutContainerSetting());
   if (type === DashItemType.RealTime) details = JSON.stringify(createDefaultRealTimeSetting());
+  if (type === DashItemType.Image) details = JSON.stringify(createDefaultDashboardImageSetting());
+  if (type === DashItemType.Text) details = JSON.stringify(createDefaultDashboardTextSetting());
   await createNewDashItem(type, details, layoutId);
 };
 
@@ -506,6 +525,12 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
       break;
     case DashItemType.RealTime:
       name = t("admin.dashboardDesigner.realTime");
+      break;
+    case DashItemType.Image:
+      name = t("admin.dashboardDesigner.imageComponent");
+      break;
+    case DashItemType.Text:
+      name = t("admin.dashboardDesigner.textComponent");
       break;
     default:
       name = t("admin.untitledChart");
@@ -601,6 +626,20 @@ const updateContainerSetting = async (item: DashboardItemDef, setting: ILayoutCo
   state.items[item.layoutId] = updated;
 };
 const updateRealTimeSetting = async (item: DashboardItemDef, setting: IRealTimeSetting) => {
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    details: JSON.stringify(setting),
+  });
+  state.items[item.layoutId] = updated;
+};
+const updateImageSetting = async (item: DashboardItemDef, setting: IDashboardImageSetting) => {
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    details: JSON.stringify(setting),
+  });
+  state.items[item.layoutId] = updated;
+};
+const updateTextSetting = async (item: DashboardItemDef, setting: IDashboardTextSetting) => {
   const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
     id: item.id,
     details: JSON.stringify(setting),
