@@ -1,7 +1,7 @@
 <template>
   <MobilePage :title="form?.name || t('admin.formListView.dataList')" @back="goBack">
     <template #right>
-      <van-icon v-if="form && !loadError" name="plus" @click="goToAdd" />
+      <van-icon v-if="form && !loadError && canAdd" name="plus" @click="goToAdd" />
     </template>
 
     <div class="data-page">
@@ -12,6 +12,9 @@
       <template v-else>
         <div class="table-toolbar mobile-card">
           <div class="toolbar-tip">{{ currentView?.name || t("admin.formListView.defaultView") }}</div>
+          <van-dropdown-menu v-if="authGroups.length" class="auth-group-menu">
+            <van-dropdown-item v-model="currentAuthGroupId" :options="authGroupOptions" @change="onAuthGroupChange" />
+          </van-dropdown-menu>
         </div>
 
         <div v-if="mobileType === MobileFormListViewType.Table" class="data-table-wrapper mobile-card">
@@ -65,6 +68,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
   FieldType,
+  DataPerms,
   MobileFormListViewType,
   SystemField,
   type FormData,
@@ -72,10 +76,12 @@ import {
   type FormListView,
   type FormListViewMobileSettings,
   type FormListViewSettings,
+  type AuthGroup,
 } from "@eimsnext/models";
 import MobilePage from "@/components/base/MobilePage.vue";
 import { SortDirection, type IDynamicFilter } from "@eimsnext/services";
-import { formDataServiceMobile, formServiceMobile, formListViewServiceMobile } from "@/services/mobileService";
+import { FlagEnum } from "@eimsnext/utils";
+import { authGroupServiceMobile, formDataServiceMobile, formServiceMobile, formListViewServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
 const route = useRoute();
@@ -94,14 +100,26 @@ const dataList = ref<FormData[]>([]);
 const columns = ref<{ field: string; title: string; width: number }[]>([]);
 const mobileSettings = ref<FormListViewMobileSettings>({ fieldColumns: 1 });
 const loadError = ref(false);
+const authGroups = ref<AuthGroup[]>([]);
+const currentAuthGroupId = ref("");
+const currentAuthGroup = computed(() => authGroups.value.find((group) => group.id === currentAuthGroupId.value));
+const authGroupOptions = computed(() => authGroups.value.map((group) => ({ text: group.name, value: group.id })));
+const canAdd = computed(() => !currentAuthGroup.value || FlagEnum.has(currentAuthGroup.value.dataPerms, DataPerms.AddNew));
 
 const goBack = () => router.back();
-const goToAdd = () => router.push(`/app/${appId}/form/${formId}/add`);
-const goToDetail = (row: FormData) => router.push(`/app/${appId}/form/${formId}/${row.id}`);
+const authGroupQuery = () => currentAuthGroupId.value ? { authGroupId: currentAuthGroupId.value } : undefined;
+const goToAdd = () => router.push({ path: `/app/${appId}/form/${formId}/add`, query: authGroupQuery() });
+const goToDetail = (row: FormData) => router.push({ path: `/app/${appId}/form/${formId}/${row.id}`, query: authGroupQuery() });
+const onAuthGroupChange = async () => {
+  currentPage.value = 1;
+  await loadData();
+};
 const mobileType = computed(() => currentView.value?.mobileType || MobileFormListViewType.Table);
 
 const loadForm = async () => {
   form.value = await formServiceMobile.get(formId);
+  authGroups.value = await authGroupServiceMobile.getAssigned(formId);
+  currentAuthGroupId.value = authGroups.value[0]?.id || "";
   views.value = await formListViewServiceMobile.query(formId);
   currentView.value = views.value[0];
   const settings = parseSettings(currentView.value?.settings);
@@ -126,8 +144,8 @@ const loadData = async () => {
     const filter = buildFilter();
     const sort = buildSort();
     const [list, count] = await Promise.all([
-      formDataServiceMobile.query(formId, skip, pageSize.value, filter, sort),
-      formDataServiceMobile.count(formId, filter),
+      formDataServiceMobile.query(formId, skip, pageSize.value, filter, sort, currentAuthGroupId.value || undefined),
+      formDataServiceMobile.count(formId, filter, currentAuthGroupId.value || undefined),
     ]);
     dataList.value = list;
     total.value = count;

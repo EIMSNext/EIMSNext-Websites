@@ -8,6 +8,7 @@ import {
 } from "@eimsnext/models";
 import {
   appDefService,
+  authGroupService,
   authService,
   formDataService,
   formDefService,
@@ -65,19 +66,23 @@ export const formListViewServiceMobile = {
 };
 
 export const formDataServiceMobile = {
-  query(formId: string, skip = 0, top = 20, filter?: any, sort?: any): Promise<FormData[]> {
+  query(formId: string, skip = 0, top = 20, filter?: any, sort?: any, authGroupId?: string): Promise<FormData[]> {
     return formDataService.dynamicQuery<FormData>({
       skip,
       take: top,
       filter: filter || `formId eq '${formId}'`,
       sort: sort || "createTime desc",
+      scope: authGroupId ? { authGroupId } : undefined,
     });
   },
-  count(formId: string, filter?: any): Promise<number> {
-    return formDataService.dynamicCount(filter || `formId eq '${formId}'`);
+  count(formId: string, filter?: any, authGroupId?: string): Promise<number> {
+    return formDataService.dynamicCount({
+      filter: filter || `formId eq '${formId}'`,
+      scope: authGroupId ? { authGroupId } : undefined,
+    });
   },
-  get(dataId: string): Promise<FormData> {
-    return formDataService.get<FormData>(dataId);
+  get(dataId: string, authGroupId?: string): Promise<FormData> {
+    return formDataService.get<FormData>(dataId, authGroupId ? { authGroupId } : undefined);
   },
   post(form: FormDef, data: Record<string, unknown>, action: DataAction): Promise<FormData> {
     return formDataService.post<FormData>({
@@ -96,6 +101,12 @@ export const formDataServiceMobile = {
       data,
       action: DataAction.Save,
     } as never);
+  },
+};
+
+export const authGroupServiceMobile = {
+  getAssigned(formId: string) {
+    return authGroupService.getAssigned(formId);
   },
 };
 

@@ -23,7 +23,7 @@
           <div class="action-btn" :title="t('admin.dashItem.hideOnDesktop')" @click="onHide">
             <et-icon icon="el-hide" />
           </div>
-          <el-popover v-if="itemDef.itemType === DashItemType.RealTime" v-model:visible="realtimeSettingsVisible" placement="bottom-end" trigger="click" width="310">
+          <el-popover v-if="itemDef.itemType === DashItemType.RealTime && realTimeSetting" v-model:visible="realtimeSettingsVisible" placement="bottom-end" trigger="click" width="310">
             <RealTimeSettings :model-value="realTimeSetting" @updated="onRealTimeSettingUpdated" />
             <template #reference>
               <div class="action-btn" :title="t('common.edit')"><et-icon icon="el-editPen" /></div>
@@ -68,7 +68,7 @@
       <template v-else-if="itemDef.itemType == DashItemType.Filter">
         <FilterWidgetCard :item-def="itemDef" :is-public="isPublic" @change="onFilterValueChanged" />
       </template>
-      <template v-else-if="itemDef.itemType == DashItemType.RealTime">
+      <template v-else-if="itemDef.itemType == DashItemType.RealTime && realTimeSetting">
         <RealTimeDisplay :setting="realTimeSetting" />
       </template>
       <template v-else>
@@ -143,7 +143,7 @@ const detailTableSetting = computed<IDetailTableSetting | undefined>(() => {
   return parseDetailTableSetting(props.itemDef.details);
 });
 
-const realTimeSetting = computed<IRealTimeSetting>(() => parseRealTimeSetting(props.itemDef.details));
+const realTimeSetting = computed<IRealTimeSetting | undefined>(() => parseRealTimeSetting(props.itemDef.details));
 const realtimeSettingsVisible = ref(false);
 
 const itemTitle = computed(() => {

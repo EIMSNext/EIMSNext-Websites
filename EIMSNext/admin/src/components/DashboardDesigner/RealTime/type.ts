@@ -32,14 +32,13 @@ export const createDefaultRealTimeSetting = (): IRealTimeSetting => ({
   format: REAL_TIME_FORMAT_OPTIONS[0].value,
 });
 
-export const parseRealTimeSetting = (details?: string): IRealTimeSetting => {
-  const fallback = createDefaultRealTimeSetting();
+export const parseRealTimeSetting = (details?: string): IRealTimeSetting | undefined => {
   try {
     const parsed = JSON.parse(details || "{}") as Partial<IRealTimeSetting>;
     const validFormat = REAL_TIME_FORMAT_OPTIONS.some((option) => option.value === parsed.format);
-    if (parsed.kind !== "realtime" || !validFormat) return fallback;
-    return { ...fallback, ...parsed };
+    if (parsed.kind !== "realtime" || !validFormat) return undefined;
+    return { version: 1, kind: "realtime", format: parsed.format! };
   } catch {
-    return fallback;
+    return undefined;
   }
 };

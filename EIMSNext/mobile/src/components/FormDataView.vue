@@ -39,17 +39,19 @@ import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { showToast } from "vant";
 import { useI18n } from "vue-i18n";
-import { DataAction, type FormData, type FormDef } from "@eimsnext/models";
+import { DataAction, DataPerms, type AuthGroup, type FormData, type FormDef, type IFieldPerm } from "@eimsnext/models";
 import FormCreateMobile from "@eimsnext/form-render-vant";
+import { FlagEnum } from "@eimsnext/utils";
 import MobileFormRenderer from "@/components/form/MobileFormRenderer.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
-import { formDataServiceMobile, formServiceMobile } from "@/services/mobileService";
+import { authGroupServiceMobile, formDataServiceMobile, formServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 const formId = route.params.formId as string;
 const dataId = route.params.dataId as string | undefined;
+const authGroupId = computed(() => String(route.query.authGroupId || ""));
 
 const loading = ref(false);
 const saving = ref(false);
@@ -58,13 +60,18 @@ const formDef = ref<FormDef>();
 const formData = ref<Record<string, unknown>>({});
 const currentData = ref<FormData>();
 const loadError = ref(false);
+const authGroup = ref<AuthGroup>();
+const fieldPerms = computed<IFieldPerm[] | undefined>(() => authGroup.value?.fieldPerms);
 
 const isAdd = computed(() => !dataId || Boolean(route.meta.isAdd));
+const canAdd = computed(() => !authGroup.value || FlagEnum.has(authGroup.value.dataPerms, DataPerms.AddNew));
+const canEdit = computed(() => !authGroup.value || FlagEnum.has(authGroup.value.dataPerms, DataPerms.Edit));
 const renderRule = computed(() => {
   const layout = formDef.value?.content?.layout;
   if (!layout) return [];
   try {
-    return reactive(FormCreateMobile.parseJson(layout));
+    const rules = FormCreateMobile.parseJson(layout);
+    return reactive(applyFieldPermissions(rules, fieldPerms.value, isAdd.value));
   } catch {
     return [];
   }
@@ -78,6 +85,7 @@ const renderOption = computed(() => ({
 const goBack = () => router.back();
 
 const handleSave = async (action = DataAction.Save) => {
+  if ((isAdd.value && !canAdd.value) || (!isAdd.value && !canEdit.value)) return;
   saving.value = true;
   try {
     if (isAdd.value && formDef.value) {
@@ -102,8 +110,10 @@ const loadData = async () => {
   try {
     formDef.value = await formServiceMobile.get(formId);
     if (!formDef.value) throw new Error("Form definition is unavailable");
+    const groups = await authGroupServiceMobile.getAssigned(formId);
+    authGroup.value = groups.find((group) => group.id === authGroupId.value);
     if (!isAdd.value && dataId) {
-      const data = await formDataServiceMobile.get(dataId);
+      const data = await formDataServiceMobile.get(dataId, authGroupId.value || undefined);
       if (!data) throw new Error("Form data is unavailable");
       currentData.value = data;
       formData.value = data.data || {};
@@ -118,6 +128,42 @@ const loadData = async () => {
 onMounted(() => {
   void loadData();
 });
+
+function applyFieldPermissions(rules: any[], permissions: IFieldPerm[] | undefined, isNewData: boolean) {
+  if (permissions === undefined) return rules;
+
+  return rules.map((rule) => {
+    const next = { ...rule, props: { ...(rule.props || {}) } };
+    const permission = permissions.find((item) => item.id === rule.field);
+    if (rule.type === "tableform") {
+      if (!permission) return { ...next, hidden: true };
+      next.hidden = next.hidden === true || !permission.visible;
+      next.props = {
+        ...next.props,
+        disabled: next.props.disabled === true || !permission.editable,
+        addable: next.props.addable !== false && permission.tableInsert === true,
+        deletable: next.props.deletable !== false && permission.tableDelete === true,
+        editable: permission.tableEdit === true,
+        initialRowsAreNew: isNewData,
+      };
+      next.props.columns = (next.props.columns || []).map((column: any) => {
+        const child = column.rule?.[0];
+        const childPermission = child && permissions.find((item) => item.id === `${rule.field}>${child.field}`);
+        if (!child || !childPermission) return { ...column, hidden: true };
+        return {
+          ...column,
+          hidden: column.hidden === true || !childPermission.visible,
+          rule: [{ ...child, hidden: child.hidden === true || !childPermission.visible, props: { ...(child.props || {}), disabled: child.props?.disabled === true || !childPermission.editable } }],
+        };
+      });
+      return next;
+    }
+    if (!permission) return { ...next, hidden: true };
+    next.hidden = next.hidden === true || !permission.visible;
+    next.props.disabled = next.props.disabled === true || !permission.editable;
+    return next;
+  });
+}
 </script>
 
 <style scoped lang="scss">
