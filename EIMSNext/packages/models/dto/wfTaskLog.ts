@@ -1,8 +1,8 @@
-﻿import { CorpModelBase, IdBase, Operator } from "./modelBase";
-import { BriefField } from "./wfTodo";
+import { CorpModelBase, IdBase, Operator } from "./modelBase";
+import { BriefField } from "./wfTask";
 import { ApproveAction } from "./workflow";
 
-export interface WfApprovalLog extends CorpModelBase {
+export interface WfTaskLog extends CorpModelBase {
   appId: string;
   formId: string;
   formName: string;

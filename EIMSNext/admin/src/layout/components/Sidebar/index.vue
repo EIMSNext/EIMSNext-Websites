@@ -35,8 +35,8 @@
     <div>
       <el-menu mode="vertical">
 <router-link custom :to="{ name: 'mytasks', params: { appId: app?.id } }" v-slot="{ navigate }">
-          <el-menu-item index="mytodo" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
-            <el-badge :is-dot="hasAppTodo" :offset="[0, 12]">
+          <el-menu-item index="mytask" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
+            <el-badge :is-dot="hasAppTask" :offset="[0, 12]">
               <et-icon icon="icon-mytodo" class="step-image" size="14px" />
             </el-badge>
             <span v-if="isSidebarOpened" class="app-menu-text">
@@ -146,7 +146,7 @@ import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
 import { appDefService, dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
-import { BADGE_REFRESH_INTERVAL, queryAppTodoCount } from "@/utils/badge";
+import { BADGE_REFRESH_INTERVAL, queryAppTaskCount } from "@/utils/badge";
 import { normalizeMenuType } from "@/utils/appEntry";
 import { ElMessage } from "element-plus";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
@@ -218,10 +218,10 @@ const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
 
 const systemStore = useSystemStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
-const appTodoCount = ref(0);
-const hasAppTodo = computed(() => appTodoCount.value > 0);
+const appTaskCount = ref(0);
+const hasAppTask = computed(() => appTaskCount.value > 0);
 const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
-let appTodoTimer: ReturnType<typeof setInterval> | null = null;
+let appTaskTimer: ReturnType<typeof setInterval> | null = null;
 
 const loadCurrentApp = async () => {
   try {
@@ -244,29 +244,29 @@ watch(
   { immediate: true }
 );
 
-const loadAppTodoCount = async () => {
-  appTodoCount.value = await queryAppTodoCount(contextStore.appId);
+const loadAppTaskCount = async () => {
+  appTaskCount.value = await queryAppTaskCount(contextStore.appId);
 };
 
 watch(
   () => contextStore.appId,
   () => {
-    loadAppTodoCount();
+    loadAppTaskCount();
   },
   { immediate: true }
 );
 
 onMounted(() => {
   loadAdminPermissions();
-  appTodoTimer = setInterval(() => {
-    loadAppTodoCount();
+  appTaskTimer = setInterval(() => {
+    loadAppTaskCount();
   }, BADGE_REFRESH_INTERVAL);
 });
 
 onBeforeUnmount(() => {
-  if (appTodoTimer) {
-    clearInterval(appTodoTimer);
-    appTodoTimer = null;
+  if (appTaskTimer) {
+    clearInterval(appTaskTimer);
+    appTaskTimer = null;
   }
 });
 

@@ -92,7 +92,7 @@
 
 <script setup lang="ts">
 import { dateFormat } from "@/utils/common";
-import { FlowManageTodoItem } from "@eimsnext/models";
+import { FlowManageTaskItem } from "@eimsnext/models";
 import { workflowService } from "@eimsnext/services";
 import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
@@ -110,8 +110,8 @@ const keyword = ref("");
 const pageNum = ref(1);
 const pageSize = ref(20);
 const totalRef = ref(0);
-const tableData = ref<FlowManageTodoItem[]>([]);
-const checkedRows = ref<FlowManageTodoItem[]>([]);
+const tableData = ref<FlowManageTaskItem[]>([]);
+const checkedRows = ref<FlowManageTaskItem[]>([]);
 const showApproverDialog = ref(false);
 const showMemberDialog = ref(false);
 const selectedApproverTags = ref<ISelectedTag[]>([]);
@@ -124,12 +124,12 @@ const memberOptions = computed(() => ({
 
 const formatDateTime = (value?: number) => dateFormat(value, "YYYY-MM-DD HH:mm:ss") || "-";
 
-const getRowKey = (row: FlowManageTodoItem) => row.todoId;
+const getRowKey = (row: FlowManageTaskItem) => row.taskId;
 
 const handleQuery = async () => {
   loading.value = true;
   try {
-    const result = await workflowService.queryManageTodos({
+    const result = await workflowService.queryManageTasks({
       keyword: keyword.value.trim(),
       pageNum: pageNum.value,
       pageSize: pageSize.value,
@@ -162,7 +162,7 @@ const pageChanged = (curPage: number, pSize: number) => {
   handleQuery();
 };
 
-const handleSelectionChange = (rows: FlowManageTodoItem[]) => {
+const handleSelectionChange = (rows: FlowManageTaskItem[]) => {
   checkedRows.value = rows;
 };
 

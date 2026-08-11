@@ -434,15 +434,15 @@ export default {
       selectReturnNode: "Please select return node",
       enterComment: "Please enter approval comment",
     },
-    wfApprovalLogs: {
+    wfTaskLogs: {
       noApprovalData: "No approval data",
       loadFailed: "Failed to load approval data",
       retry: "Retry",
       noMore: "No more data",
     },
     myTasks: {
-      noTodoData: "No todo data",
-      loadFailed: "Failed to load todos",
+      noTaskData: "No task data",
+      loadFailed: "Failed to load tasks",
       retry: "Retry",
       noMore: "No more data",
     },
@@ -511,7 +511,7 @@ export default {
     data_updated: "When data is updated",
     data_removed: "When data is deleted",
     wfstatus_updated: "When workflow status changes",
-    wftodo_updated: "When workflow task changes",
+    wftask_updated: "When workflow task changes",
     currentCorporate: "Current Team",
     appAdmin: {
       title: "App Admin",
@@ -2881,7 +2881,7 @@ export default {
     },
     workbench: {
       title: "Workbench",
-      todo: "Todo",
+      task: "Task",
       myApps: "My Apps",
     },
     formList: {
@@ -2927,7 +2927,7 @@ export default {
     },
     workflow: {
       title: "Workflow Center",
-      todo: "My Todo",
+      task: "My Task",
       started: "Started by Me",
       approved: "Approved by Me",
       processed: "Processed by Me",

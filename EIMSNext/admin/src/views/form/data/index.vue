@@ -87,8 +87,8 @@
             </div>
             <div class="shared-side-body">
               <template v-if="sideTab === 'flow'">
-                <template v-if="approvalLogs.length > 0">
-                  <div v-for="log in approvalLogs" :key="log.id" class="workflow-card">
+                <template v-if="taskLogs.length > 0">
+                  <div v-for="log in taskLogs" :key="log.id" class="workflow-card">
                     <div class="workflow-card-header">
                       <div class="workflow-node">{{ log.nodeName }}</div>
                       <div class="workflow-time">{{ formatDate(log.approvalTime) }}</div>
@@ -178,13 +178,13 @@ defineOptions({
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { DataChangeType, FormDataChangeLog, FormDef, FormData, PrintDef, WfApprovalLog } from "@eimsnext/models";
+import { DataChangeType, FormDataChangeLog, FormDef, FormData, PrintDef, WfTaskLog } from "@eimsnext/models";
 import {
   customPrintService,
   formDataService,
   PrintRequest,
   printDefService,
-  wfApprovalLogService,
+  wfTaskLogService,
 } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
 import { ShareLinkBar, ToolbarItem } from "@eimsnext/components";
@@ -206,7 +206,7 @@ const tagsViewStore = useTagsViewStore();
 const { isFullscreen, toggle } = useFullscreen();
 const formDef = ref<FormDef>();
 const formData = ref<FormData>();
-const approvalLogs = ref<WfApprovalLog[]>([]);
+const taskLogs = ref<WfTaskLog[]>([]);
 const changeLogs = ref<FormDataChangeLog[]>([]);
 const customPrintTemplates = ref<PrintDef[]>([]);
 const loading = ref(false);
@@ -227,7 +227,7 @@ const sideTitle = computed(() => {
 });
 
 const sideRecordCount = computed(() => {
-  return sideTab.value === "flow" ? approvalLogs.value.length : changeLogs.value.length;
+  return sideTab.value === "flow" ? taskLogs.value.length : changeLogs.value.length;
 });
 
 const formatDate = (value?: number) => {
@@ -390,7 +390,7 @@ onBeforeMount(async () => {
     const [form, data, logs, dataLogs] = await Promise.all([
       formStore.get(formId),
       formDataService.get<FormData>(dataId, queryParams, { silentError: true }),
-      wfApprovalLogService.query<WfApprovalLog>(
+      wfTaskLogService.query<WfTaskLog>(
         buildQuery({
           filter: { formId, dataId },
           orderBy: "approvalTime desc",
@@ -410,7 +410,7 @@ onBeforeMount(async () => {
       generatePrintData();
     }
 
-    approvalLogs.value = logs || [];
+    taskLogs.value = logs || [];
     changeLogs.value = dataLogs || [];
   } catch {
     loadError.value = true;

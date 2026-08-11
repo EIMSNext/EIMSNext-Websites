@@ -4,7 +4,7 @@ import {
   type AppDef,
   type FormData,
   type FormDef,
-  type WfTodo,
+  type WfTask,
 } from "@eimsnext/models";
 import {
   appDefService,
@@ -14,7 +14,7 @@ import {
   formDefService,
   formListViewService,
   systemService,
-  wfTodoService,
+  wfTaskService,
   workflowService,
 } from "@eimsnext/services";
 import type { LoginRequest } from "@eimsnext/services";
@@ -110,17 +110,17 @@ export const authGroupServiceMobile = {
   },
 };
 
-export const todoServiceMobile = {
+export const taskServiceMobile = {
   getCount(): Promise<number> {
-    return wfTodoService.count();
+    return wfTaskService.count();
   },
-  query(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.query<WfTodo>(
+  query(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.query<WfTask>(
       buildODataQuery(appId ? `appId eq '${appId}'` : undefined, skip, top, "approveNodeStartTime desc")
     );
   },
-  get(taskId: string): Promise<WfTodo> {
-    return wfTodoService.get<WfTodo>(taskId);
+  get(taskId: string): Promise<WfTask> {
+    return wfTaskService.get<WfTask>(taskId);
   },
   approve(dataId: string, action: ApproveAction, comment = "") {
     return workflowService.approve({ dataId, action, comment });
@@ -158,8 +158,8 @@ export const todoServiceMobile = {
 };
 
 export const workflowServiceMobile = {
-  getMyStarted(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.dynamicQuery<WfTodo>({
+  getMyStarted(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.dynamicQuery<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,
@@ -167,8 +167,8 @@ export const workflowServiceMobile = {
       scope: "started",
     });
   },
-  getApproved(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.dynamicQuery<WfTodo>({
+  getApproved(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.dynamicQuery<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,
@@ -176,8 +176,8 @@ export const workflowServiceMobile = {
       scope: "approved",
     });
   },
-  getCced(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.dynamicQuery<WfTodo>({
+  getCced(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.dynamicQuery<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,

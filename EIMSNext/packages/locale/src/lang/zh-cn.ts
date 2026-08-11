@@ -230,14 +230,14 @@ export default {
       selectReturnNode: "请选择回退节点",
       enterComment: "请输入审批意见",
     },
-    wfApprovalLogs: {
+    wfTaskLogs: {
       noApprovalData: "暂无审批数据",
       loadFailed: "审批数据加载失败",
       retry: "重试",
       noMore: "没有更多了",
     },
     myTasks: {
-      noTodoData: "暂无待办数据",
+      noTaskData: "暂无待办数据",
       loadFailed: "待办加载失败",
       retry: "重试",
       noMore: "没有更多了",
@@ -912,7 +912,7 @@ export default {
     data_updated: "有数据被修改时",
     data_removed: "有数据被删除时",
     wfstatus_updated: "流程状态变更时",
-    wftodo_updated: "流程待办变更时",
+    wftask_updated: "流程待办变更时",
     currentCorporate: "当前所在企业",
     appAdmin: {
       title: "应用后台",
@@ -2860,7 +2860,7 @@ export default {
     },
     workbench: {
       title: "工作台",
-      todo: "待办",
+      task: "待办",
       myApps: "我的应用",
     },
     formList: {
@@ -2906,7 +2906,7 @@ export default {
     },
     workflow: {
       title: "流程中心",
-      todo: "我的待办",
+      task: "我的待办",
       started: "我发起的",
       approved: "我已审批",
       processed: "我处理的",

@@ -1,7 +1,7 @@
 import { Operator } from "./modelBase";
 
-export interface FlowManageTodoItem {
-  todoId: string;
+export interface FlowManageTaskItem {
+  taskId: string;
   wfInstanceId: string;
   dataId: string;
   formName: string;
@@ -13,8 +13,8 @@ export interface FlowManageTodoItem {
   approveNodeStartTime: number;
 }
 
-export interface FlowManageTodoQueryResult {
-  items: FlowManageTodoItem[];
+export interface FlowManageTaskQueryResult {
+  items: FlowManageTaskItem[];
   total: number;
 }
 

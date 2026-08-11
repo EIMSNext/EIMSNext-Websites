@@ -1,6 +1,6 @@
 <template>
   <van-tabs :active="currentTab" @update:active="switchTab">
-    <van-tab :title="t('mobile.workflow.todo')" name="todo" />
+    <van-tab :title="t('mobile.workflow.task')" name="task" />
     <van-tab :title="t('mobile.workflow.started')" name="started" />
     <van-tab :title="t('mobile.workflow.processed')" name="approved" />
     <van-tab :title="t('mobile.workflow.cced')" name="cced" />
@@ -17,7 +17,7 @@
           v-for="task in list"
           :key="task.id"
           class="workflow-card"
-          @click="currentTab === 'todo' ? emit('open-approval', task) : emit('open-detail', task)"
+          @click="currentTab === 'task' ? emit('open-approval', task) : emit('open-detail', task)"
         >
           <div class="workflow-card-header">
             <div class="workflow-form-name">{{ task.formName }}</div>
@@ -37,9 +37,9 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import type { WfTodo } from "@eimsnext/models";
+import type { WfTask } from "@eimsnext/models";
 import MobileCard from "@/components/base/MobileCard.vue";
-import { todoServiceMobile, workflowServiceMobile } from "@/services/mobileService";
+import { taskServiceMobile, workflowServiceMobile } from "@/services/mobileService";
 
 const props = defineProps<{
   activeTab: string;
@@ -48,23 +48,23 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   "change-tab": [tab: string];
-  "open-approval": [task: WfTodo];
-  "open-detail": [task: WfTodo];
+  "open-approval": [task: WfTask];
+  "open-detail": [task: WfTask];
 }>();
 
 const { t } = useI18n();
 const currentTab = ref(props.activeTab);
 const refreshing = ref(false);
 const loading = ref(false);
-const list = ref<WfTodo[]>([]);
+const list = ref<WfTask[]>([]);
 const loadError = ref(false);
 
 const load = async () => {
   loading.value = true;
   loadError.value = false;
   try {
-    if (currentTab.value === "todo") {
-      list.value = await todoServiceMobile.query(props.appId || undefined, 0, 20);
+    if (currentTab.value === "task") {
+      list.value = await taskServiceMobile.query(props.appId || undefined, 0, 20);
     } else if (currentTab.value === "started") {
       list.value = await workflowServiceMobile.getMyStarted(props.appId || undefined, 0, 20);
     } else if (currentTab.value === "approved") {

@@ -1,5 +1,5 @@
 import { bus } from "@eimsnext/utils";
-import { TODO_TAB_ORDER } from "@/config/todoTabs";
+import { TASK_TAB_ORDER } from "@/config/taskTabs";
 
 export const useTagsViewStore = defineStore("tagsView", () => {
   const visitedViews = ref<TagView[]>([]);
@@ -20,13 +20,13 @@ export const useTagsViewStore = defineStore("tagsView", () => {
       return;
     }
 
-    const orderIndex = TODO_TAB_ORDER.indexOf(baseName as typeof TODO_TAB_ORDER[number]);
+    const orderIndex = TASK_TAB_ORDER.indexOf(baseName as typeof TASK_TAB_ORDER[number]);
     if (orderIndex >= 0) {
       let insertPos = 0;
       for (let i = orderIndex - 1; i >= 0; i--) {
         const prevIdx = visitedViews.value.findIndex((v) => {
           const vb = v.name?.split("-")[0] ?? v.name;
-          return vb === TODO_TAB_ORDER[i];
+          return vb === TASK_TAB_ORDER[i];
         });
         if (prevIdx >= 0) { insertPos = prevIdx + 1; break; }
       }

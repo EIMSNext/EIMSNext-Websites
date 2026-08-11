@@ -11,13 +11,13 @@
 </template>
 <script lang="ts" setup>
 defineOptions({
-  name: "WfApprovalLogView",
+  name: "WfTaskLogView",
 });
 
 import {
   FormData,
   FormContent,
-  WfApprovalLog,
+  WfTaskLog,
   WorkflowActionStatus,
 } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
@@ -29,14 +29,14 @@ const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
-    approvalLog: WfApprovalLog;
+    taskLog: WfTaskLog;
   }>(),
   {}
 );
 
 const actions = ref<FormActionSettings>({});
 const appId = ref("");
-const dataId = ref(props.approvalLog.dataId);
+const dataId = ref(props.taskLog.dataId);
 const formStore = useFormStore();
 const formDef = ref<FormContent>(new FormContent());
 const formData = ref<FormData>();
@@ -68,18 +68,18 @@ const handleUrge = async () => {
 };
 
 onMounted(async () => {
-  let form = await formStore.get(props.approvalLog.formId);
+  let form = await formStore.get(props.taskLog.formId);
   if (form) {
     appId.value = form.appId;
     formDef.value = form.content!;
   }
 
-  let data = await formDataService.get<FormData>(props.approvalLog!.dataId);
+  let data = await formDataService.get<FormData>(props.taskLog!.dataId);
   if (data) {
     formData.value = data;
   }
 
-  actionStatus.value = await workflowService.getActionStatus(props.approvalLog.dataId);
+  actionStatus.value = await workflowService.getActionStatus(props.taskLog.dataId);
   actions.value = {
     withdraw: { text: "common.wfProcess.withdraw", visible: actionStatus.value.canWithdraw },
     urge: { text: "common.wfProcess.urge", visible: actionStatus.value.canUrge },

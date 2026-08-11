@@ -9,7 +9,7 @@
       :destroy-on-close="true"
     >
       <div class="form-container">
-        <WfApprovalLogView :approvalLog="selectedTask!" @submit="handleProcessed"></WfApprovalLogView>
+        <WfTaskLogView :taskLog="selectedTask!" @submit="handleProcessed"></WfTaskLogView>
       </div>
     </et-dialog>
     <el-space v-if="dataRef.length > 0" direction="vertical" class="task-space">
@@ -70,17 +70,17 @@
     </el-space>
 
     <div v-else-if="!isLoading && !loadError" class="list-empty">
-      <el-empty :description="$t('comp.wfApprovalLogs.noApprovalData')" />
+      <el-empty :description="$t('comp.wfTaskLogs.noApprovalData')" />
     </div>
 
     <div v-if="loadError" class="list-empty">
-      <el-empty :description="$t('comp.wfApprovalLogs.loadFailed')">
-        <el-button type="primary" @click="retryLoad">{{ $t("comp.wfApprovalLogs.retry") }}</el-button>
+      <el-empty :description="$t('comp.wfTaskLogs.loadFailed')">
+        <el-button type="primary" @click="retryLoad">{{ $t("comp.wfTaskLogs.retry") }}</el-button>
       </el-empty>
     </div>
 
     <div v-if="isLoadingMore" class="list-status">{{ $t("common.loading") }}</div>
-    <div v-else-if="!hasMore && dataRef.length > 0" class="list-status">{{ $t("comp.wfApprovalLogs.noMore") }}</div>
+    <div v-else-if="!hasMore && dataRef.length > 0" class="list-status">{{ $t("comp.wfTaskLogs.noMore") }}</div>
 
     <button v-if="showTopButton" class="top-button" type="button" @click="scrollToTop">
       <et-icon icon="backtop" size="20px" />
@@ -89,16 +89,16 @@
 </template>
 <script setup lang="ts">
 defineOptions({
-  name: "WfApprovalLogs",
+  name: "WfTaskLogs",
 });
 
 import { useRoute } from "vue-router";
 import { nextTick, ref, watch } from "vue";
-import { WfApprovalLog } from "@eimsnext/models";
-import { wfApprovalLogService } from "@eimsnext/services";
+import { WfTaskLog } from "@eimsnext/models";
+import { wfTaskLogService } from "@eimsnext/services";
 import { EtDialog } from "@eimsnext/components";
 import buildQuery from "odata-query";
-import WfApprovalLogView from "./WfApprovalLogView.vue";
+import WfTaskLogView from "./WfTaskLogView.vue";
 
 const PAGE_SIZE = 20;
 const SCROLL_THRESHOLD = 120;
@@ -113,8 +113,8 @@ const props = withDefaults(
 const showDetailsDialog = ref(false);
 const route = useRoute();
 const listRef = ref<HTMLElement | null>(null);
-const dataRef = ref<WfApprovalLog[]>([]);
-const selectedTask = ref<WfApprovalLog>();
+const dataRef = ref<WfTaskLog[]>([]);
+const selectedTask = ref<WfTaskLog>();
 const filterRef = ref(props.filter);
 const pageRef = ref(1);
 const hasMore = ref(true);
@@ -215,7 +215,7 @@ const loadData = async (reset = false) => {
   });
 
   try {
-    const res = await wfApprovalLogService.query<WfApprovalLog>(query);
+    const res = await wfTaskLogService.query<WfTaskLog>(query);
     dataRef.value = reset ? res : [...dataRef.value, ...res];
     hasMore.value = res.length === PAGE_SIZE;
     loadError.value = false;
@@ -242,7 +242,7 @@ const loadData = async (reset = false) => {
   }
 };
 
-const viewLog = async (task: WfApprovalLog) => {
+const viewLog = async (task: WfTaskLog) => {
   selectedTask.value = task;
   showDetailsDialog.value = true;
 };

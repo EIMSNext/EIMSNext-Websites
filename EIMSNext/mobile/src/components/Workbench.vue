@@ -2,14 +2,14 @@
   <MobilePage :title="t('mobile.workbench.title')" @back="goBack">
     <div class="workbench-content">
       <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-        <MobileCard class="todo-card" @click="goToMyTasks">
-          <div class="todo-main">
-            <div class="todo-icon">
+        <MobileCard class="task-card" @click="goToMyTasks">
+          <div class="task-main">
+            <div class="task-icon">
               <van-icon name="clock-o" size="28" />
             </div>
             <div>
-              <div class="todo-title">{{ t("mobile.workbench.todo") }}</div>
-              <div class="todo-count">{{ todoCount }}</div>
+              <div class="task-title">{{ t("mobile.workbench.task") }}</div>
+              <div class="task-count">{{ taskCount }}</div>
             </div>
           </div>
           <van-icon name="arrow" />
@@ -57,31 +57,31 @@ import { useI18n } from "vue-i18n";
 import type { AppDef } from "@eimsnext/models";
 import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
-import { appServiceMobile, todoServiceMobile } from "@/services/mobileService";
+import { appServiceMobile, taskServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
 const { t } = useI18n();
 const refreshing = ref(false);
-const todoCount = ref(0);
+const taskCount = ref(0);
 const apps = ref<AppDef[]>([]);
 
 const goBack = () => router.back();
-const goToMyTasks = () => router.push("/wftodo");
-const goToMyStarted = () => router.push("/wftodo?tab=started");
-const goToMyApproved = () => router.push("/wftodo?tab=approved");
-const goToMyCced = () => router.push("/wftodo?tab=cced");
+const goToMyTasks = () => router.push("/wftask");
+const goToMyStarted = () => router.push("/wftask?tab=started");
+const goToMyApproved = () => router.push("/wftask?tab=approved");
+const goToMyCced = () => router.push("/wftask?tab=cced");
 const gotoApp = (app: AppDef) => router.push(`/app/${app.id}`);
 
 const loadApps = async () => {
   apps.value = await appServiceMobile.getMyApps();
 };
 
-const loadTodoCount = async () => {
-  todoCount.value = await todoServiceMobile.getCount();
+const loadTaskCount = async () => {
+  taskCount.value = await taskServiceMobile.getCount();
 };
 
 const onRefresh = async () => {
-  await Promise.all([loadApps(), loadTodoCount()]);
+  await Promise.all([loadApps(), loadTaskCount()]);
   refreshing.value = false;
 };
 
@@ -95,20 +95,20 @@ onMounted(() => {
   padding: 12px;
 }
 
-.todo-card {
+.task-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
 }
 
-.todo-main {
+.task-main {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.todo-icon {
+.task-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -119,12 +119,12 @@ onMounted(() => {
   color: var(--et-color-primary);
 }
 
-.todo-title {
+.task-title {
   color: var(--mobile-text-secondary);
   font-size: 13px;
 }
 
-.todo-count {
+.task-count {
   color: var(--mobile-text-primary);
   font-size: 24px;
   font-weight: 700;

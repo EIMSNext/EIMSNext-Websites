@@ -36,10 +36,10 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { showToast } from "vant";
 import { useI18n } from "vue-i18n";
-import { FlowStatus, type WorkflowNodeAction, type WorkflowNodeActionType, type WfTodo } from "@eimsnext/models";
+import { FlowStatus, type WorkflowNodeAction, type WorkflowNodeActionType, type WfTask } from "@eimsnext/models";
 import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
-import { formDataServiceMobile, todoServiceMobile } from "@/services/mobileService";
+import { formDataServiceMobile, taskServiceMobile } from "@/services/mobileService";
 
 type MobileActionKey = WorkflowNodeActionType | "withdraw" | "urge";
 
@@ -51,7 +51,7 @@ const taskId = route.params.taskId as string;
 const loading = ref(false);
 const approving = ref(false);
 const pendingKey = ref("");
-const task = ref<WfTodo>();
+const task = ref<WfTask>();
 const nodeActions = ref<WorkflowNodeAction[]>([]);
 const actionStatus = ref({ canWithdraw: false, canUrge: false });
 const flowStatus = ref<FlowStatus>();
@@ -109,7 +109,7 @@ const chooseCandidate = (actionType: "addsign" | "transfer") => {
 
 const chooseReturnTarget = async () => {
   if (!task.value) return "";
-  const targets = await todoServiceMobile.getReturnNodes(task.value.dataId, task.value.wfInstanceId);
+  const targets = await taskServiceMobile.getReturnNodes(task.value.dataId, task.value.wfInstanceId);
   if (!targets.length) {
     showToast(t("mobile.approval.noReturnNodes"));
     return "";
@@ -130,29 +130,29 @@ const runAction = async (key: MobileActionKey) => {
   try {
     switch (key) {
       case "submit":
-        await todoServiceMobile.submit(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, getComment(t("mobile.approvalActions.submit")));
+        await taskServiceMobile.submit(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, getComment(t("mobile.approvalActions.submit")));
         showToast(t("mobile.approval.submitted"));
         router.back();
         break;
       case "reject":
-        await todoServiceMobile.reject(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, getComment(t("mobile.approvalActions.reject")));
+        await taskServiceMobile.reject(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, getComment(t("mobile.approvalActions.reject")));
         showToast(t("mobile.approval.rejected"));
         router.back();
         break;
       case "withdraw":
         if (!window.confirm(t("mobile.approval.withdrawConfirm"))) return;
-        await todoServiceMobile.withdraw(task.value.dataId, task.value.wfInstanceId, getComment(t("mobile.approvalActions.withdraw")));
+        await taskServiceMobile.withdraw(task.value.dataId, task.value.wfInstanceId, getComment(t("mobile.approvalActions.withdraw")));
         showToast(t("mobile.approval.withdrawn"));
         router.back();
         break;
       case "urge":
-        await todoServiceMobile.urge(task.value.dataId, task.value.wfInstanceId);
+        await taskServiceMobile.urge(task.value.dataId, task.value.wfInstanceId);
         showToast(t("common.wfProcess.urgeSuccess"));
         break;
       case "return": {
         const targetNodeId = await chooseReturnTarget();
         if (!targetNodeId) return;
-        await todoServiceMobile.return(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, targetNodeId, getComment(t("mobile.approvalActions.return")));
+        await taskServiceMobile.return(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, targetNodeId, getComment(t("mobile.approvalActions.return")));
         showToast(t("mobile.approval.returned"));
         router.back();
         break;
@@ -160,7 +160,7 @@ const runAction = async (key: MobileActionKey) => {
       case "addsign": {
         const targetEmployeeId = chooseCandidate("addsign");
         if (!targetEmployeeId) return;
-        await todoServiceMobile.addSign(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, targetEmployeeId, getComment(t("mobile.approvalActions.addSign")));
+        await taskServiceMobile.addSign(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, targetEmployeeId, getComment(t("mobile.approvalActions.addSign")));
         showToast(t("mobile.approval.addSigned"));
         router.back();
         break;
@@ -168,7 +168,7 @@ const runAction = async (key: MobileActionKey) => {
       case "transfer": {
         const targetEmployeeId = chooseCandidate("transfer");
         if (!targetEmployeeId) return;
-        await todoServiceMobile.transfer(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, targetEmployeeId, getComment(t("mobile.approvalActions.transfer")));
+        await taskServiceMobile.transfer(task.value.dataId, task.value.wfInstanceId, task.value.approveNodeId, targetEmployeeId, getComment(t("mobile.approvalActions.transfer")));
         showToast(t("mobile.approval.transferred"));
         router.back();
         break;
@@ -189,14 +189,14 @@ const loadTask = async () => {
   loading.value = true;
   loadError.value = false;
   try {
-    const loadedTask = await todoServiceMobile.get(taskId);
+    const loadedTask = await taskServiceMobile.get(taskId);
     if (!loadedTask) throw new Error("Workflow task is unavailable");
     task.value = loadedTask;
 
     const [data, status, actions] = await Promise.all([
       formDataServiceMobile.get(loadedTask.dataId),
-      todoServiceMobile.getActionStatus(loadedTask.dataId, loadedTask.wfInstanceId),
-      todoServiceMobile.getNodeActions(loadedTask.dataId, loadedTask.wfInstanceId),
+      taskServiceMobile.getActionStatus(loadedTask.dataId, loadedTask.wfInstanceId),
+      taskServiceMobile.getNodeActions(loadedTask.dataId, loadedTask.wfInstanceId),
     ]);
     flowStatus.value = data.flowStatus;
     actionStatus.value = status;

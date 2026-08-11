@@ -1,8 +1,8 @@
 <template>
   <Layout>
     <!-- 工作流侧边栏 -->
-    <div class="todobar-container">
-      <TodoSidebar />
+    <div class="taskbar-container">
+      <TaskSidebar />
     </div>
     <!-- 左侧和顶部布局 -->
     <div :class="{ hasTagsView: showTagsView }" class="main-container">
@@ -32,7 +32,7 @@
 import { computed } from "vue";
 import Layout from "@/layout/index.vue";
 import { useSystemStore, useSettingsStore, useTagsViewStore } from "@/store";
-import TodoSidebar from "../components/TodoSidebar/index.vue";
+import TaskSidebar from "../components/TaskSidebar/index.vue";
 import TagsView from "../components/TagsView/index.vue";
 import variables from "@/styles/variables.module.scss";
 
@@ -52,7 +52,7 @@ const appMainHeight = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-.todobar-container {
+.taskbar-container {
   position: fixed;
   z-index: 999;
   width: $sidebar-width;
@@ -91,7 +91,7 @@ const appMainHeight = computed(() => {
 }
 
 .layout-left.hideSidebar {
-  .todobar-container {
+  .taskbar-container {
     width: $sidebar-width-collapsed !important;
   }
 

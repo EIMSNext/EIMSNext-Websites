@@ -14,12 +14,12 @@
         :default-active="defaultActiveMenu"
         :default-openeds="defaultOpenedMenus"
         @select="handleMenuSelect"
-        class="todo-sidebar-menu"
+        class="task-sidebar-menu"
       >
         <!-- 我的待办 -->
         <el-sub-menu index="mytasks">
           <template #title>
-            <el-badge :is-dot="hasCorpTodo" :offset="[0, 8]">
+            <el-badge :is-dot="hasCorpTask" :offset="[0, 8]">
               <et-icon icon="icon-mytodo" size="14px" class="step-image" />
             </el-badge>
             <span class="app-menu-text" @click.stop="goToTaskType('mytasks')">
@@ -105,11 +105,11 @@
         :default-active="defaultActiveMenu"
         :default-openeds="defaultOpenedMenus"
         @select="handleMenuSelect"
-        class="todo-sidebar-menu"
+        class="task-sidebar-menu"
       >
         <!-- 我的待办 -->
         <el-menu-item index="mytasks" class="pl-15px" @click.stop="goToTaskType('mytasks')">
-          <el-badge :is-dot="hasCorpTodo" :offset="[0, 8]">
+          <el-badge :is-dot="hasCorpTask" :offset="[0, 8]">
             <et-icon icon="icon-mytodo" size="14px" class="step-image" />
           </el-badge>
         </el-menu-item>
@@ -135,7 +135,7 @@
 
 <script setup lang="ts">
 defineOptions({
-  name: "TodoSidebar",
+  name: "TaskSidebar",
 });
 
 import { ref, computed, onBeforeUnmount, onMounted } from "vue";
@@ -145,7 +145,7 @@ import { useAppStore } from "@eimsnext/store";
 import { AppDef } from "@eimsnext/models";
 import { getAppIcon, getAppIconColor } from "@/utils/common";
 import { useI18n } from "vue-i18n";
-import { BADGE_REFRESH_INTERVAL, queryCorpTodoCount } from "@/utils/badge";
+import { BADGE_REFRESH_INTERVAL, queryCorpTaskCount } from "@/utils/badge";
 
 const appStore = useAppStore();
 const router = useRouter();
@@ -183,9 +183,9 @@ function toggleSideBar() {
 }
 
 const appsRef = ref<AppDef[]>([]);
-const corpTodoCount = ref(0);
-const hasCorpTodo = computed(() => corpTodoCount.value > 0);
-let corpTodoTimer: ReturnType<typeof setInterval> | null = null;
+const corpTaskCount = ref(0);
+const hasCorpTask = computed(() => corpTaskCount.value > 0);
+let corpTaskTimer: ReturnType<typeof setInterval> | null = null;
 
 const selectApp = (app: AppDef, taskType: string) => {
   let routePath = `/mystarted`;
@@ -235,24 +235,24 @@ const goToTaskType = (taskType: string) => {
 
 const handleMenuSelect = () => {};
 
-const loadCorpTodoCount = async () => {
-  corpTodoCount.value = await queryCorpTodoCount();
+const loadCorpTaskCount = async () => {
+  corpTaskCount.value = await queryCorpTaskCount();
 };
 
 onMounted(async () => {
   await appStore.load();
   appsRef.value = appStore.items;
-  await loadCorpTodoCount();
+  await loadCorpTaskCount();
 
-  corpTodoTimer = setInterval(() => {
-    loadCorpTodoCount();
+  corpTaskTimer = setInterval(() => {
+    loadCorpTaskCount();
   }, BADGE_REFRESH_INTERVAL);
 });
 
 onBeforeUnmount(() => {
-  if (corpTodoTimer) {
-    clearInterval(corpTodoTimer);
-    corpTodoTimer = null;
+  if (corpTaskTimer) {
+    clearInterval(corpTaskTimer);
+    corpTaskTimer = null;
   }
 });
 </script>

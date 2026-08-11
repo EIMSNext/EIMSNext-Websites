@@ -1,14 +1,14 @@
 <template>
   <et-card :showHeader="false">
     <div class="flow-center-wrapper">
-      <div class="my-todo">
-        <div class="todo-wrapper" @click="goToMyTasks">
+      <div class="my-task">
+        <div class="task-wrapper" @click="goToMyTasks">
           <div class="image-wrapper">
             <et-icon icon="icon-mytodo" size="64px" color="var(--et-color-info)" />
           </div>
-          <div class="todo-count">
-            <div class="todo-count-text">{{ t("common.wfProcess.mytasks") }}</div>
-            <div class="todo-count-number">{{ todoCount }}</div>
+          <div class="task-count">
+            <div class="task-count-text">{{ t("common.wfProcess.mytasks") }}</div>
+            <div class="task-count-number">{{ taskCount }}</div>
           </div>
         </div>
       </div>
@@ -35,20 +35,20 @@
 </template>
 
 <script setup lang="ts">
-import { BADGE_REFRESH_INTERVAL, queryCorpTodoCount } from "@/utils/badge";
+import { BADGE_REFRESH_INTERVAL, queryCorpTaskCount } from "@/utils/badge";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 const { t } = useI18n();
 const router = useRouter();
-const todoCount = ref(0);
-let todoTimer: ReturnType<typeof setInterval> | null = null;
+const taskCount = ref(0);
+let taskTimer: ReturnType<typeof setInterval> | null = null;
 
 defineOptions({
   name: "MyTasksCard",
 });
 
-const loadTodoCount = async () => {
-  todoCount.value = await queryCorpTodoCount();
+const loadTaskCount = async () => {
+  taskCount.value = await queryCorpTaskCount();
 };
 
 const goToMyTasks = () => {
@@ -69,17 +69,17 @@ const goToMyCced = () => {
 };
 
 onMounted(() => {
-  loadTodoCount();
+  loadTaskCount();
 
-  todoTimer = setInterval(() => {
-    loadTodoCount();
+  taskTimer = setInterval(() => {
+    loadTaskCount();
   }, BADGE_REFRESH_INTERVAL);
 });
 
 onBeforeUnmount(() => {
-  if (todoTimer) {
-    clearInterval(todoTimer);
-    todoTimer = null;
+  if (taskTimer) {
+    clearInterval(taskTimer);
+    taskTimer = null;
   }
 });
 </script>
@@ -92,13 +92,13 @@ onBeforeUnmount(() => {
   position: relative;
   width: 100%;
 
-  .my-todo {
+  .my-task {
     border-radius: var(--et-radius-6);
     height: 100%;
     padding: var(--et-space-20);
     width: 32%;
 
-    .todo-wrapper {
+    .task-wrapper {
       align-items: center;
       border-radius: var(--et-radius-6);
       cursor: pointer;
@@ -115,8 +115,8 @@ onBeforeUnmount(() => {
         width: var(--et-size-64);
       }
 
-      .todo-count {
-        .todo-count-text {
+      .task-count {
+        .task-count-text {
           font-size: var(--et-font-size-18);
           font-weight: 500;
           height: var(--et-size-24);
@@ -124,7 +124,7 @@ onBeforeUnmount(() => {
           margin-bottom: var(--et-space-5);
         }
 
-        .todo-count-number {
+        .task-count-number {
           font-size: var(--et-font-size-36);
           font-weight: 700;
           height: var(--et-size-36);

@@ -9,12 +9,12 @@
       :destroy-on-close="true"
     >
       <div class="form-container">
-        <WfProcess :todo="selectedTask!" @processed="handleProcessed" />
+        <WfProcess :task="selectedTask!" @processed="handleProcessed" />
       </div>
     </et-dialog>
     <el-space v-if="dataRef.length > 0" direction="vertical" class="task-space">
       <template v-for="task in dataRef" :key="task.id">
-        <et-card class="task-card" @click="processTodo(task)">
+        <et-card class="task-card" @click="processTask(task)">
           <template #header>
             <div class="flex-y-center">
               <div class="flow-header">
@@ -70,7 +70,7 @@
     </el-space>
 
     <div v-else-if="!isLoading && !loadError" class="list-empty">
-      <el-empty :description="$t('comp.myTasks.noTodoData')" />
+      <el-empty :description="$t('comp.myTasks.noTaskData')" />
     </div>
 
     <div v-if="loadError" class="list-empty">
@@ -94,8 +94,8 @@ defineOptions({
 
 import { nextTick, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { WfTodo } from "@eimsnext/models";
-import { wfTodoService } from "@eimsnext/services";
+import { WfTask } from "@eimsnext/models";
+import { wfTaskService } from "@eimsnext/services";
 import { EtDialog } from "@eimsnext/components";
 import buildQuery from "odata-query";
 import WfProcess from "./WfProcess.vue";
@@ -106,8 +106,8 @@ const SCROLL_THRESHOLD = 120;
 const showProcessDialog = ref(false);
 const route = useRoute();
 const listRef = ref<HTMLElement | null>(null);
-const dataRef = ref<WfTodo[]>([]);
-const selectedTask = ref<WfTodo>();
+const dataRef = ref<WfTask[]>([]);
+const selectedTask = ref<WfTask>();
 const pageRef = ref(1);
 const hasMore = ref(true);
 const isLoading = ref(false);
@@ -197,7 +197,7 @@ const loadData = async (reset = false) => {
   });
 
   try {
-    const res = await wfTodoService.query<WfTodo>(query);
+    const res = await wfTaskService.query<WfTask>(query);
     dataRef.value = reset ? res : [...dataRef.value, ...res];
     hasMore.value = res.length === PAGE_SIZE;
     loadError.value = false;
@@ -205,7 +205,7 @@ const loadData = async (reset = false) => {
       pageRef.value = currentPage + 1;
     }
   } catch (error: any) {
-    console.error("load todo data error:", error);
+    console.error("load task data error:", error);
     loadError.value = true;
     if (reset) {
       dataRef.value = [];
@@ -224,7 +224,7 @@ const loadData = async (reset = false) => {
   }
 };
 
-const processTodo = async (task: WfTodo) => {
+const processTask = async (task: WfTask) => {
   selectedTask.value = task;
   showProcessDialog.value = true;
 };
