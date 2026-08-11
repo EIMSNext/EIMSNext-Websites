@@ -26,7 +26,7 @@
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import type { WfTodo } from "@eimsnext/models";
+import type { WfTask } from "@eimsnext/models";
 import MobilePage from "@/components/base/MobilePage.vue";
 import InnerWorkflowTabs from "@/components/workflow/InnerWorkflowTabs.vue";
 
@@ -45,11 +45,11 @@ const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 const appId = computed(() => props.appId || (route.params.appId as string) || "");
-const activeTab = ref<string>((route.query.tab as string) || "todo");
+const activeTab = ref<string>((route.query.tab as string) || "task");
 
 const goBack = () => router.back();
-const goToApproval = (task: WfTodo) => router.push(`/wftodo/${task.id}`);
-const goToDetail = (task: WfTodo) => router.push(`/app/${task.appId}/form/${task.formId}/${task.dataId}`);
+const goToApproval = (task: WfTask) => router.push(`/wftask/${task.id}`);
+const goToDetail = (task: WfTask) => router.push(`/app/${task.appId}/form/${task.formId}/${task.dataId}`);
 const handleTabChange = (tab: string) => {
   activeTab.value = tab;
 };

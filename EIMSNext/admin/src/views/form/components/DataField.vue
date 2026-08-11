@@ -56,7 +56,12 @@ onBeforeMount(() => {
         form.usingWorkflow,
         undefined,
         { fieldPerms: props.fieldPerms, t } as any
-      ).filter((item) => (item.data as IFormFieldDef)?.type !== FieldType.DataSelect);
+      ).filter((item) => {
+        const field = item.data as IFormFieldDef;
+        const canView = props.fieldPerms === undefined ||
+          props.fieldPerms.some((permission) => permission.id === field.field && permission.visible);
+        return field?.type !== FieldType.DataSelect && canView;
+      });
   });
 });
 </script>

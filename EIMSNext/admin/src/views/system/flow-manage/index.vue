@@ -57,6 +57,7 @@
         <el-table
           v-loading="loading"
           :data="tableData"
+          :row-key="getRowKey"
           height="100%"
           class="flow-manage-table"
           show-overflow-tooltip
@@ -91,7 +92,7 @@
 
 <script setup lang="ts">
 import { dateFormat } from "@/utils/common";
-import { FlowManageTodoItem } from "@eimsnext/models";
+import { FlowManageTaskItem } from "@eimsnext/models";
 import { workflowService } from "@eimsnext/services";
 import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
@@ -109,8 +110,8 @@ const keyword = ref("");
 const pageNum = ref(1);
 const pageSize = ref(20);
 const totalRef = ref(0);
-const tableData = ref<FlowManageTodoItem[]>([]);
-const checkedRows = ref<FlowManageTodoItem[]>([]);
+const tableData = ref<FlowManageTaskItem[]>([]);
+const checkedRows = ref<FlowManageTaskItem[]>([]);
 const showApproverDialog = ref(false);
 const showMemberDialog = ref(false);
 const selectedApproverTags = ref<ISelectedTag[]>([]);
@@ -123,21 +124,28 @@ const memberOptions = computed(() => ({
 
 const formatDateTime = (value?: number) => dateFormat(value, "YYYY-MM-DD HH:mm:ss") || "-";
 
+const getRowKey = (row: FlowManageTaskItem) => row.taskId;
+
 const handleQuery = async () => {
   loading.value = true;
   try {
-    const result = await workflowService.queryManageTodos({
+    const result = await workflowService.queryManageTasks({
       keyword: keyword.value.trim(),
       pageNum: pageNum.value,
       pageSize: pageSize.value,
     });
-    tableData.value = result.items || [];
-    totalRef.value = result.total || 0;
+    tableData.value = result?.items ?? [];
+    totalRef.value = result?.total ?? 0;
     checkedRows.value = checkedRows.value.filter((checked) =>
       tableData.value.some(
         (item) => item.wfInstanceId === checked.wfInstanceId && item.approveNodeId === checked.approveNodeId
       )
     );
+  } catch {
+    tableData.value = [];
+    totalRef.value = 0;
+    checkedRows.value = [];
+    ElMessage.error(t("common.loadFailed"));
   } finally {
     loading.value = false;
   }
@@ -154,8 +162,32 @@ const pageChanged = (curPage: number, pSize: number) => {
   handleQuery();
 };
 
-const handleSelectionChange = (rows: FlowManageTodoItem[]) => {
+const handleSelectionChange = (rows: FlowManageTaskItem[]) => {
   checkedRows.value = rows;
+};
+
+const showBatchActionResult = async (
+  results: PromiseSettledResult<unknown>[],
+  actionName: string,
+) => {
+  const failedDataIds = results
+    .map((result, index) => (result.status === "rejected" ? checkedRows.value[index]?.dataId || "-" : null))
+    .filter((dataId): dataId is string => dataId !== null);
+
+  if (failedDataIds.length === 0) {
+    ElMessage.success(t("admin.flowManage.batchSuccess", { action: actionName }));
+    return;
+  }
+
+  await ElMessageBox.alert(
+    t("admin.flowManage.batchPartial", {
+      success: results.length - failedDataIds.length,
+      failed: failedDataIds.length,
+      details: failedDataIds.join(", "),
+    }),
+    t("admin.flowManage.batchResultTitle", { action: actionName }),
+    { type: "warning" },
+  );
 };
 
 const handleTerminate = async () => {
@@ -171,7 +203,7 @@ const handleTerminate = async () => {
 
   actionLoading.value = true;
   try {
-    await Promise.all(
+    const results = await Promise.allSettled(
       checkedRows.value.map((row) =>
         workflowService.terminate({
           wfInstanceId: row.wfInstanceId,
@@ -179,7 +211,7 @@ const handleTerminate = async () => {
         })
       )
     );
-    ElMessage.success(t("admin.flowManage.terminateSuccess"));
+    await showBatchActionResult(results, t("admin.flowManage.terminate"));
     checkedRows.value = [];
     await handleQuery();
   } finally {
@@ -223,7 +255,7 @@ const submitChangeApprover = async () => {
 
   actionLoading.value = true;
   try {
-    await Promise.all(
+    const results = await Promise.allSettled(
       checkedRows.value.map((row) =>
         workflowService.changeApprover({
           wfInstanceId: row.wfInstanceId,
@@ -234,7 +266,7 @@ const submitChangeApprover = async () => {
         })
       )
     );
-    ElMessage.success(t("admin.flowManage.approverUpdated"));
+    await showBatchActionResult(results, t("admin.flowManage.changeApprover"));
     closeApproverDialog();
     checkedRows.value = [];
     await handleQuery();

@@ -12,7 +12,12 @@
     </div>
   </et-dialog>
   <div class="shared-form-data-page" v-loading="loading">
-    <div class="shared-form-shell">
+    <el-result v-if="loadError" icon="error" :title="$t('admin.formData.dataNotAvailable')">
+      <template #extra>
+        <el-button @click="returnToList">{{ $t("common.back") }}</el-button>
+      </template>
+    </el-result>
+    <div v-else class="shared-form-shell">
       <div class="shared-form-card">
         <div class="shared-form-header">
           <div>
@@ -82,8 +87,8 @@
             </div>
             <div class="shared-side-body">
               <template v-if="sideTab === 'flow'">
-                <template v-if="approvalLogs.length > 0">
-                  <div v-for="log in approvalLogs" :key="log.id" class="workflow-card">
+                <template v-if="taskLogs.length > 0">
+                  <div v-for="log in taskLogs" :key="log.id" class="workflow-card">
                     <div class="workflow-card-header">
                       <div class="workflow-node">{{ log.nodeName }}</div>
                       <div class="workflow-time">{{ formatDate(log.approvalTime) }}</div>
@@ -172,14 +177,14 @@ defineOptions({
 });
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import { DataChangeType, FormDataChangeLog, FormDef, FormData, PrintDef, WfApprovalLog } from "@eimsnext/models";
+import { useRoute, useRouter } from "vue-router";
+import { DataChangeType, FormDataChangeLog, FormDef, FormData, PrintDef, WfTaskLog } from "@eimsnext/models";
 import {
   customPrintService,
   formDataService,
   PrintRequest,
   printDefService,
-  wfApprovalLogService,
+  wfTaskLogService,
 } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
 import { ShareLinkBar, ToolbarItem } from "@eimsnext/components";
@@ -195,15 +200,17 @@ const PdfPreview = defineAsyncComponent(() => import("@/components/PrintDesigner
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 const formStore = useFormStore();
 const tagsViewStore = useTagsViewStore();
 const { isFullscreen, toggle } = useFullscreen();
 const formDef = ref<FormDef>();
 const formData = ref<FormData>();
-const approvalLogs = ref<WfApprovalLog[]>([]);
+const taskLogs = ref<WfTaskLog[]>([]);
 const changeLogs = ref<FormDataChangeLog[]>([]);
 const customPrintTemplates = ref<PrintDef[]>([]);
 const loading = ref(false);
+const loadError = ref(false);
 const printConfig = ref(getPrintConfig(false));
 const formPrintData = ref<IPrintData>();
 const printTrigger = ref<HTMLElement | null>(null);
@@ -213,13 +220,14 @@ const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
 const sideTab = ref<"flow" | "dataLog">("flow");
 const shareUrl = computed(() => `${window.location.origin}/#/app/${route.params.appId}/form/${route.params.formId}/data/${route.params.dataId}`);
+const returnToList = () => router.replace(`/app/${route.params.appId}/form/${route.params.formId}`);
 
 const sideTitle = computed(() => {
   return sideTab.value === "flow" ? t("admin.formData.flowDynamic") : t("admin.formData.dataLog");
 });
 
 const sideRecordCount = computed(() => {
-  return sideTab.value === "flow" ? approvalLogs.value.length : changeLogs.value.length;
+  return sideTab.value === "flow" ? taskLogs.value.length : changeLogs.value.length;
 });
 
 const formatDate = (value?: number) => {
@@ -381,15 +389,15 @@ onBeforeMount(async () => {
   try {
     const [form, data, logs, dataLogs] = await Promise.all([
       formStore.get(formId),
-      formDataService.get<FormData>(dataId, queryParams),
-      wfApprovalLogService.query<WfApprovalLog>(
+      formDataService.get<FormData>(dataId, queryParams, { silentError: true }),
+      wfTaskLogService.query<WfTaskLog>(
         buildQuery({
           filter: { formId, dataId },
           orderBy: "approvalTime desc",
           top: 20,
         })
       ),
-      formDataService.getChangeLogs(dataId, 0, 20, authGroupId),
+      formDataService.getChangeLogs(dataId, 0, 20, authGroupId, { silentError: true }),
     ]);
 
     if (form) {
@@ -402,8 +410,10 @@ onBeforeMount(async () => {
       generatePrintData();
     }
 
-    approvalLogs.value = logs || [];
+    taskLogs.value = logs || [];
     changeLogs.value = dataLogs || [];
+  } catch {
+    loadError.value = true;
   } finally {
     loading.value = false;
   }

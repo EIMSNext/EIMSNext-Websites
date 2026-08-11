@@ -12,7 +12,7 @@
         <el-icon class="is-loading"><Loading /></el-icon>
       </div>
       <div class="tip">
-        <span v-html="loadingTipHtml"></span>
+        <span>{{ loadingTip }}</span>
         <a class="help-link" :href="helpDocUrl" target="_blank">{{ t("common.helpDoc") }}</a>
       </div>
     </div>
@@ -74,11 +74,8 @@ let pollTimer: number | null = null;
 
 const POLL_INTERVAL = 2000;
 
-const loadingTipHtml = computed(() => {
-  const safeHookUrl = props.hookUrl.replace(/[<>"']/g, "");
-  const urlLink = `<a class="hook-url" href="${safeHookUrl}" target="_blank" rel="noopener">${safeHookUrl}</a>`;
-  const tip = t("dataflow.httpSampleDialog.loading").replace("{0}", urlLink);
-  return tip;
+const loadingTip = computed(() => {
+  return t("dataflow.httpSampleDialog.loading").replace("{0}", props.hookUrl);
 });
 
 function clearPoll() {

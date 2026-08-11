@@ -44,13 +44,13 @@ const routes: RouteRecordRaw[] = [
     meta: { titleKey: 'mobile.formData.detailTitle', requireAuth: true }
   },
   {
-    path: '/wftodo',
+    path: '/wftask',
     name: 'WorkflowTabs',
     component: () => import('@/components/WorkflowTabs.vue'),
     meta: { titleKey: 'mobile.workflow.title', requireAuth: true }
   },
   {
-    path: '/wftodo/:taskId',
+    path: '/wftask/:taskId',
     name: 'WfApproval',
     component: () => import('@/components/WfApproval.vue'),
     meta: { titleKey: 'mobile.approval.title', requireAuth: true }

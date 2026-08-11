@@ -5,6 +5,25 @@ import { useUserStore } from "@eimsnext/store";
 const snapshot = ref<AdminPermissionSnapshot>();
 let loadPromise: Promise<AdminPermissionSnapshot> | undefined;
 
+const createEmptySnapshot = (): AdminPermissionSnapshot => ({
+  isNormalAdmin: false,
+  canCreateOrDeleteApp: false,
+  manageableAppIds: [],
+  deletableAppIds: [],
+  appDepartmentScopeMode: ScopeMode.Partial,
+  appDepartmentIds: [],
+  appRoleScopeMode: ScopeMode.Partial,
+  appRoleIds: [],
+  contactViewDepartmentScopeMode: ScopeMode.Partial,
+  contactViewDepartmentIds: [],
+  contactManageDepartmentScopeMode: ScopeMode.Partial,
+  contactManageDepartmentIds: [],
+  contactViewRoleScopeMode: ScopeMode.Partial,
+  contactViewRoleIds: [],
+  contactManageRoleScopeMode: ScopeMode.Partial,
+  contactManageRoleIds: [],
+});
+
 export const useAdminPermissions = () => {
   const userStore = useUserStore();
 
@@ -20,6 +39,11 @@ export const useAdminPermissions = () => {
   const loadAdminPermissions = async (force = false) => {
     if (!force && snapshot.value) return snapshot.value;
     if (!force && loadPromise) return loadPromise;
+
+    if (userStore.currentUser.userType !== UserType.AppAdmin) {
+      snapshot.value = createEmptySnapshot();
+      return snapshot.value;
+    }
 
     loadPromise = systemService.getAdminPermissions().then((res) => {
       snapshot.value = res;

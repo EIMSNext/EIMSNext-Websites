@@ -4,16 +4,17 @@ import {
   type AppDef,
   type FormData,
   type FormDef,
-  type WfTodo,
+  type WfTask,
 } from "@eimsnext/models";
 import {
   appDefService,
+  authGroupService,
   authService,
   formDataService,
   formDefService,
   formListViewService,
   systemService,
-  wfTodoService,
+  wfTaskService,
   workflowService,
 } from "@eimsnext/services";
 import type { LoginRequest } from "@eimsnext/services";
@@ -65,19 +66,23 @@ export const formListViewServiceMobile = {
 };
 
 export const formDataServiceMobile = {
-  query(formId: string, skip = 0, top = 20, filter?: any, sort?: any): Promise<FormData[]> {
+  query(formId: string, skip = 0, top = 20, filter?: any, sort?: any, authGroupId?: string): Promise<FormData[]> {
     return formDataService.dynamicQuery<FormData>({
       skip,
       take: top,
       filter: filter || `formId eq '${formId}'`,
       sort: sort || "createTime desc",
+      scope: authGroupId ? { authGroupId } : undefined,
     });
   },
-  count(formId: string, filter?: any): Promise<number> {
-    return formDataService.dynamicCount(filter || `formId eq '${formId}'`);
+  count(formId: string, filter?: any, authGroupId?: string): Promise<number> {
+    return formDataService.dynamicCount({
+      filter: filter || `formId eq '${formId}'`,
+      scope: authGroupId ? { authGroupId } : undefined,
+    });
   },
-  get(dataId: string): Promise<FormData> {
-    return formDataService.get<FormData>(dataId);
+  get(dataId: string, authGroupId?: string): Promise<FormData> {
+    return formDataService.get<FormData>(dataId, authGroupId ? { authGroupId } : undefined);
   },
   post(form: FormDef, data: Record<string, unknown>, action: DataAction): Promise<FormData> {
     return formDataService.post<FormData>({
@@ -99,17 +104,23 @@ export const formDataServiceMobile = {
   },
 };
 
-export const todoServiceMobile = {
-  getCount(): Promise<number> {
-    return wfTodoService.count();
+export const authGroupServiceMobile = {
+  getAssigned(formId: string) {
+    return authGroupService.getAssigned(formId);
   },
-  query(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.query<WfTodo>(
+};
+
+export const taskServiceMobile = {
+  getCount(): Promise<number> {
+    return wfTaskService.count();
+  },
+  query(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.query<WfTask>(
       buildODataQuery(appId ? `appId eq '${appId}'` : undefined, skip, top, "approveNodeStartTime desc")
     );
   },
-  get(taskId: string): Promise<WfTodo> {
-    return wfTodoService.get<WfTodo>(taskId);
+  get(taskId: string): Promise<WfTask> {
+    return wfTaskService.get<WfTask>(taskId);
   },
   approve(dataId: string, action: ApproveAction, comment = "") {
     return workflowService.approve({ dataId, action, comment });
@@ -147,8 +158,8 @@ export const todoServiceMobile = {
 };
 
 export const workflowServiceMobile = {
-  getMyStarted(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.dynamicQuery<WfTodo>({
+  getMyStarted(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.dynamicQuery<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,
@@ -156,8 +167,8 @@ export const workflowServiceMobile = {
       scope: "started",
     });
   },
-  getApproved(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.dynamicQuery<WfTodo>({
+  getApproved(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.dynamicQuery<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,
@@ -165,8 +176,8 @@ export const workflowServiceMobile = {
       scope: "approved",
     });
   },
-  getCced(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.dynamicQuery<WfTodo>({
+  getCced(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.dynamicQuery<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,

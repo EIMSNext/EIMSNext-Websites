@@ -49,6 +49,7 @@
             :maxLevel="maxLevel"
             :fieldBuildSetting="fieldBuildSettingRef"
             :valueBuildSetting="valueBuildSettingRef"
+            :allow-field-value="allowFieldValue"
             @change="onInput"
             @remove="removeGroup(idx)"
           ></ConditionList>
@@ -61,6 +62,7 @@
             :condType="condType"
             :fieldBuildSetting="fieldBuildSettingRef"
             :valueBuildSetting="valueBuildSettingRef"
+            :allow-field-value="allowFieldValue"
             @change="onInput"
             @remove="removeItem(idx)"
           ></ConditionItem>
@@ -97,6 +99,7 @@ const props = withDefaults(
     maxLevel?: number;
     fieldBuildSetting?: IFieldBuildSetting;
     valueBuildSetting?: IFieldBuildSetting;
+    allowFieldValue?: boolean;
   }>(),
   {
     showTitle: true,

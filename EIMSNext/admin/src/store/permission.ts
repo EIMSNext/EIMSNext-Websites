@@ -55,7 +55,12 @@ export const usePermissionStore = defineStore("permission", () => {
   const generateAppMenus = async () => {
     appMenus.value = [];
     if (appId.value) {
-      let app = await appStore.get(appId.value);
+      let app;
+      try {
+        app = await appStore.get(appId.value, true, true, { silentError: true });
+      } catch {
+        return;
+      }
       if (app) {
         let appMenuPerms: IAppMenuPerm[] = [];
         if (!isUnrestrictedAdmin())

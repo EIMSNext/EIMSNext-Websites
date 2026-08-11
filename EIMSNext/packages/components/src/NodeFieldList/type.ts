@@ -120,6 +120,9 @@ export function buildNodeFieldTree(
 ): ITreeNode[] {
   const fieldDataType = getConditionFieldType(fieldDef?.type);
   const fieldMapping = setting.fieldMapping || {};
+  const canViewField = (field: string) =>
+    setting.fieldLimit?.fieldPerms === undefined ||
+    setting.fieldLimit.fieldPerms.some((permission) => permission.id === field && permission.visible);
   const hasFieldMapping =
     setting.fieldMapping != null && setting.fieldMapping != undefined;
 
@@ -132,6 +135,7 @@ export function buildNodeFieldTree(
     const outputFields = nodeForm?.outputFields ?? [];
     if (outputFields.length > 0) {
       outputFields.forEach((sourceFieldDef) => {
+        if (!canViewField(sourceFieldDef.field)) return;
         const isMultiResultSubField =
           fieldDef?.isSubField && !singleResult && sourceFieldDef.isSubField;
         if (
@@ -158,6 +162,7 @@ export function buildNodeFieldTree(
     if (children && children.length > 0) {
       //master fields
       children.forEach((x: FieldDef) => {
+        if (!canViewField(x.field)) return;
         let shouldHidden = true;
         //1. 左边为子表字段
         if (fieldDef?.isSubField) {
@@ -317,6 +322,7 @@ export function buildNodeFieldTree(
           if (x.type == FieldType.TableForm) {
             if (x.columns) {
               x.columns.forEach((sub: FieldDef) => {
+                if (!canViewField(`${x.field}>${sub.field}`)) return;
                 // A multi-result subfield cannot be matched to a target subfield.
                 // The supported multi-result-to-subtable path only maps master fields.
                 if (fieldDef?.isSubField && !singleResult) return;

@@ -1,8 +1,9 @@
 <template>
-  <div class="dash-edit-layout custom-scroll">
+  <el-result v-if="loadError" icon="error" :title="t('admin.dashboardDesigner.notAvailable')" />
+  <div v-else class="dash-edit-layout custom-scroll">
     <grid-layout
       ref="gridRef"
-      v-model:layout="state.layout"
+      v-model:layout="rootLayout"
       :col-num="colNum"
       :col-width="colWidth"
       :row-height="rowHeight"
@@ -18,7 +19,7 @@
       resize-ignore-from=".no-drag"
     >
       <grid-item
-        v-for="item in state.layout"
+        v-for="item in rootLayout"
         :x="item.x"
         :y="item.y"
         :w="item.w"
@@ -34,8 +35,11 @@
         <DashItemCard
           v-if="state.items[item.i]"
           :item-def="state.items[item.i]"
+          :layout="state.layout"
+          :items="state.items"
           :is-view="true"
           :external-filter="chartFilters[state.items[item.i].id]"
+          :external-filters="chartFilters"
           @filter-change="handleFilterChange"
         />
       </grid-item>
@@ -63,10 +67,18 @@ const state = reactive<IGridLayoutState>({
   draggable: false,
   resizable: false,
 });
+const rootLayout = computed<IGridLayoutItem[]>({
+  get: () => state.layout.filter((item) => !item.parentLayoutId),
+  set: (updated) => {
+    const nested = state.layout.filter((item) => item.parentLayoutId);
+    state.layout.splice(0, state.layout.length, ...updated, ...nested);
+  },
+});
 const colNum = ref(24);
 const colWidth = ref(150);
 const rowHeight = ref(10);
 const dashboard = ref<DashboardDef>();
+const loadError = ref(false);
 const refreshTimer = ref<number>();
 let loadTask: Promise<void> | undefined;
 const { isFullscreen } = useFullscreen();
@@ -86,8 +98,9 @@ const getMaxHeight = (item: IGridLayoutItem) => {
 const loadDashboard = async () => {
   if (loadTask) return loadTask;
   loadTask = (async () => {
+    loadError.value = false;
     try {
-      const dash = await dashboardDefService.get<DashboardDef>(dashId);
+      const dash = await dashboardDefService.get<DashboardDef>(dashId, undefined, { silentError: true });
       dashboard.value = dash;
       try {
         const parsedLayout = JSON.parse(dash.layout) || [];
@@ -109,9 +122,11 @@ const loadDashboard = async () => {
         console.error("布局JSON解析失败：", e);
         state.layout.splice(0, state.layout.length);
       }
-    } catch (e) {
-      console.error("加载仪表盘失败：", e);
-      ElMessage.error(t("admin.dashboardDesigner.loadFailed"));
+    } catch {
+      dashboard.value = undefined;
+      state.layout.splice(0, state.layout.length);
+      state.items = {};
+      loadError.value = true;
     } finally {
       loadTask = undefined;
     }

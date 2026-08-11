@@ -7,16 +7,14 @@ import enUS from "vant/es/locale/lang/en-US";
 import zhCN from "vant/es/locale/lang/zh-CN";
 import FormCreateMobile from "@eimsnext/form-render-vant";
 import installFormCreateMobile from "@eimsnext/form-render-vant/auto-import";
+import "@eimsnext/form-render-vant/dist/index.css";
+import { formulas } from "@eimsnext/utils";
 import App from "./App.vue";
 import router from "./router";
-import "vant/es/toast/style";
+import "vant/lib/index.css";
 import "./styles/index.scss";
 
-const initHttp = () => {
-  setupHttp((error) => {
-    console.error("mobile http error", error);
-  });
-};
+const initHttp = () => setupHttp();
 
 const initTheme = () => {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -46,6 +44,7 @@ initTheme();
 
 const app = createApp(App);
 FormCreateMobile.use(installFormCreateMobile);
+Object.entries(formulas).forEach(([name, handler]) => FormCreateMobile.setFormula(name, handler));
 app.use(FormCreateMobile);
 app.use(initI18n());
 app.use(router);

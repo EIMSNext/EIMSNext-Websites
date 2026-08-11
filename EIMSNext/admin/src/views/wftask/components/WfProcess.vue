@@ -53,7 +53,7 @@ import { computed, onMounted, ref } from "vue";
 import {
   FormData as FormData_2,
   FormContent,
-  WfTodo,
+  WfTask,
   WorkflowActionStatus,
   FlowStatus,
 } from "@eimsnext/models";
@@ -75,7 +75,7 @@ const workflowServiceEx = workflowService as typeof workflowService & {
 
 const props = withDefaults(
   defineProps<{
-    todo: WfTodo;
+    task: WfTask;
   }>(),
   {}
 );
@@ -224,7 +224,7 @@ const getDefaultActionText = (actionType: NodeActionType) => {
 };
 
 const loadNodeActions = async () => {
-  nodeActionConfigs.value = await workflowService.getNodeActions(props.todo.dataId, props.todo.wfInstanceId);
+  nodeActionConfigs.value = await workflowService.getNodeActions(props.task.dataId, props.task.wfInstanceId);
 };
 
 const handleAction = async (key: string, data: any) => {
@@ -236,7 +236,7 @@ const handleAction = async (key: string, data: any) => {
       showCommentDialog.value = true;
       break;
     case "return":
-      returnTargets.value = await workflowServiceEx.getReturnNodes(props.todo.dataId, props.todo.wfInstanceId);
+      returnTargets.value = await workflowServiceEx.getReturnNodes(props.task.dataId, props.task.wfInstanceId);
       selectedTargetNodeId.value = returnTargets.value[0]?.nodeId || "";
       pendingActionKey.value = "return";
       comment.value = "";
@@ -274,18 +274,18 @@ const confirmAction = async () => {
     switch (pendingActionKey.value) {
       case "submit":
         await workflowServiceEx.submit({
-          wfInstanceId: props.todo.wfInstanceId,
-          wfNodeId: props.todo.approveNodeId,
-          dataId: props.todo.dataId,
+          wfInstanceId: props.task.wfInstanceId,
+          wfNodeId: props.task.approveNodeId,
+          dataId: props.task.dataId,
           action: undefined as any,
           comment: comment.value,
         });
         break;
       case "reject":
         await workflowServiceEx.reject({
-          wfInstanceId: props.todo.wfInstanceId,
-          wfNodeId: props.todo.approveNodeId,
-          dataId: props.todo.dataId,
+          wfInstanceId: props.task.wfInstanceId,
+          wfNodeId: props.task.approveNodeId,
+          dataId: props.task.dataId,
           action: undefined as any,
           comment: comment.value,
         });
@@ -295,9 +295,9 @@ const confirmAction = async () => {
           return;
         }
         await workflowServiceEx["return"]({
-          wfInstanceId: props.todo.wfInstanceId,
-          wfNodeId: props.todo.approveNodeId,
-          dataId: props.todo.dataId,
+          wfInstanceId: props.task.wfInstanceId,
+          wfNodeId: props.task.approveNodeId,
+          dataId: props.task.dataId,
           targetNodeId: selectedTargetNodeId.value,
           comment: comment.value,
         });
@@ -307,9 +307,9 @@ const confirmAction = async () => {
           return;
         }
         await workflowServiceEx.addSign({
-          wfInstanceId: props.todo.wfInstanceId,
-          wfNodeId: props.todo.approveNodeId,
-          dataId: props.todo.dataId,
+          wfInstanceId: props.task.wfInstanceId,
+          wfNodeId: props.task.approveNodeId,
+          dataId: props.task.dataId,
           targetEmployeeId: getSelectedEmployeeId(),
           comment: comment.value,
         });
@@ -319,9 +319,9 @@ const confirmAction = async () => {
           return;
         }
         await workflowServiceEx.transfer({
-          wfInstanceId: props.todo.wfInstanceId,
-          wfNodeId: props.todo.approveNodeId,
-          dataId: props.todo.dataId,
+          wfInstanceId: props.task.wfInstanceId,
+          wfNodeId: props.task.approveNodeId,
+          dataId: props.task.dataId,
           targetEmployeeId: getSelectedEmployeeId(),
           comment: comment.value,
         });
@@ -340,8 +340,8 @@ const handleWithdraw = async () => {
       type: "warning",
     });
     await workflowService.withdraw({
-      wfInstanceId: props.todo.wfInstanceId,
-      dataId: props.todo.dataId,
+      wfInstanceId: props.task.wfInstanceId,
+      dataId: props.task.dataId,
     });
     emit("processed");
   } catch {
@@ -351,8 +351,8 @@ const handleWithdraw = async () => {
 const handleUrge = async () => {
   try {
     await workflowService.urge({
-      wfInstanceId: props.todo.wfInstanceId,
-      dataId: props.todo.dataId,
+      wfInstanceId: props.task.wfInstanceId,
+      dataId: props.task.dataId,
     });
     ElMessage.success(t("common.wfProcess.urgeSuccess"));
   } catch {
@@ -360,17 +360,17 @@ const handleUrge = async () => {
 };
 
 onMounted(async () => {
-  const form = await formStore.get(props.todo.formId);
+  const form = await formStore.get(props.task.formId);
   if (form) {
     formDef.value = form.content!;
   }
 
-  const data = await formDataService.get<FormData_2>(props.todo.dataId);
+  const data = await formDataService.get<FormData_2>(props.task.dataId);
   if (data) {
     formData.value = data;
   }
 
-  actionStatus.value = await workflowService.getActionStatus(props.todo.dataId, props.todo.wfInstanceId);
+  actionStatus.value = await workflowService.getActionStatus(props.task.dataId, props.task.wfInstanceId);
   await loadNodeActions();
   buildCustomActions();
 });

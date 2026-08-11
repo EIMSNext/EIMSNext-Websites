@@ -1,24 +1,24 @@
 <template>
-  <WfApprovalLogs :filter="filter" />
+  <WfTaskLogs :filter="filter" />
 </template>
 
 <script setup lang="ts">
 defineOptions({
-  name: "CCTomeGlobal",
+  name: "MyStartedGlobal",
 });
 
 import { ref, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import WfApprovalLogs from "@/views/wftodo/components/WfApprovalLogs.vue";
+import WfTaskLogs from "@/views/wftask/components/WfTaskLogs.vue";
 import { useAppStore } from "@eimsnext/store";
 import { AppDef } from "@eimsnext/models";
-
+import { getAppIcon, getAppIconColor } from "@/utils/common";
 
 const route = useRoute();
 const appStore = useAppStore();
 
 const selectedApp = ref<AppDef | null>(null);
-const filter = ref({ result: 7 });
+const filter = ref({ nodeType: 1 });
 
 // 监听路由参数变化
 watch(
@@ -35,6 +35,7 @@ watch(
     } else {
       selectedApp.value = null;
     }
+    // 不需要在这里更新filter，WfTaskLogs组件会通过updateFilterWithAppId()函数添加appId
   },
   { immediate: true }
 );

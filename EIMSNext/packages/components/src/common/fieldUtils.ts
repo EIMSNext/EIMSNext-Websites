@@ -37,7 +37,9 @@ export const flattenDataItem = (item: any) => {
 };
 
 export const dateFormat = (val: any, fmt?: string) => {
-  const format = fmt || "YYYY-MM-DD";
+  const format = (fmt || "YYYY-MM-DD")
+    .replace(/yyyy/g, "YYYY")
+    .replace(/(?<!d)dd(?!d)/g, "DD");
   return val ? dayjs(val).format(format) : "";
 };
 

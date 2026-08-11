@@ -76,7 +76,8 @@ export class HttpRequest {
           this.handleUnauthorized();
         }
 
-        if (error && config.interceptors?.errorHandler) {
+        const requestConfig = error.config as HttpRequestConfig | undefined;
+        if (error && !requestConfig?.silentError && config.interceptors?.errorHandler) {
           config.interceptors?.errorHandler(error);
         }
 

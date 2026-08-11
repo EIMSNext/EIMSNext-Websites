@@ -1,52 +1,61 @@
 <template>
   <MobilePage :title="form?.name || t('admin.formListView.dataList')" @back="goBack">
     <template #right>
-      <van-icon name="plus" @click="goToAdd" />
+      <van-icon v-if="form && !loadError && canAdd" name="plus" @click="goToAdd" />
     </template>
 
     <div class="data-page">
-      <div class="table-toolbar mobile-card">
-        <div class="toolbar-tip">{{ currentView?.name || t("admin.formListView.defaultView") }}</div>
-      </div>
+      <van-empty v-if="loadError" image="error" :description="t('admin.formData.dataNotAvailable')">
+        <van-button size="small" @click="initialize">{{ t("common.retry") }}</van-button>
+      </van-empty>
 
-      <div v-if="mobileType === MobileFormListViewType.Table" class="data-table-wrapper mobile-card">
-        <div class="table-scroll-area">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
-                  {{ col.title }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in dataList" :key="row.id" @click="goToDetail(row)">
-                <td v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
-                  {{ formatCell(row, col.field) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <template v-else>
+        <div class="table-toolbar mobile-card">
+          <div class="toolbar-tip">{{ currentView?.name || t("admin.formListView.defaultView") }}</div>
+          <van-dropdown-menu v-if="authGroups.length" class="auth-group-menu">
+            <van-dropdown-item v-model="currentAuthGroupId" :options="authGroupOptions" @change="onAuthGroupChange" />
+          </van-dropdown-menu>
         </div>
-        <div v-if="!loading && dataList.length === 0" class="empty-tip">{{ t("common.noData") }}</div>
-      </div>
 
-      <div v-else class="mobile-card-list">
-        <div v-for="row in dataList" :key="row.id" class="mobile-data-card mobile-card" @click="goToDetail(row)">
-          <div class="card-title">{{ cardTitle(row) }}</div>
-          <div class="card-fields" :class="`cols-${mobileSettings.fieldColumns || 1}`">
-            <div v-for="col in columns" :key="col.field" class="card-field">
-              <span class="field-label">{{ col.title }}</span>
-              <span class="field-value">{{ formatCell(row, col.field) || "--" }}</span>
+        <div v-if="mobileType === MobileFormListViewType.Table" class="data-table-wrapper mobile-card">
+          <div class="table-scroll-area">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
+                    {{ col.title }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in dataList" :key="row.id" @click="goToDetail(row)">
+                  <td v-for="col in columns" :key="col.field" :style="{ minWidth: `${col.width}px` }">
+                    {{ formatCell(row, col.field) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="!loading && dataList.length === 0" class="empty-tip">{{ t("common.noData") }}</div>
+        </div>
+
+        <div v-else class="mobile-card-list">
+          <div v-for="row in dataList" :key="row.id" class="mobile-data-card mobile-card" @click="goToDetail(row)">
+            <div class="card-title">{{ cardTitle(row) }}</div>
+            <div class="card-fields" :class="`cols-${mobileSettings.fieldColumns || 1}`">
+              <div v-for="col in columns" :key="col.field" class="card-field">
+                <span class="field-label">{{ col.title }}</span>
+                <span class="field-value">{{ formatCell(row, col.field) || "--" }}</span>
+              </div>
             </div>
           </div>
+          <div v-if="!loading && dataList.length === 0" class="empty-tip mobile-card">{{ t("common.noData") }}</div>
         </div>
-        <div v-if="!loading && dataList.length === 0" class="empty-tip mobile-card">{{ t("common.noData") }}</div>
-      </div>
+      </template>
     </div>
 
     <template #footer>
-      <div class="pagination-wrap">
+      <div v-if="!loadError" class="pagination-wrap">
         <van-pagination v-model="currentPage" :total-items="total" :items-per-page="pageSize" mode="simple" @change="loadData" />
       </div>
     </template>
@@ -59,6 +68,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
   FieldType,
+  DataPerms,
   MobileFormListViewType,
   SystemField,
   type FormData,
@@ -66,10 +76,12 @@ import {
   type FormListView,
   type FormListViewMobileSettings,
   type FormListViewSettings,
+  type AuthGroup,
 } from "@eimsnext/models";
 import MobilePage from "@/components/base/MobilePage.vue";
 import { SortDirection, type IDynamicFilter } from "@eimsnext/services";
-import { formDataServiceMobile, formServiceMobile, formListViewServiceMobile } from "@/services/mobileService";
+import { FlagEnum } from "@eimsnext/utils";
+import { authGroupServiceMobile, formDataServiceMobile, formServiceMobile, formListViewServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
 const route = useRoute();
@@ -87,14 +99,27 @@ const currentView = ref<FormListView>();
 const dataList = ref<FormData[]>([]);
 const columns = ref<{ field: string; title: string; width: number }[]>([]);
 const mobileSettings = ref<FormListViewMobileSettings>({ fieldColumns: 1 });
+const loadError = ref(false);
+const authGroups = ref<AuthGroup[]>([]);
+const currentAuthGroupId = ref("");
+const currentAuthGroup = computed(() => authGroups.value.find((group) => group.id === currentAuthGroupId.value));
+const authGroupOptions = computed(() => authGroups.value.map((group) => ({ text: group.name, value: group.id })));
+const canAdd = computed(() => !currentAuthGroup.value || FlagEnum.has(currentAuthGroup.value.dataPerms, DataPerms.AddNew));
 
 const goBack = () => router.back();
-const goToAdd = () => router.push(`/app/${appId}/form/${formId}/add`);
-const goToDetail = (row: FormData) => router.push(`/app/${appId}/form/${formId}/${row.id}`);
+const authGroupQuery = () => currentAuthGroupId.value ? { authGroupId: currentAuthGroupId.value } : undefined;
+const goToAdd = () => router.push({ path: `/app/${appId}/form/${formId}/add`, query: authGroupQuery() });
+const goToDetail = (row: FormData) => router.push({ path: `/app/${appId}/form/${formId}/${row.id}`, query: authGroupQuery() });
+const onAuthGroupChange = async () => {
+  currentPage.value = 1;
+  await loadData();
+};
 const mobileType = computed(() => currentView.value?.mobileType || MobileFormListViewType.Table);
 
 const loadForm = async () => {
   form.value = await formServiceMobile.get(formId);
+  authGroups.value = await authGroupServiceMobile.getAssigned(formId);
+  currentAuthGroupId.value = authGroups.value[0]?.id || "";
   views.value = await formListViewServiceMobile.query(formId);
   currentView.value = views.value[0];
   const settings = parseSettings(currentView.value?.settings);
@@ -114,16 +139,31 @@ const loadForm = async () => {
 
 const loadData = async () => {
   loading.value = true;
-  const skip = (currentPage.value - 1) * pageSize.value;
-  const filter = buildFilter();
-  const sort = buildSort();
-  const [list, count] = await Promise.all([
-    formDataServiceMobile.query(formId, skip, pageSize.value, filter, sort),
-    formDataServiceMobile.count(formId, filter),
-  ]);
-  dataList.value = list;
-  total.value = count;
-  loading.value = false;
+  try {
+    const skip = (currentPage.value - 1) * pageSize.value;
+    const filter = buildFilter();
+    const sort = buildSort();
+    const [list, count] = await Promise.all([
+      formDataServiceMobile.query(formId, skip, pageSize.value, filter, sort, currentAuthGroupId.value || undefined),
+      formDataServiceMobile.count(formId, filter, currentAuthGroupId.value || undefined),
+    ]);
+    dataList.value = list;
+    total.value = count;
+  } catch {
+    loadError.value = true;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const initialize = async () => {
+  loadError.value = false;
+  try {
+    await loadForm();
+    await loadData();
+  } catch {
+    loadError.value = true;
+  }
 };
 
 const formatCell = (row: FormData, field: string) => {
@@ -205,7 +245,7 @@ const imageText = (value: any) => {
 };
 
 onMounted(() => {
-  void loadForm().then(loadData);
+  void initialize();
 });
 </script>
 

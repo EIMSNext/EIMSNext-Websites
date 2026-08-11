@@ -30,12 +30,15 @@ const props = withDefaults(
 );
 
 const condList = toRef<IConditionList>(props.modelValue);
-const filterFieldBuildSetting = {
+const filterFieldBuildSetting = computed(() => ({
   version: 0,
   rule: 0,
   matchType: false,
-  fieldLimit: { excludeFieldTypes: [FieldType.DataSelect] },
-};
+  fieldLimit: {
+    excludeFieldTypes: [FieldType.DataSelect],
+    fieldPerms: props.fieldPerms,
+  },
+}));
 const onChange = (filter: IConditionList) => {
   condList.value = filter;
 };

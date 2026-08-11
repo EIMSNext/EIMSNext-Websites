@@ -96,6 +96,24 @@ export function useDashboardDragDrop(state: IGridLayoutState, gridRef: Ref<any>)
   };
 
   const dashItemDrop = async (e: DragEvent, callback: ((showDialog: boolean, type: DashItemType) => void) | null) => {
+    const elementAtDrop = document.elementFromPoint(e.clientX, e.clientY);
+    const target = elementAtDrop?.closest<HTMLElement>("[data-layout-container-id]")
+      || (e.target instanceof Element ? e.target.closest<HTMLElement>("[data-layout-container-id]") : null);
+    if (target?.dataset.layoutContainerId) {
+      const parentLayoutId = target.dataset.layoutContainerId;
+      const tabId = target.dataset.tabId;
+      const siblingCount = state.layout.filter((item) => item.parentLayoutId === parentLayoutId && item.tabId === tabId).length;
+      state.layout = state.layout.filter((obj) => obj.i !== "drop");
+      return {
+        x: (siblingCount * 6) % colNum.value,
+        y: Math.floor((siblingCount * 6) / colNum.value) * newHeight,
+        w: newWidth,
+        h: newHeight,
+        type: draggingItemType.value,
+        parentLayoutId,
+        tabId,
+      };
+    }
     const parentRect = gridRef.value.$el.getBoundingClientRect();
     let mouseInGrid = false;
     if (

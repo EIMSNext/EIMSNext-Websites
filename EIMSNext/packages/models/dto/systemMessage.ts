@@ -34,7 +34,7 @@ export enum MessageCategory {
 
 export enum MessageType {
   FormNotify = "0",
-  WfTodoNotify = "1",
+  WfTaskNotify = "1",
   WfExpireNotify = "2",
   WfUrgeNotify = "3",
   ExportNotify = "4",

@@ -1,5 +1,21 @@
 <template>
-  <div class="layout-grid-item">
+  <LayoutContainerCard
+    v-if="itemDef.itemType === DashItemType.LayoutContainer"
+    :item-def="itemDef"
+    :layout="layout"
+    :items="items"
+    :is-view="isView"
+    :is-public="isPublic"
+    :public-token="publicToken"
+    :external-filters="externalFilters"
+    @update-layout="emit('update-layout', $event)"
+    @update-setting="(...args) => emit('update-setting', ...args)"
+    @edit="emit('edit', $event)"
+    @delete="emit('delete', $event)"
+    @filter-change="onFilterValueChanged"
+    @update-realtime-setting="(...args) => emit('update-realtime-setting', ...args)"
+  />
+  <div v-else class="layout-grid-item">
     <div class="container-group-drag-handle"></div>
     <div v-if="!isView" class="container-header">
       <div class="header-action-container">
@@ -7,7 +23,13 @@
           <div class="action-btn" :title="t('admin.dashItem.hideOnDesktop')" @click="onHide">
             <et-icon icon="el-hide" />
           </div>
-          <div class="action-btn" :title="t('common.edit')" @click="onEdit"><et-icon icon="el-editPen" /></div>
+          <el-popover v-if="itemDef.itemType === DashItemType.RealTime && realTimeSetting" v-model:visible="realtimeSettingsVisible" placement="bottom-end" trigger="click" width="310">
+            <RealTimeSettings :model-value="realTimeSetting" @updated="onRealTimeSettingUpdated" />
+            <template #reference>
+              <div class="action-btn" :title="t('common.edit')"><et-icon icon="el-editPen" /></div>
+            </template>
+          </el-popover>
+          <div v-else class="action-btn" :title="t('common.edit')" @click="onEdit"><et-icon icon="el-editPen" /></div>
           <div class="action-btn" :title="t('admin.dashItem.copy')" @click="onCopy">
             <et-icon icon="el-documentCopy" />
           </div>
@@ -46,6 +68,9 @@
       <template v-else-if="itemDef.itemType == DashItemType.Filter">
         <FilterWidgetCard :item-def="itemDef" :is-public="isPublic" @change="onFilterValueChanged" />
       </template>
+      <template v-else-if="itemDef.itemType == DashItemType.RealTime && realTimeSetting">
+        <RealTimeDisplay :setting="realTimeSetting" />
+      </template>
       <template v-else>
         <el-empty class="et-dash-empty">
           <div class="empty-wrapper">
@@ -65,6 +90,11 @@ import EChartsViewer from "../ECharts/EChartsViewer.vue";
 import FilterWidgetCard from "./FilterWidgetCard.vue";
 import DetailTableViewer from "../DetailTable/DetailTableViewer.vue";
 import { detailTableSettingValidate, IDetailTableSetting, parseDetailTableSetting } from "../DetailTable/type";
+import LayoutContainerCard from "../LayoutContainer/LayoutContainerCard.vue";
+import { IGridLayoutItem } from "@eimsnext/models";
+import RealTimeDisplay from "../RealTime/RealTimeDisplay.vue";
+import RealTimeSettings from "../RealTime/RealTimeSettings.vue";
+import { parseRealTimeSetting, IRealTimeSetting } from "../RealTime/type";
 const { t } = useLocale();
 
 defineOptions({
@@ -80,10 +110,16 @@ const props = withDefaults(
     height?: number;
     width?: number;
     externalFilter?: any;
+    externalFilters?: Record<string, any>;
+    layout?: IGridLayoutItem[];
+    items?: Record<string, DashboardItemDef>;
   }>(),
   {
     isView: false,
     isPublic: false,
+    externalFilters: () => ({}),
+    layout: () => [],
+    items: () => ({}),
   }
 );
 
@@ -107,6 +143,9 @@ const detailTableSetting = computed<IDetailTableSetting | undefined>(() => {
   return parseDetailTableSetting(props.itemDef.details);
 });
 
+const realTimeSetting = computed<IRealTimeSetting | undefined>(() => parseRealTimeSetting(props.itemDef.details));
+const realtimeSettingsVisible = ref(false);
+
 const itemTitle = computed(() => {
   if (props.itemDef.name) {
     return props.itemDef.name;
@@ -127,7 +166,7 @@ const isInteractiveContent = computed(() => {
   return props.isView && [DashItemType.Filter, DashItemType.DetailTable].includes(props.itemDef.itemType);
 });
 
-const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change"]);
+const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change", "update-layout", "update-setting", "update-realtime-setting"]);
 const onHide = () => {
   emit("hide", props.itemDef);
 };
@@ -142,6 +181,10 @@ const onDelete = () => {
 };
 const onFilterValueChanged = (payload: { itemId: string; value: any }) => {
   emit("filter-change", payload);
+};
+const onRealTimeSettingUpdated = (setting: IRealTimeSetting) => {
+  realtimeSettingsVisible.value = false;
+  emit("update-realtime-setting", props.itemDef, setting);
 };
 </script>
 <style lang="scss" scoped>

@@ -1,6 +1,6 @@
 ﻿import { CorpModelBase, IdBase, Operator } from "./modelBase";
 
-export interface WfTodo extends CorpModelBase {
+export interface WfTask extends CorpModelBase {
   wfInstanceId: string;
   approveNodeId: string;
   approveNodeName: string;

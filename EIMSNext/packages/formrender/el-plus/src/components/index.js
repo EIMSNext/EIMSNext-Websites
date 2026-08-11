@@ -12,6 +12,7 @@ import { FcTree as tree } from "./tree";
 import { FcUpload as upload } from "./upload";
 import { FcEditor } from './wangeditor';
 import { FcDataSelect as dataSelect } from "./dataSelect";
+import { FcQuery as query } from "./query";
 import { FcSerialNo as serialno } from "./serialno";
 
 // export { FcCheckbox, FcFrame, FcGroup, FcRadio, FcSelect, FcTree, FcUpload, FcEditor }
@@ -28,6 +29,7 @@ export default [
     upload,
     group,
     dataSelect,
+    query,
     serialno,
     subForm,
     IconWarning

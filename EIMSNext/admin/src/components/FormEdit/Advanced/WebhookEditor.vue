@@ -57,10 +57,10 @@
                 {{ t("admin.wfstatus_updated") }}
               </el-checkbox>
               <el-checkbox
-                :modelValue="wfTodoUpdated"
-                @change="(val) => triggerChanged(WebHookTrigger.WfTodo_Updated, val)"
+                :modelValue="wfTaskUpdated"
+                @change="(val) => triggerChanged(WebHookTrigger.WfTask_Updated, val)"
               >
-                {{ t("admin.wftodo_updated") }}
+                {{ t("admin.wftask_updated") }}
               </el-checkbox>
             </div>
           </div>
@@ -101,7 +101,7 @@ const dataRemoved = computed(() => FlagEnum.has(triggers.value, WebHookTrigger.D
 const wfStatusUpdated = computed(() =>
   FlagEnum.has(triggers.value, WebHookTrigger.WfStatus_Updated)
 );
-const wfTodoUpdated = computed(() => FlagEnum.has(triggers.value, WebHookTrigger.WfTodo_Updated));
+const wfTaskUpdated = computed(() => FlagEnum.has(triggers.value, WebHookTrigger.WfTask_Updated));
 
 const emit = defineEmits(["update:modelValue", "saved"]);
 const triggers = ref(hook.value.triggers || WebHookTrigger.NotSet);

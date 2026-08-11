@@ -6,7 +6,6 @@ import {
   DataPerms,
   FormDef,
   FormType,
-  UserType,
 } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { appSetting, FlagEnum } from "@eimsnext/utils";
@@ -27,12 +26,8 @@ export function getAuthGroupDataPerms(authGrp?: AuthGroup) {
 
   return undefined;
 }
-export function hasDataPerm(userType: UserType, needPerm: DataPerms, dataPerms?: DataPerms) {
-  return (
-    userType == UserType.CorpOwmer ||
-    userType == UserType.CorpAdmin ||
-    (dataPerms && FlagEnum.has(dataPerms, needPerm)) == true
-  );
+export function hasDataPerm(needPerm: DataPerms, dataPerms?: DataPerms) {
+  return (dataPerms && FlagEnum.has(dataPerms, needPerm)) == true;
 }
 
 export function getAppIcon(app?: AppDef) {

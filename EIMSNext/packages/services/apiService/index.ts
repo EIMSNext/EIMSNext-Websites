@@ -5,6 +5,7 @@ export * from "./authProfileService";
 export * from "./systemMessageService";
 export * from "./aggregateService";
 export * from "./appProfileService";
+export * from "./appPackageService";
 export * from "./pluginProfileService";
 export * from "./customPrintService";
 export * from "./workflowService";

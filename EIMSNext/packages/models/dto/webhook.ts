@@ -28,5 +28,5 @@ export enum WebHookTrigger {
   Data_Updated = 1 << 1,
   Data_Removed = 1 << 2,
   WfStatus_Updated = 1 << 3,
-  WfTodo_Updated = 1 << 4,
+  WfTask_Updated = 1 << 4,
 }

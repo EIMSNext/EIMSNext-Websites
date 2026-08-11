@@ -3,7 +3,7 @@ import {
   ApproveRequest,
   ChangeApproverRequest,
   FlowManageQueryRequest,
-  FlowManageTodoQueryResult,
+  FlowManageTaskQueryResult,
   ReturnRequest,
   ReturnTargetNode,
   StartRequest,
@@ -76,9 +76,8 @@ export class WorkflowService extends ServiceBase {
     return this.http().api.get<ReturnTargetNode[]>(`${this.getUrl(this.modelName(), "ReturnNodes")}${query}`);
   }
 
-  async queryManageTodos(params: FlowManageQueryRequest): Promise<FlowManageTodoQueryResult> {
-    const result = await this.http().api.get<{ data: FlowManageTodoQueryResult }>(this.getUrl(this.modelName(), "ManageTodos"), params);
-    return result.data;
+  async queryManageTasks(params: FlowManageQueryRequest): Promise<FlowManageTaskQueryResult> {
+    return this.http().api.get<FlowManageTaskQueryResult>(this.getUrl(this.modelName(), "ManageTasks"), params);
   }
 
   terminate(data: TerminateWorkflowRequest): Promise<any> {

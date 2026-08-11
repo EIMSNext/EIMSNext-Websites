@@ -1,12 +1,12 @@
 <template>
-  <WfApprovalLogs :filter="filter" />
+  <WfTaskLogs :filter="filter" />
 </template>
 <script setup lang="ts">
 defineOptions({
   name: "MyApproved",
 });
 
-import WfApprovalLogs from './WfApprovalLogs.vue';
+import WfTaskLogs from './WfTaskLogs.vue';
 
 const filter = { result: 7 }
 

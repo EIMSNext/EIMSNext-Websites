@@ -23,4 +23,6 @@ export enum DashItemType {
   Comp = "comp",
   Filter = "filter",
   DetailTable = "detailTable",
+  LayoutContainer = "layoutContainer",
+  RealTime = "realTime",
 }

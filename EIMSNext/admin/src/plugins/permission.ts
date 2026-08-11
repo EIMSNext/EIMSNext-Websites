@@ -64,7 +64,12 @@ export function setupPermission() {
                   (to.params.formId || to.params.dashId)
                 ) {
                   const appStore = useAppStore();
-                  const app = await appStore.get(to.params.appId as string);
+                  let app;
+                  try {
+                    app = await appStore.get(to.params.appId as string, true, true, { silentError: true });
+                  } catch {
+                    // A target page renders its own denied or missing-resource state.
+                  }
                   const menuId = to.params.formId || to.params.dashId;
                   if (menuId) {
                     const form = findMenu(app?.appMenus || [], menuId as string);

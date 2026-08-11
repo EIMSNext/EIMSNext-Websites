@@ -34,7 +34,7 @@
                       <div class="line-content" draggable="true"
                         @dragstart="dashItemDragStart($event, DashItemType.Chart)"
                         @drag="(dashItemDrag($event, DashItemType.Chart), (hoverMenu = false))"
-                        @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
+                        @dragend="handlePaletteDrop($event, DashItemType.Chart)" unselectable="on"
                         @mouseover="setHoverMenu(true, DashItemType.Chart)" @mouseleave="hoverMenu = false">
                         <et-icon icon="el-PieChart" class="line-icon" />
                         <div class="line-text">{{ t("admin.dashboardDesigner.statsChart") }}</div>
@@ -56,7 +56,7 @@
                       <div class="line-content" draggable="true"
                         @dragstart="dashItemDragStart($event, DashItemType.DetailTable)"
                         @drag="dashItemDrag($event, DashItemType.DetailTable), (hoverMenu = false)"
-                        @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
+                        @dragend="handlePaletteDrop($event, DashItemType.DetailTable)" unselectable="on"
                         @mouseover="setHoverMenu(true, DashItemType.DetailTable)" @mouseleave="hoverMenu = false">
                         <et-icon icon="el-Grid" class="line-icon" />
                         <div class="line-text">{{ t("admin.dashboardDesigner.detailTable") }}</div>
@@ -109,8 +109,22 @@
               </div>
             </div>
             <div>
-              <!-- <div class="menu-label">组件</div> -->
+              <div class="menu-label">组件</div>
               <div class="menu-group">
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.LayoutContainer)"
+                    @drag="dashItemDrag($event, DashItemType.LayoutContainer)" @dragend="handlePaletteDrop($event, DashItemType.LayoutContainer)" unselectable="on">
+                    <et-icon icon="el-Grid" class="line-icon" />
+                    <div class="line-text">布局容器</div>
+                  </div>
+                </div>
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.RealTime)"
+                    @drag="dashItemDrag($event, DashItemType.RealTime)" @dragend="handlePaletteDrop($event, DashItemType.RealTime)" unselectable="on">
+                    <et-icon icon="el-Clock" class="line-icon" />
+                    <div class="line-text">{{ t("admin.dashboardDesigner.realTime") }}</div>
+                  </div>
+                </div>
                 <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Comp" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
                   :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Comp }">
@@ -192,7 +206,7 @@
                 </el-popover> -->
                 <div class="menu-line">
                   <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Filter)"
-                    @drag="dashItemDrag($event, DashItemType.Filter)" @dragend="handleFilterDrop($event)" unselectable="on">
+                    @drag="dashItemDrag($event, DashItemType.Filter)" @dragend="handlePaletteDrop($event, DashItemType.Filter)" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-filter"></i></div>
                     <div class="line-text">{{ t("admin.dashboardDesigner.filterWidget") }}</div>
                   </div>
@@ -217,18 +231,20 @@
       </el-aside>
       <el-main class="designer-main">
         <div class="dash-edit-layout custom-scroll" @dragover="gridDragOver">
-          <grid-layout ref="gridRef" v-model:layout="state.layout" :col-num="colNum" :col-width="colWidth"
+          <grid-layout ref="gridRef" v-model:layout="rootLayout" :col-num="colNum" :col-width="colWidth"
             :row-height="rowHeight" :is-draggable="state.draggable" :is-resizable="state.resizable" :is-mirrored="false"
             :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true"
             :responsive="true">
-            <grid-item v-for="item in state.layout" :ref="(e) => setItemRef(item, e)" :x="item.x" :y="item.y"
+            <grid-item v-for="item in rootLayout" :ref="(e) => setItemRef(item, e)" :x="item.x" :y="item.y"
               :w="item.w" :h="item.h" :i="item.i" :key="item.i" @resize="resizeEvent" @resized="resizedEvent"
               @moved="movedEvent" @container-resized="containerResizedEvent" :minW="getMinWidth(item)"
               :minH="getMinHeight(item)" :maxW="60" :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag"
               :class="{ edited: item.inEdit, gridNoTran: item.drag }" :style="{ 'z-index': getZIndex(item) }">
-              <DashItemCard v-if="state.items[item.i]" :item-def="state.items[item.i]" :height="item.h" :width="item.w"
+              <DashItemCard v-if="state.items[item.i]" :item-def="state.items[item.i]" :layout="state.layout" :items="state.items" :height="item.h" :width="item.w"
                 :is-view="false" @hide="handleItemHide(state.items[item.i])" @edit="handleItemEdit(state.items[item.i])"
-                @copy="handleItemCopy(state.items[item.i])" @delete="handleItemDelete(state.items[item.i])" />
+                @copy="handleItemCopy(state.items[item.i])" @delete="handleItemDelete(state.items[item.i])"
+                @update-layout="updateNestedLayout" @update-setting="updateContainerSetting"
+                @update-realtime-setting="updateRealTimeSetting" />
             </grid-item>
           </grid-layout>
         </div>
@@ -271,6 +287,8 @@ import { IDashboardBindingCandidate, IDashboardChartTarget } from "./FilterDesig
 import { createDefaultDetailTableSetting } from "./DetailTable/type";
 import { useDashboardDragDrop } from "./useDashboardDragDrop";
 import { escapeODataString } from "@/utils/odata";
+import { createDefaultLayoutContainerSetting, ILayoutContainerSetting, parseLayoutContainerSetting } from "./LayoutContainer/type";
+import { createDefaultRealTimeSetting, IRealTimeSetting } from "./RealTime/type";
 const { t } = useI18n();
 
 defineOptions({
@@ -305,6 +323,14 @@ const state = reactive<IGridLayoutState>({
   draggable: true,
   resizable: true,
 });
+const rootLayout = computed<IGridLayoutItem[]>({
+  get: () => state.layout.filter((item) => !item.parentLayoutId),
+  set: (updated) => {
+    const nested = state.layout.filter((item) => item.parentLayoutId);
+    state.layout.splice(0, state.layout.length, ...updated, ...nested);
+  },
+});
+const pendingDrop = ref<(IGridLayoutItem & { parentLayoutId?: string; tabId?: string }) | undefined>();
 
 const {
   colNum,
@@ -363,13 +389,9 @@ const containerResizedEvent = (
   newWPx: number
 ) => { };
 
-const openSourceDialog = (b: boolean, type: DashItemType) => {
-  draggingItemType.value = type;
-  showDataSourceDialog.value = true;
-};
-
 const handleSourceCancel = async () => {
   showDataSourceDialog.value = false;
+  pendingDrop.value = undefined;
   state.layout = state.layout.filter((obj) => obj.i !== "drop");
   await nextTick();
 };
@@ -377,24 +399,28 @@ const handleSourceOk = async (source: IDataSource) => {
   dataSource.value = source;
   showDataSourceDialog.value = false;
 
-  let details = dragPos.type == DashItemType.DetailTable
+  const target = pendingDrop.value;
+  if (!target?.type) return;
+  let details = target.type == DashItemType.DetailTable
     ? createDefaultDetailTableSetting(dataSource.value)
     : { datasource: dataSource.value };
   let layoutId = uniqueId();
 
   state.layout.push({
-    x: dragPos.x,
-    y: dragPos.y,
-    w: dragPos.w,
-    h: dragPos.h,
+    x: target.x,
+    y: target.y,
+    w: target.w,
+    h: target.h,
     i: layoutId,
-    type: dragPos.type,
+    type: target.type,
+    parentLayoutId: target.parentLayoutId,
+    tabId: target.tabId,
   });
 
-  await createNewDashItem(dragPos.type!, JSON.stringify(details), layoutId);
+  await createNewDashItem(target.type, JSON.stringify(details), layoutId);
 
   await nextTick();
-  gridRef.value.emitter.emit("dragEvent", [
+  if (!target.parentLayoutId) gridRef.value.emitter.emit("dragEvent", [
     "dragend",
     dragPos.i,
     dragPos.x,
@@ -405,11 +431,12 @@ const handleSourceOk = async (source: IDataSource) => {
 
   showChartEditor.value = false;
   showDetailTableEditor.value = false;
-  if (dragPos.type == DashItemType.DetailTable) {
+  if (target.type == DashItemType.DetailTable) {
     showDetailTableEditor.value = true;
   } else {
     showChartEditor.value = true;
   }
+  pendingDrop.value = undefined;
 };
 
 const loadBindingCandidates = async () => {
@@ -437,29 +464,22 @@ const setHoverMenu = (b: boolean, type: DashItemType) => {
   hoverMenuType.value = type;
 };
 
-const handleFilterDrop = async (e: DragEvent) => {
+const handlePaletteDrop = async (e: DragEvent, type: DashItemType) => {
   const result = await dashItemDrop(e, null);
-  if (result) {
-    const layoutId = uniqueId();
-    state.layout.push({
-      x: result.x,
-      y: result.y,
-      w: result.w,
-      h: result.h,
-      i: layoutId,
-      type: result.type,
-    });
-    await nextTick();
-    gridRef.value.emitter.emit("dragEvent", [
-      "dragend",
-      "drop",
-      result.x,
-      result.y,
-      result.h,
-      result.w,
-    ]);
-    await createNewDashItem(result.type!, "{}", layoutId);
+  if (!result) return;
+  const target = { ...result, type } as IGridLayoutItem & { parentLayoutId?: string; tabId?: string };
+  if (type === DashItemType.Chart || type === DashItemType.DetailTable) {
+    pendingDrop.value = target;
+    draggingItemType.value = type;
+    showDataSourceDialog.value = true;
+    return;
   }
+  const layoutId = uniqueId();
+  state.layout.push({ ...target, i: layoutId });
+  let details = "{}";
+  if (type === DashItemType.LayoutContainer) details = JSON.stringify(createDefaultLayoutContainerSetting());
+  if (type === DashItemType.RealTime) details = JSON.stringify(createDefaultRealTimeSetting());
+  await createNewDashItem(type, details, layoutId);
 };
 
 const createNewDashItem = async (itemType: DashItemType, details: string, layoutId: string) => {
@@ -480,6 +500,12 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
       break;
     case DashItemType.Filter:
       name = t("admin.dashboardDesigner.filterWidgetName");
+      break;
+    case DashItemType.LayoutContainer:
+      name = "未命名布局容器";
+      break;
+    case DashItemType.RealTime:
+      name = t("admin.dashboardDesigner.realTime");
       break;
     default:
       name = t("admin.untitledChart");
@@ -536,6 +562,7 @@ onUnmounted(() => cleanupMouseTracking());
 
 const handleItemHide = (item: DashboardItemDef) => { };
 const handleItemEdit = (item: DashboardItemDef) => {
+  if (item.itemType === DashItemType.LayoutContainer) return;
   dashItemDefRef.value = item;
   showChartEditor.value = false;
   showDetailTableEditor.value = false;
@@ -550,7 +577,36 @@ const handleItemEdit = (item: DashboardItemDef) => {
   }
 };
 const handleItemCopy = (item: DashboardItemDef) => { };
-const handleItemDelete = (item: DashboardItemDef) => { };
+const handleItemDelete = async (item: DashboardItemDef) => {
+  const hasChildren = state.layout.some((layout) => layout.parentLayoutId === item.layoutId);
+  if (item.itemType === DashItemType.LayoutContainer && hasChildren) return;
+  await dashboardItemDefService.delete(item.id);
+  state.layout = state.layout.filter((layout) => layout.i !== item.layoutId);
+  delete state.items[item.layoutId];
+  await onSave();
+};
+const updateNestedLayout = (layout: IGridLayoutItem[]) => {
+  state.layout.splice(0, state.layout.length, ...layout);
+};
+const updateContainerSetting = async (item: DashboardItemDef, setting: ILayoutContainerSetting, name: string) => {
+  const previous = parseLayoutContainerSetting(item.details);
+  if (previous.mode !== setting.mode) {
+    state.layout.forEach((layout) => {
+      if (layout.parentLayoutId !== item.layoutId) return;
+      layout.tabId = setting.mode === "tabs" ? setting.tabs[0]?.id : undefined;
+    });
+    await onSave();
+  }
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, { id: item.id, name, details: JSON.stringify(setting) });
+  state.items[item.layoutId] = updated;
+};
+const updateRealTimeSetting = async (item: DashboardItemDef, setting: IRealTimeSetting) => {
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    details: JSON.stringify(setting),
+  });
+  state.items[item.layoutId] = updated;
+};
 
 watch(
   () => props.dashDef,

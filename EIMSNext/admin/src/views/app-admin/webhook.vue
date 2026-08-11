@@ -199,7 +199,7 @@ function triggerText(value?: WebHookTrigger) {
   if (FlagEnum.has(triggers, WebHookTrigger.Data_Updated)) labels.push(t("admin.data_updated"));
   if (FlagEnum.has(triggers, WebHookTrigger.Data_Removed)) labels.push(t("admin.data_removed"));
   if (FlagEnum.has(triggers, WebHookTrigger.WfStatus_Updated)) labels.push(t("admin.wfstatus_updated"));
-  if (FlagEnum.has(triggers, WebHookTrigger.WfTodo_Updated)) labels.push(t("admin.wftodo_updated"));
+  if (FlagEnum.has(triggers, WebHookTrigger.WfTask_Updated)) labels.push(t("admin.wftask_updated"));
   return labels.join(t("common.listSeparator")) || "--";
 }
 

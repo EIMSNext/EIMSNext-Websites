@@ -5,7 +5,7 @@ import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-rou
 const AppLayout = () => import("@/layout/applayout/index.vue");
 const AppAdminLayout = () => import("@/layout/appadminlayout/index.vue");
 export const SysLayout = () => import("@/layout/syslayout/index.vue");
-const TodoLayout = () => import("@/layout/todolayout/index.vue");
+const TaskLayout = () => import("@/layout/tasklayout/index.vue");
 const OpenPlatformLayout = () => import("@/layout/openplatform/index.vue");
 
 interface SystemRouteDef {
@@ -21,7 +21,7 @@ const systemRoutes: SystemRouteDef[] = [
   { path: "admin",       component: () => import("@/views/system/admin/index.vue"),       title: "admin",       allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "corp-log",    component: () => import("@/views/system/corp-log/index.vue"),    title: "corp-log",    allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "flow-manage", component: () => import("@/views/system/flow-manage/index.vue"), title: "flow-manage", allowedUserTypes: [UserType.CorpAdmin] },
-  { path: "plugin",      component: () => import("@/views/system/plugin/index.vue"),      title: "plugin",      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "plugin",      component: () => import("@/views/system/plugin/index.vue"),      title: "plugin",      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.PlatAdmin] },
 ];
 
 interface OpenPlatformRouteDef {
@@ -65,10 +65,10 @@ function createOpenPlatformRoutes(defs: OpenPlatformRouteDef[]): RouteRecordRaw[
   }));
 }
 
-function createTodoRoute(path: string, name: string, component: () => Promise<any>, title: string): RouteRecordRaw {
+function createTaskRoute(path: string, name: string, component: () => Promise<any>, title: string): RouteRecordRaw {
   return {
     path,
-    component: TodoLayout,
+    component: TaskLayout,
     children: [{
       path: "",
       name: `${name}-global`,
@@ -159,10 +159,10 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  createTodoRoute("/mytasks", "mytasks", () => import("@/views/wftodo/global/mytasks.vue"), "common.wfProcess.mytasks"),
-  createTodoRoute("/mystarted", "mystarted", () => import("@/views/wftodo/global/mystarted.vue"), "common.wfProcess.mystarted"),
-  createTodoRoute("/myapproved", "myapproved", () => import("@/views/wftodo/global/myapproved.vue"), "common.wfProcess.myapproved"),
-  createTodoRoute("/cctome", "cctome", () => import("@/views/wftodo/global/cctome.vue"), "common.wfProcess.cctome"),
+  createTaskRoute("/mytasks", "mytasks", () => import("@/views/wftask/global/mytasks.vue"), "common.wfProcess.mytasks"),
+  createTaskRoute("/mystarted", "mystarted", () => import("@/views/wftask/global/mystarted.vue"), "common.wfProcess.mystarted"),
+  createTaskRoute("/myapproved", "myapproved", () => import("@/views/wftask/global/myapproved.vue"), "common.wfProcess.myapproved"),
+  createTaskRoute("/cctome", "cctome", () => import("@/views/wftask/global/cctome.vue"), "common.wfProcess.cctome"),
   ...createSysRoutes(systemRoutes),
   ...createOpenPlatformRoutes(openPlatformRoutes),
   {
@@ -296,7 +296,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/mytasks",
-        component: () => import("@/views/wftodo/app/tasks.vue"),
+        component: () => import("@/views/wftask/app/tasks.vue"),
         name: "mytasks",
         meta: {
           title: "common.wfProcess.mytasks",
@@ -313,7 +313,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/mystarted",
-        component: () => import("@/views/wftodo/app/started.vue"),
+        component: () => import("@/views/wftask/app/started.vue"),
         name: "mystarted",
         meta: {
           title: "common.wfProcess.mystarted",
@@ -331,7 +331,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/myapproved",
-        component: () => import("@/views/wftodo/app/approved.vue"),
+        component: () => import("@/views/wftask/app/approved.vue"),
         name: "myapproved",
         meta: {
           title: "common.wfProcess.myapproved",
@@ -349,7 +349,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/cctome",
-        component: () => import("@/views/wftodo/app/cctome.vue"),
+        component: () => import("@/views/wftask/app/cctome.vue"),
         name: "cctome",
         meta: {
           title: "common.wfProcess.cctome",

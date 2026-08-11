@@ -45,7 +45,7 @@
               </span>
             </div>
             <div class="flow-node-content">
-              <div class="node-desc" v-html="content" />
+              <div class="node-desc">{{ content }}</div>
             </div>
           </div>
         </slot>

@@ -21,6 +21,9 @@ export function buildColumns(
   fieldPerms?: IFieldPerm[],
   t?: (key: string) => string,
 ): ITableColumn[] {
+  const canViewField = (field: string) =>
+    fieldPerms === undefined ||
+    fieldPerms.some((permission) => permission.id === field && permission.visible);
   const getSystemFieldLabel = (key: "dataTitle" | "flowStatus" | "createBy" | "createTime") =>
     t ? t(`comp.fieldBlock.systemFields.${key}`) : ({
       dataTitle: "数据标题",
@@ -28,7 +31,7 @@ export function buildColumns(
       createBy: "提交人",
       createTime: "提交时间",
     }[key]);
-  const dispalyAll = displayFields.length == 0;
+  const dispalyAll = displayFields.length == 0 && fieldPerms === undefined;
   const subDisplayFields = new Dictionary();
   displayFields.forEach((d) => {
     if (d.isSubField) {
@@ -50,7 +53,7 @@ export function buildColumns(
   });
 
   const columns: ITableColumn[] = [];
-  if (dispalyAll || displayFields.find((d) => d.field == SystemField.DataTitle)) {
+  if (canViewField(SystemField.DataTitle) && (dispalyAll || displayFields.find((d) => d.field == SystemField.DataTitle))) {
     const dataTitleField = getDataTitle(getSystemFieldLabel("dataTitle"));
     columns.push({
       field: dataTitleField.field,
@@ -62,7 +65,7 @@ export function buildColumns(
     });
   }
 
-  if (usingWf && (dispalyAll || displayFields.find((d) => d.field == SystemField.FlowStatus))) {
+  if (usingWf && canViewField(SystemField.FlowStatus) && (dispalyAll || displayFields.find((d) => d.field == SystemField.FlowStatus))) {
     const statusField = getFlowStatus(getSystemFieldLabel("flowStatus"));
     columns.push({
       field: statusField.field,
@@ -80,9 +83,10 @@ export function buildColumns(
     }
 
     if (
-      dispalyAll ||
-      displayFields.find((d) => d.field == x.field) ||
-      subDisplayFields.has(x.field)
+      canViewField(x.field) &&
+      (dispalyAll ||
+        displayFields.find((d) => d.field == x.field) ||
+        subDisplayFields.has(x.field))
     ) {
       let col: ITableColumn = {
         field: x.field,
@@ -98,7 +102,8 @@ export function buildColumns(
           col.field,
           x.columns,
           dispalyAll,
-          subDisplayFields.get(x.field)
+          subDisplayFields.get(x.field),
+          fieldPerms,
         );
       } else {
         col.width = 120;
@@ -108,7 +113,7 @@ export function buildColumns(
     }
   });
 
-  if (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateBy)) {
+  if (canViewField(SystemField.CreateBy) && (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateBy))) {
     const createByField = getCreateBy(getSystemFieldLabel("createBy"));
     columns.push({
       field: createByField.field,
@@ -119,7 +124,7 @@ export function buildColumns(
     });
   }
 
-  if (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateTime)) {
+  if (canViewField(SystemField.CreateTime) && (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateTime))) {
     const createTimeField = getCreateTime(getSystemFieldLabel("createTime"));
     columns.push({
       field: createTimeField.field,
@@ -138,7 +143,8 @@ function buildSubColumns(
   pField: string,
   fields: FieldDef[],
   dispalyAll: boolean,
-  subDisplayFields?: IFormFieldDef[]
+  subDisplayFields?: IFormFieldDef[],
+  fieldPerms?: IFieldPerm[],
 ): ITableColumn[] {
   const columns: ITableColumn[] = [];
   if (dispalyAll || subDisplayFields) {
@@ -147,7 +153,10 @@ function buildSubColumns(
         return;
       }
 
-      if (dispalyAll || subDisplayFields?.find((d) => d.field == x.field)) {
+      const fieldId = `${pField}>${x.field}`;
+      const canView = fieldPerms === undefined ||
+        fieldPerms.some((permission) => permission.id === fieldId && permission.visible);
+      if (canView && (dispalyAll || subDisplayFields?.find((d) => d.field == x.field))) {
         let col: ITableColumn = {
           field: x.field,
           title: x.title,
@@ -156,7 +165,7 @@ function buildSubColumns(
           oriField: `${pField}>${x.field}`,
         };
         if (x.columns && x.columns.length > 0) {
-          col.children = buildSubColumns(col.field, x.columns, dispalyAll);
+          col.children = buildSubColumns(fieldId, x.columns, dispalyAll, undefined, fieldPerms);
         } else {
           col.width = 120;
         }
