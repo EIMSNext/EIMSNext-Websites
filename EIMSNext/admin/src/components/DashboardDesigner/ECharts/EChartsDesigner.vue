@@ -76,7 +76,7 @@
         </div>
       </el-aside>
       <el-main class="center-echarts center-echarts-main">
-        <div class="center-box" :class="{ 'green-line': dropable.dimension1 }">
+        <div v-if="chartSetting.chartType !== ChartType.Indicator && chartSetting.chartType !== ChartType.Progress" class="center-box" :class="{ 'green-line': dropable.dimension1 }">
           <div class="title">{{ t("admin.dashboardChartDesigner.dimension") }}</div>
           <div class="drag-target-container container-veidoo">
             <Draggable
@@ -153,7 +153,7 @@
                     <template #content>
                       <div class="chart-type-tooltip">
                         <div class="chart-type-tooltip-title">{{ t(cc.i18n) }}</div>
-                        <div>{{ getLimitationDesc(t, cc.limitation) }}</div>
+                        <div>{{ cc.limitationDescription ? t(cc.limitationDescription) : getLimitationDesc(t, cc.limitation) }}</div>
                       </div>
                     </template>
                     <el-button
@@ -170,7 +170,7 @@
           </el-collapse>
           <el-collapse v-model="activeSettingItems" expand-icon-position="left">
             <el-collapse-item
-              v-if="chartConfig && chartConfig.subType"
+              v-if="chartConfig && chartConfig.subType && chartSetting.chartType !== ChartType.Line"
               name="chartsubtype"
               :title="t('admin.dashboardChartDesigner.barSubType')"
               class="box-head"
@@ -185,6 +185,86 @@
                     <i class="icon" :class="ct.cssClass || chartConfig.cssClass"></i>
                   </el-button>
                 </template>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item v-if="chartSetting.chartType === ChartType.Indicator" name="indicatorconfig" :title="t('admin.dashboardChartDesigner.indicatorConfig')" class="box-head">
+              <div class="chart-settings-panel">
+                <el-checkbox v-model="indicatorOptions.showName">{{ t('admin.dashboardChartDesigner.showMetricName') }}</el-checkbox>
+                <div class="setting-row">
+                  <span>{{ t('admin.dashboardChartDesigner.decimalPlaces') }}</span>
+                  <el-input-number v-model="indicatorOptions.decimalPlaces" :min="0" :max="6" :controls="false" />
+                </div>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item v-if="chartSetting.chartType === ChartType.Progress" name="progressconfig" :title="t('admin.dashboardChartDesigner.progressConfig')" class="box-head">
+              <div class="chart-settings-panel">
+                <el-radio-group v-model="progressOptions.targetType">
+                  <el-radio value="metric">{{ t('admin.dashboardChartDesigner.targetMetric') }}</el-radio>
+                  <el-radio value="value">{{ t('admin.dashboardChartDesigner.manualTarget') }}</el-radio>
+                </el-radio-group>
+                <el-select v-if="progressOptions.targetType === 'metric'" v-model="progressTargetMetricId" :placeholder="t('admin.dashboardChartDesigner.selectTargetMetric')">
+                  <el-option v-for="metric in metricCandidates" :key="metric.id" :label="metric.label || metric.id" :value="metric.id" />
+                </el-select>
+                <el-select v-if="progressOptions.targetType === 'metric'" v-model="progressTargetAggFun">
+                  <el-option :label="t('admin.dashboardFieldBar.count')" value="count" />
+                  <el-option :label="t('admin.dashboardFieldBar.sum')" value="sum" />
+                  <el-option :label="t('admin.dashboardFieldBar.average')" value="avg" />
+                  <el-option :label="t('admin.dashboardFieldBar.max')" value="max" />
+                  <el-option :label="t('admin.dashboardFieldBar.min')" value="min" />
+                </el-select>
+                <el-input-number v-else v-model="progressOptions.targetValue" :min="0.000001" :controls="false" :placeholder="t('admin.dashboardChartDesigner.manualTarget')" />
+                <div class="setting-row">
+                  <span>{{ t('admin.dashboardChartDesigner.decimalPlaces') }}</span>
+                  <el-input-number v-model="progressOptions.decimalPlaces" :min="0" :max="6" :controls="false" />
+                </div>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item v-if="chartSetting.chartType === ChartType.Line" name="lineconfig" :title="t('admin.dashboardChartDesigner.lineConfig')" class="box-head">
+              <div class="chart-settings-panel">
+                <div class="setting-row">
+                  <span>{{ t('admin.dashboardChartDesigner.lineType') }}</span>
+                  <el-radio-group v-model="lineOptions.smooth">
+                    <el-radio :value="false">{{ t('admin.dashboardChartDesigner.lineNormal') }}</el-radio>
+                    <el-radio :value="true">{{ t('admin.dashboardChartDesigner.lineCurve') }}</el-radio>
+                  </el-radio-group>
+                </div>
+                <el-checkbox v-model="lineOptions.showSymbol">{{ t('admin.dashboardChartDesigner.showDataPoint') }}</el-checkbox>
+                <el-select v-model="lineOptions.xAxisLabelMode">
+                  <el-option value="horizontal" :label="t('admin.dashboardChartDesigner.xAxisHorizontal')" />
+                  <el-option value="tilt" :label="t('admin.dashboardChartDesigner.xAxisTilt')" />
+                  <el-option value="vertical" :label="t('admin.dashboardChartDesigner.xAxisVertical')" />
+                </el-select>
+                <el-checkbox v-model="lineOptions.showAllLabels">{{ t('admin.dashboardChartDesigner.showAllXAxisLabels') }}</el-checkbox>
+                <el-checkbox v-model="lineOptions.showDataZoom">{{ t('admin.dashboardChartDesigner.showDataZoom') }}</el-checkbox>
+                <el-input v-model="lineOptions.yAxisTitle" :placeholder="t('admin.dashboardChartDesigner.yAxisTitle')" />
+                <div class="setting-row"><span>{{ t('admin.dashboardChartDesigner.yAxisMin') }}</span><el-input-number v-model="lineOptions.yAxisMin" :controls="false" /></div>
+                <div class="setting-row"><span>{{ t('admin.dashboardChartDesigner.yAxisMax') }}</span><el-input-number v-model="lineOptions.yAxisMax" :controls="false" /></div>
+                <el-checkbox v-model="lineOptions.showDataLabel">{{ t('admin.dashboardChartDesigner.showDataLabel') }}</el-checkbox>
+                <el-radio-group v-model="lineOptions.labelOverlap">
+                  <el-radio value="adjust">{{ t('admin.dashboardChartDesigner.labelAdjust') }}</el-radio>
+                  <el-radio value="hide">{{ t('admin.dashboardChartDesigner.labelHide') }}</el-radio>
+                  <el-radio value="stagger">{{ t('admin.dashboardChartDesigner.labelStagger') }}</el-radio>
+                </el-radio-group>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item v-if="chartSetting.chartType === ChartType.VBar || chartSetting.chartType === ChartType.HBar" name="barconfig" :title="t('admin.dashboardChartDesigner.barConfig')" class="box-head">
+              <div class="chart-settings-panel">
+                <el-select v-model="barOptions.categoryAxisLabelMode">
+                  <el-option value="horizontal" :label="t('admin.dashboardChartDesigner.xAxisHorizontal')" />
+                  <el-option value="tilt" :label="t('admin.dashboardChartDesigner.xAxisTilt')" />
+                  <el-option value="vertical" :label="t('admin.dashboardChartDesigner.xAxisVertical')" />
+                </el-select>
+                <el-checkbox v-model="barOptions.showAllCategoryLabels">{{ t('admin.dashboardChartDesigner.showAllXAxisLabels') }}</el-checkbox>
+                <el-checkbox v-model="barOptions.showDataZoom">{{ t('admin.dashboardChartDesigner.showDataZoom') }}</el-checkbox>
+                <el-input v-model="barOptions.valueAxisTitle" :placeholder="t('admin.dashboardChartDesigner.valueAxisTitle')" />
+                <div class="setting-row"><span>{{ t('admin.dashboardChartDesigner.valueAxisMin') }}</span><el-input-number v-model="barOptions.valueAxisMin" :controls="false" /></div>
+                <div class="setting-row"><span>{{ t('admin.dashboardChartDesigner.valueAxisMax') }}</span><el-input-number v-model="barOptions.valueAxisMax" :controls="false" /></div>
+                <el-checkbox v-model="barOptions.showDataLabel">{{ t('admin.dashboardChartDesigner.showDataLabel') }}</el-checkbox>
+                <el-radio-group v-model="barOptions.labelOverlap">
+                  <el-radio value="adjust">{{ t('admin.dashboardChartDesigner.labelAdjust') }}</el-radio>
+                  <el-radio value="hide">{{ t('admin.dashboardChartDesigner.labelHide') }}</el-radio>
+                  <el-radio value="stagger">{{ t('admin.dashboardChartDesigner.labelStagger') }}</el-radio>
+                </el-radio-group>
               </div>
             </el-collapse-item>
             <el-collapse-item name="datatake" :title="t('admin.dashboardChartDesigner.dataDisplay')" class="box-head">
@@ -232,6 +312,7 @@ import {
 } from "./type";
 import {
   dashboardItemDefService,
+  AggregateFun,
   DatasourceType,
   IDimension,
   SortDirection,
@@ -320,10 +401,31 @@ const activeCollItems = ref(["charttype"]);
 const activeSettingItems = ref(["chartsubtype", "datatake"]);
 const chartConfig = ref<IChartConfig>();
 const dropable = ref<any>({});
+const indicatorOptions = reactive({ showName: true, decimalPlaces: 0 });
+const progressOptions = reactive({ targetType: "metric" as "metric" | "value", targetValue: undefined as number | undefined, decimalPlaces: 0 });
+const lineOptions = reactive({ smooth: false, showSymbol: true, xAxisLabelMode: "horizontal" as "horizontal" | "tilt" | "vertical", showAllLabels: false, showDataZoom: false, yAxisTitle: "", yAxisMin: null as number | null, yAxisMax: null as number | null, showDataLabel: false, labelOverlap: "adjust" as "adjust" | "hide" | "stagger" });
+const barOptions = reactive({ categoryAxisLabelMode: "horizontal" as "horizontal" | "tilt" | "vertical", showAllCategoryLabels: false, showDataZoom: false, valueAxisTitle: "", valueAxisMin: null as number | null, valueAxisMax: null as number | null, showDataLabel: false, labelOverlap: "adjust" as "adjust" | "hide" | "stagger" });
+const metricCandidates = computed(() => fields.value);
+const progressTargetMetricId = computed({
+  get: () => chartSetting.progress?.targetMetric?.id || "",
+  set: (id: string) => {
+    const target = metricCandidates.value.find((field) => field.id === id);
+    chartSetting.progress = { ...progressOptions, targetType: "metric", targetMetric: target ? { ...cloneDragField(target), aggFun: AggregateFun.Count } : undefined };
+  },
+});
+const progressTargetAggFun = computed({
+  get: () => chartSetting.progress?.targetMetric?.aggFun || AggregateFun.Count,
+  set: (aggFun: AggregateFun) => {
+    if (chartSetting.progress?.targetMetric) chartSetting.progress.targetMetric.aggFun = aggFun;
+  },
+});
 
 const selectChartType = (cc: IChartConfig) => {
   chartConfig.value = cc;
   chartSetting.chartType = cc.id;
+  chartSetting.chartSubType = cc.subType?.[0]?.id;
+  if (cc.id === ChartType.Indicator || cc.id === ChartType.Progress) chartSetting.dimension1 = [];
+  if (cc.id === ChartType.Indicator || cc.id === ChartType.Progress) chartSetting.metrics = (chartSetting.metrics || []).slice(0, 1);
 };
 
 const selectChartSubType = (cc: IChartConfig, sub: any) => {
@@ -378,6 +480,9 @@ const removeDim1 = (dim: IDimensionField) => {
 };
 
 const addMetric = () => {
+  if ((chartSetting.chartType === ChartType.Progress || chartSetting.chartType === ChartType.Indicator) && (chartSetting.metrics?.length || 0) > 1) {
+    chartSetting.metrics?.splice(1);
+  }
   updateSortList();
 };
 
@@ -427,6 +532,10 @@ const onFilter = (filter: IConditionList) => {
   chartSetting.filter = filter;
 };
 const onSave = async () => {
+  chartSetting.indicator = chartSetting.chartType === ChartType.Indicator ? { ...indicatorOptions } : chartSetting.indicator;
+  chartSetting.progress = chartSetting.chartType === ChartType.Progress ? { ...progressOptions, targetMetric: chartSetting.progress?.targetMetric } : chartSetting.progress;
+  chartSetting.line = chartSetting.chartType === ChartType.Line ? { ...lineOptions } : chartSetting.line;
+  chartSetting.bar = chartSetting.chartType === ChartType.VBar || chartSetting.chartType === ChartType.HBar ? { ...barOptions } : chartSetting.bar;
   var details = JSON.stringify(chartSetting);
 
   let req = {
@@ -450,10 +559,28 @@ onMounted(() => {
   if (!chartSetting.metrics) chartSetting.metrics = [];
   if (!chartSetting.filter) chartSetting.filter = { id: uniqueId(), rel: "and", items: [] };
   if (!chartSetting.sort) chartSetting.sort = { items: [] };
+  chartConfig.value = chartConfigs.find((config) => config.id === chartSetting.chartType);
+  Object.assign(indicatorOptions, { showName: chartSetting.indicator?.showName ?? true, decimalPlaces: chartSetting.indicator?.decimalPlaces ?? 0 });
+  Object.assign(progressOptions, { targetType: chartSetting.progress?.targetType ?? "metric", targetValue: chartSetting.progress?.targetValue, decimalPlaces: chartSetting.progress?.decimalPlaces ?? 0 });
+  Object.assign(lineOptions, { smooth: chartSetting.line?.smooth ?? chartSetting.chartSubType === "smooth", showSymbol: chartSetting.line?.showSymbol ?? true, xAxisLabelMode: chartSetting.line?.xAxisLabelMode ?? "horizontal", showAllLabels: chartSetting.line?.showAllLabels ?? false, showDataZoom: chartSetting.line?.showDataZoom ?? false, yAxisTitle: chartSetting.line?.yAxisTitle ?? "", yAxisMin: chartSetting.line?.yAxisMin ?? null, yAxisMax: chartSetting.line?.yAxisMax ?? null, showDataLabel: chartSetting.line?.showDataLabel ?? false, labelOverlap: chartSetting.line?.labelOverlap ?? "adjust" });
+  Object.assign(barOptions, { categoryAxisLabelMode: chartSetting.bar?.categoryAxisLabelMode ?? "horizontal", showAllCategoryLabels: chartSetting.bar?.showAllCategoryLabels ?? false, showDataZoom: chartSetting.bar?.showDataZoom ?? false, valueAxisTitle: chartSetting.bar?.valueAxisTitle ?? "", valueAxisMin: chartSetting.bar?.valueAxisMin ?? null, valueAxisMax: chartSetting.bar?.valueAxisMax ?? null, showDataLabel: chartSetting.bar?.showDataLabel ?? false, labelOverlap: chartSetting.bar?.labelOverlap ?? "adjust" });
 
   /*  */
   if (chartSetting.datasource) populateDatasourceFields();
 });
+
+watch(indicatorOptions, (options) => {
+  if (chartSetting.chartType === ChartType.Indicator) chartSetting.indicator = { ...options };
+}, { deep: true });
+watch(progressOptions, (options) => {
+  if (chartSetting.chartType === ChartType.Progress) chartSetting.progress = { ...options, targetMetric: chartSetting.progress?.targetMetric };
+}, { deep: true });
+watch(lineOptions, (options) => {
+  if (chartSetting.chartType === ChartType.Line) chartSetting.line = { ...options };
+}, { deep: true });
+watch(barOptions, (options) => {
+  if (chartSetting.chartType === ChartType.VBar || chartSetting.chartType === ChartType.HBar) chartSetting.bar = { ...options };
+}, { deep: true });
 </script>
 <style lang="scss" scoped>
 .design-container {
@@ -889,6 +1016,14 @@ onMounted(() => {
         .pie-circle {
           background-image: url("../../../assets/images/charts/Pie.circle.svg");
         }
+
+        .indicator {
+          background-image: url("../../../assets/images/charts/Indicator.svg");
+        }
+
+        .progress {
+          background-image: url("../../../assets/images/charts/Progress.svg");
+        }
       }
 
       .data-top {
@@ -921,5 +1056,19 @@ onMounted(() => {
 .chart-type-tooltip-title {
   margin-bottom: var(--et-space-6);
   font-weight: 600;
+}
+
+.chart-settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-space-10);
+  padding: 0 var(--et-space-8) var(--et-space-10);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--et-space-8);
 }
 </style>

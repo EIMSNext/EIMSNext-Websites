@@ -1,10 +1,11 @@
 import * as echarts from "echarts/core";
-import { BarChart, LineChart, PieChart } from "echarts/charts";
+import { BarChart, GaugeChart, LineChart, PieChart } from "echarts/charts";
 import {
   TitleComponent,
   TooltipComponent,
   GridComponent,
   DatasetComponent,
+  DataZoomComponent,
   LegendComponent,
 } from "echarts/components";
 import { LabelLayout, UniversalTransition } from "echarts/features";
@@ -16,10 +17,12 @@ echarts.use([
   TooltipComponent,
   GridComponent,
   DatasetComponent,
+  DataZoomComponent,
   LegendComponent,
   BarChart,
   LineChart,
   PieChart,
+  GaugeChart,
   LabelLayout,
   UniversalTransition,
   CanvasRenderer,
