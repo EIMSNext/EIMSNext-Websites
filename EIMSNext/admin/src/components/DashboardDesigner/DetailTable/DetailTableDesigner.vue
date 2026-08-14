@@ -122,6 +122,7 @@
           <DetailTableViewer
             :setting="detailSetting"
             :title="dashItemDefRef.name"
+            :item-def="dashItemDefRef"
             :designer-mode="true"
             :show-header="false"
           />

@@ -22,7 +22,7 @@
         class="full"
         @change="markDirty"
       >
-        <el-option v-for="field in selectableFields" :key="field.field" :label="field.title" :value="field.field" />
+        <el-option v-for="field in queryableFields" :key="field.field" :label="field.title" :value="field.field" />
       </el-select>
     </div>
 
@@ -38,7 +38,7 @@
         class="full"
         @change="markDirty"
       >
-        <el-option v-for="field in selectableFields" :key="field.field" :label="field.title" :value="field.field" />
+        <el-option v-for="field in displayableFields" :key="field.field" :label="field.title" :value="field.field" />
       </el-select>
     </div>
 
@@ -121,7 +121,8 @@ const iframeCode = computed(
   () => `<iframe width="100%" height="100%" style="border: none;" src="${querylinkUrl.value}"></iframe>`,
 );
 
-const selectableFields = computed(() => flattenFields(props.formDef.content?.items || []));
+const queryableFields = computed(() => flattenFields(props.formDef.content?.items || [], isPublicQueryField));
+const displayableFields = computed(() => flattenFields(props.formDef.content?.items || [], isPublicDisplayField));
 
 watch(
   () => props.publicSetting,
@@ -131,7 +132,7 @@ watch(
       accessCodeEnabled: setting.form?.queryLink?.accessCodeEnabled ?? false,
       accessCodeHash: setting.form?.queryLink?.accessCodeHash ?? "",
       expireTime: setting.form?.queryLink?.expireTime,
-      queryFields: [...(setting.form?.queryLink?.queryFields ?? [])],
+      queryFields: (setting.form?.queryLink?.queryFields ?? []).filter((field) => queryableFields.value.some((item) => item.field === field)),
       displayFields: [...(setting.form?.queryLink?.displayFields ?? [])],
     };
     isDirtyState.value = false;
@@ -157,17 +158,17 @@ function openUrl(url: string) {
   window.open(url, "_blank");
 }
 
-function flattenFields(fields: FieldDef[]) {
+function flattenFields(fields: FieldDef[], isSupported: (type?: FieldType | string) => boolean) {
   const result: { field: string; title: string }[] = [];
   fields.forEach((field) => {
     const publicSystemField = isPublicSystemFieldDef(field);
-    if ((!publicSystemField && field.hidden) || isOrgField(field.type)) {
+    if ((!publicSystemField && field.hidden) || (field.type !== FieldType.TableForm && !isSupported(field.type))) {
       return;
     }
     if (field.type === FieldType.TableForm && field.columns?.length) {
       field.columns.forEach((sub) => {
         const publicSystemSubField = isPublicSystemFieldDef(sub);
-        if ((publicSystemSubField || !sub.hidden) && !isOrgField(sub.type)) {
+        if ((publicSystemSubField || !sub.hidden) && isSupported(sub.type)) {
           result.push({ field: `${field.field}>${sub.field}`, title: `${field.title}.${sub.title}` });
         }
       });
@@ -178,13 +179,20 @@ function flattenFields(fields: FieldDef[]) {
   return result;
 }
 
-function isOrgField(type?: string) {
-  return (
-    type === FieldType.Department1 ||
-    type === FieldType.Department2 ||
-    type === FieldType.Employee1 ||
-    type === FieldType.Employee2
-  );
+function isPublicDisplayField(type?: FieldType | string) {
+  return ![FieldType.DataSelect, FieldType.FileUpload, FieldType.ImageUpload, FieldType.Signature, FieldType.TableForm].includes(type as FieldType);
+}
+
+function isPublicQueryField(type?: FieldType | string) {
+  return [
+    FieldType.Input,
+    FieldType.TextArea,
+    FieldType.SerialNo,
+    FieldType.Radio,
+    FieldType.Select1,
+    FieldType.Number,
+    FieldType.TimeStamp,
+  ].includes(type as FieldType);
 }
 
 async function save() {

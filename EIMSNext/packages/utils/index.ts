@@ -6,3 +6,4 @@ export * from "./http";
 export * from "./type";
 export * from "./eventBus";
 export * from "./theme";
+export * from "./formData";

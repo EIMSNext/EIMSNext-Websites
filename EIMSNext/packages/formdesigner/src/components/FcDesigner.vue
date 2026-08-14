@@ -2690,6 +2690,12 @@ export default defineComponent({
           rule._loadData = rule.effect.loadData;
           delete rule.effect.loadData;
         }
+        if (rule.type === "radio" || rule.type === "checkbox") {
+          if (rule.effect) {
+            delete rule.effect.fetch;
+            delete rule.effect.source;
+          }
+        }
         // 去掉空的fetch字段
         if (rule.effect?.fetch === "" || rule.effect?.fetch === undefined) {
           delete rule.effect.fetch;
@@ -2759,6 +2765,12 @@ export default defineComponent({
           } else {
             methods.tidyRule(rule);
           }
+          if (rule.type === "radio" || rule.type === "checkbox") {
+            if (rule.effect) {
+              delete rule.effect.fetch;
+              delete rule.effect.source;
+            }
+          }
           loadRule.push(rule);
         });
         return loadRule;
@@ -2820,6 +2832,12 @@ export default defineComponent({
           if (rule._loadData) {
             rule.$loadData = rule._loadData;
             delete rule._loadData;
+          }
+          if (rule.type === "radio" || rule.type === "checkbox") {
+            if (rule.effect) {
+              delete rule.effect.fetch;
+              delete rule.effect.source;
+            }
           }
           rule.props &&
             Object.keys(rule.props).forEach((k) => {

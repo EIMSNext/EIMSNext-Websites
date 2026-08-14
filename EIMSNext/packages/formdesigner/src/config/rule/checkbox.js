@@ -1,7 +1,6 @@
 import { uniqueId8 } from "@eimsnext/form-render-core";
 import {
   localeProps,
-  makeOptionsRule,
   makeTreeOptions,
 } from "../../utils/index";
 
@@ -42,9 +41,6 @@ export default {
       field: `f_${uniqueId8()}`,
       title: t("com.checkbox.name"),
       info: "",
-      effect: {
-        fetch: "",
-      },
       $required: false,
       props: {},
       options: makeTreeOptions(
@@ -56,7 +52,20 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [     
-      makeOptionsRule(t, "options"),
+      {
+        type: "TableOptions",
+        field: "formCreateOptions",
+        title: t("props.options"),
+        _fc_important_prop: true,
+        wrap: { show: false },
+        props: {
+          column: [
+            { label: t("props.label"), key: "label" },
+            { label: t("props.value"), key: "value" },
+          ],
+          showHeader: true,
+        },
+      },
       ...[
         // {
         //     type: 'switch',

@@ -66,16 +66,16 @@
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select1">
-          <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
-            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
-              :key="opt.id"></el-option>
+          <el-select size="default" filterable :allow-create="!hasDynamicSource" default-first-option v-model="value" :remote="hasDynamicSource" :remote-method="searchOptions" :loading="optionsLoading" @visible-change="loadOptions" @change="onInput">
+            <el-option v-for="opt in selectOptions" :label="opt.label" :value="opt.value"
+              :key="String(opt.value)"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select2">
-          <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
+          <el-select size="default" multiple filterable :allow-create="!hasDynamicSource" default-first-option v-model="value" :remote="hasDynamicSource" :remote-method="searchOptions" :loading="optionsLoading" @visible-change="loadOptions"
             @change="onInput">
-            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
-              :key="opt.id"></el-option>
+            <el-option v-for="opt in selectOptions" :label="opt.label" :value="opt.value"
+              :key="String(opt.value)"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Department1">
@@ -119,6 +119,7 @@ import {
 } from "@/NodeFieldList/type";
 import { IListItem } from "@/list/type";
 import { computed, ref, watch } from "vue";
+import { isDynamicSelectSource, loadDynamicSelectOptions, type DynamicSelectOption, type DynamicSelectSource } from "@eimsnext/utils";
 import memberSelectDialog from "@/memberSelect/memberSelectDialog.vue";
 import { useLocale } from "element-plus";
 import { MemberTabs } from "@/memberSelect/type";
@@ -136,6 +137,7 @@ const props = defineProps<{
   fieldDef?: IFormFieldDef;
   operator?: string;
   allowFieldValue?: boolean;
+  optionLoader?: (source: DynamicSelectSource, keyword?: string) => Promise<DynamicSelectOption[]>;
 }>();
 
 const dataType = computed(() => {
@@ -143,6 +145,16 @@ const dataType = computed(() => {
 });
 
 const isBetweenOperator = computed(() => props.operator == "between");
+const hasDynamicSource = computed(() =>
+  (props.fieldDef?.type === FieldType.Select1 || props.fieldDef?.type === FieldType.Select2) &&
+  isDynamicSelectSource(props.fieldDef?.source),
+);
+const remoteOptions = ref<DynamicSelectOption[]>([]);
+const optionsLoading = ref(false);
+let optionsRequestId = 0;
+const selectOptions = computed(() => hasDynamicSource.value
+  ? mergeSelectedOptions(remoteOptions.value, value.value)
+  : toListItem(props.fieldDef?.options).map((item) => ({ label: item.label, value: item.id })));
 
 const isMemberValueType = computed(
   () =>
@@ -244,6 +256,49 @@ const onInput = () => {
 
   emitChange();
 };
+const loadOptions = async (visible = true) => {
+  if (!visible || !hasDynamicSource.value || !props.fieldDef?.source || remoteOptions.value.length || optionsLoading.value) return;
+  await searchOptions("");
+};
+const searchOptions = async (keyword: string) => {
+  if (!hasDynamicSource.value || !props.fieldDef?.source) return;
+  const requestId = ++optionsRequestId;
+  optionsLoading.value = true;
+  try {
+    const options = await (props.optionLoader || loadDynamicSelectOptions)(props.fieldDef.source, keyword);
+    if (requestId === optionsRequestId) {
+      remoteOptions.value = options;
+    }
+  } catch {
+    if (requestId === optionsRequestId) {
+      remoteOptions.value = [];
+    }
+  } finally {
+    if (requestId === optionsRequestId) {
+      optionsLoading.value = false;
+    }
+  }
+};
+const mergeSelectedOptions = (options: DynamicSelectOption[], selected: unknown): DynamicSelectOption[] => {
+  const selectedValues = Array.isArray(selected) ? selected : selected === undefined || selected === null ? [] : [selected];
+  const result = [...options];
+  selectedValues.forEach((item) => {
+    const selectedValue = item && typeof item === "object" ? (item as { value?: unknown }).value : item;
+    if (selectedValue === undefined || selectedValue === null || result.some((option) => String(option.value) === String(selectedValue))) return;
+    result.push({ label: String(selectedValue), value: selectedValue as string | number | boolean });
+  });
+  return result;
+};
+
+watch(
+  () => props.fieldDef?.source,
+  () => {
+    optionsRequestId += 1;
+    remoteOptions.value = [];
+    loadOptions(true);
+  },
+  { deep: true, immediate: true },
+);
 const onRangeInput = () => {
   props.modelValue.value = [...rangeValue.value];
   emitChange();

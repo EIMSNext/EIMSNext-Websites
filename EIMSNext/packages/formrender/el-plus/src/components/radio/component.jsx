@@ -26,7 +26,6 @@ export default defineComponent({
   },
   emits: ["update:modelValue", "fc.el"],
   setup(props, _) {
-    const options = toRef(props.formCreateInject, "options", []);
     const opt = toRef(props, "options");
     const value = toRef(props, "modelValue");
     const inputValue = toRef(props, "inputValue", "");
@@ -41,11 +40,7 @@ export default defineComponent({
       updateCustomValue(n);
     });
     const _options = computed(() => {
-      let arr = options.value || [];
-      if (opt.value) {
-        arr = opt.value || [];
-      }
-      return Array.isArray(arr) ? arr : [];
+      return Array.isArray(opt.value) ? opt.value : [];
     });
 
     // 将接收到的对象类型的值转换为value值，以便Element Plus组件能够正确识别选中的选项

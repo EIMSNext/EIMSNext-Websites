@@ -46,10 +46,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onBeforeUnmount, ref, watch } from "vue";
 import echarts from "@/plugins/echarts";
 import { chartSettingValidate, ChartType, getChartSort, IChartSetting } from "./type";
-import { AggCalcRequest, AggregateFun, aggregateService } from "@eimsnext/services";
+import { AggCalcRequest, AggPreviewRequest, AggregateFun, aggregateService } from "@eimsnext/services";
 import { convertToFieldArray } from "@eimsnext/utils";
 import { DashboardItemDef } from "@eimsnext/models";
 import { IConditionList, ISortItem, ISortList, toDynamicFilter } from "@eimsnext/components";
@@ -82,6 +82,7 @@ const props = withDefaults(
 
 const chartOpts = ref<echarts.EChartsCoreOption>();
 const publicHttp = usePublicHttp();
+let requestVersion = 0;
 
 watch(
   () => props.publicToken,
@@ -90,32 +91,6 @@ watch(
   },
   { immediate: true },
 );
-
-const mergeFilter = (ownFilter?: IConditionList, externalFilter?: IConditionList) => {
-  const items: IConditionList[] = [];
-
-  if (ownFilter?.items?.length || ownFilter?.field) {
-    items.push(ownFilter);
-  }
-
-  if (externalFilter?.items?.length || externalFilter?.field) {
-    items.push(externalFilter);
-  }
-
-  if (items.length == 0) {
-    return undefined;
-  }
-
-  if (items.length == 1) {
-    return items[0];
-  }
-
-  return {
-    id: `merged_${Date.now()}`,
-    rel: "and",
-    items,
-  } as IConditionList;
-};
 
 const formatNumber = (value: number, decimalPlaces = 0) => {
   if (!Number.isFinite(value)) return "-";
@@ -130,28 +105,31 @@ const firstNumericValue = (values: any[] | undefined) => {
 };
 
 const getChartOpts = async (setting: IChartSetting) => {
-  if (!chartSettingValidate(setting)) return null;
+  const currentRequest = ++requestVersion;
+  if (!chartSettingValidate(setting)) {
+    chartOpts.value = undefined;
+    return null;
+  }
 
   let chartType = setting.chartType || "";
   let chartSubType = setting.chartSubType || chartType;
   let opt: any;
-  const mergedFilter = mergeFilter(setting.filter, props.externalFilter);
-  const requestedMetrics = [...(setting.metrics || [])];
-  if (chartType === ChartType.Progress && setting.progress?.targetType === "metric" && setting.progress.targetMetric) {
-    if (!requestedMetrics.some((metric) => metricKey(metric) === metricKey(setting.progress!.targetMetric!))) requestedMetrics.push(setting.progress.targetMetric);
-  }
   let aggRequest: AggCalcRequest = {
-    dataSource: setting.datasource,
-    dimensions: [...(setting.dimension1 || []), ...(setting.dimension2 || [])],
-    metrics: requestedMetrics,
-    filter: mergedFilter ? toDynamicFilter(mergedFilter) : undefined,
+    itemId: props.itemDef?.id || "",
+    filter: props.externalFilter ? toDynamicFilter(props.externalFilter) : undefined,
     sort: getChartSort(setting),
-    take: setting.takeEnable ? setting.take : -1,
-    itemId: props.itemDef?.id,
   };
-  const aggResult = props.isPublic && props.publicToken
+  if (!aggRequest.itemId) {
+    chartOpts.value = undefined;
+    return null;
+  }
+  const previewRequest: AggPreviewRequest = { ...aggRequest, details: JSON.stringify(setting) };
+  const aggResult = props.designerMode
+    ? await aggregateService.preview(previewRequest)
+    : props.isPublic && props.publicToken
     ? await publicHttp.api.post<any[]>("/aggregate/calucate", aggRequest)
     : await aggregateService.calucate(aggRequest);
+  if (currentRequest !== requestVersion) return null;
   let ds = convertToFieldArray(aggResult);
   switch (chartType) {
     case ChartType.Indicator: {
@@ -178,9 +156,16 @@ const getChartOpts = async (setting: IChartSetting) => {
       }
       const percent = actual / target * 100;
       const options = progress || {};
+      const style = options.style || "ring";
+      const labelParts = [
+        options.showActual ? formatNumber(actual, options.decimalPlaces || 0) : undefined,
+        options.showTarget ? formatNumber(target, options.decimalPlaces || 0) : undefined,
+        options.showPercent === false ? undefined : `${formatNumber(percent, options.decimalPlaces || 0)}%`,
+      ].filter(Boolean);
+      const isSemi = style === "semi";
       opt = {
         title: options.showName === false ? undefined : { text: actualMetric.title || actualMetric.label || actualMetric.id, left: "center", top: "2%" },
-        series: [{ type: "gauge", startAngle: 90, endAngle: -270, radius: "72%", pointer: { show: false }, progress: { show: true, width: 14 }, axisLine: { lineStyle: { width: 14 } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 24, offsetCenter: [0, "8%"], formatter: () => `${formatNumber(percent, options.decimalPlaces || 0)}%` }, data: [{ value: Math.min(100, Math.max(0, percent)) }] }],
+        series: [{ type: "gauge", startAngle: isSemi ? 180 : 90, endAngle: isSemi ? 0 : -270, center: isSemi ? ["50%", "65%"] : ["50%", "50%"], radius: isSemi ? "90%" : "72%", pointer: { show: false }, progress: { show: true, width: style === "thin" ? 7 : 14, roundCap: true }, axisLine: { lineStyle: { width: style === "thin" ? 7 : 14 } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 24, offsetCenter: isSemi ? [0, "18%"] : [0, "8%"], formatter: () => labelParts.join(" / ") }, data: [{ value: Math.min(100, Math.max(0, percent)) }] }],
       };
       chartOpts.value = applyChartTheme(opt);
       break;
@@ -189,11 +174,12 @@ const getChartOpts = async (setting: IChartSetting) => {
     case ChartType.HBar: {
       const bar = setting.bar || {};
       const categories = ds[setting.dimension1![0].id] || [];
+      const isHorizontal = chartType === ChartType.HBar;
       const labelLayout = bar.labelOverlap === "hide"
         ? { hideOverlap: true }
         : bar.labelOverlap === "stagger"
-          ? (params: any) => ({ dy: params.dataIndex % 2 ? 14 : 0 })
-          : { moveOverlap: "shiftY" };
+          ? (params: any) => (isHorizontal ? { dy: params.dataIndex % 2 ? 14 : 0 } : { dx: params.dataIndex % 2 ? 14 : 0 })
+          : { moveOverlap: isHorizontal ? "shiftY" : "shiftX" };
       const series = setting.metrics!.map((metric) => ({
         name: metric.title || metric.label || metric.id,
         type: "bar",
@@ -222,7 +208,6 @@ const getChartOpts = async (setting: IChartSetting) => {
         min: bar.valueAxisMin ?? undefined,
         max: bar.valueAxisMax ?? undefined,
       };
-      const isHorizontal = chartType === ChartType.HBar;
       opt = {
         xAxis: isHorizontal ? valueAxis : categoryAxis,
         yAxis: isHorizontal ? categoryAxis : valueAxis,
@@ -255,6 +240,8 @@ const getChartOpts = async (setting: IChartSetting) => {
       opt = {
         xAxis: { type: "category", data: lineXAxis, axisLabel: { rotate: line.xAxisLabelMode === "tilt" ? 35 : line.xAxisLabelMode === "vertical" ? 90 : 0, interval: line.showAllLabels ? 0 : "auto" } },
         yAxis: { type: "value", name: line.yAxisTitle || undefined, min: line.yAxisMin ?? undefined, max: line.yAxisMax ?? undefined },
+        tooltip: { trigger: "axis" },
+        legend: lineSeries.length > 1 ? { data: lineSeries.map((series: any) => series.name) } : undefined,
         dataZoom: line.showDataZoom ? [{ type: "inside" }, { type: "slider" }] : undefined,
         series: lineSeries,
       };
@@ -387,6 +374,10 @@ watch(
 
 watch(isDark, async () => {
   if (props.setting) await getChartOpts(props.setting);
+});
+
+onBeforeUnmount(() => {
+  requestVersion++;
 });
 
 let darkObserver: MutationObserver | undefined;

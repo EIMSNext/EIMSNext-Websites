@@ -44,11 +44,16 @@ export interface IIndicatorChartOptions extends INumberFormatOptions {
 }
 
 export type ProgressTargetType = "metric" | "value";
+export type ProgressStyle = "ring" | "semi" | "thin";
 export interface IProgressChartOptions extends INumberFormatOptions {
   targetType?: ProgressTargetType;
   targetMetric?: IMetricsField;
   targetValue?: number;
   showName?: boolean;
+  style?: ProgressStyle;
+  showActual?: boolean;
+  showTarget?: boolean;
+  showPercent?: boolean;
 }
 
 export type AxisLabelMode = "horizontal" | "tilt" | "vertical";
@@ -125,18 +130,18 @@ export function chartSettingValidate(setting: IChartSetting): boolean {
   };
 
   if (setting.chartType === ChartType.Indicator) {
-    return !setting.dimension1?.length && setting.metrics?.length === 1 && !!setting.metrics[0]?.id && decimalPlacesValid(setting.indicator?.decimalPlaces);
+    return !setting.dimension1?.length && !setting.dimension2?.length && setting.metrics?.length === 1 && !!setting.metrics[0]?.id && decimalPlacesValid(setting.indicator?.decimalPlaces);
   }
 
   if (setting.chartType === ChartType.Progress) {
-    if (setting.dimension1?.length || setting.metrics?.length !== 1 || !setting.metrics[0]?.id || !decimalPlacesValid(setting.progress?.decimalPlaces)) return false;
+    if (setting.dimension1?.length || setting.dimension2?.length || setting.metrics?.length !== 1 || !setting.metrics[0]?.id || !decimalPlacesValid(setting.progress?.decimalPlaces)) return false;
     const progress = setting.progress;
     return progress?.targetType === "metric"
       ? !!progress.targetMetric?.id
       : progress?.targetType === "value" && Number(progress.targetValue) > 0;
   }
 
-  if (!setting.dimension1 || setting.dimension1.length == 0) return false;
+  if (!setting.dimension1 || setting.dimension1.length !== 1 || setting.dimension2?.length) return false;
 
   if (!setting.metrics || setting.metrics.length == 0) return false;
 

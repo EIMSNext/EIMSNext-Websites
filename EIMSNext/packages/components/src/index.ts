@@ -8,6 +8,7 @@ import { MemberSelect, MemberSelectDialog } from "./memberSelect";
 import { EtCard } from "./card";
 import { EtToolbar, EtToolbarItem } from "./toolbar";
 import { ConditionList, ConditionItem, ConditionValue } from "./ConditionList";
+import { PublicConditionList } from "./PublicConditionList";
 import { FieldSelect } from "./FieldSelect";
 import { FieldSortList, FieldSortItem } from "./FieldSortList";
 import { FormFieldList, FormFieldItem, FormFieldValue } from "./FormFieldList";
@@ -54,6 +55,7 @@ export * from "./FieldBlockPicker";
 export * from "./FieldBlockCodeEditor";
 export * from "./FieldBlock/shared";
 export * from "./TriggerTimeSettings";
+export * from "./PublicConditionList";
 export { default as fieldIcons } from "./fieldIcons";
 
 export default [
@@ -72,6 +74,7 @@ export default [
   ConditionList,
   ConditionItem,
   ConditionValue,
+  PublicConditionList,
   FieldSelect,
   FieldSortList,
   FieldSortItem,
