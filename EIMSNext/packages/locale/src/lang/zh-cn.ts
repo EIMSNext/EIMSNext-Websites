@@ -465,6 +465,7 @@ export default {
       recent: "最近使用",
       favorites: "我的收藏",
       addFavorite: "添加收藏",
+      removeFavorite: "取消收藏",
       addChart: "添加图表",
       chooseChart: "选择图表",
       chartLoading: "图表加载中...",

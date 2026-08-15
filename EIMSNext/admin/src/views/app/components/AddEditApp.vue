@@ -105,7 +105,7 @@ const save = async () => {
   cursor: pointer;
   display: inline-block;
   margin: 5px;
-  border-radius: 8px;
+  border-radius: 4px;
   height: 48px;
   width: 48px;
   vertical-align: middle;

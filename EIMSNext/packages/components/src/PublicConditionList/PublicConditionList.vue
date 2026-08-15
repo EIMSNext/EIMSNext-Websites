@@ -3,9 +3,9 @@
     <el-col v-for="condition in conditions" :key="condition.field!.field" :xs="24" :sm="12">
       <el-form-item :label="condition.field!.label" required>
         <div v-if="condition.field!.type === FieldType.Number" class="range-value">
-          <el-input-number v-model="numberValues[condition.field!.field][0]" class="range-input" @change="setRangeCondition(condition, numberValues[condition.field!.field])" />
+          <el-input-number v-model="numberValues[condition.field!.field][0]" class="range-input" @change="(value: number | undefined) => setRangeCondition(condition, 0, value)" />
           <span class="range-separator">-</span>
-          <el-input-number v-model="numberValues[condition.field!.field][1]" class="range-input" @change="setRangeCondition(condition, numberValues[condition.field!.field])" />
+          <el-input-number v-model="numberValues[condition.field!.field][1]" class="range-input" @change="(value: number | undefined) => setRangeCondition(condition, 1, value)" />
         </div>
         <el-date-picker
           v-else-if="condition.field!.type === FieldType.TimeStamp"
@@ -121,14 +121,26 @@ const normalize = () => {
   emit("update:modelValue", { id: props.modelValue.id || "public_conditions", rel: "and", items });
   emit("validity-change", items.length === props.fields.length && items.every(isFilled));
 };
-const setRangeCondition = (condition: IConditionList, value?: [number | string | null, number | string | null]) => {
+const setRangeCondition = (condition: IConditionList, index: 0 | 1, value?: number) => {
   if (!condition.value) return;
-  condition.value.value = value?.[0] == null || value?.[1] == null ? [] : value;
+  const field = condition.field!.field;
+  const values = numberValues[field] || [null, null];
+  values[index] = value ?? null;
+  numberValues[field] = values;
+  if (values[0] == null || values[1] == null) {
+    emit("validity-change", false);
+    return;
+  }
+  condition.value.value = [...values];
   emitChange();
 };
 const setTimestampCondition = (condition: IConditionList, value?: [string | null, string | null]) => {
   if (!condition.value) return;
-  condition.value.value = value?.[0] == null || value?.[1] == null ? [] : [Number(value[0]), Number(value[1])];
+  if (!value || value[0] == null || value[1] == null) {
+    emit("validity-change", false);
+    return;
+  }
+  condition.value.value = [Number(value[0]), Number(value[1])];
   emitChange();
 };
 const setScalarCondition = (condition: IConditionList, value?: string | number) => {
@@ -149,7 +161,11 @@ const emitChange = () => {
   emit("change");
   emit("validity-change", conditions.value.length === props.fields.length && conditions.value.every(isFilled));
 };
-watch(() => props.fields, normalize, { immediate: true, deep: true });
+watch(
+  () => props.fields.map((field) => `${field.field}|${field.type}|${field.isSubField}|${JSON.stringify(field.source || field.options || [])}`),
+  normalize,
+  { immediate: true },
+);
 watch(() => props.modelValue.items?.length, (length) => {
   if (length !== props.fields.length) normalize();
 });

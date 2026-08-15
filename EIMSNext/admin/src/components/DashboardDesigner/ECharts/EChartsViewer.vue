@@ -27,6 +27,7 @@
         <div ref="sortRef" class="header-btn no-drag" @click.stop="onSort">
           <et-icon icon="el-sort" size="16px" />
         </div>
+        <slot name="header-actions"></slot>
       </div>
       <div class="header-title" :title="title">{{ title }}</div>
     </div>
@@ -420,15 +421,19 @@ onUnmounted(() => {
   }
 
   .header-actions {
+    align-items: center;
     background: transparent;
     color: var(--et-text-secondary);
     cursor: pointer;
+    display: flex;
     float: right;
 
     .header-btn {
-      width: var(--et-size-30);
+      align-items: center;
+      display: inline-flex;
       height: var(--et-size-30);
-      display: inline-block;
+      justify-content: center;
+      width: var(--et-size-30);
     }
   }
 }

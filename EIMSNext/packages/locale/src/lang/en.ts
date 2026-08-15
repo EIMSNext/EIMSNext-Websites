@@ -465,6 +465,7 @@ export default {
       recent: "Recent",
       favorites: "Favorites",
       addFavorite: "Add Favorite",
+      removeFavorite: "Remove favorite",
       addChart: "Add Chart",
       chooseChart: "Choose Chart",
       chartLoading: "Loading chart...",

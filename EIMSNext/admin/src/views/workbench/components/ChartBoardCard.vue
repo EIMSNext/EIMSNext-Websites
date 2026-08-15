@@ -1,90 +1,138 @@
 <template>
   <div class="chart-board-card">
-    <DashItemCard v-if="chartItem" :item-def="chartItem" :is-view="true" />
-    <et-card v-else :title="t('admin.workbench.chartBoard')" class="chart-board-empty-card">
-      <div class="chart-board-empty">
-        <template v-if="loading">{{ t("admin.workbench.chartLoading") }}</template>
-        <template v-else>
-          <i class="x-icon iconfont-fx-pc icon-info-o"></i>
-          <div>{{ errorText || t("admin.workbench.chartNotConfigured") }}</div>
-          <el-button v-if="editable" class="mt-3" type="primary" @click.stop="$emit('configure')">
-            {{ t("admin.workbench.chooseChart") }}
+    <et-card class="chart-board-shell" data-workbench-card-root>
+      <template #header>
+        <div class="workbench-card-header">
+          <span class="workbench-card-title">{{ t("admin.workbench.myChart") }}</span>
+          <el-button v-if="allowManage" link type="primary" @click.stop="$emit('add-chart')">
+            <et-icon icon="el-plus" />
+            {{ t("common.add") }}
           </el-button>
-        </template>
+        </div>
+      </template>
+      <grid-layout
+        v-if="chartLayout.length"
+        v-model:layout="chartLayout"
+        class="my-charts-grid"
+        data-workbench-height-content
+        :col-num="24"
+        :row-height="24"
+        :margin="[12, 12]"
+        :is-draggable="Boolean(allowManage)"
+        :is-resizable="Boolean(allowManage)"
+        :is-bounded="false"
+        :vertical-compact="true"
+        :use-css-transforms="true"
+        @layout-updated="handleLayoutUpdated"
+      >
+        <grid-item
+          v-for="chart in chartLayout"
+          :key="chart.i"
+          :x="chart.x"
+          :y="chart.y"
+          :w="chart.w"
+          :h="chart.h"
+          :i="chart.i"
+          :minW="chart.minW || 6"
+          :minH="chart.minH || 5"
+          :drag-allow-from="'.my-chart-item'"
+          :drag-ignore-from="'.no-drag'"
+        >
+          <MyChartItem :chart="chart" :allow-manage="allowManage" @remove="$emit('remove-chart', chart.i)" />
+        </grid-item>
+      </grid-layout>
+      <div v-else class="chart-board-empty" data-workbench-height-content>
+        <i class="x-icon iconfont-fx-pc icon-info-o"></i>
+        <div>{{ t("admin.workbench.chartNotConfigured") }}</div>
       </div>
     </et-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { WorkbenchChartItem, WorkbenchLayoutItem } from "@eimsnext/models";
-import { workbenchService } from "@eimsnext/services";
-import DashItemCard from "@/components/DashboardDesigner/components/DashItemCard.vue";
+import type { WorkbenchChartLayoutItem, WorkbenchLayoutItem } from "@eimsnext/models";
+import { GridLayout, GridItem } from "vue-grid-layout-v3";
+import MyChartItem from "./MyChartItem.vue";
 import { useI18n } from "vue-i18n";
 
-defineOptions({
-  name: "WorkbenchChartBoardCard",
-});
+defineOptions({ name: "WorkbenchChartBoardCard" });
 
 const props = defineProps<{
   item: WorkbenchLayoutItem;
-  editable?: boolean;
+  allowManage?: boolean;
+}>();
+const emit = defineEmits<{
+  (e: "add-chart"): void;
+  (e: "remove-chart", chartId: string): void;
+  (e: "update-charts", charts: WorkbenchChartLayoutItem[]): void;
+  (e: "content-change"): void;
 }>();
 const { t } = useI18n();
+const chartLayout = ref<WorkbenchChartLayoutItem[]>([]);
 
-defineEmits<{
-  (e: "configure"): void;
-}>();
+const copyCharts = (charts: WorkbenchChartLayoutItem[] = []) => charts.map((chart) => ({ ...chart }));
 
-const loading = ref(false);
-const errorText = ref("");
-const chartItem = ref<WorkbenchChartItem>();
-let loadSeq = 0;
-
-const loadChart = async () => {
-  const dashboardItemId = props.item.config?.dashboardItemId;
-  const seq = ++loadSeq;
-  chartItem.value = undefined;
-  errorText.value = "";
-
-  if (!dashboardItemId) {
-    return;
-  }
-
-  loading.value = true;
-  try {
-    const result = await workbenchService.getChartItem(dashboardItemId);
-    if (seq !== loadSeq) return;
-    chartItem.value = result;
-  } catch {
-    if (seq !== loadSeq) return;
-    errorText.value = t("admin.dashItem.invalidConfig");
-  } finally {
-    if (seq === loadSeq) loading.value = false;
-  }
+const notifyContentChange = () => {
+  nextTick(() => requestAnimationFrame(() => emit("content-change")));
 };
 
 watch(
-  () => props.item.config?.dashboardItemId,
-  () => loadChart(),
-  { immediate: true }
+  () => props.item.config?.charts,
+  (charts) => {
+    chartLayout.value = copyCharts(charts);
+    notifyContentChange();
+  },
+  { immediate: true, deep: true }
 );
+
+const handleLayoutUpdated = (updatedLayout: WorkbenchChartLayoutItem[]) => {
+  const currentCharts = new Map(chartLayout.value.map((chart) => [chart.i, chart]));
+  const nextCharts = updatedLayout.map((chart) => ({
+    ...currentCharts.get(chart.i),
+    ...chart,
+  })) as WorkbenchChartLayoutItem[];
+  chartLayout.value = nextCharts;
+  emit("update-charts", copyCharts(nextCharts));
+  notifyContentChange();
+};
 </script>
 
 <style lang="scss" scoped>
 .chart-board-card {
-  height: 100%;
-  min-height: 100%;
-  position: relative;
+  height: auto;
   width: 100%;
+}
 
-  :deep(.layout-grid-item) {
-    height: 100%;
+:deep(.vue-grid-item > .vue-resizable-handle) {
+  height: var(--et-size-24);
+  width: var(--et-size-24);
+  z-index: 20;
+}
+
+.chart-board-shell {
+  height: auto;
+
+  :deep(> .el-card__header) { flex: 0 0 auto; }
+
+  :deep(> .el-card__body) {
+    box-sizing: border-box;
+    overflow: visible;
+    padding: 0;
   }
 }
 
-.chart-board-empty-card {
-  height: 100%;
+.workbench-card-header {
+  align-items: center;
+  display: flex;
+  gap: var(--et-space-10);
+  padding-top: var(--et-space-12);
+  padding-bottom: var(--et-space-4);
+}
+
+.workbench-card-title {
+  color: var(--et-text-primary);
+  font-size: var(--et-font-size-16);
+  font-weight: 700;
 }
 
 .chart-board-empty {
@@ -93,7 +141,6 @@ watch(
   display: flex;
   flex-direction: column;
   gap: var(--et-space-8);
-  height: 100%;
   justify-content: center;
   min-height: var(--et-size-160);
   text-align: center;

@@ -1,5 +1,10 @@
 @use "./reset";
 
+.el-dialog .el-dialog__title {
+  font-size: var(--et-font-size-18) !important;
+  font-weight: 700 !important;
+}
+
 .app-container {
   padding: var(--et-space-15);
 }

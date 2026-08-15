@@ -1,19 +1,34 @@
 <template>
   <AddEditApp v-if="showAddEditDialog" :edit="isEditMode" :app="currentApp" @cancel="showAddEditDialog = false"
     @ok="handleSaved"></AddEditApp>
-  <et-card :title="t('admin.myApp')">
-    <template #action>
-      <el-button v-if="canCreateApp" type="primary" icon="plus" @click="createApp">
-        {{ t("admin.newApp") }}
-      </el-button>
+  <et-card :title="t('admin.myApp')" class="my-apps-card" data-workbench-card-root>
+    <template #header>
+      <div class="workbench-card-header">
+        <span class="workbench-card-title">{{ t("admin.myApp") }}</span>
+        <div class="workbench-card-actions">
+          <el-input
+            v-model="keyword"
+            clearable
+            class="app-search"
+            :placeholder="t('admin.appAdmin.searchByName')"
+          >
+            <template #prefix>
+              <et-icon icon="el-search" />
+            </template>
+          </el-input>
+          <el-button v-if="canCreateApp" type="primary" icon="plus" @click="createApp">
+            {{ t("admin.newApp") }}
+          </el-button>
+        </div>
+      </div>
     </template>
 
-    <div class="content">
+    <div class="content" data-workbench-height-content>
       <ul class="app-list">
         <li class="app-group">
           <div class="group-name">{{ t("common.other") }}</div>
           <ul class="app-items-container">
-            <template v-for="app in appsRef" :key="app.id">
+            <template v-for="app in filteredApps" :key="app.id">
               <li v-if="app.id !== SYSTEM_APP_ID" class="app-item">
                 <div class="item-container">
                   <div class="item-link" @click="gotoApp(app)">
@@ -21,7 +36,7 @@
                       <div class="app-item-icon">
                         <AppIcon :app="app" />
                       </div>
-                      <div class="app-title">{{ app.name }}</div>
+                      <div class="app-title" :title="app.name">{{ app.name }}</div>
                     </div>
                   </div>
                   <div
@@ -79,6 +94,7 @@ const appStore = useAppStore();
 const contextStore = useContextStore();
 const workbenchStore = useWorkbenchStore();
 const { items: appsRef } = storeToRefs(appStore);
+const keyword = ref("");
 const showAddEditDialog = ref(false);
 const isEditMode = ref(false);
 const currentApp = ref<AppDef | undefined>(undefined);
@@ -93,6 +109,11 @@ const canManageApp = (app: AppDef) => canManageAppId(app.id);
 const canDeleteApp = (app: AppDef) => canDeleteAppId(app.id);
 const canShowAppActions = (app: AppDef) => canManageApp(app) || canDeleteApp(app);
 const refreshAdminPermissions = () => loadAdminPermissions(true);
+const filteredApps = computed(() => {
+  const searchText = keyword.value.trim().toLocaleLowerCase();
+  if (!searchText) return appsRef.value;
+  return appsRef.value.filter((app) => app.name.toLocaleLowerCase().includes(searchText));
+});
 
 const createApp = () => {
   if (!canCreateApp.value) return;
@@ -151,13 +172,47 @@ onMounted(async () => {
 });
 </script>
 <style lang="scss" scoped>
+.my-apps-card {
+  height: 100%;
+
+  :deep(.el-card__body) {
+    padding-bottom: 0;
+  }
+}
+
+.workbench-card-header {
+  align-items: center;
+  display: flex;
+  gap: var(--et-space-10);
+  width: 100%;
+  padding-top: var(--et-space-12);
+  padding-bottom: var(--et-space-4);
+}
+
+.workbench-card-title {
+  color: var(--et-text-primary);
+  font-weight: 700;
+  font-size: var(--et-font-size-16);
+}
+
+.workbench-card-actions {
+  align-items: center;
+  display: flex;
+  gap: var(--et-space-12);
+  margin-left: auto;
+}
+
+.app-search {
+  width: var(--et-size-280);
+}
+
 .content {
   .app-list {
     margin: 0 auto;
     padding: 0;
 
-    .app-group {
-      padding: var(--et-space-8) 0;
+      .app-group {
+        padding: var(--et-space-8) 0 0;
       width: 100%;
 
       .group-name {
@@ -216,6 +271,10 @@ onMounted(async () => {
             }
 
             .app-title {
+              max-width: 100%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
               margin-top: var(--et-space-12);
             }
           }
@@ -223,51 +282,67 @@ onMounted(async () => {
           &:hover {
             background-color: var(--et-bg-page);
 
-            .favorite-icon {
-              visibility: visible;
-            }
-
+            .favorite-icon,
             .setting-icon {
+              opacity: 1;
+              pointer-events: auto;
               visibility: visible;
             }
           }
 
           .favorite-icon {
-            display: block;
+            align-items: center;
+            display: flex;
+            height: var(--et-size-32);
+            justify-content: center;
             left: var(--et-space-10);
             top: var(--et-space-10);
             color: var(--et-text-tertiary);
             cursor: pointer;
             font-size: var(--et-font-size-16);
             line-height: var(--et-line-height-16);
+            opacity: 0;
+            pointer-events: none;
             position: absolute;
+            transition: opacity 0.2s ease;
             visibility: hidden;
+            width: var(--et-size-32);
 
             &.active {
               color: var(--et-color-warning);
-              visibility: visible;
             }
           }
 
           .setting-btn {
-            border: none;
-            background-color: var(--et-bg-page);
+            background: transparent;
+            border: 0;
+            height: var(--et-size-32);
+            padding: 0;
+            width: var(--et-size-32);
 
             &:hover {
-              border: none;
+              background: transparent;
+              border: 0;
             }
           }
 
           .setting-icon {
-            display: block;
+            align-items: center;
+            display: flex;
+            height: var(--et-size-32);
+            justify-content: center;
             right: var(--et-space-10);
             top: var(--et-space-10);
             color: var(--et-text-tertiary);
             cursor: pointer;
             font-size: var(--et-font-size-16);
             line-height: var(--et-line-height-16);
+            opacity: 0;
+            pointer-events: none;
             position: absolute;
+            transition: opacity 0.2s ease;
             visibility: hidden;
+            width: var(--et-size-32);
           }
         }
       }

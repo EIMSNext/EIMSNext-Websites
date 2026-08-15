@@ -67,6 +67,7 @@ const isPlatAdmin = computed(() => userStore.currentUser.userType === UserType.P
     line-height: var(--et-size-50);
     color: var(--et-text-primary);
     cursor: pointer;
+    padding-left: var(--et-space-2);
   }
 }
 

@@ -58,6 +58,7 @@
             <div class="canvas">
               <grid-layout
                 v-model:layout="editableLayout"
+                class="workbench-designer-grid"
                 :col-num="24"
                 :row-height="24"
                 :is-draggable="true"
@@ -89,8 +90,6 @@
                     :item="item"
                     editable
                     @remove="removeWidget(item)"
-                    @configure-chart="openChartDialog(item)"
-                    @add-favorite="showFavoriteDialog = true"
                   />
                 </grid-item>
               </grid-layout>
@@ -99,12 +98,6 @@
         </div>
       </div>
     </Layout>
-    <AddFavoriteDialog v-model="showFavoriteDialog" />
-    <ChartSelectDialog
-      v-model="showChartDialog"
-      :dashboard-item-id="activeChartItem?.config?.dashboardItemId"
-      @select="handleChartSelected"
-    />
 </template>
 
 <script setup lang="ts">
@@ -122,8 +115,6 @@ import {
   WIDGET_FIXED_HEIGHT,
 } from "@/store";
 import WorkbenchWidgetRenderer from "./components/WorkbenchWidgetRenderer.vue";
-import AddFavoriteDialog from "./components/AddFavoriteDialog.vue";
-import ChartSelectDialog from "./components/ChartSelectDialog.vue";
 import { useI18n } from "vue-i18n";
 
 defineOptions({
@@ -139,14 +130,10 @@ const { layout } = storeToRefs(workbenchStore);
 const editableLayout = ref<WorkbenchLayoutItem[]>([]);
 const saving = ref(false);
 const isDirty = ref(false);
-const showFavoriteDialog = ref(false);
-const showChartDialog = ref(false);
-const activeChartItem = ref<WorkbenchLayoutItem>();
 
 const enabledComponents = computed<{ type: WorkbenchWidgetType; label: string; icon: string }[]>(() => [
   { type: "flowCenter", label: t("admin.flowcenter"), icon: "icon-flow" },
   { type: "myApps", label: t("admin.myApp"), icon: "icon-appdefault" },
-  { type: "chartBoard", label: t("admin.workbench.chartBoard"), icon: "el-DataAnalysis" },
   { type: "recent", label: t("admin.workbench.recent"), icon: "el-clock" },
   { type: "favorites", label: t("admin.workbench.favorites"), icon: "el-star" },
 ]);
@@ -191,33 +178,13 @@ const addWidget = (type: WorkbenchWidgetType) => {
   if (!canAdd(type)) return;
 
   const bottom = editableLayout.value.reduce((value, item) => Math.max(value, item.y + item.h), 0);
-  const item = createWorkbenchWidget(type, { y: bottom });
-  editableLayout.value.push(item);
+  editableLayout.value.push(createWorkbenchWidget(type, { y: bottom }));
 
-  if (type === "chartBoard") {
-    openChartDialog(item);
-  }
 };
 
 const removeWidget = (item: WorkbenchLayoutItem) => {
   if (isFixedWorkbenchWidget(item.type)) return;
   editableLayout.value = editableLayout.value.filter((current) => current.i !== item.i);
-};
-
-const openChartDialog = (item: WorkbenchLayoutItem) => {
-  if (item.type !== "chartBoard") return;
-  activeChartItem.value = item;
-  showChartDialog.value = true;
-};
-
-const handleChartSelected = (value: { dashboardId: string; dashboardItemId: string; title: string }) => {
-  if (!activeChartItem.value) return;
-  activeChartItem.value.config = {
-    ...activeChartItem.value.config,
-    dashboardId: value.dashboardId,
-    dashboardItemId: value.dashboardItemId,
-    title: value.title,
-  };
 };
 
 const getMinHeight = (item: WorkbenchLayoutItem) => {
@@ -405,18 +372,18 @@ watch(layout, syncLayout, { deep: true });
   flex: 1;
   min-width: 0;
   overflow: auto;
-  padding: var(--et-space-24);
+  padding: 0;
 }
 
 .canvas {
   min-height: calc(100vh - var(--et-size-160));
 }
 
-:deep(.vue-grid-layout) {
+.workbench-designer-grid {
   min-height: calc(100vh - var(--et-size-160));
 }
 
-:deep(.vue-grid-item) {
+:deep(.workbench-designer-grid > .vue-grid-item) {
   overflow: visible;
 }
 </style>

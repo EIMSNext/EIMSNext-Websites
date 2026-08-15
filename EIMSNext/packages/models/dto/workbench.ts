@@ -31,6 +31,21 @@ export interface WorkbenchWidgetConfig {
   title?: string;
   dashboardId?: string;
   dashboardItemId?: string;
+  charts?: WorkbenchChartLayoutItem[];
+}
+
+/** A user's independent placement of a dashboard chart in the workbench. */
+export interface WorkbenchChartLayoutItem {
+  i: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  minW?: number;
+  minH?: number;
+  dashboardId: string;
+  dashboardItemId: string;
+  title: string;
 }
 
 export interface WorkbenchConfig extends CorpModelBase {

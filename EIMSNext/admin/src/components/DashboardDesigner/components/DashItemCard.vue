@@ -63,7 +63,11 @@
           :is-public="isPublic"
           :public-token="publicToken"
           :item-def="itemDef"
-        />
+        >
+          <template #header-actions>
+            <slot name="header-actions"></slot>
+          </template>
+        </e-charts-viewer>
       </template>
       <template v-else-if="itemDef.itemType == DashItemType.DetailTable && detailTableSetting && detailTableSettingValidate(detailTableSetting)">
         <DetailTableViewer
