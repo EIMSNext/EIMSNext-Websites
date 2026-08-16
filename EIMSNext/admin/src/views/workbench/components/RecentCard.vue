@@ -66,14 +66,6 @@ onMounted(loadRecent);
 <style lang="scss" scoped>
 .workbench-list-card {
   height: auto;
-
-  :deep(.el-card__body) {
-    max-height: calc(
-      var(--et-size-40) * 10 + var(--et-space-10)
-    );
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
 }
 
 .workbench-card-header {

@@ -25,7 +25,7 @@
           :h="item.h"
           :i="item.i"
           :minW="item.minW || 5"
-          :minH="item.minH || 5"
+          :minH="item.type === 'flowCenter' ? item.minH || item.h : 1"
           :maxW="24"
           :maxH="999"
         >
@@ -113,7 +113,7 @@ const syncWidgetHeight = (widgetId: string, contentHeight: number) => {
   const item = runtimeLayout.value.find((current) => current.i === widgetId);
   if (!item) return;
   const nextHeight = Math.max(
-    item.minH || 1,
+    1,
     Math.ceil((contentHeight + GRID_ROW_GAP) / (GRID_ROW_HEIGHT + GRID_ROW_GAP))
   );
   if (item.h === nextHeight) return;

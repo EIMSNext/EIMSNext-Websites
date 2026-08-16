@@ -41,9 +41,22 @@
           <MyChartItem :chart="chart" :allow-manage="allowManage" @remove="$emit('remove-chart', chart.i)" />
         </grid-item>
       </grid-layout>
-      <div v-else class="chart-board-empty" data-workbench-height-content>
-        <i class="x-icon iconfont-fx-pc icon-info-o"></i>
-        <div>{{ t("admin.workbench.chartNotConfigured") }}</div>
+      <div
+        v-else
+        class="chart-board-empty"
+        :class="{ 'runtime-empty': allowManage }"
+        data-workbench-height-content
+      >
+        <template v-if="allowManage">
+          <span>{{ t("common.noData") }}</span>
+          <el-button link type="primary" @click.stop="$emit('add-chart')">
+            {{ t("common.add") }}
+          </el-button>
+        </template>
+        <template v-else>
+          <i class="x-icon iconfont-fx-pc icon-info-o"></i>
+          <div>{{ t("admin.workbench.chartNotConfigured") }}</div>
+        </template>
       </div>
     </et-card>
   </div>
@@ -144,5 +157,9 @@ const handleLayoutUpdated = (updatedLayout: WorkbenchChartLayoutItem[]) => {
   justify-content: center;
   min-height: var(--et-size-160);
   text-align: center;
+
+  &.runtime-empty {
+    flex-direction: row;
+  }
 }
 </style>

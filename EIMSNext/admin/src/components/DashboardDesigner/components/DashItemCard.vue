@@ -13,6 +13,8 @@
     @edit="emit('edit', $event)"
     @delete="emit('delete', $event)"
     @filter-change="onFilterValueChanged"
+    @quick-filter-change="onQuickFilterValueChanged"
+    @apply-filters="onApplyFilters"
     @update-realtime-setting="(...args) => emit('update-realtime-setting', ...args)"
     @update-image-setting="(...args) => emit('update-image-setting', ...args)"
     @update-text-setting="(...args) => emit('update-text-setting', ...args)"
@@ -40,7 +42,7 @@
           <div v-else-if="itemDef.itemType === DashItemType.Text && textSetting" class="action-btn" :title="t('common.edit')" @click="toggleTextEditing">
             <et-icon :icon="textEditing ? 'el-check' : 'el-editPen'" />
           </div>
-          <div v-else class="action-btn" :title="t('common.edit')" @click="onEdit"><et-icon icon="el-editPen" /></div>
+          <div v-else-if="itemDef.itemType !== DashItemType.FilterButton" class="action-btn" :title="t('common.edit')" @click="onEdit"><et-icon icon="el-editPen" /></div>
           <div class="action-btn" :title="t('admin.dashItem.copy')" @click="onCopy">
             <et-icon icon="el-documentCopy" />
           </div>
@@ -83,6 +85,12 @@
       <template v-else-if="itemDef.itemType == DashItemType.Filter">
         <FilterWidgetCard :item-def="itemDef" :is-public="isPublic" @change="onFilterValueChanged" />
       </template>
+      <template v-else-if="itemDef.itemType == DashItemType.QuickFilter && quickFilterSetting">
+        <QuickFilterViewer :item-id="itemDef.id" :setting="quickFilterSetting" :is-public="isPublic" @change="onQuickFilterValueChanged" />
+      </template>
+      <template v-else-if="itemDef.itemType == DashItemType.FilterButton">
+        <FilterButtonViewer @apply="onApplyFilters" />
+      </template>
       <template v-else-if="itemDef.itemType == DashItemType.RealTime && realTimeSetting">
         <RealtimeViewer :setting="realTimeSetting" />
       </template>
@@ -124,6 +132,9 @@ import { IDashboardImageSetting, parseDashboardImageSetting } from "../Image/typ
 import TextViewer from "../Text/TextViewer.vue";
 import TextEditor from "../Text/TextEditor.vue";
 import { IDashboardTextSetting, parseDashboardTextSetting, sanitizeDashboardHtml } from "../Text/type";
+import QuickFilterViewer from "../QuickFilter/QuickFilterViewer.vue";
+import FilterButtonViewer from "../QuickFilter/FilterButtonViewer.vue";
+import { parseQuickFilterSetting } from "../QuickFilter/type";
 const { t } = useLocale();
 
 defineOptions({
@@ -177,6 +188,7 @@ const realtimeSettingsVisible = ref(false);
 const imageSetting = computed<IDashboardImageSetting | undefined>(() => parseDashboardImageSetting(props.itemDef.details));
 const imageSettingsVisible = ref(false);
 const textSetting = computed<IDashboardTextSetting | undefined>(() => parseDashboardTextSetting(props.itemDef.details));
+const quickFilterSetting = computed(() => props.itemDef.itemType === DashItemType.QuickFilter ? parseQuickFilterSetting(props.itemDef.details) : undefined);
 const textEditing = ref(false);
 const textDraft = ref("");
 const lastSavedText = ref("");
@@ -202,14 +214,22 @@ const itemTitle = computed(() => {
     return t("admin.dashboardDesigner.textComponent");
   }
 
+  if (props.itemDef.itemType == DashItemType.QuickFilter) {
+    return t("admin.dashboardDesigner.quickFilter");
+  }
+
+  if (props.itemDef.itemType == DashItemType.FilterButton) {
+    return t("admin.dashboardDesigner.filterButton");
+  }
+
   return t("admin.untitledChart");
 });
 
 const isInteractiveContent = computed(() => {
-  return props.itemDef.itemType === DashItemType.Text || (props.isView && [DashItemType.Filter, DashItemType.DetailTable].includes(props.itemDef.itemType));
+  return props.itemDef.itemType === DashItemType.Text || (props.isView && [DashItemType.Filter, DashItemType.QuickFilter, DashItemType.FilterButton, DashItemType.DetailTable].includes(props.itemDef.itemType));
 });
 
-const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change", "update-layout", "update-setting", "update-realtime-setting", "update-image-setting", "update-text-setting"]);
+const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change", "quick-filter-change", "apply-filters", "update-layout", "update-setting", "update-realtime-setting", "update-image-setting", "update-text-setting"]);
 const onHide = () => {
   emit("hide", props.itemDef);
 };
@@ -224,6 +244,12 @@ const onDelete = () => {
 };
 const onFilterValueChanged = (payload: { itemId: string; value: any }) => {
   emit("filter-change", payload);
+};
+const onQuickFilterValueChanged = (payload: { itemId: string; option?: any }) => {
+  emit("quick-filter-change", payload);
+};
+const onApplyFilters = () => {
+  emit("apply-filters", { itemId: props.itemDef.id });
 };
 const onRealTimeSettingUpdated = (setting: IRealTimeSetting) => {
   realtimeSettingsVisible.value = false;

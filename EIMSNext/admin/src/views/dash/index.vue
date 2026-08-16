@@ -41,6 +41,8 @@
           :external-filter="chartFilters[state.items[item.i].id]"
           :external-filters="chartFilters"
           @filter-change="handleFilterChange"
+          @quick-filter-change="handleQuickFilterChange"
+          @apply-filters="handleApplyFilters"
         />
       </grid-item>
     </grid-layout>
@@ -83,7 +85,7 @@ const refreshTimer = ref<number>();
 let loadTask: Promise<void> | undefined;
 const { isFullscreen } = useFullscreen();
 
-const { chartFilters, rebuildChartFilters, handleFilterChange } = useChartFilterLinkage(state);
+const { chartFilters, rebuildChartFilters, handleFilterChange, handleQuickFilterChange, handleApplyFilters } = useChartFilterLinkage(state);
 
 const getMinWidth = (item: IGridLayoutItem) => {
   return 6;

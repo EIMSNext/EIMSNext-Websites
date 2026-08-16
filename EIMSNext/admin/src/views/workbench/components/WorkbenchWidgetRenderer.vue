@@ -62,6 +62,18 @@ const isDynamicHeight = computed(() =>
 );
 let resizeObserver: ResizeObserver | undefined;
 let mutationObserver: MutationObserver | undefined;
+let observedContent: HTMLElement | undefined;
+
+const getHeightContent = () =>
+  widgetRef.value?.querySelector<HTMLElement>("[data-workbench-height-content]") ?? undefined;
+
+const observeHeightContent = () => {
+  const content = getHeightContent();
+  if (!resizeObserver || content === observedContent) return;
+  if (observedContent) resizeObserver.unobserve(observedContent);
+  observedContent = content;
+  if (observedContent) resizeObserver.observe(observedContent);
+};
 
 const reportContentHeight = () => {
   if (!isDynamicHeight.value || !widgetRef.value) return;
@@ -91,6 +103,7 @@ const reportContentHeight = () => {
 
 const scheduleContentHeight = () => {
   nextTick(() => {
+    observeHeightContent();
     requestAnimationFrame(() => requestAnimationFrame(reportContentHeight));
   });
 };
@@ -120,11 +133,13 @@ onMounted(async () => {
       mutationObserver.observe(body, { childList: true, subtree: true });
     }
   }
+  observeHeightContent();
 });
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
   mutationObserver?.disconnect();
+  observedContent = undefined;
 });
 
 const widgetTitle = computed(() => {

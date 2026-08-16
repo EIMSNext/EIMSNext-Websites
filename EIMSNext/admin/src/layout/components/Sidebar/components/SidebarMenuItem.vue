@@ -2,7 +2,12 @@
   <template v-if="currentMenuType === FormType.Group">
     <el-sub-menu :index="groupIndex" teleported ref="subMenuRef" v-model:expanded="expandedKeys">
       <template #title>
-        <div class="menu-title-row group-drop-target" @dragover.prevent @drop.stop.prevent="handleGroupDrop">
+        <div
+          class="menu-title-row group-drop-target"
+          :class="{ 'menu-title-row-expanded': isSidebarOpened }"
+          @dragover.prevent
+          @drop.stop.prevent="handleGroupDrop"
+        >
           <SidebarMenuItemTitle :icon="groupIcon" :title="item.title" :iconColor="getAppIconColor(item)" />
           <span v-if="canEdit || canDelete" class="more-wrapper" @click.stop>
             <el-dropdown placement="bottom-start" size="large" trigger="click">
@@ -10,10 +15,12 @@
               <template #dropdown>
                 <el-dropdown-menu class="sidebar-menu-dropdown">
                   <el-dropdown-item v-if="canEdit" @click="emit('editGroup', item)">
+                    <et-icon class="dropdown-item-icon" icon="el-editPen" size="14px" />
                     {{ t("common.edit") }}
                   </el-dropdown-item>
                   <el-divider v-if="canEdit && canDelete" class="sidebar-menu-divider" />
                   <el-dropdown-item v-if="canDelete" class="btn-delete" @click="deleteGroup(item)">
+                    <et-icon class="dropdown-item-icon" icon="el-delete" size="14px" />
                     {{ t("common.delete") }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -40,29 +47,44 @@
   </template>
 
   <router-link v-else custom :to="routeTo" v-slot="{ navigate }">
-    <el-menu-item :index="routeTo.path" :class="{ 'pl-15px': !isSidebarOpened }" @click="() => navigate()">
-      <SidebarMenuItemTitle :icon="getFormIcon(item)" :title="item.title" :iconColor="getAppIconColor(item)" />
-      <span
-        class="favorite-wrapper"
-        :class="{ active: isFavorite }"
-        @click.stop="toggleFavorite"
-      >
-        <et-icon icon="el-star" />
-      </span>
-      <span v-if="canEdit || canDelete" class="more-wrapper" @click.stop>
+    <el-menu-item
+      :index="routeTo.path"
+      :class="{ 'pl-15px': !isSidebarOpened, 'menu-item-expanded': isSidebarOpened }"
+      @click="() => navigate()"
+    >
+      <SidebarMenuItemTitle
+        :icon="getFormIcon(item)"
+        :title="item.title"
+        :iconColor="getAppIconColor(item)"
+        icon-size="18px"
+      />
+      <span class="more-wrapper" @click.stop>
         <el-dropdown placement="bottom-start" size="large" trigger="click">
           <et-icon icon="el-More" @click.prevent="" />
           <template #dropdown>
             <el-dropdown-menu class="sidebar-menu-dropdown">
               <el-dropdown-item v-if="canEdit" @click="editForm(item.menuId, currentMenuType)">
+                <et-icon class="dropdown-item-icon" icon="el-editPen" size="14px" />
                 {{ t("common.edit") }}
               </el-dropdown-item>
               <el-dropdown-item v-if="canEdit" @click="emit('editMenu', item)">
+                <et-icon class="dropdown-item-icon" icon="el-setting" size="14px" />
                 {{ t("admin.editNameAndIcon") }}
               </el-dropdown-item>
               <el-divider v-if="canEdit && canDelete" class="sidebar-menu-divider" />
               <el-dropdown-item v-if="canDelete" class="btn-delete" @click="deleteGroup(item)">
+                <et-icon class="dropdown-item-icon" icon="el-delete" size="14px" />
                 {{ t("common.delete") }}
+              </el-dropdown-item>
+              <el-divider v-if="canEdit || canDelete" class="sidebar-menu-divider" />
+              <el-dropdown-item @click="toggleFavorite">
+                <et-icon
+                  class="dropdown-item-icon"
+                  icon="el-star"
+                  size="14px"
+                  :color="isFavorite ? 'var(--et-color-warning)' : 'currentcolor'"
+                />
+                {{ t(isFavorite ? "admin.workbench.removeFavorite" : "admin.workbench.addFavorite") }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -215,17 +237,22 @@ onMounted(() => {
 
 .menu-title-row {
   width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
+}
+
+.menu-title-row-expanded {
+  padding-right: var(--et-size-30);
+}
+
+:deep(.el-menu-item.menu-item-expanded) {
+  padding-right: var(--et-size-64) !important;
 }
 
 .el-menu-item:hover,
 :deep(.el-sub-menu__title:hover) {
   .more-wrapper {
-    visibility: visible;
-  }
-
-  .favorite-wrapper {
     visibility: visible;
   }
 }
@@ -237,21 +264,12 @@ onMounted(() => {
   visibility: hidden;
 }
 
-.favorite-wrapper {
-  position: absolute;
-  right: 38px;
-  display: flex;
-  color: var(--et-text-tertiary);
-  visibility: hidden;
-}
-
-.favorite-wrapper.active {
-  color: var(--et-color-warning);
-  visibility: visible;
-}
-
 .sidebar-menu-dropdown {
   min-width: var(--et-size-150);
+}
+
+.dropdown-item-icon {
+  margin-right: var(--et-space-8);
 }
 
 .sidebar-menu-divider {

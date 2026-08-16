@@ -97,7 +97,7 @@ import type { TableInstance, TableTooltipData } from "element-plus";
 import { flowStatusArray } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 import { ITableColumn } from "../type";
-import { extractImageUrl, flattenDataItem, formatFormValue, findFieldDef } from "../listViewUtils";
+import { extractImageUrl, flattenDataItem, formatDataTitle, formatFormValue, findFieldDef } from "../listViewUtils";
 import FormListViewCard from "./FormListViewCard.vue";
 
 const props = defineProps<{
@@ -155,8 +155,19 @@ const getColumnSetting = (field: string): any => {
 
 const formatCell = (row: any, field: string, value?: any) => {
   if (field === SystemField.FlowStatus) return getFlowStatusName(value ?? row[field]);
+  if (field === SystemField.DataTitle) return formatDataTitle(row, props.formDef, t);
   const col = getColumnSetting(field);
-  const fieldDef = col || findFieldDef(props.formDef, field, t);
+  const sourceFieldDef = findFieldDef(props.formDef, field, t);
+  const fieldDef = sourceFieldDef && col
+    ? {
+        ...sourceFieldDef,
+        type: col.type || sourceFieldDef.type,
+        props: {
+          ...sourceFieldDef.props,
+          format: col.format ?? sourceFieldDef.props?.format,
+        },
+      }
+    : col || sourceFieldDef;
   return formatFormValue(value ?? row[field], fieldDef, getFlowStatusName);
 };
 
@@ -181,10 +192,15 @@ const onRowClick = (row: FormData, column: any) => {
 
 const formatCardValue = (row: any, field: string) => {
   const fieldDef = findFieldDef(props.formDef, field, t);
-  return formatFormValue(row[field], fieldDef, getFlowStatusName);
+  const value = row[field] !== undefined ? row[field] : row[field.split(">").pop() || field];
+  return formatFormValue(value, fieldDef, getFlowStatusName);
 };
 
-const getCardTitle = (row: any) => formatCardValue(row, cardSettings.value.titleField || SystemField.DataTitle) || row[SystemField.DataTitle] || "-";
+const getCardTitle = (row: any) => {
+  const titleField = cardSettings.value.titleField || SystemField.DataTitle;
+  if (titleField === SystemField.DataTitle) return formatDataTitle(row, props.formDef, t) || "-";
+  return formatCardValue(row, titleField) || formatDataTitle(row, props.formDef, t) || "-";
+};
 const getCoverUrl = (row: any) => cardSettings.value.coverField ? extractImageUrl(row[cardSettings.value.coverField]) : "";
 
 const kanbanGroups = computed(() => {

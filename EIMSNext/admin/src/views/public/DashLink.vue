@@ -68,6 +68,8 @@
             :external-filter="chartFilters[state.items[item.i].id]"
             :external-filters="chartFilters"
             @filter-change="handleFilterChange"
+            @quick-filter-change="handleQuickFilterChange"
+            @apply-filters="handleApplyFilters"
           />
         </grid-item>
       </grid-layout>
@@ -130,7 +132,7 @@ const rootLayout = computed<IGridLayoutItem[]>({
 const colNum = ref(24);
 const colWidth = ref(150);
 const rowHeight = ref(10);
-const { chartFilters, rebuildChartFilters, handleFilterChange } = useChartFilterLinkage(state);
+const { chartFilters, rebuildChartFilters, handleFilterChange, handleQuickFilterChange, handleApplyFilters } = useChartFilterLinkage(state);
 
 const renderToolbar = () => renderPrintFullscreenToolbar();
 

@@ -24,9 +24,31 @@
       @cancel="closeGroupDialog"
       @ok="handleAppUpdated"
     />
-    <div class="app-title" :style="{ paddingRight: isSidebarOpened ? 'var(--et-space-15)' : 'var(--et-space-6)' }">
+    <div class="app-title" :style="{ paddingRight: isSidebarOpened ? 'var(--et-size-40)' : 'var(--et-space-6)' }">
       <AppIcon v-if="app" :app="app" iconSize="12px" style="width: 20px;height: 20px;" />
-      <span v-if="isSidebarOpened" class="ml-[3px]">{{ app?.name }}</span>
+      <span
+        v-if="isSidebarOpened"
+        class="app-title-text ml-[3px]"
+        :title="app?.name || ''"
+        role="button"
+        tabindex="0"
+        @click.stop="toggleAppFavorite"
+        @keydown.enter.prevent="toggleAppFavorite"
+        @keydown.space.prevent="toggleAppFavorite"
+      >
+        {{ app?.name }}
+      </span>
+      <button
+        v-if="isSidebarOpened && app"
+        type="button"
+        class="app-favorite-button"
+        :class="{ active: isAppFavorite }"
+        :title="t(isAppFavorite ? 'admin.workbench.removeFavorite' : 'admin.workbench.addFavorite')"
+        :aria-label="t(isAppFavorite ? 'admin.workbench.removeFavorite' : 'admin.workbench.addFavorite')"
+        @click.stop="toggleAppFavorite"
+      >
+        <et-icon icon="el-star" size="16px" />
+      </button>
       <el-button class="side-bar-control" @click.stop="toggleSideBar">
         <et-icon v-if="isSidebarOpened" icon="el-DArrowLeft" size="14px"></et-icon>
         <et-icon v-else icon="el-DArrowRight" size="14px"></et-icon>
@@ -37,7 +59,7 @@
 <router-link custom :to="{ name: 'mytasks', params: { appId: app?.id } }" v-slot="{ navigate }">
           <el-menu-item index="mytask" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <el-badge :is-dot="hasAppTask" :offset="[0, 12]">
-              <et-icon icon="icon-mytodo" class="step-image" size="14px" />
+              <et-icon icon="icon-mytodo" class="step-image" size="18px" />
             </el-badge>
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.mytasks") }}
@@ -46,7 +68,7 @@
         </router-link>
 <router-link custom :to="{ name: 'mystarted', params: { appId: app?.id } }" v-slot="{ navigate }">
           <el-menu-item index="mystarted" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
-            <et-icon icon="icon-mystarted" class="step-image" size="14px" />
+            <et-icon icon="icon-mystarted" class="step-image" size="18px" />
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.mystarted") }}
             </span>
@@ -54,7 +76,7 @@
         </router-link>
 <router-link custom :to="{ name: 'myapproved', params: { appId: app?.id } }" v-slot="{ navigate }">
           <el-menu-item index="myapproved" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
-            <et-icon icon="icon-myapproved" class="step-image" size="14px" />
+            <et-icon icon="icon-myapproved" class="step-image" size="18px" />
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.myapproved") }}
             </span>
@@ -62,7 +84,7 @@
         </router-link>
 <router-link custom :to="{ name: 'cctome', params: { appId: app?.id } }" v-slot="{ navigate }">
           <el-menu-item index="mycced" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
-            <et-icon icon="icon-mycced" class="step-image" size="14px" />
+            <et-icon icon="icon-mycced" class="step-image" size="18px" />
             <span v-if="isSidebarOpened" class="app-menu-text">
               {{ t("common.wfProcess.cctome") }}
             </span>
@@ -132,7 +154,7 @@
 import DashboardDesigner from "@/components/DashboardDesigner/index.vue";
 import EditFormIcon from "./components/EditFormIcon.vue";
 import EditMenuGroup from "./components/EditMenuGroup.vue";
-import { usePermissionStore, useSystemStore } from "@/store";
+import { usePermissionStore, useSystemStore, useWorkbenchStore } from "@/store";
 import {
   AppDef,
   AppMenu,
@@ -217,7 +239,9 @@ const app = ref<AppDef>();
 const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
 
 const systemStore = useSystemStore();
+const workbenchStore = useWorkbenchStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
+const isAppFavorite = computed(() => !!app.value && workbenchStore.isFavorite("app", app.value.id));
 const appTaskCount = ref(0);
 const hasAppTask = computed(() => appTaskCount.value > 0);
 const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
@@ -234,6 +258,12 @@ const loadCurrentApp = async () => {
 // 展开/收缩菜单
 function toggleSideBar() {
   systemStore.toggleSidebar();
+}
+
+async function toggleAppFavorite() {
+  if (!app.value) return;
+  await workbenchStore.loadFavorites();
+  await workbenchStore.toggleFavorite({ targetType: "app", targetId: app.value.id });
 }
 
 watch(
@@ -258,6 +288,7 @@ watch(
 
 onMounted(() => {
   loadAdminPermissions();
+  void workbenchStore.loadFavorites();
   appTaskTimer = setInterval(() => {
     loadAppTaskCount();
   }, BADGE_REFRESH_INTERVAL);
@@ -467,6 +498,51 @@ const createFolder = () => {
   padding: var(--et-space-12) var(--et-space-15) var(--et-space-12) var(--et-space-6);
   font-size: var(--et-font-size-16);
   align-items: center;
+}
+
+.app-title-text {
+  cursor: pointer;
+  flex: 0 1 var(--et-size-90);
+  max-width: var(--et-size-90);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.app-favorite-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--et-text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 var(--et-size-24);
+  height: var(--et-size-24);
+  justify-content: center;
+  margin-left: auto;
+  padding: 0;
+  width: var(--et-size-24);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    color var(--et-duration-fast) var(--et-ease-standard),
+    opacity var(--et-duration-fast) var(--et-ease-standard);
+
+  &.active,
+  &:hover {
+    color: var(--et-color-warning);
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.app-title:hover .app-favorite-button {
+  opacity: 1;
+  visibility: visible;
 }
 
 .form-action {

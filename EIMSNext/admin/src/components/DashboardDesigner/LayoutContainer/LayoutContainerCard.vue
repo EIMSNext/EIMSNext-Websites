@@ -54,6 +54,8 @@ const emit = defineEmits<{
   edit: [item: DashboardItemDef];
   delete: [item: DashboardItemDef];
   "filter-change": [payload: { itemId: string; value: any }];
+  "quick-filter-change": [payload: { itemId: string; option?: any }];
+  "apply-filters": [payload: { itemId: string }];
 }>();
 
 const settingsVisible = ref(false);
@@ -121,6 +123,8 @@ const ContainerGrid = defineComponent({
           externalFilter: props.externalFilters[props.items[layoutItem.i].id], layout: props.layout, items: props.items,
           onEdit: (item: DashboardItemDef) => emit("edit", item), onDelete: (item: DashboardItemDef) => emit("delete", item),
           onFilterChange: (payload: { itemId: string; value: any }) => emit("filter-change", payload),
+          onQuickFilterChange: (payload: { itemId: string; option?: any }) => emit("quick-filter-change", payload),
+          onApplyFilters: (payload: { itemId: string }) => emit("apply-filters", payload),
           onUpdateRealtimeSetting: (item: DashboardItemDef, setting: Record<string, any>) => emit("update-realtime-setting", item, setting),
           onUpdateImageSetting: (item: DashboardItemDef, setting: Record<string, any>) => emit("update-image-setting", item, setting),
           onUpdateTextSetting: (item: DashboardItemDef, setting: Record<string, any>) => emit("update-text-setting", item, setting),

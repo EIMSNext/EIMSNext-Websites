@@ -24,8 +24,19 @@
         </el-tooltip>
       </div>
     </div>
-    <div v-else class="workbench-empty" data-workbench-height-content>
-      <div>{{ t("admin.workbench.favoritesEmpty") }}</div>
+    <div
+      v-else
+      class="workbench-empty"
+      :class="{ 'runtime-empty': allowManage }"
+      data-workbench-height-content
+    >
+      <template v-if="allowManage">
+        <span>{{ t("common.noData") }}</span>
+        <el-button link type="primary" @click.stop="$emit('add')">
+          {{ t("common.add") }}
+        </el-button>
+      </template>
+      <div v-else>{{ t("admin.workbench.favoritesEmpty") }}</div>
     </div>
   </et-card>
 </template>
@@ -206,5 +217,10 @@ onBeforeUnmount(() => {
   min-height: var(--et-size-120);
   padding: var(--et-space-16);
   text-align: center;
+
+  &.runtime-empty {
+    flex-direction: row;
+    gap: var(--et-space-8);
+  }
 }
 </style>

@@ -1,6 +1,6 @@
 window.appSetting = {
-  authUrl: "http://localhost:6666",
-  apiUrl: "http://localhost:8888",
-  uploadUrl: "http://localhost:8844",
+  authUrl: "https://localhost:7777",
+  apiUrl: "https://localhost:8899",
+  uploadUrl: "https://localhost:8855",
   httpTimeout: 100000,
 };

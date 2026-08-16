@@ -27,4 +27,6 @@ export enum DashItemType {
   RealTime = "realTime",
   Image = "image",
   Text = "text",
+  QuickFilter = "quickFilter",
+  FilterButton = "filterButton",
 }

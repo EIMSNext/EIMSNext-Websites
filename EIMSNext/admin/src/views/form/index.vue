@@ -60,7 +60,11 @@
       <DataField :model-value="fieldList" :formId="formId" :field-perms="fieldPerms" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
     <div class="toolbar-head">
-      <et-toolbar class="form-list-toolbar" :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler"></et-toolbar>
+      <et-toolbar
+        class="form-list-toolbar form-list-toolbar-leading"
+        :left-group="leftBars"
+        @command="toolbarHandler"
+      />
       <FormDataSearchBar
         :keyword="searchState.keyword"
         :selected-fields="searchState.selectedFields"
@@ -69,6 +73,11 @@
         @update:keyword="searchState.keyword = $event"
         @update:selected-fields="searchState.selectedFields = $event"
         @search="handleSearch"
+      />
+      <et-toolbar
+        class="form-list-toolbar form-list-toolbar-trailing"
+        :right-group="rightBars"
+        @command="toolbarHandler"
       />
     </div>
     <FormDraftDrawer
@@ -90,7 +99,7 @@
       @select="openDraft"
       @delete="deleteDraft"
     />
-    <div v-if="availableViews.length > 0" class="view-tabs">
+    <div v-if="visibleCustomViews.length > 0" class="view-tabs">
       <button
         v-for="view in availableViews"
         :key="view.id"
@@ -192,6 +201,7 @@ import {
   type FormDataSearchState,
   buildAllSearchableFields,
   filterSearchableFields,
+  MAX_SEARCH_FIELD_COUNT,
   normalizeSelectedSearchFields,
   resolveSearchFields,
 } from "./searchUtils";
@@ -257,6 +267,7 @@ const searchState = reactive<FormDataSearchState>({
   keyword: "",
   selectedFields: [],
 });
+const searchFieldsInitialized = ref(false);
 const userStore = useUserStore();
 const { currentUser } = userStore;
 const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
@@ -277,15 +288,22 @@ const canExport = computed(() => hasDataPerm(DataPerms.Export, dataPerms.value))
 const canRemove = computed(() =>
   hasDataPerm(DataPerms.Remove, dataPerms.value)
 );
-const availableViews = computed(() => {
-  if (!formDef.value) return [];
-  const source = listViews.value.length > 0 ? listViews.value : [createDefaultFormListView(formDef.value, t)];
+const visibleCustomViews = computed(() => {
   const authGroupId = curAuthGrp.value?.id;
-  return source.filter((view) => {
+  return listViews.value.filter((view) => {
+    if (view.id === "__default") return false;
     if (view.disabled) return false;
     if (!authGroupId || !view.authGroupIds || view.authGroupIds.length === 0) return true;
     return view.authGroupIds.includes(authGroupId);
   });
+});
+
+const availableViews = computed(() => {
+  if (!formDef.value) return [];
+  return [
+    createDefaultFormListView(formDef.value, t),
+    ...visibleCustomViews.value.filter((view) => view.id !== "__default"),
+  ];
 });
 
 const leftBars = ref<ToolbarItem[]>([
@@ -343,52 +361,6 @@ const leftBars = ref<ToolbarItem[]>([
       },
     },
   },
-  // { type: "button", config: { text: "导出", command: "download", icon: "el-download" } }
-]);
-
-const rightBars = ref<ToolbarItem[]>([
-  {
-    type: "button",
-    config: {
-      text: "common.filter",
-      class: "data-filter",
-      command: "filter",
-      visible: true,
-      icon: "el-filter",
-      onCommand: (cmd: string, e: MouseEvent) => {
-        ((filterBtnRef.value = e.currentTarget), (showSort.value = showField.value = false));
-        showFilter.value = !showFilter.value;
-      },
-    },
-  },
-  {
-    type: "button",
-    config: {
-      text: "common.sort",
-      class: "data-filter",
-      command: "sort",
-      visible: true,
-      icon: "el-sort",
-      onCommand: (cmd: string, e: MouseEvent) => {
-        ((sortBtnRef.value = e.currentTarget), (showFilter.value = showField.value = false));
-        showSort.value = !showSort.value;
-      },
-    },
-  },
-  {
-    type: "button",
-    config: {
-      text: "common.fields",
-      class: "data-filter",
-      command: "list",
-      visible: true,
-      icon: "el-list",
-      onCommand: (cmd: string, e: MouseEvent) => {
-        ((fieldBtnRef.value = e.currentTarget), (showFilter.value = showSort.value = false));
-        showField.value = !showField.value;
-      },
-    },
-  },
   {
     type: "button",
     config: {
@@ -413,6 +385,51 @@ const rightBars = ref<ToolbarItem[]>([
       onCommand: () => {
         showDraftDrawer.value = true;
         void refreshDrafts();
+      },
+    },
+  },
+]);
+
+const rightBars = ref<ToolbarItem[]>([
+  {
+    type: "button",
+    config: {
+      text: "common.filter",
+      class: "data-filter",
+      command: "filter",
+      visible: true,
+      icon: "el-filter",
+      onCommand: (cmd: string, e: MouseEvent) => {
+        ((filterBtnRef.value = e.currentTarget), (showSort.value = showField.value = false));
+        showFilter.value = !showFilter.value;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "common.fields",
+      class: "data-filter",
+      command: "list",
+      visible: true,
+      icon: "el-list",
+      onCommand: (cmd: string, e: MouseEvent) => {
+        ((fieldBtnRef.value = e.currentTarget), (showFilter.value = showSort.value = false));
+        showField.value = !showField.value;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "common.sort",
+      class: "data-filter",
+      command: "sort",
+      visible: true,
+      icon: "el-sort",
+      onCommand: (cmd: string, e: MouseEvent) => {
+        ((sortBtnRef.value = e.currentTarget), (showFilter.value = showField.value = false));
+        showSort.value = !showSort.value;
       },
     },
   },
@@ -521,15 +538,6 @@ const loadFormContext = async () => {
       groupItem.config.menuItems = menuItems;
       groupItem.config.visible = true;
       groupItem.config.disabled = false;
-    } else if (canManageCurrentApp.value) {
-      groupItem.config.menuItems = [{
-        text: "admin.formList.adminAllPermissions",
-        command: "admin-all",
-        visible: true,
-        checked: true,
-      }];
-      groupItem.config.visible = true;
-      groupItem.config.disabled = true;
     } else {
       groupItem.config.menuItems = [];
       groupItem.config.visible = false;
@@ -580,10 +588,20 @@ const searchableFields = computed(() =>
     : []
 );
 
+const initializeSearchFields = () => {
+  if (searchFieldsInitialized.value || searchableFields.value.length === 0) return;
+  searchState.selectedFields = searchableFields.value
+    .slice(0, MAX_SEARCH_FIELD_COUNT)
+    .map((field) => field.field);
+  searchFieldsInitialized.value = true;
+};
+
 const exportColumns = computed<ExportColumn[]>(() => buildExportColumns());
 
 const applyCurrentView = (preferredViewId?: string) => {
   if (!formDef.value) return;
+
+  initializeSearchFields();
 
   const nextView =
     availableViews.value.find((view) => view.id === preferredViewId) ||
@@ -1060,9 +1078,27 @@ onUnmounted(() => {
 
 .toolbar-head {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--et-space-12);
+  min-height: 42px;
+  margin-bottom: var(--et-space-10);
+  padding: var(--et-space-6) var(--et-space-10);
+  border: 1px solid var(--el-border-color-lighter);
+  border-bottom: 0;
+  background: var(--el-bg-color);
+}
+
+.form-list-toolbar {
+  min-width: 0;
+}
+
+.form-list-toolbar-leading {
+  flex: 1;
+}
+
+.form-list-toolbar-trailing {
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .view-tab {
@@ -1100,19 +1136,19 @@ onUnmounted(() => {
   margin-left: var(--et-space-0);
 }
 
-:deep(.form-list-toolbar .toolbar-container) {
-  min-height: 42px;
-  margin-bottom: var(--et-space-10);
-  padding: var(--et-space-6) var(--et-space-10);
-  border: 1px solid var(--el-border-color-lighter);
-  border-bottom: 0;
-  background: var(--el-bg-color);
+:deep(.form-list-toolbar.toolbar-container) {
+  margin-bottom: 0;
+  background: transparent;
 }
 
 :deep(.form-list-toolbar .left-group),
 :deep(.form-list-toolbar .right-group) {
   align-items: center;
   gap: 2px;
+}
+
+:deep(.form-list-toolbar .right-group) {
+  margin-left: 0;
 }
 
 :deep(.form-list-toolbar .toolbar-item.el-button),
@@ -1152,10 +1188,17 @@ onUnmounted(() => {
   overflow: auto;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 900px) {
   .toolbar-head {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .form-list-toolbar-leading {
+    flex-basis: 100%;
+  }
+
+  .form-list-toolbar-trailing {
+    margin-left: auto;
   }
 }
 
