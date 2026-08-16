@@ -7,6 +7,28 @@
   max-width: 360px;
 }
 
+.fc-radio-group,
+.fc-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+
+.fc-radio-group--vertical,
+.fc-checkbox-group--vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.fc-radio-group--vertical .el-radio,
+.fc-radio-group--vertical .el-radio-button,
+.fc-checkbox-group--vertical .el-checkbox,
+.fc-checkbox-group--vertical .el-checkbox-button {
+  margin-right: 0;
+}
+
 .form-create .form-create .el-form-item {
   margin-bottom: 22px;
 }

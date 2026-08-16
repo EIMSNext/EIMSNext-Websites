@@ -3248,6 +3248,7 @@ export default {
       props: {
         input: "Whether to fill in",
         type: "Type",
+        distribution: "Distribution",
         min: "Minimum number that can be checked",
         max: "The maximum number that can be checked",
         textColor: "Font color when the button is active",
@@ -3857,6 +3858,7 @@ export default {
       props: {
         input: "Whether to fill in",
         type: "Type",
+        distribution: "Distribution",
         textColor: "Text color when button form is activated",
         fill: "Fill color and border color when the button form is activated",
         readonly: "Readonly",

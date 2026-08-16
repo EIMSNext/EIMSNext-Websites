@@ -3219,6 +3219,7 @@ export default {
       props: {
         input: "是否可以填写",
         type: "按钮类型",
+        distribution: "分布方式",
         min: "可被勾选的最小数量",
         max: "可被勾选的最大数量",
         textColor: "当按钮为活跃状态时的字体颜色",
@@ -3809,6 +3810,7 @@ export default {
       props: {
         input: "是否可以填写",
         type: "按钮形式",
+        distribution: "分布方式",
         textColor: "按钮形式激活时的文本颜色",
         fill: "按钮形式激活时的填充色和边框色",
         readonly: "只读",

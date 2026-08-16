@@ -139,23 +139,26 @@ export default {
   },
   makeWrap(ctx, children) {
     const rule = ctx.prop;
+    // Do not mutate the reactive rule while removing designer-only wrap fields.
+    // The title toggle must remain available on subsequent renders.
+    const wrap = { ...(rule.wrap || {}) };
     const uni = `${this.key}${ctx.key}`;
-    const col = rule.col;
-    const isTitle = this.isTitle(rule) && rule.wrap.title !== false;
+    const col = rule.col || {};
+    const isTitle = this.isTitle(rule) && wrap.title !== false;
     const labelWidth = !col.labelWidth && !isTitle ? 0 : col.labelWidth;
     const { inline, col: _col } = this.rule.props;
-    delete rule.wrap.title;
-    const item = isFalse(rule.wrap.show)
+    delete wrap.title;
+    const item = isFalse(wrap.show)
       ? children
       : this.$r(
           mergeProps([
-            rule.wrap,
+            wrap,
             {
               props: {
                 labelWidth:
                   labelWidth === void 0 ? labelWidth : toString(labelWidth),
                 label: isTitle ? rule.title.title : undefined,
-                ...tidyRule(rule.wrap || {}),
+                ...tidyRule(wrap),
                 prop: ctx.id,
                 rules: ctx.injectValidate(),
               },

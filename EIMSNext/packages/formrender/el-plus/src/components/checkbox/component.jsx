@@ -23,9 +23,14 @@ export default defineComponent({
     options: Array,
     input: Boolean,
     inputValue: String,
+    distribution: {
+      type: String,
+    },
+    direction: String,
   },
   emits: ["update:modelValue", "fc.el"],
   setup(props, _) {
+    const injectedOptions = computed(() => props.formCreateInject?.options);
     const opt = toRef(props, "options");
     const value = toRef(props, "modelValue");
     const inputValue = toRef(props, "inputValue", "");
@@ -56,7 +61,19 @@ export default defineComponent({
     });
 
     const _options = computed(() => {
-      return Array.isArray(opt.value) ? opt.value : [];
+      const source = opt.value ?? injectedOptions.value ?? [];
+      return Array.isArray(source)
+        ? source.map((option) => {
+            if (option && typeof option === "object") {
+              return {
+                ...option,
+                value: option.value ?? option.label,
+                label: option.label ?? option.value,
+              };
+            }
+            return { value: option, label: option };
+          })
+        : [];
     });
 
     // 将接收到的对象类型的值数组转换为value值数组，以便Element Plus组件能够正确识别选中的选项
@@ -133,9 +150,16 @@ export default defineComponent({
   render() {
     const name = this.type === "button" ? "ElCheckboxButton" : "ElCheckbox";
     const Type = resolveComponent(name);
+    const distribution = this.distribution || this.direction || "horizontal";
+    const groupClass = [
+      this.$attrs.class,
+      "fc-checkbox-group",
+      `fc-checkbox-group--${distribution}`,
+    ];
     return (
       <ElCheckboxGroup
         {...this.$attrs}
+        class={groupClass}
         modelValue={this.computedValue}
         v-slots={getSlot(this.$slots, ["default"])}
         onUpdate:modelValue={this.onInput}

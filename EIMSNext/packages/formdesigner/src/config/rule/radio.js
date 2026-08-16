@@ -1,5 +1,6 @@
 import { uniqueId8 } from "@eimsnext/form-render-core";
 import {
+  localeOptions,
   localeProps,
   makeTreeOptions,
 } from "../../utils/index";
@@ -22,14 +23,18 @@ export default {
   sfc(rule) {
     rule.type = "elRadioGroup";
     rule.children = (rule.options || []).map((opt) => {
+      const option =
+        opt && typeof opt === "object"
+          ? { value: opt.value ?? opt.label, label: opt.label ?? opt.value }
+          : { value: opt, label: opt };
       return {
-        type: rule.props.type === "button" ? "elRadioButton" : "elRadio",
+        type: rule.props?.type === "button" ? "elRadioButton" : "elRadio",
         props: {
-          label: opt,
-          value: opt,
+          label: option.value,
+          value: option.value,
         },
         _sfc: {
-          content: opt.label,
+          content: option.label,
         },
       };
     });
@@ -42,7 +47,7 @@ export default {
       title: t("com.radio.name"),
       info: "",
       $required: false,
-      props: {},
+      props: { type: "default", distribution: "horizontal" },
       options: makeTreeOptions(
         t("props.option"),
         { label: "label", value: "value" },
@@ -65,6 +70,24 @@ export default {
           ],
           showHeader: true,
         },
+      },
+      {
+        type: "select",
+        field: "type",
+        value: "default",
+        options: localeOptions(t, [
+          { label: "default", value: "default" },
+          { label: "button", value: "button" },
+        ]),
+      },
+      {
+        type: "select",
+        field: "distribution",
+        value: "horizontal",
+        options: localeOptions(t, [
+          { label: "horizontal", value: "horizontal" },
+          { label: "vertical", value: "vertical" },
+        ]),
       },
       // {type: 'switch', field: 'disabled'}
       // {
