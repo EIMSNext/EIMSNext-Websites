@@ -1,4 +1,5 @@
 import formCreateMobile from '@eimsnext/form-render-vant';
+import '@eimsnext/form-render-vant/dist/index.css';
 import fcSelect from '@eimsnext/form-render-elplus';
 import fcTree from '@eimsnext/form-render-elplus';
 import fcUpload from '@eimsnext/form-render-elplus';

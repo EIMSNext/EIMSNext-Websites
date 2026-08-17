@@ -1,5 +1,100 @@
 .form-create-m {
   width: 100%;
+  --fc-field-label-line-height: 22px;
+  --fc-field-label-font-size: 12px;
+  --fc-field-control-line-height: 24px;
+  --fc-field-single-height: 60px;
+  --fc-field-block-gap: 6px;
+  --fc-field-option-gap: 4px;
+  --fc-field-option-font-size: 12px;
+  --van-radio-size: 16px;
+  --van-radio-dot-size: 6px;
+  --van-radio-label-margin: 4px;
+  --van-checkbox-size: 16px;
+  --van-checkbox-label-margin: 4px;
+  --van-cell-line-height: var(--fc-field-control-line-height);
+  --van-cell-vertical-padding: 4px;
+  --van-cell-horizontal-padding: 10px;
+  --van-field-text-area-min-height: 72px;
+}
+
+.form-create-m .field-layout-content {
+  box-sizing: border-box;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.form-create-m .field-layout-content.field-layout-single {
+  height: var(--fc-field-single-height);
+  min-height: var(--fc-field-single-height);
+}
+
+.form-create-m .field-layout-content.field-layout-multi {
+  height: auto;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+.form-create-m .field-layout-content.field-layout-no-label.field-layout-single {
+  height: calc(var(--fc-field-control-line-height) + 8px);
+  min-height: calc(var(--fc-field-control-line-height) + 8px);
+}
+
+.form-create-m .field-layout-content.field-layout-no-label {
+  margin-bottom: 0;
+}
+
+.form-create-m .field-layout-content .field-component {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.form-create-m .field-layout-content .field-name {
+  font-size: var(--fc-field-label-font-size);
+  line-height: var(--fc-field-label-line-height);
+}
+
+.form-create-m .field-layout-content .van-radio__label,
+.form-create-m .field-layout-content .van-checkbox__label {
+  font-size: var(--fc-field-option-font-size);
+}
+
+.form-create-m .field-layout-content > .van-field__label {
+  min-height: var(--fc-field-label-line-height);
+  line-height: var(--fc-field-label-line-height);
+  margin-bottom: 4px;
+}
+
+.form-create-m .field-layout-content > .van-field__value {
+  min-width: 0;
+  min-height: var(--fc-field-control-line-height);
+  padding: 0 8px;
+  border: 1px solid var(--van-border-color, #ebedf0);
+  border-radius: 4px;
+  box-sizing: border-box;
+  background: var(--van-background-2, #fff);
+}
+
+.form-create-m .field-layout-content > .van-field__value > .van-field__body {
+  width: 100%;
+  min-height: var(--fc-field-control-line-height);
+}
+
+.form-create-m
+  .field-layout-content
+  > .van-field__value
+  > .van-field__body
+  > .van-field__control
+  > .field-component
+  > .van-cell.van-field {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.form-create-m .form-create-m .field-layout-content,
+.form-create-m ._fc-m-group-container .field-layout-content {
+  margin-bottom: 0;
 }
 
 .form-create-m.is-preview .fc-clock,
@@ -239,6 +334,65 @@
 
 .fc-select-popup-footer .van-button {
   width: 100%;
+}
+
+.form-create-m .fc-option-label.is-colored {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 1px 7px;
+  border-radius: 3px;
+  background: var(--fc-option-color);
+  color: #fff;
+  line-height: 20px;
+}
+
+.form-create-m .fc-select-option-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.form-create-m .fc-option-color-dot {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.form-create-m .fc-select-placeholder {
+  color: var(--van-field-placeholder-text-color);
+}
+
+.form-create-m .fc-select-selected-values {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  color: var(--van-field-input-text-color);
+}
+
+.form-create-m .fc-select-selected-values.is-multiple {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.form-create-m .fc-select-selected-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.form-create-m .fc-select-selected-value.is-colored {
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--fc-option-color) 14%, transparent);
+  color: var(--van-text-color);
+}
+
+.form-create-m .fc-select-selected-value.is-colored .fc-option-color-dot {
+  background: var(--fc-option-color);
 }
 
 .fc-mobile-popup-header {

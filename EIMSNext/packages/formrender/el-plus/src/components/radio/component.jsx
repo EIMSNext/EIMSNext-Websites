@@ -23,6 +23,7 @@ export default defineComponent({
     type: String,
     input: Boolean,
     inputValue: String,
+    optionColor: Boolean,
     distribution: {
       type: String,
     },
@@ -88,8 +89,13 @@ export default defineComponent({
     const onInput = (n) => {
       // 根据value值找到对应的选项对象
       const selectedOption = _options.value.find(opt => opt.value === n);
-      // 如果找到，返回完整的选项对象，否则返回原始值
-      _.emit("update:modelValue", selectedOption || n);
+      // Color is presentation-only and must never be persisted as form data.
+      if (selectedOption) {
+        const { color, ...formValue } = selectedOption;
+        _.emit("update:modelValue", formValue);
+        return;
+      }
+      _.emit("update:modelValue", n);
     };
     const updateCustomValue = (n) => {
       const o = customValue.value;
@@ -146,8 +152,10 @@ export default defineComponent({
         {this.options.map((opt, index) => {
           const props = { ...opt };
           const label = props.label;
+          const color = props.color;
           delete props.value;
           delete props.label;
+          delete props.color;
           // 直接使用value属性作为label和value，确保能够正确比较
           return (
             <Type
@@ -156,7 +164,15 @@ export default defineComponent({
               value={opt.value}
               key={name + index + "-" + (opt.value || index)}
             >
-              {label || opt.value || ""}
+              <span
+                class={[
+                  "fc-option-label",
+                  this.optionColor && color ? "is-colored" : "",
+                ]}
+                style={this.optionColor && color ? { "--fc-option-color": color } : undefined}
+              >
+                {label || opt.value || ""}
+              </span>
             </Type>
           );
         })}

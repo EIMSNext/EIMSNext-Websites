@@ -144,6 +144,6 @@ watch(() => props.modelValue, (newVal) => {
 .el-form-item__label {
   width: 80px;
   text-align: right;
-  margin-right: 8px;
+ line-height: 30px;
 }
 </style>

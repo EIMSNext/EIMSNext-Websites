@@ -148,8 +148,24 @@ export default {
     const labelWidth = !col.labelWidth && !isTitle ? 0 : col.labelWidth;
     const { inline, col: _col } = this.rule.props;
     delete wrap.title;
+    const layoutClass = this.getLayoutClass(ctx);
+    const component = this.$r(
+      {
+        type: "div",
+        class: "field-component",
+        key: `${uni}fc`,
+      },
+      { default: () => children }
+    );
     const item = isFalse(wrap.show)
-      ? children
+      ? this.$r(
+          {
+            type: "div",
+            class: this.$render.mergeClass(rule.className, "field-layout-raw"),
+            key: `${uni}raw`,
+          },
+          { default: () => component }
+        )
       : this.$r(
           mergeProps([
             wrap,
@@ -159,17 +175,21 @@ export default {
                   labelWidth === void 0 ? labelWidth : toString(labelWidth),
                 label: isTitle ? rule.title.title : undefined,
                 ...tidyRule(wrap),
+                labelClass: "field-label",
                 prop: ctx.id,
                 rules: ctx.injectValidate(),
               },
-              class: this.$render.mergeClass(rule.className, "fc-form-item"),
+              class: this.$render.mergeClass(
+                rule.className,
+                `fc-form-item field-layout-content ${layoutClass}`
+              ),
               key: `${uni}fi`,
               ref: ctx.wrapRef,
               type: "formItem",
             },
           ]),
           {
-            default: () => children,
+            default: () => component,
             ...(isTitle ? { label: () => this.makeInfo(rule, uni, ctx) } : {}),
           }
         );
@@ -181,6 +201,37 @@ export default {
     if (this.options.form.title === false) return false;
     const title = rule.title;
     return !((!title.title && !title.native) || isFalse(title.show));
+  },
+  getLayoutClass(ctx) {
+    const type = String(ctx.originType || ctx.rule?.type || ctx.type || ctx.trueType || "").toLowerCase();
+    const multiTypes = [
+      "textarea",
+      "checkbox",
+      "radio",
+      "employee2",
+      "department2",
+      "upload",
+      "imageupload",
+      "fileupload",
+      "query",
+      "dataselect",
+      "group",
+      "array",
+      "subform",
+      "object",
+      "tableform",
+      "editor",
+      "wangeditor",
+    ];
+    const distribution =
+      ctx.prop?.props?.distribution ||
+      ctx.prop?.props?.direction ||
+      ctx.prop?.distribution ||
+      ctx.prop?.direction;
+    const multi = multiTypes.includes(type) &&
+      (type !== "radio" && type !== "checkbox" || distribution === "vertical");
+    const noLabel = !this.isTitle(ctx.prop);
+    return `field-layout-${multi ? "multi" : "single"}${noLabel ? " field-layout-no-label" : ""}`;
   },
   makeInfo(rule, uni, ctx) {
     const titleProp = { ...rule.title };
@@ -247,7 +298,7 @@ export default {
       {
         props: tidyRule(titleProp),
         key: `${uni}tit`,
-        class: "fc-form-title",
+        class: "fc-form-title field-name",
         type: titleProp.type || "span",
       },
     ]);

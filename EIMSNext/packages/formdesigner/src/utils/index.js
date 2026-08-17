@@ -108,7 +108,7 @@ export function makeTitleRule(t) {
   ];
 }
 
-export function makeOptionsRule(t, to, label, value) {
+export function makeOptionsRule(t, to, label, value, staticOptionsProps) {
   const options = [
     { label: t("fetch.optionsType.struct"), value: 2 },
     { label: t("fetch.optionsType.fetch"), value: 3 },
@@ -144,12 +144,12 @@ export function makeOptionsRule(t, to, label, value) {
       value: 2,
       rule: [
         {
-          type: "TableOptions",
+          type: staticOptionsProps ? "StaticOptionsConfig" : "TableOptions",
           field: "formCreate" + upper(to).replace(".", ">"),
           title: t("props.options"),
           _fc_important_prop: true,
           wrap: { show: false },
-          props: {
+          props: staticOptionsProps || {
             column: [
               { label: t("props.label"), key: label || "label" },
               { label: t("props.value"), key: value || "value" },

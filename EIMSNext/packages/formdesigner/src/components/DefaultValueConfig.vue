@@ -143,7 +143,6 @@ export default defineComponent({
 <style>
 ._fd-default-value {
   width: 100%;
-  margin-bottom: 10px;
   padding: 0 10px;
 }
 

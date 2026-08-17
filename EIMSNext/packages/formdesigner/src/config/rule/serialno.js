@@ -6,7 +6,7 @@ const name = "serialno";
 
 export default {
   menu: "subform",
-  icon: "icon-serial-number",
+  icon: "icon-input",
   label,
   name,
   input: true,

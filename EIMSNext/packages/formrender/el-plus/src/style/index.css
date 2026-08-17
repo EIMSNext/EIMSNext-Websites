@@ -7,19 +7,92 @@
   max-width: 360px;
 }
 
+.form-create {
+  --fc-field-label-line-height: 30px;
+  --fc-field-control-line-height: 30px;
+  --fc-field-single-height: 80px;
+  --fc-field-block-gap: 10px;
+  --fc-field-option-gap: 4px;
+}
+
+.form-create .field-layout-content {
+  box-sizing: border-box;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.form-create .field-layout-content.field-layout-single {
+  height: var(--fc-field-single-height);
+  min-height: var(--fc-field-single-height);
+}
+
+.form-create .field-layout-content.field-layout-multi {
+  height: auto;
+  min-height: 0;
+  padding-bottom: var(--fc-field-block-gap);
+}
+
+.form-create .field-layout-content.field-layout-no-label.field-layout-single {
+  height: var(--fc-field-control-line-height);
+  min-height: var(--fc-field-control-line-height);
+}
+
+.form-create .field-layout-content.field-layout-no-label {
+  margin-bottom: 0;
+}
+
+.form-create .field-layout-content > .el-form-item__label,
+.form-create .field-layout-content > .el-form-item__label-wrap > .el-form-item__label {
+  box-sizing: border-box;
+  min-height: var(--fc-field-label-line-height);
+  line-height: var(--fc-field-label-line-height);
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.form-create .field-layout-content > .el-form-item__content {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: var(--fc-field-control-line-height);
+  line-height: var(--fc-field-control-line-height);
+}
+
+.form-create .field-layout-content > .el-form-item__content > .field-component,
+.form-create .field-layout-raw > .field-component {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.form-create .field-layout-content.fc-wrap-top > .el-form-item__label,
+.form-create .field-layout-content.fc-wrap-top > .el-form-item__label-wrap > .el-form-item__label {
+  height: var(--fc-field-label-line-height);
+  margin-bottom: 0;
+  line-height: var(--fc-field-label-line-height);
+  font-weight: 600;
+  text-align: left;
+}
+
+.form-create .field-layout-content.fc-wrap-top > .el-form-item__content {
+  min-height: var(--fc-field-control-line-height);
+}
+
+.form-create .field-layout-content .field-name {
+  line-height: var(--fc-field-label-line-height);
+}
+
 .fc-radio-group,
 .fc-checkbox-group {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 20px;
 }
 
 .fc-radio-group--vertical,
 .fc-checkbox-group--vertical {
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
 }
 
 .fc-radio-group--vertical .el-radio,
@@ -29,8 +102,49 @@
   margin-right: 0;
 }
 
+.form-create .fc-option-label.is-colored {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 1px 7px;
+  border-radius: 3px;
+  background: var(--fc-option-color);
+  color: #fff;
+  line-height: 20px;
+}
+
+.form-create .fc-select-option-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.form-create .fc-option-color-dot {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.form-create .fc-select-prefix-dot {
+  margin-right: 3px;
+}
+
+.form-create .fc-select-color-tag .fc-option-color-dot {
+  background: currentColor !important;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 70%);
+}
+
 .form-create .form-create .el-form-item {
   margin-bottom: 22px;
+}
+
+.form-create .form-create .field-layout-content,
+.form-create ._fc-group-container .field-layout-content,
+.form-create ._fc-table-form-v2 .field-layout-content {
+  margin-bottom: 0;
 }
 
 .form-create {
@@ -86,6 +200,14 @@
   line-height: 20px;
   margin-bottom: 4px;
 }
+
+/* Field layout owns the complete 80px box, so the legacy top-label gap must
+   not be added on top of its 30px label row. */
+.form-create .field-layout-content.fc-wrap-top > .el-form-item__label,
+.form-create .field-layout-content.fc-wrap-top > .el-form-item__label-wrap > .el-form-item__label {
+  margin-bottom: 0;
+}
+
 .fc-form-footer {
   margin-top: 12px;
 }

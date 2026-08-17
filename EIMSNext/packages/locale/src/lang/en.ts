@@ -3035,6 +3035,7 @@ export default {
     pc: "Pc",
     title: "Title",
     content: "Content",
+    color: "Color",
     collection: "Collection",
     group: "Group",
     custom: "Custom",

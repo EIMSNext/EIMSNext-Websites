@@ -47,7 +47,7 @@ export default {
       title: t("com.checkbox.name"),
       info: "",
       $required: false,
-      props: { type: "default", distribution: "horizontal" },
+      props: { type: "default", distribution: "horizontal", optionColor: false },
       options: makeTreeOptions(
         t("props.option"),
         { label: "label", value: "value" },
@@ -58,17 +58,12 @@ export default {
   props(_, { t }) {
     return localeProps(t, name + ".props", [     
       {
-        type: "TableOptions",
+        type: "StaticOptionsConfig",
         field: "formCreateOptions",
         title: t("props.options"),
         _fc_important_prop: true,
-        wrap: { show: false },
         props: {
-          column: [
-            { label: t("props.label"), key: "label" },
-            { label: t("props.value"), key: "value" },
-          ],
-          showHeader: true,
+          multiple: true,
         },
       },
       {
@@ -129,9 +124,6 @@ export default {
         //     field: 'fill'
         // }
       ],
-      {
-        type: "DefaultValueConfig",
-      },
       // {
       //   type: "CheckBoxInput",
       //   field: "readonly",

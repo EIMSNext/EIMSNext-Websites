@@ -8,6 +8,10 @@ export default defineComponent({
     props: {
         modelValue: Array,
         options: Array,
+        distribution: String,
+        direction: String,
+        formCreateInject: Object,
+        optionColor: Boolean,
     },
     emits: ['update:modelValue', 'change'],
     setup(props, _) {
@@ -24,14 +28,23 @@ export default defineComponent({
         }
     },
     render() {
-        return <van-checkbox-group direction="horizontal" {...this.$attrs} modelValue={Array.isArray(this.modelValue) ? this.modelValue : []}
+        const options = this.options || this.formCreateInject?.options || [];
+        const direction = (this.distribution || this.direction) === 'vertical' ? 'vertical' : 'horizontal';
+        return <van-checkbox-group direction={direction} {...this.$attrs} modelValue={Array.isArray(this.modelValue) ? this.modelValue : []}
             onUpdate:modelValue={this.onInput}>
-            {(this.options || []).map(opt => {
-                const tmp = {...opt};
-                const {text, value} = opt;
+            {options.map(opt => {
+                const normalized = typeof opt === 'object' ? opt : {label: opt, value: opt};
+                const tmp = {...normalized};
+                const {text, label, value, color} = normalized;
                 delete tmp.text;
+                delete tmp.label;
                 delete tmp.value;
-                return <van-checkbox name={value} shape="square" {...tmp}>{text || opt.label || value}</van-checkbox>
+                delete tmp.color;
+                return <van-checkbox name={value} shape="square" {...tmp}>
+                    <span class={['fc-option-label', this.optionColor && color ? 'is-colored' : '']} style={this.optionColor && color ? {'--fc-option-color': color} : undefined}>
+                        {text || label || value}
+                    </span>
+                </van-checkbox>
             })}
         </van-checkbox-group>
     }

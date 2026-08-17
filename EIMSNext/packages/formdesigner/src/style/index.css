@@ -726,6 +726,21 @@ html.dark {
     width: 100%;
 }
 
+/* Keep the canvas spacing predictable without stacking the item and drag-tool padding. */
+._fc-designer ._fc-m-drag > form > .el-row > ._fd-drag-tool > ._fd-drag-box > ._fd-drag-item,
+._fc-designer ._fc-m-drag > form > .van-row > ._fd-drag-tool > ._fd-drag-box > ._fd-drag-item {
+    padding: 0;
+}
+
+._fc-designer ._fc-m-drag ._fd-drag-item > ._fd-drag-tool {
+    padding: 0;
+    border-radius: 4px;
+}
+
+._fc-designer ._fc-m-drag ._fd-drag-item > ._fd-drag-tool.active {
+    padding: 0;
+}
+
 ._fd-fcDialog-drag, ._fd-fcDrawer-drag {
     padding: 3px;
 }
@@ -776,6 +791,53 @@ html.dark {
 
 ._fc-r .el-form-item {
     margin-bottom: 10px !important;
+}
+
+/* The property panel uses the same renderer for its editors, but must keep its
+   compact editor sizing instead of the canvas field layout metrics. */
+._fc-r .field-layout-content {
+    height: auto !important;
+    min-height: 0 !important;
+    margin-bottom: 10px !important;
+}
+
+._fc-r .field-layout-raw {
+    height: auto !important;
+    min-height: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+._fc-r .field-layout-raw:has(> .field-component > ._fd-checkbox-input) {
+    margin-bottom: 0 !important;
+}
+
+._fc-r .field-layout-content > .el-form-item__label,
+._fc-r .field-layout-content > .el-form-item__label-wrap > .el-form-item__label {
+    min-height: unset !important;
+    height: auto !important;
+    line-height: normal !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+._fc-r .field-layout-content > .el-form-item__content {
+    min-height: unset !important;
+    line-height: normal !important;
+}
+
+._fc-r .field-layout-content > .el-form-item__content > .field-component,
+._fc-r .field-layout-raw > .field-component {
+    width: 100% !important;
+    min-width: 0;
+}
+
+._fc-r .field-layout-content .field-name {
+    line-height: 30px !important;
+}
+
+._fc-r .field-layout-content.fc-wrap-top > .el-form-item__label,
+._fc-r .field-layout-content.fc-wrap-top > .el-form-item__label-wrap > .el-form-item__label {
+    line-height: 30px !important;
 }
 
 ._fc-r .el-form-item__label {
@@ -865,8 +927,7 @@ html.dark {
 
 ._fd-drag-item {
     width: 100%;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 0;
     box-sizing: border-box;
 }
 
@@ -930,18 +991,50 @@ html.dark {
     cursor: pointer;
 }
 
-._fd-preview-dialog {
-    border-radius: 6px;
-    padding-top: 0;
-    min-height: 40%;
+._fd-preview-drawer.el-drawer {
+    border-radius: 0;
+    padding: 0;
 }
 
-._fd-preview-dialog > .el-dialog__header {
+._fd-preview-drawer .el-drawer__body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+}
+
+._fd-preview-toolbar {
+    position: relative;
+    display: flex;
+    flex: 0 0 50px;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--fc-line-color-3);
+    background: var(--fc-bg-color-1);
+}
+
+._fd-preview-close {
     position: absolute;
-    right: 0;
-    top: 0;
-    float: right;
-    z-index: 9;
+    top: 11px;
+    right: 18px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--fc-text-color-1);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+._fd-preview-close:hover {
+    color: var(--fc-style-color-1);
 }
 
 ._fd-preview-code {
@@ -950,13 +1043,18 @@ html.dark {
     overflow: auto;
 }
 
-._fd-preview-tabs .el-tabs__nav-wrap::after {
-    height: 1px;
-    background-color: var(--fc-line-color-3);
-}
-
-._fd-preview-tabs .el-tabs__item {
-    height: 46px;
+._fd-preview-drawer .data-container {
+    flex: 1 1 auto;
+    width: 800px;
+    max-width: calc(100% - 20px);
+    min-height: 0;
+    margin: 10px auto !important;
+    padding: 16px;
+    border: 1px solid var(--fc-line-color-2);
+    border-radius: 4px;
+    background: var(--fc-bg-color-1);
+    box-sizing: border-box;
+    overflow: auto;
 }
 
 ._fd-preview-code > code {
@@ -964,27 +1062,40 @@ html.dark {
 }
 
 ._fd-preview-device {
-    position: absolute;
-    right: 50px;
-    top: 9px;
     display: flex;
     align-items: center;
+    padding: 2px;
+    border-radius: 4px;
+    background: var(--fc-bg-color-2);
 }
 
-._fd-preview-device > div {
+._fd-preview-device > button {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 76px;
+    width: 72px;
     height: 28px;
-    border-radius: 3px 3px 3px 3px;
-    margin-right: 10px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--fc-text-color-1);
     cursor: pointer;
+}
+
+._fd-preview-device > button + button {
+    margin-left: 2px;
 }
 
 ._fd-preview-mobile {
     display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+    padding: 10px;
+    overflow: hidden;
 }
 
 ._fd-preview-mobile > div {
@@ -992,13 +1103,16 @@ html.dark {
     border: 6px solid var(--fc-line-color-2);
     box-sizing: border-box;
     width: 350px;
-    overflow: scroll;
-    height: 70vh;
+    max-height: 100%;
+    overflow: auto;
+    height: min(70vh, 100%);
+    background: var(--fc-bg-color-1);
 }
 
-._fd-preview-device > div.active {
-    background: var(--fc-style-bg-color-1);
+._fd-preview-device > button.active {
+    background: var(--fc-bg-color-1);
     color: var(--fc-style-color-1);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
 }
 
 ._fd-row-line {
@@ -1045,6 +1159,13 @@ html.dark {
 .el-form--small .fc-wrap-top.el-form-item .el-form-item__label {
     line-height: 20px;
     margin-bottom: 4px
+}
+
+/* Canvas fields use a fixed 30px title row. Keep the property editor's
+   compact label rules independent from the canvas layout. */
+._fc-designer ._fc-m-drag .field-layout-content.fc-wrap-top > .el-form-item__label,
+._fc-designer ._fc-m-drag .field-layout-content.fc-wrap-top > .el-form-item__label-wrap > .el-form-item__label {
+    margin-bottom: 0;
 }
 
 ._fd-slot-empty {

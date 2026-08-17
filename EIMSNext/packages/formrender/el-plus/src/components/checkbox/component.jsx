@@ -23,6 +23,7 @@ export default defineComponent({
     options: Array,
     input: Boolean,
     inputValue: String,
+    optionColor: Boolean,
     distribution: {
       type: String,
     },
@@ -117,7 +118,9 @@ export default defineComponent({
       // 根据value数组找到对应的选项对象数组
       const selectedOptions = n.map(val => {
         const option = _options.value.find(opt => opt.value === val);
-        return option || val;
+        if (!option) return val;
+        const { color, ...formValue } = option;
+        return formValue;
       });
       _.emit("update:modelValue", selectedOptions);
     };
@@ -168,8 +171,10 @@ export default defineComponent({
         {this.options.map((opt, index) => {
           const props = { ...opt };
           const label = props.label;
+          const color = props.color;
           delete props.value;
           delete props.label;
+          delete props.color;
           // 直接使用value属性作为label和value，确保能够正确比较
           return (
             <Type
@@ -178,7 +183,15 @@ export default defineComponent({
               value={opt.value}
               key={name + index + "-" + (opt.value || index)}
             >
-              {label || opt.value || ""}
+              <span
+                class={[
+                  "fc-option-label",
+                  this.optionColor && color ? "is-colored" : "",
+                ]}
+                style={this.optionColor && color ? { "--fc-option-color": color } : undefined}
+              >
+                {label || opt.value || ""}
+              </span>
             </Type>
           );
         })}

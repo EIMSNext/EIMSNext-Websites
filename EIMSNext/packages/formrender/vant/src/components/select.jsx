@@ -30,6 +30,7 @@ export default defineComponent({
     filterable: Boolean,
     multiple: Boolean,
     multipleLimit: Number,
+    optionColor: Boolean,
     placeholder: String,
     modelValue: {
       type: [Array, String, Number, Boolean, Object],
@@ -116,6 +117,7 @@ export default defineComponent({
     return {
       show,
       keyword,
+      sourceOptions,
       filteredOptions,
       selectedValues,
       displayValue,
@@ -140,6 +142,46 @@ export default defineComponent({
       this.clearable && this.displayValue ? (
         <van-icon name="clear" onClick={this.clear} />
       ) : undefined;
+    const optionTitle = (option) => {
+      const color = this.optionColor && option?.color;
+      return (
+        <span class="fc-select-option-label">
+          {color ? (
+            <span
+              class="fc-option-color-dot"
+              style={{ backgroundColor: color }}
+            ></span>
+          ) : null}
+          <span>{String(this.optionLabel(option))}</span>
+        </span>
+      );
+    };
+    const selectedContent = () => {
+      const selectedOptions = this.selectedValues.map((value) =>
+        this.sourceOptions.find((option) => this.optionValue(option) === value) ||
+        { label: value, value },
+      );
+      if (!selectedOptions.length) {
+        return <span class="fc-select-placeholder">{this.placeholder}</span>;
+      }
+      return (
+        <span class={['fc-select-selected-values', this.multiple ? 'is-multiple' : '']}>
+          {selectedOptions.map((option, index) => {
+            const color = this.optionColor && option?.color;
+            return (
+              <span
+                key={`${this.optionValue(option)}-${index}`}
+                class={['fc-select-selected-value', color ? 'is-colored' : '']}
+                style={color ? { '--fc-option-color': color } : undefined}
+              >
+                {color ? <span class="fc-option-color-dot"></span> : null}
+                {this.optionLabel(option)}
+              </span>
+            );
+          })}
+        </span>
+      );
+    };
 
     return (
       <>
@@ -151,7 +193,7 @@ export default defineComponent({
           placeholder={this.placeholder}
           modelValue={this.displayValue}
           onClick={this.open}
-          v-slots={{ "right-icon": clearIcon }}
+          v-slots={{ input: selectedContent, "right-icon": clearIcon }}
         />
         <van-popup
           show={this.show}
@@ -176,7 +218,6 @@ export default defineComponent({
                 {this.filteredOptions.map((option, index) => (
                   <van-cell
                     key={`${this.optionValue(option)}-${index}`}
-                    title={String(this.optionLabel(option))}
                     clickable
                     onClick={() => {
                       const value = this.optionValue(option);
@@ -186,6 +227,7 @@ export default defineComponent({
                       this.toggleMultiple(next);
                     }}
                     v-slots={{
+                      title: () => optionTitle(option),
                       rightIcon: () => (
                         <van-checkbox
                           name={this.optionValue(option)}
@@ -200,10 +242,10 @@ export default defineComponent({
               this.filteredOptions.map((option, index) => (
                 <van-cell
                   key={`${this.optionValue(option)}-${index}`}
-                  title={String(this.optionLabel(option))}
                   clickable
                   onClick={() => this.selectOne(option)}
                   v-slots={{
+                    title: () => optionTitle(option),
                     rightIcon: () =>
                       this.selectedValues[0] === this.optionValue(option) ? (
                         <van-icon name="success" color="var(--van-primary-color)" />

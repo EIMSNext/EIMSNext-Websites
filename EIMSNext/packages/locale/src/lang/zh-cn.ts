@@ -3014,6 +3014,7 @@ export default {
     pc: "电脑端",
     title: "标题",
     content: "内容",
+    color: "颜色",
     collection: "合集",
     group: "分组",
     custom: "自定义",
