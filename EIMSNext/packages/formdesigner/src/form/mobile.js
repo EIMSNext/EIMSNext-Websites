@@ -1,8 +1,5 @@
 import formCreateMobile from '@eimsnext/form-render-vant';
 import '@eimsnext/form-render-vant/dist/index.css';
-import fcSelect from '@eimsnext/form-render-elplus';
-import fcTree from '@eimsnext/form-render-elplus';
-import fcUpload from '@eimsnext/form-render-elplus';
 import { formulas } from '@eimsnext/utils';
 import StepForm from '../components/mobile/stepForm/StepForm.vue';
 import Popup from '../components/mobile/popup/Popup.vue';
@@ -195,12 +192,13 @@ export function useAdvanced(formCreate) {
             },
             select: {
                 mergeProp(ctx) {
+                    if (ctx.prop.options) {
+                        ctx.prop.props.options = ctx.prop.options;
+                    }
+                    ctx.prop.component = 'fc-select';
                     if (ctx.prop.props.multiple === true) {
-                        ctx.prop.component = fcSelect;
+                        return;
                     } else {
-                        if (ctx.prop.options) {
-                            ctx.prop.props.options = ctx.prop.options;
-                        }
                         ctx.prop.props.options = (ctx.prop.props.options || []).map(item => {
                             return {
                                 text: item.label,
@@ -218,7 +216,7 @@ export function useAdvanced(formCreate) {
             },
             timePicker: {
                 mergeProp(ctx) {
-                    ctx.prop.component = 'elTimePicker';
+                    ctx.prop.component = 'fc-time-picker';
                     const props = ctx.prop.props;
                     if (!props.valueFormat) {
                         props.valueFormat = 'HH:mm:ss';
@@ -227,7 +225,7 @@ export function useAdvanced(formCreate) {
             },
             datePicker: {
                 mergeProp(ctx) {
-                    ctx.prop.component = 'elDatePicker';
+                    ctx.prop.component = 'fc-date-picker';
                     const props = ctx.prop.props;
                     if (!props.valueFormat) {
                         props.valueFormat = DEFAULT_FORMATS[props.type] || DEFAULT_FORMATS['date'];
@@ -236,12 +234,12 @@ export function useAdvanced(formCreate) {
             },
             colorPicker: {
                 mergeProp(ctx) {
-                    ctx.prop.component = 'elColorPicker';
+                    ctx.prop.component = 'fc-color-picker';
                 }
             },
             cascader: {
                 mergeProp(ctx) {
-                    ctx.prop.component = 'elCascader';
+                    ctx.prop.component = 'fc-cascader';
                 }
             },
             divider: {
@@ -251,12 +249,19 @@ export function useAdvanced(formCreate) {
             },
             upload: {
                 mergeProp(ctx) {
-                    ctx.prop.component = fcUpload;
+                    ctx.prop.component = 'fc-uploader';
                 }
             },
             tree: {
                 mergeProp(ctx) {
-                    ctx.prop.component = fcTree;
+                    const props = ctx.prop.props;
+                    ctx.prop.component = 'fc-cascader';
+                    props.options = props.data || [];
+                    props.fieldNames = {
+                        text: props.props?.label || 'label',
+                        value: props.nodeKey || 'id',
+                        children: 'children',
+                    };
                 }
             },
             row: {

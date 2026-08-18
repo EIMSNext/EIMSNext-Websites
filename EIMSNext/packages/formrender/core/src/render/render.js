@@ -296,6 +296,7 @@ export default function useRender(Render) {
             return this.vm.setupState.top.slots;
           },
           options: [],
+          popupContainer: undefined,
           children: [],
           preview: false,
           id: ctx.id,
@@ -313,6 +314,7 @@ export default function useRender(Render) {
       const inject = state.ctxInject[ctx.id];
       extend(inject, {
         preview: ctx.prop.preview,
+        popupContainer: this.$handle.options.popupContainer,
         options: ctx.prop.options,
         children: ctx.loadChildrenPending(),
       });

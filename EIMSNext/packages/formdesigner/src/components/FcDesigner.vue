@@ -815,7 +815,7 @@
             </div>
             <template v-if="previewDevice === 'mobile'">
               <div class="_fd-preview-mobile">
-                <div>
+                <div :id="previewPopupTarget">
                   <ViewFormMobile
                     driver="elm"
                     :rule="preview.rule"
@@ -1219,6 +1219,7 @@ export default defineComponent({
       eventShow: false,
       unloadStatus: false,
       previewDevice: "pc",
+      previewPopupTarget: `fc-preview-${uniqueId8()}`,
       t,
       preview: {
         state: false,
@@ -2282,6 +2283,9 @@ export default defineComponent({
         // inside the designer's PC/mobile preview.
         data.preview.option.submitBtn = false;
         data.preview.option.resetBtn = false;
+        // Keep Vant popups inside the transformed mobile preview frame. Runtime
+        // forms leave this unset and continue teleporting overlays to body.
+        data.preview.option.popupContainer = `#${data.previewPopupTarget}`;
         if (!data.activePage.default) {
           data.preview.option.formData = deepCopy(methods.getPreviewFormData());
         }

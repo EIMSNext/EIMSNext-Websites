@@ -6,6 +6,7 @@ import Select from './select';
 import Uploader from './uploader';
 import Radio from './radio';
 import DatePicker from './datePicker';
+import ColorPicker from './colorPicker';
 import TimePicker from './timePicker';
 import Group from './group';
 import SerialNo from './serialno';
@@ -25,6 +26,7 @@ export default [
     Radio,
     Select,
     DatePicker,
+    ColorPicker,
     TimePicker,
     Group,
     SerialNo,

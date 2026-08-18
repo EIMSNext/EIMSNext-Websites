@@ -200,6 +200,7 @@ export default defineComponent({
           onUpdate:show={(value) => (this.show = value)}
           round
           position="bottom"
+          teleport={props.formCreateInject?.popupContainer ?? undefined}
           class="fc-select-popup"
         >
           {this.filterable ? (

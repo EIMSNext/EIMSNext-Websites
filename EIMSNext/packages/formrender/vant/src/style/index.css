@@ -7,10 +7,10 @@
   --fc-field-block-gap: 6px;
   --fc-field-option-gap: 4px;
   --fc-field-option-font-size: 12px;
-  --van-radio-size: 16px;
-  --van-radio-dot-size: 6px;
+  --van-radio-size: 14px;
+  --van-radio-dot-size: 5px;
   --van-radio-label-margin: 4px;
-  --van-checkbox-size: 16px;
+  --van-checkbox-size: 14px;
   --van-checkbox-label-margin: 4px;
   --van-cell-line-height: var(--fc-field-control-line-height);
   --van-cell-vertical-padding: 4px;
@@ -20,6 +20,7 @@
 
 .form-create-m .field-layout-content {
   box-sizing: border-box;
+  display: block;
   min-width: 0;
   margin-bottom: 0;
 }
@@ -50,6 +51,41 @@
   box-sizing: border-box;
 }
 
+.form-create-m .field-layout-content .van-field__value,
+.form-create-m .field-layout-content .van-field__control {
+  text-align: left;
+}
+
+/* Mobile fields use a stacked title/control layout. The field component
+ * itself stays responsible for the original control dimensions. */
+.form-create-m .field-layout-content > .van-field__label {
+  display: block;
+  width: auto;
+  max-width: none;
+  padding: 0;
+  text-align: left !important;
+}
+
+.form-create-m .field-layout-content > .van-field__value {
+  display: block;
+  width: 100%;
+  flex: none;
+}
+
+.form-create-m .field-layout-content .field-component > .van-cell.van-field,
+.form-create-m .field-layout-content .field-component > .van-cell.van-field > .van-field__value {
+  width: 100%;
+  flex: none;
+}
+
+.form-create-m .field-layout-content .van-field__control--right {
+  text-align: left !important;
+}
+
+.form-create-m .van-field__control {
+  text-align: left;
+}
+
 .form-create-m .field-layout-content .field-name {
   font-size: var(--fc-field-label-font-size);
   line-height: var(--fc-field-label-line-height);
@@ -60,10 +96,42 @@
   font-size: var(--fc-field-option-font-size);
 }
 
+.form-create-m .van-radio,
+.form-create-m .van-checkbox,
+.fc-organization-popup .van-radio,
+.fc-organization-popup .van-checkbox {
+  --van-radio-size: 14px;
+  --van-checkbox-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.form-create-m .van-radio__icon,
+.form-create-m .van-checkbox__icon,
+.fc-organization-popup .van-radio__icon,
+.fc-organization-popup .van-checkbox__icon {
+  display: inline-flex;
+  flex: 0 0 14px;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  line-height: 14px;
+}
+
+.form-create-m .van-radio__label,
+.form-create-m .van-checkbox__label {
+  display: inline-flex;
+  align-items: center;
+}
+
 .form-create-m .field-layout-content > .van-field__label {
   min-height: var(--fc-field-label-line-height);
   line-height: var(--fc-field-label-line-height);
-  margin-bottom: 4px;
+  margin-bottom: var(--fc-field-block-gap);
 }
 
 .form-create-m .field-layout-content > .van-field__value {
@@ -74,6 +142,20 @@
   border-radius: 4px;
   box-sizing: border-box;
   background: var(--van-background-2, #fff);
+}
+
+/* Option groups are controls made of individual radio/checkbox items; the
+ * group itself should stay unframed while input-like controls keep the field
+ * border above. */
+.form-create-m .field-layout-content > .van-field__value:has(
+    .van-radio-group,
+    .van-checkbox-group
+  ) {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .form-create-m .field-layout-content > .van-field__value > .van-field__body {
@@ -408,6 +490,429 @@
 
 .fc-mobile-popup-content > .van-loading {
   padding: 40px 0;
+}
+
+.fc-organization-popup {
+  --van-radio-size: 14px;
+  --van-checkbox-size: 14px;
+  --van-cell-line-height: 20px;
+  width: 100%;
+  background: var(--van-background-2, #fff);
+  text-align: left;
+}
+
+.fc-organization-popup.is-quick {
+  height: min(64vh, 520px);
+}
+
+.fc-organization-popup.is-directory {
+  height: min(88vh, 720px);
+}
+
+.fc-organization-popup > .van-search {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+}
+
+.fc-org-quick-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--van-border-color, #ebedf0);
+}
+
+.fc-org-quick-actions button,
+.fc-org-view-all,
+.fc-org-tabs button,
+.fc-org-breadcrumb button,
+.fc-org-nav-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--van-primary-color, #1989fa);
+  font: inherit;
+}
+
+.fc-org-quick-content,
+.fc-org-directory-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: var(--van-background-2, #fff);
+}
+
+.fc-org-search-hint {
+  display: flex;
+  height: 100%;
+  min-height: 160px;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  color: var(--van-text-color-2, #969799);
+  font-size: 12px;
+}
+
+.fc-org-view-all {
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 36px;
+  border-top: 1px solid var(--van-border-color, #ebedf0);
+  text-align: center;
+}
+
+.fc-org-selected {
+  display: flex;
+  flex: 0 0 auto;
+  min-height: 46px;
+  max-height: 80px;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 4px;
+  margin: 0 12px 8px;
+  padding: 5px;
+  overflow-y: auto;
+  border: 1px dashed var(--van-border-color, #ebedf0);
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.fc-org-selected.is-empty {
+  background: var(--van-background, #f7f8fa);
+}
+
+.fc-org-selected-tag {
+  display: inline-flex;
+  max-width: 100%;
+  height: 22px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  border-radius: 3px;
+  background: var(--van-primary-color, #1989fa);
+  color: #fff;
+  font-size: 11px;
+}
+
+.fc-org-selected-tag > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fc-org-selected-tag .van-icon {
+  flex: 0 0 auto;
+}
+
+.fc-org-tabs {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 12px;
+  border-bottom: 1px solid var(--van-border-color, #ebedf0);
+  text-align: left;
+}
+
+.fc-org-tabs button {
+  position: relative;
+  min-width: 0;
+  min-height: 36px;
+  overflow: hidden;
+  color: var(--van-text-color, #323233);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fc-org-tabs button.is-active {
+  color: var(--van-primary-color, #1989fa);
+}
+
+.fc-org-tabs button.is-active::after {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  left: 4px;
+  height: 2px;
+  background: var(--van-primary-color, #1989fa);
+  content: "";
+}
+
+.fc-org-breadcrumb {
+  display: flex;
+  flex: 0 0 auto;
+  min-height: 34px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  overflow-x: auto;
+  background: var(--van-background, #f7f8fa);
+  font-size: 11px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.fc-org-breadcrumb span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fc-org-breadcrumb .van-icon {
+  color: var(--van-text-color-3, #c8c9cc);
+  font-size: 10px;
+}
+
+.fc-org-list-row {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--van-border-color, #ebedf0);
+  box-sizing: border-box;
+  background: var(--van-background-2, #fff);
+  text-align: left;
+}
+
+.fc-org-list-check {
+  display: inline-flex;
+  flex: 0 0 14px;
+  align-items: center;
+  justify-content: center;
+}
+
+.fc-org-list-check.is-end {
+  margin-left: auto;
+}
+
+.fc-org-avatar {
+  display: inline-flex;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+}
+
+.fc-org-avatar.is-department {
+  background: #f2a007;
+}
+
+.fc-org-avatar.is-employee {
+  background: #3a7fe8;
+}
+
+.fc-org-list-label {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+}
+
+.fc-org-list-label strong,
+.fc-org-list-label small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fc-org-list-label strong {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.fc-org-list-label small {
+  color: var(--van-text-color-2, #969799);
+  font-size: 10px;
+}
+
+.fc-org-nav-button {
+  display: inline-flex;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  color: var(--van-text-color-2, #969799);
+}
+
+.fc-org-footer,
+.fc-org-quick-footer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  padding: 0 0 env(safe-area-inset-bottom);
+}
+
+.fc-org-quick-footer {
+  grid-template-columns: 1fr;
+}
+
+.fc-org-footer .van-button,
+.fc-org-quick-footer .van-button {
+  width: 100%;
+  border-radius: 0;
+}
+
+.fc-date-sheet {
+  --van-calendar-header-shadow: none;
+  --van-calendar-header-title-height: 32px;
+  --van-calendar-header-subtitle-font-size: 12px;
+  --van-calendar-weekdays-height: 28px;
+  --van-calendar-weekdays-font-size: 11px;
+  --van-calendar-month-title-font-size: 12px;
+  --van-calendar-day-height: 34px;
+  --van-calendar-day-font-size: 11px;
+  --van-calendar-selected-day-size: 28px;
+  max-height: min(78vh, 620px);
+  overflow: hidden;
+  background: var(--van-background-2, #fff);
+}
+
+.fc-date-sheet-toolbar {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  min-height: 34px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--van-border-color, #ebedf0);
+}
+
+.fc-date-sheet-toolbar button,
+.fc-date-sheet-tabs button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--van-primary-color, #1989fa);
+  font: inherit;
+}
+
+.fc-date-sheet-tabs {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.fc-date-sheet-tab-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.fc-date-sheet-tabs button {
+  min-height: 20px;
+  padding: 0 9px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--van-primary-color, #1989fa) 12%, transparent);
+  font-size: 10px;
+}
+
+.fc-date-sheet-tabs button.is-active {
+  background: var(--van-primary-color, #1989fa);
+  color: #fff;
+}
+
+.fc-date-sheet-content {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.fc-date-sheet .van-calendar,
+.fc-date-sheet .van-calendar__body {
+  height: auto;
+}
+
+.fc-date-sheet .van-calendar__footer {
+  display: none;
+}
+
+.fc-date-sheet .van-picker {
+  min-height: 220px;
+}
+
+.fc-color-picker-value {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+}
+
+.fc-color-picker-swatch,
+.fc-color-picker-presets i {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--van-border-color, #dcdee0);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.fc-color-picker-popup {
+  min-height: 240px;
+}
+
+.fc-color-picker-header {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--van-border-color, #ebedf0);
+}
+
+.fc-color-picker-header button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--van-primary-color, #1989fa);
+  font: inherit;
+}
+
+.fc-color-picker-body {
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+}
+
+.fc-color-picker-input {
+  display: block;
+  width: 100%;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--van-border-color, #dcdee0);
+  border-radius: 4px;
+  background: transparent;
+}
+
+.fc-color-picker-presets {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.fc-color-picker-presets button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.fc-color-picker-presets button.is-active {
+  border-color: var(--van-primary-color, #1989fa);
 }
 
 .fc-data-select-mobile {

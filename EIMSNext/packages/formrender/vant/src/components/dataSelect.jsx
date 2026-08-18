@@ -257,6 +257,7 @@ export default defineComponent({
           onUpdate:show={(value) => (this.show = value)}
           round
           position="bottom"
+          teleport={this.formCreateInject?.popupContainer ?? undefined}
           class="fc-data-select-popup"
         >
           <div class="fc-mobile-popup-header">
