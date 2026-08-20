@@ -28,7 +28,7 @@
               <template #default="scope">
                 <template v-if="getColoredItems(scope.row, sub.field).length">
                   <template v-for="(item, index) in getColoredItems(scope.row, sub.field)" :key="`${item.value}-${index}`">
-                    <span v-if="index" class="colored-option-separator">, </span>
+                    <span v-if="showOptionSeparator(getColoredItems(scope.row, sub.field), index)" class="colored-option-separator">, </span>
                     <el-tag v-if="item.color" size="small" :style="getOptionTagStyle(item)">
                       {{ item.label ?? item.value }}
                     </el-tag>
@@ -53,7 +53,7 @@
               </template>
                 <template v-else-if="getColoredItems(scope.row, col.field).length">
                   <template v-for="(item, index) in getColoredItems(scope.row, col.field)" :key="`${item.value}-${index}`">
-                    <span v-if="index" class="colored-option-separator">, </span>
+                    <span v-if="showOptionSeparator(getColoredItems(scope.row, col.field), index)" class="colored-option-separator">, </span>
                     <el-tag v-if="item.color" size="small" :style="getOptionTagStyle(item)">
                     {{ item.label ?? item.value }}
                   </el-tag>
@@ -91,7 +91,7 @@
             <template #field-value="{ field, value }">
               <span v-if="getColoredItems(row, field.field).length" class="fv-card-colored-options">
                 <template v-for="(item, index) in getColoredItems(row, field.field)" :key="`${item.value}-${index}`">
-                  <span v-if="index" class="colored-option-separator">, </span>
+                  <span v-if="showOptionSeparator(getColoredItems(row, field.field), index)" class="colored-option-separator">, </span>
                   <el-tag v-if="item.color" size="small" :style="getOptionTagStyle(item)">
                     {{ item.label ?? item.value }}
                   </el-tag>
@@ -123,7 +123,7 @@
         <template #field-value="{ field, value }">
           <span v-if="getColoredItems(row, field.field).length" class="fv-card-colored-options">
             <template v-for="(item, index) in getColoredItems(row, field.field)" :key="`${item.value}-${index}`">
-              <span v-if="index" class="colored-option-separator">, </span>
+              <span v-if="showOptionSeparator(getColoredItems(row, field.field), index)" class="colored-option-separator">, </span>
               <el-tag v-if="item.color" size="small" :style="getOptionTagStyle(item)">
                 {{ item.label ?? item.value }}
               </el-tag>
@@ -302,6 +302,9 @@ const getOptionTagStyle = (item: any) => item?.color
   ? { backgroundColor: item.color, borderColor: item.color, color: "#fff" }
   : undefined;
 
+const showOptionSeparator = (items: any[], index: number) =>
+  index > 0 && !items[index - 1]?.color && !items[index]?.color;
+
 const getCardTitle = (row: any) => {
   const titleField = cardSettings.value.titleField || SystemField.DataTitle;
   if (titleField === SystemField.DataTitle) return formatDataTitle(row, props.formDef, t) || "-";
@@ -331,6 +334,20 @@ const kanbanGroups = computed(() => {
 .data-table-full {
   width: 100%;
   height: 100%;
+  font-size: 13px;
+
+  &.el-table {
+    font-size: 13px;
+  }
+
+  :deep(.el-table__header-wrapper th.el-table__cell),
+  :deep(.el-table__fixed-header-wrapper th.el-table__cell) {
+    padding: 6px 0;
+  }
+
+  :deep(.el-table__body td.el-table__cell) {
+    padding: 6px 0;
+  }
 
   :deep(.el-tag + .el-tag) {
     margin-left: 4px;

@@ -48,5 +48,14 @@ const handleClick = (_tab: TabsPaneContext, _event: Event) => {};
 
 :deep(.adv-tabs.el-tabs--left .el-tabs__item.is-left) {
   justify-content: flex-start;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: var(--et-bg-hover);
+  }
+
+  &.is-active {
+    background: var(--et-bg-primary-soft);
+  }
 }
 </style>
