@@ -2,16 +2,21 @@
   <div class="chart-board-card">
     <et-card class="chart-board-shell" data-workbench-card-root>
       <template #header>
-        <div class="workbench-card-header">
+        <div class="workbench-card-header" :class="{ 'design-header': designMode }" @mousedown.stop>
           <span class="workbench-card-title">{{ t("admin.workbench.myChart") }}</span>
+          <button v-if="designMode && removable" type="button" class="workbench-card-delete no-drag" :title="t('common.delete')" @click.stop="$emit('remove')"><et-icon icon="el-delete" size="16px" /></button>
           <el-button v-if="allowManage" link type="primary" @click.stop="$emit('add-chart')">
             <et-icon icon="el-plus" />
             {{ t("common.add") }}
           </el-button>
         </div>
       </template>
+      <div v-if="designMode" class="chart-board-empty design-empty" data-workbench-height-content>
+        <i class="x-icon iconfont-fx-pc icon-info-o"></i>
+        <div>{{ t("admin.workbench.chartNotConfigured") }}</div>
+      </div>
       <grid-layout
-        v-if="chartLayout.length"
+        v-else-if="chartLayout.length"
         v-model:layout="chartLayout"
         class="my-charts-grid"
         data-workbench-height-content
@@ -73,12 +78,15 @@ defineOptions({ name: "WorkbenchChartBoardCard" });
 const props = defineProps<{
   item: WorkbenchLayoutItem;
   allowManage?: boolean;
+  designMode?: boolean;
+  removable?: boolean;
 }>();
 const emit = defineEmits<{
   (e: "add-chart"): void;
   (e: "remove-chart", chartId: string): void;
   (e: "update-charts", charts: WorkbenchChartLayoutItem[]): void;
   (e: "content-change"): void;
+  (e: "remove"): void;
 }>();
 const { t } = useI18n();
 const chartLayout = ref<WorkbenchChartLayoutItem[]>([]);
@@ -140,6 +148,8 @@ const handleLayoutUpdated = (updatedLayout: WorkbenchChartLayoutItem[]) => {
   gap: var(--et-space-10);
   padding-top: var(--et-space-12);
   padding-bottom: var(--et-space-4);
+  width: 100%;
+  pointer-events: auto;
 }
 
 .workbench-card-title {
@@ -162,4 +172,9 @@ const handleLayoutUpdated = (updatedLayout: WorkbenchChartLayoutItem[]) => {
     flex-direction: row;
   }
 }
+</style>
+<style lang="scss" scoped>
+.workbench-card-delete { background: transparent; border: 0; color: var(--et-color-danger); cursor: pointer; display: inline-flex; margin-left: auto; opacity: 0; padding: var(--et-space-2); pointer-events: none; }
+.design-header:hover .workbench-card-delete { opacity: 1; pointer-events: auto; }
+.design-empty { min-height: var(--et-size-120); }
 </style>

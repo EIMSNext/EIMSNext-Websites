@@ -19,7 +19,7 @@ import { store } from "@eimsnext/store";
 export const WORKBENCH_COLS = 24;
 
 export const FIXED_WORKBENCH_WIDGETS: WorkbenchWidgetType[] = ["flowCenter", "myApps"];
-const REQUIRED_WORKBENCH_WIDGETS: WorkbenchWidgetType[] = ["flowCenter", "myApps", "chartBoard"];
+const REQUIRED_WORKBENCH_WIDGETS: WorkbenchWidgetType[] = ["flowCenter", "myApps"];
 
 export const WIDGET_FIXED_HEIGHT: Partial<Record<WorkbenchWidgetType, number>> = {
   flowCenter: 4,
@@ -167,7 +167,7 @@ export const normalizeWorkbenchLayout = (layout: WorkbenchLayoutItem[]) => {
         ...item,
         minW: item.minW || (item.type === "chartBoard" ? 6 : 5),
         minH: item.minH || (item.type === "chartBoard" ? 5 : 3),
-        locked: isFixedWorkbenchWidget(item.type) || item.type === "chartBoard",
+        locked: isFixedWorkbenchWidget(item.type),
       };
 
       if (item.type === "flowCenter") {

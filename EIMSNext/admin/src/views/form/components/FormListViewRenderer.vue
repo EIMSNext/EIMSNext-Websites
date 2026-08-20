@@ -287,6 +287,7 @@ const getColoredItems = (row: any, field: string) => {
         props: {
           ...(sourceFieldDef?.props || {}),
           ...(layoutFieldDef.props || {}),
+          options: layoutFieldDef.options || layoutFieldDef.props?.options || sourceFieldDef?.props?.options,
         },
       }
     : sourceFieldDef;

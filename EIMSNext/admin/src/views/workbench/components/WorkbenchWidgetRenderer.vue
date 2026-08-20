@@ -2,27 +2,21 @@
   <div
     ref="widgetRef"
     class="workbench-widget"
-    :class="{ editable, 'dynamic-height': isDynamicHeight, [item.type]: true }"
+    :class="{ editable, preview, 'dynamic-height': isDynamicHeight, [item.type]: true }"
   >
-    <div v-if="editable" class="widget-toolbar" @mousedown.stop @click.stop>
-      <span class="widget-title">{{ widgetTitle }}</span>
-      <div class="widget-actions">
-        <el-button v-if="!item.locked" link type="danger" @click="$emit('remove')">
-          {{ t("common.delete") }}
-        </el-button>
-      </div>
-    </div>
-
     <MyTasksCard v-if="item.type === 'flowCenter'" />
     <MyAppsCard v-else-if="item.type === 'myApps'" />
-    <RecentCard v-else-if="item.type === 'recent'" />
-    <FavoritesCard v-else-if="item.type === 'favorites'" :allow-manage="!editable" @add="$emit('add-favorite')" />
+    <RecentCard v-else-if="item.type === 'recent'" :design-mode="editable && !preview" :removable="!item.locked" @remove="$emit('remove')" />
+    <FavoritesCard v-else-if="item.type === 'favorites'" :allow-manage="!editable && !preview" :design-mode="editable && !preview" :removable="!item.locked" @add="$emit('add-favorite')" @remove="$emit('remove')" />
     <ChartBoardCard
       v-else-if="item.type === 'chartBoard'"
       :item="item"
-      :allow-manage="!editable"
+      :allow-manage="!editable && !preview"
+      :design-mode="editable && !preview"
+      :removable="!item.locked"
       @add-chart="$emit('add-chart')"
       @remove-chart="$emit('remove-chart', $event)"
+      @remove="$emit('remove')"
       @update-charts="$emit('update-charts', $event)"
       @content-change="scheduleContentHeight"
     />
@@ -45,6 +39,7 @@ defineOptions({
 const props = defineProps<{
   item: WorkbenchLayoutItem;
   editable?: boolean;
+  preview?: boolean;
 }>();
 const { t } = useI18n();
 const emit = defineEmits<{
@@ -142,18 +137,6 @@ onBeforeUnmount(() => {
   observedContent = undefined;
 });
 
-const widgetTitle = computed(() => {
-  if (props.item.type === "chartBoard") {
-    return props.item.config?.title || t("admin.workbench.myChart");
-  }
-  const titleMap: Record<string, string> = {
-    flowCenter: t("admin.flowcenter"),
-    myApps: t("admin.myApp"),
-    recent: t("admin.workbench.recent"),
-    favorites: t("admin.workbench.favorites"),
-  };
-  return titleMap[props.item.type] || t("common.component");
-});
 </script>
 
 <style lang="scss" scoped>
@@ -181,45 +164,14 @@ const widgetTitle = computed(() => {
   &.editable {
     cursor: move;
 
-    :deep([data-workbench-card-root]) {
-      pointer-events: none;
-      padding-top: calc(var(--et-card-padding, var(--et-space-16)) + var(--et-size-26));
-    }
+    :deep([data-workbench-card-root]) { pointer-events: none; }
+    :deep(.workbench-card-delete) { pointer-events: auto; }
     :deep(.chart-board-card) {
       pointer-events: none;
     }
   }
+
+  &.preview :deep([data-workbench-card-root]) { pointer-events: none; }
 }
 
-.widget-toolbar {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid var(--et-border-color);
-  border-bottom: none;
-  border-radius: var(--et-radius-6) var(--et-radius-6) 0 0;
-  box-shadow: var(--et-shadow-sm);
-  display: flex;
-  height: var(--et-size-26);
-  justify-content: space-between;
-  left: 0;
-  padding: 0 var(--et-space-8);
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 4;
-  cursor: default;
-  pointer-events: auto;
-}
-
-.widget-title {
-  color: var(--et-text-secondary);
-  font-size: var(--et-font-size-12);
-  font-weight: 600;
-}
-
-.widget-actions {
-  align-items: center;
-  display: flex;
-  gap: var(--et-space-4);
-}
 </style>

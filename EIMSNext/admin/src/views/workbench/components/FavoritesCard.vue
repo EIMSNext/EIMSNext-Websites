@@ -1,15 +1,17 @@
 <template>
   <et-card :title="t('admin.workbench.favorites')" class="workbench-list-card" data-workbench-card-root>
     <template #header>
-      <div class="workbench-card-header">
+      <div class="workbench-card-header" :class="{ 'design-header': designMode }" @mousedown.stop>
         <span class="workbench-card-title">{{ t("admin.workbench.favorites") }}</span>
+        <button v-if="designMode && removable" type="button" class="workbench-card-delete no-drag" :title="t('common.delete')" @click.stop="$emit('remove')"><et-icon icon="el-delete" size="16px" /></button>
         <el-button v-if="allowManage" link type="primary" @click.stop="$emit('add')">
           <et-icon icon="el-plus" />
           {{ t("common.add") }}
         </el-button>
       </div>
     </template>
-    <div v-if="favorites.length" class="workbench-list" data-workbench-height-content>
+    <div v-if="designMode" class="workbench-empty design-empty" data-workbench-height-content>{{ t("admin.workbench.favoritesEmpty") }}</div>
+    <div v-else-if="favorites.length" class="workbench-list" data-workbench-height-content>
       <div v-for="item in favorites" :key="`${item.targetType}:${item.targetId}`" class="workbench-list-item" @click="openItem(item)">
         <div class="workbench-list-icon" :style="{ backgroundColor: item.iconColor || 'var(--et-color-primary)' }">
           <et-icon :icon="item.icon || defaultIcon(item.targetType)" />
@@ -58,12 +60,17 @@ defineOptions({
 
 const props = withDefaults(defineProps<{
   allowManage?: boolean;
+  designMode?: boolean;
+  removable?: boolean;
 }>(), {
   allowManage: false,
+  designMode: false,
+  removable: false,
 });
 
 defineEmits<{
   (e: "add"): void;
+  (e: "remove"): void;
 }>();
 
 const router = useRouter();
@@ -112,11 +119,13 @@ const removeItem = async (item: WorkbenchFavorite) => {
 };
 
 const loadFavorites = async () => {
+  if (props.designMode) return;
   await workbenchStore.refreshFavorites();
   favorites.value = workbenchStore.favorites;
 };
 
 onMounted(() => {
+  if (props.designMode) return;
   loadFavorites();
   window.addEventListener(WORKBENCH_FAVORITES_CHANGED_EVENT, loadFavorites);
 });
@@ -146,6 +155,7 @@ onBeforeUnmount(() => {
   width: 100%;
   padding-top: var(--et-space-12);
   padding-bottom: var(--et-space-4);
+  pointer-events: auto;
 }
 
 .workbench-card-title {
@@ -223,4 +233,9 @@ onBeforeUnmount(() => {
     gap: var(--et-space-8);
   }
 }
+</style>
+<style lang="scss" scoped>
+.workbench-card-delete { background: transparent; border: 0; color: var(--et-color-danger); cursor: pointer; display: inline-flex; margin-left: auto; opacity: 0; padding: var(--et-space-2); pointer-events: none; }
+.design-header:hover .workbench-card-delete { opacity: 1; pointer-events: auto; }
+.design-empty { min-height: var(--et-size-120); }
 </style>

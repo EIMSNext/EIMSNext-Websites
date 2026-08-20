@@ -1,11 +1,13 @@
 <template>
   <et-card :title="t('admin.workbench.recent')" class="workbench-list-card" data-workbench-card-root>
     <template #header>
-      <div class="workbench-card-header">
+      <div class="workbench-card-header" :class="{ 'design-header': designMode }" @mousedown.stop>
         <span class="workbench-card-title">{{ t("admin.workbench.recent") }}</span>
+        <button v-if="designMode && removable" type="button" class="workbench-card-delete no-drag" :title="t('common.delete')" @click.stop="$emit('remove')"><et-icon icon="el-delete" size="16px" /></button>
       </div>
     </template>
-    <div v-if="recent.length" class="workbench-list" data-workbench-height-content>
+    <div v-if="designMode" class="workbench-empty design-empty" data-workbench-height-content>{{ t("admin.workbench.recentEmpty") }}</div>
+    <div v-else-if="recent.length" class="workbench-list" data-workbench-height-content>
       <div v-for="item in recent" :key="`${item.targetType}:${item.targetId}`" class="workbench-list-item" @click="openItem(item)">
         <div class="workbench-list-icon" :style="{ backgroundColor: item.iconColor || 'var(--et-color-info)' }">
           <et-icon :icon="item.icon || defaultIcon(item.targetType)" />
@@ -35,6 +37,8 @@ const router = useRouter();
 const { t } = useI18n();
 const contextStore = useContextStore();
 const recent = ref<WorkbenchRecentVisit[]>([]);
+const props = withDefaults(defineProps<{ designMode?: boolean; removable?: boolean }>(), { designMode: false, removable: false });
+defineEmits<{ (e: "remove"): void }>();
 
 const defaultIcon = (targetType: WorkbenchTargetType) => {
   if (targetType === "dashboard") return "el-DataAnalysis";
@@ -55,12 +59,13 @@ const openItem = async (item: WorkbenchRecentVisit) => {
 };
 
 const loadRecent = async () => {
+  if (props.designMode) return;
   recent.value = await workbenchRecentVisitService.query<WorkbenchRecentVisit>(
     "$top=10&$orderby=lastVisitTime desc,createTime desc"
   );
 };
 
-onMounted(loadRecent);
+onMounted(() => { if (!props.designMode) loadRecent(); });
 </script>
 
 <style lang="scss" scoped>
@@ -75,6 +80,7 @@ onMounted(loadRecent);
   width: 100%;
   padding-top: var(--et-space-12);
   padding-bottom: var(--et-space-4);
+  pointer-events: auto;
 }
 
 .workbench-card-title {
@@ -135,4 +141,9 @@ onMounted(loadRecent);
   padding: var(--et-space-16);
   text-align: center;
 }
+</style>
+<style lang="scss" scoped>
+.workbench-card-delete { background: transparent; border: 0; color: var(--et-color-danger); cursor: pointer; display: inline-flex; margin-left: auto; opacity: 0; padding: var(--et-space-2); pointer-events: none; }
+.design-header:hover .workbench-card-delete { opacity: 1; pointer-events: auto; }
+.design-empty { min-height: var(--et-size-120); }
 </style>

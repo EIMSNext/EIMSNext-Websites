@@ -89,8 +89,8 @@
                     <el-popover
                       :visible="customColorOption === option && customColorOpen"
                       trigger="click"
-                      placement="top-start"
-                      :width="270"
+                      placement="top-end"
+                      :width="284"
                       :teleported="false"
                       @update:visible="setCustomPickerVisible(option, $event)"
                     >
@@ -105,6 +105,7 @@
                         </button>
                       </template>
                       <div class="_fd-custom-color-picker" @click.stop>
+                        <div class="_fd-custom-color-picker__title">{{ t('props.customColor') }}</div>
                         <el-color-picker-panel
                           :model-value="customColorValue"
                           :border="false"
@@ -545,17 +546,33 @@ export default defineComponent({
 }
 
 ._fd-custom-color-picker {
-  width: 250px;
+  width: 260px;
   padding: 0;
 }
 
-._fd-custom-color-picker .el-color-picker-panel,
-._fd-custom-color-picker .el-color-picker__panel,
-._fd-custom-color-picker .el-color-dropdown {
-  width: 250px;
+._fd-custom-color-picker__title {
+  margin-bottom: 10px;
+  color: var(--fc-text-color-1);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+._fd-custom-color-picker .el-color-picker-panel {
+  width: 236px;
+  padding: 0;
   box-sizing: border-box;
   border: 0;
   box-shadow: none;
+}
+
+._fd-custom-color-picker .el-color-picker-panel__wrapper,
+._fd-custom-color-picker .el-color-svpanel,
+._fd-custom-color-picker .el-color-hue-slider {
+  width: 236px;
+}
+
+._fd-custom-color-picker .el-color-picker-panel__footer .el-input {
+  width: 100%;
 }
 
 ._fd-static-options__drag {
