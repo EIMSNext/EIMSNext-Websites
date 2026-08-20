@@ -40,7 +40,7 @@
       :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
       <div>{{ t("common.message.deleteConfirm_Content", [checkedDatas.length]) }}</div>
     </EtConfirmDialog>
-    <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
+    <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="detailsDialogTitle" :show-footer="false"
       :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
         <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms" :authGroupId="curAuthGrp?.id"
@@ -196,6 +196,8 @@ import {
   parseCondition,
   parseSort,
   parseViewSettings,
+  flattenDataItem,
+  formatDataTitle,
 } from "./listViewUtils";
 import {
   type FormDataSearchState,
@@ -578,6 +580,10 @@ const draftPageNum = ref(1);
 const draftPageSize = ref(20);
 const selectedData = ref<FormData>();
 const showDetailsDialog = ref(false);
+const detailsDialogTitle = computed(() => {
+  if (!formDef.value || !selectedData.value) return formDef.value?.name || "";
+  return formatDataTitle(flattenDataItem(selectedData.value), formDef.value, t) || formDef.value.name;
+});
 const checkedDatas = ref<any[]>([]);
 const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
 const selectedExportColumnKeys = ref<string[]>([]);

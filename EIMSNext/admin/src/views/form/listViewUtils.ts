@@ -253,6 +253,25 @@ export const formatFormValue = (
   return String(normalized);
 };
 
+export const getColoredOptionItems = (value: any, fieldDef?: Pick<FieldDef, "type" | "props">): any[] => {
+  const types = [FieldType.Radio, FieldType.CheckBox, FieldType.Select1, FieldType.Select2];
+  const props = fieldDef?.props as any;
+  if (!fieldDef || !types.includes(fieldDef.type as FieldType)) return [];
+  const options = Array.isArray(props?.options) ? props.options : [];
+  if (props?.optionColor === false || (props?.optionColor !== true && !options.some((option: any) => option?.color))) return [];
+  const normalizedValue = normalizeValue(value);
+  const values = Array.isArray(normalizedValue) ? normalizedValue : [normalizedValue];
+  const items = values.map((item) => {
+    const rawValue = item && typeof item === "object" ? item.value : item;
+    return options.find((option: any) =>
+      String(option?.value) === String(rawValue) ||
+      String(option?.label) === String(rawValue),
+    ) ||
+      (item && typeof item === "object" ? item : { value: rawValue, label: rawValue });
+  }).filter((item) => item && item.label !== undefined && item.label !== null && item.label !== "");
+  return items.some((item) => item.color) ? items : [];
+};
+
 const getRowFieldValue = (row: Record<string, any>, field: string) => {
   if (row[field] !== undefined) return row[field];
   const leafField = field.split(">").pop();

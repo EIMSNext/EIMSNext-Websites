@@ -45,24 +45,89 @@
             @update:model-value="updateValue(option, $event)"
           />
           <template v-if="colorEnabled">
-            <el-color-picker
-              :model-value="option.color || undefined"
-              color-format="hex"
-              :predefine="predefineColors"
-              size="small"
-              :aria-label="t('props.color')"
-              @update:model-value="updateColor(option, $event)"
-            />
-            <el-tooltip :content="t('props.clear')">
-              <button
-                type="button"
-                class="_fd-static-options__icon-button"
-                :disabled="!option.color"
-                @click="clearColor(option)"
-              >
-                <i class="fc-icon icon-refresh"></i>
-              </button>
-            </el-tooltip>
+            <el-popover
+              :visible="colorPopoverOption === option"
+              trigger="click"
+              placement="bottom-start"
+              :width="252"
+              :teleported="false"
+              @update:visible="setColorPopoverVisible(option, $event)"
+            >
+              <template #reference>
+                <button
+                  type="button"
+                  class="_fd-static-options__color-button"
+                  :aria-label="t('props.color')"
+                  @click.stop
+                >
+                  <span
+                    class="_fd-static-options__color-swatch"
+                    :style="option.color ? { backgroundColor: option.color } : undefined"
+                  ></span>
+                </button>
+              </template>
+              <div class="_fd-color-board" @click.stop>
+                <div class="_fd-color-board__section">
+                  <div class="_fd-color-board__label">{{ t('props.recommendedColor') }}</div>
+                  <div class="_fd-color-board__colors">
+                    <button
+                      v-for="color in predefineColors"
+                      :key="color"
+                      type="button"
+                      class="_fd-color-board__color-box"
+                      :class="{ 'is-selected': option.color === color }"
+                      :aria-label="color"
+                      @click="selectColor(option, color)"
+                    >
+                      <span class="_fd-color-board__color" :style="{ backgroundColor: color }"></span>
+                    </button>
+                  </div>
+                </div>
+                <div class="_fd-color-board__section _fd-color-board__custom">
+                  <div class="_fd-color-board__label">{{ t('props.customColor') }}</div>
+                  <div class="_fd-color-board__colors">
+                    <el-popover
+                      :visible="customColorOption === option && customColorOpen"
+                      trigger="click"
+                      placement="top-start"
+                      :width="270"
+                      :teleported="false"
+                      @update:visible="setCustomPickerVisible(option, $event)"
+                    >
+                      <template #reference>
+                        <button
+                          type="button"
+                          class="_fd-color-board__add"
+                          :aria-label="t('props.addColor')"
+                          @click.stop
+                        >
+                          <i class="fc-icon icon-add"></i>
+                        </button>
+                      </template>
+                      <div class="_fd-custom-color-picker" @click.stop>
+                        <el-color-picker-panel
+                          :model-value="customColorValue"
+                          :border="false"
+                          color-format="hex"
+                          @update:model-value="updateCustomColor"
+                        />
+                      </div>
+                    </el-popover>
+                    <button
+                      v-for="color in customColors"
+                      :key="color"
+                      type="button"
+                      class="_fd-color-board__color-box"
+                      :class="{ 'is-selected': option.color === color }"
+                      :aria-label="color"
+                      @click="selectColor(option, color)"
+                    >
+                      <span class="_fd-color-board__color" :style="{ backgroundColor: color }"></span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </el-popover>
           </template>
           <i class="fc-icon icon-move _fd-static-options__drag" :title="t('tableOptions.handle')"></i>
           <el-tooltip :content="t('props.delete')">
@@ -86,28 +151,39 @@
 
 <script>
 import { defineComponent } from "vue";
+import { ElColorPickerPanel } from "element-plus";
 import draggable from "vuedraggable/src/vuedraggable";
 
 const PREDEFINE_COLORS = [
-  "#ef5350",
-  "#ff9800",
-  "#fbc02d",
-  "#8bc34a",
-  "#42bd73",
-  "#00acc1",
-  "#4f7cff",
-  "#8e66d9",
-  "#d65bb4",
-  "#ec407a",
-  "#607d8b",
+  "#eb5050", "#f0a800", "#46c26f", "#a2c204", "#00aed1", "#5865f5", "#c643e0", "#f0437d",
+  "#fa8118", "#d6c504", "#00b899", "#6ac73c", "#2f7deb", "#7e47eb", "#d941c0", "#485970",
+  "#f9cbcb", "#fbe5b3", "#c8edd4", "#e3edb4", "#b3e7f1", "#cdd1fc", "#eec7f6", "#fbc7d8",
+  "#fed9ba", "#f3eeb4", "#b3eadf", "#d2eec5", "#c1d8f9", "#d8c8f9", "#f4c6ec", "#c8cdd4",
 ];
+const CUSTOM_COLOR_STORAGE_KEY = "eimsnext.formdesigner.custom-colors";
 
 const optionValue = (value) =>
   value && typeof value === "object" ? value.value : value;
 
+const collectCustomColors = (options) => [...new Set(
+  (Array.isArray(options) ? options : [])
+    .map((option) => option?.color)
+    .filter((color) => color && !PREDEFINE_COLORS.some((item) => item.toLowerCase() === color.toLowerCase())),
+)];
+
+const readStoredCustomColors = () => {
+  if (typeof window === "undefined") return [];
+  try {
+    const value = JSON.parse(window.localStorage.getItem(CUSTOM_COLOR_STORAGE_KEY) || "[]");
+    return Array.isArray(value) ? value.filter((color) => typeof color === "string" && color) : [];
+  } catch {
+    return [];
+  }
+};
+
 export default defineComponent({
   name: "StaticOptionsConfig",
-  components: { draggable },
+  components: { draggable, ElColorPickerPanel },
   emits: ["update:modelValue", "change"],
   props: {
     modelValue: Array,
@@ -122,6 +198,13 @@ export default defineComponent({
     return {
       options: this.normalizeOptions(this.modelValue),
       predefineColors: PREDEFINE_COLORS,
+      customColors: [...new Set([...readStoredCustomColors(), ...collectCustomColors(this.modelValue)])],
+      colorPopoverOption: null,
+      customColorOption: null,
+      customColorOpen: false,
+      customColorValue: PREDEFINE_COLORS[0],
+      customColorInitial: PREDEFINE_COLORS[0],
+      customColorDirty: false,
     };
   },
   computed: {
@@ -140,6 +223,7 @@ export default defineComponent({
       if (value !== this.options) {
         this.options = this.normalizeOptions(value);
       }
+      collectCustomColors(value).forEach((color) => this.addCustomColor(color));
     },
   },
   methods: {
@@ -203,14 +287,78 @@ export default defineComponent({
       else delete option.color;
       this.onOptionsChanged();
     },
-    clearColor(option) {
-      delete option.color;
-      this.onOptionsChanged();
-    },
     setColorEnabled(value) {
       if (!this.activeRule) return;
       if (!this.activeRule.props) this.activeRule.props = {};
       this.activeRule.props[this.colorField] = value;
+      if (value) {
+        this.options.forEach((option, index) => {
+          if (!option.color) {
+            option.color = this.predefineColors[index % this.predefineColors.length];
+          }
+        });
+        this.onOptionsChanged();
+      } else {
+        this.$emit("change", this.options);
+      }
+    },
+    setColorPopoverVisible(option, visible) {
+      if (visible) {
+        this.colorPopoverOption = option;
+        return;
+      }
+      if (this.colorPopoverOption === option) {
+        this.colorPopoverOption = null;
+        this.closeCustomPicker(false);
+      }
+    },
+    selectColor(option, color) {
+      this.updateColor(option, color);
+      this.colorPopoverOption = null;
+      this.closeCustomPicker(false);
+    },
+    setCustomPickerVisible(option, visible) {
+      if (visible) {
+        this.openCustomPicker(option);
+      } else {
+        this.closeCustomPicker(false);
+      }
+    },
+    openCustomPicker(option) {
+      this.customColorOption = option;
+      this.customColorValue = option.color || this.predefineColors[0];
+      this.customColorInitial = this.customColorValue;
+      this.customColorDirty = false;
+      this.customColorOpen = true;
+    },
+    closeCustomPicker(visible) {
+      if (visible) return;
+      if (this.customColorOpen && this.customColorDirty && this.customColorValue) {
+        this.addCustomColor(this.customColorValue);
+        if (this.customColorOption) this.updateColor(this.customColorOption, this.customColorValue);
+        this.persistCustomColors();
+      }
+      this.customColorOpen = false;
+      this.customColorOption = null;
+      this.customColorDirty = false;
+    },
+    updateCustomColor(color) {
+      if (!color) return;
+      this.customColorValue = color;
+      this.customColorDirty = color.toLowerCase() !== this.customColorInitial.toLowerCase();
+    },
+    addCustomColor(color) {
+      if (color && !this.customColors.some((item) => item.toLowerCase() === color.toLowerCase())) {
+        this.customColors.push(color);
+      }
+    },
+    persistCustomColors() {
+      if (typeof window === "undefined") return;
+      try {
+        window.localStorage.setItem(CUSTOM_COLOR_STORAGE_KEY, JSON.stringify(this.customColors));
+      } catch {
+        // Storage can be unavailable in private browsing or restricted previews.
+      }
     },
     remove(index) {
       this.options.splice(index, 1);
@@ -220,7 +368,11 @@ export default defineComponent({
     add() {
       const index = this.options.length + 1;
       const label = `${this.t("props.option")}${index}`;
-      this.options.push({ label, value: label });
+      const option = { label, value: label };
+      if (this.colorEnabled) {
+        option.color = this.predefineColors[this.options.length % this.predefineColors.length];
+      }
+      this.options.push(option);
       this.onOptionsChanged();
     },
     syncDefaultValues() {
@@ -315,21 +467,95 @@ export default defineComponent({
   box-shadow: inset 0 0 0 3px var(--el-bg-color);
 }
 
-._fd-static-options__row .el-color-picker {
+._fd-static-options__color-button {
+  display: inline-flex;
   flex: 0 0 auto;
-}
-
-._fd-static-options__row .el-color-picker__trigger {
+  align-items: center;
+  justify-content: center;
   width: 22px;
   height: 22px;
-  padding: 2px;
+  padding: 0;
   border: 0;
+  border-radius: 50%;
+  background: var(--el-bg-color);
+  cursor: pointer;
+}
+
+._fd-static-options__color-swatch {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 50%;
+  background: var(--el-fill-color-light);
+}
+
+._fd-color-board {
+  width: 100%;
+  color: var(--fc-text-color-1);
+  font-size: 12px;
+}
+
+._fd-color-board__section + ._fd-color-board__section {
+  margin-top: 14px;
+}
+
+._fd-color-board__label {
+  margin-bottom: 8px;
+}
+
+._fd-color-board__colors {
+  display: grid;
+  grid-template-columns: repeat(8, 20px);
+  gap: 7px;
+  align-items: center;
+}
+
+._fd-color-board__color-box,
+._fd-color-board__add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+._fd-color-board__color-box.is-selected {
+  border-color: var(--el-color-primary);
+}
+
+._fd-color-board__color {
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
 }
 
-._fd-static-options__row .el-color-picker__color {
+._fd-color-board__add {
+  border-color: var(--el-border-color);
+  color: var(--el-text-color-secondary);
+}
+
+._fd-color-board__add:hover {
+  border-color: var(--el-color-primary);
+  color: var(--el-color-primary);
+}
+
+._fd-custom-color-picker {
+  width: 250px;
+  padding: 0;
+}
+
+._fd-custom-color-picker .el-color-picker-panel,
+._fd-custom-color-picker .el-color-picker__panel,
+._fd-custom-color-picker .el-color-dropdown {
+  width: 250px;
+  box-sizing: border-box;
   border: 0;
-  border-radius: 50%;
+  box-shadow: none;
 }
 
 ._fd-static-options__drag {

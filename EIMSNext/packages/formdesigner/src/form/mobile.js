@@ -83,6 +83,24 @@ const findCheckboxLabel = function (find, data) {
     });
 };
 
+const optionValue = option => option && typeof option === 'object' ? option.value : option;
+const optionLabel = option => option && typeof option === 'object'
+    ? option.label || option.text || option.value || ''
+    : option || '';
+const renderOptionValue = (h, values, data, colorEnabled) => {
+    const children = [];
+    values.forEach((value, index) => {
+        const option = data.find(item => String(optionValue(item)) === String(optionValue(value)));
+        if (index) children.push(', ');
+        if (colorEnabled && option?.color) {
+            children.push(h('span', {class: 'fc-option-preview-tag', style: {backgroundColor: option.color}}, [optionLabel(option)]));
+        } else {
+            children.push(optionLabel(option || value));
+        }
+    });
+    return children;
+};
+
 function toArray(val) {
     if (!val) {
         return [];
@@ -108,11 +126,14 @@ export function useAdvanced(formCreate) {
             const type = ctx.type;
             const subForm = ctx.$handle.subForm[ctx.id];
             const readMode = ctx.prop.readMode;
+            let renderedValue;
             if (readMode === false || readMode === 'custom' || !ctx.input || ctx.rule.subForm || (Array.isArray(subForm) ? subForm.length : subForm) || ['fcGroup', 'fcSubForm', 'tableform', 'stepForm', 'upload'].indexOf(ctx.trueType) > -1) {
                 return ctx.parser.render(_, ctx);
             }
-            if (['radio', 'select', 'checkbox'].indexOf(type) > -1) {
-                val = findCheckboxLabel([...toArray(val)], ctx.prop.props.options || ctx.prop.props.formCreateInject.options || []).join(', ');
+            if (['radio', 'select', 'select2', 'checkbox'].indexOf(type) > -1) {
+                const data = ctx.prop.props.options || ctx.prop.props.formCreateInject.options || [];
+                renderedValue = renderOptionValue(h, [...toArray(val)], data, ctx.prop.props.optionColor);
+                val = findCheckboxLabel([...toArray(val)], data).join(', ');
             } else if (['timePicker', 'datePicker', 'slider'].indexOf(type) > -1) {
                 val = Array.isArray(val) ? val.join(' - ') : val;
             } else if (type === 'cascader') {
@@ -138,7 +159,7 @@ export function useAdvanced(formCreate) {
                 val = val ? '是' : '否';
             }
 
-            return h('span', {class: '_fc-read-view'}, ['' + (val == null ? '' : val)]);
+            return h('span', {class: '_fc-read-view'}, renderedValue || ['' + (val == null ? '' : val)]);
         },
         updateWrap(ctx) {
             let style = ctx.prop?.wrap?.style;

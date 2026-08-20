@@ -447,6 +447,15 @@
   color: var(--van-field-placeholder-text-color);
 }
 
+.form-create-m.is-preview .fc-option-preview-tag {
+  display: inline-block;
+  margin: 1px 4px 1px 0;
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: #fff;
+  line-height: 20px;
+}
+
 .form-create-m .fc-select-selected-values {
   display: inline-flex;
   align-items: center;

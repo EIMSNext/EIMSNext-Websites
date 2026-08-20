@@ -1,31 +1,26 @@
 <template>
-    <Layout>
+    <et-drawer v-model="drawerVisible" :closing="beforeClose" @close="close">
+      <template #title>
+        <span class="drawer-title">{{ t("admin.workbench.customize") }}</span>
+      </template>
+      <template #top-right>
+        <el-link type="primary" :underline="false" class="drawer-help">{{ t("admin.workbench.help") }}</el-link>
+        <el-button-group>
+          <el-button type="primary" plain>
+            <et-icon icon="el-Monitor" />
+          </el-button>
+          <el-button plain>
+            <et-icon icon="el-Iphone" />
+          </el-button>
+        </el-button-group>
+        <el-button disabled>
+          <et-icon icon="el-document" />
+          {{ t("admin.workbench.pageStyle") }}
+        </el-button>
+        <el-button @click="preview">{{ t("common.preview") }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ t("common.save") }}</el-button>
+      </template>
       <div class="workbench-designer">
-        <div class="designer-header">
-          <div class="header-title">
-            <el-button link @click="back">
-              <et-icon icon="el-arrowLeft" />
-            </el-button>
-            <span>{{ t("admin.workbench.customize") }}</span>
-          </div>
-          <el-link type="primary" :underline="false">{{ t("admin.workbench.help") }}</el-link>
-          <div class="header-actions">
-            <el-button-group>
-              <el-button type="primary" plain>
-                <et-icon icon="el-Monitor" />
-              </el-button>
-              <el-button plain>
-                <et-icon icon="el-Iphone" />
-              </el-button>
-            </el-button-group>
-            <el-button disabled>
-              <et-icon icon="el-document" />
-              {{ t("admin.workbench.pageStyle") }}
-            </el-button>
-            <el-button @click="preview">{{ t("common.preview") }}</el-button>
-            <el-button type="primary" :loading="saving" @click="save">{{ t("common.save") }}</el-button>
-          </div>
-        </div>
 
         <div class="designer-body">
           <aside class="component-panel">
@@ -97,7 +92,7 @@
           </main>
         </div>
       </div>
-    </Layout>
+    </et-drawer>
 </template>
 
 <script setup lang="ts">
@@ -105,7 +100,6 @@ import type { WorkbenchLayoutItem, WorkbenchWidgetType } from "@eimsnext/models"
 import { UserType } from "@eimsnext/models";
 import { useUserStore } from "@eimsnext/store";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
-import Layout from "@/layout/index.vue";
 import {
   cloneWorkbenchLayout,
   createWorkbenchWidget,
@@ -130,6 +124,8 @@ const { layout } = storeToRefs(workbenchStore);
 const editableLayout = ref<WorkbenchLayoutItem[]>([]);
 const saving = ref(false);
 const isDirty = ref(false);
+const drawerVisible = ref(true);
+const skipRouteLeave = ref(false);
 
 const enabledComponents = computed<{ type: WorkbenchWidgetType; label: string; icon: string }[]>(() => [
   { type: "flowCenter", label: t("admin.flowcenter"), icon: "icon-flow" },
@@ -228,7 +224,7 @@ const preview = async () => {
   router.push("/workbench");
 };
 
-const back = async () => {
+const beforeClose = async (): Promise<boolean> => {
   if (isDirty.value) {
     try {
       await ElMessageBox.confirm(
@@ -237,11 +233,24 @@ const back = async () => {
         { type: "warning" }
       );
     } catch {
-      return;
+      return false;
     }
   }
+  return true;
+};
+
+const close = () => {
+  skipRouteLeave.value = true;
   router.push("/workbench");
 };
+
+onBeforeRouteLeave(async (_to, _from, next) => {
+  if (skipRouteLeave.value || (await beforeClose())) {
+    next();
+  } else {
+    next(false);
+  }
+});
 
 const beforeUnload = (e: BeforeUnloadEvent) => {
   if (isDirty.value) {
@@ -286,38 +295,24 @@ watch(layout, syncLayout, { deep: true });
 <style lang="scss" scoped>
 .workbench-designer {
   background: var(--et-bg-page);
-  min-height: calc(100vh - var(--et-size-50));
+  height: 100%;
+  min-height: 0;
 }
 
-.designer-header {
-  align-items: center;
-  background: var(--et-bg-container);
-  border-bottom: 1px solid var(--et-border-color);
-  display: flex;
-  gap: var(--et-space-24);
-  height: var(--et-size-56);
-  padding: 0 var(--et-space-18);
-}
-
-.header-title {
-  align-items: center;
+.drawer-title {
   color: var(--et-text-primary);
-  display: flex;
   font-size: var(--et-font-size-16);
   font-weight: 700;
-  gap: var(--et-space-8);
 }
 
-.header-actions {
-  align-items: center;
-  display: flex;
-  gap: var(--et-space-10);
-  margin-left: auto;
+.drawer-help {
+  margin-right: var(--et-space-12);
 }
 
 .designer-body {
   display: flex;
-  min-height: calc(100vh - var(--et-size-106));
+  height: 100%;
+  min-height: 0;
 }
 
 .component-panel {
@@ -376,11 +371,11 @@ watch(layout, syncLayout, { deep: true });
 }
 
 .canvas {
-  min-height: calc(100vh - var(--et-size-160));
+  min-height: 100%;
 }
 
 .workbench-designer-grid {
-  min-height: calc(100vh - var(--et-size-160));
+  min-height: 100%;
 }
 
 :deep(.workbench-designer-grid > .vue-grid-item) {

@@ -28,6 +28,38 @@ const findCheckboxLabel = function (find, data) {
   });
 };
 
+const optionValue = (option) =>
+  option && typeof option === "object" ? option.value : option;
+
+const optionLabel = (option) => {
+  if (option && typeof option === "object") {
+    return option.label ?? option.text ?? option.value ?? "";
+  }
+  return option ?? "";
+};
+
+const renderOptionValue = (h, values, data, colorEnabled) => {
+  const parts = values.map((value) => {
+    const option = data.find(
+      (item) => String(optionValue(item)) === String(optionValue(value)),
+    );
+    const label = optionLabel(option || value);
+    if (colorEnabled && option?.color) {
+      return h("span", {
+        class: "fc-option-preview-tag",
+        style: { backgroundColor: option.color },
+      }, [label]);
+    }
+    return label;
+  });
+  const children = [];
+  parts.forEach((part, index) => {
+    if (index) children.push(", ");
+    children.push(part);
+  });
+  return children;
+};
+
 function toArray(val) {
   if (!val) {
     return [];
@@ -43,6 +75,7 @@ export default function renderPreview(_, ctx) {
   const type = ctx.type;
   const subForm = ctx.$handle.subForm[ctx.id];
   const readMode = ctx.prop.readMode;
+  let renderedValue;
   if (ctx.prop.title.title && ctx.prop.title.title.trim()) {
     ctx.prop.title.title += "：";
   }
@@ -76,10 +109,9 @@ export default function renderPreview(_, ctx) {
     return ctx.parser.render(_, ctx);
   }
   if (["radio", "select", "select2", "checkbox"].indexOf(type) > -1) {
-    val = findCheckboxLabel(
-      [...toArray(val)],
-      ctx.prop.props.options || ctx.prop.props.formCreateInject.options || [],
-    ).join(", ");
+    const data = ctx.prop.props.options || ctx.prop.props.formCreateInject.options || [];
+    renderedValue = renderOptionValue(h, [...toArray(val)], data, ctx.prop.props.optionColor);
+    val = findCheckboxLabel([...toArray(val)], data).join(", ");
   } else if (["timePicker", "datePicker", "slider"].indexOf(type) > -1) {
     val = Array.isArray(val) ? val.join(" - ") : val;
   } else if (type === "timestamp") {
@@ -149,5 +181,5 @@ export default function renderPreview(_, ctx) {
   } else if (typeof val === "boolean") {
     val = val ? "是" : "否";
   }
-  return h("span", { class: "_fc-read-view" }, ["" + (val == null ? "" : val)]);
+  return h("span", { class: "_fc-read-view" }, renderedValue || ["" + (val == null ? "" : val)]);
 }

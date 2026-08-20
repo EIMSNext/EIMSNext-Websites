@@ -25,7 +25,44 @@ function tidyRule(rule) {
   return _rule;
 }
 
+const optionValue = (option) => option && typeof option === "object" ? option.value : option;
+const optionLabel = (option) => option && typeof option === "object"
+  ? option.label || option.text || option.value || ""
+  : option || "";
+
+function renderOptionPreview(ctx) {
+  const type = ctx.type;
+  const props = ctx.prop?.props || {};
+  if (!props.optionColor || !["radio", "checkbox", "select", "select2"].includes(type)) return null;
+  const data = props.options || props.formCreateInject?.options || [];
+  const values = Array.isArray(ctx.rule?.value) ? ctx.rule.value : [ctx.rule?.value];
+  const children = [];
+  values.forEach((value, index) => {
+    if (value === undefined || value === null || value === "") return;
+    const option = data.find(
+      (item) => String(optionValue(item)) === String(optionValue(value)),
+    );
+    if (index && children.length) children.push(", ");
+    if (option?.color) {
+      children.push(ctx.$render.vNode.h("span", {
+        class: "fc-option-preview-tag",
+        style: { backgroundColor: option.color },
+      }, [optionLabel(option)]));
+    } else {
+      children.push(optionLabel(option || value));
+    }
+  });
+  return ctx.$render.vNode.h("span", { class: "_fc-read-view" }, children);
+}
+
 export default {
+  defaultPreview(ctx, children) {
+    if (ctx.prop?.readMode !== false && ctx.prop?.readMode !== "custom") {
+      const preview = renderOptionPreview(ctx);
+      if (preview) return preview;
+    }
+    return ctx.parser.render(children, ctx);
+  },
   validate() {
     const form = this.form();
     if (form) {

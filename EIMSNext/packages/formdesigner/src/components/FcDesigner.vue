@@ -2283,9 +2283,9 @@ export default defineComponent({
         // inside the designer's PC/mobile preview.
         data.preview.option.submitBtn = false;
         data.preview.option.resetBtn = false;
-        // Keep Vant popups inside the transformed mobile preview frame. Runtime
-        // forms leave this unset and continue teleporting overlays to body.
-        data.preview.option.popupContainer = `#${data.previewPopupTarget}`;
+        // Preview overlays must use the document body. A target rendered inside
+        // this component tree is not guaranteed to exist before Vant mounts.
+        delete data.preview.option.popupContainer;
         if (!data.activePage.default) {
           data.preview.option.formData = deepCopy(methods.getPreviewFormData());
         }

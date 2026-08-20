@@ -225,6 +225,16 @@
   color: var(--el-text-color-regular);
 }
 
+.form-create.is-preview .fc-option-preview-tag,
+.form-create-m.is-preview .fc-option-preview-tag {
+  display: inline-block;
+  margin: 1px 4px 1px 0;
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: #fff;
+  line-height: 20px;
+}
+
 .form-create.is-preview .fc-divider ._fc-read-view,
 .form-create.is-preview ._fc-table-form-v2 ._fc-read-view {
   background-color: transparent;
