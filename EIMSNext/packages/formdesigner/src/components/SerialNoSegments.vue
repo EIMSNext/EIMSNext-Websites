@@ -1,32 +1,7 @@
 <template>
   <div class="_fd-serialno-segments">
     <div class="_fd-serialno-head">
-      <span>{{ t('com.serialno.segmentsTitle') }}</span>
-      <el-popover
-        v-model:visible="addOpen"
-        placement="bottom"
-        :width="180"
-        trigger="manual"
-        popper-class="_fd-serialno-add-pop"
-      >
-        <template #reference>
-          <i class="fc-icon icon-add-circle" @click="addOpen = !addOpen"></i>
-        </template>
-        <div class="_fd-serialno-add-list">
-          <div class="_fd-serialno-add-item" @click="add('fixed')">
-            <i class="fc-icon icon-input"></i>
-            <span>{{ t('com.serialno.addFixed') }}</span>
-          </div>
-          <div class="_fd-serialno-add-item" @click="add('date')">
-            <i class="fc-icon icon-date"></i>
-            <span>{{ t('com.serialno.addDate') }}</span>
-          </div>
-          <div class="_fd-serialno-add-item" @click="add('field')">
-            <i class="fc-icon icon-group"></i>
-            <span>{{ t('com.serialno.addField') }}</span>
-          </div>
-        </div>
-      </el-popover>
+      <span class="_fd-serialno-title">{{ t('com.serialno.segmentsTitle') }}</span>
     </div>
 
     <draggable
@@ -38,20 +13,53 @@
       @end="onDragEnd"
     >
       <template #item="{ element, index }">
-        <ConfigItem>
-          <template #label>
-            <i class="fc-icon icon-drag"></i>
-            <span>{{ formatLabel(element) }}</span>
-          </template>
-          <i class="fc-icon icon-edit" @click="openEdit(element)"></i>
-          <i
+        <div class="_fd-serialno-rule-row" @click="openEdit(element)">
+          <i class="fc-icon icon-drag _fd-serialno-drag" @click.stop></i>
+          <span class="_fd-serialno-rule-text">{{ formatLabel(element) }}</span>
+          <button type="button" class="_fd-serialno-action" :title="t('common.edit')" @click.stop="openEdit(element)">
+            <i class="fc-icon icon-edit"></i>
+          </button>
+          <button
             v-if="element.type !== 'counter'"
-            class="fc-icon icon-delete"
-            @click="removeAt(index)"
-          ></i>
-        </ConfigItem>
+            type="button"
+            class="_fd-serialno-action is-danger"
+            :title="t('common.delete')"
+            @click.stop="removeAt(index)"
+          >
+            <i class="fc-icon icon-delete"></i>
+          </button>
+        </div>
       </template>
     </draggable>
+
+    <el-popover
+      v-model:visible="addOpen"
+      placement="bottom-start"
+      :width="180"
+      trigger="manual"
+      popper-class="_fd-serialno-add-pop"
+    >
+      <template #reference>
+        <el-button class="_fd-serialno-add-button" plain @click="addOpen = !addOpen">
+          <i class="fc-icon icon-add"></i>
+          <span>{{ t('com.serialno.addRule') }}</span>
+        </el-button>
+      </template>
+      <div class="_fd-serialno-add-list">
+        <div class="_fd-serialno-add-item" @click="add('fixed')">
+          <i class="fc-icon icon-input"></i>
+          <span>{{ t('com.serialno.addFixed') }}</span>
+        </div>
+        <div class="_fd-serialno-add-item" @click="add('date')">
+          <i class="fc-icon icon-date"></i>
+          <span>{{ t('com.serialno.addDate') }}</span>
+        </div>
+        <div class="_fd-serialno-add-item" @click="add('field')">
+          <i class="fc-icon icon-group"></i>
+          <span>{{ t('com.serialno.addField') }}</span>
+        </div>
+      </div>
+    </el-popover>
 
     <SerialNoCounterDialog
       v-if="editing && editing.type === 'counter'"
@@ -80,7 +88,6 @@
 import { defineComponent, ref, computed, inject } from "vue";
 import draggable from "vuedraggable/src/vuedraggable";
 import { uniqueId8 } from "@eimsnext/form-render-core";
-import ConfigItem from "./style/ConfigItem.vue";
 import SerialNoCounterDialog from "./SerialNoCounterDialog.vue";
 import SerialNoDateDialog from "./SerialNoDateDialog.vue";
 import SerialNoFixedDialog from "./SerialNoFixedDialog.vue";
@@ -90,7 +97,6 @@ export default defineComponent({
   name: "SerialNoSegments",
   components: {
     draggable,
-    ConfigItem,
     SerialNoCounterDialog,
     SerialNoDateDialog,
     SerialNoFixedDialog,
@@ -177,18 +183,81 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--fc-text-color-1);
   margin-bottom: 8px;
 }
-._fd-serialno-segments ._fd-serialno-head .fc-icon {
+._fd-serialno-title {
+  flex: 1;
+}
+
+._fd-serialno-add-button {
+  width: 100%;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+._fd-serialno-rule-row {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  margin-bottom: 8px;
+  padding: 0 8px;
+  border: 1px solid var(--el-border-color-light);
+  border-radius: 6px;
+  color: var(--fc-text-color-1);
   cursor: pointer;
+  transition: border-color .2s, background-color .2s;
+}
+
+._fd-serialno-rule-row:hover {
+  border-color: var(--el-color-primary-light-5);
+  background: var(--el-fill-color-light);
+}
+
+._fd-serialno-drag {
+  margin-right: 8px;
+  color: var(--fc-text-color-3);
+  cursor: grab;
+}
+
+._fd-serialno-rule-text {
+  flex: 1;
+  min-width: 0;
+  line-height: 20px;
+}
+
+._fd-serialno-action {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--el-text-color-secondary);
+  cursor: pointer;
+}
+
+._fd-serialno-rule-row:hover ._fd-serialno-action {
+  display: inline-flex;
+}
+
+._fd-serialno-action:hover {
+  color: var(--el-color-primary);
+}
+
+._fd-serialno-action.is-danger:hover {
+  color: var(--el-color-danger);
 }
 ._fd-serialno-segments ._fd-serialno-add-list {
   display: flex;
   flex-direction: column;
 }
-._fd-serialno-segments ._fd-serialno-add-item {
+._fd-serialno-add-list ._fd-serialno-add-item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -197,7 +266,7 @@ export default defineComponent({
   color: var(--el-text-color-regular);
   border-radius: 4px;
 }
-._fd-serialno-segments ._fd-serialno-add-item:hover {
+._fd-serialno-add-list ._fd-serialno-add-item:hover {
   background: var(--el-fill-color-light);
   color: var(--el-color-primary);
 }

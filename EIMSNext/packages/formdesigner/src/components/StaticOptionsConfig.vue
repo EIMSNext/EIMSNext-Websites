@@ -1,7 +1,10 @@
 <template>
   <section class="_fd-static-options">
     <header class="_fd-static-options__header">
-      <span>{{ t("props.options") }}</span>
+      <div class="_fd-static-options__column-labels">
+        <span>{{ t("props.label") }}</span>
+        <span>{{ t("props.value") }}</span>
+      </div>
       <div class="_fd-static-options__color-toggle">
         <span>{{ t("props.color") }}</span>
         <el-switch
@@ -144,8 +147,8 @@
       </template>
     </draggable>
 
-    <el-button link type="primary" @click="add">
-      <i class="fc-icon icon-add"></i> {{ t("tableOptions.add") }}
+    <el-button link type="primary" class="_fd-static-options__add" @click="add">
+      <i class="fc-icon icon-add"></i> {{ t("tableOptions.addOption") }}
     </el-button>
   </section>
 </template>
@@ -405,11 +408,23 @@ export default defineComponent({
 }
 
 ._fd-static-options__header {
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 8px;
   color: var(--fc-text-color-1);
   font-size: 14px;
   font-weight: 600;
+}
+
+._fd-static-options__column-labels {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 6px;
+  margin-left: 26px;
+}
+
+._fd-static-options__column-labels span {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 ._fd-static-options__color-toggle {
@@ -417,6 +432,10 @@ export default defineComponent({
   color: var(--fc-text-color-2);
   font-size: 13px;
   font-weight: 400;
+}
+
+._fd-static-options__add {
+  gap: 6px;
 }
 
 ._fd-static-options__row {

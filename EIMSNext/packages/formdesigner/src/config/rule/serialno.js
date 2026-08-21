@@ -39,8 +39,7 @@ export default {
       { type: "SerialNoSegments", field: "segments" },
       { type: "GroupLabel", props: { title: t("com.serialno.resetNote") } },
       { type: "input", field: "placeholder" },
-      { type: "DefaultValueConfig" },
-      { type: "CheckBoxInput", field: "disabled", wrap: { show: false } },
+      { type: "GroupLabel", props: { title: t("props.othersetting") } },
     ]);
   },
 };

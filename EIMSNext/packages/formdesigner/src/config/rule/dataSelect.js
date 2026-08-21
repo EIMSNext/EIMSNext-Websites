@@ -44,6 +44,7 @@ export default {
         props: {
           placeholder: t("dataflow.selectForm"),
           sourceScope: "crossApp",
+          resetDataSelectConfig: true,
         },
         control: [
           {

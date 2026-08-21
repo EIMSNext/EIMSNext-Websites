@@ -2580,6 +2580,7 @@ export default {
   tableOptions: {
     handle: "操作",
     add: "添加",
+    addOption: "添加选项",
     empty1: "点击右下角",
     empty2: "按钮添加一列",
     rmCol: "删除当前列",
@@ -3583,6 +3584,7 @@ export default {
       placeholder: "自动生成,无需填写",
       resetNote: "暂未开始计数,下一条数据提交时计数值为 1",
       segmentsTitle: "流水号规则",
+      addRule: "添加",
       addDate: "提交日期",
       addFixed: "固定字符",
       addField: "表单字段",
@@ -4486,6 +4488,11 @@ export default {
     datalinkFields: "可见字段",
     allFieldsDefault: "默认全部字段",
     visibleFieldsTip: "不选择时全部可用字段可见",
+    fieldPermission: "外链权限配置",
+    fieldPermissionTitle: "外链权限配置",
+    fieldPermissionDesc: "可以查看和编辑数据的哪些字段",
+    fieldPermissionSummaryAll: "可查看全部字段，可编辑{editable}个字段",
+    fieldPermissionSummary: "可查看{visible}个字段，可编辑{editable}个字段",
 
     queryPageSettings: "查询页面设置",
     queryFields: "查询字段",

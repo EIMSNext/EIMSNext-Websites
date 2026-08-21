@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { FieldType } from "@eimsnext/models";
+import { FieldType, FlowStatus, SystemField, isSystemField } from "@eimsnext/models";
 
 export const normalizeDataSelectField = (field) => {
   if (!field) return null;
@@ -26,7 +26,10 @@ export const createDataSelectQuery = ({ formId, page, pageSize, fields }) => ({
               (field, index, values) =>
                 values.findIndex((item) => item.field === field.field) === index,
             )
-            .map((field) => ({ field: `data.${field.field}`, visible: true })),
+            .map((field) => ({
+              field: isSystemField(field.field) ? field.field : `data.${field.field}`,
+              visible: true,
+            })),
         ],
       }
     : {}),
@@ -74,7 +77,20 @@ export const resolveDataSelectValue = (record, path) => {
   return "";
 };
 
-export const formatDataSelectValue = (value, field) => {
+export const formatDataSelectValue = (value, field, t) => {
+  if (field?.field === SystemField.FlowStatus) {
+    const labels = {
+      [FlowStatus.Draft]: ["workflow.flowStatus.draft", "草稿"],
+      [FlowStatus.Approving]: ["workflow.flowStatus.approving", "审批中"],
+      [FlowStatus.Approved]: ["workflow.flowStatus.approved", "已审批"],
+      [FlowStatus.Rejected]: ["workflow.flowStatus.rejected", "已驳回"],
+      [FlowStatus.Suspended]: ["workflow.flowStatus.suspended", "已挂起"],
+      [FlowStatus.Discarded]: ["workflow.flowStatus.discarded", "已废弃"],
+    };
+    const [key, fallback] = labels[value] || [];
+    return key ? (t?.(key) || fallback) : stringifyDataSelectValue(value);
+  }
+
   if (field?.type === FieldType.TimeStamp && value) {
     const date = dayjs(Number(value));
     return date.isValid()

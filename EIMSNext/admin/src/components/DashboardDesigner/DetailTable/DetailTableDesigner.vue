@@ -17,7 +17,7 @@
             </div>
             <div class="data-source-title" v-if="detailSetting.datasource?.id">
               <et-icon size="16px" :icon="getFormIcon()" :color="getAppIconColor()"></et-icon>
-              <span class="data-source-name">{{ detailSetting.datasource.label }}</span>
+            <span class="data-source-name" :title="detailSetting.datasource.label">{{ detailSetting.datasource.label }}</span>
             </div>
           </div>
 
@@ -407,7 +407,12 @@ watch(
 }
 
 .data-source-name {
+  flex: 1 1 auto;
+  min-width: 0;
   margin-left: var(--et-space-10);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fields-container {

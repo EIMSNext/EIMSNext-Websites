@@ -101,7 +101,7 @@ export default defineComponent({
       if (!word) return rows.value;
       return rows.value.filter((row) =>
         tableFields.value.some((field) =>
-          String(formatDataSelectValue(resolveDataSelectValue(row, field.field), field))
+          String(formatDataSelectValue(resolveDataSelectValue(row, field.field), field, t))
             .toLocaleLowerCase()
             .includes(word),
         ),
@@ -112,7 +112,7 @@ export default defineComponent({
       if (!data) return [];
       return displayFields.value.map((field) => ({
         label: field.label || t("com.dataselect.unknownField", "未知字段"),
-        value: formatDataSelectValue(resolveDataSelectValue(data, field.field), field),
+        value: formatDataSelectValue(resolveDataSelectValue(data, field.field), field, t),
       }));
     });
 
@@ -140,13 +140,21 @@ export default defineComponent({
               dataType: "json",
             })
           : await formDataService.query(query);
+        const countBody = props.formCreateInject?.api?.fetch
+          ? await props.formCreateInject.api.fetch({
+              action: "/FormData/$count",
+              method: "post",
+              data: query.filter,
+              dataType: "json",
+            }).catch(() => null)
+          : await formDataService.count(query.filter).catch(() => null);
         const data = Array.isArray(body?.value)
           ? body.value
           : Array.isArray(body)
             ? body
             : [];
         rows.value = data.map(mergeDataSelectRecord);
-        const count = Number(body?.count ?? body?.["@odata.count"]);
+        const count = Number(countBody?.value ?? countBody?.count ?? countBody?.["@odata.count"] ?? countBody);
         total.value = Number.isFinite(count)
           ? count
           : (nextPage - 1) * pageSize.value + data.length +
@@ -216,7 +224,7 @@ export default defineComponent({
       fetchRows,
       recordId,
       fieldValue(row, field) {
-        return formatDataSelectValue(resolveDataSelectValue(row, field.field), field);
+        return formatDataSelectValue(resolveDataSelectValue(row, field.field), field, t);
       },
       async open() {
         if (!editable.value) return;

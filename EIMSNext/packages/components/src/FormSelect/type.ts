@@ -45,5 +45,7 @@ export function buildFormDefListItems(forms: FormDef[], options?: IFormSelectOpt
       label: item.name,
       appId: item.appId,
       external: item.external,
+      icon: item.usingWorkflow ? "icon-flowdefault" : "icon-formdefault",
+      iconColor: item.usingWorkflow ? "#8b5cf6" : "#1296db",
     }));
 }

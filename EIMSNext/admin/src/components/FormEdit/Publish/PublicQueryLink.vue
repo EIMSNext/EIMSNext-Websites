@@ -2,12 +2,13 @@
   <div class="tab-content">
     <div class="link-row">
       <el-switch v-model="querylink.enabled" @change="markDirty" />
-      <el-input :model-value="querylinkUrl" readonly class="link-input" />
-      <el-button @click="copyText(querylinkUrl)">{{ t("common.copy") }}</el-button>
-      <el-button @click="openUrl(querylinkUrl)">{{ t("common.open") }}</el-button>
-      <el-button @click="showEmbed = true">{{ t("publicpublish.embed") }}</el-button>
+      <template v-if="querylink.enabled">
+        <ShareLinkBar :url="querylinkUrl" class="share-link" />
+        <el-button @click="showEmbed = true">{{ t("publicpublish.embed") }}</el-button>
+      </template>
     </div>
 
+    <template v-if="querylink.enabled">
     <h4 class="section-title">{{ t("publicpublish.queryPageSettings") }}</h4>
 
     <div class="form-group">
@@ -18,6 +19,7 @@
         filterable
         collapse-tags
         collapse-tags-tooltip
+        :max-collapse-tags="5"
         :placeholder="t('publicpublish.top5FieldsDefault')"
         class="full"
         @change="markDirty"
@@ -34,6 +36,7 @@
         filterable
         collapse-tags
         collapse-tags-tooltip
+        :max-collapse-tags="5"
         :placeholder="t('publicpublish.top5FieldsDefault')"
         class="full"
         @change="markDirty"
@@ -75,6 +78,7 @@
     <el-button type="primary" @click="save">
       {{ t("common.save") }}
     </el-button>
+    </template>
   </div>
 </template>
 
@@ -90,6 +94,7 @@ import {
   PublicTargetType,
 } from "@eimsnext/models";
 import { publicSettingService } from "@eimsnext/services";
+import { ShareLinkBar } from "@eimsnext/components";
 import { sha256 } from "@eimsnext/utils";
 import LimitSection from "./LimitSection.vue";
 import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
@@ -152,10 +157,6 @@ function onAccessCodeChange(v: string) {
 async function copyText(text: string) {
   await navigator.clipboard.writeText(text);
   ElMessage.success(t("common.copied"));
-}
-
-function openUrl(url: string) {
-  window.open(url, "_blank");
 }
 
 function flattenFields(fields: FieldDef[], isSupported: (type?: FieldType | string) => boolean) {
@@ -225,13 +226,13 @@ defineExpose({
 
 <style scoped lang="scss">
 .tab-content {
-  padding: var(--et-space-12) 0;
+  padding: var(--et-space-8) 0;
 }
 
 .link-row {
   align-items: center;
   display: flex;
-  gap: var(--et-space-12);
+  gap: var(--et-space-8);
   margin-bottom: var(--et-space-16);
 
   .link-input {

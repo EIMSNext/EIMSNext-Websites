@@ -16,7 +16,7 @@
             </div>
             <div class="data-source-title">
               <et-icon size="16px" :icon="getFormIcon()" :color="getAppIconColor()"></et-icon>
-              <span class="data-source-name">{{ chartSetting.datasource?.label }}</span>
+              <span class="data-source-name" :title="chartSetting.datasource?.label">{{ chartSetting.datasource?.label }}</span>
             </div>
           </div>
           <div class="data-source" v-if="chartSetting.datasource.type == DatasourceType.Form">
@@ -402,7 +402,16 @@ const changeDataSource = () => {
 };
 
 const handleSourceOk = async (source: IDataSource) => {
+  const sourceChanged = chartSetting.datasource?.id !== source?.id || chartSetting.datasource?.type !== source?.type;
   chartSetting.datasource = source;
+  if (sourceChanged) {
+    chartSetting.dimension1 = [];
+    chartSetting.dimension2 = [];
+    chartSetting.metrics = [];
+    chartSetting.sort = { items: [] };
+    chartSetting.filter = { id: uniqueId(), rel: "and", items: [] };
+    chartSetting.progress = undefined;
+  }
   showDataSourceDialog.value = false;
   populateDatasourceFields();
 };
@@ -444,9 +453,38 @@ const selectChartType = (cc: IChartConfig) => {
   if (cc.id === ChartType.Indicator || cc.id === ChartType.Progress) {
     chartSetting.dimension1 = [];
     chartSetting.dimension2 = [];
+    chartSetting.sort = { items: [] };
   }
-  if (cc.id === ChartType.Indicator || cc.id === ChartType.Progress) chartSetting.metrics = (chartSetting.metrics || []).slice(0, 1);
+  if (cc.id === ChartType.Indicator || cc.id === ChartType.Progress) {
+    chartSetting.metrics = (chartSetting.metrics || []).slice(0, 1).map((metric) => ({
+      ...metric,
+      aggFun: metric.aggFun || AggregateFun.Count,
+    }));
+    if (cc.id === ChartType.Indicator) {
+      Object.assign(indicatorOptions, {
+        showName: chartSetting.indicator?.showName ?? true,
+        decimalPlaces: chartSetting.indicator?.decimalPlaces ?? 0,
+      });
+      chartSetting.indicator = { ...indicatorOptions };
+    } else {
+      Object.assign(progressOptions, {
+        targetType: chartSetting.progress?.targetType ?? "metric",
+        targetValue: chartSetting.progress?.targetValue,
+        decimalPlaces: chartSetting.progress?.decimalPlaces ?? 0,
+        style: chartSetting.progress?.style ?? "ring",
+        showName: chartSetting.progress?.showName ?? true,
+        showActual: chartSetting.progress?.showActual ?? false,
+        showTarget: chartSetting.progress?.showTarget ?? false,
+        showPercent: chartSetting.progress?.showPercent ?? true,
+      });
+      chartSetting.progress = {
+        ...progressOptions,
+        targetMetric: chartSetting.progress?.targetMetric,
+      };
+    }
+  }
   if (cc.id !== ChartType.Indicator && cc.id !== ChartType.Progress && chartSetting.dimension1 && chartSetting.dimension1.length > 1) chartSetting.dimension1 = chartSetting.dimension1.slice(0, 1);
+  if (cc.id !== ChartType.Indicator && cc.id !== ChartType.Progress) updateSortList();
 };
 
 const selectChartSubType = (cc: IChartConfig, sub: any) => {
@@ -515,6 +553,10 @@ const removeMetric = (metric: IMetricsField) => {
 };
 
 const updateSortList = () => {
+  if (chartSetting.chartType === ChartType.Indicator || chartSetting.chartType === ChartType.Progress) {
+    chartSetting.sort = { items: [] };
+    return;
+  }
   let newSorts: ISortItem[] = [];
   let sortList: ISortList = chartSetting.sort || { items: [] };
 
@@ -555,6 +597,9 @@ const onFilter = (filter: IConditionList) => {
   chartSetting.filter = filter;
 };
 const onSave = async () => {
+  if (chartSetting.chartType === ChartType.Indicator || chartSetting.chartType === ChartType.Progress) {
+    chartSetting.sort = { items: [] };
+  }
   chartSetting.indicator = chartSetting.chartType === ChartType.Indicator ? { ...indicatorOptions } : chartSetting.indicator;
   chartSetting.progress = chartSetting.chartType === ChartType.Progress ? { ...progressOptions, targetMetric: progressOptions.targetType === "metric" ? chartSetting.progress?.targetMetric : undefined } : chartSetting.progress;
   chartSetting.line = chartSetting.chartType === ChartType.Line ? { ...lineOptions } : chartSetting.line;
@@ -655,9 +700,14 @@ watch(barOptions, (options) => {
           display: flex;
           align-items: center;
 
-          .data-source-name {
+.data-source-name {
+            flex: 1 1 auto;
+            min-width: 0;
             margin-left: var(--et-space-10);
             cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
         }
       }

@@ -12,9 +12,8 @@
           <div class="item-wrapper clickable" @click.stop="itemClick(item)">
             <div class="item-content">
               <et-icon
-                v-if="item.icon"
-                :icon="item.icon"
-                :color="item.iconColor"
+                :icon="item.icon || 'icon-formdefault'"
+                :color="item.iconColor || '#1296db'"
                 class="item-icon"
               ></et-icon>
               <div class="item-label">

@@ -158,6 +158,7 @@ export function chartSettingValidate(setting: IChartSetting): boolean {
 }
 
 export function getChartSort(setting: IChartSetting) {
+  if (setting.chartType === ChartType.Indicator || setting.chartType === ChartType.Progress) return [];
   let sorts: IAgSortItem[] = [];
   let dims = [...(setting.dimension1 || []), ...(setting.dimension2 || [])];
   let metrics = [...(setting.metrics || [])];

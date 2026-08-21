@@ -97,7 +97,10 @@ export const createFormDataQuery = ({ formId, page, pageSize, filter, fields }) 
             { field: "formId", visible: true },
             ...fields
               .filter((field, index, values) => values.findIndex((item) => item.field === field.field) === index)
-              .map((field) => ({ field: `data.${field.field}`, visible: true })),
+              .map((field) => ({
+                field: isSystemField(field.field) ? field.field : `data.${field.field}`,
+                visible: true,
+              })),
           ],
         }
       : {}),

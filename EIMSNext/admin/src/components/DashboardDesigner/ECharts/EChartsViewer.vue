@@ -24,7 +24,7 @@
         <div v-if="!designerMode" class="header-btn no-drag" @click.stop="onRefresh">
           <et-icon icon="el-refresh" size="16px" />
         </div>
-        <div ref="sortRef" class="header-btn no-drag" @click.stop="onSort">
+        <div v-if="setting.chartType !== ChartType.Indicator && setting.chartType !== ChartType.Progress" ref="sortRef" class="header-btn no-drag" @click.stop="onSort">
           <et-icon icon="el-sort" size="16px" />
         </div>
         <slot name="header-actions"></slot>
@@ -139,7 +139,7 @@ const getChartOpts = async (setting: IChartSetting) => {
       const options = setting.indicator || {};
       opt = {
         title: options.showName === false ? undefined : { text: metric.title || metric.label || metric.id, left: "center", top: "18%" },
-        series: [{ type: "gauge", startAngle: 90, endAngle: -270, radius: "76%", pointer: { show: false }, progress: { show: false }, axisLine: { lineStyle: { width: 0 } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 32, offsetCenter: [0, "8%"], formatter: () => formatNumber(value, options.decimalPlaces || 0) }, data: [{ value }] }],
+        series: [{ type: "gauge", startAngle: 90, endAngle: -270, radius: "76%", pointer: { show: false }, progress: { show: false }, itemStyle: { color: "#6A83FC" }, axisLine: { lineStyle: { width: 0 } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 32, offsetCenter: [0, "8%"], color: "#6A83FC", formatter: () => formatNumber(value, options.decimalPlaces || 0) }, data: [{ value }] }],
       };
       chartOpts.value = applyChartTheme(opt);
       break;
@@ -166,7 +166,7 @@ const getChartOpts = async (setting: IChartSetting) => {
       const isSemi = style === "semi";
       opt = {
         title: options.showName === false ? undefined : { text: actualMetric.title || actualMetric.label || actualMetric.id, left: "center", top: "2%" },
-        series: [{ type: "gauge", startAngle: isSemi ? 180 : 90, endAngle: isSemi ? 0 : -270, center: isSemi ? ["50%", "65%"] : ["50%", "50%"], radius: isSemi ? "90%" : "72%", pointer: { show: false }, progress: { show: true, width: style === "thin" ? 7 : 14, roundCap: true }, axisLine: { lineStyle: { width: style === "thin" ? 7 : 14 } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 24, offsetCenter: isSemi ? [0, "18%"] : [0, "8%"], formatter: () => labelParts.join(" / ") }, data: [{ value: Math.min(100, Math.max(0, percent)) }] }],
+        series: [{ type: "gauge", startAngle: isSemi ? 180 : 90, endAngle: isSemi ? 0 : -270, center: isSemi ? ["50%", "65%"] : ["50%", "50%"], radius: isSemi ? "90%" : "72%", pointer: { show: false }, progress: { show: true, width: style === "thin" ? 7 : 14, roundCap: true, itemStyle: { color: "#6A83FC" } }, axisLine: { lineStyle: { width: style === "thin" ? 7 : 14, color: [[1, isDark.value ? "#374151" : "#E6EAF2"]] } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 24, offsetCenter: isSemi ? [0, "18%"] : [0, "8%"], color: "#6A83FC", formatter: () => labelParts.join(" / ") }, data: [{ value: Math.min(100, Math.max(0, percent)) }] }],
       };
       chartOpts.value = applyChartTheme(opt);
       break;

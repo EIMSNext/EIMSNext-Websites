@@ -2589,6 +2589,7 @@ export default {
   tableOptions: {
     handle: "Operation",
     add: "Add",
+    addOption: "Add option",
     empty1: "Click the lower right corner",
     empty2: "Button to add a column",
     rmCol: "Delete current column",
@@ -3628,6 +3629,7 @@ export default {
       placeholder: "Auto-generated",
       resetNote: "Counter not started, will be 1 on next submit",
       segmentsTitle: "Serial number rule",
+      addRule: "Add",
       addDate: "Submit date",
       addFixed: "Fixed text",
       addField: "Form field",
