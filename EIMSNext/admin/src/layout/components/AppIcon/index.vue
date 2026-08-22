@@ -1,13 +1,13 @@
 <template>
     <div class="app-icon" :style="{ backgroundColor: getAppIconColor(app) }"">
         <div>
-        <et-icon :icon="getAppIcon(app)" color="#ffffff" :size="iconSize" />
+        <et-icon :icon="getAppIcon(app)" :color="getAppIconTextColor(app)" :size="iconSize" />
     </div>
     </div>
 </template>
 <script setup lang="ts">
 import { AppDef } from "@eimsnext/models";
-import { getAppIcon, getAppIconColor } from '@/utils/common';
+import { getAppIcon, getAppIconColor, getAppIconTextColor } from '@/utils/common';
 
 const props = withDefaults(defineProps<{
     app: AppDef,

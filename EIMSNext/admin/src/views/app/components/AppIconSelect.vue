@@ -30,7 +30,7 @@
               justify-content: center;
             "
           >
-            <et-icon :icon="icon" color="#ffffff" size="28px" />
+            <et-icon :icon="icon" color="var(--el-color-white, #fff)" size="28px" />
           </span>
         </div>
       </div>

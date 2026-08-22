@@ -23,7 +23,7 @@
           <template #default="{ data }">
             <div class="favorite-tree-node" :class="{ selected: isSelected(data) }">
               <span v-if="data.kind === 'app'" class="tree-app-icon" :style="{ backgroundColor: data.iconColor }">
-                <et-icon :icon="data.icon" color="#fff" size="12px" />
+                <et-icon :icon="data.icon" color="var(--el-color-white, #fff)" size="12px" />
               </span>
               <et-icon v-else class="tree-icon" :icon="data.icon" :style="{ color: data.iconColor }" size="18px" />
               <span class="tree-label" :title="data.label">{{ data.label }}</span>

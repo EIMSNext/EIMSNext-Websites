@@ -62,7 +62,9 @@ function rgbToHex(r: number, g: number, b: number) {
     .join("")}`;
 }
 
-function mix(hex: string, target: string, weight: number) {
+// Equivalent to Element Plus' Sass color.mix($mixColor, $base, $weight).
+// A 10% level means 10% white plus 90% of the source color.
+function mixElementPlus(hex: string, target: string, weight: number) {
   const sourceRgb = hexToRgb(hex);
   const targetRgb = hexToRgb(target);
   const factor = clamp(weight, 0, 1);
@@ -83,12 +85,19 @@ function toRgbTriplet(hex: string) {
   return hexToRgb(hex).join(", ");
 }
 
+const SEMANTIC_COLORS = {
+  success: "#23c343",
+  danger: "#c93636",
+  warning: "#f0a800",
+  info: "#2468bd",
+};
+
 export function generateThemeColors(primary: string) {
   const normalized = normalizeHex(primary);
-  const hover = mix(normalized, "#ffffff", 0.3);
-  const active = mix(normalized, "#000000", 0.2);
-  const outline = mix(normalized, "#ffffff", 0.5);
-  const softBg = mix(normalized, "#ffffff", 0.9);
+  const hover = mixElementPlus(normalized, "#ffffff", 0.3);
+  const active = mixElementPlus(normalized, "#000000", 0.2);
+  const outline = mixElementPlus(normalized, "#ffffff", 0.5);
+  const softBg = mixElementPlus(normalized, "#ffffff", 0.9);
   const colors: Record<string, string> = {
     primary: normalized,
     "primary-hover": hover,
@@ -96,18 +105,22 @@ export function generateThemeColors(primary: string) {
     "primary-outline": toRgbString(normalized, 0.2),
     "bg-primary-soft": toRgbString(normalized, 0.1),
     "border-color-focus": normalized,
+    // Element Plus' built-in filled type buttons always use --el-color-white.
     "text-on-primary": "#ffffff",
-    secondary: mix(normalized, "#000000", 0.08),
-    "secondary-hover": mix(normalized, "#ffffff", 0.12),
-    "secondary-active": mix(normalized, "#000000", 0.18),
+    "text-on-primary-hover": "#ffffff",
+    "text-on-primary-active": "#ffffff",
+    "text-on-overlay": "#ffffff",
+    secondary: mixElementPlus(normalized, "#000000", 0.08),
+    "secondary-hover": mixElementPlus(normalized, "#ffffff", 0.12),
+    "secondary-active": mixElementPlus(normalized, "#000000", 0.18),
 
     "color-primary": normalized,
     "color-primary-hover": hover,
     "color-primary-active": active,
     "color-primary-outline": toRgbString(normalized, 0.2),
-    "color-secondary": mix(normalized, "#000000", 0.08),
-    "color-secondary-hover": mix(normalized, "#ffffff", 0.12),
-    "color-secondary-active": mix(normalized, "#000000", 0.18),
+    "color-secondary": mixElementPlus(normalized, "#000000", 0.08),
+    "color-secondary-hover": mixElementPlus(normalized, "#ffffff", 0.12),
+    "color-secondary-active": mixElementPlus(normalized, "#000000", 0.18),
     "color-primary-dark-2": active,
 
     "el-primary": normalized,
@@ -129,10 +142,29 @@ export function generateThemeColors(primary: string) {
   };
 
   for (let i = 1; i <= 9; i += 1) {
-    const lightColor = mix(normalized, "#ffffff", i * 0.1);
+    const lightColor = mixElementPlus(normalized, "#ffffff", i * 0.1);
     colors[`color-primary-light-${i}`] = lightColor;
     colors[`el-primary-light-${i}`] = lightColor;
   }
+
+  // Element Plus resolves semantic button states through a parallel set of
+  // variables. Keep these in one runtime contract so custom themes and dark
+  // mode do not leave a component with a mismatched foreground.
+  Object.entries(SEMANTIC_COLORS).forEach(([name, color]) => {
+    const activeColor = mixElementPlus(color, "#000000", 0.2);
+    colors[`color-${name}`] = color;
+    colors[`text-on-${name}`] = "#ffffff";
+    colors[`text-on-${name}-hover`] = "#ffffff";
+    colors[`text-on-${name}-active`] = "#ffffff";
+    colors[`color-${name}-dark-2`] = activeColor;
+    colors[`el-${name}`] = color;
+    colors[`el-${name}-dark-2`] = activeColor;
+    for (let i = 1; i <= 9; i += 1) {
+      const lightColor = mixElementPlus(color, "#ffffff", i * 0.1);
+      colors[`color-${name}-light-${i}`] = lightColor;
+      colors[`el-${name}-light-${i}`] = lightColor;
+    }
+  });
 
   colors["color-primary-light-3"] = hover;
   colors["color-primary-light-5"] = outline;

@@ -109,7 +109,7 @@
   padding: 1px 7px;
   border-radius: 3px;
   background: var(--fc-option-color);
-  color: #fff;
+  color: var(--fc-option-text-color, var(--et-text-on-primary, #fff));
   line-height: 20px;
 }
 
@@ -231,7 +231,7 @@
   margin: 1px 4px 1px 0;
   padding: 1px 7px;
   border-radius: 3px;
-  color: #fff;
+  color: var(--fc-option-text-color, var(--et-text-on-primary, #fff));
   line-height: 20px;
 }
 
@@ -259,8 +259,8 @@
 }
 
 .form-create .el-divider--horizontal.fc-divider-enhanced {
-  --fc-divider-color: #c8cdd4;
-  --fc-divider-title-color: #141e31;
+  --fc-divider-color: var(--et-border-color, #c8cdd4);
+  --fc-divider-title-color: var(--et-text-primary, #141e31);
   position: relative;
   display: flex;
   align-items: center;

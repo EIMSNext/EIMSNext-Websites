@@ -43,7 +43,7 @@ function back() {
   .pan-back-btn {
     background: var(--et-color-success);
     border: none !important;
-    color: var(--et-text-on-primary);
+    color: var(--et-text-on-success);
 
     &:hover {
       background: var(--et-color-success-light-3);

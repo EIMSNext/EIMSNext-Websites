@@ -34,35 +34,65 @@ html.dark {
 
 ._fc-designer, ._fd-config-dialog {
     --el-color-primary: var(--et-color-primary, #2E73FF);
-    --el-color-primary-light-3: var(--el-color-primary-light-3, #6699FF);
-    --el-color-primary-light-5: var(--el-color-primary-light-5, #99BBFF);
-    --el-color-primary-light-7: var(--el-color-primary-light-7, #CCDFFF);
-    --el-color-primary-light-8: var(--el-color-primary-light-8, #E0EBFF);
-    --el-color-primary-light-9: var(--el-color-primary-light-9, #CCDFFF);
-    --el-color-primary-dark-2: var(--el-color-primary-dark-2, #265FCC);
+    --el-color-primary-light-3: var(--et-color-primary-light-3, #6699FF);
+    --el-color-primary-light-5: var(--et-color-primary-light-5, #99BBFF);
+    --el-color-primary-light-7: var(--et-color-primary-light-7, #CCDFFF);
+    --el-color-primary-light-8: var(--et-color-primary-light-8, #E0EBFF);
+    --el-color-primary-light-9: var(--et-color-primary-light-9, #CCDFFF);
+    --el-color-primary-dark-2: var(--et-color-primary-dark-2, #265FCC);
     --el-color-success: var(--et-color-success, #00C050);
-    --el-color-success-light-3: var(--el-color-success-light-3, #4DDB82);
-    --el-color-success-light-5: var(--el-color-success-light-5, #80E6A3);
-    --el-color-success-light-7: var(--el-color-success-light-7, #B3F1C5);
-    --el-color-success-light-8: var(--el-color-success-light-8, #CCF6D5);
-    --el-color-success-light-9: var(--el-color-success-light-9, #E6FAE6);
-    --el-color-success-dark-2: var(--el-color-success-dark-2, #00A046);
+    --el-color-success-light-3: var(--et-color-success-light-3, #4DDB82);
+    --el-color-success-light-5: var(--et-color-success-light-5, #80E6A3);
+    --el-color-success-light-7: var(--et-color-success-light-7, #B3F1C5);
+    --el-color-success-light-8: var(--et-color-success-light-8, #CCF6D5);
+    --el-color-success-light-9: var(--et-color-success-light-9, #E6FAE6);
+    --el-color-success-dark-2: var(--et-color-success-dark-2, #00A046);
     --el-color-danger: var(--et-color-danger, #FF2E2E);
-    --el-color-danger-light-3: var(--el-color-danger-light-3, #FF6666);
-    --el-color-danger-light-5: var(--el-color-danger-light-5, #FF9999);
-    --el-color-danger-light-7: var(--el-color-danger-light-7, #FFCCCC);
-    --el-color-danger-light-8: var(--el-color-danger-light-8, #FFD9D9);
-    --el-color-danger-light-9: var(--el-color-danger-light-9, #FFE6E6);
-    --el-color-danger-dark-2: var(--el-color-danger-dark-2, #CC2626);
+    --el-color-danger-light-3: var(--et-color-danger-light-3, #FF6666);
+    --el-color-danger-light-5: var(--et-color-danger-light-5, #FF9999);
+    --el-color-danger-light-7: var(--et-color-danger-light-7, #FFCCCC);
+    --el-color-danger-light-8: var(--et-color-danger-light-8, #FFD9D9);
+    --el-color-danger-light-9: var(--et-color-danger-light-9, #FFE6E6);
+    --el-color-danger-dark-2: var(--et-color-danger-dark-2, #CC2626);
+    --el-color-warning: var(--et-color-warning, #F0A800);
+    --el-color-warning-light-3: var(--et-color-warning-light-3, #F5BF4D);
+    --el-color-warning-light-5: var(--et-color-warning-light-5, #F8D380);
+    --el-color-warning-light-7: var(--et-color-warning-light-7, #FBE6B3);
+    --el-color-warning-light-8: var(--et-color-warning-light-8, #FCECBF);
+    --el-color-warning-light-9: var(--et-color-warning-light-9, #FDF6DF);
+    --el-color-warning-dark-2: var(--et-color-warning-dark-2, #C08000);
+    --el-color-info: var(--et-color-info, #2468BD);
+    --el-color-info-light-3: var(--et-color-info-light-3, #6495D1);
+    --el-color-info-light-5: var(--et-color-info-light-5, #91B4DE);
+    --el-color-info-light-7: var(--et-color-info-light-7, #BED2EC);
+    --el-color-info-light-8: var(--et-color-info-light-8, #D3E1F1);
+    --el-color-info-light-9: var(--et-color-info-light-9, #E9F0F8);
+    --el-color-info-dark-2: var(--et-color-info-dark-2, #1D5397);
     --el-menu-hover-bg-color: var(--et-menu-hover, var(--el-color-primary-light-9));
+}
+
+/* Neutralize fd-theme classes left by legacy designer bundles. */
+body[class*="fd-theme-"] ._fc-designer,
+body[class*="fd-theme-"] ._fd-config-dialog {
+    --fc-style-color-1: var(--et-color-primary) !important;
+    --fc-style-bg-color-1: var(--et-bg-primary-soft) !important;
+    --fc-style-color-4: var(--et-color-info) !important;
+    --fc-style-bg-color-4: var(--et-bg-info-soft) !important;
+    --el-color-primary: var(--et-color-primary) !important;
+    --el-color-primary-light-3: var(--et-color-primary-light-3) !important;
+    --el-color-primary-light-5: var(--et-color-primary-light-5) !important;
+    --el-color-primary-light-7: var(--et-color-primary-light-7) !important;
+    --el-color-primary-light-8: var(--et-color-primary-light-8) !important;
+    --el-color-primary-light-9: var(--et-color-primary-light-9) !important;
+    --el-color-primary-dark-2: var(--et-color-primary-dark-2) !important;
 }
 
 ._fc-designer .el-button--primary, ._fd-config-dialog .el-button--primary {
     --el-button-bg-color: var(--el-color-primary);
-    --el-button-text-color: var(--el-color-white);
+    --el-button-text-color: var(--et-text-on-primary);
     --el-button-border-color: var(--el-color-primary);
     --el-button-hover-bg-color: var(--el-color-primary-light-3);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-primary-hover);
     --el-button-hover-border-color: var(--el-color-primary-light-3);
     --el-button-active-bg-color: var(--el-color-primary-dark-2);
     --el-button-active-border-color: var(--el-color-primary-dark-2);
@@ -72,11 +102,11 @@ html.dark {
     --el-button-bg-color: var(--el-color-primary-light-8);
     --el-button-text-color: var(--el-color-primary);
     --el-button-border-color: var(--el-color-primary-light-5);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-primary);
     --el-button-hover-bg-color: var(--el-color-primary);
     --el-button-hover-border-color: var(--el-color-primary);
     --el-button-active-bg-color: var(--el-color-primary-dark-2);
-    --el-button-active-text-color: var(--el-color-white);
+    --el-button-active-text-color: var(--et-text-on-primary-active);
     --el-button-active-border-color: var(--el-color-primary-dark-2);
 }
 
@@ -86,12 +116,13 @@ html.dark {
 
 ._fc-designer .el-button--success, ._fd-config-dialog .el-button--success {
     --el-button-bg-color: var(--el-color-success);
-    --el-button-text-color: var(--el-color-white);
+    --el-button-text-color: var(--et-text-on-success);
     --el-button-border-color: var(--el-color-success);
     --el-button-hover-bg-color: var(--el-color-success-light-3);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-success-hover);
     --el-button-hover-border-color: var(--el-color-success-light-3);
     --el-button-active-bg-color: var(--el-color-success-dark-2);
+    --el-button-active-text-color: var(--et-text-on-success-active);
     --el-button-active-border-color: var(--el-color-success-dark-2);
 }
 
@@ -99,12 +130,12 @@ html.dark {
     --el-button-bg-color: var(--el-color-success-light-8);
     --el-button-text-color: var(--el-color-success);
     --el-button-border-color: var(--el-color-success-light-5);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-success-hover);
     --el-button-hover-bg-color: var(--el-color-success);
     --el-button-hover-border-color: var(--el-color-success);
     --el-button-active-bg-color: var(--el-color-success-dark-2);
-    --el-button-active-text-color: var(--el-color-white);
-    --el-button-active-border-color: var(--el-color-primary-dark-2);
+    --el-button-active-text-color: var(--et-text-on-success-active);
+    --el-button-active-border-color: var(--el-color-success-dark-2);
 }
 
 ._fc-designer .el-button--success.is-link, ._fd-config-dialog .el-button--success.is-link {
@@ -113,12 +144,13 @@ html.dark {
 
 ._fc-designer .el-button--danger, ._fd-config-dialog .el-button--danger {
     --el-button-bg-color: var(--el-color-danger);
-    --el-button-text-color: var(--el-color-white);
+    --el-button-text-color: var(--et-text-on-danger);
     --el-button-border-color: var(--el-color-danger);
     --el-button-hover-bg-color: var(--el-color-danger-light-3);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-danger-hover);
     --el-button-hover-border-color: var(--el-color-danger-light-3);
     --el-button-active-bg-color: var(--el-color-danger-dark-2);
+    --el-button-active-text-color: var(--et-text-on-danger-active);
     --el-button-active-border-color: var(--el-color-danger-dark-2);
 }
 
@@ -126,12 +158,12 @@ html.dark {
     --el-button-bg-color: var(--el-color-danger-light-8);
     --el-button-text-color: var(--el-color-danger);
     --el-button-border-color: var(--el-color-danger-light-5);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-danger-hover);
     --el-button-hover-bg-color: var(--el-color-danger);
     --el-button-hover-border-color: var(--el-color-danger);
     --el-button-active-bg-color: var(--el-color-danger-dark-2);
-    --el-button-active-text-color: var(--el-color-white);
-    --el-button-active-border-color: var(--el-color-primary-dark-2);
+    --el-button-active-text-color: var(--et-text-on-danger-active);
+    --el-button-active-border-color: var(--el-color-danger-dark-2);
 }
 
 ._fc-designer .el-button--danger.is-link, ._fd-config-dialog .el-button--danger.is-link {
@@ -510,11 +542,13 @@ html.dark {
     font-size: 14px;
     padding: 10px;
     margin: 0;
+    color: var(--fc-text-color-1);
 }
 
 ._fc-l-title i {
     font-size: 12px;
     font-weight: 400;
+    color: inherit;
 }
 
 ._fc-l-title i.down {
@@ -762,6 +796,11 @@ html.dark {
 
 ._fd-drag-box ._fd-drag-box {
     outline: 1px dashed var(--fc-line-color-1);
+}
+
+._fc-designer ._fd-drag-tool.active,
+._fc-designer ._fd-drag-tool:has(._fd-drag-tool.active) {
+    outline-color: var(--et-color-primary) !important;
 }
 
 /*._fd-drag-box ._fd-drag-box:hover{

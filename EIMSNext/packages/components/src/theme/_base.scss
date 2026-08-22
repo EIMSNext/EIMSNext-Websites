@@ -17,6 +17,21 @@ $et-prefix: "et";
   --et-color-primary-dark-2: var(--et-color-primary-active);
   --et-bg-primary-soft: rgb(64 128 255 / 10%);
   --et-text-on-primary: #ffffff;
+  --et-text-on-primary-hover: #ffffff;
+  --et-text-on-primary-active: #ffffff;
+  --et-text-on-success: #ffffff;
+  --et-text-on-success-hover: #ffffff;
+  --et-text-on-success-active: #ffffff;
+  --et-text-on-danger: #ffffff;
+  --et-text-on-danger-hover: #ffffff;
+  --et-text-on-danger-active: #ffffff;
+  --et-text-on-warning: #ffffff;
+  --et-text-on-warning-hover: #ffffff;
+  --et-text-on-warning-active: #ffffff;
+  --et-text-on-info: #ffffff;
+  --et-text-on-info-hover: #ffffff;
+  --et-text-on-info-active: #ffffff;
+  --et-text-on-overlay: #ffffff;
 
   --el-color-primary: var(--et-color-primary);
   --el-color-primary-rgb: 64, 128, 255;
@@ -48,8 +63,8 @@ $et-prefix: "et";
   --et-color-secondary-active: #3469d1;
   --et-color-success: #23c343;
   --et-color-warning: #f0a800;
-  --et-color-danger: #eb5050;
-  --et-color-info: #2f7deb;
+  --et-color-danger: #c93636;
+  --et-color-info: #2468bd;
   --et-color-success-light-3: #65d77a;
   --et-color-danger-light-5: #f5a8a8;
   --et-color-danger-light-9: #fdeeee;
@@ -224,12 +239,12 @@ $et-prefix: "et";
   --el-button-bg-color: var(--et-color-primary);
   --el-button-border-color: var(--et-color-primary);
   --el-button-outline-color: var(--el-color-primary-light-5);
-  --el-button-hover-text-color: var(--et-text-on-primary);
+  --el-button-hover-text-color: var(--et-text-on-primary-hover);
   --el-button-hover-bg-color: var(--et-color-primary-hover);
   --el-button-hover-border-color: var(--et-color-primary-hover);
   --el-button-hover-link-text-color: var(--et-color-primary-hover);
   --el-button-active-color: var(--et-color-primary-active);
-  --el-button-active-text-color: var(--et-text-on-primary);
+  --el-button-active-text-color: var(--et-text-on-primary-active);
   --el-button-active-bg-color: var(--et-color-primary-active);
   --el-button-active-border-color: var(--et-color-primary-active);
   --el-button-disabled-text-color: var(--et-text-on-primary);
@@ -267,6 +282,32 @@ $et-prefix: "et";
   --el-button-hover-border-color: transparent;
   --el-button-active-bg-color: transparent;
   --el-button-active-border-color: transparent;
+}
+
+// These foregrounds are derived at runtime from their actual semantic
+// backgrounds, rather than assuming that every status color is dark.
+.el-button--success {
+  --el-button-text-color: var(--et-text-on-success);
+  --el-button-hover-text-color: var(--et-text-on-success-hover);
+  --el-button-active-text-color: var(--et-text-on-success-active);
+}
+
+.el-button--danger {
+  --el-button-text-color: var(--et-text-on-danger);
+  --el-button-hover-text-color: var(--et-text-on-danger-hover);
+  --el-button-active-text-color: var(--et-text-on-danger-active);
+}
+
+.el-button--warning {
+  --el-button-text-color: var(--et-text-on-warning);
+  --el-button-hover-text-color: var(--et-text-on-warning-hover);
+  --el-button-active-text-color: var(--et-text-on-warning-active);
+}
+
+.el-button--info {
+  --el-button-text-color: var(--et-text-on-info);
+  --el-button-hover-text-color: var(--et-text-on-info-hover);
+  --el-button-active-text-color: var(--et-text-on-info-active);
 }
 
 .el-tabs__active-bar {

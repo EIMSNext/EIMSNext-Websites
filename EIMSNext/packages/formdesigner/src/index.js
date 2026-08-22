@@ -105,7 +105,6 @@ import globalUseLocale, { locale, t } from "./utils/locale";
 import CodeMirror from "codemirror";
 import "codemirror/addon/mode/simple";
 import "./style/index.css";
-import "./style/theme.css";
 import "./form/elm.css";
 import "./style/icon.css";
 import "./utils/highlight/style.css";

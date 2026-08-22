@@ -5,6 +5,7 @@ import {
   hasProperty,
   toString,
   extend,
+  getFilledTextColor,
 } from "@eimsnext/form-render-core";
 
 function isTooltip(info) {
@@ -58,7 +59,7 @@ function renderOptionPreview(ctx) {
     if (option?.color) {
       children.push(ctx.$render.vNode.h("span", {
         class: "fc-option-preview-tag",
-        style: { backgroundColor: option.color },
+        style: { backgroundColor: option.color, color: getFilledTextColor() },
       }, [optionLabel(option)]));
     } else {
       children.push(optionLabel(option || value));

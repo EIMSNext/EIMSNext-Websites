@@ -61,6 +61,20 @@
       </div>
     </el-popover>
 
+    <section class="_fd-serialno-reset-panel">
+      <div class="_fd-serialno-reset-title">{{ t('com.serialno.resetTitle') }}</div>
+      <div v-if="sequenceLoading" class="_fd-serialno-reset-text">{{ t('com.serialno.resetLoading') }}</div>
+      <template v-else-if="hasStarted">
+        <div class="_fd-serialno-reset-text">
+          {{ t('com.serialno.resetStarted', { current: currentCount, next: currentCount + 1 }) }}
+        </div>
+        <el-button link type="primary" class="_fd-serialno-reset-button" @click="resetSequence">
+          {{ t('com.serialno.resetButton') }}
+        </el-button>
+      </template>
+      <div v-else class="_fd-serialno-reset-text">{{ t('com.serialno.resetNotStarted') }}</div>
+    </section>
+
     <SerialNoCounterDialog
       v-if="editing && editing.type === 'counter'"
       v-model="editing"
@@ -85,9 +99,10 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, inject } from "vue";
+import { defineComponent, ref, computed, inject, watch } from "vue";
 import draggable from "vuedraggable/src/vuedraggable";
 import { uniqueId8 } from "@eimsnext/form-render-core";
+import { serialNoSequenceService } from "@eimsnext/services";
 import SerialNoCounterDialog from "./SerialNoCounterDialog.vue";
 import SerialNoDateDialog from "./SerialNoDateDialog.vue";
 import SerialNoFixedDialog from "./SerialNoFixedDialog.vue";
@@ -116,6 +131,55 @@ export default defineComponent({
     });
     const addOpen = ref(false);
     const editing = ref(null);
+    const sequenceId = ref("");
+    const currentCount = ref(0);
+    const sequenceLoading = ref(false);
+    const activeRule = computed(() => designer.setupState.activeRule);
+    const appId = computed(() => designer.setupState.appId || "");
+    const formId = computed(() => designer.setupState.formId || "");
+    const serialField = computed(() => activeRule.value?.field || "");
+    const hasStarted = computed(() => currentCount.value > 0);
+    let sequenceRequestVersion = 0;
+
+    watch([appId, formId, serialField], loadSequence, { immediate: true });
+
+    async function loadSequence() {
+      const requestVersion = ++sequenceRequestVersion;
+      if (!appId.value || !formId.value || !serialField.value) {
+        sequenceId.value = "";
+        currentCount.value = 0;
+        sequenceLoading.value = false;
+        return;
+      }
+      const scope = { appId: appId.value, formId: formId.value, field: serialField.value };
+      sequenceLoading.value = true;
+      try {
+        const sequence = (await serialNoSequenceService.queryByScope(scope.appId, scope.formId, scope.field))[0];
+        if (requestVersion !== sequenceRequestVersion) return;
+        sequenceId.value = sequence?.id || "";
+        currentCount.value = Math.max(0, Number(sequence?.currId || 0));
+      } catch {
+        if (requestVersion !== sequenceRequestVersion) return;
+        sequenceId.value = "";
+        currentCount.value = 0;
+      } finally {
+        if (requestVersion === sequenceRequestVersion) sequenceLoading.value = false;
+      }
+    }
+
+    async function resetSequence() {
+      if (!sequenceId.value) return;
+      const requestVersion = ++sequenceRequestVersion;
+      const id = sequenceId.value;
+      sequenceLoading.value = true;
+      try {
+        await serialNoSequenceService.reset(id);
+        if (requestVersion !== sequenceRequestVersion || sequenceId.value !== id) return;
+        currentCount.value = 0;
+      } finally {
+        if (requestVersion === sequenceRequestVersion) sequenceLoading.value = false;
+      }
+    }
 
     function add(type) {
       addOpen.value = false;
@@ -167,12 +231,16 @@ export default defineComponent({
       segments,
       addOpen,
       editing,
+      sequenceLoading,
+      currentCount,
+      hasStarted,
       add,
       openEdit,
       removeAt,
       onDragEnd,
       onUpdate,
       formatLabel,
+      resetSequence,
     };
   },
 });
@@ -197,6 +265,28 @@ export default defineComponent({
   justify-content: center;
   gap: 6px;
   margin-bottom: 8px;
+}
+
+._fd-serialno-reset-panel {
+  margin-top: 14px;
+  padding: 0;
+  color: var(--fc-text-color-1);
+}
+
+._fd-serialno-reset-title {
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+._fd-serialno-reset-text {
+  line-height: 1.7;
+  color: var(--fc-text-color-1);
+}
+
+._fd-serialno-reset-button {
+  margin-top: 4px;
+  padding: 0;
 }
 
 ._fd-serialno-rule-row {

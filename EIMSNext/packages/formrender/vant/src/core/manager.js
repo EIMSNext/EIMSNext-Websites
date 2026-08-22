@@ -1,5 +1,5 @@
 import getConfig from "./config";
-import { mergeProps, is, hasProperty, extend } from "@eimsnext/form-render-core";
+import { mergeProps, is, hasProperty, extend, getFilledTextColor } from "@eimsnext/form-render-core";
 import { showNotify } from "vant";
 
 function tidy(props, name) {
@@ -46,7 +46,7 @@ function renderOptionPreview(ctx) {
     if (option?.color) {
       children.push(ctx.$render.vNode.h("span", {
         class: "fc-option-preview-tag",
-        style: { backgroundColor: option.color },
+        style: { backgroundColor: option.color, color: getFilledTextColor() },
       }, [optionLabel(option)]));
     } else {
       children.push(optionLabel(option || value));

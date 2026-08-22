@@ -1,4 +1,5 @@
 import {defineComponent, toRef} from 'vue';
+import { getFilledTextColor } from '@eimsnext/form-render-core';
 
 const NAME = 'fcCheckbox';
 
@@ -41,7 +42,7 @@ export default defineComponent({
                 delete tmp.value;
                 delete tmp.color;
                 return <van-checkbox name={value} shape="square" {...tmp}>
-                    <span class={['fc-option-label', this.optionColor && color ? 'is-colored' : '']} style={this.optionColor && color ? {'--fc-option-color': color} : undefined}>
+                    <span class={['fc-option-label', this.optionColor && color ? 'is-colored' : '']} style={this.optionColor && color ? {'--fc-option-color': color, '--fc-option-text-color': getFilledTextColor()} : undefined}>
                         {text || label || value}
                     </span>
                 </van-checkbox>

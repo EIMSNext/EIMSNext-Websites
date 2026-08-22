@@ -37,8 +37,6 @@ export default {
   props(_, { t }) {
     return localeProps(t, name + ".props", [
       { type: "SerialNoSegments", field: "segments" },
-      { type: "GroupLabel", props: { title: t("com.serialno.resetNote") } },
-      { type: "input", field: "placeholder" },
       { type: "GroupLabel", props: { title: t("props.othersetting") } },
     ]);
   },

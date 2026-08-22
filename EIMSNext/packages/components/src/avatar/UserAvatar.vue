@@ -5,6 +5,7 @@
       width: size,
       height: size,
       ...(avatar ? {} : { backgroundColor: bgColor }),
+      ...(avatar ? {} : { color: getContrastTextColor(bgColor) }),
     }"
   >
     <img
@@ -20,6 +21,8 @@
 </template>
 
 <script setup lang="ts">
+import { getContrastTextColor } from "@eimsnext/utils";
+
 defineOptions({
   name: "UserAvatar",
 });
@@ -68,7 +71,7 @@ const formatFirstChar = () => {
 }
 
 .avatar-text {
-  color: var(--et-text-on-primary);
+  color: inherit;
   font-weight: 500;
   user-select: none;
 }

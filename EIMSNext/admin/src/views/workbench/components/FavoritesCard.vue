@@ -190,7 +190,7 @@ onBeforeUnmount(() => {
 .workbench-list-icon {
   align-items: center;
   border-radius: var(--et-radius-6);
-  color: #fff;
+  color: var(--el-color-white, #fff);
   display: flex;
   flex: 0 0 var(--et-size-24);
   height: var(--et-size-24);
@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
 }
 
 .workbench-list-action {
-  color: var(--et-color-warning);
+  color: var(--et-color-primary);
   flex: 0 0 auto;
   opacity: 0;
   transition: opacity 0.2s ease;

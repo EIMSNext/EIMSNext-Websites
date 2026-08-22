@@ -425,7 +425,7 @@
   padding: 1px 7px;
   border-radius: 3px;
   background: var(--fc-option-color);
-  color: #fff;
+  color: var(--fc-option-text-color, var(--et-text-on-primary, #fff));
   line-height: 20px;
 }
 
@@ -452,7 +452,7 @@
   margin: 1px 4px 1px 0;
   padding: 1px 7px;
   border-radius: 3px;
-  color: #fff;
+  color: var(--fc-option-text-color, var(--et-text-on-primary, #fff));
   line-height: 20px;
 }
 
@@ -600,7 +600,7 @@
   padding: 0 6px;
   border-radius: 3px;
   background: var(--van-primary-color, #1989fa);
-  color: #fff;
+  color: var(--et-text-on-primary, #fff);
   font-size: 11px;
 }
 
@@ -704,16 +704,18 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: #fff;
+  color: var(--et-text-on-primary, #fff);
   font-size: 11px;
 }
 
 .fc-org-avatar.is-department {
-  background: #f2a007;
+  background: var(--et-color-warning, #f2a007);
+  color: var(--et-text-on-warning, #303133);
 }
 
 .fc-org-avatar.is-employee {
-  background: #3a7fe8;
+  background: var(--et-color-primary, #3a7fe8);
+  color: var(--et-text-on-primary, #fff);
 }
 
 .fc-org-list-label {
@@ -829,7 +831,7 @@
 
 .fc-date-sheet-tabs button.is-active {
   background: var(--van-primary-color, #1989fa);
-  color: #fff;
+  color: var(--et-text-on-primary, #fff);
 }
 
 .fc-date-sheet-content {
@@ -965,8 +967,8 @@
 }
 
 .form-create-m .van-divider.fc-divider-enhanced {
-  --fc-divider-color: #c8cdd4;
-  --fc-divider-title-color: #141e31;
+  --fc-divider-color: var(--et-border-color, #c8cdd4);
+  --fc-divider-title-color: var(--et-text-primary, #141e31);
   margin: 12px 16px;
   color: var(--fc-divider-title-color);
   border-color: var(--fc-divider-color);

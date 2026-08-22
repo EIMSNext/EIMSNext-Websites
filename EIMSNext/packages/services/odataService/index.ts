@@ -33,3 +33,4 @@ export * from "./workflowHelper";
 export * from "./workbenchConfigService";
 export * from "./workbenchFavoriteService";
 export * from "./workbenchRecentVisitService";
+export * from "./serialNoSequenceService";

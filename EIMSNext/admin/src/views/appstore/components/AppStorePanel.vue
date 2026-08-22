@@ -432,8 +432,8 @@ onMounted(loadProfiles);
 
 .market-card:hover {
   transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--et-color-warning) 26%, var(--et-border-color-light));
-  box-shadow: 0 22px 36px color-mix(in srgb, var(--et-color-warning) 12%, transparent);
+  border-color: color-mix(in srgb, var(--et-color-primary) 26%, var(--et-border-color-light));
+  box-shadow: 0 22px 36px color-mix(in srgb, var(--et-color-primary) 12%, transparent);
 }
 
 .market-cover {
@@ -564,7 +564,7 @@ onMounted(loadProfiles);
 }
 
 :global(html.dark) .sidebar-item.active {
-  color: var(--et-color-warning);
+  color: var(--et-color-primary);
 }
 
 @media (max-width: 1200px) {

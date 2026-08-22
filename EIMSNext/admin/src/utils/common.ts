@@ -37,11 +37,14 @@ export function getAppIcon(app?: AppDef) {
   return icon;
 }
 export function getAppIconColor(menu?: any) {
-  let color = "#1296db";
+  let color = "var(--et-color-primary)";
   if (menu && menu.iconColor) color = menu.iconColor;
-  if (menu && menu.menuType && menu.menuType == 2) color = "orange";
 
   return color;
+}
+
+export function getAppIconTextColor(menu?: any) {
+  return "var(--el-color-white, #fff)";
 }
 
 export function getFormIcon(form?: AppMenu) {

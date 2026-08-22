@@ -853,7 +853,7 @@ watch(barOptions, (options) => {
 
         .quota-item {
           background-color: var(--et-color-success);
-          color: var(--et-text-on-primary);
+          color: var(--et-text-on-success);
           line-height: var(--et-line-height-16);
         }
 

@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, onUnmounted, ref, watch } from "vue";
 import echarts from "@/plugins/echarts";
 import { chartSettingValidate, ChartType, getChartSort, IChartSetting } from "./type";
 import { AggCalcRequest, AggPreviewRequest, AggregateFun, aggregateService } from "@eimsnext/services";
@@ -105,6 +105,11 @@ const firstNumericValue = (values: any[] | undefined) => {
   return Number.isFinite(value) ? value : 0;
 };
 
+const themeColor = (name: string, fallback: string) => {
+  if (typeof document === "undefined") return fallback;
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+};
+
 const getChartOpts = async (setting: IChartSetting) => {
   const currentRequest = ++requestVersion;
   if (!chartSettingValidate(setting)) {
@@ -114,6 +119,8 @@ const getChartOpts = async (setting: IChartSetting) => {
 
   let chartType = setting.chartType || "";
   let chartSubType = setting.chartSubType || chartType;
+  const primaryColor = themeColor("--et-color-primary", "#2E73FF");
+  const mutedColor = themeColor("--et-bg-muted", isDark.value ? "#374151" : "#E6EAF2");
   let opt: any;
   let aggRequest: AggCalcRequest = {
     itemId: props.itemDef?.id || "",
@@ -139,7 +146,7 @@ const getChartOpts = async (setting: IChartSetting) => {
       const options = setting.indicator || {};
       opt = {
         title: options.showName === false ? undefined : { text: metric.title || metric.label || metric.id, left: "center", top: "18%" },
-        series: [{ type: "gauge", startAngle: 90, endAngle: -270, radius: "76%", pointer: { show: false }, progress: { show: false }, itemStyle: { color: "#6A83FC" }, axisLine: { lineStyle: { width: 0 } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 32, offsetCenter: [0, "8%"], color: "#6A83FC", formatter: () => formatNumber(value, options.decimalPlaces || 0) }, data: [{ value }] }],
+        series: [{ type: "gauge", startAngle: 90, endAngle: -270, radius: "76%", pointer: { show: false }, progress: { show: false }, itemStyle: { color: primaryColor }, axisLine: { lineStyle: { width: 0 } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 32, offsetCenter: [0, "8%"], color: primaryColor, formatter: () => formatNumber(value, options.decimalPlaces || 0) }, data: [{ value }] }],
       };
       chartOpts.value = applyChartTheme(opt);
       break;
@@ -166,7 +173,7 @@ const getChartOpts = async (setting: IChartSetting) => {
       const isSemi = style === "semi";
       opt = {
         title: options.showName === false ? undefined : { text: actualMetric.title || actualMetric.label || actualMetric.id, left: "center", top: "2%" },
-        series: [{ type: "gauge", startAngle: isSemi ? 180 : 90, endAngle: isSemi ? 0 : -270, center: isSemi ? ["50%", "65%"] : ["50%", "50%"], radius: isSemi ? "90%" : "72%", pointer: { show: false }, progress: { show: true, width: style === "thin" ? 7 : 14, roundCap: true, itemStyle: { color: "#6A83FC" } }, axisLine: { lineStyle: { width: style === "thin" ? 7 : 14, color: [[1, isDark.value ? "#374151" : "#E6EAF2"]] } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 24, offsetCenter: isSemi ? [0, "18%"] : [0, "8%"], color: "#6A83FC", formatter: () => labelParts.join(" / ") }, data: [{ value: Math.min(100, Math.max(0, percent)) }] }],
+        series: [{ type: "gauge", startAngle: isSemi ? 180 : 90, endAngle: isSemi ? 0 : -270, center: isSemi ? ["50%", "65%"] : ["50%", "50%"], radius: isSemi ? "90%" : "72%", pointer: { show: false }, progress: { show: true, width: style === "thin" ? 7 : 14, roundCap: true, itemStyle: { color: primaryColor } }, axisLine: { lineStyle: { width: style === "thin" ? 7 : 14, color: [[1, mutedColor]] } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 24, offsetCenter: isSemi ? [0, "18%"] : [0, "8%"], color: primaryColor, formatter: () => labelParts.join(" / ") }, data: [{ value: Math.min(100, Math.max(0, percent)) }] }],
       };
       chartOpts.value = applyChartTheme(opt);
       break;
@@ -190,7 +197,12 @@ const getChartOpts = async (setting: IChartSetting) => {
         labelLayout,
       }));
       if (chartSubType === "waterfall") {
-        const colors = ["#66b1ff", "#73d13d", "#ff4d4f", "#73d13d", "#ff7a45"];
+        const colors = [
+          primaryColor,
+          themeColor("--et-color-success", primaryColor),
+          themeColor("--et-color-danger", primaryColor),
+          themeColor("--et-color-warning", primaryColor),
+        ];
         series.forEach((item: any) => {
           item.data = item.data.map((value: number, index: number) => ({ value, itemStyle: { color: colors[index % colors.length] } }));
         });
@@ -250,7 +262,7 @@ const getChartOpts = async (setting: IChartSetting) => {
         opt.series.forEach((series: any) => { series.stack = "total"; });
       }
       if (chartSubType == "area") {
-        opt.series.forEach((series: any) => { series.areaStyle = { color: "rgba(25,183,207,0.2)" }; });
+        opt.series.forEach((series: any) => { series.areaStyle = { color: primaryColor, opacity: 0.2 }; });
       }
       if (chartSubType == "smooth") opt.series.forEach((series: any) => { series.smooth = true; });
       if (chartSubType == "step") {
@@ -320,11 +332,11 @@ const isDark = ref(typeof document !== "undefined" && document.documentElement.c
 
 const applyChartTheme = (opt: echarts.EChartsCoreOption | undefined): echarts.EChartsCoreOption | undefined => {
   if (!opt) return opt;
-  const textColor = isDark.value ? "#E5EAF3" : "#303133";
-  const axisColor = isDark.value ? "#6B7280" : "#DCDFE6";
-  const splitLineColor = isDark.value ? "#374151" : "#EBEEF5";
-  const tooltipBg = isDark.value ? "rgba(50,50,50,0.95)" : "rgba(255,255,255,0.95)";
-  const tooltipText = isDark.value ? "#E5EAF3" : "#303133";
+  const textColor = themeColor("--et-text-primary", isDark.value ? "#E5EAF3" : "#303133");
+  const axisColor = themeColor("--et-border-color", isDark.value ? "#6B7280" : "#DCDFE6");
+  const splitLineColor = themeColor("--et-border-color-light", isDark.value ? "#374151" : "#EBEEF5");
+  const tooltipBg = themeColor("--et-bg-container", isDark.value ? "#323232" : "#FFFFFF");
+  const tooltipText = textColor;
 
   return {
     backgroundColor: "transparent",
@@ -381,17 +393,20 @@ onBeforeUnmount(() => {
   requestVersion++;
 });
 
-let darkObserver: MutationObserver | undefined;
+let themeObserver: MutationObserver | undefined;
 onMounted(() => {
   if (typeof document === "undefined") return;
-  darkObserver = new MutationObserver(() => {
+  themeObserver = new MutationObserver((records) => {
     isDark.value = document.documentElement.classList.contains("dark");
+    if (records.some((record) => record.attributeName === "style") && props.setting) {
+      void getChartOpts(props.setting);
+    }
   });
-  darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style"] });
 });
 
 onUnmounted(() => {
-  darkObserver?.disconnect();
+  themeObserver?.disconnect();
 });
 </script>
 

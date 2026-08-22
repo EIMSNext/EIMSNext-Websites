@@ -3627,7 +3627,11 @@ export default {
     serialno: {
       name: "Serial number",
       placeholder: "Auto-generated",
-      resetNote: "Counter not started, will be 1 on next submit",
+      resetTitle: "Serial number reset",
+      resetLoading: "Loading counter status...",
+      resetNotStarted: "Counter not started; the next submitted record will be 1",
+      resetStarted: "Counted to {current}; the next submitted record will be {next}",
+      resetButton: "Reset",
       segmentsTitle: "Serial number rule",
       addRule: "Add",
       addDate: "Submit date",

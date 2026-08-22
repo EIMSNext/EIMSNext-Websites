@@ -55,7 +55,7 @@
       </el-button>
     </div>
     <div>
-      <el-menu mode="vertical">
+      <el-menu mode="vertical" class="app-workflow-menu" :default-active="workflowActiveIndex">
 <router-link custom :to="{ name: 'mytasks', params: { appId: app?.id } }" v-slot="{ navigate }">
           <el-menu-item index="mytask" draggable="false" :class="{ 'pl-15px': !isSidebarOpened }" @dragstart.prevent @click="() => navigate()">
             <el-badge :is-dot="hasAppTask" :offset="[0, 12]">
@@ -242,6 +242,15 @@ const systemStore = useSystemStore();
 const workbenchStore = useWorkbenchStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
 const isAppFavorite = computed(() => !!app.value && workbenchStore.isFavorite("app", app.value.id));
+const workflowActiveIndex = computed(() => {
+  switch (route.path) {
+    case "/mytasks": return "mytask";
+    case "/mystarted": return "mystarted";
+    case "/myapproved": return "myapproved";
+    case "/cctome": return "mycced";
+    default: return "";
+  }
+});
 const appTaskCount = ref(0);
 const hasAppTask = computed(() => appTaskCount.value > 0);
 const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
@@ -501,6 +510,7 @@ const createFolder = () => {
 }
 
 .app-title-text {
+  color: var(--et-text-primary);
   cursor: pointer;
   flex: 0 1 var(--et-size-90);
   max-width: var(--et-size-90);
@@ -508,6 +518,24 @@ const createFolder = () => {
   overflow: hidden;
   text-overflow: clip;
   white-space: nowrap;
+}
+
+.app-workflow-menu {
+  --el-menu-text-color: var(--et-text-primary);
+  --el-menu-active-color: var(--et-color-primary);
+  --el-menu-hover-text-color: var(--et-color-primary);
+  --el-menu-hover-bg-color: var(--et-bg-primary-soft);
+}
+
+.app-workflow-menu :deep(.el-menu-item:hover),
+.app-workflow-menu :deep(.el-menu-item.is-active) {
+  background-color: var(--et-bg-primary-soft) !important;
+  color: var(--et-color-primary) !important;
+}
+
+.app-workflow-menu :deep(.el-menu-item:hover .step-image),
+.app-workflow-menu :deep(.el-menu-item.is-active .step-image) {
+  color: var(--et-color-primary) !important;
 }
 
 .app-favorite-button {
@@ -531,7 +559,7 @@ const createFolder = () => {
 
   &.active,
   &:hover {
-    color: var(--et-color-warning);
+    color: var(--et-color-primary);
   }
 
   &:focus-visible {

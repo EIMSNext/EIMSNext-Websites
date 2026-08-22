@@ -13,13 +13,13 @@
       </template>
       <template #handle>
         <div v-if="isgod" class="handle">
-          <el-button size="small" class="btn-info builder-action-btn" @click="setJson">导入JSON
+          <el-button size="small" class="builder-action-btn" @click="setJson">导入JSON
           </el-button>
-          <el-button size="small" class="btn-info builder-action-btn" @click="setOption">导入Options
+          <el-button size="small" class="builder-action-btn" @click="setOption">导入Options
           </el-button>
-          <el-button size="small" class="btn-info builder-action-btn" @click="showJson">生成JSON
+          <el-button size="small" class="builder-action-btn" @click="showJson">生成JSON
           </el-button>
-          <el-button size="small" class="btn-info builder-action-btn" @click="showOption">生成Options
+          <el-button size="small" class="builder-action-btn" @click="showOption">生成Options
           </el-button>
         </div>
       </template>
@@ -463,6 +463,15 @@ body {
 }
 
 .builder-action-btn {
+  --el-button-bg-color: transparent;
+  --el-button-text-color: var(--et-text-primary);
+  --el-button-border-color: transparent;
+  --el-button-hover-bg-color: var(--et-color-primary);
+  --el-button-hover-text-color: var(--el-color-white, #fff);
+  --el-button-hover-border-color: var(--et-color-primary);
+  --el-button-active-bg-color: var(--et-color-primary-active);
+  --el-button-active-text-color: var(--el-color-white, #fff);
+  --el-button-active-border-color: var(--et-color-primary-active);
   border: none;
 }
 

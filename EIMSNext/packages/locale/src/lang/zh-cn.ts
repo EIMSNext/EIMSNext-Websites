@@ -3582,7 +3582,11 @@ export default {
     serialno: {
       name: "流水号",
       placeholder: "自动生成,无需填写",
-      resetNote: "暂未开始计数,下一条数据提交时计数值为 1",
+      resetTitle: "流水号重置",
+      resetLoading: "正在读取计数状态...",
+      resetNotStarted: "暂未开始计数，下一条数据提交时计数值为 1",
+      resetStarted: "已计数到{current}，下一条数据提交时计数值为{next}",
+      resetButton: "重置",
       segmentsTitle: "流水号规则",
       addRule: "添加",
       addDate: "提交日期",

@@ -7,3 +7,4 @@ export * from "./type";
 export * from "./eventBus";
 export * from "./theme";
 export * from "./formData";
+export { getContrastTextColor, getFilledTextColor } from "./color";

@@ -1,4 +1,4 @@
-import { is } from "@eimsnext/form-render-core";
+import { getFilledTextColor, is } from "@eimsnext/form-render-core";
 import dayjs from "dayjs";
 
 const findTreeLabel = function (find, data, key, props) {
@@ -47,7 +47,7 @@ const renderOptionValue = (h, values, data, colorEnabled) => {
     if (colorEnabled && option?.color) {
       return h("span", {
         class: "fc-option-preview-tag",
-        style: { backgroundColor: option.color },
+        style: { backgroundColor: option.color, color: getFilledTextColor() },
       }, [label]);
     }
     return label;

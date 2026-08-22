@@ -13,7 +13,7 @@
             <div class="item-content">
               <et-icon
                 :icon="item.icon || 'icon-formdefault'"
-                :color="item.iconColor || '#1296db'"
+                :color="item.iconColor || 'var(--et-color-primary)'"
                 class="item-icon"
               ></et-icon>
               <div class="item-label">

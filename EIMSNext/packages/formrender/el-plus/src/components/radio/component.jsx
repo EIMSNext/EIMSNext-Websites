@@ -6,7 +6,7 @@ import {
   toRef,
   watch,
 } from "vue";
-import { getSlot } from "@eimsnext/form-render-core";
+import { getFilledTextColor, getSlot } from "@eimsnext/form-render-core";
 
 const NAME = "fcRadio";
 
@@ -169,7 +169,7 @@ export default defineComponent({
                   "fc-option-label",
                   this.optionColor && color ? "is-colored" : "",
                 ]}
-                style={this.optionColor && color ? { "--fc-option-color": color } : undefined}
+                style={this.optionColor && color ? { "--fc-option-color": color, "--fc-option-text-color": getFilledTextColor() } : undefined}
               >
                 {label || opt.value || ""}
               </span>

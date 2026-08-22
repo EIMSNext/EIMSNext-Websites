@@ -309,7 +309,7 @@ onMounted(async () => {
             width: var(--et-size-32);
 
             &.active {
-              color: var(--et-color-warning);
+              color: var(--et-color-primary);
             }
           }
 

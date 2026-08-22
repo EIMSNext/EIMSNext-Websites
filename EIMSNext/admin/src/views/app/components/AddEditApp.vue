@@ -13,7 +13,7 @@
           <template #reference>
             <div class="app-icon" :style="{ backgroundColor: appIconColor }"">
               <span style=" width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-              <et-icon :icon="appIcon" color="#ffffff" size="28px" /></span>
+              <et-icon :icon="appIcon" color="var(--el-color-white, #fff)" size="28px" /></span>
             </div>
           </template>
           <AppIconSelect :icon="appIcon" :icon-color="appIconColor" @ok="onIconSelected" />

@@ -42,6 +42,8 @@ import {
   resolveFormDataValue,
   resolveQueryFilter,
   stringifyFormDataValue,
+  getContrastTextColor,
+  getFilledTextColor,
 } from "./utils";
 import { fragment, FcSubForm } from "./components";
 import fetch from "./frame/fetch";
@@ -97,4 +99,6 @@ export {
   resolveFormDataValue,
   resolveQueryFilter,
   stringifyFormDataValue,
+  getContrastTextColor,
+  getFilledTextColor,
 };

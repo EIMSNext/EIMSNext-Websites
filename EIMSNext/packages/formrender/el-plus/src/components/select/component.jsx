@@ -1,5 +1,5 @@
 import { defineComponent, toRef } from "vue";
-import { getSlot, hasProperty, is } from "@eimsnext/form-render-core";
+import { getFilledTextColor, getSlot, hasProperty, is } from "@eimsnext/form-render-core";
 
 const NAME = "fcSelect";
 const rawValue = (value) =>
@@ -90,7 +90,7 @@ export default defineComponent({
               closable={!selectDisabled && !item.isDisabled}
               disableTransitions
               class="fc-select-color-tag"
-              style={color ? { backgroundColor: color, borderColor: color, color: "#fff" } : undefined}
+              style={color ? { backgroundColor: color, borderColor: color, color: getFilledTextColor() } : undefined}
               onClose={(event) => deleteTag(event, item)}
             >
               {makeColorLabel(option || item)}

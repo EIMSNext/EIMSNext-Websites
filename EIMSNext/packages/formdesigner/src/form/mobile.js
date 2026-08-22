@@ -10,7 +10,7 @@ import Cell from '../components/cell/Cell.vue';
 import Value from '../components/value/Value.vue';
 import FcCity from '../components/mobile/City.vue';
 import Slot from '../components/slotComponent/SlotComponent.vue';
-import {is} from '@eimsnext/form-render-core';
+import {getFilledTextColor, is} from '@eimsnext/form-render-core';
 import Json from '../components/jsonComponent/JsonComponent.vue';
 import InlineForm from '../components/InlineForm.vue';
 import Echarts from '../components/echarts/Echarts.vue';
@@ -93,7 +93,7 @@ const renderOptionValue = (h, values, data, colorEnabled) => {
         const option = data.find(item => String(optionValue(item)) === String(optionValue(value)));
         if (index) children.push(', ');
         if (colorEnabled && option?.color) {
-            children.push(h('span', {class: 'fc-option-preview-tag', style: {backgroundColor: option.color}}, [optionLabel(option)]));
+            children.push(h('span', {class: 'fc-option-preview-tag', style: {backgroundColor: option.color, color: getFilledTextColor()}}, [optionLabel(option)]));
         } else {
             children.push(optionLabel(option || value));
         }

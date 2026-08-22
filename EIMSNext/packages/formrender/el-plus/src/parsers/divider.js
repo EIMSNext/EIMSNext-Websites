@@ -1,7 +1,7 @@
 const name = 'divider';
 const DEFAULT_STYLE = 'solidShort';
-const DEFAULT_COLOR = '#C8CDD4';
-const DEFAULT_TITLE_COLOR = '#141E31';
+const DEFAULT_COLOR = 'var(--et-border-color, #C8CDD4)';
+const DEFAULT_TITLE_COLOR = 'var(--et-text-primary, #141E31)';
 const STYLE_NAMES = [
   'plain',
   'dash',

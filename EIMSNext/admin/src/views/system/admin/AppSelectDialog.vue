@@ -21,7 +21,7 @@
             <label v-for="app in group.apps" :key="app.id" class="app-row">
               <el-checkbox :model-value="selectedIds.includes(app.id)" @change="(checked) => toggleApp(app.id, checked === true)" />
               <span class="app-icon" :style="{ backgroundColor: getAppIconColor(app) }">
-                <et-icon :icon="getAppIcon(app)" color="#fff" size="13px" />
+                <et-icon :icon="getAppIcon(app)" :color="getAppIconTextColor(app)" size="13px" />
               </span>
               <span class="app-name">{{ app.name }}</span>
             </label>
@@ -37,7 +37,7 @@
           @close="toggleApp(app.id, false)"
         >
           <span class="app-icon" :style="{ backgroundColor: getAppIconColor(app) }">
-            <et-icon :icon="getAppIcon(app)" color="#fff" size="12px" />
+            <et-icon :icon="getAppIcon(app)" :color="getAppIconTextColor(app)" size="12px" />
           </span>
           {{ app.name }}
         </el-tag>
@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { getAppIcon, getAppIconColor } from "@/utils/common";
+import { getAppIcon, getAppIconColor, getAppIconTextColor } from "@/utils/common";
 import { AppDef } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
 

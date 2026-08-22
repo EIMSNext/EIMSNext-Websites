@@ -111,7 +111,7 @@ onMounted(() => { if (!props.designMode) loadRecent(); });
 .workbench-list-icon {
   align-items: center;
   border-radius: var(--et-radius-6);
-  color: #fff;
+  color: var(--el-color-white, #fff);
   display: flex;
   flex: 0 0 var(--et-size-24);
   height: var(--et-size-24);

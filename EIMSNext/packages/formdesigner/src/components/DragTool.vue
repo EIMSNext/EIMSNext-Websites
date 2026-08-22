@@ -195,6 +195,16 @@ export default defineComponent({
   min-width: 80px;
   min-height: 20px;
   background-color: var(--fc-style-bg-color-1);
+  color: var(--fc-text-color-1);
+  outline-color: var(--fc-style-color-1);
+}
+
+/* An active container must retain normal field text. Its affordance is the
+   theme-colored outline, not a warning-colored label or border. */
+._fc-designer ._fd-drag-tool.active .el-form-item__label,
+._fc-designer ._fd-drag-tool.active .field-name,
+._fc-designer ._fd-drag-tool.active ._fc-field-title {
+  color: var(--fc-text-color-1) !important;
 }
 
 ._fd-drag-tool.active>div>._fd-drag-btn {
@@ -212,7 +222,7 @@ export default defineComponent({
 }*/
 
 ._fd-drag-tool._fd-drop-hover:hover {
-  outline: 1px dashed var(--fc-tool-border-color);
+  outline: 1px dashed var(--fc-style-color-1);
 }
 
 ._fd-drag-tool ._fd-drag-btn {
@@ -289,7 +299,7 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   background: var(--et-overlay-color-strong);
-  color: var(--et-text-on-primary);
+  color: var(--et-text-on-overlay);
   font-size: 14px;
 }
 

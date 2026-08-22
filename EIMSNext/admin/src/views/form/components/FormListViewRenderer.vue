@@ -142,6 +142,7 @@ import { computed, ref } from "vue";
 import { FormData, FormDef, FormListView, FormListViewField, FormListViewSettings, FormListViewType, FlowStatus, SystemField } from "@eimsnext/models";
 import type { TableInstance, TableTooltipData } from "element-plus";
 import { flowStatusArray } from "@eimsnext/components";
+import { getFilledTextColor } from "@eimsnext/utils";
 import { useI18n } from "vue-i18n";
 import { ITableColumn } from "../type";
 import { extractImageUrl, flattenDataItem, formatDataTitle, formatFormValue, findFieldDef, getColoredOptionItems } from "../listViewUtils";
@@ -299,7 +300,7 @@ const getColoredItems = (row: any, field: string) => {
 };
 
 const getOptionTagStyle = (item: any) => item?.color
-  ? { backgroundColor: item.color, borderColor: item.color, color: "#fff" }
+  ? { backgroundColor: item.color, borderColor: item.color, color: getFilledTextColor() }
   : undefined;
 
 const showOptionSeparator = (items: any[], index: number) =>

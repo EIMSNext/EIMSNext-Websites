@@ -34,8 +34,8 @@ export default {
     ctx.prop.style = [
       ctx.prop.style,
       {
-        "--fc-divider-color": props.dividerColor || "#c8cdd4",
-        "--fc-divider-title-color": props.dividerTitleColor || "#141e31",
+        "--fc-divider-color": props.dividerColor || "var(--et-border-color, #c8cdd4)",
+        "--fc-divider-title-color": props.dividerTitleColor || "var(--et-text-primary, #141e31)",
       },
     ];
     delete props.dividerStyle;

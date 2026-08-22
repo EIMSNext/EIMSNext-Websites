@@ -1084,7 +1084,6 @@ export default defineComponent({
     provide("designer", vm);
 
     const configRef = toRef(props, "config", {});
-    const theme = toRef(props, "theme");
     const fieldRef = toRef(props, "field", []);
     const formListRef = toRef(props, "list", []);
     const baseRule = toRef(configRef.value, "baseRule", null);
@@ -1155,14 +1154,6 @@ export default defineComponent({
           return `"${v}"`;
         })
         .join(" ");
-    });
-    watch(theme, (n, o) => {
-      if (o) {
-        document.body.classList.remove("fd-theme-" + o);
-      }
-      if (n) {
-        document.body.classList.add("fd-theme-" + n);
-      }
     });
     let _t = globalT;
     if (locale.value) {
@@ -4830,15 +4821,17 @@ export default defineComponent({
     };
   },
   mounted() {
-    if (this.theme) {
-      document.body.classList.add("fd-theme-" + this.theme);
-    }
+    // Legacy fd-theme-* classes hard-code colors and must not override the
+    // application's runtime theme variables. Clear any class left by an older
+    // designer instance before rendering.
+    document.body.classList.remove("fd-theme-purple", "fd-theme-orange", "fd-theme-pink", "fd-theme-green");
     if (this.config?.hotKey !== false) {
       document.addEventListener("keydown", this.bindHotkey);
       document.addEventListener("paste", this.bindPaste);
     }
   },
   unmounted() {
+    document.body.classList.remove("fd-theme-purple", "fd-theme-orange", "fd-theme-pink", "fd-theme-green");
     document.removeEventListener("keydown", this.bindHotkey);
     document.removeEventListener("paste", this.bindPaste);
   },
