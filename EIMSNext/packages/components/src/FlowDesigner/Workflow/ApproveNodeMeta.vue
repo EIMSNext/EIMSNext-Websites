@@ -284,7 +284,7 @@
         <p class="by-level-desc">{{ t("workflow.byLevelApprovalRuleDesc") }}</p>
         <MetaItemHeader :label="t('workflow.approvalTerminal')" />
         <div class="by-level-row">
-          <el-radio v-model="byLevelDraft.terminal" :label="ByLevelApprovalTerminal.StarterDepartment">
+          <el-radio v-model="byLevelDraft.terminal" :value="ByLevelApprovalTerminal.StarterDepartment">
             {{ t("workflow.initiator") }}
           </el-radio>
           <el-select
@@ -301,7 +301,7 @@
           </el-select>
         </div>
         <div class="by-level-row">
-          <el-radio v-model="byLevelDraft.terminal" :label="ByLevelApprovalTerminal.Organization">
+          <el-radio v-model="byLevelDraft.terminal"  :value="ByLevelApprovalTerminal.Organization">
             {{ t("workflow.organizationInAddressBook") }}
           </el-radio>
           <el-select

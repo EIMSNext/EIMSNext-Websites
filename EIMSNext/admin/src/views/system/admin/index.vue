@@ -202,8 +202,8 @@
               <div class="scope-row">
                 <span class="scope-label">{{ t("admin.adminGroup.optionalDept") }}</span>
                 <el-radio-group v-model="draft.appDepartmentScopeMode">
-                  <el-radio :label="ScopeMode.All">{{ t("admin.adminGroup.allDepts") }}</el-radio>
-                  <el-radio :label="ScopeMode.Partial">
+                  <el-radio :value="ScopeMode.All">{{ t("admin.adminGroup.allDepts") }}</el-radio>
+                  <el-radio :value="ScopeMode.Partial">
                     {{ t("admin.adminGroup.partialDepts") }}
                   </el-radio>
                 </el-radio-group>
@@ -220,8 +220,8 @@
               <div class="scope-row">
                 <span class="scope-label">{{ t("admin.adminGroup.optionalRole") }}</span>
                 <el-radio-group v-model="draft.appRoleScopeMode">
-                  <el-radio :label="ScopeMode.All">{{ t("admin.adminGroup.allRoles") }}</el-radio>
-                  <el-radio :label="ScopeMode.Partial">
+                  <el-radio :value="ScopeMode.All">{{ t("admin.adminGroup.allRoles") }}</el-radio>
+                  <el-radio :value="ScopeMode.Partial">
                     {{ t("admin.adminGroup.partialRoles") }}
                   </el-radio>
                 </el-radio-group>
@@ -1189,3 +1189,4 @@ onMounted(() => {
   padding: var(--et-space-28) var(--et-space-22);
 }
 </style>
+

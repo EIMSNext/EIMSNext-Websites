@@ -25,8 +25,8 @@
           </el-checkbox>
           <div class="scope-row">
             <el-radio-group v-model="local.contactDepartmentScopeMode">
-              <el-radio :label="ScopeMode.All">{{ t("admin.adminGroup.allDepts") }}</el-radio>
-              <el-radio :label="ScopeMode.Partial">
+              <el-radio :value="ScopeMode.All">{{ t("admin.adminGroup.allDepts") }}</el-radio>
+              <el-radio :value="ScopeMode.Partial">
                 {{ t("admin.adminGroup.partialDepts") }}
               </el-radio>
             </el-radio-group>
@@ -53,8 +53,8 @@
           </div>
           <div class="scope-row">
             <el-radio-group v-model="local.contactRoleScopeMode">
-              <el-radio :label="ScopeMode.All">{{ t("admin.adminGroup.allRoles") }}</el-radio>
-              <el-radio :label="ScopeMode.Partial">
+              <el-radio :value="ScopeMode.All">{{ t("admin.adminGroup.allRoles") }}</el-radio>
+              <el-radio :value="ScopeMode.Partial">
                 {{ t("admin.adminGroup.partialRoles") }}
               </el-radio>
             </el-radio-group>
@@ -239,3 +239,4 @@ const save = () => {
   padding: var(--et-space-10);
 }
 </style>
+
