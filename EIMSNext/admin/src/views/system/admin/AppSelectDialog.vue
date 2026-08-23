@@ -1,5 +1,6 @@
 <template>
   <et-dialog
+    class="no-head-divider no-foot-divider"
     :model-value="modelValue"
     :title="t('admin.appSelect.title')"
     width="680px"
@@ -165,7 +166,7 @@ const save = () => {
   grid-template-columns: 1fr 1fr;
   height: 482px;
   overflow: hidden;
-  margin: 0 20px;
+  margin: var(--et-space-20) ;
 }
 
 .app-select-left,
