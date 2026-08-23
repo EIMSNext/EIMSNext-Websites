@@ -9,15 +9,15 @@
     width="440px"
   >
     <el-radio-group v-model="mode" class="_fd-serialno-format-group">
-      <div class="_fd-serialno-format-row">
-        <el-radio :label="'preset'">
-          <span class="_fd-serialno-format-name">{{ t('com.serialno.presetFormat') }}</span>
+      <div class="_fd-serialno-format-block">
+        <el-radio value="preset" class="_fd-serialno-format-radio">
+          {{ t('com.serialno.presetFormat') }}
         </el-radio>
         <el-select
           v-model="presetValue"
           :disabled="mode !== 'preset'"
           size="default"
-          class="_fd-serialno-format-control"
+          class="_fd-serialno-format-select"
         >
           <el-option
             v-for="opt in presetOptions"
@@ -27,22 +27,24 @@
           />
         </el-select>
       </div>
-      <div class="_fd-serialno-format-row">
-        <el-radio :label="'custom'">
-          <span class="_fd-serialno-format-name">{{ t('com.serialno.customFormat') }}</span>
+      <div class="_fd-serialno-format-block">
+        <el-radio value="custom" class="_fd-serialno-format-radio">
+          {{ t('com.serialno.customFormat') }}
         </el-radio>
-        <el-input
-          v-model="customValue"
-          :disabled="mode !== 'custom'"
-          size="default"
-          class="_fd-serialno-format-control"
-          :placeholder="t('com.serialno.formatPlaceholder')"
-        />
+        <div class="_fd-serialno-format-control-wrap">
+          <el-input
+            v-model="customValue"
+            :disabled="mode !== 'custom'"
+            size="default"
+            class="_fd-serialno-format-input"
+            :placeholder="t('com.serialno.formatPlaceholder')"
+          />
+          <div class="_fd-serialno-format-preview">
+            {{ t('com.serialno.formatPreview', { value: previewText || '—' }) }}
+          </div>
+        </div>
       </div>
     </el-radio-group>
-    <div class="_fd-serialno-format-preview">
-      {{ t('com.serialno.formatPreview', { value: previewText || '—' }) }}
-    </div>
     <template #footer>
       <el-button @click="visible = false">{{ t('props.cancel') }}</el-button>
       <el-button type="primary" @click="confirm">{{ t('props.ok') }}</el-button>
@@ -125,29 +127,32 @@ export default defineComponent({
 ._fd-serialno-dialog ._fd-serialno-format-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  width: 100%;
+  gap: 16px;
+  align-items: flex-start;
+  margin: 0 20px 10px 20px;
 }
-._fd-serialno-dialog ._fd-serialno-format-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+._fd-serialno-dialog ._fd-serialno-format-block {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  column-gap: 8px;
+  row-gap: 6px;
 }
-._fd-serialno-dialog ._fd-serialno-format-row .el-radio {
-  flex: 0 0 auto;
+._fd-serialno-dialog ._fd-serialno-format-radio {
+  grid-column: 1 / 3;
   margin-right: 0;
-  white-space: nowrap;
 }
-._fd-serialno-dialog ._fd-serialno-format-name {
-  color: var(--el-text-color-regular);
+._fd-serialno-dialog ._fd-serialno-format-select,
+._fd-serialno-dialog ._fd-serialno-format-input {
+  grid-column: 2;
+  width: 200px;
 }
-._fd-serialno-dialog ._fd-serialno-format-control {
-  flex: 1;
-  width: 100%;
+._fd-serialno-dialog ._fd-serialno-format-control-wrap {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
 }
 ._fd-serialno-dialog ._fd-serialno-format-preview {
-  margin-top: 12px;
-  padding-left: 0;
+  margin-top: 4px;
   font-size: 12px;
   color: var(--el-text-color-secondary);
 }

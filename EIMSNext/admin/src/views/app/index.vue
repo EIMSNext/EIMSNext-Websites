@@ -13,7 +13,7 @@
     @update:model-value="handleDashboardEditorVisible"
   />
   <Layout>
-    <div class="empty-app">
+    <div v-if="showEmptyPage" class="empty-app">
       <div class="empty-content">
         <div class="empty-tips">
           <div class="empty-title">{{ $t("admin.appPage.createPlaceholder") }}</div>
@@ -85,12 +85,14 @@ const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
 
 const app = ref<AppDef>();
 let appLoadSequence = 0;
+const showEmptyPage = ref(false);
 
 const loadAppEntry = async () => {
   const sequence = ++appLoadSequence;
   const targetAppId = appId.value;
   if (!targetAppId) return;
 
+  showEmptyPage.value = false;
   await contextStore.setAppId(targetAppId);
   await loadAdminPermissions();
   const resolvedApp = await appStore.get(targetAppId, false);
@@ -106,6 +108,9 @@ const loadAppEntry = async () => {
       await router.replace(path);
       return;
     }
+
+    // 决议后仍停留本页：该应用确实没有可用入口，显示空应用占位
+    showEmptyPage.value = true;
   }
 };
 
