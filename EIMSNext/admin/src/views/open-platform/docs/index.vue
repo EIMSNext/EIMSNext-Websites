@@ -32,6 +32,7 @@ defineOptions({ name: "OpenPlatformDocsPage" });
 .placeholder-title {
   margin: 8px 0 0;
   font-size: 32px;
+  color: var(--et-text-primary);
 }
 
 .placeholder-text {

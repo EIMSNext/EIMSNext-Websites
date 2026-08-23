@@ -437,6 +437,7 @@ const leftBars = ref<ToolbarItem[]>([
     type: "button",
     config: {
       text: "common.delete",
+      class: "delete-button",
       command: "delete",
       icon: "el-delete",
       visible: true,

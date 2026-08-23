@@ -102,7 +102,7 @@
                 <div class="flow-header">
                   <el-button @click="edit(flow)">{{ t("common.edit") }}</el-button>
                   <el-button @click="viewLog(flow)">{{ t("dataflow.viewExecutionLog") }}</el-button>
-                  <el-button @click="remove(flow)">{{ t("common.delete") }}</el-button>
+                  <el-button class="delete-button" @click="remove(flow)">{{ t("common.delete") }}</el-button>
                   <el-switch
                     :model-value="!flow.disabled"
                     @change="toggleDisable(flow)"

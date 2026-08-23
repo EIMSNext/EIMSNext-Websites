@@ -67,6 +67,14 @@ function back() {
     color: var(--et-text-primary);
   }
 
+  h2 {
+    color: var(--et-text-primary);
+  }
+
+  h6 {
+    color: var(--et-text-secondary);
+  }
+
   .list-unstyled {
     font-size: var(--et-font-size-14);
 

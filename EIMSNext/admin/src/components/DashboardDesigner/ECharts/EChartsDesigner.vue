@@ -835,6 +835,7 @@ watch(barOptions, (options) => {
         padding: 0 var(--et-space-10);
         line-height: var(--et-line-height-34);
         width: var(--et-size-91);
+        color: var(--et-text-primary);
       }
 
       .drag-target-container {

@@ -9,7 +9,7 @@
       </el-popover>
       <el-tooltip :disabled="!hasChildren" content="容器内存在组件，不能删除" placement="top">
         <span>
-          <el-button link :disabled="hasChildren" :title="t('common.delete')" @click="emit('delete', itemDef)"><et-icon icon="el-delete" /></el-button>
+          <el-button link class="delete-button" :disabled="hasChildren" :title="t('common.delete')" @click="emit('delete', itemDef)"><et-icon icon="el-delete" /></el-button>
         </span>
       </el-tooltip>
     </div>

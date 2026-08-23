@@ -29,33 +29,42 @@
 
     <aside class="admin-sidebar">
       <section class="sidebar-section">
-        <div class="section-label">{{ t('admin.adminGroup.sysAdminGroup') }}</div>
+        <div class="section-label">{{ t("admin.adminGroup.sysAdminGroup") }}</div>
         <button
           class="tree-node system-node"
           :class="{ active: selectedKind === 'system' }"
           @click="selectSystemAdmins"
         >
           <et-icon icon="icon-admin" color="var(--et-color-primary)" />
-          <span>{{ t('admin.adminGroup.sysAdmin') }}</span>
+          <span>{{ t("admin.adminGroup.sysAdmin") }}</span>
         </button>
       </section>
 
       <section class="sidebar-section normal-section">
         <div class="section-header">
-          <span class="section-label">{{ t('admin.adminGroup.normalGroup') }}</span>
+          <span class="section-label">{{ t("admin.adminGroup.normalGroup") }}</span>
           <el-dropdown trigger="click">
             <el-button class="add-button" type="primary">
               <et-icon icon="el-plus" />
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="openCreate(AdminGroupType.Folder)">{{ t('admin.adminGroup.group') }}</el-dropdown-item>
-                <el-dropdown-item @click="openCreate(AdminGroupType.Normal)">{{ t('admin.adminGroup.adminGroup') }}</el-dropdown-item>
+                <el-dropdown-item @click="openCreate(AdminGroupType.Folder)">
+                  {{ t("admin.adminGroup.group") }}
+                </el-dropdown-item>
+                <el-dropdown-item @click="openCreate(AdminGroupType.Normal)">
+                  {{ t("admin.adminGroup.adminGroup") }}
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </div>
-        <el-input v-model="keyword" class="group-search" clearable :placeholder="t('admin.adminGroup.selectGroup')">
+        <el-input
+          v-model="keyword"
+          class="group-search"
+          clearable
+          :placeholder="t('admin.adminGroup.selectGroup')"
+        >
           <template #prefix>
             <et-icon icon="el-UserFilled" />
           </template>
@@ -139,11 +148,11 @@
     <main class="admin-main">
       <template v-if="selectedKind === 'system'">
         <header class="content-header">
-          <strong>{{ t('admin.adminGroup.sysAdmin') }}</strong>
-          <span>{{ t('admin.adminGroup.sysAdminDesc') }}</span>
+          <strong>{{ t("admin.adminGroup.sysAdmin") }}</strong>
+          <span>{{ t("admin.adminGroup.sysAdminDesc") }}</span>
         </header>
         <section class="form-section">
-          <div class="form-label">{{ t('admin.adminGroup.admin') }}</div>
+          <div class="form-label">{{ t("admin.adminGroup.admin") }}</div>
           <selected-tags
             :model-value="systemAdminTags"
             :editable="true"
@@ -153,7 +162,9 @@
           />
         </section>
         <div class="footer-actions">
-          <el-button type="primary" :loading="saving" @click="saveSystemAdmins">{{ t('admin.adminGroup.save') }}</el-button>
+          <el-button type="primary" :loading="saving" @click="saveSystemAdmins">
+            {{ t("admin.adminGroup.save") }}
+          </el-button>
         </div>
       </template>
 
@@ -162,7 +173,7 @@
           <strong>{{ selectedGroup.name }}</strong>
         </header>
         <section class="form-section">
-          <div class="form-label">{{ t('admin.adminGroup.admin') }}</div>
+          <div class="form-label">{{ t("admin.adminGroup.admin") }}</div>
           <selected-tags
             :model-value="employeeTags"
             :editable="true"
@@ -173,94 +184,112 @@
         </section>
 
         <section class="form-section">
-          <div class="form-label">{{ t('admin.adminGroup.appManage') }}</div>
-          <div class="field-line">
-            <el-button link type="primary" @click="showAppDialog = true">
-              <et-icon icon="el-plus" />
-              {{ t('admin.adminGroup.selectEditableApp') }}
-            </el-button>
+          <div class="form-label">{{ t("admin.adminGroup.appManage") }}</div>
+          <div class="config-content">
+            <div class="config-item">
+              <selected-tags
+                :model-value="appTags"
+                :editable="true"
+                :empty-text="t('admin.adminGroup.selectApp')"
+                class="select-box compact"
+                @editTag="showAppDialog = true"
+              />
+              <el-checkbox v-model="draft.canCreateOrDeleteApp">
+                {{ t("admin.adminGroup.canAddDeleteApp") }}
+              </el-checkbox>
+            </div>
+            <div class="config-item">
+              <div class="scope-row">
+                <span class="scope-label">{{ t("admin.adminGroup.optionalDept") }}</span>
+                <el-radio-group v-model="draft.appDepartmentScopeMode">
+                  <el-radio :label="ScopeMode.All">{{ t("admin.adminGroup.allDepts") }}</el-radio>
+                  <el-radio :label="ScopeMode.Partial">
+                    {{ t("admin.adminGroup.partialDepts") }}
+                  </el-radio>
+                </el-radio-group>
+              </div>
+              <selected-tags
+                :model-value="appDeptTags"
+                :editable="draft.appDepartmentScopeMode === ScopeMode.Partial"
+                :empty-text="t('admin.adminGroup.selectDept')"
+                class="select-box"
+                @editTag="openAppDeptSelect"
+              />
+            </div>
+            <div class="config-item">
+              <div class="scope-row">
+                <span class="scope-label">{{ t("admin.adminGroup.optionalRole") }}</span>
+                <el-radio-group v-model="draft.appRoleScopeMode">
+                  <el-radio :label="ScopeMode.All">{{ t("admin.adminGroup.allRoles") }}</el-radio>
+                  <el-radio :label="ScopeMode.Partial">
+                    {{ t("admin.adminGroup.partialRoles") }}
+                  </el-radio>
+                </el-radio-group>
+              </div>
+              <selected-tags
+                :model-value="appRoleTags"
+                :editable="draft.appRoleScopeMode === ScopeMode.Partial"
+                :empty-text="t('admin.adminGroup.selectRole')"
+                class="select-box"
+                @editTag="openAppRoleSelect"
+              />
+            </div>
           </div>
-          <selected-tags
-            :model-value="appTags"
-            :editable="true"
-            :empty-text="t('admin.adminGroup.selectApp')"
-            class="select-box compact"
-            @editTag="showAppDialog = true"
-          />
-          <el-checkbox v-model="draft.canCreateOrDeleteApp">{{ t('admin.adminGroup.canAddDeleteApp') }}</el-checkbox>
-        </section>
-
-        <section class="form-section">
-          <div class="scope-row">
-            <span class="scope-label">{{ t('admin.adminGroup.optionalDept') }}</span>
-            <el-radio-group v-model="draft.appDepartmentScopeMode">
-              <el-radio :label="ScopeMode.All">{{ t('admin.adminGroup.allDepts') }}</el-radio>
-              <el-radio :label="ScopeMode.Partial">{{ t('admin.adminGroup.partialDepts') }}</el-radio>
-            </el-radio-group>
-          </div>
-          <selected-tags
-            :model-value="appDeptTags"
-            :editable="draft.appDepartmentScopeMode === ScopeMode.Partial"
-            :empty-text="t('admin.adminGroup.selectDept')"
-            class="select-box"
-            @editTag="openAppDeptSelect"
-          />
-        </section>
-
-        <section class="form-section">
-          <div class="scope-row">
-            <span class="scope-label">{{ t('admin.adminGroup.optionalRole') }}</span>
-            <el-radio-group v-model="draft.appRoleScopeMode">
-              <el-radio :label="ScopeMode.All">{{ t('admin.adminGroup.allRoles') }}</el-radio>
-              <el-radio :label="ScopeMode.Partial">{{ t('admin.adminGroup.partialRoles') }}</el-radio>
-            </el-radio-group>
-          </div>
-          <selected-tags
-            :model-value="appRoleTags"
-            :editable="draft.appRoleScopeMode === ScopeMode.Partial"
-            :empty-text="t('admin.adminGroup.selectRole')"
-            class="select-box"
-            @editTag="openAppRoleSelect"
-          />
         </section>
 
         <section class="contact-section">
-          <div class="form-label">{{ t('admin.adminGroup.contactTitle') }}</div>
-          <div class="contact-desc">{{ t('admin.adminGroup.contactDesc') }}</div>
+          <div class="form-label">{{ t("admin.adminGroup.contactTitle") }}</div>
+          <div class="contact-desc">{{ t("admin.adminGroup.contactDesc") }}</div>
           <div class="contact-card">
             <div class="contact-card-header">
               <strong>{{ selectedGroup.name }}</strong>
               <span class="contact-actions">
                 <et-icon icon="el-edit" @click="showContactDialog = true" />
-                <et-icon icon="el-delete" color="var(--et-color-danger)" @click="clearContactPermission" />
+                <et-icon
+                  icon="el-delete"
+                  color="var(--et-color-danger)"
+                  @click="clearContactPermission"
+                />
               </span>
             </div>
             <div class="contact-card-body">
               <div class="summary-row">
-                <strong>{{ t('admin.adminGroup.internalDept') }}</strong>
+                <strong>{{ t("admin.adminGroup.internalDept") }}</strong>
                 <span>{{ contactDepartmentSummary }}</span>
               </div>
-              <selected-tags v-if="draft.contactDepartmentScopeMode === ScopeMode.Partial" :model-value="contactDeptTags" />
+              <selected-tags
+                v-if="draft.contactDepartmentScopeMode === ScopeMode.Partial"
+                :model-value="contactDeptTags"
+              />
               <div class="summary-row">
-                <strong>{{ t('admin.adminGroup.internalRole') }}</strong>
+                <strong>{{ t("admin.adminGroup.internalRole") }}</strong>
                 <span>{{ contactRoleSummary }}</span>
               </div>
-              <selected-tags v-if="draft.contactRoleScopeMode === ScopeMode.Partial" :model-value="contactRoleTags" />
+              <selected-tags
+                v-if="draft.contactRoleScopeMode === ScopeMode.Partial"
+                :model-value="contactRoleTags"
+              />
             </div>
           </div>
         </section>
 
         <div class="footer-actions">
-          <el-button @click="openEdit(selectedGroup)">{{ t('admin.adminGroup.editName') }}</el-button>
-          <el-button type="danger" plain @click="deleteGroup(selectedGroup)">{{ t('admin.adminGroup.delete') }}</el-button>
-          <el-button type="primary" :loading="saving" @click="savePermissions">{{ t('admin.adminGroup.save') }}</el-button>
+          <el-button @click="openEdit(selectedGroup)">
+            {{ t("admin.adminGroup.editName") }}
+          </el-button>
+          <el-button type="danger" plain @click="deleteGroup(selectedGroup)">
+            {{ t("admin.adminGroup.delete") }}
+          </el-button>
+          <el-button type="primary" :loading="saving" @click="savePermissions">
+            {{ t("admin.adminGroup.save") }}
+          </el-button>
         </div>
       </template>
 
       <template v-else-if="selectedGroup?.type === AdminGroupType.Folder">
         <header class="content-header">
           <strong>{{ selectedGroup.name }}</strong>
-          <span>{{ t('admin.adminGroup.groupDesc') }}</span>
+          <span>{{ t("admin.adminGroup.groupDesc") }}</span>
         </header>
       </template>
       <el-empty v-else :description="t('admin.adminGroup.pleaseSelectGroup')" />
@@ -292,7 +321,13 @@ import {
   roleService,
   systemService,
 } from "@eimsnext/services";
-import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
+import {
+  DataItemType,
+  ISelectedTag,
+  MemberSelectDialog,
+  MemberTabs,
+  SelectedTags,
+} from "@eimsnext/components";
 import Draggable from "vuedraggable";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
@@ -377,21 +412,34 @@ const normalizeGroup = (group: AdminGroup): AdminGroup => ({
   appDepartmentIds: group.appDepartmentIds || [],
   appRoleScopeMode: String(group.appRoleScopeMode ?? ScopeMode.All) as ScopeMode,
   appRoleIds: group.appRoleIds || [],
-  contactDepartmentPermission: String(group.contactDepartmentPermission ?? PermissionLevel.None) as PermissionLevel,
-  contactDepartmentScopeMode: String(group.contactDepartmentScopeMode ?? ScopeMode.All) as ScopeMode,
+  contactDepartmentPermission: String(
+    group.contactDepartmentPermission ?? PermissionLevel.None
+  ) as PermissionLevel,
+  contactDepartmentScopeMode: String(
+    group.contactDepartmentScopeMode ?? ScopeMode.All
+  ) as ScopeMode,
   contactDepartmentIds: group.contactDepartmentIds || [],
-  contactRolePermission: String(group.contactRolePermission ?? PermissionLevel.None) as PermissionLevel,
+  contactRolePermission: String(
+    group.contactRolePermission ?? PermissionLevel.None
+  ) as PermissionLevel,
   contactRoleScopeMode: String(group.contactRoleScopeMode ?? ScopeMode.All) as ScopeMode,
   contactRoleIds: group.contactRoleIds || [],
 });
 
-const selectedGroup = computed(() => groups.value.find((group) => group.id === selectedGroupId.value));
+const selectedGroup = computed(() =>
+  groups.value.find((group) => group.id === selectedGroupId.value)
+);
 
 const filteredGroups = computed(() => {
   const kw = keyword.value.trim();
   const normalGroups = groups.value.filter((group) => group.type !== AdminGroupType.System);
   if (!kw) return normalGroups;
-  const folderIds = new Set(normalGroups.filter((group) => group.name.includes(kw)).map((group) => group.parentId).filter(Boolean));
+  const folderIds = new Set(
+    normalGroups
+      .filter((group) => group.name.includes(kw))
+      .map((group) => group.parentId)
+      .filter(Boolean)
+  );
   return normalGroups.filter((group) => group.name.includes(kw) || folderIds.has(group.id));
 });
 
@@ -420,7 +468,8 @@ const refreshTree = () => {
   treeItems.value = buildTree(filteredGroups.value);
 };
 
-const idMap = <T extends { id: string }>(items: T[]) => new Map(items.map((item) => [item.id, item]));
+const idMap = <T extends { id: string }>(items: T[]) =>
+  new Map(items.map((item) => [item.id, item]));
 
 const employeeTags = computed(() => idsToEmployeeTags(draft.value.employeeIds));
 const systemAdminTags = computed(() => idsToEmployeeTags(systemEmployeeIds.value));
@@ -485,7 +534,8 @@ const idsToRoleTags = (ids: string[]): ISelectedTag[] => {
 
 const memberDialogOptions = computed(() => {
   const adminScope = adminPermissions.value?.isNormalAdmin ?? true;
-  if (memberDialogTarget.value === "appDepartments") return { showTabs: MemberTabs.Department, adminScope };
+  if (memberDialogTarget.value === "appDepartments")
+    return { showTabs: MemberTabs.Department, adminScope };
   if (memberDialogTarget.value === "appRoles") return { showTabs: MemberTabs.Role, adminScope };
   return { showTabs: MemberTabs.Employee, adminScope };
 });
@@ -514,20 +564,24 @@ const contactDraft = computed(() => ({
 }));
 
 const contactDepartmentSummary = computed(() => {
-  if (draft.value.contactDepartmentPermission === PermissionLevel.None) return t('admin.adminGroup.notConfigured');
+  if (draft.value.contactDepartmentPermission === PermissionLevel.None)
+    return t("admin.adminGroup.notConfigured");
   return draft.value.contactDepartmentScopeMode === ScopeMode.All
-    ? t('admin.adminGroup.viewManageAllDept')
-    : t('admin.adminGroup.viewManagePartialDept');
+    ? t("admin.adminGroup.viewManageAllDept")
+    : t("admin.adminGroup.viewManagePartialDept");
 });
 
 const contactRoleSummary = computed(() => {
-  if (draft.value.contactRolePermission === PermissionLevel.None) return t('admin.adminGroup.notConfigured');
-  const level = draft.value.contactRolePermission === PermissionLevel.Manage
-    ? t('admin.adminGroup.viewManage')
-    : t('admin.adminGroup.visible');
-  const scope = draft.value.contactRoleScopeMode === ScopeMode.All
-    ? t('admin.adminGroup.allRoles')
-    : t('admin.adminGroup.partialRoles');
+  if (draft.value.contactRolePermission === PermissionLevel.None)
+    return t("admin.adminGroup.notConfigured");
+  const level =
+    draft.value.contactRolePermission === PermissionLevel.Manage
+      ? t("admin.adminGroup.viewManage")
+      : t("admin.adminGroup.visible");
+  const scope =
+    draft.value.contactRoleScopeMode === ScopeMode.All
+      ? t("admin.adminGroup.allRoles")
+      : t("admin.adminGroup.partialRoles");
   return `${level}-${scope}`;
 });
 
@@ -547,14 +601,17 @@ const loadData = async () => {
     groups.value = adminGroups.map(normalizeGroup);
     refreshTree();
     systemGroup.value = groups.value.find((group) => group.type === AdminGroupType.System);
-    systemEmployeeIds.value = systemGroup.value?.employeeIds ? [...systemGroup.value.employeeIds] : [];
+    systemEmployeeIds.value = systemGroup.value?.employeeIds
+      ? [...systemGroup.value.employeeIds]
+      : [];
     employees.value = empList;
     departments.value = deptList;
     roles.value = roleList;
     apps.value = appList;
 
     if (selectedKind.value === "normal" && !selectedGroup.value) {
-      selectedGroupId.value = groups.value.find((group) => group.type === AdminGroupType.Normal)?.id || "";
+      selectedGroupId.value =
+        groups.value.find((group) => group.type === AdminGroupType.Normal)?.id || "";
     }
   } finally {
     loading.value = false;
@@ -635,8 +692,11 @@ const saveGroupInfo = async (form: { name: string; description: string }) => {
 };
 
 const deleteGroup = async (group: AdminGroup) => {
-  if (group.type === AdminGroupType.Folder && groups.value.some((item) => item.parentId === group.id)) {
-    ElMessage.warning(t('admin.adminGroup.cannotDeleteWithSubgroups'));
+  if (
+    group.type === AdminGroupType.Folder &&
+    groups.value.some((item) => item.parentId === group.id)
+  ) {
+    ElMessage.warning(t("admin.adminGroup.cannotDeleteWithSubgroups"));
     return;
   }
 
@@ -673,16 +733,24 @@ const openAppRoleSelect = () => {
 const finishMemberSelect = (tags: ISelectedTag[]) => {
   switch (memberDialogTarget.value) {
     case "systemEmployees":
-      systemEmployeeIds.value = tags.filter((tag) => tag.type === DataItemType.Employee).map((tag) => tag.id);
+      systemEmployeeIds.value = tags
+        .filter((tag) => tag.type === DataItemType.Employee)
+        .map((tag) => tag.id);
       break;
     case "appDepartments":
-      draft.value.appDepartmentIds = tags.filter((tag) => tag.type === DataItemType.Department).map((tag) => tag.id);
+      draft.value.appDepartmentIds = tags
+        .filter((tag) => tag.type === DataItemType.Department)
+        .map((tag) => tag.id);
       break;
     case "appRoles":
-      draft.value.appRoleIds = tags.filter((tag) => tag.type === DataItemType.Role).map((tag) => tag.id);
+      draft.value.appRoleIds = tags
+        .filter((tag) => tag.type === DataItemType.Role)
+        .map((tag) => tag.id);
       break;
     default:
-      draft.value.employeeIds = tags.filter((tag) => tag.type === DataItemType.Employee).map((tag) => tag.id);
+      draft.value.employeeIds = tags
+        .filter((tag) => tag.type === DataItemType.Employee)
+        .map((tag) => tag.id);
       break;
   }
   showMemberDialog.value = false;
@@ -693,7 +761,8 @@ const setSelectedApps = (ids: string[]) => {
 };
 
 const setContactPermission = (value: Partial<AdminPermissionDraft>) => {
-  draft.value.contactDepartmentPermission = value.contactDepartmentPermission || PermissionLevel.None;
+  draft.value.contactDepartmentPermission =
+    value.contactDepartmentPermission || PermissionLevel.None;
   draft.value.contactDepartmentScopeMode = value.contactDepartmentScopeMode || ScopeMode.All;
   draft.value.contactDepartmentIds = [...(value.contactDepartmentIds || [])];
   draft.value.contactRolePermission = value.contactRolePermission || PermissionLevel.None;
@@ -712,12 +781,12 @@ const clearContactPermission = () => {
 
 const saveSystemAdmins = async () => {
   if (!systemGroup.value?.id) {
-    ElMessage.warning(t('admin.adminGroup.missingSysAdminGroup'));
+    ElMessage.warning(t("admin.adminGroup.missingSysAdminGroup"));
     return;
   }
 
   if (systemEmployeeIds.value.length > 5) {
-    ElMessage.warning(t('admin.adminGroup.max5SysAdmins'));
+    ElMessage.warning(t("admin.adminGroup.max5SysAdmins"));
     return;
   }
 
@@ -731,7 +800,7 @@ const saveSystemAdmins = async () => {
     const index = groups.value.findIndex((item) => item.id === group.id);
     if (index > -1) groups.value[index] = normalizeGroup(group);
     else groups.value.push(normalizeGroup(group));
-    ElMessage.success(t('admin.adminGroup.saveSuccess'));
+    ElMessage.success(t("admin.adminGroup.saveSuccess"));
   } finally {
     saving.value = false;
   }
@@ -762,7 +831,7 @@ const savePermissions = async () => {
     const index = groups.value.findIndex((group) => group.id === updated.id);
     if (index > -1) groups.value[index] = normalizeGroup(updated);
     syncDraft(normalizeGroup(updated));
-    ElMessage.success(t('admin.adminGroup.saveSuccess'));
+    ElMessage.success(t("admin.adminGroup.saveSuccess"));
   } finally {
     saving.value = false;
   }
@@ -829,20 +898,30 @@ const handleDragEnd = async () => {
   await moveGroup(source, result.parentId, result.siblings);
 };
 
-const handleRootMove = (event: { relatedContext?: { element?: AdminTreeItem }; originalEvent?: { target?: EventTarget | null } }) => {
+const handleRootMove = (event: {
+  relatedContext?: { element?: AdminTreeItem };
+  originalEvent?: { target?: EventTarget | null };
+}) => {
   if (keyword.value.trim()) return false;
   const target = event.relatedContext?.element;
   const source = draggingGroup.value;
   if (!source || !target) return true;
-  const onFolderTitle = event.originalEvent?.target instanceof HTMLElement && !!event.originalEvent.target.closest(".group-drop-target");
-  return !(onFolderTitle && target.type === AdminGroupType.Folder && source.type === AdminGroupType.Normal);
+  const onFolderTitle =
+    event.originalEvent?.target instanceof HTMLElement &&
+    !!event.originalEvent.target.closest(".group-drop-target");
+  return !(
+    onFolderTitle &&
+    target.type === AdminGroupType.Folder &&
+    source.type === AdminGroupType.Normal
+  );
 };
 
-const handleChildMove = () => !keyword.value.trim() && draggingGroup.value?.type === AdminGroupType.Normal;
+const handleChildMove = () =>
+  !keyword.value.trim() && draggingGroup.value?.type === AdminGroupType.Normal;
 
 const dropToFolder = async (folder: AdminTreeItem) => {
   if (keyword.value.trim()) {
-    ElMessage.warning(t('admin.adminGroup.clearSearchBeforeSort'));
+    ElMessage.warning(t("admin.adminGroup.clearSearchBeforeSort"));
     return;
   }
 
@@ -939,6 +1018,10 @@ onMounted(() => {
   text-align: left;
   width: 100%;
 
+  et-icon {
+    color: var(--et-color-success);
+  }
+
   span:nth-child(2) {
     flex: 1;
     min-width: 0;
@@ -995,6 +1078,10 @@ onMounted(() => {
   height: 48px;
   padding: 0 var(--et-space-22);
 
+  strong {
+    color: var(--et-text-primary);
+  }
+
   span {
     color: var(--et-text-secondary);
     font-size: var(--et-font-size-13);
@@ -1012,9 +1099,20 @@ onMounted(() => {
 .form-label {
   font-weight: 700;
   line-height: 34px;
+  color: var(--et-text-primary);
 }
 
-.field-line,
+.config-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-space-20);
+
+  .config-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--et-space-10);
+  }
+}
 .scope-row {
   align-items: center;
   display: flex;
@@ -1025,6 +1123,7 @@ onMounted(() => {
 .scope-label {
   font-weight: 700;
   min-width: 96px;
+  color: var(--et-text-primary);
 }
 
 .select-box {
@@ -1054,6 +1153,7 @@ onMounted(() => {
 .contact-card-header {
   align-items: center;
   background: var(--el-fill-color-light);
+  color: var(--et-text-primary);
   display: flex;
   height: 48px;
   justify-content: space-between;
@@ -1076,6 +1176,7 @@ onMounted(() => {
 }
 
 .summary-row {
+  color: var(--et-text-primary);
   display: grid;
   gap: var(--et-space-20);
   grid-template-columns: 110px 1fr;

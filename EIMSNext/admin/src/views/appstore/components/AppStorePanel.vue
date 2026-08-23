@@ -270,6 +270,7 @@ onMounted(loadProfiles);
   margin: 16px 0 10px;
   font-size: 36px;
   line-height: 1.12;
+  color: var(--et-text-primary);
 }
 
 .hero-subtitle {

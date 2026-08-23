@@ -507,6 +507,7 @@ onBeforeMount(loadRuns);
   justify-content: space-between;
   padding-bottom: var(--et-space-12);
   border-bottom: 1px solid var(--et-border-color);
+  color: var(--et-text-primary);
 }
 
 .node-status-mark {

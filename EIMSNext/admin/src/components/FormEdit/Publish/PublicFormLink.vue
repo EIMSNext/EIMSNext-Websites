@@ -21,7 +21,7 @@
         <span class="ext-name">{{ ext }}</span>
         <el-input :model-value="buildExtUrl(ext)" readonly />
         <el-button @click="copyText(buildExtUrl(ext))">{{ t("common.copy") }}</el-button>
-        <el-button @click="removeExtValue(ext)">{{ t("common.delete") }}</el-button>
+        <el-button class="delete-button" @click="removeExtValue(ext)">{{ t("common.delete") }}</el-button>
       </div>
       <el-input
         v-model="newExtValue"
@@ -260,6 +260,10 @@ defineExpose({
   gap: var(--et-space-8);
   margin-bottom: var(--et-space-8);
 
+  strong {
+    color: var(--et-text-primary);
+  }
+
   .extlink-sub {
     color: var(--et-text-secondary);
     font-size: var(--et-font-size-12);
@@ -288,6 +292,10 @@ defineExpose({
   align-items: center;
   display: flex;
   gap: var(--et-space-12);
+
+  strong {
+    color: var(--et-text-primary);
+  }
 
   .sub-section__tip {
     color: var(--et-text-secondary);

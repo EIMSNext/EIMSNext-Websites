@@ -169,7 +169,7 @@ export default defineComponent({
 }
 
 ._fd-drag-tool:has(._fd-drag-tool:hover) {
-  outline-style: dashed;
+  outline: 1px dashed var(--fc-line-color-1);
 }
 
 ._fd-drag-tool:not(.active):hover>div>._fd-drag-btn {
@@ -196,7 +196,7 @@ export default defineComponent({
   min-height: 20px;
   background-color: var(--fc-style-bg-color-1);
   color: var(--fc-text-color-1);
-  outline-color: var(--fc-style-color-1);
+  outline: 1px dashed var(--fc-style-color-1);
 }
 
 /* An active container must retain normal field text. Its affordance is the

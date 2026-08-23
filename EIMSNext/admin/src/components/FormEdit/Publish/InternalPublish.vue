@@ -34,7 +34,7 @@
                 <template #action>
                   <div class="auth-grp-header">
                     <el-button @click="edit(authGrp)">{{ t("common.edit") }}</el-button>
-                    <el-button @click="remove(authGrp)">{{ t("common.delete") }}</el-button>
+                    <el-button class="delete-button" @click="remove(authGrp)">{{ t("common.delete") }}</el-button>
                     <el-switch
                       :model-value="!authGrp.disabled"
                       @change="toggleDisable(authGrp)"

@@ -192,7 +192,7 @@ const leftBars = ref<ToolbarItem[]>([
     type: "button",
     config: {
       text: t("common.addNew"),
-      type: "success",
+      type: "primary",
       command: "add",
       visible: true,
       icon: "el-plus",
@@ -208,7 +208,7 @@ const leftBars = ref<ToolbarItem[]>([
     type: "button",
     config: {
       text: t("common.delete"),
-      type: "danger",
+      class: "delete-button",
       command: "delete",
       visible: true,
       icon: "el-delete",

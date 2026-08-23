@@ -8,7 +8,7 @@
     <div class="image-list">
       <div v-for="image in images" :key="image.url" class="image-thumb">
         <img :src="getFileFullUrl(image.thumbUrl || image.url)" :alt="image.name" />
-        <el-button link class="delete-image" :title="t('common.delete')" @click="removeImage(image.url)"><et-icon icon="el-delete" /></el-button>
+        <el-button link class="delete-image delete-button" :title="t('common.delete')" @click="removeImage(image.url)"><et-icon icon="el-delete" /></el-button>
       </div>
       <el-upload
         v-if="images.length < DASHBOARD_IMAGE_LIMIT"

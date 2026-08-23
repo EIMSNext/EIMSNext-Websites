@@ -294,6 +294,10 @@ onBeforeMount(loadAll);
   gap: var(--et-space-6);
   min-height: var(--et-size-78);
   padding: var(--et-space-14) var(--et-space-12);
+
+  strong {
+    color: var(--et-text-primary);
+  }
 }
 
 .flow-card-footer {

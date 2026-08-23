@@ -140,7 +140,7 @@ const leftBars = ref<ToolbarItem[]>([
     type: "button",
     config: {
       text: t("common.add"),
-      type: "success",
+      type: "primary",
       command: "add",
       visible: true,
       icon: "el-plus",
@@ -155,7 +155,7 @@ const leftBars = ref<ToolbarItem[]>([
     type: "button",
     config: {
       text: t("admin.role.toolbar.remove"),
-      type: "danger",
+      class: "delete-button",
       command: "delete",
       visible: true,
       icon: "el-delete",

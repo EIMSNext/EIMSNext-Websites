@@ -38,7 +38,11 @@
       <template #default="{ node, data }">
         <div class="node-data" :title="data.label">
           <div class="node-wrapper">
-            <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
+            <et-icon
+              :icon="data.icon"
+              icon-class="node-icon"
+              :color="getNodeIconColor(data)"
+            ></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
               <et-icon icon="el-Plus" class="action-item" @click.stop="handleAddClick(data)" />
@@ -115,6 +119,9 @@ const handleNodeClick = (data: ITreeNode) => {
   selectedDept.value = data.data;
   emit("node-click", data.data);
 };
+
+/** 树节点图标颜色 —— 与 memberSelect 保持一致（部门统一绿色） */
+const getNodeIconColor = () => "var(--et-color-success)";
 
 const handleAddClick = (data: ITreeNode) => {
   editMode.value = false;

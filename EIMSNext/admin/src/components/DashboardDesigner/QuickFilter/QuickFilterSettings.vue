@@ -15,7 +15,7 @@
           <div v-for="option in draft.options" :key="option.id" class="option-row">
             <el-radio :value="option.id" />
             <el-input v-model="option.name" :placeholder="t('admin.dashboardDesigner.quickFilterOptionName')" />
-            <el-button link :title="t('common.delete')" @click="removeOption(option.id)"><et-icon icon="el-delete" /></el-button>
+            <el-button link class="delete-button" :title="t('common.delete')" @click="removeOption(option.id)"><et-icon icon="el-delete" /></el-button>
           </div>
         </el-radio-group>
       </section>
@@ -30,7 +30,7 @@
               <span>{{ condition.name || t('admin.dashboardDesigner.filterCondition') }}</span>
               <div>
                 <el-button link :title="t('common.edit')" @click="editCondition(index)"><et-icon icon="el-editPen" /></el-button>
-                <el-button link :title="t('common.delete')" @click="activeOption.conditions.splice(index, 1)"><et-icon icon="el-delete" /></el-button>
+                <el-button link class="delete-button" :title="t('common.delete')" @click="activeOption.conditions.splice(index, 1)"><et-icon icon="el-delete" /></el-button>
               </div>
             </div>
           </div>

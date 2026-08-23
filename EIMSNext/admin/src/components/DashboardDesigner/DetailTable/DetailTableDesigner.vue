@@ -472,6 +472,7 @@ watch(
   line-height: var(--et-line-height-34);
   width: var(--et-size-91);
   flex-shrink: 0;
+  color: var(--et-text-primary);
 }
 
 .drag-target-container {

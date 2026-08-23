@@ -205,6 +205,7 @@ const handleDashboardEditorVisible = (visible: boolean) => {
         font-size: var(--et-font-size-16);
         font-weight: 700;
         line-height: var(--et-line-height-22);
+        color: var(--et-text-primary);
       }
     }
 
@@ -267,6 +268,7 @@ const handleDashboardEditorVisible = (visible: boolean) => {
             font-size: var(--et-font-size-16);
             font-weight: 700;
             line-height: var(--et-line-height-22);
+            color: var(--et-text-primary);
           }
         }
 

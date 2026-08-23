@@ -653,6 +653,7 @@ const close = () => {
 .drawer-title {
   font-size: var(--et-font-size-20);
   font-weight: 700;
+  color: var(--et-text-primary);
 }
 
 .filter-shell {

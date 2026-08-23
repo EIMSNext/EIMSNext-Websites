@@ -9,9 +9,19 @@
   >
     <div class="app-select">
       <div class="app-select-left">
-        <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable :placeholder="t('common.search')" />
+        <el-input
+          v-model="keyword"
+          class="search-input"
+          prefix-icon="Search"
+          clearable
+          :placeholder="t('common.search')"
+        />
         <div class="select-all-row">
-          <el-checkbox :model-value="allFilteredChecked" :indeterminate="isIndeterminate" @change="toggleAll">
+          <el-checkbox
+            :model-value="allFilteredChecked"
+            :indeterminate="isIndeterminate"
+            @change="toggleAll"
+          >
             {{ t("common.selectAll") }}
           </el-checkbox>
         </div>
@@ -19,7 +29,10 @@
           <template v-for="group in groupedApps" :key="group.name">
             <div class="group-title">{{ group.name }}</div>
             <label v-for="app in group.apps" :key="app.id" class="app-row">
-              <el-checkbox :model-value="selectedIds.includes(app.id)" @change="(checked) => toggleApp(app.id, checked === true)" />
+              <el-checkbox
+                :model-value="selectedIds.includes(app.id)"
+                @change="(checked) => toggleApp(app.id, checked === true)"
+              />
               <span class="app-icon" :style="{ backgroundColor: getAppIconColor(app) }">
                 <et-icon :icon="getAppIcon(app)" :color="getAppIconTextColor(app)" size="13px" />
               </span>
@@ -74,13 +87,13 @@ watch(
       keyword.value = "";
     }
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 const availableApps = computed(() =>
   props.apps
     .filter((app) => app.id !== "system")
-    .sort((a, b) => (a.sortIndex || 0) - (b.sortIndex || 0)),
+    .sort((a, b) => (a.sortIndex || 0) - (b.sortIndex || 0))
 );
 
 const filteredApps = computed(() => {
@@ -152,6 +165,7 @@ const save = () => {
   grid-template-columns: 1fr 1fr;
   height: 482px;
   overflow: hidden;
+  margin: 0 20px;
 }
 
 .app-select-left,
@@ -223,12 +237,26 @@ const save = () => {
 
 .selected-app {
   max-width: 100%;
+  background-color: var(--et-fill-color-light) !important;
+  color: var(--et-text-primary) !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--et-radius-4);
+  padding: 0 var(--et-space-8);
 
   :deep(.el-tag__content) {
     align-items: center;
     display: inline-flex;
     gap: var(--et-space-6);
     min-width: 0;
+  }
+
+  :deep(.el-tag__close) {
+    color: var(--et-text-primary) !important;
+
+    &:hover {
+      color: var(--et-text-primary) !important;
+      background-color: transparent !important;
+    }
   }
 }
 </style>

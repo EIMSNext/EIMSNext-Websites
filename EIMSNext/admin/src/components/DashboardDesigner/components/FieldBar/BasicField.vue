@@ -24,7 +24,7 @@
         <div class="item-text" :class="isDeleted ? 'style-red' : ''">
           <et-icon
             icon="el-arrowDown"
-            :color="isDeleted ? 'var(--et-color-danger)' : 'var(--et-text-on-primary)'"
+            :color="isDeleted ? 'var(--et-color-danger)' : 'var(--et-color-primary)'"
             class="field-icon"
           ></et-icon>
           {{ field.title || field.label }}
@@ -33,7 +33,7 @@
           <et-icon
             icon="el-close"
             size="10px"
-            :color="isDeleted ? 'var(--et-text-on-primary)' : 'var(--et-color-primary-hover)'"
+            :color="isDeleted ? 'var(--et-text-on-primary)' : 'var(--et-color-primary)'"
             @click.stop="onRemoveClick"
           />
         </div>
@@ -156,6 +156,6 @@ const onRemoveClick = () => {
 
 .dimension-item {
   background-color: var(--et-color-primary-hover);
-  color: var(--et-text-on-primary);
+  color: var(--et-color-primary);
 }
 </style>

@@ -32,43 +32,50 @@ html.dark {
     --fc-line-color-3: var(--et-border-color-light, #2B2B2C); /*分割线色*/
 }
 
+/* Design canvas root — override the default text color so the canvas
+   never inherits a foreign html.dark color (e.g. var(--et-color-primary))
+   that would turn every uncolored label into a theme-colored one. */
+._fc-designer {
+  color: var(--fc-text-color-1);
+}
+
 ._fc-designer, ._fd-config-dialog {
-    --el-color-primary: var(--et-color-primary, #2E73FF);
-    --el-color-primary-light-3: var(--et-color-primary-light-3, #6699FF);
-    --el-color-primary-light-5: var(--et-color-primary-light-5, #99BBFF);
-    --el-color-primary-light-7: var(--et-color-primary-light-7, #CCDFFF);
-    --el-color-primary-light-8: var(--et-color-primary-light-8, #E0EBFF);
-    --el-color-primary-light-9: var(--et-color-primary-light-9, #CCDFFF);
-    --el-color-primary-dark-2: var(--et-color-primary-dark-2, #265FCC);
-    --el-color-success: var(--et-color-success, #00C050);
-    --el-color-success-light-3: var(--et-color-success-light-3, #4DDB82);
-    --el-color-success-light-5: var(--et-color-success-light-5, #80E6A3);
-    --el-color-success-light-7: var(--et-color-success-light-7, #B3F1C5);
-    --el-color-success-light-8: var(--et-color-success-light-8, #CCF6D5);
-    --el-color-success-light-9: var(--et-color-success-light-9, #E6FAE6);
-    --el-color-success-dark-2: var(--et-color-success-dark-2, #00A046);
-    --el-color-danger: var(--et-color-danger, #FF2E2E);
-    --el-color-danger-light-3: var(--et-color-danger-light-3, #FF6666);
-    --el-color-danger-light-5: var(--et-color-danger-light-5, #FF9999);
-    --el-color-danger-light-7: var(--et-color-danger-light-7, #FFCCCC);
-    --el-color-danger-light-8: var(--et-color-danger-light-8, #FFD9D9);
-    --el-color-danger-light-9: var(--et-color-danger-light-9, #FFE6E6);
-    --el-color-danger-dark-2: var(--et-color-danger-dark-2, #CC2626);
-    --el-color-warning: var(--et-color-warning, #F0A800);
-    --el-color-warning-light-3: var(--et-color-warning-light-3, #F5BF4D);
-    --el-color-warning-light-5: var(--et-color-warning-light-5, #F8D380);
-    --el-color-warning-light-7: var(--et-color-warning-light-7, #FBE6B3);
-    --el-color-warning-light-8: var(--et-color-warning-light-8, #FCECBF);
-    --el-color-warning-light-9: var(--et-color-warning-light-9, #FDF6DF);
-    --el-color-warning-dark-2: var(--et-color-warning-dark-2, #C08000);
-    --el-color-info: var(--et-color-info, #2468BD);
-    --el-color-info-light-3: var(--et-color-info-light-3, #6495D1);
-    --el-color-info-light-5: var(--et-color-info-light-5, #91B4DE);
-    --el-color-info-light-7: var(--et-color-info-light-7, #BED2EC);
-    --el-color-info-light-8: var(--et-color-info-light-8, #D3E1F1);
-    --el-color-info-light-9: var(--et-color-info-light-9, #E9F0F8);
-    --el-color-info-dark-2: var(--et-color-info-dark-2, #1D5397);
-    --el-menu-hover-bg-color: var(--et-menu-hover, var(--el-color-primary-light-9));
+  --el-color-primary: var(--et-color-primary, #2E73FF);
+  --el-color-primary-light-3: var(--et-color-primary-light-3, #6699FF);
+  --el-color-primary-light-5: var(--et-color-primary-light-5, #99BBFF);
+  --el-color-primary-light-7: var(--et-color-primary-light-7, #CCDFFF);
+  --el-color-primary-light-8: var(--et-color-primary-light-8, #E0EBFF);
+  --el-color-primary-light-9: var(--et-color-primary-light-9, #CCDFFF);
+  --el-color-primary-dark-2: var(--et-color-primary-dark-2, #265FCC);
+  --el-color-success: var(--et-color-success, #00C050);
+  --el-color-success-light-3: var(--et-color-success-light-3, #4DDB82);
+  --el-color-success-light-5: var(--et-color-success-light-5, #80E6A3);
+  --el-color-success-light-7: var(--et-color-success-light-7, #B3F1C5);
+  --el-color-success-light-8: var(--et-color-success-light-8, #CCF6D5);
+  --el-color-success-light-9: var(--et-color-success-light-9, #E6FAE6);
+  --el-color-success-dark-2: var(--et-color-success-dark-2, #00A046);
+  --el-color-danger: var(--et-color-danger, #FF2E2E);
+  --el-color-danger-light-3: var(--et-color-danger-light-3, #FF6666);
+  --el-color-danger-light-5: var(--et-color-danger-light-5, #FF9999);
+  --el-color-danger-light-7: var(--et-color-danger-light-7, #FFCCCC);
+  --el-color-danger-light-8: var(--et-color-danger-light-8, #FFD9D9);
+  --el-color-danger-light-9: var(--et-color-danger-light-9, #FFE6E6);
+  --el-color-danger-dark-2: var(--et-color-danger-dark-2, #CC2626);
+  --el-color-warning: var(--et-color-warning, #F0A800);
+  --el-color-warning-light-3: var(--et-color-warning-light-3, #F5BF4D);
+  --el-color-warning-light-5: var(--et-color-warning-light-5, #F8D380);
+  --el-color-warning-light-7: var(--et-color-warning-light-7, #FBE6B3);
+  --el-color-warning-light-8: var(--et-color-warning-light-8, #FCECBF);
+  --el-color-warning-light-9: var(--et-color-warning-light-9, #FDF6DF);
+  --el-color-warning-dark-2: var(--et-color-warning-dark-2, #C08000);
+  --el-color-info: var(--et-color-info, #2468BD);
+  --el-color-info-light-3: var(--et-color-info-light-3, #6495D1);
+  --el-color-info-light-5: var(--et-color-info-light-5, #91B4DE);
+  --el-color-info-light-7: var(--et-color-info-light-7, #BED2EC);
+  --el-color-info-light-8: var(--et-color-info-light-8, #D3E1F1);
+  --el-color-info-light-9: var(--et-color-info-light-9, #E9F0F8);
+  --el-color-info-dark-2: var(--et-color-info-dark-2, #1D5397);
+  --el-menu-hover-bg-color: var(--et-menu-hover, var(--el-color-primary-light-9));
 }
 
 /* Neutralize fd-theme classes left by legacy designer bundles. */
@@ -79,12 +86,12 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     --fc-style-color-4: var(--et-color-info) !important;
     --fc-style-bg-color-4: var(--et-bg-info-soft) !important;
     --el-color-primary: var(--et-color-primary) !important;
-    --el-color-primary-light-3: var(--et-color-primary-light-3) !important;
-    --el-color-primary-light-5: var(--et-color-primary-light-5) !important;
-    --el-color-primary-light-7: var(--et-color-primary-light-7) !important;
-    --el-color-primary-light-8: var(--et-color-primary-light-8) !important;
-    --el-color-primary-light-9: var(--et-color-primary-light-9) !important;
-    --el-color-primary-dark-2: var(--et-color-primary-dark-2) !important;
+  --el-color-primary-light-3: var(--et-color-primary-light-3) !important;
+  --el-color-primary-light-5: var(--et-color-primary-light-5) !important;
+  --el-color-primary-light-7: var(--et-color-primary-light-7) !important;
+  --el-color-primary-light-8: var(--et-color-primary-light-8) !important;
+  --el-color-primary-light-9: var(--et-color-primary-light-9) !important;
+  --el-color-primary-dark-2: var(--et-color-primary-dark-2) !important;
 }
 
 ._fc-designer .el-button--primary, ._fd-config-dialog .el-button--primary {
@@ -171,13 +178,13 @@ body[class*="fd-theme-"] ._fd-config-dialog {
 }
 
 ._fd-plain-button {
-    border-color: var(--fc-style-color-1);
-    color: var(--fc-style-color-1);
+    border-color: var(--et-border-color);
+    color: var(--et-text-primary);
 }
 
 ._fc-designer ._fd-plain-button.el-button--primary.is-plain {
-    --el-button-text-color: var(--fc-style-color-1);
-    --el-button-border-color: var(--fc-style-color-1);
+    --el-button-text-color: var(--et-text-primary);
+    --el-button-border-color: var(--et-border-color);
 }
 
 ._fc-designer .CodeMirror-gutters, ._fd-config-dialog .CodeMirror-gutters {
@@ -230,6 +237,7 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     height: 40px;
     cursor: pointer;
     box-sizing: border-box;
+    color: var(--fc-text-color-2);
 }
 
 ._fc-l-menu-item.active {
@@ -582,7 +590,7 @@ body[class*="fd-theme-"] ._fd-config-dialog {
 
 ._fc-l-item:hover {
     border: 1px dashed var(--el-color-primary);
-    color: var(--el-color-primary);    
+    color: var(--et-text-primary);    
 }
 
 ._fc-m-tools {
@@ -775,6 +783,17 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     padding: 0;
 }
 
+/* Canvas field text stays neutral unless its own field node is selected.
+   Selection affordance is the 1px dashed theme outline — never theme-colored text.
+   !important defends against any legacy rule that paints the label with the
+   primary color. */
+._fc-designer ._fc-m-drag .el-form-item__label,
+._fc-designer ._fc-m-drag .field-layout-designer:not(.active) .el-form-item__label,
+._fc-designer ._fc-m-drag .field-layout-designer:not(.active) .field-name,
+._fc-designer ._fc-m-drag .field-layout-designer:not(.active) ._fc-field-title {
+    color: var(--fc-text-color-1) !important;
+}
+
 ._fd-fcDialog-drag, ._fd-fcDrawer-drag {
     padding: 3px;
 }
@@ -800,7 +819,7 @@ body[class*="fd-theme-"] ._fd-config-dialog {
 
 ._fc-designer ._fd-drag-tool.active,
 ._fc-designer ._fd-drag-tool:has(._fd-drag-tool.active) {
-    outline-color: var(--et-color-primary) !important;
+    outline: 1px dashed color-mix(in srgb, var(--et-color-primary) 55%, transparent) !important;
 }
 
 /*._fd-drag-box ._fd-drag-box:hover{
@@ -1413,6 +1432,7 @@ body[class*="fd-theme-"] ._fd-config-dialog {
 ._fc-field-title {
     font-weight: 600;
     font-size: 14px;
+    color: var(--et-text-primary);
 }
 
 .fc-form-col:has(.hideConfigItem){

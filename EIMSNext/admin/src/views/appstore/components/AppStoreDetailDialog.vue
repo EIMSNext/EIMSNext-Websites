@@ -219,6 +219,7 @@ const { t } = useI18n();
   margin: 0;
   font-size: 34px;
   line-height: 1.15;
+  color: var(--et-text-primary);
 }
 
 .detail-subtitle {
