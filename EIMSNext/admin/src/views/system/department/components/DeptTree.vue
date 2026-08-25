@@ -41,7 +41,7 @@
             <et-icon
               :icon="data.icon"
               icon-class="node-icon"
-              :color="getNodeIconColor(data)"
+               :color="getNodeIconColor()"
             ></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
