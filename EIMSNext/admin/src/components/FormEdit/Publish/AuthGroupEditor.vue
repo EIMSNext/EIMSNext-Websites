@@ -108,7 +108,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { DataflowDiagram, IConditionList, IFieldPermItem } from "@eimsnext/components";
+import { EventFlowDiagram, IConditionList, IFieldPermItem } from "@eimsnext/components";
 import { FormDef, AuthGroup, DataPerms, AuthGroupType, IFieldPerm } from "@eimsnext/models";
 import { FlagEnum, uniqueId } from "@eimsnext/utils";
 

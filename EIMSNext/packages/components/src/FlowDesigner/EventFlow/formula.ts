@@ -8,14 +8,14 @@ import {
   IFormFieldItem,
 } from "@/FormFieldList/type";
 
-export interface IDataflowFormulaTreeItem {
+export interface IEventFlowFormulaTreeItem {
   id: string;
   label: string;
   formula?: boolean;
   info?: string;
   example?: string;
   field?: IFormFieldDef;
-  children?: IDataflowFormulaTreeItem[];
+  children?: IEventFlowFormulaTreeItem[];
 }
 
 export interface IFormulaInferenceError {
@@ -41,9 +41,9 @@ function buildFieldDef(node: INodeForm, field: FieldDef, parent?: FieldDef) {
   return toFormFieldDef(node.form!.id, field, parent, node.nodeId, node.singleResult);
 }
 
-export function buildDataflowFieldTree(nodes: INodeForm[]): IDataflowFormulaTreeItem[] {
+export function buildEventFlowFieldTree(nodes: INodeForm[]): IEventFlowFormulaTreeItem[] {
   return nodes.map((node) => {
-    const children: IDataflowFormulaTreeItem[] = [];
+    const children: IEventFlowFormulaTreeItem[] = [];
     if (node.outputFields?.length) {
       node.outputFields.forEach((field) => {
         children.push({

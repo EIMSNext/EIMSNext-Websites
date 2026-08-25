@@ -210,7 +210,7 @@ const formEditTargets: Record<string, FormEditTarget> = {
   "ext-data": { outerTab: "extension", advancedTab: "advanced-data" },
   "ext-notify": { outerTab: "extension", advancedTab: "notify" },
   "ext-print": { outerTab: "extension", advancedTab: "print" },
-  "ext-dataflow": { outerTab: "extension", advancedTab: "dataflow" },
+  "ext-eventFlow": { outerTab: "extension", advancedTab: "eventFlow" },
   "ext-webhook": { outerTab: "extension", advancedTab: "webpush" },
   publish: { outerTab: "publish" },
   datamanage: { outerTab: "datamanage" },

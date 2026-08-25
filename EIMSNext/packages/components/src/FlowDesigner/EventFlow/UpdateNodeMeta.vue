@@ -1,7 +1,7 @@
 <template>
   <template v-if="ready">
     <MetaItemHeader
-      :label="t('dataflow.editFrom')"
+      :label="t('eventFlow.editFrom')"
       :required="true"
     ></MetaItemHeader>
     <div class="mode-container">
@@ -12,11 +12,11 @@
         @change="modeChanged"
       >
         <el-option
-          :label="t('dataflow.recordInForm')"
+          :label="t('eventFlow.recordInForm')"
           :value="UpdateMode.Form"
         />
         <el-option
-          :label="t('dataflow.recordInNode')"
+          :label="t('eventFlow.recordInNode')"
           :value="UpdateMode.Node"
         />
       </el-select>
@@ -42,7 +42,7 @@
     </div>
     <MetaItemHeader
       class="mt-[8px]"
-      :label="t('dataflow.dataCondition')"
+      :label="t('eventFlow.dataCondition')"
       :required="true"
     ></MetaItemHeader>
     <ConditionList
@@ -57,13 +57,13 @@
     <div>
       <el-checkbox
         v-model="activeData.metadata.updateMeta!.insertIfNoData"
-        :label="t('dataflow.createIfNoMatched_Tips')"
+        :label="t('eventFlow.createIfNoMatched_Tips')"
         @change="insertIfNoDataChanged"
       />
     </div>
     <MetaItemHeader
       class="mt-[8px]"
-      :label="t('dataflow.setFieldValue')"
+      :label="t('eventFlow.setFieldValue')"
       :required="true"
     ></MetaItemHeader>
     <div v-if="formulaErrorMsg" class="formula-error-banner">
@@ -75,8 +75,8 @@
         size="large"
         @change="showEditPanelChanged"
       >
-        <el-radio-button :label="t('dataflow.editRecord')" value="1" />
-        <el-radio-button :label="t('dataflow.addRecord')" value="0" />
+        <el-radio-button :label="t('eventFlow.editRecord')" value="1" />
+        <el-radio-button :label="t('eventFlow.addRecord')" value="0" />
       </el-radio-group>
     </div>
     <div
@@ -98,7 +98,7 @@
       </FormFieldList>
       <div v-if="subCondNeeded" class="sub-cond-panel mt-[8px]">
         <div class="mb-[8px]">
-          {{ t("dataflow.subCondition_Tips") }}
+          {{ t("eventFlow.subCondition_Tips") }}
         </div>
         <ConditionList
           v-model="subCondList"
@@ -208,9 +208,9 @@ const formulaErrorMsg = computed(() => {
     showEditPanel.value == "0"
       ? insertFieldList.value.items
       : formFieldList.value.items,
-    t("dataflow.formulaInferenceError"),
+    t("eventFlow.formulaInferenceError"),
   );
-  return result.valid ? "" : t("dataflow.formulaInferenceError");
+  return result.valid ? "" : t("eventFlow.formulaInferenceError");
 });
 
 const ensureUpdateMeta = () => {
@@ -330,9 +330,9 @@ const fieldSelecting = async (field: IFormFieldItem) => {
       let mainField = splitSubField(field.field.field)[0];
       if (mainField != fieldLimit.limitField) {
         let confirm = await EtConfirm.showDialog(
-          t("dataflow.fieldConflict_MsgContent"),
+          t("eventFlow.fieldConflict_MsgContent"),
           {
-            title: t("dataflow.fieldConflict_MsgTitle"),
+            title: t("eventFlow.fieldConflict_MsgTitle"),
             icon: MessageIcon.Warning,
           },
         );
@@ -384,9 +384,9 @@ const fieldValueChanging = async (
         formFieldList.value.items.findIndex((x) => x.field.isSubField) > -1
       ) {
         let confirm = await EtConfirm.showDialog(
-          t("dataflow.fieldConflict_MsgContent"),
+          t("eventFlow.fieldConflict_MsgContent"),
           {
-            title: t("dataflow.fieldConflict_MsgTitle"),
+            title: t("eventFlow.fieldConflict_MsgTitle"),
             icon: MessageIcon.Warning,
           },
         );

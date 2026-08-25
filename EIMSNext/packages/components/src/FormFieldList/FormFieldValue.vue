@@ -60,7 +60,7 @@
       <template v-if="fieldValueType == FieldValueType.Formula">
         <div class="formula-value-panel">
           <el-badge class="w_full" type="warning" is-dot :hidden="!formulaValue">
-            <el-button class="w_full" plain @click="showFormulaEditor = true">{{t("dataflow.setFormula")}}</el-button>
+            <el-button class="w_full" plain @click="showFormulaEditor = true">{{t("eventFlow.setFormula")}}</el-button>
           </el-badge>
           <FormulaEditorDialog v-model="formulaValue" v-model:visible="showFormulaEditor" :nodes="nodes"
             @update:modelValue="onFormulaChange" />
@@ -90,8 +90,8 @@ import { toListItem } from "@/ConditionList/type";
 import { MemberTabs } from "@/memberSelect/type";
 import { ISelectedTag } from "@/selectedTags/type";
 import { DataItemType } from "@/common";
-import FormulaEditorDialog from "@/FlowDesigner/Dataflow/FormulaEditorDialog.vue";
-import { normalizeFormulaValue } from "@/FlowDesigner/Dataflow/formula";
+import FormulaEditorDialog from "@/FlowDesigner/EventFlow/FormulaEditorDialog.vue";
+import { normalizeFormulaValue } from "@/FlowDesigner/EventFlow/formula";
 
 const { t } = useLocale();
 
@@ -215,7 +215,7 @@ const fieldValueTypes = computed<IListItem[]>(() => [
   },
   {
     id: FieldValueType.Formula,
-    label: t("dataflow.formula"),
+    label: t("eventFlow.formula"),
     type: DataItemType.Unknown,
   },
   {

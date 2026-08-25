@@ -1,49 +1,49 @@
 <template>
-  <template v-if="triggerKind === DataflowTriggerKind.Form">
-    <MetaItemHeader :label="t('dataflow.triggeringForm')" :required="true" />
+  <template v-if="triggerKind === EventFlowTriggerKind.Form">
+    <MetaItemHeader :label="t('eventFlow.triggeringForm')" :required="true" />
     <div class="section-indent">
       <el-input v-model="formName" readonly size="default" class="full-width-input" />
     </div>
-    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.trigger')" :required="true" />
+    <MetaItemHeader class="mt-[8px]" :label="t('eventFlow.trigger')" :required="true" />
     <div class="trigger-header ml-[8px]">
       <el-popover popper-class="data-triggers" placement="bottom" :show-arrow="false" width="200" trigger="click">
         <div class="trigger-header">
           <div class="add-trigger" :class="{ notAllow: triggerBySubmit }" @click="addTrigger(EventType.Submitted)">
-            {{ t("dataflow.addedRecord") }}
+            {{ t("eventFlow.addedRecord") }}
           </div>
           <template v-if="!usingFlow">
             <div class="add-trigger" :class="{ notAllow: triggerByUpdate }" @click="addTrigger(EventType.Modified)">
-              {{ t("dataflow.updatedRecord") }}
+              {{ t("eventFlow.updatedRecord") }}
             </div>
             <div class="add-trigger" :class="{ notAllow: triggerByDelete }" @click="addTrigger(EventType.Removed)">
-              {{ t("dataflow.deletedRecord") }}
+              {{ t("eventFlow.deletedRecord") }}
             </div>
           </template>
           <template v-if="usingFlow">
             <div class="add-trigger" :class="{ notAllow: triggerByApproved }" @click="addTrigger(EventType.Approved)">
-              {{ t("dataflow.wfApproved") }}
+              {{ t("eventFlow.wfApproved") }}
             </div>
             <div class="add-trigger" :class="{ notAllow: triggerByRejected }" @click="addTrigger(EventType.Rejected)">
-              {{ t("dataflow.wfRejected") }}
+              {{ t("eventFlow.wfRejected") }}
             </div>
             <div class="add-trigger" :class="{ notAllow: triggerByApproving }" @click="addTrigger(EventType.Approving)">
-              {{ t("dataflow.wfNextNode") }}
+              {{ t("eventFlow.wfNextNode") }}
             </div>
           </template>
         </div>
         <template #reference>
-          <el-button class="btn-add-trigger">{{ "+ " + t("dataflow.addTrigger") }}</el-button>
+          <el-button class="btn-add-trigger">{{ "+ " + t("eventFlow.addTrigger") }}</el-button>
         </template>
       </el-popover>
       <div class="item-triggers">
         <template v-for="(item, index) in triggerList" :key="item.id">
           <div class="show-triggers">
-            <div class="color-838892">{{ index == 0 ? t("dataflow.when") : t("dataflow.or") }}</div>
+            <div class="color-838892">{{ index == 0 ? t("eventFlow.when") : t("eventFlow.or") }}</div>
             <template v-if="item.id == EventType.Approving">
               <div class="trigger-approving-content">
-                <div>{{ t("dataflow.wfNextNode") }}</div>
+                <div>{{ t("eventFlow.wfNextNode") }}</div>
                 <div class="trigger-node-select-wrap">
-                  <el-select v-model="wfNodeId" :placeholder="t('dataflow.selectNode')" size="default" class="trigger-node-select" @change="onNodeInput">
+                  <el-select v-model="wfNodeId" :placeholder="t('eventFlow.selectNode')" size="default" class="trigger-node-select" @change="onNodeInput">
                     <el-option v-for="item in nodeList" :key="item.id" :label="item.label" :value="item.id" />
                   </el-select>
                 </div>
@@ -62,20 +62,20 @@
         </template>
       </div>
     </div>
-    <MetaItemHeader class="mt-[12px]" :label="t('dataflow.triggerCondition')" :required="true" />
+    <MetaItemHeader class="mt-[12px]" :label="t('eventFlow.triggerCondition')" :required="true" />
     <ConditionList v-model="condList" :formId="flowContext!.formId" @change="onCondInput" @remove="onCondClear" />
   </template>
 
-  <template v-else-if="triggerKind === DataflowTriggerKind.Schedule">
-    <MetaItemHeader :label="t('dataflow.triggerTime')" :required="true" />
+  <template v-else-if="triggerKind === EventFlowTriggerKind.Schedule">
+    <MetaItemHeader :label="t('eventFlow.triggerTime')" :required="true" />
     <TriggerTimeSettings v-model="scheduleValue" :field-options="availableTimeFields" :allow-mode-switch="true" class="section-indent" />
-    <MetaItemHeader v-if="showScheduleCondition" class="mt-[12px]" :label="t('dataflow.triggerCondition')" :required="true" />
+    <MetaItemHeader v-if="showScheduleCondition" class="mt-[12px]" :label="t('eventFlow.triggerCondition')" :required="true" />
     <ConditionList v-if="showScheduleCondition" v-model="condList" :formId="flowContext!.formId" @change="onCondInput" @remove="onCondClear" />
-    <div v-else class="section-indent muted-text">{{ t("dataflow.noTriggerData") }}</div>
+    <div v-else class="section-indent muted-text">{{ t("eventFlow.noTriggerData") }}</div>
   </template>
 
   <template v-else>
-    <MetaItemHeader :label="t('dataflow.triggerAddress')" :required="true" />
+    <MetaItemHeader :label="t('eventFlow.triggerAddress')" :required="true" />
     <div class="section-indent">
       <el-input :model-value="hookUrl" readonly class="full-width-input">
         <template #append>
@@ -83,9 +83,9 @@
         </template>
       </el-input>
     </div>
-    <MetaItemHeader class="mt-[12px]" :label="t('dataflow.triggerConfig')" :required="false" />
+    <MetaItemHeader class="mt-[12px]" :label="t('eventFlow.triggerConfig')" :required="false" />
     <div class="section-indent http-config">
-      <el-checkbox v-model="enableIpLimit">{{ t("dataflow.allowedIps") }}</el-checkbox>
+      <el-checkbox v-model="enableIpLimit">{{ t("eventFlow.allowedIps") }}</el-checkbox>
       <el-input
         v-if="enableIpLimit"
         v-model="allowedIpText"
@@ -94,16 +94,16 @@
         :placeholder="t('comp.triggerNodeMeta.oneIpPerLine')"
         @change="syncAllowedIps"
       />
-      <el-checkbox v-model="enableCustomResponse">{{ t("dataflow.responseContent") }}</el-checkbox>
+      <el-checkbox v-model="enableCustomResponse">{{ t("eventFlow.responseContent") }}</el-checkbox>
       <div v-if="enableCustomResponse" class="response-config">
         <el-input-number v-model="responseStatusCode" :min="200" :max="599" @change="syncHttpSettings" />
         <el-input v-model="responseContentType" placeholder="Content-Type" @change="syncHttpSettings" />
         <el-input v-model="responseBody" type="textarea" :rows="4" :placeholder="t('comp.triggerNodeMeta.responseBodyPlaceholder')" @change="syncHttpSettings" />
       </div>
     </div>
-    <MetaItemHeader class="mt-[12px]" :label="t('dataflow.sampleFields')" :required="false" />
+    <MetaItemHeader class="mt-[12px]" :label="t('eventFlow.sampleFields')" :required="false" />
     <div class="section-indent http-config">
-      <el-button type="primary" @click="openSampleDialog">{{ t("dataflow.fetchSampleData") }}</el-button>
+      <el-button type="primary" @click="openSampleDialog">{{ t("eventFlow.fetchSampleData") }}</el-button>
       <el-table :data="httpFields" size="small" border class="http-table">
         <el-table-column prop="label" :label="t('comp.triggerNodeMeta.fieldName')" min-width="180" />
         <el-table-column prop="type" :label="t('comp.triggerNodeMeta.fieldType')" width="120" />
@@ -114,7 +114,7 @@
 
   <HttpSampleDialog
     v-model="showSampleDialog"
-    :dataflow-id="flowContext.definitionId"
+    :event-flow-id="flowContext.definitionId"
     :corp-id="corpId"
     :hook-url="hookUrl"
     @captured="onHttpSampleCaptured"
@@ -130,8 +130,8 @@ import {
   EventType,
 } from "../Common/FlowData";
 import {
-  DataflowScheduleSourceType,
-  DataflowTriggerKind,
+  EventFlowScheduleSourceType,
+  EventFlowTriggerKind,
   FieldType,
   FormDef,
   TimerOffsetDirection,
@@ -141,7 +141,7 @@ import {
 } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { FlagEnum, uniqueId } from "@eimsnext/utils";
-import { DataflowHttpSampleResult, wfDefinitionService } from "@eimsnext/services";
+import { EventFlowHttpSampleResult, wfDefinitionService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
@@ -181,19 +181,19 @@ const corpId = computed(() => (flowContext as any).corpId || "");
 const actionList = computed<IListItem[]>(() => [
   {
     id: "submit",
-    label: t("dataflow.wfAction_Submit"),
+    label: t("eventFlow.wfAction_Submit"),
     type: DataItemType.Unknown,
   },
-  // { id: "return", label: t("dataflow.wfAction_Return") },
+  // { id: "return", label: t("eventFlow.wfAction_Return") },
 ]);
 
-const triggerKind = computed(() => activeData.value.metadata.triggerMeta?.triggerKind ?? DataflowTriggerKind.Form);
+const triggerKind = computed(() => activeData.value.metadata.triggerMeta?.triggerKind ?? EventFlowTriggerKind.Form);
 const availableTimeFields = computed<TriggerTimeFieldOption[]>(() => formRef.value ? buildNotifyTimeFieldOptions(formRef.value) : []);
 const showScheduleCondition = computed(() => scheduleValue.value.mode === TriggerTimeMode.Field);
 const httpFields = computed(() => activeData.value.metadata.triggerMeta?.httpSettings?.sampleFields ?? []);
 const hookUrl = computed(() => {
-  const dataflowId = flowContext.definitionId || "{dataflowId}";
-  return `/api/v1/tenant/{corpId}/dataflow/${dataflowId}`;
+  const eventFlowId = flowContext.definitionId || "{eventFlowId}";
+  return `/api/v1/tenant/{corpId}/eventflow/${eventFlowId}`;
 });
 const enableIpLimit = computed({
   get: () => (activeData.value.metadata.triggerMeta?.httpSettings?.allowedIps?.length ?? 0) > 0,
@@ -235,12 +235,12 @@ const scheduleValue = computed<TriggerTimeSettingsValue>({
   get: () => {
     const timeSettings = activeData.value.metadata.triggerMeta?.timeSettings;
     return {
-      mode: timeSettings?.sourceType === DataflowScheduleSourceType.FormField ? TriggerTimeMode.Field : TriggerTimeMode.Custom,
+      mode: timeSettings?.sourceType === EventFlowScheduleSourceType.FormField ? TriggerTimeMode.Field : TriggerTimeMode.Custom,
       repeatType: timeSettings?.repeatType ?? TimerRepeatType.Once,
       repeatConfig: timeSettings?.repeatConfig,
       custom: {
         startTime: timeSettings?.startTime,
-        endTime: timeSettings?.sourceType === DataflowScheduleSourceType.Custom ? timeSettings?.endTime : undefined,
+        endTime: timeSettings?.sourceType === EventFlowScheduleSourceType.Custom ? timeSettings?.endTime : undefined,
       },
       field: {
         timeField: timeSettings?.timeField,
@@ -249,14 +249,14 @@ const scheduleValue = computed<TriggerTimeSettingsValue>({
         fixedTime: timeSettings?.fixedTime || "09:00",
         offsetValue: timeSettings?.offsetValue ?? 1,
         offsetUnit: timeSettings?.offsetUnit ?? TimerOffsetUnit.Minute,
-        endTime: timeSettings?.sourceType === DataflowScheduleSourceType.FormField ? timeSettings?.endTime : undefined,
+        endTime: timeSettings?.sourceType === EventFlowScheduleSourceType.FormField ? timeSettings?.endTime : undefined,
       },
     };
   },
   set: (value) => {
     if (!activeData.value.metadata.triggerMeta) return;
     activeData.value.metadata.triggerMeta.timeSettings = {
-      sourceType: value.mode === TriggerTimeMode.Field ? DataflowScheduleSourceType.FormField : DataflowScheduleSourceType.Custom,
+      sourceType: value.mode === TriggerTimeMode.Field ? EventFlowScheduleSourceType.FormField : EventFlowScheduleSourceType.Custom,
       startTime: value.mode === TriggerTimeMode.Custom ? value.custom?.startTime : undefined,
       endTime: value.mode === TriggerTimeMode.Custom ? value.custom?.endTime : value.field?.endTime,
       timeField: value.mode === TriggerTimeMode.Field ? value.field?.timeField : undefined,
@@ -294,17 +294,17 @@ const triggerList = computed(() => {
   const tList: any[] = [];
 
   if (triggerBySubmit.value)
-    tList.push({ id: EventType.Submitted, title: t("dataflow.addedRecord") });
+    tList.push({ id: EventType.Submitted, title: t("eventFlow.addedRecord") });
   if (triggerByUpdate.value)
-    tList.push({ id: EventType.Modified, title: t("dataflow.updatedRecord") });
+    tList.push({ id: EventType.Modified, title: t("eventFlow.updatedRecord") });
   if (triggerByDelete.value)
-    tList.push({ id: EventType.Removed, title: t("dataflow.deletedRecord") });
+    tList.push({ id: EventType.Removed, title: t("eventFlow.deletedRecord") });
   if (triggerByApproving.value)
-    tList.push({ id: EventType.Approving, title: t("dataflow.wfNextNode") });
+    tList.push({ id: EventType.Approving, title: t("eventFlow.wfNextNode") });
   if (triggerByApproved.value)
-    tList.push({ id: EventType.Approved, title: t("dataflow.wfApproved") });
+    tList.push({ id: EventType.Approved, title: t("eventFlow.wfApproved") });
   if (triggerByRejected.value)
-    tList.push({ id: EventType.Rejected, title: t("dataflow.wfRejected") });
+    tList.push({ id: EventType.Rejected, title: t("eventFlow.wfRejected") });
 
   return tList;
 });
@@ -357,19 +357,19 @@ function syncHttpSettings() {
 
 function openSampleDialog() {
   if (!flowContext.definitionId) {
-    ElMessage.warning(t("dataflow.httpSampleDialog.errorNoDraft"));
+    ElMessage.warning(t("eventFlow.httpSampleDialog.errorNoDraft"));
     return;
   }
   showSampleDialog.value = true;
 }
 
-function onHttpSampleCaptured(result: DataflowHttpSampleResult) {
+function onHttpSampleCaptured(result: EventFlowHttpSampleResult) {
   const settings = activeData.value.metadata.triggerMeta?.httpSettings;
   if (settings && result.sampleFields) {
     settings.sampleCapturedAt = result.capturedAt ?? Date.now();
     settings.sampleFields = result.sampleFields;
   }
-  ElMessage.success(t("dataflow.httpSampleDialog.viewSample"));
+  ElMessage.success(t("eventFlow.httpSampleDialog.viewSample"));
 }
 
 function buildNotifyTimeFieldOptions(formDef: FormDef): TriggerTimeFieldOption[] {
@@ -416,7 +416,7 @@ onBeforeMount(() => {
       formName.value = form.name;
       usingFlow.value = form.usingWorkflow;
     } else {
-      formName.value = t("dataflow.unknownForm");
+      formName.value = t("eventFlow.unknownForm");
     }
 
     if (usingFlow.value) {

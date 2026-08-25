@@ -9,11 +9,11 @@ import {
   NotifyChannel,
   WorkflowAutoProcessRule,
   WorkflowWithdrawRule,
-  DataflowTriggerKind,
-  DataflowScheduleSourceType,
-  DataflowHttpSampleField,
-  DataflowHttpTriggerSetting,
-  DataflowTimeTriggerSetting,
+  EventFlowTriggerKind,
+  EventFlowScheduleSourceType,
+  EventFlowHttpSampleField,
+  EventFlowHttpTriggerSetting,
+  EventFlowTimeTriggerSetting,
   FieldType,
   WfNoApproverActionType,
 } from "@eimsnext/models";
@@ -72,7 +72,7 @@ export interface IFlowData {
   endNode: IFlowNodeData;
   workflowMeta?: WorkflowMeta;
   eventSource?: EventSourceType;
-  dfCascade?: CascadeMode;
+  efCascade?: CascadeMode;
   eventIds?: string[];
 }
 
@@ -458,7 +458,7 @@ function isNodeListInsideNode(
   return nodeData.childNodes?.some((child) => isNodeListInsideNode(child, nodeDatas)) ?? false;
 }
 
-export function cleanupInvalidDataflowDependencies(flowData: IFlowData) {
+export function cleanupInvalidEventFlowDependencies(flowData: IFlowData) {
   const nodes = collectFlowNodes(flowData);
 
   nodes.forEach((node) => {
@@ -844,9 +844,9 @@ export interface TriggerMeta {
   condition: IConditionList;
   changeFields?: string[]; //数据修改时，哪些字段修改会触发
   singleResult: boolean;
-  triggerKind?: DataflowTriggerKind;
-  timeSettings?: DataflowTimeTriggerSetting;
-  httpSettings?: DataflowHttpTriggerSetting;
+  triggerKind?: EventFlowTriggerKind;
+  timeSettings?: EventFlowTimeTriggerSetting;
+  httpSettings?: EventFlowHttpTriggerSetting;
 }
 
 export interface InsertMeta {
@@ -930,17 +930,17 @@ export enum EventType {
   Approved = 16,
   Rejected = 32,
 }
-export function createDataflowData(
+export function createEventFlowData(
   eventSource: EventSourceType,
   t: Translator
 ): IFlowData {
   const triggerKind = eventSource === EventSourceType.Http
-    ? DataflowTriggerKind.Http
+    ? EventFlowTriggerKind.Http
     : eventSource === EventSourceType.Schedule
-      ? DataflowTriggerKind.Schedule
-      : DataflowTriggerKind.Form;
+      ? EventFlowTriggerKind.Schedule
+      : EventFlowTriggerKind.Form;
   return {
-    dfCascade: CascadeMode.Never,
+    efCascade: CascadeMode.Never,
     eventSource: eventSource,
     startNode: {
       id: uniqueId(),
@@ -956,7 +956,7 @@ export function createDataflowData(
           singleResult: true,
           triggerKind,
           timeSettings: {
-            sourceType: DataflowScheduleSourceType.Custom,
+            sourceType: EventFlowScheduleSourceType.Custom,
             repeatType: TimerRepeatType.Once,
             fixedTime: "09:00",
             offsetValue: 1,

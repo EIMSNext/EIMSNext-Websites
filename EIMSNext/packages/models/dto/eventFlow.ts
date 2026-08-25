@@ -3,7 +3,7 @@ import { TimerOffsetDirection, TimerOffsetUnit, TimerRepeatType } from "./formNo
 /**
  * 数据流触发类型。
  */
-export enum DataflowTriggerKind {
+export enum EventFlowTriggerKind {
   Form = "form",
   Schedule = "schedule",
   Http = "http",
@@ -12,7 +12,7 @@ export enum DataflowTriggerKind {
 /**
  * 定时触发时间源类型。
  */
-export enum DataflowScheduleSourceType {
+export enum EventFlowScheduleSourceType {
   Custom = "custom",
   FormField = "formField",
 }
@@ -20,7 +20,7 @@ export enum DataflowScheduleSourceType {
 /**
  * 数据流HTTP样例字段。
  */
-export interface DataflowHttpSampleField {
+export interface EventFlowHttpSampleField {
   key: string;
   label: string;
   type: string;
@@ -30,21 +30,21 @@ export interface DataflowHttpSampleField {
 /**
  * 数据流HTTP触发设置。
  */
-export interface DataflowHttpTriggerSetting {
+export interface EventFlowHttpTriggerSetting {
   allowedIps?: string[];
   responseEnabled?: boolean;
   responseStatusCode?: number;
   responseContentType?: string;
   responseBody?: string;
   sampleCapturedAt?: number;
-  sampleFields?: DataflowHttpSampleField[];
+  sampleFields?: EventFlowHttpSampleField[];
 }
 
 /**
  * 数据流定时触发设置。
  */
-export interface DataflowTimeTriggerSetting {
-  sourceType: DataflowScheduleSourceType;
+export interface EventFlowTimeTriggerSetting {
+  sourceType: EventFlowScheduleSourceType;
   startTime?: number;
   endTime?: number;
   timeField?: string;

@@ -6,7 +6,7 @@ import { IFlowData } from "../Common/FlowData";
 import FlowDiagram from "../Common/FlowDiagram.vue";
 
 defineOptions({
-  name: "DataflowDiagram",
+  name: "EventFlowDiagram",
 });
 const props = defineProps<{
   flowData: IFlowData;

@@ -26,7 +26,7 @@ import { IConditionList, ConditionType } from "@/ConditionList/type";
 const { t } = useLocale();
 
 defineOptions({
-  name: "DfConditionNodeMeta",
+  name: "EfConditionNodeMeta",
 });
 
 const ready = ref(false);

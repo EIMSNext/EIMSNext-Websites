@@ -1,7 +1,7 @@
 <template>
   <template v-if="ready">
     <MetaItemHeader
-      :label="t('dataflow.targetForm')"
+      :label="t('eventFlow.targetForm')"
       :required="true"
     ></MetaItemHeader>
     <FormSelect
@@ -11,7 +11,7 @@
     ></FormSelect>
     <MetaItemHeader
       class="mt-[8px]"
-      :label="t('dataflow.setFieldValue')"
+      :label="t('eventFlow.setFieldValue')"
       :required="true"
     ></MetaItemHeader>
     <div v-if="formulaErrorMsg" class="formula-error-banner">
@@ -70,9 +70,9 @@ const nodes = ref<INodeForm[]>([]);
 const formulaErrorMsg = computed(() => {
   const result = validateFormulaFieldList(
     formFieldList.value.items,
-    t("dataflow.formulaInferenceError"),
+    t("eventFlow.formulaInferenceError"),
   );
-  return result.valid ? "" : t("dataflow.formulaInferenceError");
+  return result.valid ? "" : t("eventFlow.formulaInferenceError");
 });
 
 const formChanged = async (form: IFormItem) => {

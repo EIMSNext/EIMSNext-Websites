@@ -54,7 +54,7 @@ const selectedNodeId = computed(() =>
 
 const missingLabel = (field: IFormFieldDef) => {
   const label = field.label || field.field;
-  return label.includes(t("dataflow.deletedField")) ? label : `${label}（${t("dataflow.deletedField")}）`;
+  return label.includes(t("eventFlow.deletedField")) ? label : `${label}（${t("eventFlow.deletedField")}）`;
 };
 
 const appendMissingSelectedNode = () => {

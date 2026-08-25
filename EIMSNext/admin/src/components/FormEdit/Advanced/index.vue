@@ -10,8 +10,8 @@
       <el-tab-pane :label="$t('admin.advanced.print')" name="print" class="adv-panel">
         <PrintDefList :form-def="formDef"></PrintDefList>
       </el-tab-pane>
-      <el-tab-pane :label="$t('admin.advanced.dataflow')" name="dataflow" class="adv-panel">
-        <DataflowList :form-def="formDef" />
+      <el-tab-pane :label="$t('admin.advanced.eventFlow')" name="eventFlow" class="adv-panel">
+        <EventFlowList :form-def="formDef" />
       </el-tab-pane>
       <el-tab-pane :label="$t('admin.advanced.webhook')" name="webpush" class="adv-panel">
         <WebhookList :form-def="formDef" />
@@ -23,7 +23,7 @@
 import DataAdvanced from "./DataAdvanced.vue";
 import NotifyList from "./NotifyList.vue";
 import WebhookList from "./WebhookList.vue";
-import DataflowList from "./DataflowList.vue";
+import EventFlowList from "./EventFlowList.vue";
 import PrintDefList from "./PrintDefList.vue";
 import { FormDef } from "@eimsnext/models";
 import { TabsPaneContext } from "element-plus";

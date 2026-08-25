@@ -2,7 +2,7 @@
   <EtDialog
     v-model="dialogVisible"
     class="formula-editor-dialog"
-    :title="title || t('dataflow.formulaEditor')"
+    :title="title || t('eventFlow.formulaEditor')"
     width="1100px"
     :destroy-on-close="true"
     :append-to-body="true"
@@ -38,9 +38,9 @@
           />
         </div>
         <div class="formula-info-panel">
-          <div v-if="currentFormulaInfo">{{ t("dataflow.formulaInfo") }}: {{ currentFormulaInfo }}</div>
+          <div v-if="currentFormulaInfo">{{ t("eventFlow.formulaInfo") }}: {{ currentFormulaInfo }}</div>
           <div v-if="currentFormulaExample">
-            {{ t("dataflow.formulaExample") }}: {{ currentFormulaExample }}
+            {{ t("eventFlow.formulaExample") }}: {{ currentFormulaExample }}
           </div>
         </div>
       </div>
@@ -59,9 +59,9 @@ import { INodeForm } from "@/NodeFieldList/type";
 import { IFormulaRef, IFormulaValue } from "@/FormFieldList/type";
 import { EtDialog } from "@/dialog";
 import {
-  buildDataflowFieldTree,
+  buildEventFlowFieldTree,
   getFormulaFieldDisplayLabel,
-  IDataflowFormulaTreeItem,
+  IEventFlowFormulaTreeItem,
 } from "./formula";
 
 const { t } = useI18n();
@@ -93,8 +93,8 @@ const formulaKeyword = ref("");
 const formulaInfoText = ref("");
 const formulaExampleText = ref("");
 
-const fieldTree = computed(() => buildDataflowFieldTree(props.nodes));
-const formulaTreeInfo = computed<IDataflowFormulaTreeItem[]>(() =>
+const fieldTree = computed(() => buildEventFlowFieldTree(props.nodes));
+const formulaTreeInfo = computed<IEventFlowFormulaTreeItem[]>(() =>
   formulaTree.map((group: IFormulaGroupMeta) => ({
     id: group.key,
     label: t(`formula.${group.key}`),
@@ -118,14 +118,14 @@ const currentFormulaInfo = computed(() => formulaInfoText.value);
 const currentFormulaExample = computed(() => formulaExampleText.value);
 
 function filterTree(
-  tree: IDataflowFormulaTreeItem[],
+  tree: IEventFlowFormulaTreeItem[],
   keyword: string,
-): IDataflowFormulaTreeItem[] {
+): IEventFlowFormulaTreeItem[] {
   if (!keyword) return tree;
   const lowerKeyword = keyword.toLowerCase();
   return tree
-    .map((item): IDataflowFormulaTreeItem | undefined => {
-      const children: IDataflowFormulaTreeItem[] | undefined = item.children
+    .map((item): IEventFlowFormulaTreeItem | undefined => {
+      const children: IEventFlowFormulaTreeItem[] | undefined = item.children
         ? filterTree(item.children, keyword)
         : undefined;
       if (
@@ -136,7 +136,7 @@ function filterTree(
       }
       return undefined;
     })
-    .filter((item): item is IDataflowFormulaTreeItem => !!item);
+    .filter((item): item is IEventFlowFormulaTreeItem => !!item);
 }
 
 function ensureRef(field: IFormulaRef["field"]) {
@@ -171,7 +171,7 @@ function markReadableLabels() {
   });
 }
 
-function onFieldClick(data: IDataflowFormulaTreeItem) {
+function onFieldClick(data: IEventFlowFormulaTreeItem) {
   if (!data.field || !editor.value) return;
   const refItem = ensureRef(data.field);
   editor.value.replaceRange(refItem.key, editor.value.getCursor());
@@ -180,7 +180,7 @@ function onFieldClick(data: IDataflowFormulaTreeItem) {
   nextTick(() => markReadableLabels());
 }
 
-function onFormulaClick(data: IDataflowFormulaTreeItem) {
+function onFormulaClick(data: IEventFlowFormulaTreeItem) {
   if (!data.formula || data.field || !editor.value) return;
   editor.value.replaceRange(`${data.label}()`, editor.value.getCursor());
   editor.value.moveH(-1, "char");

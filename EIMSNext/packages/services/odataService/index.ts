@@ -5,7 +5,7 @@ export * from "./authGroupService";
 export * from "./clientGrantService";
 export * from "./clientService";
 export * from "./crossBindingService";
-export * from "./dfRunLogService";
+export * from "./efRunLogService";
 export * from "./corporateService";
 export * from "./departmentService";
 export * from "./employeeService";

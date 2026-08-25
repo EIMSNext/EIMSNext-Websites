@@ -4,15 +4,15 @@
       <div class="left"></div>
       <div class="right">
         <el-button @click="save">{{ t("common.save") }}</el-button>
-        <el-button>{{ t("admin.misc.dataflowActivate") }}</el-button>
+        <el-button>{{ t("admin.misc.eventFlowActivate") }}</el-button>
       </div>
     </div>
     <div class="flow-editor-wrapper">
       <div class="flow-editor">
-        <DataflowDiagram :flow-data="flowData" />
+        <EventFlowDiagram :flow-data="flowData" />
       </div>
-      <div class="flow-meta-container dataflow-meta-container">
-        <DataflowMetaEditor v-if="ready" />
+      <div class="flow-meta-container event-flow-meta-container">
+        <EventFlowMetaEditor v-if="ready" />
       </div>
     </div>
   </div>
@@ -25,7 +25,7 @@ import {
   IFlowNodeData,
   collectPluginFieldValidationErrors,
   createFlowNode,
-  createDataflowData,
+  createEventFlowData,
   EtConfirm,
   ConfirmResult,
   MessageIcon,
@@ -39,7 +39,7 @@ enum FormulaFieldValueType {
   Formula = "formula",
 }
 
-interface IDataflowFormFieldItem {
+interface IEventFlowFormFieldItem {
   field: { field: string; label: string; isSubField?: boolean };
   value: {
     type: string;
@@ -48,7 +48,7 @@ interface IDataflowFormFieldItem {
 }
 
 defineOptions({
-  name: "DataflowDesigner",
+  name: "EventFlowDesigner",
 });
 const props = defineProps<{
   appId: string;
@@ -59,7 +59,7 @@ const props = defineProps<{
 const ready = ref(false);
 const currentWfDef = ref<WfDefinition>(props.flowDef);
 
-const flowData = ref<IFlowData>(createDataflowData(props.flowDef.eventSource ?? EventSourceType.Form, t));
+const flowData = ref<IFlowData>(createEventFlowData(props.flowDef.eventSource ?? EventSourceType.Form, t));
 flowData.value.startNode.metadata.triggerMeta!.formId = props.formId;
 
 const flowContext = reactive<IFlowContext>({
@@ -68,7 +68,7 @@ const flowContext = reactive<IFlowContext>({
   eventSource: props.flowDef.eventSource,
   sourceId: props.flowDef.sourceId,
   formId: props.formId,
-  flowType: FlowType.Dataflow,
+  flowType: FlowType.EventFlow,
   clonedData: createFlowNode(FlowNodeType.None, t),
   activeData: flowData.value.startNode,
   flowData: flowData.value,
@@ -89,7 +89,7 @@ onBeforeMount(() => {
   ready.value = true;
 });
 
-const validateFormulaFieldList = (items: IDataflowFormFieldItem[]) => {
+const validateFormulaFieldList = (items: IEventFlowFormFieldItem[]) => {
   const errors: { field: string; label: string }[] = [];
   items.forEach((item) => {
     if (item.value.type != FormulaFieldValueType.Formula) return;
@@ -183,16 +183,16 @@ const save = async () => {
   const pluginConfigErrors = getPluginConfigValidation();
   if (pluginConfigErrors.length > 0) {
     const error = pluginConfigErrors[0];
-    ElMessage.error(t("dataflow.pluginConfigInvalidContent", { node: error.nodeName, field: error.label }));
+    ElMessage.error(t("eventFlow.pluginConfigInvalidContent", { node: error.nodeName, field: error.label }));
     return;
   }
 
   const formulaErrors = getFormulaValidation();
   if (formulaErrors.length > 0) {
     const confirm = await EtConfirm.showDialog(
-      t("dataflow.formulaSaveDisabledContent"),
+      t("eventFlow.formulaSaveDisabledContent"),
       {
-        title: t("dataflow.formulaSaveDisabledTitle"),
+        title: t("eventFlow.formulaSaveDisabledTitle"),
         icon: MessageIcon.Warning,
       },
     );
@@ -203,9 +203,9 @@ const save = async () => {
   const missingFieldErrors = getMissingFieldValidation();
   if (missingFieldErrors.length > 0) {
     const confirm = await EtConfirm.showDialog(
-      t("dataflow.missingFieldSaveDisabledContent"),
+      t("eventFlow.missingFieldSaveDisabledContent"),
       {
-        title: t("dataflow.missingFieldSaveDisabledTitle"),
+        title: t("eventFlow.missingFieldSaveDisabledTitle"),
         icon: MessageIcon.Warning,
       },
     );
@@ -236,7 +236,7 @@ const save = async () => {
 };
 </script>
 <style lang="scss">
-.dataflow-meta-container {
+.event-flow-meta-container {
   width: var(--et-size-500);
 }
 </style>

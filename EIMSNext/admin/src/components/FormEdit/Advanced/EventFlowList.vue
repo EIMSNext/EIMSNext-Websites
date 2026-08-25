@@ -9,33 +9,33 @@
   >
     <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
-  <et-dialog v-model="showAddDialog" :title="t('dataflow.newDataflowDialog')" width="640px">
+  <et-dialog v-model="showAddDialog" :title="t('eventFlow.newEventFlowDialog')" width="640px">
     <div class="add-dialog">
       <div class="name-field">
-        <div class="label">{{ t("dataflow.dataflowName") }}</div>
+        <div class="label">{{ t("eventFlow.eventFlowName") }}</div>
         <el-input
           v-model="nameDraft"
-          :placeholder="t('dataflow.untitledDataflow')"
+          :placeholder="t('eventFlow.untitledEventFlow')"
           maxlength="50"
           show-word-limit
         />
       </div>
 
-      <div class="section-label">{{ t("dataflow.selectTriggerType") }}</div>
+      <div class="section-label">{{ t("eventFlow.selectTriggerType") }}</div>
 
       <div class="add-item" :class="{ active: newEventSource === EventSourceType.Form }" @click="newEventSource = EventSourceType.Form">
         <div class="item-icon">
           <el-icon><Document /></el-icon>
         </div>
         <div class="item-body">
-          <div class="title">{{ t("dataflow.formTrigger") }}</div>
-          <div class="desc">{{ t("dataflow.formTriggerDesc") }}</div>
+          <div class="title">{{ t("eventFlow.formTrigger") }}</div>
+          <div class="desc">{{ t("eventFlow.formTriggerDesc") }}</div>
           <div v-if="newEventSource === EventSourceType.Form" class="form-selector" @click.stop>
             <el-select
               :model-value="formDef.id"
               disabled
               class="full-width-input"
-              :placeholder="t('dataflow.selectForm')"
+              :placeholder="t('eventFlow.selectForm')"
             >
               <el-option :label="formDef.name" :value="formDef.id" />
             </el-select>
@@ -48,8 +48,8 @@
           <el-icon><Clock /></el-icon>
         </div>
         <div class="item-body">
-          <div class="title">{{ t("dataflow.scheduleTrigger") }}</div>
-          <div class="desc">{{ t("dataflow.scheduleTriggerDesc") }}</div>
+          <div class="title">{{ t("eventFlow.scheduleTrigger") }}</div>
+          <div class="desc">{{ t("eventFlow.scheduleTriggerDesc") }}</div>
         </div>
       </div>
 
@@ -58,8 +58,8 @@
           <el-icon><Link /></el-icon>
         </div>
         <div class="item-body">
-          <div class="title">{{ t("dataflow.httpTrigger") }}</div>
-          <div class="desc">{{ t("dataflow.httpTriggerDesc") }}</div>
+          <div class="title">{{ t("eventFlow.httpTrigger") }}</div>
+          <div class="desc">{{ t("eventFlow.httpTriggerDesc") }}</div>
         </div>
       </div>
     </div>
@@ -72,36 +72,36 @@
     <template #title>
       <el-input v-model="selectedFlow!.name" class="title-editor" />
     </template>
-    <DataflowDesigner :appId="formDef.appId" :formId="formDef.id" :flow-def="selectedFlow!" />
+    <EventFlowDesigner :appId="formDef.appId" :formId="formDef.id" :flow-def="selectedFlow!" />
   </et-drawer>
   <et-drawer v-model="showLogDrawer">
     <template #title>
-      <span>{{ t("dataflow.executionLog") }}</span>
+      <span>{{ t("eventFlow.executionLog") }}</span>
     </template>
-    <DataflowRunLogView
+    <EventFlowRunLogView
       v-if="logFlow"
       :form-def="formDef"
       :flow-def="logFlow"
     />
   </et-drawer>
-  <AdvanceLayout :title="t('admin.advanced.dataflow')" :desc="t('dataflow.formTriggerDesc') + ' / ' + t('dataflow.scheduleTriggerDesc') + ' / ' + t('dataflow.httpTriggerDesc')">
+  <AdvanceLayout :title="t('admin.advanced.eventFlow')" :desc="t('eventFlow.formTriggerDesc') + ' / ' + t('eventFlow.scheduleTriggerDesc') + ' / ' + t('eventFlow.httpTriggerDesc')">
     <div class="flow-container">
       <div class="panel-header">
         <div class="header-left">
           <el-button type="primary" icon="plus" @click="showAddDialog = true">
-            {{ t("dataflow.newDataflow") }}
+            {{ t("eventFlow.newEventFlow") }}
           </el-button>
         </div>
         <div class="header-right"></div>
       </div>
       <div>
         <el-space direction="vertical" class="flow-space">
-          <template v-for="flow in dataflows">
+          <template v-for="flow in eventFlows">
             <et-card class="flow-card" :title="flow.name">
               <template #action>
                 <div class="flow-header">
                   <el-button @click="edit(flow)">{{ t("common.edit") }}</el-button>
-                  <el-button @click="viewLog(flow)">{{ t("dataflow.viewExecutionLog") }}</el-button>
+                  <el-button @click="viewLog(flow)">{{ t("eventFlow.viewExecutionLog") }}</el-button>
                   <el-button class="delete-button" @click="remove(flow)">{{ t("common.delete") }}</el-button>
                   <el-switch
                     :model-value="!flow.disabled"
@@ -118,8 +118,8 @@
   </AdvanceLayout>
 </template>
 <script setup lang="ts">
-import DataflowDesigner from "../../DataflowDesigner/index.vue";
-import DataflowRunLogView from "./DataflowRunLogView.vue";
+import EventFlowDesigner from "../../EventFlowDesigner/index.vue";
+import EventFlowRunLogView from "./EventFlowRunLogView.vue";
 import { FormDef, EventSourceType, WfDefinition, FlowType } from "@eimsnext/models";
 import { wfDefinitionService } from "@eimsnext/services";
 import { Clock, Document, Link } from "@element-plus/icons-vue";
@@ -129,7 +129,7 @@ import AdvanceLayout from "./AdvanceLayout.vue";
 import { MessageIcon } from "@eimsnext/components";
 
 defineOptions({
-  name: "DataflowList",
+  name: "EventFlowList",
 });
 
 const { t } = useLocale();
@@ -142,16 +142,16 @@ const showDrawer = ref(false);
 const showLogDrawer = ref(false);
 const showAddDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
-const dataflows = ref<WfDefinition[]>([]);
+const eventFlows = ref<WfDefinition[]>([]);
 const selectedFlow = ref<WfDefinition>();
 const logFlow = ref<WfDefinition>();
 const newEventSource = ref<EventSourceType>(EventSourceType.Form);
 const nameDraft = ref("");
 
-const loadDataflows = (formId: string) => {
-  let query = buildQuery({ filter: { flowType: FlowType.Dataflow, sourceId: formId } });
+const loadEventFlows = (formId: string) => {
+  let query = buildQuery({ filter: { flowType: FlowType.EventFlow, sourceId: formId } });
   wfDefinitionService.query<WfDefinition>(query).then((res) => {
-    dataflows.value = res;
+    eventFlows.value = res;
   });
 
   // formStore.get(formId).then(form => { if (form) formNamesCache.add(formId, form.name) })
@@ -163,18 +163,18 @@ const getTriggerSource = (flow: WfDefinition) => {
   }
 
    if (flow.eventSource == EventSourceType.Http) {
-    return t("dataflow.httpTrigger");
+    return t("eventFlow.httpTrigger");
   }
 
-  return t("dataflow.scheduleTrigger");
+  return t("eventFlow.scheduleTrigger");
 };
 
 const addNew = (eventSource: EventSourceType) => {
   selectedFlow.value = {
     id: "",
     appId: props.formDef.appId,
-    name: nameDraft.value.trim() || t("dataflow.untitledDataflow"),
-    flowType: FlowType.Dataflow,
+    name: nameDraft.value.trim() || t("eventFlow.untitledEventFlow"),
+    flowType: FlowType.EventFlow,
     externalId: "",
     version: 1,
     isCurrent: true,
@@ -215,13 +215,13 @@ const remove = (flow: WfDefinition) => {
 };
 const execDelete = () => {
   wfDefinitionService.delete<WfDefinition>(selectedFlow.value!.id).then(() => {
-    loadDataflows(props.formDef.id);
+    loadEventFlows(props.formDef.id);
     showDeleteConfirmDialog.value = false;
   });
 };
 const toggleDisable = (flow: WfDefinition) => {
   if (flow.disabled && hasMissingField(flow)) {
-    ElMessage.warning(t("dataflow.missingFieldEnableBlocked"));
+    ElMessage.warning(t("eventFlow.missingFieldEnableBlocked"));
     return;
   }
 
@@ -252,12 +252,12 @@ const findMissingFlag = (value: unknown): boolean => {
 function close() {
   showDrawer.value = false;
 
-  loadDataflows(props.formDef.id);
+  loadEventFlows(props.formDef.id);
 }
 
 onBeforeMount(() => {
   if (props.formDef) {
-    loadDataflows(props.formDef.id);
+    loadEventFlows(props.formDef.id);
   }
 });
 </script>

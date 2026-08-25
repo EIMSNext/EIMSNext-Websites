@@ -1,6 +1,6 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('dataflow.pluginName')" :required="true" />
+    <MetaItemHeader :label="t('eventFlow.pluginName')" :required="true" />
     <el-select v-model="pluginId" class="full-width-input" @change="onPluginChanged">
       <el-option
         v-for="plugin in plugins"
@@ -10,7 +10,7 @@
       />
     </el-select>
 
-    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.pluginFunction')" :required="true" />
+    <MetaItemHeader class="mt-[8px]" :label="t('eventFlow.pluginFunction')" :required="true" />
     <el-select v-model="functionId" class="full-width-input" @change="onFunctionChanged">
       <el-option
         v-for="fn in selectedPlugin?.functions ?? []"

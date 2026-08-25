@@ -9,7 +9,7 @@ import { useFormStore } from "@eimsnext/store";
 import { INodeForm } from "@/NodeFieldList/type";
 import { DataItemType } from "@/common";
 import { IFormFieldDef } from "@/FieldSelect/type";
-import { DataflowTriggerKind, FieldType } from "@eimsnext/models";
+import { EventFlowTriggerKind, FieldType } from "@eimsnext/models";
 
 export function buildWfNodeListItems(wfFlowData: IFlowData): IListItem[] {
   const items: IListItem[] = [];
@@ -56,7 +56,7 @@ export async function getPrevNodes(
         switch (prevNode.nodeType) {
           case FlowNodeType.Start:
           node.singleResult = true;
-          if (prevNode.metadata.triggerMeta?.triggerKind === DataflowTriggerKind.Http) {
+          if (prevNode.metadata.triggerMeta?.triggerKind === EventFlowTriggerKind.Http) {
             node.outputFields = (prevNode.metadata.triggerMeta?.httpSettings?.sampleFields ?? []).map((field) => ({
               formId: currentNodeId,
               field: field.key,
@@ -67,7 +67,7 @@ export async function getPrevNodes(
               singleResultNode: true,
               sourceType: "http",
             } satisfies IFormFieldDef));
-          } else if (prevNode.metadata.triggerMeta?.triggerKind === DataflowTriggerKind.Schedule) {
+          } else if (prevNode.metadata.triggerMeta?.triggerKind === EventFlowTriggerKind.Schedule) {
             formId = prevNode.metadata.triggerMeta?.timeSettings?.sourceType === "formField"
               ? prevNode.metadata.triggerMeta?.formId
               : undefined;

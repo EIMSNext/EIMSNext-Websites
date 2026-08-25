@@ -1,7 +1,7 @@
 <template>
   <template v-if="ready">
     <MetaItemHeader
-      :label="t('dataflow.targetForm')"
+      :label="t('eventFlow.targetForm')"
       :required="true"
     ></MetaItemHeader>
     <FormSelect
@@ -11,7 +11,7 @@
     ></FormSelect>
     <MetaItemHeader
       class="mt-[8px]"
-      :label="t('dataflow.queryCondition')"
+      :label="t('eventFlow.queryCondition')"
       :required="true"
     ></MetaItemHeader>
     <ConditionList
@@ -25,7 +25,7 @@
     </ConditionList>
     <MetaItemHeader
       class="mt-[8px]"
-      :label="t('dataflow.sortRule')"
+      :label="t('eventFlow.sortRule')"
     ></MetaItemHeader>
     <FieldSortList
       v-model="sortList"
@@ -34,14 +34,14 @@
     ></FieldSortList>
     <MetaItemHeader
       class="mt-[8px]"
-      :label="t('dataflow.numberOfTake')"
+      :label="t('eventFlow.numberOfTake')"
       :required="true"
     ></MetaItemHeader>
     <div>
       <el-input-number
         v-model="activeData.metadata.queryManyMeta!.take" align="right"
       ></el-input-number>
-      {{ t("dataflow.records") }}
+      {{ t("eventFlow.records") }}
     </div>
   </template>
 </template>

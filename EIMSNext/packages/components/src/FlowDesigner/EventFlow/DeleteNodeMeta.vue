@@ -1,7 +1,7 @@
 <template>
   <template v-if="ready">
     <MetaItemHeader
-      :label="t('dataflow.deleteFrom')"
+      :label="t('eventFlow.deleteFrom')"
       :required="true"
     ></MetaItemHeader>
     <div class="mode-container">
@@ -12,11 +12,11 @@
         @change="modeChanged"
       >
         <el-option
-          :label="t('dataflow.recordInForm')"
+          :label="t('eventFlow.recordInForm')"
           :value="UpdateMode.Form"
         />
         <el-option
-          :label="t('dataflow.recordInNode')"
+          :label="t('eventFlow.recordInNode')"
           :value="UpdateMode.Node"
         />
       </el-select>
@@ -30,7 +30,7 @@
         v-if="mode == UpdateMode.Node"
         v-model="activeData.metadata.deleteMeta!.nodeId"
         size="default"
-        :placeholder="t('dataflow.selectNode')"
+        :placeholder="t('eventFlow.selectNode')"
         @change="nodeChanged"
       >
         <el-option
@@ -43,7 +43,7 @@
     </div>
     <MetaItemHeader
       class="mt-[8px]"
-      :label="t('dataflow.dataCondition')"
+      :label="t('eventFlow.dataCondition')"
       :required="true"
     ></MetaItemHeader>
     <ConditionList

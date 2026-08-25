@@ -353,7 +353,7 @@ import { MemberTabs } from "@/component";
 import { DataItemType } from "@/common";
 import { FieldType, FormDef, NotifyChannel, WfNoApproverActionType } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
-import FormulaEditorDialog from "../Dataflow/FormulaEditorDialog.vue";
+import FormulaEditorDialog from "../EventFlow/FormulaEditorDialog.vue";
 import { INodeForm } from "@/NodeFieldList/type";
 import { IFormulaValue } from "@/FormFieldList/type";
 import { Edit } from "@element-plus/icons-vue";

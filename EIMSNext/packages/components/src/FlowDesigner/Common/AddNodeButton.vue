@@ -66,7 +66,7 @@ const allGroups: NodeGroup[] = [
   {
     category: "data",
     labelKey: "workflow.category.dataProcessing",
-    flowType: FlowType.Dataflow,
+    flowType: FlowType.EventFlow,
     nodes: [
       { type: FlowNodeType.Insert, labelKey: "workflow.insertDataNode", icon: "el-plus" },
       { type: FlowNodeType.Update, labelKey: "workflow.updateDataNode", icon: "el-edit" },
@@ -76,13 +76,13 @@ const allGroups: NodeGroup[] = [
   {
     category: "control",
     labelKey: "workflow.category.logicControl",
-    flowType: FlowType.Dataflow,
+    flowType: FlowType.EventFlow,
     nodes: [{ type: FlowNodeType.Branch2, labelKey: "workflow.branch2Node", icon: "el-copy-document" }],
   },
   {
     category: "query",
     labelKey: "workflow.category.dataQuery",
-    flowType: FlowType.Dataflow,
+    flowType: FlowType.EventFlow,
     nodes: [
       { type: FlowNodeType.QueryOne, labelKey: "workflow.queryOneNode", icon: "el-search" },
       { type: FlowNodeType.QueryMany, labelKey: "workflow.queryManyNode", icon: "el-files" },
@@ -91,7 +91,7 @@ const allGroups: NodeGroup[] = [
   {
     category: "extension",
     labelKey: "workflow.category.extension",
-    flowType: FlowType.Dataflow,
+    flowType: FlowType.EventFlow,
     nodes: [
       { type: FlowNodeType.Print, labelKey: "workflow.printNode", icon: "el-printer" },
       { type: FlowNodeType.Plugin, labelKey: "workflow.pluginNode", icon: "el-plug" },

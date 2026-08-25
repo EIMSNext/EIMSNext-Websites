@@ -65,7 +65,7 @@ import {
   IFlowContext,
   FlowNodeType,
   IFlowNodeMetaData,
-  cleanupInvalidDataflowDependencies,
+  cleanupInvalidEventFlowDependencies,
   getFlowNodeById,
   moveFlowNode,
   syncFlowNodeOrder,
@@ -318,8 +318,8 @@ const dropNode = (event: DragEvent) => {
     props.nodeData,
     dragOverPosition.value
   );
-  if (moved && flowContext.flowType === FlowType.Dataflow) {
-    cleanupInvalidDataflowDependencies(flowContext.flowData);
+  if (moved && flowContext.flowType === FlowType.EventFlow) {
+    cleanupInvalidEventFlowDependencies(flowContext.flowData);
   }
 };
 

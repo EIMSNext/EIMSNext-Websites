@@ -2,7 +2,7 @@
   <et-dialog
     :model-value="modelValue"
     class="http-sample-dialog"
-    :title="t('dataflow.httpSampleDialog.title')"
+    :title="t('eventFlow.httpSampleDialog.title')"
     :show-footer="false"
     width="520px"
     @cancel="onCancel"
@@ -26,7 +26,7 @@
 
     <div class="footer">
       <el-button v-if="phase === 'success'" type="primary" @click="onViewSample">
-        {{ t("dataflow.httpSampleDialog.viewSample") }}
+        {{ t("eventFlow.httpSampleDialog.viewSample") }}
       </el-button>
       <el-button v-else @click="onCancel">
         {{ t("common.cancel") }}
@@ -40,7 +40,7 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { CircleCheckFilled, Loading } from "@element-plus/icons-vue";
 import { useLocale } from "element-plus";
 import { EtDialog } from "@/dialog";
-import { dataflowSampleService, DataflowHttpSampleResult } from "@eimsnext/services";
+import { eventFlowSampleService, EventFlowHttpSampleResult } from "@eimsnext/services";
 
 defineOptions({
   name: "HttpSampleDialog",
@@ -51,20 +51,20 @@ const { t } = useLocale();
 const props = withDefaults(
   defineProps<{
     modelValue: boolean;
-    dataflowId?: string;
+    eventFlowId?: string;
     corpId?: string;
     hookUrl: string;
     helpDocUrl?: string;
   }>(),
   {
-    helpDocUrl: "https://help.example.com/dataflow/http-trigger",
+    helpDocUrl: "https://help.example.com/eventflow/http-trigger",
   },
 );
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
   cancel: [];
-  captured: [result: DataflowHttpSampleResult];
+  captured: [result: EventFlowHttpSampleResult];
 }>();
 
 type Phase = "loading" | "success";
@@ -75,7 +75,7 @@ let pollTimer: number | null = null;
 const POLL_INTERVAL = 2000;
 
 const loadingTip = computed(() => {
-  return t("dataflow.httpSampleDialog.loading").replace("{0}", props.hookUrl);
+  return t("eventFlow.httpSampleDialog.loading").replace("{0}", props.hookUrl);
 });
 
 function clearPoll() {
@@ -91,13 +91,13 @@ function scheduleNextPoll() {
 }
 
 function pollSample() {
-  if (!props.dataflowId) {
+  if (!props.eventFlowId) {
     emit("update:modelValue", false);
     return;
   }
 
-  dataflowSampleService
-    .getHttpSample(props.dataflowId, props.corpId ?? "")
+  eventFlowSampleService
+    .getHttpSample(props.eventFlowId, props.corpId ?? "")
     .then((res) => {
       if (res?.hasSample && res.sampleFields) {
         phase.value = "success";

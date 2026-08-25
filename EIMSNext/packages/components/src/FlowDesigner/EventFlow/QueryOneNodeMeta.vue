@@ -1,12 +1,12 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('dataflow.targetForm')" :required="true"></MetaItemHeader>
+    <MetaItemHeader :label="t('eventFlow.targetForm')" :required="true"></MetaItemHeader>
     <FormSelect v-model="formItem" :appId="appId" @change="formChanged"></FormSelect>
-    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.queryCondition')" :required="true"></MetaItemHeader>
+    <MetaItemHeader class="mt-[8px]" :label="t('eventFlow.queryCondition')" :required="true"></MetaItemHeader>
     <ConditionList v-model="condList" :formId="formId" :nodeId="nodeId" :nodes="nodes" @change="onCondition"
       @remove="onCondClear">
     </ConditionList>
-    <MetaItemHeader class="mt-[8px]" :label="t('dataflow.sortRule')"></MetaItemHeader>
+    <MetaItemHeader class="mt-[8px]" :label="t('eventFlow.sortRule')"></MetaItemHeader>
     <FieldSortList v-model="sortList" :form-id="formId" @change="onSort"></FieldSortList>
   </template>
 </template>

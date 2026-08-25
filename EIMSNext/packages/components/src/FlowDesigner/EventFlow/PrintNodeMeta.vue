@@ -1,10 +1,10 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('dataflow.printObject')" :required="true" />
+    <MetaItemHeader :label="t('eventFlow.printObject')" :required="true" />
     <el-select
       v-model="sourceNodeId"
       class="full-width-input"
-      :placeholder="t('dataflow.selectPrintObject')"
+      :placeholder="t('eventFlow.selectPrintObject')"
       :disabled="sourceOptions.length === 0"
       @change="sourceChanged"
     >
@@ -16,22 +16,22 @@
       />
     </el-select>
     <div v-if="sourceOptions.length === 0" class="print-empty-text">
-      {{ t('dataflow.noPrintObject') }}
+      {{ t('eventFlow.noPrintObject') }}
     </div>
 
     <div class="print-template-header">
-      <MetaItemHeader :label="t('dataflow.printTemplate')" :required="true" />
+      <MetaItemHeader :label="t('eventFlow.printTemplate')" :required="true" />
       <span v-if="selectedSource" class="print-source">
-        {{ t('dataflow.printTemplateSource', { name: selectedSource.nodeName }) }}
+        {{ t('eventFlow.printTemplateSource', { name: selectedSource.nodeName }) }}
         <el-link type="primary" :underline="false" @click="openPrintTemplates">
-          {{ t('dataflow.printTemplateLink') }}
+          {{ t('eventFlow.printTemplateLink') }}
         </el-link>
       </span>
     </div>
     <el-select
       v-model="printDefId"
       class="full-width-input"
-      :placeholder="t('dataflow.selectPrintTemplate')"
+      :placeholder="t('eventFlow.selectPrintTemplate')"
       :disabled="!formId || loadingTemplates"
       :loading="loadingTemplates"
       @change="templateChanged"
@@ -44,7 +44,7 @@
       />
     </el-select>
     <div v-if="formId && !loadingTemplates && templates.length === 0" class="print-empty-text">
-      {{ t('dataflow.noPrintTemplate') }}
+      {{ t('eventFlow.noPrintTemplate') }}
     </div>
   </template>
 </template>
@@ -129,7 +129,7 @@ function templateChanged(id: string) {
 }
 
 function openPrintTemplates() {
-  // The dataflow editor is opened from app administration; keep the action
+  // The eventFlow editor is opened from app administration; keep the action
   // non-destructive and expose the existing template manager as a new tab.
   if (formId.value) {
     window.open(`/app/${flowContext.appId}/form/${formId.value}?mode=editform&tab=ext-print`, "_blank");

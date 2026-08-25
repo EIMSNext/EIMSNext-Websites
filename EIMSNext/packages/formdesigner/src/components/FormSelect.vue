@@ -51,7 +51,7 @@ export default {
   },
   computed: {
     computedPlaceholder() {
-      return this.placeholder || this.designer?.setupState?.t?.('dataflow.selectForm') || '选择表单';
+      return this.placeholder || this.designer?.setupState?.t?.('eventFlow.selectForm') || '选择表单';
     }
   },
   methods: {

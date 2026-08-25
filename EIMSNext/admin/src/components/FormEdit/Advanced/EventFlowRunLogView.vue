@@ -1,27 +1,27 @@
 <template>
-  <div class="dataflow-run-log-view">
+  <div class="event-flow-run-log-view">
     <div v-if="mode === 'list'" class="log-list-page">
       <div class="log-toolbar">
         <div class="toolbar-item">
-          <span class="toolbar-label">{{ t("dataflow.runlog.triggerTime") }}</span>
+          <span class="toolbar-label">{{ t("eventFlow.runlog.triggerTime") }}</span>
           <el-date-picker
             v-model="timeRange"
             type="datetimerange"
             value-format="x"
             range-separator="~"
-            :start-placeholder="t('dataflow.runlog.startTime')"
-            :end-placeholder="t('dataflow.runlog.endTime')"
+            :start-placeholder="t('eventFlow.runlog.startTime')"
+            :end-placeholder="t('eventFlow.runlog.endTime')"
             clearable
           />
         </div>
         <div class="toolbar-item">
-          <span class="toolbar-label">{{ t("dataflow.runlog.result") }}</span>
+          <span class="toolbar-label">{{ t("eventFlow.runlog.result") }}</span>
           <el-select v-model="successFilter" :placeholder="t('common.pleaseSelect')" clearable class="result-select">
-            <el-option :label="t('dataflow.runlog.success')" value="success" />
-            <el-option :label="t('dataflow.runlog.failed')" value="failed" />
+            <el-option :label="t('eventFlow.runlog.success')" value="success" />
+            <el-option :label="t('eventFlow.runlog.failed')" value="failed" />
           </el-select>
         </div>
-        <el-button type="primary" @click="reloadRuns">{{ t("dataflow.runlog.filter") }}</el-button>
+        <el-button type="primary" @click="reloadRuns">{{ t("eventFlow.runlog.filter") }}</el-button>
       </div>
 
       <el-table
@@ -32,20 +32,20 @@
         class="log-table"
         @row-click="openRunDetail"
       >
-        <el-table-column :label="t('dataflow.runlog.triggerTime')" width="220">
+        <el-table-column :label="t('eventFlow.runlog.triggerTime')" width="220">
           <template #default="{ row }">{{ formatDate(row.triggerTime) }}</template>
         </el-table-column>
-        <el-table-column :label="t('dataflow.runlog.triggerBy')" width="180">
-          <template #default="{ row }">{{ row.triggerBy?.label || t("dataflow.runlog.anonymousUser") }}</template>
+        <el-table-column :label="t('eventFlow.runlog.triggerBy')" width="180">
+          <template #default="{ row }">{{ row.triggerBy?.label || t("eventFlow.runlog.anonymousUser") }}</template>
         </el-table-column>
-        <el-table-column :label="t('dataflow.runlog.triggerAction')" min-width="180">
+        <el-table-column :label="t('eventFlow.runlog.triggerAction')" min-width="180">
           <template #default="{ row }">{{ getTriggerLabel(row) }}</template>
         </el-table-column>
-        <el-table-column :label="t('dataflow.runlog.result')" min-width="260">
+        <el-table-column :label="t('eventFlow.runlog.result')" min-width="260">
           <template #default="{ row }">
             <div class="result-cell">
               <el-tag :type="row.success ? 'success' : 'danger'" effect="dark">
-                {{ row.success ? t("dataflow.runlog.success") : t("dataflow.runlog.failed") }}
+                {{ row.success ? t("eventFlow.runlog.success") : t("eventFlow.runlog.failed") }}
               </el-tag>
               <span v-if="!row.success" class="result-error">{{ row.errMsg }}</span>
             </div>
@@ -54,7 +54,7 @@
       </el-table>
 
       <div class="log-pagination">
-        <span>{{ t("dataflow.runlog.totalRecords", { total }) }}</span>
+        <span>{{ t("eventFlow.runlog.totalRecords", { total }) }}</span>
         <el-pagination
           v-model:current-page="pageIndex"
           v-model:page-size="pageSize"
@@ -70,19 +70,19 @@
 
     <div v-else class="log-detail-page">
       <div class="detail-header">
-        <el-button link icon="el-arrow-left" @click="backToList">{{ t("dataflow.runlog.backToList") }}</el-button>
+        <el-button link icon="el-arrow-left" @click="backToList">{{ t("eventFlow.runlog.backToList") }}</el-button>
         <div class="detail-title">
           <span>{{ flowDef.name }}</span>
-          <span v-if="detail?.run.dataflowVersion" class="version">V{{ detail.run.dataflowVersion }}</span>
+          <span v-if="detail?.run.eventFlowVersion" class="version">V{{ detail.run.eventFlowVersion }}</span>
           <el-tag v-if="detail" :type="detail.run.success ? 'success' : 'danger'" effect="dark">
-            {{ detail.run.success ? t("dataflow.runlog.success") : t("dataflow.runlog.failed") }}
+            {{ detail.run.success ? t("eventFlow.runlog.success") : t("eventFlow.runlog.failed") }}
           </el-tag>
         </div>
       </div>
 
       <div v-loading="detailLoading" class="detail-body">
         <div class="diagram-panel">
-          <DataflowDiagram :flow-data="flowData" />
+          <EventFlowDiagram :flow-data="flowData" />
         </div>
         <aside class="node-detail-panel">
           <template v-if="selectedNode">
@@ -92,45 +92,45 @@
                 <strong>{{ selectedNode.name }}</strong>
                 <span class="node-type">{{ selectedLog?.nodeName && selectedLog.nodeName !== selectedNode.name ? selectedLog.nodeName : "" }}</span>
               </div>
-              <el-button link type="primary" @click="viewNodeConfig">{{ t("dataflow.runlog.viewNodeConfig") }}</el-button>
+              <el-button link type="primary" @click="viewNodeConfig">{{ t("eventFlow.runlog.viewNodeConfig") }}</el-button>
             </div>
 
             <el-button v-if="selectedLog && !selectedLog.success" type="primary" disabled class="retry-button">
-              {{ t("dataflow.runlog.retry") }}
+              {{ t("eventFlow.runlog.retry") }}
             </el-button>
 
             <div class="detail-section">
-              <div class="detail-label">{{ t("dataflow.runlog.execTime") }}</div>
+              <div class="detail-label">{{ t("eventFlow.runlog.execTime") }}</div>
               <div class="detail-value">{{ formatExecTime(selectedLog) }}</div>
             </div>
 
             <template v-if="selectedLog">
               <template v-if="selectedLog.success">
                 <div class="detail-section">
-                  <div class="detail-label">{{ t("dataflow.runlog.result") }}</div>
-                  <div class="detail-value success-text">{{ t("dataflow.runlog.execSuccess") }}</div>
+                  <div class="detail-label">{{ t("eventFlow.runlog.result") }}</div>
+                  <div class="detail-value success-text">{{ t("eventFlow.runlog.execSuccess") }}</div>
                 </div>
               </template>
               <template v-else>
                 <div class="detail-section">
-                  <div class="detail-label">{{ t("dataflow.runlog.failReason") }}</div>
-                  <div class="detail-value danger-text">{{ selectedLog.failureReason || selectedLog.errMsg || t("dataflow.runlog.execFailed") }}</div>
+                  <div class="detail-label">{{ t("eventFlow.runlog.failReason") }}</div>
+                  <div class="detail-value danger-text">{{ selectedLog.failureReason || selectedLog.errMsg || t("eventFlow.runlog.execFailed") }}</div>
                 </div>
                 <div class="detail-section">
-                  <div class="detail-label">{{ t("dataflow.runlog.troubleshootSuggestion") }}</div>
-                  <div class="detail-value">{{ selectedLog.troubleshootingSuggestion || t("dataflow.runlog.checkNodeConfig") }}</div>
+                  <div class="detail-label">{{ t("eventFlow.runlog.troubleshootSuggestion") }}</div>
+                  <div class="detail-value">{{ selectedLog.troubleshootingSuggestion || t("eventFlow.runlog.checkNodeConfig") }}</div>
                 </div>
               </template>
             </template>
-            <div v-else class="empty-node-log">{{ t("dataflow.runlog.nodeNotExecuted") }}</div>
+            <div v-else class="empty-node-log">{{ t("eventFlow.runlog.nodeNotExecuted") }}</div>
           </template>
-          <el-empty v-else :description="t('dataflow.runlog.pleaseSelectNode')" />
+          <el-empty v-else :description="t('eventFlow.runlog.pleaseSelectNode')" />
         </aside>
       </div>
 
-      <el-drawer v-model="showConfig" :title="t('dataflow.runlog.viewNodeConfig')" direction="rtl" size="520px">
+      <el-drawer v-model="showConfig" :title="t('eventFlow.runlog.viewNodeConfig')" direction="rtl" size="520px">
         <div class="config-readonly">
-          <DataflowMetaEditor />
+          <EventFlowMetaEditor />
         </div>
       </el-drawer>
     </div>
@@ -139,24 +139,24 @@
 
 <script setup lang="ts">
 import {
-  DataflowDiagram,
-  DataflowMetaEditor,
+  EventFlowDiagram,
+  EventFlowMetaEditor,
   FlowNodeType,
   IFlowContext,
   IFlowData,
   IFlowLogState,
   IFlowNodeData,
-  createDataflowData,
+  createEventFlowData,
   createFlowNode,
   getFlowNodeById,
 } from "@eimsnext/components";
-import { DfRunLogNode, DfRunLog, DfRunLogDetail, EventSourceType, FlowType, FormDef, WfDefinition } from "@eimsnext/models";
-import { dfRunLogService } from "@eimsnext/services";
+import { EfRunLogNode, EfRunLog, EfRunLogDetail, EventSourceType, FlowType, FormDef, WfDefinition } from "@eimsnext/models";
+import { efRunLogService } from "@eimsnext/services";
 import { dateFormat } from "@/utils/common";
 import { useLocale } from "element-plus";
 
 defineOptions({
-  name: "DataflowRunLogView",
+  name: "EventFlowRunLogView",
 });
 
 const props = defineProps<{
@@ -168,15 +168,15 @@ const { t } = useLocale();
 const mode = ref<"list" | "detail">("list");
 const loading = ref(false);
 const detailLoading = ref(false);
-const runs = ref<DfRunLog[]>([]);
+const runs = ref<EfRunLog[]>([]);
 const total = ref(0);
 const pageIndex = ref(1);
 const pageSize = ref(10);
 const timeRange = ref<string[]>();
 const successFilter = ref<"" | "success" | "failed">("");
-const detail = ref<DfRunLogDetail>();
+const detail = ref<EfRunLogDetail>();
 const selectedNode = ref<IFlowNodeData>();
-const selectedLog = ref<DfRunLogNode>();
+const selectedLog = ref<EfRunLogNode>();
 const showConfig = ref(false);
 
 const flowData = ref<IFlowData>(createFlowData());
@@ -209,7 +209,7 @@ const flowContext = reactive<IFlowContext>({
   formId: props.formDef.id,
   eventSource: props.flowDef.eventSource,
   sourceId: props.flowDef.sourceId,
-  flowType: FlowType.Dataflow,
+  flowType: FlowType.EventFlow,
   clonedData: createFlowNode(FlowNodeType.None, t),
   activeData: flowData.value.startNode,
   flowData: flowData.value,
@@ -220,7 +220,7 @@ const flowContext = reactive<IFlowContext>({
 provide("flowContext", flowContext);
 
 const nodeLogMap = computed(() => {
-  const map = new Map<string, DfRunLogNode>();
+  const map = new Map<string, EfRunLogNode>();
   detail.value?.nodes.forEach((item) => {
     if (item.nodeId) map.set(item.nodeId, item);
   });
@@ -238,7 +238,7 @@ function createFlowData() {
     return JSON.parse(props.flowDef.content) as IFlowData;
   }
 
-  const data = createDataflowData(props.flowDef.eventSource ?? EventSourceType.Form, t);
+  const data = createEventFlowData(props.flowDef.eventSource ?? EventSourceType.Form, t);
   data.startNode.metadata.triggerMeta!.formId = props.formDef.id;
   return data;
 }
@@ -255,8 +255,8 @@ async function loadRuns() {
   loading.value = true;
   try {
     const [startTime, endTime] = timeRange.value ?? [];
-    const result = await dfRunLogService.queryRuns({
-      dataflowId: props.flowDef.id,
+    const result = await efRunLogService.queryRuns({
+      eventFlowId: props.flowDef.id,
       startTime: startTime ? Number(startTime) : undefined,
       endTime: endTime ? Number(endTime) : undefined,
       success: successFilter.value ? successFilter.value === "success" : undefined,
@@ -275,13 +275,13 @@ function reloadRuns() {
   loadRuns();
 }
 
-async function openRunDetail(run: DfRunLog) {
+async function openRunDetail(run: EfRunLog) {
   mode.value = "detail";
   detailLoading.value = true;
   selectedNode.value = undefined;
   selectedLog.value = undefined;
   try {
-    detail.value = await dfRunLogService.getRunDetail(run.id);
+    detail.value = await efRunLogService.getRunDetail(run.id);
     logState.executedNodeIds = new Set(detail.value.executedNodeIds);
     logState.failedNodeIds = new Set(detail.value.failedNodeIds);
     syncFlowContext();
@@ -331,7 +331,7 @@ function formatDate(value?: number) {
   return value ? dateFormat(value, "YYYY-MM-DD HH:mm:ss") : "-";
 }
 
-function formatExecTime(log?: DfRunLogNode) {
+function formatExecTime(log?: EfRunLogNode) {
   if (!log) return "-";
   if (log.startTime && log.endTime && log.startTime !== log.endTime) {
     return `${formatDate(log.startTime)} ~ ${formatDate(log.endTime)}`;
@@ -340,11 +340,11 @@ function formatExecTime(log?: DfRunLogNode) {
   return formatDate(log.startTime || log.execTime);
 }
 
-function getTriggerLabel(run: DfRunLog) {
+function getTriggerLabel(run: EfRunLog) {
   const source = `${run.eventSource}`;
-  if (source === `${EventSourceType.Http}` || source === "4") return t("dataflow.runlog.triggerHttp");
-  if (source === `${EventSourceType.Schedule}` || source === "3") return t("dataflow.runlog.triggerSchedule");
-  return t("dataflow.runlog.triggerDataPush");
+  if (source === `${EventSourceType.Http}` || source === "4") return t("eventFlow.runlog.triggerHttp");
+  if (source === `${EventSourceType.Schedule}` || source === "3") return t("eventFlow.runlog.triggerSchedule");
+  return t("eventFlow.runlog.triggerDataPush");
 }
 
 function isNodeExecuted(node: IFlowNodeData): boolean {
@@ -397,7 +397,7 @@ onBeforeMount(loadRuns);
 </script>
 
 <style lang="scss" scoped>
-.dataflow-run-log-view {
+.event-flow-run-log-view {
   height: 100%;
   min-height: 0;
   background: var(--et-bg-page);

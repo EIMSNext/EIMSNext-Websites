@@ -20,8 +20,8 @@ import { EtDrawer } from "./drawer";
 import {
   WorkflowDiagram,
   WorkflowMetaEditor,
-  DataflowDiagram,
-  DataflowMetaEditor,
+  EventFlowDiagram,
+  EventFlowMetaEditor,
 } from "./FlowDesigner";
 import { EtFieldPerms } from "./FieldPerms";
 import { UserAvatar } from "./avatar";
@@ -41,7 +41,7 @@ export {
   toggleDarkMode,
 } from "./theme/runtime";
 export * from "./FlowDesigner";
-export * from "./FlowDesigner/Dataflow/fieldMappingRules";
+export * from "./FlowDesigner/EventFlow/fieldMappingRules";
 export {
   convertCandidateToTag,
   convertCandidateToTags,
@@ -89,8 +89,8 @@ export default [
   EtDrawer,
   WorkflowDiagram,
   WorkflowMetaEditor,
-  DataflowDiagram,
-  DataflowMetaEditor,
+  EventFlowDiagram,
+  EventFlowMetaEditor,
   EtFieldPerms,
   UserAvatar,
   SortList,

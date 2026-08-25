@@ -1,14 +1,14 @@
-import { DataflowTriggerKind } from "./dataflow";
+import { EventFlowTriggerKind } from "./eventFlow";
 import { CorpModelBase, ModelBase, Operator } from "./modelBase";
 import { EventSourceType } from "./wfDefinition";
 
-export interface DfRunLog extends CorpModelBase {
+export interface EfRunLog extends CorpModelBase {
   appId?: string;
-  dataflowId: string;
-  dataflowName?: string;
-  dataflowVersion?: number;
+  eventFlowId: string;
+  eventFlowName?: string;
+  eventFlowVersion?: number;
   wfInstanceId?: string;
-  triggerKind?: DataflowTriggerKind | number | string;
+  triggerKind?: EventFlowTriggerKind | number | string;
   eventSource?: EventSourceType | number | string;
   eventType?: number | string;
   triggerBy?: Operator;
@@ -19,10 +19,10 @@ export interface DfRunLog extends CorpModelBase {
   errMsg?: string;
 }
 
-export interface DfRunLogNode extends ModelBase {
+export interface EfRunLogNode extends ModelBase {
   corpId?: string;
   runLogId?: string;
-  dataflowId?: string;
+  eventFlowId?: string;
   wfInstanceId?: string;
   dataId?: string;
   nodeId?: string;
@@ -38,8 +38,8 @@ export interface DfRunLogNode extends ModelBase {
   execTime?: number;
 }
 
-export interface DfRunLogQueryParams {
-  dataflowId: string;
+export interface EfRunLogQueryParams {
+  eventFlowId: string;
   startTime?: number;
   endTime?: number;
   success?: boolean;
@@ -47,14 +47,14 @@ export interface DfRunLogQueryParams {
   top?: number;
 }
 
-export interface DfRunLogQueryResult {
+export interface EfRunLogQueryResult {
   total: number;
-  items: DfRunLog[];
+  items: EfRunLog[];
 }
 
-export interface DfRunLogDetail {
-  run: DfRunLog;
-  nodes: DfRunLogNode[];
+export interface EfRunLogDetail {
+  run: EfRunLog;
+  nodes: EfRunLogNode[];
   executedNodeIds: string[];
   failedNodeIds: string[];
 }
