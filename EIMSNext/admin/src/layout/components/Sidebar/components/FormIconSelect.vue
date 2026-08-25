@@ -104,8 +104,8 @@ onMounted(() => {
   }
 
   .color-chip[aria-pressed="true"] {
-    outline: 1px solid rgb(64 128 255 / 55%);
-    box-shadow: 0 0 0 2px rgb(64 128 255 / 16%);
+    outline: 1px solid color-mix(in srgb, var(--et-color-primary) 55%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--et-color-primary) 16%, transparent);
   }
 }
 

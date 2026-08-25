@@ -61,3 +61,17 @@ const changeTheme = (val: any) => {
 };
 
 </script>
+
+<style scoped lang="scss">
+.elt-drawer .flex-x-between {
+  color: var(--et-text-primary);
+}
+
+.elt-drawer .el-switch {
+  --el-switch-on-color: var(--et-color-primary) !important;
+}
+
+.elt-drawer .el-switch__label {
+  color: var(--et-text-primary);
+}
+</style>

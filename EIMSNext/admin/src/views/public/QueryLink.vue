@@ -31,22 +31,12 @@
 
       <div v-if="mode === 'query'" class="query-panel">
         <el-form v-if="queryFields.length" label-position="top">
-          <el-row :gutter="12">
-            <el-col v-for="field in queryFields" :key="field.field" :xs="24" :sm="12">
-              <el-form-item :label="field.title">
-                <el-input
-                  v-model="queryValues[field.field]"
-                  clearable
-                  @keyup.enter="runQuery"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <PublicConditionList v-model="queryCondition" :fields="queryFields" :option-loader="loadPublicSelectOptions" @validity-change="queryValid = $event" />
         </el-form>
 
         <div class="query-actions">
           <el-button @click="resetQuery">{{ t("common.reset") }}</el-button>
-          <el-button type="primary" :loading="queryLoading" @click="runQuery">
+          <el-button type="primary" :loading="queryLoading" :disabled="!queryValid || !queryFields.length" @click="runQuery">
             {{ t("common.search") }}
           </el-button>
         </div>
@@ -123,6 +113,13 @@ import { Loading } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import type { IDynamicFindOptions, IDynamicFilter } from "@eimsnext/services";
 import {
+  IConditionList,
+  IFormFieldDef,
+  PublicConditionList,
+  toDynamicFilter,
+} from "@eimsnext/components";
+import { loadDynamicSelectOptions, type DynamicSelectOption, type DynamicSelectSource } from "@eimsnext/utils";
+import {
   FieldDef,
   FieldType,
   FormContent,
@@ -164,7 +161,8 @@ const accessCodeExpired = ref(false);
 const formDef = ref<FormDef>();
 const publicSetting = ref<PublicSetting>();
 const mode = ref<Mode>("query");
-const queryValues = ref<Record<string, any>>({});
+const queryCondition = ref<IConditionList>({ id: "public_conditions", rel: "and", items: [] });
+const queryValid = ref(false);
 const listRows = ref<FormData[]>([]);
 const listTotal = ref(0);
 const listPage = ref(1);
@@ -174,7 +172,19 @@ const detailVisible = ref(false);
 const currentDetailIndex = ref(-1);
 
 const ordinaryFields = computed(() => flattenFields(formDef.value?.content?.items || []));
-const queryFields = computed(() => resolveFields(publicSetting.value?.form?.queryLink?.queryFields || []));
+const queryableFields = computed(() => ordinaryFields.value.filter((field) => isPublicQueryField(field.type)));
+const queryFields = computed<IFormFieldDef[]>(() => resolveFields(publicSetting.value?.form?.queryLink?.queryFields || [], queryableFields.value).map((field) => ({
+  formId: formId.value,
+  field: field.field,
+  label: field.title,
+  type: field.type,
+  format: field.props?.format,
+  options: field.props?.options,
+  source: field.type === FieldType.Select1
+    ? (field as FieldDef & { effect?: { source?: DynamicSelectSource } }).effect?.source
+    : undefined,
+  isSubField: field.field.includes(">"),
+})));
 const displayFields = computed(() => {
   const configured = resolveFields(publicSetting.value?.form?.queryLink?.displayFields || []);
   return configured.length ? configured : ordinaryFields.value.slice(0, 5);
@@ -236,6 +246,7 @@ async function submitAccessCode() {
 }
 
 async function runQuery() {
+  if (!queryValid.value || queryFields.value.length === 0) return;
   listPage.value = 1;
   await loadListData();
   if (listRows.value.length >= 0) {
@@ -271,13 +282,8 @@ async function loadListData() {
 }
 
 function buildQueryRequest(): IDynamicFindOptions {
-  const filters: IDynamicFilter[] = [{ field: "formId", op: "eq", value: formId.value }];
-  queryFields.value.forEach((field) => {
-    const value = queryValues.value[field.field];
-    if (value !== undefined && value !== null && `${value}`.trim() !== "") {
-      filters.push({ field: `data.${field.field}`, op: "eq", value });
-    }
-  });
+  const publicFilter = toDynamicFilter(queryCondition.value);
+  const filters: IDynamicFilter[] = [{ field: "formId", op: "eq", value: formId.value }, ...(publicFilter.items || [])];
 
   return {
     filter: { rel: "and", items: filters },
@@ -287,7 +293,8 @@ function buildQueryRequest(): IDynamicFindOptions {
 }
 
 function resetQuery() {
-  queryValues.value = {};
+  queryCondition.value = { id: "public_conditions", rel: "and", items: [] };
+  queryValid.value = false;
   listPage.value = 1;
 }
 
@@ -345,21 +352,25 @@ function getFieldValue(data: any, field: string) {
   return data[field];
 }
 
-function resolveFields(fields: string[]): FieldDef[] {
+function resolveFields(fields: string[], candidates = ordinaryFields.value): FieldDef[] {
   if (!fields.length) return [];
   const allowed = new Set(fields);
-  return ordinaryFields.value.filter((field) => allowed.has(field.field));
+  return candidates.filter((field) => allowed.has(field.field));
+}
+
+function loadPublicSelectOptions(source: DynamicSelectSource, keyword?: string): Promise<DynamicSelectOption[]> {
+  return loadDynamicSelectOptions(source, keyword, publicHttp);
 }
 
 function flattenFields(fields: FieldDef[]): FieldDef[] {
   const result: FieldDef[] = [];
   fields.forEach((field) => {
     const publicSystemField = isPublicSystemFieldDef(field);
-    if ((!publicSystemField && field.hidden) || isOrgField(field.type)) return;
+    if ((!publicSystemField && field.hidden) || (field.type !== FieldType.TableForm && !isSupportedQueryField(field.type))) return;
     if (field.type === FieldType.TableForm && field.columns?.length) {
       field.columns.forEach((sub) => {
         const publicSystemSubField = isPublicSystemFieldDef(sub);
-        if ((publicSystemSubField || !sub.hidden) && !isOrgField(sub.type)) {
+        if ((publicSystemSubField || !sub.hidden) && isSupportedQueryField(sub.type)) {
           result.push({ ...sub, field: `${field.field}>${sub.field}`, title: `${field.title}.${sub.title}` });
         }
       });
@@ -370,8 +381,20 @@ function flattenFields(fields: FieldDef[]): FieldDef[] {
   return result;
 }
 
-function isOrgField(type?: string) {
-  return type === FieldType.Department1 || type === FieldType.Department2 || type === FieldType.Employee1 || type === FieldType.Employee2;
+function isSupportedQueryField(type?: string) {
+  return ![FieldType.DataSelect, FieldType.FileUpload, FieldType.ImageUpload, FieldType.Signature, FieldType.TableForm].includes(type as FieldType);
+}
+
+function isPublicQueryField(type?: FieldType | string) {
+  return [
+    FieldType.Input,
+    FieldType.TextArea,
+    FieldType.SerialNo,
+    FieldType.Radio,
+    FieldType.Select1,
+    FieldType.Number,
+    FieldType.TimeStamp,
+  ].includes(type as FieldType);
 }
 </script>
 

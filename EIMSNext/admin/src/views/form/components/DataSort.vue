@@ -3,7 +3,7 @@
     <FieldSortList v-model="sortList" :form-id="formId" :fieldPerms="fieldPerms" @change="onChange"></FieldSortList>
     <div class="actions">
       <el-button type="primary" @click="onSort">{{ t("common.sort") }}</el-button>
-      <el-button>{{ t("common.deleteAll") }}</el-button>
+      <el-button class="delete-button">{{ t("common.deleteAll") }}</el-button>
     </div>
   </div>
 </template>

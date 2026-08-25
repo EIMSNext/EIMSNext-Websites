@@ -1,6 +1,7 @@
 import { IFieldLimit } from "../NodeFieldList/type";
 import { DataItemType } from "../common";
 import { IListItem } from "../list/type";
+import type { DynamicSelectSource } from "@eimsnext/utils";
 import {
   FieldDef,
   FieldType,
@@ -19,6 +20,7 @@ export interface IFormFieldDef {
   type: FieldType;
   format?: string;
   options?: ValueOption[];
+  source?: DynamicSelectSource;
   isSubField?: boolean;
   nodeId?: string;
   singleResultNode?: boolean;
@@ -43,6 +45,7 @@ export function toFormFieldDef(
       type: field.type,
       format: field.props?.format,
       options: field.props?.options,
+      source: getDynamicSelectSource(field),
       isSubField: true,
       nodeId: nodeId,
       singleResultNode: singleResultNode,
@@ -56,6 +59,7 @@ export function toFormFieldDef(
       type: field.type,
       format: field.props?.format,
       options: field.props?.options,
+      source: getDynamicSelectSource(field),
       isSubField: false,
       nodeId: nodeId,
       singleResultNode: singleResultNode,
@@ -66,6 +70,13 @@ export function toFormFieldDef(
 }
 export function getFieldIcon(type: FieldType) {
   return "el-UserFilled";
+}
+
+function getDynamicSelectSource(field: FieldDef): DynamicSelectSource | undefined {
+  if (field.type !== FieldType.Select1 && field.type !== FieldType.Select2) {
+    return undefined;
+  }
+  return (field as FieldDef & { effect?: { source?: DynamicSelectSource } }).effect?.source;
 }
 export function buildFieldListItems(
   formId: string,

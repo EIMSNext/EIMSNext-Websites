@@ -191,6 +191,16 @@ export const formatFormValue = (
   const normalized = normalizeValue(value);
   const type = fieldDef?.type;
   const format = "format" in (fieldDef || {}) ? (fieldDef as any).format : (fieldDef as FieldDef | undefined)?.props?.format;
+  const options = (fieldDef as FieldDef | undefined)?.props?.options;
+  const formatOption = (item: any): string => {
+    if (item === undefined || item === null || item === "") return "";
+    if (typeof item === "object") {
+      if (item.label || item.name) return String(item.label || item.name);
+      item = item.value;
+    }
+    const option = options?.find((candidate) => String(candidate.value) === String(item));
+    return option?.label ?? String(item);
+  };
 
   if (type === FieldType.TimeStamp) {
     return dateFormat(normalized, format);
@@ -209,10 +219,20 @@ export const formatFormValue = (
     }).filter(Boolean).join("; ");
   }
 
-  if (type === FieldType.CheckBox || type === FieldType.Select2 || type === FieldType.Employee2 || type === FieldType.Department2) {
+  if (
+    type === FieldType.Radio ||
+    type === FieldType.CheckBox ||
+    type === FieldType.Select1 ||
+    type === FieldType.Select2 ||
+    type === FieldType.Employee1 ||
+    type === FieldType.Employee2 ||
+    type === FieldType.Department1 ||
+    type === FieldType.Department2
+  ) {
     if (Array.isArray(normalized)) {
-      return normalized.map((item) => item?.label || item?.name || item?.value || item).filter(Boolean).join(", ");
+      return normalized.map(formatOption).filter(Boolean).join(", ");
     }
+    return formatOption(normalized);
   }
 
   if (flowStatusLabel && type === FieldType.None && typeof normalized === "number") {
@@ -221,9 +241,8 @@ export const formatFormValue = (
 
   if (Array.isArray(normalized)) {
     return normalized.map((item) => {
-      if (Array.isArray(item)) return item.map((sub) => sub?.label || sub?.name || sub).join(", ");
-      if (typeof item === "object" && item !== null) return item.label || item.name || item.value || "";
-      return item;
+      if (Array.isArray(item)) return item.map(formatOption).join(", ");
+      return formatOption(item);
     }).filter(Boolean).join(", ");
   }
 
@@ -232,4 +251,51 @@ export const formatFormValue = (
   }
 
   return String(normalized);
+};
+
+export const getColoredOptionItems = (value: any, fieldDef?: Pick<FieldDef, "type" | "props">): any[] => {
+  const types = [FieldType.Radio, FieldType.CheckBox, FieldType.Select1, FieldType.Select2];
+  const props = fieldDef?.props as any;
+  if (!fieldDef || !types.includes(fieldDef.type as FieldType)) return [];
+  const options = Array.isArray(props?.options) ? props.options : [];
+  if (props?.optionColor === false || (props?.optionColor !== true && !options.some((option: any) => option?.color))) return [];
+  const normalizedValue = normalizeValue(value);
+  const values = Array.isArray(normalizedValue) ? normalizedValue : [normalizedValue];
+  const items = values.map((item) => {
+    const rawValue = item && typeof item === "object" ? item.value : item;
+    return options.find((option: any) =>
+      String(option?.value) === String(rawValue) ||
+      String(option?.label) === String(rawValue),
+    ) ||
+      (item && typeof item === "object" ? item : { value: rawValue, label: rawValue });
+  }).filter((item) => item && item.label !== undefined && item.label !== null && item.label !== "");
+  return items.some((item) => item.color) ? items : [];
+};
+
+const getRowFieldValue = (row: Record<string, any>, field: string) => {
+  if (row[field] !== undefined) return row[field];
+  const leafField = field.split(">").pop();
+  return leafField ? row[leafField] : undefined;
+};
+
+/** Resolves the configured data-title expression for list/card display. */
+export const formatDataTitle = (row: Record<string, any>, formDef: FormDef, t: (key: string) => string) => {
+  const dataTitle = formDef.formSettings?.advanced?.dataTitle;
+  const customContent = dataTitle?.mode === "custom" ? dataTitle.content || "" : "";
+  const tokenFields = Array.from(customContent.matchAll(/\$\{([^}]+)\}/g)).map((match) => match[1].trim());
+  const defaultField = (formDef.content?.items || []).find((field) => field.type !== FieldType.TableForm)?.field;
+  const fields = tokenFields.length > 0 ? tokenFields : defaultField ? [defaultField] : [];
+  const valueFor = (field: string) => {
+    const fieldDef = findFieldDef(formDef, field, t);
+    return formatFormValue(getRowFieldValue(row, field), fieldDef, undefined);
+  };
+
+  if (customContent) {
+    return customContent.replace(/\$\{([^}]+)\}/g, (_token, field: string) => valueFor(field.trim()));
+  }
+
+  const calculated = fields.map(valueFor).filter(Boolean).join(" ");
+  if (calculated) return calculated;
+
+  return formatFormValue(row[SystemField.DataTitle], findFieldDef(formDef, SystemField.DataTitle, t));
 };

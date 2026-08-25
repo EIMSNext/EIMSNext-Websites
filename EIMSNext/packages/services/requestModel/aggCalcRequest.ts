@@ -2,15 +2,15 @@ import { FieldType } from "@eimsnext/models";
 import { IDynamicFilter, SortDirection } from "./odataQueryRequest";
 
 export interface AggCalcRequest {
-  dataSource: IAgDatasource;
-  dimensions?: IDimension[];
-  metrics?: IMetric[];
+  itemId: string;
   filter?: IDynamicFilter;
   sort?: IAgSortItem[];
   take?: number;
   skip?: number;
-  itemId?: string;
-  displayFields?: string[];
+}
+
+export interface AggPreviewRequest extends AggCalcRequest {
+  details: string;
 }
 
 export interface IAgDatasource {

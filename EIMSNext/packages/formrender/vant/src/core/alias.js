@@ -10,6 +10,7 @@ export default {
   cell: PRE + "-cell",
   timePicker: "fc-time-picker",
   timestamp: "fc-date-picker",
+  colorPicker: "fc-color-picker",
   switch: PRE + "-switch",
   select: "fc-select",
   select2: "fc-select",

@@ -12,15 +12,21 @@ export type FormDataSearchState = {
   selectedFields: string[];
 };
 
+export const MAX_SEARCH_FIELD_COUNT = 10;
+
 const searchableFieldTypes = new Set<FieldType>([
   FieldType.Input,
-  FieldType.TextArea,
   FieldType.Number,
+  FieldType.TextArea,
   FieldType.Radio,
   FieldType.CheckBox,
   FieldType.Select1,
   FieldType.Select2,
   FieldType.SerialNo,
+  FieldType.Employee1,
+  FieldType.Employee2,
+  FieldType.Department1,
+  FieldType.Department2,
 ]);
 
 export const isSearchableFieldType = (type?: FieldType | string) =>
@@ -78,7 +84,9 @@ export const normalizeSelectedSearchFields = (
 ) => {
   if (fields.length === 0) return [];
   const candidateSet = new Set(candidates.map((item) => item.field));
-  return fields.filter((field) => candidateSet.has(field));
+  return fields
+    .filter((field) => candidateSet.has(field))
+    .slice(0, MAX_SEARCH_FIELD_COUNT);
 };
 
 export const resolveSearchFields = (
@@ -88,5 +96,5 @@ export const resolveSearchFields = (
   if (!state.keyword.trim()) return [];
   const normalized = normalizeSelectedSearchFields(state.selectedFields, candidates);
   if (normalized.length > 0) return normalized;
-  return candidates.map((field) => field.field);
+  return [SystemField.DataTitle];
 };

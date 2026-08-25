@@ -10,8 +10,8 @@
       <el-tab-pane :label="$t('admin.advanced.print')" name="print" class="adv-panel">
         <PrintDefList :form-def="formDef"></PrintDefList>
       </el-tab-pane>
-      <el-tab-pane :label="$t('admin.advanced.dataflow')" name="dataflow" class="adv-panel">
-        <DataflowList :form-def="formDef" />
+      <el-tab-pane :label="$t('admin.advanced.eventFlow')" name="eventFlow" class="adv-panel">
+        <EventFlowList :form-def="formDef" />
       </el-tab-pane>
       <el-tab-pane :label="$t('admin.advanced.webhook')" name="webpush" class="adv-panel">
         <WebhookList :form-def="formDef" />
@@ -23,7 +23,7 @@
 import DataAdvanced from "./DataAdvanced.vue";
 import NotifyList from "./NotifyList.vue";
 import WebhookList from "./WebhookList.vue";
-import DataflowList from "./DataflowList.vue";
+import EventFlowList from "./EventFlowList.vue";
 import PrintDefList from "./PrintDefList.vue";
 import { FormDef } from "@eimsnext/models";
 import { TabsPaneContext } from "element-plus";
@@ -48,5 +48,14 @@ const handleClick = (_tab: TabsPaneContext, _event: Event) => {};
 
 :deep(.adv-tabs.el-tabs--left .el-tabs__item.is-left) {
   justify-content: flex-start;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: var(--et-bg-hover);
+  }
+
+  &.is-active {
+    background: var(--et-bg-primary-soft);
+  }
 }
 </style>

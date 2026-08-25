@@ -57,7 +57,7 @@ const props = defineProps<{
 
 const field = ref(props.modelValue.field);
 const value = ref(props.modelValue.value);
-const displayError = computed(() => props.errorMessage || (field.value.missing ? t("dataflow.deletedField") : ""));
+const displayError = computed(() => props.errorMessage || (field.value.missing ? t("eventFlow.deletedField") : ""));
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
 

@@ -106,16 +106,16 @@ export default defineComponent({
         }
     },
     render() {
-        const clearIcon = () => {
+        const rightIcon = () => {
             return this.$props.clearable && !is.empty(this.inputValue) ?
                 <i class="van-badge__wrapper van-icon van-icon-clear van-field__clear"
-                    onClick={this.clear}></i> : undefined;
+                    onClick={this.clear}></i> : <van-icon name="calendar-o" />;
         }
         return <>
             <van-field ref="el" placeholder={this.placeholder} readonly disabled={this.$props.disabled}
                 onClick={this.open}
-                model-value={this.getStrValue()} isLink border={false} v-slots={{
-                    'right-icon': clearIcon
+                model-value={this.getStrValue()} isLink={false} border={false} v-slots={{
+                    'right-icon': rightIcon
                 }} />
             <van-calendar {...{ ...this.$attrs, ...this.dateRange }} show={this.show} onUpdate:show={v => (this.show = v)}
                 type={this.type}

@@ -1,6 +1,7 @@
 <template>
   <et-dialog
     :model-value="modelValue"
+    class="no-head-divider no-foot-divider"
     :title="t('admin.adminGroup.contactTitle')"
     width="850px"
     destroy-on-close
@@ -17,42 +18,58 @@
 
     <div class="contact-permission">
       <section class="permission-section">
-        <div class="section-title">{{ t('admin.adminGroup.internalDept') }}</div>
-        <el-checkbox v-model="local.contactDepartmentEnabled">{{ t('admin.adminGroup.visibleAndManage') }}</el-checkbox>
-        <div class="scope-row">
-          <el-radio-group v-model="local.contactDepartmentScopeMode">
-            <el-radio :label="ScopeMode.All">{{ t('admin.adminGroup.allDepts') }}</el-radio>
-            <el-radio :label="ScopeMode.Partial">{{ t('admin.adminGroup.partialDepts') }}</el-radio>
-          </el-radio-group>
+        <div class="section-title">{{ t("admin.adminGroup.internalDept") }}</div>
+        <div class="section-content">
+          <el-checkbox v-model="local.contactDepartmentEnabled">
+            {{ t("admin.adminGroup.visibleAndManage") }}
+          </el-checkbox>
+          <div class="scope-row">
+            <el-radio-group v-model="local.contactDepartmentScopeMode">
+              <el-radio :value="ScopeMode.All">{{ t("admin.adminGroup.allDepts") }}</el-radio>
+              <el-radio :value="ScopeMode.Partial">
+                {{ t("admin.adminGroup.partialDepts") }}
+              </el-radio>
+            </el-radio-group>
+          </div>
+          <selected-tags
+            :model-value="deptTags"
+            :editable="
+              local.contactDepartmentEnabled &&
+              local.contactDepartmentScopeMode === ScopeMode.Partial
+            "
+            :empty-text="t('admin.adminGroup.selectDept')"
+            class="scope-tags"
+            @editTag="openDepartmentSelect"
+          />
         </div>
-        <selected-tags
-          :model-value="deptTags"
-          :editable="local.contactDepartmentEnabled && local.contactDepartmentScopeMode === ScopeMode.Partial"
-          :empty-text="t('admin.adminGroup.selectDept')"
-          class="scope-tags"
-          @editTag="openDepartmentSelect"
-        />
       </section>
 
       <section class="permission-section">
-        <div class="section-title">{{ t('admin.adminGroup.internalRole') }}</div>
-        <div class="checkbox-row">
-          <el-checkbox v-model="roleCanView">{{ t('admin.adminGroup.visible') }}</el-checkbox>
-          <el-checkbox v-model="roleCanManage">{{ t('admin.adminGroup.manage') }}</el-checkbox>
+        <div class="section-title">{{ t("admin.adminGroup.internalRole") }}</div>
+        <div class="section-content">
+          <div class="checkbox-row">
+            <el-checkbox v-model="roleCanView">{{ t("admin.adminGroup.visible") }}</el-checkbox>
+            <el-checkbox v-model="roleCanManage">{{ t("admin.adminGroup.manage") }}</el-checkbox>
+          </div>
+          <div class="scope-row">
+            <el-radio-group v-model="local.contactRoleScopeMode">
+              <el-radio :value="ScopeMode.All">{{ t("admin.adminGroup.allRoles") }}</el-radio>
+              <el-radio :value="ScopeMode.Partial">
+                {{ t("admin.adminGroup.partialRoles") }}
+              </el-radio>
+            </el-radio-group>
+          </div>
+          <selected-tags
+            :model-value="roleTags"
+            :editable="
+              local.contactRolePermission !== PermissionLevel.None &&
+              local.contactRoleScopeMode === ScopeMode.Partial
+            "
+            :empty-text="t('admin.adminGroup.selectRole')"
+            class="scope-tags"
+            @editTag="openRoleSelect"
+          />
         </div>
-        <div class="scope-row">
-          <el-radio-group v-model="local.contactRoleScopeMode">
-            <el-radio :label="ScopeMode.All">{{ t('admin.adminGroup.allRoles') }}</el-radio>
-            <el-radio :label="ScopeMode.Partial">{{ t('admin.adminGroup.partialRoles') }}</el-radio>
-          </el-radio-group>
-        </div>
-        <selected-tags
-          :model-value="roleTags"
-          :editable="local.contactRolePermission !== PermissionLevel.None && local.contactRoleScopeMode === ScopeMode.Partial"
-          :empty-text="t('admin.adminGroup.selectRole')"
-          class="scope-tags"
-          @editTag="openRoleSelect"
-        />
       </section>
     </div>
   </et-dialog>
@@ -60,7 +77,13 @@
 
 <script setup lang="ts">
 import { PermissionLevel, ScopeMode } from "@eimsnext/models";
-import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
+import {
+  DataItemType,
+  ISelectedTag,
+  MemberSelectDialog,
+  MemberTabs,
+  SelectedTags,
+} from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
 
 defineOptions({
@@ -102,14 +125,16 @@ watch(
       };
     }
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 watch(
   () => local.value.contactDepartmentEnabled,
   (enabled) => {
-    local.value.contactDepartmentPermission = enabled ? PermissionLevel.Manage : PermissionLevel.None;
-  },
+    local.value.contactDepartmentPermission = enabled
+      ? PermissionLevel.Manage
+      : PermissionLevel.None;
+  }
 );
 
 const roleCanView = computed({
@@ -131,7 +156,9 @@ const dialogMemberOptions = computed(() => ({
   adminScope: true,
 }));
 
-const dialogTags = computed(() => (selectingType.value === "dept" ? props.deptTags : props.roleTags));
+const dialogTags = computed(() =>
+  selectingType.value === "dept" ? props.deptTags : props.roleTags
+);
 
 const openDepartmentSelect = () => {
   selectingType.value = "dept";
@@ -145,9 +172,13 @@ const openRoleSelect = () => {
 
 const finishMemberSelect = (tags: ISelectedTag[]) => {
   if (selectingType.value === "dept") {
-    local.value.contactDepartmentIds = tags.filter((tag) => tag.type === DataItemType.Department).map((tag) => tag.id);
+    local.value.contactDepartmentIds = tags
+      .filter((tag) => tag.type === DataItemType.Department)
+      .map((tag) => tag.id);
   } else {
-    local.value.contactRoleIds = tags.filter((tag) => tag.type === DataItemType.Role).map((tag) => tag.id);
+    local.value.contactRoleIds = tags
+      .filter((tag) => tag.type === DataItemType.Role)
+      .map((tag) => tag.id);
   }
   showMemberDialog.value = false;
 };
@@ -160,7 +191,9 @@ const cancel = () => {
 const save = () => {
   emit("ok", {
     ...local.value,
-    contactDepartmentPermission: local.value.contactDepartmentEnabled ? PermissionLevel.Manage : PermissionLevel.None,
+    contactDepartmentPermission: local.value.contactDepartmentEnabled
+      ? PermissionLevel.Manage
+      : PermissionLevel.None,
   });
   emit("update:modelValue", false);
 };
@@ -171,6 +204,7 @@ const save = () => {
   display: flex;
   flex-direction: column;
   gap: var(--et-space-26);
+  margin: var(--et-space-20);
 }
 
 .permission-section {
@@ -186,7 +220,12 @@ const save = () => {
   line-height: 20px;
   padding-left: var(--et-space-8);
 }
-
+.section-content {
+  display: flex;
+  flex-direction: column;
+  margin-left: var(--et-space-20);
+  gap: var(--et-space-8);
+}
 .checkbox-row,
 .scope-row {
   display: flex;
@@ -200,3 +239,4 @@ const save = () => {
   padding: var(--et-space-10);
 }
 </style>
+

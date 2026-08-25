@@ -88,7 +88,7 @@ export default defineComponent({
     );
 
     const cellValue = (row, field) =>
-      formatDataSelectValue(resolveFormDataValue(row, field.field), field) || "";
+      formatDataSelectValue(resolveFormDataValue(row, field.field), field, t) || "";
 
     return () => {
       if (!configured.value || error.value) {

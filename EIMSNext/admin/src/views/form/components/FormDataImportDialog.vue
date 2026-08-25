@@ -1190,15 +1190,16 @@ function getColumnName(index: number) {
   width: 42px;
   height: 42px;
   border-radius: var(--et-radius-round);
-  color: var(--et-text-on-primary);
   font-size: 28px;
 
   &.success {
     background: var(--et-color-success);
+    color: var(--et-text-on-success);
   }
 
   &.warning {
     background: var(--et-color-warning);
+    color: var(--et-text-on-warning);
   }
 }
 

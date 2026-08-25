@@ -13,7 +13,11 @@
     @edit="emit('edit', $event)"
     @delete="emit('delete', $event)"
     @filter-change="onFilterValueChanged"
+    @quick-filter-change="onQuickFilterValueChanged"
+    @apply-filters="onApplyFilters"
     @update-realtime-setting="(...args) => emit('update-realtime-setting', ...args)"
+    @update-image-setting="(...args) => emit('update-image-setting', ...args)"
+    @update-text-setting="(...args) => emit('update-text-setting', ...args)"
   />
   <div v-else class="layout-grid-item">
     <div class="container-group-drag-handle"></div>
@@ -29,7 +33,16 @@
               <div class="action-btn" :title="t('common.edit')"><et-icon icon="el-editPen" /></div>
             </template>
           </el-popover>
-          <div v-else class="action-btn" :title="t('common.edit')" @click="onEdit"><et-icon icon="el-editPen" /></div>
+          <el-popover v-else-if="itemDef.itemType === DashItemType.Image && imageSetting" v-model:visible="imageSettingsVisible" placement="bottom-end" trigger="click" width="360">
+            <ImageSettings :model-value="imageSetting" @updated="onImageSettingUpdated" />
+            <template #reference>
+              <div class="action-btn" :title="t('common.edit')"><et-icon icon="el-editPen" /></div>
+            </template>
+          </el-popover>
+          <div v-else-if="itemDef.itemType === DashItemType.Text && textSetting" class="action-btn" :title="t('common.edit')" @click="toggleTextEditing">
+            <et-icon :icon="textEditing ? 'el-check' : 'el-editPen'" />
+          </div>
+          <div v-else-if="itemDef.itemType !== DashItemType.FilterButton" class="action-btn" :title="t('common.edit')" @click="onEdit"><et-icon icon="el-editPen" /></div>
           <div class="action-btn" :title="t('admin.dashItem.copy')" @click="onCopy">
             <et-icon icon="el-documentCopy" />
           </div>
@@ -52,7 +65,11 @@
           :is-public="isPublic"
           :public-token="publicToken"
           :item-def="itemDef"
-        />
+        >
+          <template #header-actions>
+            <slot name="header-actions"></slot>
+          </template>
+        </e-charts-viewer>
       </template>
       <template v-else-if="itemDef.itemType == DashItemType.DetailTable && detailTableSetting && detailTableSettingValidate(detailTableSetting)">
         <DetailTableViewer
@@ -68,8 +85,21 @@
       <template v-else-if="itemDef.itemType == DashItemType.Filter">
         <FilterWidgetCard :item-def="itemDef" :is-public="isPublic" @change="onFilterValueChanged" />
       </template>
+      <template v-else-if="itemDef.itemType == DashItemType.QuickFilter && quickFilterSetting">
+        <QuickFilterViewer :item-id="itemDef.id" :setting="quickFilterSetting" :is-public="isPublic" @change="onQuickFilterValueChanged" />
+      </template>
+      <template v-else-if="itemDef.itemType == DashItemType.FilterButton">
+        <FilterButtonViewer @apply="onApplyFilters" />
+      </template>
       <template v-else-if="itemDef.itemType == DashItemType.RealTime && realTimeSetting">
-        <RealTimeDisplay :setting="realTimeSetting" />
+        <RealtimeViewer :setting="realTimeSetting" />
+      </template>
+      <template v-else-if="itemDef.itemType == DashItemType.Image && imageSetting">
+        <ImageViewer :setting="imageSetting" />
+      </template>
+      <template v-else-if="itemDef.itemType == DashItemType.Text && textSetting">
+        <TextEditor v-if="!isView && textEditing" v-model="textDraft" @blur="persistTextDraft" />
+        <TextViewer v-else :setting="textSetting" />
       </template>
       <template v-else>
         <el-empty class="et-dash-empty">
@@ -84,6 +114,7 @@
 </template>
 <script setup lang="ts">
 import { DashboardItemDef, DashItemType } from "@eimsnext/models";
+import { onBeforeUnmount } from "vue";
 import { useLocale } from "element-plus";
 import { chartSettingValidate, IChartSetting } from "../ECharts/type";
 import EChartsViewer from "../ECharts/EChartsViewer.vue";
@@ -92,9 +123,18 @@ import DetailTableViewer from "../DetailTable/DetailTableViewer.vue";
 import { detailTableSettingValidate, IDetailTableSetting, parseDetailTableSetting } from "../DetailTable/type";
 import LayoutContainerCard from "../LayoutContainer/LayoutContainerCard.vue";
 import { IGridLayoutItem } from "@eimsnext/models";
-import RealTimeDisplay from "../RealTime/RealTimeDisplay.vue";
+import RealtimeViewer from "../RealTime/RealtimeViewer.vue";
 import RealTimeSettings from "../RealTime/RealTimeSettings.vue";
 import { parseRealTimeSetting, IRealTimeSetting } from "../RealTime/type";
+import ImageViewer from "../Image/ImageViewer.vue";
+import ImageSettings from "../Image/ImageSettings.vue";
+import { IDashboardImageSetting, parseDashboardImageSetting } from "../Image/type";
+import TextViewer from "../Text/TextViewer.vue";
+import TextEditor from "../Text/TextEditor.vue";
+import { IDashboardTextSetting, parseDashboardTextSetting, sanitizeDashboardHtml } from "../Text/type";
+import QuickFilterViewer from "../QuickFilter/QuickFilterViewer.vue";
+import FilterButtonViewer from "../QuickFilter/FilterButtonViewer.vue";
+import { parseQuickFilterSetting } from "../QuickFilter/type";
 const { t } = useLocale();
 
 defineOptions({
@@ -145,6 +185,13 @@ const detailTableSetting = computed<IDetailTableSetting | undefined>(() => {
 
 const realTimeSetting = computed<IRealTimeSetting | undefined>(() => parseRealTimeSetting(props.itemDef.details));
 const realtimeSettingsVisible = ref(false);
+const imageSetting = computed<IDashboardImageSetting | undefined>(() => parseDashboardImageSetting(props.itemDef.details));
+const imageSettingsVisible = ref(false);
+const textSetting = computed<IDashboardTextSetting | undefined>(() => parseDashboardTextSetting(props.itemDef.details));
+const quickFilterSetting = computed(() => props.itemDef.itemType === DashItemType.QuickFilter ? parseQuickFilterSetting(props.itemDef.details) : undefined);
+const textEditing = ref(false);
+const textDraft = ref("");
+const lastSavedText = ref("");
 
 const itemTitle = computed(() => {
   if (props.itemDef.name) {
@@ -159,14 +206,30 @@ const itemTitle = computed(() => {
     return t("admin.dashboardDesigner.filterWidgetName");
   }
 
+  if (props.itemDef.itemType == DashItemType.Image) {
+    return t("admin.dashboardDesigner.imageComponent");
+  }
+
+  if (props.itemDef.itemType == DashItemType.Text) {
+    return t("admin.dashboardDesigner.textComponent");
+  }
+
+  if (props.itemDef.itemType == DashItemType.QuickFilter) {
+    return t("admin.dashboardDesigner.quickFilter");
+  }
+
+  if (props.itemDef.itemType == DashItemType.FilterButton) {
+    return t("admin.dashboardDesigner.filterButton");
+  }
+
   return t("admin.untitledChart");
 });
 
 const isInteractiveContent = computed(() => {
-  return props.isView && [DashItemType.Filter, DashItemType.DetailTable].includes(props.itemDef.itemType);
+  return props.itemDef.itemType === DashItemType.Text || (props.isView && [DashItemType.Filter, DashItemType.QuickFilter, DashItemType.FilterButton, DashItemType.DetailTable].includes(props.itemDef.itemType));
 });
 
-const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change", "update-layout", "update-setting", "update-realtime-setting"]);
+const emit = defineEmits(["hide", "edit", "copy", "delete", "filter-change", "quick-filter-change", "apply-filters", "update-layout", "update-setting", "update-realtime-setting", "update-image-setting", "update-text-setting"]);
 const onHide = () => {
   emit("hide", props.itemDef);
 };
@@ -182,10 +245,44 @@ const onDelete = () => {
 const onFilterValueChanged = (payload: { itemId: string; value: any }) => {
   emit("filter-change", payload);
 };
+const onQuickFilterValueChanged = (payload: { itemId: string; option?: any }) => {
+  emit("quick-filter-change", payload);
+};
+const onApplyFilters = () => {
+  emit("apply-filters", { itemId: props.itemDef.id });
+};
 const onRealTimeSettingUpdated = (setting: IRealTimeSetting) => {
   realtimeSettingsVisible.value = false;
   emit("update-realtime-setting", props.itemDef, setting);
 };
+const onImageSettingUpdated = (setting: IDashboardImageSetting) => {
+  emit("update-image-setting", props.itemDef, setting);
+};
+const beginTextEditing = () => {
+  if (!textSetting.value) return;
+  textDraft.value = textSetting.value.html;
+  lastSavedText.value = textSetting.value.html;
+  textEditing.value = true;
+};
+const persistTextDraft = () => {
+  if (!textSetting.value) return;
+  const html = sanitizeDashboardHtml(textDraft.value);
+  textDraft.value = html;
+  if (html === lastSavedText.value) return;
+  lastSavedText.value = html;
+  emit("update-text-setting", props.itemDef, { version: 1, kind: "text", html } as IDashboardTextSetting);
+};
+const toggleTextEditing = () => {
+  if (textEditing.value) {
+    persistTextDraft();
+    textEditing.value = false;
+    return;
+  }
+  beginTextEditing();
+};
+onBeforeUnmount(() => {
+  if (textEditing.value) persistTextDraft();
+});
 </script>
 <style lang="scss" scoped>
 // 核心card容器

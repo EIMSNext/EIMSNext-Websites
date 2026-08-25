@@ -1,10 +1,10 @@
 <template>
-  <div class="_fd-drag-tool" @click.stop="active" :class="{
+  <div class="_fd-drag-tool field-layout-designer" @click.stop="active" :class="{
     active: fcx.active === id,
     'is-inside': inside,
     'is-inline': inline,
   }">
-    <div class="_fd-drag-mask" v-if="mask"></div>
+    <div class="_fd-drag-mask form-widget-mask" v-if="mask"></div>
     <div class="_fd-drag-hidden" v-if="hidden">
       <i class="fc-icon icon-eye-close"></i> {{ t("props.hide") }}
     </div>
@@ -141,7 +141,7 @@ export default defineComponent({
   min-height: 20px;
   min-width: 0;
   box-sizing: border-box;
-  padding: 2px;
+  padding: 0;
   overflow: hidden;
   word-wrap: break-word;
   word-break: break-all;
@@ -149,9 +149,9 @@ export default defineComponent({
 }
 
 ._fd-drag-tool ._fd-drag-tool {
-  margin: 2px;
-  max-width: calc(100% - 4px);
-  max-height: calc(100% - 7px);
+  margin: 0;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 ._fd-drag-tool.is-inline {
@@ -169,7 +169,7 @@ export default defineComponent({
 }
 
 ._fd-drag-tool:has(._fd-drag-tool:hover) {
-  outline-style: dashed;
+  outline: 1px dashed var(--fc-line-color-1);
 }
 
 ._fd-drag-tool:not(.active):hover>div>._fd-drag-btn {
@@ -183,7 +183,7 @@ export default defineComponent({
 }
 
 ._fd-drag-tool:has(._fd-drag-tool) {
-  padding: 2px;
+  padding: 0;
 }
 
 ._fd-drag-tool+._fd-drag-tool {
@@ -193,8 +193,18 @@ export default defineComponent({
 ._fd-drag-tool.active {
   z-index: 2;
   min-width: 80px;
-  min-height: 36px;
+  min-height: 20px;
   background-color: var(--fc-style-bg-color-1);
+  color: var(--fc-text-color-1);
+  outline: 1px dashed var(--fc-style-color-1);
+}
+
+/* An active container must retain normal field text. Its affordance is the
+   theme-colored outline, not a warning-colored label or border. */
+._fc-designer ._fd-drag-tool.active .el-form-item__label,
+._fc-designer ._fd-drag-tool.active .field-name,
+._fc-designer ._fd-drag-tool.active ._fc-field-title {
+  color: var(--fc-text-color-1) !important;
 }
 
 ._fd-drag-tool.active>div>._fd-drag-btn {
@@ -212,7 +222,7 @@ export default defineComponent({
 }*/
 
 ._fd-drag-tool._fd-drop-hover:hover {
-  outline: 1px dashed var(--fc-tool-border-color);
+  outline: 1px dashed var(--fc-style-color-1);
 }
 
 ._fd-drag-tool ._fd-drag-btn {
@@ -289,7 +299,7 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   background: var(--et-overlay-color-strong);
-  color: var(--et-text-on-primary);
+  color: var(--et-text-on-overlay);
   font-size: 14px;
 }
 
@@ -301,6 +311,12 @@ export default defineComponent({
 
 ._fd-drag-hidden .fc-icon {
   margin-right: 5px;
+}
+
+.field-layout-designer > .field-layout-content,
+.field-layout-designer > .field-layout-raw {
+  position: relative;
+  z-index: 0;
 }
 
 </style>

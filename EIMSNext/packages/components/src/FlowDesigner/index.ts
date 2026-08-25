@@ -1,16 +1,16 @@
-import dataflowDiagram from "./Dataflow/DataflowDiagram.vue";
-import dataflowMetaEditor from "./Dataflow/DataflowMetaEditor.vue";
-import httpSampleDialog from "./Dataflow/HttpSampleDialog.vue";
+import eventFlowDiagram from "./EventFlow/EventFlowDiagram.vue";
+import eventFlowMetaEditor from "./EventFlow/EventFlowMetaEditor.vue";
+import httpSampleDialog from "./EventFlow/HttpSampleDialog.vue";
 import workflowDiagram from "./Workflow/WorkflowDiagram.vue";
 import workflowMetaEditor from "./Workflow/WorkflowMetaEditor.vue";
 import { withInstall } from "../utils/install";
-export * from "./Dataflow/formula";
-export * from "./Dataflow/fieldMappingRules";
+export * from "./EventFlow/formula";
+export * from "./EventFlow/fieldMappingRules";
 
-const DataflowDiagram = withInstall(dataflowDiagram);
-const DataflowMetaEditor = withInstall(dataflowMetaEditor);
+const EventFlowDiagram = withInstall(eventFlowDiagram);
+const EventFlowMetaEditor = withInstall(eventFlowMetaEditor);
 const HttpSampleDialog = withInstall(httpSampleDialog);
 const WorkflowDiagram = withInstall(workflowDiagram);
 const WorkflowMetaEditor = withInstall(workflowMetaEditor);
 
-export { DataflowDiagram, DataflowMetaEditor, HttpSampleDialog, WorkflowDiagram, WorkflowMetaEditor };
+export { EventFlowDiagram, EventFlowMetaEditor, HttpSampleDialog, WorkflowDiagram, WorkflowMetaEditor };

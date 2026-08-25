@@ -2,41 +2,48 @@
   <div class="tab-content">
     <div class="link-row">
       <el-switch v-model="datalink.enabled" @change="markDirty" />
-      <el-input :model-value="datalinkUrl" readonly class="link-input" />
-      <el-button @click="copyText(datalinkUrl)">{{ t("common.copy") }}</el-button>
-      <el-button @click="openUrl(datalinkUrl)">{{ t("common.open") }}</el-button>
     </div>
 
-    <div class="form-group">
-      <label class="group-label">{{ t("publicpublish.datalinkFields") }}</label>
-      <el-select
-        v-model="visibleFieldKeys"
-        multiple
-        filterable
-        collapse-tags
-        collapse-tags-tooltip
-        :placeholder="t('publicpublish.allFieldsDefault')"
-        class="full"
-        @change="onVisibleFieldsChange"
-      >
-        <el-option v-for="field in selectableFields" :key="field.field" :label="field.title" :value="field.field" />
-      </el-select>
-      <p class="field-tip">{{ t("publicpublish.visibleFieldsTip") }}</p>
-    </div>
+    <template v-if="datalink.enabled">
+      <div class="permission-row">
+        <el-button type="primary" @click="openFieldPerms">
+          {{ t("publicpublish.fieldPermission") }}
+        </el-button>
+        <span>{{ permissionSummary }}</span>
+      </div>
 
-    <LimitSection
-      :enabled="datalink.accessCodeEnabled || false"
-      :access-code="accessCodeInput"
-      :expire-time="datalink.expireTime ?? null"
-      @update:enabled="datalink.accessCodeEnabled = $event; markDirty()"
-      @update:access-code="onAccessCodeChange"
-      @update:expire-time="datalink.expireTime = $event ?? undefined; markDirty()"
-      @change="markDirty"
-    />
+      <el-dialog v-model="showFieldPermDialog" class="field-permission-dialog" width="465px" :title="t('publicpublish.fieldPermissionTitle')">
+        <div class="permission-toolbar">
+          <span>{{ t("publicpublish.fieldPermissionDesc") }}</span>
+          <el-input v-model="fieldPermSearch" :placeholder="t('common.search')" clearable class="permission-search" />
+        </div>
+        <EtFieldPerms
+          :model-value="visibleFieldPermItems"
+          :fields="permissionFields"
+          :default-visbile="true"
+          class="permission-list"
+          @update:model-value="mergeFieldPerms"
+        />
+        <template #footer>
+          <el-button @click="showFieldPermDialog = false">{{ t("common.cancel") }}</el-button>
+          <el-button type="primary" @click="saveFieldPerms">{{ t("common.save") }}</el-button>
+        </template>
+      </el-dialog>
 
-    <el-button type="primary" @click="save">
-      {{ t("common.save") }}
-    </el-button>
+      <LimitSection
+        :enabled="datalink.accessCodeEnabled || false"
+        :access-code="accessCodeInput"
+        :expire-time="datalink.expireTime ?? null"
+        @update:enabled="datalink.accessCodeEnabled = $event; markDirty()"
+        @update:access-code="onAccessCodeChange"
+        @update:expire-time="datalink.expireTime = $event ?? undefined; markDirty()"
+        @change="markDirty"
+      />
+
+      <el-button type="primary" @click="save">
+        {{ t("common.save") }}
+      </el-button>
+    </template>
   </div>
 </template>
 
@@ -48,7 +55,6 @@ import {
   FieldType,
   FormDef,
   PublicDataLinkSetting,
-  PublicFieldPermission,
   PublicSetting,
   PublicTargetType,
 } from "@eimsnext/models";
@@ -56,6 +62,15 @@ import { publicSettingService } from "@eimsnext/services";
 import { sha256 } from "@eimsnext/utils";
 import LimitSection from "./LimitSection.vue";
 import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
+
+interface IFieldPermItem {
+  id: string;
+  visible: boolean;
+  editable: boolean;
+  tableInsert?: boolean;
+  tableEdit?: boolean;
+  tableDelete?: boolean;
+}
 
 const { t } = useI18n();
 
@@ -72,14 +87,45 @@ const datalink = ref<PublicDataLinkSetting>({
 });
 
 const accessCodeInput = ref("");
-const visibleFieldKeys = ref<string[]>([]);
+const showFieldPermDialog = ref(false);
+const fieldPermSearch = ref("");
+const fieldPermItems = ref<IFieldPermItem[]>([]);
 const isDirtyState = ref(false);
 
-const datalinkUrl = computed(
-  () => `${window.location.origin}${window.location.pathname}#/public/form/${props.formDef.id}/data/{dataId}`,
-);
-
 const selectableFields = computed(() => flattenFields(props.formDef.content?.items || []));
+const publicPermissionFields = computed(() => {
+  const fields = props.formDef.content?.items || [];
+  return filterPublicFields(fields);
+});
+const permissionFields = computed(() => {
+  const fields = publicPermissionFields.value;
+  const keyword = fieldPermSearch.value.trim().toLowerCase();
+  if (!keyword) return fields;
+  return fields.reduce<FieldDef[]>((result, field) => {
+    const fieldMatch = field.title.toLowerCase().includes(keyword);
+    if (field.type === FieldType.TableForm && field.columns?.length) {
+      const columns = field.columns.filter((column) =>
+        fieldMatch || column.title.toLowerCase().includes(keyword),
+      );
+      if (fieldMatch || columns.length) result.push({ ...field, columns });
+    } else if (fieldMatch) {
+      result.push(field);
+    }
+    return result;
+  }, []);
+});
+const visibleFieldPermIds = computed(() => new Set(flattenFields(permissionFields.value).map((field) => field.field)));
+const visibleFieldPermItems = computed(() => fieldPermItems.value.filter((item) => visibleFieldPermIds.value.has(item.id)));
+const permissionSummary = computed(() => {
+  const fields = datalink.value.fields || [];
+  const visible = fields.filter((item) => item.visible !== false).length;
+  const editable = fields.filter((item) => item.editable).length;
+  const total = selectableFields.value.length;
+  if (total > 0 && visible >= total) {
+    return t("publicpublish.fieldPermissionSummaryAll", { editable });
+  }
+  return t("publicpublish.fieldPermissionSummary", { visible, editable });
+});
 
 watch(
   () => props.publicSetting,
@@ -91,9 +137,11 @@ watch(
       expireTime: setting.form?.dataLink?.expireTime,
       fields: [...(setting.form?.dataLink?.fields ?? [])],
     };
-    visibleFieldKeys.value = (datalink.value.fields || [])
-      .filter((field) => field.visible !== false)
-      .map((field) => field.field);
+    fieldPermItems.value = (datalink.value.fields || []).map((field) => ({
+      id: field.field,
+      visible: field.visible !== false,
+      editable: field.editable !== false,
+    }));
     isDirtyState.value = false;
   },
   { immediate: true, deep: true },
@@ -108,23 +156,48 @@ function onAccessCodeChange(v: string) {
   markDirty();
 }
 
-function onVisibleFieldsChange() {
-  const selected = new Set(visibleFieldKeys.value);
-  datalink.value.fields = selectableFields.value.map<PublicFieldPermission>((field) => ({
+function openFieldPerms() {
+  if (!fieldPermItems.value.length) {
+    fieldPermItems.value = selectableFields.value.map((field) => ({ id: field.field, visible: true, editable: false }));
+  }
+  showFieldPermDialog.value = true;
+}
+
+function mergeFieldPerms(value: IFieldPermItem[]) {
+  const updates = new Map(value.map((item) => [item.id, item]));
+  fieldPermItems.value = fieldPermItems.value.map((item) => updates.get(item.id) || item);
+}
+
+function saveFieldPerms() {
+  const permissions = new Map((datalink.value.fields || []).map((item) => [item.field, item]));
+  fieldPermItems.value.forEach((item) => {
+    permissions.set(item.id, { field: item.id, visible: item.visible, editable: item.editable });
+  });
+  datalink.value.fields = selectableFields.value.map((field) => permissions.get(field.field) || {
     field: field.field,
-    visible: selected.size === 0 || selected.has(field.field),
+    visible: true,
     editable: false,
-  }));
+  });
+  fieldPermSearch.value = "";
+  showFieldPermDialog.value = false;
   markDirty();
 }
 
-async function copyText(text: string) {
-  await navigator.clipboard.writeText(text);
-  ElMessage.success(t("common.copied"));
-}
-
-function openUrl(url: string) {
-  window.open(url, "_blank");
+function filterPublicFields(fields: FieldDef[]) {
+  return fields.reduce<FieldDef[]>((result, field) => {
+    const publicSystemField = isPublicSystemFieldDef(field);
+    if ((!publicSystemField && field.hidden) || isOrgField(field.type)) return result;
+    if (field.type === FieldType.TableForm && field.columns?.length) {
+      const columns = field.columns.filter((column) => {
+        const publicSystemSubField = isPublicSystemFieldDef(column);
+        return (publicSystemSubField || !column.hidden) && !isOrgField(column.type);
+      });
+      if (columns.length) result.push({ ...field, columns });
+      return result;
+    }
+    result.push(field);
+    return result;
+  }, []);
 }
 
 function flattenFields(fields: FieldDef[]) {
@@ -187,13 +260,13 @@ defineExpose({
 
 <style scoped lang="scss">
 .tab-content {
-  padding: var(--et-space-12) 0;
+  padding: var(--et-space-8) 0;
 }
 
 .link-row {
   align-items: center;
   display: flex;
-  gap: var(--et-space-12);
+  gap: var(--et-space-8);
   margin-bottom: var(--et-space-16);
 
   .link-input {
@@ -221,5 +294,37 @@ defineExpose({
 
 .full {
   width: 100%;
+}
+
+.permission-row {
+  align-items: center;
+  border-top: 1px solid var(--et-border-color-light);
+  display: flex;
+  gap: var(--et-space-12);
+  margin: var(--et-space-8) 0 var(--et-space-16);
+  padding-top: var(--et-space-16);
+
+  span {
+    color: var(--et-text-secondary);
+    font-size: var(--et-font-size-12);
+  }
+}
+
+.permission-toolbar {
+  align-items: center;
+  color: var(--et-text-secondary);
+  display: flex;
+  font-size: var(--et-font-size-13);
+  gap: var(--et-space-12);
+  margin-bottom: var(--et-space-8);
+}
+
+.permission-search {
+  margin-left: auto;
+  width: 160px;
+}
+
+.permission-list {
+  height: 320px;
 }
 </style>

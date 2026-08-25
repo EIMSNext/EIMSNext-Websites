@@ -1,13 +1,13 @@
 <template>
-  <div class="publish-shell">
-    <el-tabs v-model="activeName" tab-position="left" class="publish-tabs" :before-leave="beforeTabLeave">
-      <el-tab-pane :label="t('admin.publish.internal')" name="member" class="publish-panel">
+  <div class="adv-container">
+    <el-tabs v-model="activeName" tab-position="left" class="adv-tabs" :before-leave="beforeTabLeave">
+      <el-tab-pane :label="t('admin.publish.internal')" name="member" class="adv-panel">
         <InternalPublish v-if="activeName === 'member'" :form-def="formDef" />
       </el-tab-pane>
-      <el-tab-pane :label="t('admin.publish.public')" name="public" class="publish-panel">
+      <el-tab-pane :label="t('admin.publish.public')" name="public" class="adv-panel">
         <PublicPublish v-if="activeName === 'public'" ref="publicPanelRef" :form-def="formDef" />
       </el-tab-pane>
-      <el-tab-pane :label="t('admin.publish.view')" name="view" class="publish-panel">
+      <el-tab-pane :label="t('admin.publish.view')" name="view" class="adv-panel">
         <ViewPublish v-if="activeName === 'view'" :form-def="formDef" />
       </el-tab-pane>
     </el-tabs>
@@ -50,42 +50,20 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-.publish-shell {
-  height: 100%;
+:deep(.adv-tabs.el-tabs--left .el-tabs__nav.is-left) {
+  width: var(--et-size-165) !important;
 }
 
-.publish-tabs {
-  height: 100%;
-}
-
-.publish-panel {
-  height: 100%;
-}
-
-:deep(.publish-tabs.el-tabs--left) {
-  height: 100%;
-}
-
-:deep(.publish-tabs.el-tabs--left .el-tabs__header) {
-  margin-right: 0;
-  border-right: 1px solid var(--et-border-color-light);
-}
-
-:deep(.publish-tabs.el-tabs--left .el-tabs__nav.is-left) {
-  width: 180px;
-}
-
-:deep(.publish-tabs.el-tabs--left .el-tabs__item.is-left) {
+:deep(.adv-tabs.el-tabs--left .el-tabs__item.is-left) {
   justify-content: flex-start;
-  min-height: 62px;
-  padding: 0 var(--et-space-20);
-}
+  transition: background-color 0.2s ease, color 0.2s ease;
 
-:deep(.publish-tabs.el-tabs--left .el-tabs__content) {
-  height: 100%;
-}
+  &:hover {
+    background: var(--et-bg-hover);
+  }
 
-:deep(.publish-tabs.el-tabs--left .el-tab-pane) {
-  height: 100%;
+  &.is-active {
+    background: var(--et-bg-primary-soft);
+  }
 }
 </style>

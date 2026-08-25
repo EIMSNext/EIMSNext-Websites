@@ -31,6 +31,7 @@ const props = defineProps<{
 
     .header {
       border-bottom: 1px solid var(--et-border-color-light);
+      color: var(--et-text-primary);
       display: flex;
       font-size: var(--et-font-size-16);
       height: var(--et-size-45);

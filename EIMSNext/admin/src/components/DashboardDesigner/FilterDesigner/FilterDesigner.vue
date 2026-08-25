@@ -159,6 +159,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import { ElMessage } from "element-plus";
 import { useUserStore, useDeptStore } from "@eimsnext/store";
 import {
   EtDrawer,
@@ -202,7 +203,8 @@ defineOptions({
 
 const props = defineProps<{
   modelValue: boolean;
-  dashItemDef: DashboardItemDef;
+  dashItemDef?: DashboardItemDef;
+  initialSetting?: DashboardFilterSetting;
   chartTargets: IDashboardChartTarget[];
   bindingCandidates: IDashboardBindingCandidate[];
 }>();
@@ -223,8 +225,8 @@ const optionValue = ref<any>();
 const memberTags = ref<ISelectedTag[]>([]);
 const memberLimitTags = ref<ISelectedTag[]>([]);
 
-const initSettingFromItemDef = (itemDef: DashboardItemDef) => {
-  const parsed = JSON.parse(itemDef.details || "{}");
+const initSetting = (itemDef?: DashboardItemDef, initialSetting?: DashboardFilterSetting) => {
+  const parsed = itemDef ? JSON.parse(itemDef.details || "{}") : initialSetting;
   const fresh = isFilterSetting(parsed) ? cloneDeep(parsed) : createLocalizedDefaultSetting();
   Object.assign(setting, fresh);
   dynamicDefaultType.value = fresh.dynamicDefault?.type || "currentUser";
@@ -236,9 +238,12 @@ const initSettingFromItemDef = (itemDef: DashboardItemDef) => {
   memberLimitTags.value = [];
 };
 
-initSettingFromItemDef(props.dashItemDef);
+initSetting(props.dashItemDef, props.initialSetting);
 
-watch(() => props.dashItemDef, (newItem) => { initSettingFromItemDef(newItem); });
+watch(
+  () => [props.dashItemDef, props.initialSetting] as const,
+  ([itemDef, initialSetting]) => { initSetting(itemDef, initialSetting); },
+);
 const getMemberLimit = (value: DashboardFilterSetting): { deptIds?: string[] } | undefined => {
   return (value as DashboardFilterSetting & { memberLimit?: { deptIds?: string[] } }).memberLimit;
 };
@@ -603,20 +608,38 @@ watch(
   { immediate: true },
 );
 
-const emit = defineEmits(["update:modelValue", "close"]);
+const emit = defineEmits(["update:modelValue", "close", "save-setting"]);
+
+const validateQuickFilterCondition = () => {
+  if (!setting.targetChartIds.length) return false;
+  const targetSourceIds = new Set(
+    props.chartTargets
+      .filter((target) => setting.targetChartIds.includes(target.id))
+      .map((target) => target.dataSource.id),
+  );
+  return targetSourceIds.size > 0 && [...targetSourceIds].every((sourceId) =>
+    setting.bindings.some((binding) => binding.dataSourceId === sourceId && binding.field?.field),
+  );
+};
 
 const onSave = async () => {
-  if (setting.defaultValueMode == "dynamic") {
-    await applyDynamicDefault();
+  if (props.initialSetting) {
+    if (!validateQuickFilterCondition()) {
+      ElMessage.warning(t("admin.dashboardDesigner.quickFilterConditionIncomplete"));
+      return;
+    }
+    emit("save-setting", cloneDeep(setting));
+  } else if (props.dashItemDef) {
+    if (setting.defaultValueMode == "dynamic") {
+      await applyDynamicDefault();
+    }
+    const req = {
+      id: props.dashItemDef.id,
+      name: setting.name,
+      details: JSON.stringify(setting),
+    };
+    await dashboardItemDefService.patch<DashboardItemDef>(req.id, req);
   }
-
-  const req = {
-    id: props.dashItemDef.id,
-    name: setting.name,
-    details: JSON.stringify(setting),
-  };
-
-  await dashboardItemDefService.patch<DashboardItemDef>(req.id, req);
   close();
 };
 
@@ -630,6 +653,7 @@ const close = () => {
 .drawer-title {
   font-size: var(--et-font-size-20);
   font-weight: 700;
+  color: var(--et-text-primary);
 }
 
 .filter-shell {

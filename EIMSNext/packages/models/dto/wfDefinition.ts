@@ -168,7 +168,7 @@ export interface WfNodeSetting {
 }
 export enum FlowType {
   Workflow = "0",
-  Dataflow = "1",
+  EventFlow = "1",
 }
 export enum EventSourceType {
   None = "0",

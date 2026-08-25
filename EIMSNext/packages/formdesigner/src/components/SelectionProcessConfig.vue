@@ -82,7 +82,7 @@ export default defineComponent({
       return this.designer.setupState.t;
     },
     configured() {
-      return this.config.tableFields.length > 0 || !!this.config.buttonText;
+      return this.config.tableFields.length > 0;
     },
     activeRule() {
       return this.designer.setupState.activeRule;
@@ -136,10 +136,16 @@ export default defineComponent({
           page: this.page,
           pageSize: this.pageSize,
           filter: this.filterConfig,
+          fields: this.tableFields,
         });
         const result = await formDataService.query(query);
+        const count = await formDataService.count(query.filter).catch(() => null);
         this.rows = result.map((item) => mergeDataSelectRecord(item));
-        this.total = result.length;
+        const parsedCount = Number(count);
+        this.total = Number.isFinite(parsedCount)
+          ? parsedCount
+          : (this.page - 1) * this.pageSize + result.length
+            + (result.length === this.pageSize ? 1 : 0);
       } finally {
         this.loading = false;
       }

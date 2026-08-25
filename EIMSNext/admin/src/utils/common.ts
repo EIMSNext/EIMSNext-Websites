@@ -37,11 +37,14 @@ export function getAppIcon(app?: AppDef) {
   return icon;
 }
 export function getAppIconColor(menu?: any) {
-  let color = "#1296db";
+  let color = "var(--et-color-primary)";
   if (menu && menu.iconColor) color = menu.iconColor;
-  if (menu && menu.menuType && menu.menuType == 2) color = "orange";
 
   return color;
+}
+
+export function getAppIconTextColor(menu?: any) {
+  return "var(--el-color-white, #fff)";
 }
 
 export function getFormIcon(form?: AppMenu) {
@@ -107,10 +110,10 @@ export function dateFormat(val: any, fmt?: string) {
   return val ? dayjs(val).format(format) : "";
 }
 
-export function translateRouteTitle(t: any, title: string) {
-  return title;
-  // 判断是否存在国际化配置，如果没有原生返回
-  // const key = "route." + title;
-  // const translatedTitle = t(key);
-  // return translatedTitle === key ? title : translatedTitle;
+export function translateRouteTitle(t: any, title: string, te?: (key: string) => boolean) {
+  if (!title || typeof te !== "function") return title;
+  if (te(title)) return t(title);
+
+  const routeKey = `route.${title}`;
+  return te(routeKey) ? t(routeKey) : title;
 }

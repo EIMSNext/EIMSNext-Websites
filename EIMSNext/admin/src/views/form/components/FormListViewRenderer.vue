@@ -21,11 +21,23 @@
               v-for="sub in col.children"
               :key="sub.field"
               :prop="sub.field"
-              :formatter="tableFormatter"
               :label="sub.title"
               :width="sub.width"
               :resizable="true"
-            />
+            >
+              <template #default="scope">
+                <template v-if="getColoredItems(scope.row, sub.field).length">
+                  <template v-for="(item, index) in getColoredItems(scope.row, sub.field)" :key="`${item.value}-${index}`">
+                    <span v-if="showOptionSeparator(getColoredItems(scope.row, sub.field), index)" class="colored-option-separator">, </span>
+                    <el-tag v-if="item.color" size="small" :style="getOptionTagStyle(item)">
+                      {{ item.label ?? item.value }}
+                    </el-tag>
+                    <span v-else>{{ item.label ?? item.value }}</span>
+                  </template>
+                </template>
+                <span v-else>{{ formatCell(scope.row, sub.field) }}</span>
+              </template>
+            </el-table-column>
           </el-table-column>
         </template>
         <template v-else>
@@ -38,6 +50,15 @@
                   :src="url"
                   class="table-image-thumb table-image-thumb-spaced"
                 />
+              </template>
+                <template v-else-if="getColoredItems(scope.row, col.field).length">
+                  <template v-for="(item, index) in getColoredItems(scope.row, col.field)" :key="`${item.value}-${index}`">
+                    <span v-if="showOptionSeparator(getColoredItems(scope.row, col.field), index)" class="colored-option-separator">, </span>
+                    <el-tag v-if="item.color" size="small" :style="getOptionTagStyle(item)">
+                    {{ item.label ?? item.value }}
+                  </el-tag>
+                  <span v-else>{{ item.label ?? item.value }}</span>
+                </template>
               </template>
               <span v-else>{{ formatCell(scope.row, col.field) }}</span>
             </template>
@@ -66,7 +87,20 @@
             :show-field-title="cardSettings.showFieldTitle"
             :format-field="(field) => formatCardValue(row, field)"
             @click="$emit('row-click', row)"
-          />
+          >
+            <template #field-value="{ field, value }">
+              <span v-if="getColoredItems(row, field.field).length" class="fv-card-colored-options">
+                <template v-for="(item, index) in getColoredItems(row, field.field)" :key="`${item.value}-${index}`">
+                  <span v-if="showOptionSeparator(getColoredItems(row, field.field), index)" class="colored-option-separator">, </span>
+                  <el-tag v-if="item.color" size="small" :style="getOptionTagStyle(item)">
+                    {{ item.label ?? item.value }}
+                  </el-tag>
+                  <span v-else>{{ item.label ?? item.value }}</span>
+                </template>
+              </span>
+              <span v-else class="fv-card-field-text">{{ value || "--" }}</span>
+            </template>
+          </FormListViewCard>
         </div>
       </div>
     </div>
@@ -85,7 +119,20 @@
         :show-field-title="cardSettings.showFieldTitle"
         :format-field="(field) => formatCardValue(row, field)"
         @click="$emit('row-click', row)"
-      />
+      >
+        <template #field-value="{ field, value }">
+          <span v-if="getColoredItems(row, field.field).length" class="fv-card-colored-options">
+            <template v-for="(item, index) in getColoredItems(row, field.field)" :key="`${item.value}-${index}`">
+              <span v-if="showOptionSeparator(getColoredItems(row, field.field), index)" class="colored-option-separator">, </span>
+              <el-tag v-if="item.color" size="small" :style="getOptionTagStyle(item)">
+                {{ item.label ?? item.value }}
+              </el-tag>
+              <span v-else>{{ item.label ?? item.value }}</span>
+            </template>
+          </span>
+          <span v-else class="fv-card-field-text">{{ value || "--" }}</span>
+        </template>
+      </FormListViewCard>
     </div>
   </div>
 </template>
@@ -95,9 +142,10 @@ import { computed, ref } from "vue";
 import { FormData, FormDef, FormListView, FormListViewField, FormListViewSettings, FormListViewType, FlowStatus, SystemField } from "@eimsnext/models";
 import type { TableInstance, TableTooltipData } from "element-plus";
 import { flowStatusArray } from "@eimsnext/components";
+import { getFilledTextColor } from "@eimsnext/utils";
 import { useI18n } from "vue-i18n";
 import { ITableColumn } from "../type";
-import { extractImageUrl, flattenDataItem, formatFormValue, findFieldDef } from "../listViewUtils";
+import { extractImageUrl, flattenDataItem, formatDataTitle, formatFormValue, findFieldDef, getColoredOptionItems } from "../listViewUtils";
 import FormListViewCard from "./FormListViewCard.vue";
 
 const props = defineProps<{
@@ -117,6 +165,39 @@ const { t } = useI18n();
 const tableRef = ref<TableInstance>();
 
 const normalizedRows = computed(() => props.rows.map(flattenDataItem));
+
+const layoutFieldDefs = computed(() => {
+  const map = new Map<string, any>();
+  const layout = props.formDef.content?.layout;
+  if (!layout) return map;
+  try {
+    const rules = Array.isArray(layout)
+      ? layout
+      : typeof layout === "string"
+        ? JSON.parse(layout)
+        : layout;
+    const visit = (nodes: any[]) => {
+      nodes.forEach((rule) => {
+        if (!rule || typeof rule !== "object") return;
+        if (rule.field) map.set(rule.field, rule);
+        if (Array.isArray(rule.children)) visit(rule.children);
+        if (Array.isArray(rule.columns)) visit(rule.columns);
+        if (Array.isArray(rule.rule)) visit(rule.rule);
+        if (Array.isArray(rule.subForm)) visit(rule.subForm);
+        if (Array.isArray(rule.props?.columns)) {
+          rule.props.columns.forEach((column: any) => {
+            if (Array.isArray(column?.rule)) visit(column.rule);
+          });
+        }
+      });
+    };
+    if (Array.isArray(rules)) visit(rules);
+    else if (Array.isArray(rules?.root)) visit(rules.root);
+  } catch {
+    // Invalid layout JSON should not prevent list data from rendering.
+  }
+  return map;
+});
 
 const cardSettings = computed(() => {
   const value = props.view.pcType === FormListViewType.Kanban ? props.settings.kanban : props.settings.gallery;
@@ -155,8 +236,19 @@ const getColumnSetting = (field: string): any => {
 
 const formatCell = (row: any, field: string, value?: any) => {
   if (field === SystemField.FlowStatus) return getFlowStatusName(value ?? row[field]);
+  if (field === SystemField.DataTitle) return formatDataTitle(row, props.formDef, t);
   const col = getColumnSetting(field);
-  const fieldDef = col || findFieldDef(props.formDef, field, t);
+  const sourceFieldDef = findFieldDef(props.formDef, field, t);
+  const fieldDef = sourceFieldDef && col
+    ? {
+        ...sourceFieldDef,
+        type: col.type || sourceFieldDef.type,
+        props: {
+          ...sourceFieldDef.props,
+          format: col.format ?? sourceFieldDef.props?.format,
+        },
+      }
+    : col || sourceFieldDef;
   return formatFormValue(value ?? row[field], fieldDef, getFlowStatusName);
 };
 
@@ -168,7 +260,6 @@ const getImageUrls = (row: any, field: string): string[] => {
   return list.map((item) => extractImageUrl(item)).filter(Boolean);
 };
 
-const tableFormatter = (row: any, column: any, cellValue: any) => formatCell(row, column.property, cellValue);
 const tableToolFormatter = (data: TableTooltipData<FormData>) => formatCell(data.row, data.column.property, data.cellValue);
 
 const onRowClick = (row: FormData, column: any) => {
@@ -181,10 +272,45 @@ const onRowClick = (row: FormData, column: any) => {
 
 const formatCardValue = (row: any, field: string) => {
   const fieldDef = findFieldDef(props.formDef, field, t);
-  return formatFormValue(row[field], fieldDef, getFlowStatusName);
+  const flattenedRow = flattenDataItem(row);
+  const value = flattenedRow[field] !== undefined ? flattenedRow[field] : flattenedRow[field.split(">").pop() || field];
+  return formatFormValue(value, fieldDef, getFlowStatusName);
 };
 
-const getCardTitle = (row: any) => formatCardValue(row, cardSettings.value.titleField || SystemField.DataTitle) || row[SystemField.DataTitle] || "-";
+const getColoredItems = (row: any, field: string) => {
+  const sourceFieldDef = findFieldDef(props.formDef, field, t);
+  const layoutFieldDef = layoutFieldDefs.value.get(field)
+    || layoutFieldDefs.value.get(field.split(">").pop() || field);
+  const fieldDef = layoutFieldDef
+    ? {
+        ...(sourceFieldDef || {}),
+        type: layoutFieldDef.type || sourceFieldDef?.type,
+        props: {
+          ...(sourceFieldDef?.props || {}),
+          ...(layoutFieldDef.props || {}),
+          options: layoutFieldDef.options || layoutFieldDef.props?.options || sourceFieldDef?.props?.options,
+        },
+      }
+    : sourceFieldDef;
+  const flattenedRow = flattenDataItem(row);
+  const value = flattenedRow[field] !== undefined
+    ? flattenedRow[field]
+    : flattenedRow[field.split(">").pop() || field];
+  return getColoredOptionItems(value, fieldDef);
+};
+
+const getOptionTagStyle = (item: any) => item?.color
+  ? { backgroundColor: item.color, borderColor: item.color, color: getFilledTextColor() }
+  : undefined;
+
+const showOptionSeparator = (items: any[], index: number) =>
+  index > 0 && !items[index - 1]?.color && !items[index]?.color;
+
+const getCardTitle = (row: any) => {
+  const titleField = cardSettings.value.titleField || SystemField.DataTitle;
+  if (titleField === SystemField.DataTitle) return formatDataTitle(row, props.formDef, t) || "-";
+  return formatCardValue(row, titleField) || formatDataTitle(row, props.formDef, t) || "-";
+};
 const getCoverUrl = (row: any) => cardSettings.value.coverField ? extractImageUrl(row[cardSettings.value.coverField]) : "";
 
 const kanbanGroups = computed(() => {
@@ -209,6 +335,46 @@ const kanbanGroups = computed(() => {
 .data-table-full {
   width: 100%;
   height: 100%;
+  font-size: 13px;
+
+  &.el-table {
+    font-size: 13px;
+  }
+
+  :deep(.el-table__header-wrapper th.el-table__cell),
+  :deep(.el-table__fixed-header-wrapper th.el-table__cell) {
+    padding: 6px 0;
+  }
+
+  :deep(.el-table__body td.el-table__cell) {
+    padding: 6px 0;
+  }
+
+  :deep(.el-tag + .el-tag) {
+    margin-left: 4px;
+  }
+
+  .colored-option-separator {
+    margin: 0 4px;
+  }
+}
+
+.fv-card-colored-options {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.fv-card-field-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colored-option-separator {
+  margin: 0 4px;
 }
 
 .kanban-view {

@@ -259,6 +259,7 @@ function flattenPluginFields(fields: Array<{ key: string; name: string; subField
   margin: 0;
   font-size: 28px;
   line-height: 1.2;
+  color: var(--et-text-primary);
 }
 
 .detail-subtitle {
@@ -363,7 +364,7 @@ function flattenPluginFields(fields: Array<{ key: string; name: string; subField
   display: grid;
   place-items: center;
   background: color-mix(in srgb, var(--et-fill-color-light) 72%, transparent);
-  color: #1e3a8a;
+  color: var(--et-text-secondary);
   font-size: 32px;
   font-weight: 700;
 }

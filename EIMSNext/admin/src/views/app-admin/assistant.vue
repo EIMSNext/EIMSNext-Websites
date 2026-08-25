@@ -3,50 +3,50 @@
     <EtConfirmDialog v-model="showDeleteConfirm" :title="t('admin.appAdmin.deleteConfirmTitle')" :icon="MessageIcon.Warning" :showNoSave="false" @ok="execDelete">
       <div>{{ t("admin.appAdmin.deleteConfirmContent") }}</div>
     </EtConfirmDialog>
-    <et-dialog v-model="showAddDialog" :title="t('dataflow.newDataflow')" width="620px" @ok="confirmAdd" @cancel="showAddDialog = false">
+    <et-dialog v-model="showAddDialog" :title="t('eventFlow.newEventFlow')" width="620px" @ok="confirmAdd" @cancel="showAddDialog = false">
       <div class="add-form">
-        <el-input v-model="nameDraft" :placeholder="t('dataflow.dataflowName')" maxlength="50" show-word-limit />
-        <el-select v-model="eventSourceDraft" :placeholder="t('dataflow.triggerType')">
-          <el-option :label="t('dataflow.formTrigger')" :value="EventSourceType.Form" />
-          <el-option :label="t('dataflow.scheduleTrigger')" :value="EventSourceType.Schedule" />
-          <el-option :label="t('dataflow.httpTrigger')" :value="EventSourceType.Http" />
+        <el-input v-model="nameDraft" :placeholder="t('eventFlow.eventFlowName')" maxlength="50" show-word-limit />
+        <el-select v-model="eventSourceDraft" :placeholder="t('eventFlow.triggerType')">
+          <el-option :label="t('eventFlow.formTrigger')" :value="EventSourceType.Form" />
+          <el-option :label="t('eventFlow.scheduleTrigger')" :value="EventSourceType.Schedule" />
+          <el-option :label="t('eventFlow.httpTrigger')" :value="EventSourceType.Http" />
         </el-select>
         <el-select v-model="sourceFormIdDraft" :placeholder="t('admin.appAdmin.sourceForm')">
           <el-option v-for="form in forms" :key="form.id" :label="form.name" :value="form.id" />
         </el-select>
       </div>
     </et-dialog>
-    <et-drawer v-model="showDesigner" @close="loadDataflows">
+    <et-drawer v-model="showDesigner" @close="loadEventFlows">
       <template #title>
         <el-input v-if="selectedFlow" v-model="selectedFlow.name" class="title-editor" />
       </template>
-      <DataflowDesigner v-if="selectedFlow" :app-id="contextStore.appId" :form-id="designerFormId" :flow-def="selectedFlow" />
+      <EventFlowDesigner v-if="selectedFlow" :app-id="contextStore.appId" :form-id="designerFormId" :flow-def="selectedFlow" />
     </et-drawer>
     <et-drawer v-model="showLog">
-      <template #title>{{ t("dataflow.executionLog") }}</template>
-      <DataflowRunLogView v-if="logFlow && logFormDef" :form-def="logFormDef" :flow-def="logFlow" />
+      <template #title>{{ t("eventFlow.executionLog") }}</template>
+      <EventFlowRunLogView v-if="logFlow && logFormDef" :form-def="logFormDef" :flow-def="logFlow" />
     </et-drawer>
 
     <div class="page-card">
       <div class="page-title">
-        <span>{{ t("admin.advanced.dataflow") }}</span>
+        <span>{{ t("admin.advanced.eventFlow") }}</span>
         <div class="title-actions">
-          <el-select v-model="triggerFilter" clearable :placeholder="t('dataflow.triggerType')">
+          <el-select v-model="triggerFilter" clearable :placeholder="t('eventFlow.triggerType')">
             <el-option :label="t('common.all')" value="" />
-            <el-option :label="t('dataflow.formTrigger')" value="form" />
-            <el-option :label="t('dataflow.scheduleTrigger')" value="schedule" />
-            <el-option :label="t('dataflow.httpTrigger')" value="http" />
+            <el-option :label="t('eventFlow.formTrigger')" value="form" />
+            <el-option :label="t('eventFlow.scheduleTrigger')" value="schedule" />
+            <el-option :label="t('eventFlow.httpTrigger')" value="http" />
           </el-select>
-          <el-input v-model="keyword" clearable :placeholder="t('dataflow.dataflowName')">
+          <el-input v-model="keyword" clearable :placeholder="t('eventFlow.eventFlowName')">
             <template #prefix><et-icon icon="el-search" size="14px" /></template>
           </el-input>
-          <el-button type="primary" @click="openAddDialog">{{ t("dataflow.newDataflow") }}</el-button>
+          <el-button type="primary" @click="openAddDialog">{{ t("eventFlow.newEventFlow") }}</el-button>
         </div>
       </div>
       <div class="flow-grid">
-        <div v-for="flow in filteredDataflows" :key="flow.id" class="flow-card">
+        <div v-for="flow in filteredEventFlows" :key="flow.id" class="flow-card">
           <div class="flow-card-title">
-            <span>{{ flow.name || t("dataflow.untitledDataflow") }}</span>
+            <span>{{ flow.name || t("eventFlow.untitledEventFlow") }}</span>
             <div class="card-actions">
               <el-button link @click="edit(flow)">{{ t("common.edit") }}</el-button>
               <el-button link @click="copy(flow)">{{ t("common.copy") }}</el-button>
@@ -60,18 +60,18 @@
           </div>
           <div class="flow-card-footer">
             <el-switch :model-value="!flow.disabled" @change="toggleDisable(flow)" />
-            <el-button link type="primary" @click="viewLog(flow)">{{ t("dataflow.viewExecutionLog") }}</el-button>
+            <el-button link type="primary" @click="viewLog(flow)">{{ t("eventFlow.viewExecutionLog") }}</el-button>
           </div>
         </div>
-        <el-empty v-if="filteredDataflows.length === 0" :description="t('admin.appAdmin.emptyDataflow')" />
+        <el-empty v-if="filteredEventFlows.length === 0" :description="t('admin.appAdmin.emptyEventFlow')" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import DataflowDesigner from "@/components/DataflowDesigner/index.vue";
-import DataflowRunLogView from "@/components/FormEdit/Advanced/DataflowRunLogView.vue";
+import EventFlowDesigner from "@/components/EventFlowDesigner/index.vue";
+import EventFlowRunLogView from "@/components/FormEdit/Advanced/EventFlowRunLogView.vue";
 import { EventSourceType, FlowType, FormDef, WfDefinition } from "@eimsnext/models";
 import { formDefService, wfDefinitionService } from "@eimsnext/services";
 import { useContextStore } from "@eimsnext/store";
@@ -82,7 +82,7 @@ import { useI18n } from "vue-i18n";
 
 const contextStore = useContextStore();
 const { t } = useI18n();
-const dataflows = ref<WfDefinition[]>([]);
+const eventFlows = ref<WfDefinition[]>([]);
 const forms = ref<FormDef[]>([]);
 const keyword = ref("");
 const showAddDialog = ref(false);
@@ -96,9 +96,9 @@ const eventSourceDraft = ref<EventSourceType>(EventSourceType.Form);
 const sourceFormIdDraft = ref("");
 const triggerFilter = ref("");
 
-const filteredDataflows = computed(() => {
+const filteredEventFlows = computed(() => {
   const text = keyword.value.trim().toLowerCase();
-  return dataflows.value.filter((flow) => {
+  return eventFlows.value.filter((flow) => {
     const matchesText = !text || (flow.name || "").toLowerCase().includes(text);
     const matchesTrigger = !triggerFilter.value || normalizeTrigger(flow) === triggerFilter.value;
     return matchesText && matchesTrigger;
@@ -108,7 +108,7 @@ const designerFormId = computed(() => selectedFlow.value?.sourceId || sourceForm
 const logFormDef = computed(() => forms.value.find((form) => form.id === logFlow.value?.sourceId) || forms.value[0]);
 
 async function loadAll() {
-  await Promise.all([loadForms(), loadDataflows()]);
+  await Promise.all([loadForms(), loadEventFlows()]);
 }
 
 async function loadForms() {
@@ -119,14 +119,14 @@ async function loadForms() {
   }
 }
 
-async function loadDataflows() {
+async function loadEventFlows() {
   const query = buildQuery({
     filter: {
       appId: contextStore.appId,
-      flowType: FlowType.Dataflow,
+      flowType: FlowType.EventFlow,
     },
   });
-  dataflows.value = await wfDefinitionService.query<WfDefinition>(query);
+  eventFlows.value = await wfDefinitionService.query<WfDefinition>(query);
 }
 
 function openAddDialog() {
@@ -140,8 +140,8 @@ function confirmAdd() {
   selectedFlow.value = {
     id: "",
     appId: contextStore.appId,
-    name: nameDraft.value.trim() || t("dataflow.untitledDataflow"),
-    flowType: FlowType.Dataflow,
+    name: nameDraft.value.trim() || t("eventFlow.untitledEventFlow"),
+    flowType: FlowType.EventFlow,
     externalId: "",
     version: 1,
     isCurrent: true,
@@ -164,11 +164,11 @@ async function copy(flow: WfDefinition) {
   const request = {
     ...flow,
     id: "",
-    name: `${flow.name || t("dataflow.untitledDataflow")}${t("common.copySuffix")}`,
+    name: `${flow.name || t("eventFlow.untitledEventFlow")}${t("common.copySuffix")}`,
     disabled: true,
   };
   await wfDefinitionService.post<WfDefinition>(request);
-  await loadDataflows();
+  await loadEventFlows();
   ElMessage.success(t("admin.appAdmin.copySuccess"));
 }
 
@@ -181,7 +181,7 @@ async function execDelete() {
   if (!selectedFlow.value) return;
   await wfDefinitionService.delete(selectedFlow.value.id);
   showDeleteConfirm.value = false;
-  await loadDataflows();
+  await loadEventFlows();
 }
 
 async function toggleDisable(flow: WfDefinition) {
@@ -195,9 +195,9 @@ function viewLog(flow: WfDefinition) {
 }
 
 function triggerText(flow: WfDefinition) {
-  if (normalizeTrigger(flow) === "http") return t("dataflow.httpTrigger");
-  if (normalizeTrigger(flow) === "schedule") return t("dataflow.scheduleTrigger");
-  return t("dataflow.formTrigger");
+  if (normalizeTrigger(flow) === "http") return t("eventFlow.httpTrigger");
+  if (normalizeTrigger(flow) === "schedule") return t("eventFlow.scheduleTrigger");
+  return t("eventFlow.formTrigger");
 }
 
 function sourceText(flow: WfDefinition) {
@@ -294,6 +294,10 @@ onBeforeMount(loadAll);
   gap: var(--et-space-6);
   min-height: var(--et-size-78);
   padding: var(--et-space-14) var(--et-space-12);
+
+  strong {
+    color: var(--et-text-primary);
+  }
 }
 
 .flow-card-footer {

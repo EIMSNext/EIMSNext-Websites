@@ -257,6 +257,10 @@ async function saveNotify() {
   min-height: var(--et-size-48);
   padding: 0 var(--et-space-20);
 
+  strong {
+    color: var(--et-text-primary);
+  }
+
   span {
     color: var(--et-text-secondary);
     font-size: var(--et-font-size-13);

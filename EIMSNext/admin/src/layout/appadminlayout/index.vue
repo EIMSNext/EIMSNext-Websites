@@ -51,7 +51,7 @@ const menuGroups = [
     titleKey: "admin.appAdmin.advancedFeatures",
     items: [
       { path: "aggregate", icon: "table", labelKey: "admin.appAdmin.aggregate" },
-      { path: "assistant", icon: "el-cpu", labelKey: "admin.advanced.dataflow" },
+      { path: "assistant", icon: "el-cpu", labelKey: "admin.advanced.eventFlow" },
       { path: "webhook", icon: "trend-charts", labelKey: "admin.webhook.title" },
     ],
   },

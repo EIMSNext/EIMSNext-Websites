@@ -32,37 +32,74 @@ html.dark {
     --fc-line-color-3: var(--et-border-color-light, #2B2B2C); /*分割线色*/
 }
 
+/* Design canvas root — override the default text color so the canvas
+   never inherits a foreign html.dark color (e.g. var(--et-color-primary))
+   that would turn every uncolored label into a theme-colored one. */
+._fc-designer {
+  color: var(--fc-text-color-1);
+}
+
 ._fc-designer, ._fd-config-dialog {
-    --el-color-primary: var(--et-color-primary, #2E73FF);
-    --el-color-primary-light-3: var(--el-color-primary-light-3, #6699FF);
-    --el-color-primary-light-5: var(--el-color-primary-light-5, #99BBFF);
-    --el-color-primary-light-7: var(--el-color-primary-light-7, #CCDFFF);
-    --el-color-primary-light-8: var(--el-color-primary-light-8, #E0EBFF);
-    --el-color-primary-light-9: var(--el-color-primary-light-9, #CCDFFF);
-    --el-color-primary-dark-2: var(--el-color-primary-dark-2, #265FCC);
-    --el-color-success: var(--et-color-success, #00C050);
-    --el-color-success-light-3: var(--el-color-success-light-3, #4DDB82);
-    --el-color-success-light-5: var(--el-color-success-light-5, #80E6A3);
-    --el-color-success-light-7: var(--el-color-success-light-7, #B3F1C5);
-    --el-color-success-light-8: var(--el-color-success-light-8, #CCF6D5);
-    --el-color-success-light-9: var(--el-color-success-light-9, #E6FAE6);
-    --el-color-success-dark-2: var(--el-color-success-dark-2, #00A046);
-    --el-color-danger: var(--et-color-danger, #FF2E2E);
-    --el-color-danger-light-3: var(--el-color-danger-light-3, #FF6666);
-    --el-color-danger-light-5: var(--el-color-danger-light-5, #FF9999);
-    --el-color-danger-light-7: var(--el-color-danger-light-7, #FFCCCC);
-    --el-color-danger-light-8: var(--el-color-danger-light-8, #FFD9D9);
-    --el-color-danger-light-9: var(--el-color-danger-light-9, #FFE6E6);
-    --el-color-danger-dark-2: var(--el-color-danger-dark-2, #CC2626);
-    --el-menu-hover-bg-color: var(--et-menu-hover, var(--el-color-primary-light-9));
+  --el-color-primary: var(--et-color-primary, #2E73FF);
+  --el-color-primary-light-3: var(--et-color-primary-light-3, #6699FF);
+  --el-color-primary-light-5: var(--et-color-primary-light-5, #99BBFF);
+  --el-color-primary-light-7: var(--et-color-primary-light-7, #CCDFFF);
+  --el-color-primary-light-8: var(--et-color-primary-light-8, #E0EBFF);
+  --el-color-primary-light-9: var(--et-color-primary-light-9, #CCDFFF);
+  --el-color-primary-dark-2: var(--et-color-primary-dark-2, #265FCC);
+  --el-color-success: var(--et-color-success, #00C050);
+  --el-color-success-light-3: var(--et-color-success-light-3, #4DDB82);
+  --el-color-success-light-5: var(--et-color-success-light-5, #80E6A3);
+  --el-color-success-light-7: var(--et-color-success-light-7, #B3F1C5);
+  --el-color-success-light-8: var(--et-color-success-light-8, #CCF6D5);
+  --el-color-success-light-9: var(--et-color-success-light-9, #E6FAE6);
+  --el-color-success-dark-2: var(--et-color-success-dark-2, #00A046);
+  --el-color-danger: var(--et-color-danger, #FF2E2E);
+  --el-color-danger-light-3: var(--et-color-danger-light-3, #FF6666);
+  --el-color-danger-light-5: var(--et-color-danger-light-5, #FF9999);
+  --el-color-danger-light-7: var(--et-color-danger-light-7, #FFCCCC);
+  --el-color-danger-light-8: var(--et-color-danger-light-8, #FFD9D9);
+  --el-color-danger-light-9: var(--et-color-danger-light-9, #FFE6E6);
+  --el-color-danger-dark-2: var(--et-color-danger-dark-2, #CC2626);
+  --el-color-warning: var(--et-color-warning, #F0A800);
+  --el-color-warning-light-3: var(--et-color-warning-light-3, #F5BF4D);
+  --el-color-warning-light-5: var(--et-color-warning-light-5, #F8D380);
+  --el-color-warning-light-7: var(--et-color-warning-light-7, #FBE6B3);
+  --el-color-warning-light-8: var(--et-color-warning-light-8, #FCECBF);
+  --el-color-warning-light-9: var(--et-color-warning-light-9, #FDF6DF);
+  --el-color-warning-dark-2: var(--et-color-warning-dark-2, #C08000);
+  --el-color-info: var(--et-color-info, #2468BD);
+  --el-color-info-light-3: var(--et-color-info-light-3, #6495D1);
+  --el-color-info-light-5: var(--et-color-info-light-5, #91B4DE);
+  --el-color-info-light-7: var(--et-color-info-light-7, #BED2EC);
+  --el-color-info-light-8: var(--et-color-info-light-8, #D3E1F1);
+  --el-color-info-light-9: var(--et-color-info-light-9, #E9F0F8);
+  --el-color-info-dark-2: var(--et-color-info-dark-2, #1D5397);
+  --el-menu-hover-bg-color: var(--et-menu-hover, var(--el-color-primary-light-9));
+}
+
+/* Neutralize fd-theme classes left by legacy designer bundles. */
+body[class*="fd-theme-"] ._fc-designer,
+body[class*="fd-theme-"] ._fd-config-dialog {
+    --fc-style-color-1: var(--et-color-primary) !important;
+    --fc-style-bg-color-1: var(--et-bg-primary-soft) !important;
+    --fc-style-color-4: var(--et-color-info) !important;
+    --fc-style-bg-color-4: var(--et-bg-info-soft) !important;
+    --el-color-primary: var(--et-color-primary) !important;
+  --el-color-primary-light-3: var(--et-color-primary-light-3) !important;
+  --el-color-primary-light-5: var(--et-color-primary-light-5) !important;
+  --el-color-primary-light-7: var(--et-color-primary-light-7) !important;
+  --el-color-primary-light-8: var(--et-color-primary-light-8) !important;
+  --el-color-primary-light-9: var(--et-color-primary-light-9) !important;
+  --el-color-primary-dark-2: var(--et-color-primary-dark-2) !important;
 }
 
 ._fc-designer .el-button--primary, ._fd-config-dialog .el-button--primary {
     --el-button-bg-color: var(--el-color-primary);
-    --el-button-text-color: var(--el-color-white);
+    --el-button-text-color: var(--et-text-on-primary);
     --el-button-border-color: var(--el-color-primary);
     --el-button-hover-bg-color: var(--el-color-primary-light-3);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-primary-hover);
     --el-button-hover-border-color: var(--el-color-primary-light-3);
     --el-button-active-bg-color: var(--el-color-primary-dark-2);
     --el-button-active-border-color: var(--el-color-primary-dark-2);
@@ -72,11 +109,11 @@ html.dark {
     --el-button-bg-color: var(--el-color-primary-light-8);
     --el-button-text-color: var(--el-color-primary);
     --el-button-border-color: var(--el-color-primary-light-5);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-primary);
     --el-button-hover-bg-color: var(--el-color-primary);
     --el-button-hover-border-color: var(--el-color-primary);
     --el-button-active-bg-color: var(--el-color-primary-dark-2);
-    --el-button-active-text-color: var(--el-color-white);
+    --el-button-active-text-color: var(--et-text-on-primary-active);
     --el-button-active-border-color: var(--el-color-primary-dark-2);
 }
 
@@ -86,12 +123,13 @@ html.dark {
 
 ._fc-designer .el-button--success, ._fd-config-dialog .el-button--success {
     --el-button-bg-color: var(--el-color-success);
-    --el-button-text-color: var(--el-color-white);
+    --el-button-text-color: var(--et-text-on-success);
     --el-button-border-color: var(--el-color-success);
     --el-button-hover-bg-color: var(--el-color-success-light-3);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-success-hover);
     --el-button-hover-border-color: var(--el-color-success-light-3);
     --el-button-active-bg-color: var(--el-color-success-dark-2);
+    --el-button-active-text-color: var(--et-text-on-success-active);
     --el-button-active-border-color: var(--el-color-success-dark-2);
 }
 
@@ -99,12 +137,12 @@ html.dark {
     --el-button-bg-color: var(--el-color-success-light-8);
     --el-button-text-color: var(--el-color-success);
     --el-button-border-color: var(--el-color-success-light-5);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-success-hover);
     --el-button-hover-bg-color: var(--el-color-success);
     --el-button-hover-border-color: var(--el-color-success);
     --el-button-active-bg-color: var(--el-color-success-dark-2);
-    --el-button-active-text-color: var(--el-color-white);
-    --el-button-active-border-color: var(--el-color-primary-dark-2);
+    --el-button-active-text-color: var(--et-text-on-success-active);
+    --el-button-active-border-color: var(--el-color-success-dark-2);
 }
 
 ._fc-designer .el-button--success.is-link, ._fd-config-dialog .el-button--success.is-link {
@@ -113,12 +151,13 @@ html.dark {
 
 ._fc-designer .el-button--danger, ._fd-config-dialog .el-button--danger {
     --el-button-bg-color: var(--el-color-danger);
-    --el-button-text-color: var(--el-color-white);
+    --el-button-text-color: var(--et-text-on-danger);
     --el-button-border-color: var(--el-color-danger);
     --el-button-hover-bg-color: var(--el-color-danger-light-3);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-danger-hover);
     --el-button-hover-border-color: var(--el-color-danger-light-3);
     --el-button-active-bg-color: var(--el-color-danger-dark-2);
+    --el-button-active-text-color: var(--et-text-on-danger-active);
     --el-button-active-border-color: var(--el-color-danger-dark-2);
 }
 
@@ -126,12 +165,12 @@ html.dark {
     --el-button-bg-color: var(--el-color-danger-light-8);
     --el-button-text-color: var(--el-color-danger);
     --el-button-border-color: var(--el-color-danger-light-5);
-    --el-button-hover-text-color: var(--el-color-white);
+    --el-button-hover-text-color: var(--et-text-on-danger-hover);
     --el-button-hover-bg-color: var(--el-color-danger);
     --el-button-hover-border-color: var(--el-color-danger);
     --el-button-active-bg-color: var(--el-color-danger-dark-2);
-    --el-button-active-text-color: var(--el-color-white);
-    --el-button-active-border-color: var(--el-color-primary-dark-2);
+    --el-button-active-text-color: var(--et-text-on-danger-active);
+    --el-button-active-border-color: var(--el-color-danger-dark-2);
 }
 
 ._fc-designer .el-button--danger.is-link, ._fd-config-dialog .el-button--danger.is-link {
@@ -139,13 +178,13 @@ html.dark {
 }
 
 ._fd-plain-button {
-    border-color: var(--fc-style-color-1);
-    color: var(--fc-style-color-1);
+    border-color: var(--et-border-color);
+    color: var(--et-text-primary);
 }
 
 ._fc-designer ._fd-plain-button.el-button--primary.is-plain {
-    --el-button-text-color: var(--fc-style-color-1);
-    --el-button-border-color: var(--fc-style-color-1);
+    --el-button-text-color: var(--et-text-primary);
+    --el-button-border-color: var(--et-border-color);
 }
 
 ._fc-designer .CodeMirror-gutters, ._fd-config-dialog .CodeMirror-gutters {
@@ -198,6 +237,7 @@ html.dark {
     height: 40px;
     cursor: pointer;
     box-sizing: border-box;
+    color: var(--fc-text-color-2);
 }
 
 ._fc-l-menu-item.active {
@@ -510,11 +550,13 @@ html.dark {
     font-size: 14px;
     padding: 10px;
     margin: 0;
+    color: var(--fc-text-color-1);
 }
 
 ._fc-l-title i {
     font-size: 12px;
     font-weight: 400;
+    color: inherit;
 }
 
 ._fc-l-title i.down {
@@ -528,9 +570,9 @@ html.dark {
     text-align: center;
     transition: all .2s ease;
     cursor: move;
-    margin-bottom: 5px;
     align-items: center;    
     border: 1px dashed var(--fc-bg-color-1);
+    line-height: 30px;
 }
 
 ._fc-l-item i {
@@ -548,7 +590,7 @@ html.dark {
 
 ._fc-l-item:hover {
     border: 1px dashed var(--el-color-primary);
-    color: var(--el-color-primary);    
+    color: var(--et-text-primary);    
 }
 
 ._fc-m-tools {
@@ -726,6 +768,32 @@ html.dark {
     width: 100%;
 }
 
+/* Keep the canvas spacing predictable without stacking the item and drag-tool padding. */
+._fc-designer ._fc-m-drag > form > .el-row > ._fd-drag-tool > ._fd-drag-box > ._fd-drag-item,
+._fc-designer ._fc-m-drag > form > .van-row > ._fd-drag-tool > ._fd-drag-box > ._fd-drag-item {
+    padding: 0;
+}
+
+._fc-designer ._fc-m-drag ._fd-drag-item > ._fd-drag-tool {
+    padding: 0;
+    border-radius: 4px;
+}
+
+._fc-designer ._fc-m-drag ._fd-drag-item > ._fd-drag-tool.active {
+    padding: 0;
+}
+
+/* Canvas field text stays neutral unless its own field node is selected.
+   Selection affordance is the 1px dashed theme outline — never theme-colored text.
+   !important defends against any legacy rule that paints the label with the
+   primary color. */
+._fc-designer ._fc-m-drag .el-form-item__label,
+._fc-designer ._fc-m-drag .field-layout-designer:not(.active) .el-form-item__label,
+._fc-designer ._fc-m-drag .field-layout-designer:not(.active) .field-name,
+._fc-designer ._fc-m-drag .field-layout-designer:not(.active) ._fc-field-title {
+    color: var(--fc-text-color-1) !important;
+}
+
 ._fd-fcDialog-drag, ._fd-fcDrawer-drag {
     padding: 3px;
 }
@@ -747,6 +815,11 @@ html.dark {
 
 ._fd-drag-box ._fd-drag-box {
     outline: 1px dashed var(--fc-line-color-1);
+}
+
+._fc-designer ._fd-drag-tool.active,
+._fc-designer ._fd-drag-tool:has(._fd-drag-tool.active) {
+    outline: 1px dashed color-mix(in srgb, var(--et-color-primary) 55%, transparent) !important;
 }
 
 /*._fd-drag-box ._fd-drag-box:hover{
@@ -776,6 +849,53 @@ html.dark {
 
 ._fc-r .el-form-item {
     margin-bottom: 10px !important;
+}
+
+/* The property panel uses the same renderer for its editors, but must keep its
+   compact editor sizing instead of the canvas field layout metrics. */
+._fc-r .field-layout-content {
+    height: auto !important;
+    min-height: 0 !important;
+    margin-bottom: 10px !important;
+}
+
+._fc-r .field-layout-raw {
+    height: auto !important;
+    min-height: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+._fc-r .field-layout-raw:has(> .field-component > ._fd-checkbox-input) {
+    margin-bottom: 0 !important;
+}
+
+._fc-r .field-layout-content > .el-form-item__label,
+._fc-r .field-layout-content > .el-form-item__label-wrap > .el-form-item__label {
+    min-height: unset !important;
+    height: auto !important;
+    line-height: normal !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+._fc-r .field-layout-content > .el-form-item__content {
+    min-height: unset !important;
+    line-height: normal !important;
+}
+
+._fc-r .field-layout-content > .el-form-item__content > .field-component,
+._fc-r .field-layout-raw > .field-component {
+    width: 100% !important;
+    min-width: 0;
+}
+
+._fc-r .field-layout-content .field-name {
+    line-height: 30px !important;
+}
+
+._fc-r .field-layout-content.fc-wrap-top > .el-form-item__label,
+._fc-r .field-layout-content.fc-wrap-top > .el-form-item__label-wrap > .el-form-item__label {
+    line-height: 30px !important;
 }
 
 ._fc-r .el-form-item__label {
@@ -865,8 +985,7 @@ html.dark {
 
 ._fd-drag-item {
     width: 100%;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 0;
     box-sizing: border-box;
 }
 
@@ -930,18 +1049,50 @@ html.dark {
     cursor: pointer;
 }
 
-._fd-preview-dialog {
-    border-radius: 6px;
-    padding-top: 0;
-    min-height: 40%;
+._fd-preview-drawer.el-drawer {
+    border-radius: 0;
+    padding: 0;
 }
 
-._fd-preview-dialog > .el-dialog__header {
+._fd-preview-drawer .el-drawer__body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+}
+
+._fd-preview-toolbar {
+    position: relative;
+    display: flex;
+    flex: 0 0 50px;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--fc-line-color-3);
+    background: var(--fc-bg-color-1);
+}
+
+._fd-preview-close {
     position: absolute;
-    right: 0;
-    top: 0;
-    float: right;
-    z-index: 9;
+    top: 11px;
+    right: 18px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--fc-text-color-1);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+._fd-preview-close:hover {
+    color: var(--fc-style-color-1);
 }
 
 ._fd-preview-code {
@@ -950,13 +1101,18 @@ html.dark {
     overflow: auto;
 }
 
-._fd-preview-tabs .el-tabs__nav-wrap::after {
-    height: 1px;
-    background-color: var(--fc-line-color-3);
-}
-
-._fd-preview-tabs .el-tabs__item {
-    height: 46px;
+._fd-preview-drawer .data-container {
+    flex: 1 1 auto;
+    width: 800px;
+    max-width: calc(100% - 20px);
+    min-height: 0;
+    margin: 10px auto !important;
+    padding: 16px;
+    border: 1px solid var(--fc-line-color-2);
+    border-radius: 4px;
+    background: var(--fc-bg-color-1);
+    box-sizing: border-box;
+    overflow: auto;
 }
 
 ._fd-preview-code > code {
@@ -964,41 +1120,60 @@ html.dark {
 }
 
 ._fd-preview-device {
-    position: absolute;
-    right: 50px;
-    top: 9px;
     display: flex;
     align-items: center;
+    padding: 2px;
+    border-radius: 4px;
+    background: var(--fc-bg-color-2);
 }
 
-._fd-preview-device > div {
+._fd-preview-device > button {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 76px;
+    width: 72px;
     height: 28px;
-    border-radius: 3px 3px 3px 3px;
-    margin-right: 10px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--fc-text-color-1);
     cursor: pointer;
+}
+
+._fd-preview-device > button + button {
+    margin-left: 2px;
 }
 
 ._fd-preview-mobile {
     display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+    padding: 10px;
+    overflow: hidden;
 }
 
 ._fd-preview-mobile > div {
+    position: relative;
+    isolation: isolate;
+    transform: translateZ(0);
     border-radius: 24px;
     border: 6px solid var(--fc-line-color-2);
     box-sizing: border-box;
     width: 350px;
-    overflow: scroll;
-    height: 70vh;
+    max-height: 100%;
+    overflow: auto;
+    height: min(70vh, 100%);
+    background: var(--fc-bg-color-1);
 }
 
-._fd-preview-device > div.active {
-    background: var(--fc-style-bg-color-1);
+._fd-preview-device > button.active {
+    background: var(--fc-bg-color-1);
     color: var(--fc-style-color-1);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
 }
 
 ._fd-row-line {
@@ -1045,6 +1220,13 @@ html.dark {
 .el-form--small .fc-wrap-top.el-form-item .el-form-item__label {
     line-height: 20px;
     margin-bottom: 4px
+}
+
+/* Canvas fields use a fixed 30px title row. Keep the property editor's
+   compact label rules independent from the canvas layout. */
+._fc-designer ._fc-m-drag .field-layout-content.fc-wrap-top > .el-form-item__label,
+._fc-designer ._fc-m-drag .field-layout-content.fc-wrap-top > .el-form-item__label-wrap > .el-form-item__label {
+    margin-bottom: 0;
 }
 
 ._fd-slot-empty {
@@ -1250,6 +1432,7 @@ html.dark {
 ._fc-field-title {
     font-weight: 600;
     font-size: 14px;
+    color: var(--et-text-primary);
 }
 
 .fc-form-col:has(.hideConfigItem){

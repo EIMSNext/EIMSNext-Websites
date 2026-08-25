@@ -20,7 +20,7 @@
   </el-popover>
   <div class="item dimension-item">
     <div @click="onFieldClick" class="item-text">
-      <et-icon icon="el-filter" color="var(--et-text-on-primary)" class="field-icon"></et-icon>
+      <et-icon icon="el-filter" color="var(--et-color-primary)" class="field-icon"></et-icon>
       <span ref="filterBtnRef">{{ t("admin.dashboardFieldBar.setFilter") }}</span>
     </div>
   </div>
@@ -103,6 +103,6 @@ const setFilter = (filter: IConditionList) => {
 
 .dimension-item {
   background-color: var(--et-color-primary-hover);
-  color: var(--et-text-on-primary);
+  color: var(--et-color-primary);
 }
 </style>

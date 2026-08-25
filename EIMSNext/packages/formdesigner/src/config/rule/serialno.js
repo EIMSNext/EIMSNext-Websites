@@ -6,7 +6,7 @@ const name = "serialno";
 
 export default {
   menu: "subform",
-  icon: "icon-serial-number",
+  icon: "icon-input",
   label,
   name,
   input: true,
@@ -37,10 +37,7 @@ export default {
   props(_, { t }) {
     return localeProps(t, name + ".props", [
       { type: "SerialNoSegments", field: "segments" },
-      { type: "GroupLabel", props: { title: t("com.serialno.resetNote") } },
-      { type: "input", field: "placeholder" },
-      { type: "DefaultValueConfig" },
-      { type: "CheckBoxInput", field: "disabled", wrap: { show: false } },
+      { type: "GroupLabel", props: { title: t("props.othersetting") } },
     ]);
   },
 };

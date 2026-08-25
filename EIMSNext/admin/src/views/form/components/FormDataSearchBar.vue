@@ -12,45 +12,60 @@
       <template #prefix>
         <et-icon icon="el-search" />
       </template>
-      <template #append>
+      <template #suffix>
         <el-popover
+          v-model:visible="pickerVisible"
           placement="bottom-end"
-          :width="320"
+          :width="280"
           trigger="click"
           popper-class="form-data-search-popover"
-          :teleported="false"
+          :teleported="true"
         >
           <template #reference>
-            <el-button text class="field-select-trigger" :disabled="disabled">
-              {{ triggerLabel }}
-              <et-icon icon="el-arrow-down" />
-            </el-button>
+            <button
+              type="button"
+              class="field-select-trigger"
+              :disabled="disabled"
+              :aria-label="t('admin.formList.searchSpecificFields')"
+            >
+              <et-icon :icon="pickerVisible ? 'el-arrow-up' : 'el-arrow-down'" size="14px" />
+            </button>
           </template>
           <div class="search-popover">
-            <div class="search-mode-row">
-              <el-radio-group v-model="searchMode">
-                <el-radio-button :value="SearchMode.All">{{ t("admin.formList.searchAllFields") }}</el-radio-button>
-                <el-radio-button :value="SearchMode.Selected">{{ t("admin.formList.searchSpecificFields") }}</el-radio-button>
-              </el-radio-group>
-            </div>
-            <div v-if="searchMode === SearchMode.Selected" class="search-field-picker">
-              <DataSelectFieldPicker
-                :model-value="selectedFieldDefs"
-                :fields="pickerFields"
-                :multiple="true"
-                :show-trigger="false"
-                :default-expanded="true"
-                :search-placeholder="t('admin.formList.searchFieldPlaceholder')"
-                @update:model-value="handleFieldUpdate"
-              />
-            </div>
-            <div v-else class="search-all-tip">
-              {{ t("admin.formList.searchAllFieldsTip", { count: fields.length }) }}
-            </div>
-            <div class="search-actions">
-              <el-button size="small" @click="resetFields">{{ t("common.reset") }}</el-button>
-              <el-button type="primary" size="small" @click="emitSearch">{{ t("common.search") }}</el-button>
-            </div>
+            <el-input
+              v-model="fieldKeyword"
+              class="field-search-input"
+              clearable
+              :placeholder="t('admin.formList.searchFieldPlaceholder')"
+            >
+              <template #prefix>
+                <et-icon icon="el-search" />
+              </template>
+            </el-input>
+            <el-scrollbar max-height="280px" class="search-field-list">
+              <div
+                v-for="field in filteredPickerFields"
+                :key="field.field"
+                class="search-field-item"
+                :class="{
+                  selected: isSelected(field.field),
+                  disabled: isSelectionDisabled(field.field),
+                }"
+                @click="toggleField(field)"
+              >
+                <el-checkbox
+                  :model-value="isSelected(field.field)"
+                  :disabled="isSelectionDisabled(field.field)"
+                  @click.stop
+                  @change="toggleField(field)"
+                />
+                <span class="search-field-label" :title="field.label">{{ field.label }}</span>
+              </div>
+              <div v-if="filteredPickerFields.length === 0" class="search-field-empty">
+                {{ t("common.noData") }}
+              </div>
+            </el-scrollbar>
+            <div class="selection-count">{{ props.selectedFields.length }} / {{ MAX_SEARCH_FIELD_COUNT }}</div>
           </div>
         </el-popover>
       </template>
@@ -59,15 +74,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { DataSelectFieldPicker, type IFormFieldDef } from "@eimsnext/components";
+import type { IFormFieldDef } from "@eimsnext/components";
 import { FieldType } from "@eimsnext/models";
-
-enum SearchMode {
-  All = "all",
-  Selected = "selected",
-}
+import { MAX_SEARCH_FIELD_COUNT } from "../searchUtils";
 
 type SearchPickerField = {
   field: string;
@@ -91,6 +102,8 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const pickerVisible = ref(false);
+const fieldKeyword = ref("");
 
 const keywordProxy = computed({
   get: () => props.keyword,
@@ -105,44 +118,35 @@ const pickerFields = computed<SearchPickerField[]>(() =>
   })),
 );
 
-const searchMode = ref(props.selectedFields.length > 0 ? SearchMode.Selected : SearchMode.All);
-
-watch(
-  () => props.selectedFields,
-  (fields) => {
-    searchMode.value = fields.length > 0 ? SearchMode.Selected : SearchMode.All;
-  },
-);
-
-const selectedFieldDefs = computed<SearchPickerField[]>(() => {
-  const selected = new Set(props.selectedFields);
-  return pickerFields.value.filter((field) => selected.has(field.field));
+const selectedFieldSet = computed(() => new Set(props.selectedFields));
+const filteredPickerFields = computed(() => {
+  const keyword = fieldKeyword.value.trim().toLocaleLowerCase();
+  if (!keyword) return pickerFields.value;
+  return pickerFields.value.filter((field) =>
+    field.label.toLocaleLowerCase().includes(keyword),
+  );
 });
 
 const placeholderText = computed(() =>
   props.disabled ? t("admin.formList.noSearchableField") : t("admin.formList.searchPlaceholder"),
 );
 
-const triggerLabel = computed(() => {
-  if (searchMode.value === SearchMode.All) return t("admin.formList.searchAllFields");
-  if (props.selectedFields.length === 0) return t("admin.formList.searchSpecificFields");
-  return t("admin.formList.searchFieldCount", { count: props.selectedFields.length });
-});
+const isSelected = (field: string) => selectedFieldSet.value.has(field);
+const isSelectionDisabled = (field: string) =>
+  !isSelected(field) && props.selectedFields.length >= MAX_SEARCH_FIELD_COUNT;
 
-const handleFieldUpdate = (fields: SearchPickerField[]) => {
-  emit("update:selectedFields", fields.map((field) => field.field));
-};
-
-const resetFields = () => {
-  searchMode.value = SearchMode.All;
-  emit("update:selectedFields", []);
-};
-
-watch(searchMode, (mode) => {
-  if (mode === SearchMode.All && props.selectedFields.length > 0) {
-    emit("update:selectedFields", []);
+const toggleField = (field: SearchPickerField) => {
+  if (isSelected(field.field)) {
+    removeField(field.field);
+    return;
   }
-});
+  if (isSelectionDisabled(field.field)) return;
+  emit("update:selectedFields", [...props.selectedFields, field.field]);
+};
+
+const removeField = (field: string) => {
+  emit("update:selectedFields", props.selectedFields.filter((item) => item !== field));
+};
 
 const emitSearch = () => {
   if (props.disabled) return;
@@ -154,7 +158,8 @@ const emitSearch = () => {
 .form-data-search-bar {
   display: flex;
   align-items: center;
-  width: min(100%, 420px);
+  flex: 0 0 200px;
+  width: 200px;
 }
 
 .search-input {
@@ -164,42 +169,75 @@ const emitSearch = () => {
 .field-select-trigger {
   display: inline-flex;
   align-items: center;
-  gap: var(--et-space-4);
+  justify-content: center;
+  width: var(--et-size-24);
+  height: var(--et-size-24);
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--et-text-secondary);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
 }
 
 .search-popover {
   display: flex;
   flex-direction: column;
-  gap: var(--et-space-12);
-}
-
-.search-mode-row {
-  display: flex;
-  justify-content: space-between;
-}
-
-.search-field-picker {
-  border: 1px solid var(--et-border-color-light);
-  border-radius: var(--et-radius-6);
-  overflow: hidden;
-}
-
-.search-all-tip {
-  padding: var(--et-space-12);
-  border-radius: var(--et-radius-6);
-  background: var(--et-bg-page);
-  color: var(--et-text-secondary);
-  font-size: var(--et-font-size-13);
-}
-
-.search-actions {
-  display: flex;
-  justify-content: flex-end;
   gap: var(--et-space-8);
 }
 
-:global(html.dark) .search-all-tip {
-  background: var(--et-bg-muted);
+.field-search-input {
+  width: 100%;
+}
+
+.search-field-list {
+  margin: 0 calc(var(--et-space-4) * -1);
+}
+
+.search-field-item {
+  display: flex;
+  align-items: center;
+  gap: var(--et-space-8);
+  min-height: 32px;
+  padding: 0 var(--et-space-8);
+  overflow: hidden;
+  border-radius: var(--et-radius-4);
+  cursor: pointer;
+
+  &:hover,
+  &.selected {
+    background: var(--et-fill-color-light);
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.search-field-label {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--et-text-primary);
+  line-height: 32px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-field-empty {
+  padding: var(--et-space-16) var(--et-space-8);
+  color: var(--et-text-secondary);
+  text-align: center;
+}
+
+.selection-count {
+  text-align: right;
+  color: var(--et-text-secondary);
+  font-size: var(--et-font-size-12);
 }
 </style>

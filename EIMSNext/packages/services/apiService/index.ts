@@ -10,5 +10,5 @@ export * from "./pluginProfileService";
 export * from "./customPrintService";
 export * from "./workflowService";
 export * from "./corpOnboardingService";
-export * from "./dataflowSampleService";
+export * from "./eventFlowSampleService";
 export * from "./workbenchService";

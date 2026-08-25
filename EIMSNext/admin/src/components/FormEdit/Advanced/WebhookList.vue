@@ -43,7 +43,7 @@
                 <div class="flow-header">
                   <el-button @click="viewLog(hook)">{{ t("admin.webhook.logTitle") }}</el-button>
                   <el-button @click="edit(hook)">{{ t("common.edit") }}</el-button>
-                  <el-button @click="remove(hook)">{{ t("common.delete") }}</el-button>
+                  <el-button class="delete-button" @click="remove(hook)">{{ t("common.delete") }}</el-button>
                   <el-switch :model-value="!hook.disabled" @change="toggleDisable(hook)"></el-switch>
                 </div>
               </template>

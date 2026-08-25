@@ -219,6 +219,7 @@ const { t } = useI18n();
   margin: 0;
   font-size: 34px;
   line-height: 1.15;
+  color: var(--et-text-primary);
 }
 
 .detail-subtitle {
@@ -237,7 +238,7 @@ const { t } = useI18n();
 }
 
 .status-badge.official { background: var(--et-color-primary); color: var(--et-text-on-primary); }
-.status-badge.hot { background: var(--et-color-warning); color: var(--et-text-on-primary); }
+.status-badge.hot { background: var(--et-color-warning); color: var(--et-text-on-warning); }
 
 .detail-tags {
   display: flex;
@@ -315,7 +316,7 @@ const { t } = useI18n();
 }
 
 .thumb.active {
-  border-color: var(--et-color-warning);
+  border-color: var(--et-color-primary);
 }
 
 .thumb img {

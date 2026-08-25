@@ -17,7 +17,7 @@
             </div>
             <div class="data-source-title" v-if="detailSetting.datasource?.id">
               <et-icon size="16px" :icon="getFormIcon()" :color="getAppIconColor()"></et-icon>
-              <span class="data-source-name">{{ detailSetting.datasource.label }}</span>
+            <span class="data-source-name" :title="detailSetting.datasource.label">{{ detailSetting.datasource.label }}</span>
             </div>
           </div>
 
@@ -122,6 +122,7 @@
           <DetailTableViewer
             :setting="detailSetting"
             :title="dashItemDefRef.name"
+            :item-def="dashItemDefRef"
             :designer-mode="true"
             :show-header="false"
           />
@@ -406,7 +407,12 @@ watch(
 }
 
 .data-source-name {
+  flex: 1 1 auto;
+  min-width: 0;
   margin-left: var(--et-space-10);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fields-container {
@@ -466,6 +472,7 @@ watch(
   line-height: var(--et-line-height-34);
   width: var(--et-size-91);
   flex-shrink: 0;
+  color: var(--et-text-primary);
 }
 
 .drag-target-container {

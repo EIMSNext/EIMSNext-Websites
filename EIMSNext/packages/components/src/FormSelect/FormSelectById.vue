@@ -2,7 +2,7 @@
   <el-select
     v-model="value"
     size="default"
-    :placeholder="t('dataflow.selectForm')"
+    :placeholder="t('eventFlow.selectForm')"
     @change="onInput"
   >
     <el-option

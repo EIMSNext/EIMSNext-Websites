@@ -6,6 +6,7 @@ import { formDataService } from "@eimsnext/services";
 import {
   buildDataSelectValue,
   createDataSelectQuery,
+  formatDataSelectValue,
   mergeDataSelectRecord,
   normalizeDataSelectField,
   normalizeDataSelectValue,
@@ -153,9 +154,20 @@ export default defineComponent({
               dataType: "json",
             })
           : await formDataService.query(query);
+        const countBody = props.formCreateInject?.api?.fetch
+          ? await props.formCreateInject.api.fetch({
+              action: "/FormData/$count",
+              method: "post",
+              data: query.filter,
+              dataType: "json",
+            }).catch(() => null)
+          : await formDataService.count(query.filter).catch(() => null);
         const data = Array.isArray(body?.value) ? body.value : Array.isArray(body) ? body : [];
         formData.value = data.map((item) => mergeDataSelectRecord(item));
-        total.value = data.length;
+        const count = Number(countBody?.value ?? countBody?.count ?? countBody?.["@odata.count"] ?? countBody);
+        total.value = Number.isFinite(count)
+          ? count
+          : (page - 1) * size + data.length + (data.length === size ? 1 : 0);
         const selectedId = selectedValue.value?.dataId;
         selectedRecord.value = selectedId
           ? formData.value.find((item) => String(item.id || item._id || "") === selectedId) || null
@@ -247,10 +259,13 @@ export default defineComponent({
     const displayRows = computed(() => {
       if (selectedValue.value) {
         return displayFields.value.map((field) => {
-          const value = resolveDataSelectValue(selectedValue.value.data, field.field);
+          const value = formatDataSelectValue(
+            resolveDataSelectValue(selectedValue.value.data, field.field),
+            field,
+          );
           return {
             label: field.label || t("com.dataselect.unknownField") || "未知字段",
-            value: value == null ? "" : String(value),
+            value,
             empty: value == null || value === "",
           };
         });

@@ -45,7 +45,7 @@ const fieldIcons: Record<string, string> = {
   stepForm: "fc-icon-step-form",
   tableform: "fc-icon-table-form",
   dataselect: "fc-icon-select",
-  serialno: "fc-icon-serial-number",
+  serialno: "fc-icon-input",
 
   // container - 容器组件
   fcSlot: "fc-icon-slot",

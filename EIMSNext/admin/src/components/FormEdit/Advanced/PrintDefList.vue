@@ -33,7 +33,7 @@
               <template #action>
                 <div class="flow-header">
                   <el-button @click="edit(print)">{{ t("common.edit") }}</el-button>
-                  <el-button @click="remove(print)">{{ t("common.delete") }}</el-button>
+                  <el-button class="delete-button" @click="remove(print)">{{ t("common.delete") }}</el-button>
                 </div>
               </template>
               <div class="flow-content">

@@ -1,19 +1,10 @@
 <template>
   <Layout>
     <div class="workbench-container">
-      <div class="workbench-toolbar">
-        <el-button
-          v-if="hasCorpAdmin"
-          type="primary"
-          :icon="Setting"
-          @click="router.push('/workbench/customize')"
-        >
-          {{ t("admin.workbench.customize") }}
-        </el-button>
-      </div>
       <grid-layout
-        v-if="!loading"
+        v-if="ready && !loading"
         v-model:layout="runtimeLayout"
+        class="workbench-grid"
         :col-num="24"
         :row-height="24"
         :is-draggable="false"
@@ -34,24 +25,34 @@
           :h="item.h"
           :i="item.i"
           :minW="item.minW || 5"
-          :minH="item.minH || 5"
+          :minH="item.type === 'flowCenter' ? item.minH || item.h : 1"
           :maxW="24"
-          :maxH="60"
+          :maxH="999"
         >
-          <WorkbenchWidgetRenderer :item="item" />
+          <WorkbenchWidgetRenderer
+            :item="item"
+            @add-favorite="showFavoriteDialog = true"
+            @add-chart="showChartDialog = true"
+            @remove-chart="removeChart"
+            @update-charts="updateCharts"
+            @content-height="syncWidgetHeight(item.i, $event)"
+          />
         </grid-item>
       </grid-layout>
       <div v-else class="workbench-loading">{{ t("admin.workbench.loading") }}</div>
     </div>
+    <AddFavoriteDialog v-model="showFavoriteDialog" />
+    <ChartSelectDialog
+      v-model="showChartDialog"
+      :selected-ids="selectedChartIds"
+      @select="addCharts"
+    />
   </Layout>
 </template>
 
 <script setup lang="ts">
-import type { WorkbenchLayoutItem } from "@eimsnext/models";
-import { UserType } from "@eimsnext/models";
-import { useUserStore } from "@eimsnext/store";
+import type { WorkbenchChartLayoutItem, WorkbenchLayoutItem } from "@eimsnext/models";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
-import { Setting } from "@element-plus/icons-vue";
 import Layout from "@/layout/index.vue";
 import {
   cloneWorkbenchLayout,
@@ -59,6 +60,8 @@ import {
   useWorkbenchStore,
 } from "@/store";
 import WorkbenchWidgetRenderer from "./components/WorkbenchWidgetRenderer.vue";
+import AddFavoriteDialog from "./components/AddFavoriteDialog.vue";
+import ChartSelectDialog from "./components/ChartSelectDialog.vue";
 import { useI18n } from "vue-i18n";
 
 defineOptions({
@@ -66,17 +69,22 @@ defineOptions({
   inheritAttrs: false,
 });
 
-const router = useRouter();
-const userStore = useUserStore();
 const workbenchStore = useWorkbenchStore();
 const { t } = useI18n();
 const { layout, loading } = storeToRefs(workbenchStore);
 const runtimeLayout = ref<WorkbenchLayoutItem[]>([]);
+const showFavoriteDialog = ref(false);
+const showChartDialog = ref(false);
+const ready = ref(false);
+const GRID_ROW_HEIGHT = 24;
+const GRID_ROW_GAP = 16;
+let saveTimer: ReturnType<typeof setTimeout> | undefined;
 
-const hasCorpAdmin = computed(() => {
-  const userType = userStore.currentUser?.userType ?? 0;
-  return (userType & UserType.CorpOwmer) !== 0 || (userType & UserType.CorpAdmin) !== 0;
-});
+const selectedChartIds = computed(() =>
+  (runtimeLayout.value.find((item) => item.type === "chartBoard")?.config?.charts || [])
+    .map((chart) => chart.dashboardItemId)
+    .filter(Boolean)
+);
 
 watch(
   layout,
@@ -88,23 +96,117 @@ watch(
 
 onMounted(async () => {
   await workbenchStore.load();
+  ready.value = true;
+});
+
+const scheduleLayoutSave = () => {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    workbenchStore.saveLayout(runtimeLayout.value).catch(() => {
+      ElMessage.error(t("common.saveFailed"));
+    });
+  }, 300);
+};
+
+const syncWidgetHeight = (widgetId: string, contentHeight: number) => {
+  if (!ready.value) return;
+  const item = runtimeLayout.value.find((current) => current.i === widgetId);
+  if (!item) return;
+  const nextHeight = Math.max(
+    1,
+    Math.ceil((contentHeight + GRID_ROW_GAP) / (GRID_ROW_HEIGHT + GRID_ROW_GAP))
+  );
+  if (item.h === nextHeight) return;
+  const nextItem = { ...item, h: nextHeight };
+  const nextLayout = runtimeLayout.value.map((current) =>
+    current.i === widgetId ? nextItem : { ...current }
+  );
+
+  const ordered = [...nextLayout].sort((left, right) => left.y - right.y || left.x - right.x);
+  const placed: WorkbenchLayoutItem[] = [];
+  ordered.forEach((current) => {
+    current.y = placed.reduce((nextY, previous) => {
+      const overlapsX =
+        current.x < previous.x + previous.w && previous.x < current.x + current.w;
+      return overlapsX ? Math.max(nextY, previous.y + previous.h) : nextY;
+    }, 0);
+    placed.push(current);
+  });
+
+  runtimeLayout.value = nextLayout;
+  scheduleLayoutSave();
+};
+
+const addCharts = (
+  values: { dashboardId: string; dashboardItemId: string; title: string }[]
+) => {
+  const chartBoard = runtimeLayout.value.find((item) => item.type === "chartBoard");
+  if (!chartBoard) return;
+  const existingCharts = chartBoard.config?.charts || [];
+  const existingIds = new Set(existingCharts.map((chart) => chart.dashboardItemId));
+  const chartsToAdd = values.filter((chart) => !existingIds.has(chart.dashboardItemId));
+  if (!chartsToAdd.length) return;
+
+  const newCharts: WorkbenchChartLayoutItem[] = chartsToAdd.map((chart, index) => {
+    const position = existingCharts.length + index;
+    return {
+      i: `chart_${chart.dashboardItemId}`,
+      x: (position % 2) * 12,
+      y: Math.floor(position / 2) * 9,
+      w: 12,
+      h: 9,
+      minW: 6,
+      minH: 5,
+      ...chart,
+    };
+  });
+  runtimeLayout.value = runtimeLayout.value.map((item) =>
+    item.i === chartBoard.i
+      ? { ...item, config: { ...item.config, charts: [...existingCharts, ...newCharts] } }
+      : item
+  );
+  scheduleLayoutSave();
+};
+
+const updateCharts = (charts: WorkbenchChartLayoutItem[]) => {
+  runtimeLayout.value = runtimeLayout.value.map((item) =>
+    item.type === "chartBoard" ? { ...item, config: { ...item.config, charts } } : item
+  );
+  scheduleLayoutSave();
+};
+
+const removeChart = (chartId: string) => {
+  const chartBoard = runtimeLayout.value.find((item) => item.type === "chartBoard");
+  if (!chartBoard) return;
+  const nextLayout = runtimeLayout.value.map((item) =>
+    item.i === chartBoard.i
+      ? {
+          ...item,
+          config: {
+            ...item.config,
+            charts: (item.config?.charts || []).filter((chart) => chart.i !== chartId),
+          },
+        }
+      : item
+  );
+  runtimeLayout.value = nextLayout;
+  scheduleLayoutSave();
+};
+
+onBeforeUnmount(() => {
+  if (saveTimer) clearTimeout(saveTimer);
 });
 </script>
 
 <style lang="scss" scoped>
-.workbench-toolbar {
-  align-items: center;
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: var(--et-space-12);
-}
-</style>
-
-<style lang="scss" scoped>
 .workbench-container {
   background: var(--et-bg-page);
+  box-sizing: border-box;
+  height: 100%;
   min-height: calc(100vh - var(--et-size-50));
-  padding: var(--et-space-24);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0;
 }
 
 .workbench-loading {
@@ -115,11 +217,11 @@ onMounted(async () => {
   justify-content: center;
 }
 
-:deep(.vue-grid-layout) {
+.workbench-grid {
   min-height: calc(100vh - var(--et-size-120));
 }
 
-:deep(.vue-grid-item) {
+:deep(.workbench-grid > .vue-grid-item) {
   overflow: visible;
 }
 </style>

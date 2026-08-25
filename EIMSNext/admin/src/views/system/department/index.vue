@@ -7,9 +7,9 @@
         <div class="org-menu">{{ $t("admin.department.title") }}</div>
         <div class="menu-items">
           <el-radio-group v-model="empStatus" @change="handleStatusChanged">
-            <el-radio :label="0">{{ $t("admin.department.active") }}</el-radio>
-            <el-radio :label="1">{{ $t("admin.department.resigned") }}</el-radio>
-            <el-radio v-if="showPendingApproval" :label="2">{{ $t("admin.department.pending") }}</el-radio>
+            <el-radio :value="0">{{ $t("admin.department.active") }}</el-radio>
+            <el-radio :value="1">{{ $t("admin.department.resigned") }}</el-radio>
+            <el-radio v-if="showPendingApproval" :value="2">{{ $t("admin.department.pending") }}</el-radio>
           </el-radio-group>
         </div>
         <div class="org-menu">{{ $t("admin.department.deptTitle") }}</div>
@@ -192,7 +192,7 @@ const leftBars = ref<ToolbarItem[]>([
     type: "button",
     config: {
       text: t("common.addNew"),
-      type: "success",
+      type: "primary",
       command: "add",
       visible: true,
       icon: "el-plus",
@@ -208,7 +208,7 @@ const leftBars = ref<ToolbarItem[]>([
     type: "button",
     config: {
       text: t("common.delete"),
-      type: "danger",
+      class: "delete-button",
       command: "delete",
       visible: true,
       icon: "el-delete",

@@ -135,7 +135,7 @@ import {
   ITableColumn,
   SystemField,
 } from "@eimsnext/models";
-import { AggCalcRequest, aggregateService, formDataService, IFormDataPermissionScopeResponse } from "@eimsnext/services";
+import { AggCalcRequest, AggPreviewRequest, aggregateService, formDataService, IFormDataPermissionScopeResponse } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
 import { useI18n } from "vue-i18n";
 import DashSort from "../components/DashSort.vue";
@@ -246,19 +246,14 @@ const buildNoAccessFieldPerms = (form: FormDef): IFieldPerm[] => {
 };
 
 const buildAggRequest = (skip: number, take: number): AggCalcRequest => {
-  const mergedFilter = mergeFilter(props.setting.filter, props.externalFilter);
   return {
-    dataSource: props.setting.datasource,
-    dimensions: [],
-    metrics: [],
-    filter: mergedFilter ? toDynamicFilter(mergedFilter) : undefined,
+    itemId: props.itemDef?.id || "",
+    filter: props.externalFilter ? toDynamicFilter(props.externalFilter) : undefined,
     sort: props.setting.sort?.items
       ? props.setting.sort.items.map((s) => ({ id: s.field.field, type: FieldType.Input, dir: s.sort }))
       : undefined,
     skip,
     take,
-    itemId: props.itemDef?.id,
-    displayFields: props.isPublic ? (props.setting.displayFields || []).map((f: any) => f.field) : undefined,
   };
 };
 
@@ -298,32 +293,6 @@ const loadFormContext = async () => {
       .filter(Boolean);
   }
   noAccessFieldPerms.value = buildNoAccessFieldPerms(form);
-};
-
-const mergeFilter = (ownFilter?: IConditionList, externalFilter?: IConditionList) => {
-  const items: IConditionList[] = [];
-
-  if (ownFilter?.items?.length || ownFilter?.field) {
-    items.push(ownFilter);
-  }
-
-  if (externalFilter?.items?.length || externalFilter?.field) {
-    items.push(externalFilter);
-  }
-
-  if (items.length === 0) {
-    return undefined;
-  }
-
-  if (items.length === 1) {
-    return items[0];
-  }
-
-  return {
-    id: `merged_${Date.now()}`,
-    rel: "and",
-    items,
-  } as IConditionList;
 };
 
 const buildQueryOptions = null; // (legacy formDataService path removed — use buildAggRequest)
@@ -400,7 +369,15 @@ const loadCount = async () => {
   }
 
   const req = buildAggRequest(0, 0);
-  const count = props.isPublic && props.publicToken
+  if (!req.itemId) {
+    rawTotal.value = 0;
+    displayTotal.value = 0;
+    return;
+  }
+  const previewReq: AggPreviewRequest = { ...req, details: JSON.stringify(props.setting) };
+  const count = props.designerMode
+    ? await aggregateService.previewCount(previewReq)
+    : props.isPublic && props.publicToken
     ? await publicHttp.api.post<number>("/aggregate/$count", req)
     : await aggregateService.count(req);
   rawTotal.value = count;
@@ -429,9 +406,18 @@ const loadRows = async () => {
   }
 
   const take = props.setting.showTop ? Math.min(pageSize.value, remaining) : pageSize.value;
-  const data = props.isPublic && props.publicToken
-    ? await publicHttp.api.post<any[]>("/aggregate/calucate", buildAggRequest(skip, take))
-    : await aggregateService.calucate(buildAggRequest(skip, take));
+  const req = buildAggRequest(skip, take);
+  if (!req.itemId) {
+    rows.value = [];
+    flattedRows.value = [];
+    return;
+  }
+  const previewReq: AggPreviewRequest = { ...req, details: JSON.stringify(props.setting) };
+  const data = props.designerMode
+    ? await aggregateService.preview(previewReq)
+    : props.isPublic && props.publicToken
+    ? await publicHttp.api.post<any[]>("/aggregate/calucate", req)
+    : await aggregateService.calucate(req);
   rows.value = (data || []).map((d: any) => ({
     id: d.id,
     formId: d.formId,

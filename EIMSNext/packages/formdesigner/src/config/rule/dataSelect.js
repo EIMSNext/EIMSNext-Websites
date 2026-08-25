@@ -42,8 +42,9 @@ export default {
         field: "dataSource",
         title: t("com.dataselect.dataSource"),
         props: {
-          placeholder: t("dataflow.selectForm"),
+          placeholder: t("eventFlow.selectForm"),
           sourceScope: "crossApp",
+          resetDataSelectConfig: true,
         },
         control: [
           {

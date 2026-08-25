@@ -2,12 +2,13 @@
   <div class="tab-content">
     <div class="link-row">
       <el-switch v-model="querylink.enabled" @change="markDirty" />
-      <el-input :model-value="querylinkUrl" readonly class="link-input" />
-      <el-button @click="copyText(querylinkUrl)">{{ t("common.copy") }}</el-button>
-      <el-button @click="openUrl(querylinkUrl)">{{ t("common.open") }}</el-button>
-      <el-button @click="showEmbed = true">{{ t("publicpublish.embed") }}</el-button>
+      <template v-if="querylink.enabled">
+        <ShareLinkBar :url="querylinkUrl" class="share-link" />
+        <el-button @click="showEmbed = true">{{ t("publicpublish.embed") }}</el-button>
+      </template>
     </div>
 
+    <template v-if="querylink.enabled">
     <h4 class="section-title">{{ t("publicpublish.queryPageSettings") }}</h4>
 
     <div class="form-group">
@@ -18,11 +19,12 @@
         filterable
         collapse-tags
         collapse-tags-tooltip
+        :max-collapse-tags="5"
         :placeholder="t('publicpublish.top5FieldsDefault')"
         class="full"
         @change="markDirty"
       >
-        <el-option v-for="field in selectableFields" :key="field.field" :label="field.title" :value="field.field" />
+        <el-option v-for="field in queryableFields" :key="field.field" :label="field.title" :value="field.field" />
       </el-select>
     </div>
 
@@ -34,11 +36,12 @@
         filterable
         collapse-tags
         collapse-tags-tooltip
+        :max-collapse-tags="5"
         :placeholder="t('publicpublish.top5FieldsDefault')"
         class="full"
         @change="markDirty"
       >
-        <el-option v-for="field in selectableFields" :key="field.field" :label="field.title" :value="field.field" />
+        <el-option v-for="field in displayableFields" :key="field.field" :label="field.title" :value="field.field" />
       </el-select>
     </div>
 
@@ -75,6 +78,7 @@
     <el-button type="primary" @click="save">
       {{ t("common.save") }}
     </el-button>
+    </template>
   </div>
 </template>
 
@@ -90,6 +94,7 @@ import {
   PublicTargetType,
 } from "@eimsnext/models";
 import { publicSettingService } from "@eimsnext/services";
+import { ShareLinkBar } from "@eimsnext/components";
 import { sha256 } from "@eimsnext/utils";
 import LimitSection from "./LimitSection.vue";
 import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
@@ -121,7 +126,8 @@ const iframeCode = computed(
   () => `<iframe width="100%" height="100%" style="border: none;" src="${querylinkUrl.value}"></iframe>`,
 );
 
-const selectableFields = computed(() => flattenFields(props.formDef.content?.items || []));
+const queryableFields = computed(() => flattenFields(props.formDef.content?.items || [], isPublicQueryField));
+const displayableFields = computed(() => flattenFields(props.formDef.content?.items || [], isPublicDisplayField));
 
 watch(
   () => props.publicSetting,
@@ -131,7 +137,7 @@ watch(
       accessCodeEnabled: setting.form?.queryLink?.accessCodeEnabled ?? false,
       accessCodeHash: setting.form?.queryLink?.accessCodeHash ?? "",
       expireTime: setting.form?.queryLink?.expireTime,
-      queryFields: [...(setting.form?.queryLink?.queryFields ?? [])],
+      queryFields: (setting.form?.queryLink?.queryFields ?? []).filter((field) => queryableFields.value.some((item) => item.field === field)),
       displayFields: [...(setting.form?.queryLink?.displayFields ?? [])],
     };
     isDirtyState.value = false;
@@ -153,21 +159,17 @@ async function copyText(text: string) {
   ElMessage.success(t("common.copied"));
 }
 
-function openUrl(url: string) {
-  window.open(url, "_blank");
-}
-
-function flattenFields(fields: FieldDef[]) {
+function flattenFields(fields: FieldDef[], isSupported: (type?: FieldType | string) => boolean) {
   const result: { field: string; title: string }[] = [];
   fields.forEach((field) => {
     const publicSystemField = isPublicSystemFieldDef(field);
-    if ((!publicSystemField && field.hidden) || isOrgField(field.type)) {
+    if ((!publicSystemField && field.hidden) || (field.type !== FieldType.TableForm && !isSupported(field.type))) {
       return;
     }
     if (field.type === FieldType.TableForm && field.columns?.length) {
       field.columns.forEach((sub) => {
         const publicSystemSubField = isPublicSystemFieldDef(sub);
-        if ((publicSystemSubField || !sub.hidden) && !isOrgField(sub.type)) {
+        if ((publicSystemSubField || !sub.hidden) && isSupported(sub.type)) {
           result.push({ field: `${field.field}>${sub.field}`, title: `${field.title}.${sub.title}` });
         }
       });
@@ -178,13 +180,20 @@ function flattenFields(fields: FieldDef[]) {
   return result;
 }
 
-function isOrgField(type?: string) {
-  return (
-    type === FieldType.Department1 ||
-    type === FieldType.Department2 ||
-    type === FieldType.Employee1 ||
-    type === FieldType.Employee2
-  );
+function isPublicDisplayField(type?: FieldType | string) {
+  return ![FieldType.DataSelect, FieldType.FileUpload, FieldType.ImageUpload, FieldType.Signature, FieldType.TableForm].includes(type as FieldType);
+}
+
+function isPublicQueryField(type?: FieldType | string) {
+  return [
+    FieldType.Input,
+    FieldType.TextArea,
+    FieldType.SerialNo,
+    FieldType.Radio,
+    FieldType.Select1,
+    FieldType.Number,
+    FieldType.TimeStamp,
+  ].includes(type as FieldType);
 }
 
 async function save() {
@@ -217,13 +226,13 @@ defineExpose({
 
 <style scoped lang="scss">
 .tab-content {
-  padding: var(--et-space-12) 0;
+  padding: var(--et-space-8) 0;
 }
 
 .link-row {
   align-items: center;
   display: flex;
-  gap: var(--et-space-12);
+  gap: var(--et-space-8);
   margin-bottom: var(--et-space-16);
 
   .link-input {

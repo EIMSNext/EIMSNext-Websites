@@ -1,0 +1,127 @@
+<template>
+  <div class="flow-meta-editor">
+    <div class="flow-node-meta">
+      <div class="attr-content">
+        <div class="attr-item has-padding no-bottom-padding">
+          <MetaItemHeader
+            :label="t('workflow.nodeName')"
+            :required="true"
+          ></MetaItemHeader>
+          <el-input
+            v-model="activeData.name"
+            :readonly="activeData.nodeType == FlowNodeType.Start"
+            size="default"
+            class="full-width-input"
+          />
+        </div>
+        <div
+          v-if="nodeType == FlowNodeType.Start"
+          class="attr-item has-padding"
+        >
+          <TriggerNodeMeta></TriggerNodeMeta>
+        </div>
+        <div
+          v-if="nodeType == FlowNodeType.Condition"
+          class="attr-item has-padding"
+        >
+          <EfConditionNodeMeta></EfConditionNodeMeta>
+        </div>
+        <div
+          v-if="nodeType == FlowNodeType.Insert"
+          class="attr-item has-padding"
+        >
+          <InsertNodeMeta></InsertNodeMeta>
+        </div>
+        <div
+          v-if="nodeType == FlowNodeType.Update"
+          class="attr-item has-padding"
+        >
+          <UpdateNodeMeta></UpdateNodeMeta>
+        </div>
+        <div
+          v-if="nodeType == FlowNodeType.Delete"
+          class="attr-item has-padding"
+        >
+          <DeleteNodeMeta></DeleteNodeMeta>
+        </div>
+        <div
+          v-if="nodeType == FlowNodeType.QueryOne"
+          class="attr-item has-padding"
+        >
+          <QueryOneNodeMeta></QueryOneNodeMeta>
+        </div>
+        <div
+          v-if="nodeType == FlowNodeType.QueryMany"
+          class="attr-item has-padding"
+        >
+          <QueryManyNodeMeta></QueryManyNodeMeta>
+        </div>
+        <div
+          v-if="nodeType == FlowNodeType.Print"
+          class="attr-item has-padding"
+        >
+          <PrintNodeMeta></PrintNodeMeta>
+        </div>
+        <div
+          v-if="nodeType == FlowNodeType.Plugin"
+          class="attr-item has-padding"
+        >
+          <PluginNodeMeta></PluginNodeMeta>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script lang="ts" setup>
+import { inject, nextTick, ref, watch } from "vue";
+import {
+  FlowNodeType,
+  IFlowContext,
+  IFlowNodeData,
+  createFlowNode,
+  EventType,
+} from "../Common/FlowData";
+import FormSelect from "@/FormSelect/FormSelect.vue";
+import MetaItemHeader from "../Common/MetaItemHeader.vue";
+import TriggerNodeMeta from "./TriggerNodeMeta.vue";
+import InsertNodeMeta from "./InsertNodeMeta.vue";
+import UpdateNodeMeta from "./UpdateNodeMeta.vue";
+import DeleteNodeMeta from "./DeleteNodeMeta.vue";
+import QueryOneNodeMeta from "./QueryOneNodeMeta.vue";
+import QueryManyNodeMeta from "./QueryManyNodeMeta.vue";
+import PrintNodeMeta from "./PrintNodeMeta.vue";
+import PluginNodeMeta from "./PluginNodeMeta.vue";
+import EfConditionNodeMeta from "./EfConditionNodeMeta.vue";
+import { useLocale } from "element-plus";
+const { t } = useLocale();
+
+defineOptions({
+  name: "EventFlowMetaEditor",
+});
+
+const flowContext = inject<IFlowContext>("flowContext")!;
+const activeData = ref<IFlowNodeData>(createFlowNode(FlowNodeType.None, t));
+const nodeType = ref(FlowNodeType.None);
+
+watch(
+  () => flowContext.activeData,
+  (newValue: IFlowNodeData) => {
+    nodeType.value = FlowNodeType.None;
+    activeData.value = newValue;
+    nextTick(() => {
+      nodeType.value = activeData.value.nodeType;
+    });
+  },
+  { immediate: true },
+);
+</script>
+
+<style scoped>
+.no-bottom-padding {
+  padding-bottom: var(--et-space-0);
+}
+
+.full-width-input {
+  width: 100%;
+}
+</style>

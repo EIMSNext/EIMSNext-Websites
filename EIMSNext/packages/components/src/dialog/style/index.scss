@@ -41,8 +41,23 @@
     }
 
     .el-dialog__footer {
-      border-top: 1px solid var(--et-border-color-strong);
+      border-top-width: var(--et-dialog-footer-border-width, 1px);
+      border-top-style: var(--et-dialog-footer-border-style, solid);
+      border-top-color: var(--et-border-color-strong);
       padding: var(--et-space-12) var(--et-space-20) !important;
+    }
+  }
+
+  /* 类名开关：分别隐藏标题栏底线 / 底部按钮上方分割线，可叠加使用 */
+  &.el-dialog {
+    &.no-head-divider .el-dialog__header {
+      border-bottom-width: 0;
+      border-bottom-style: none;
+    }
+
+    &.no-foot-divider .el-dialog__footer {
+      border-top-width: 0;
+      border-top-style: none;
     }
   }
 

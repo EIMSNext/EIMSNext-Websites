@@ -165,6 +165,7 @@ const leftBars = computed<ToolbarItem[]>(() => {
       type: "button",
       config: {
         text: "common.delete",
+        class: "delete-button",
         command: "delete",
         visible: canRemove.value && !inEdit.value,
         icon: "el-delete",

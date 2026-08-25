@@ -1,5 +1,5 @@
 <template>
-  <et-card :showHeader="false">
+  <et-card :showHeader="false" class="my-tasks-card">
     <div class="flow-center-wrapper">
       <div class="my-task">
         <div class="task-wrapper" @click="goToMyTasks">
@@ -88,7 +88,7 @@ onBeforeUnmount(() => {
   align-items: center;
   border-radius: var(--et-radius-6);
   display: flex;
-  min-height: var(--et-size-160);
+  height: 100%;
   position: relative;
   width: 100%;
 
@@ -164,6 +164,15 @@ onBeforeUnmount(() => {
         margin-top: var(--et-space-20);
       }
     }
+  }
+}
+
+.my-tasks-card {
+  height: 100%;
+
+  :deep(.el-card__body) {
+    box-sizing: border-box;
+    height: 100%;
   }
 }
 

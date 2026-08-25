@@ -9,7 +9,9 @@
       <div class="fv-card-fields">
         <div v-for="field in fields" :key="field.field" class="fv-card-field">
           <span v-if="showFieldTitle" class="fv-field-label">{{ field.label }}</span>
-          <span class="fv-field-value">{{ formatField(field.field) || "--" }}</span>
+          <slot name="field-value" :field="field" :value="formatField(field.field)">
+            <span class="fv-field-value">{{ formatField(field.field) || "--" }}</span>
+          </slot>
         </div>
       </div>
     </div>

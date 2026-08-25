@@ -128,22 +128,28 @@ defineExpose({
 .publish-container {
   height: 100%;
   overflow: auto;
-  padding: var(--et-space-20);
+  padding: 0 var(--et-space-20) var(--et-space-20);
 }
 
 .page-header {
-  margin-bottom: var(--et-space-20);
+  align-items: center;
+  border-bottom: 1px solid var(--et-border-color-light);
+  display: flex;
+  gap: var(--et-space-8);
+  min-height: 48px;
+  margin: 0 calc(var(--et-space-20) * -1) var(--et-space-12);
+  padding: 0 var(--et-space-20);
 
   h2 {
     color: var(--et-text-primary);
-    font-size: var(--et-font-size-18);
+    font-size: var(--et-font-size-16);
     font-weight: 600;
-    margin: 0 0 var(--et-space-6);
+    margin: 0;
   }
 
   p {
     color: var(--et-text-secondary);
-    font-size: var(--et-font-size-13);
+    font-size: var(--et-font-size-12);
     margin: 0;
   }
 
@@ -156,8 +162,12 @@ defineExpose({
   .extlink-guide {
     color: var(--et-color-primary);
     cursor: pointer;
-    float: right;
-    font-size: var(--et-font-size-13);
+    font-size: var(--et-font-size-12);
+    margin-left: auto;
   }
+}
+
+:deep(.el-tabs__content) {
+  padding: 0 var(--et-space-2);
 }
 </style>

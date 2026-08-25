@@ -38,8 +38,8 @@
             class="app-item"
             @click="gotoApp(app)"
           >
-            <div class="app-icon">
-              <img v-if="app.icon" :src="app.icon" alt="" />
+            <div class="app-icon" :style="{ backgroundColor: getAppIconColor(app) }">
+              <img v-if="isImageIcon(app.icon)" :src="app.icon" alt="" />
               <van-icon v-else name="apps-o" size="24" />
             </div>
             <div class="app-name">{{ app.name }}</div>
@@ -71,6 +71,8 @@ const goToMyStarted = () => router.push("/wftask?tab=started");
 const goToMyApproved = () => router.push("/wftask?tab=approved");
 const goToMyCced = () => router.push("/wftask?tab=cced");
 const gotoApp = (app: AppDef) => router.push(`/app/${app.id}`);
+const getAppIconColor = (app: AppDef) => app.iconColor || "var(--et-color-primary)";
+const isImageIcon = (icon?: string) => /^(https?:|data:|blob:|\/)/i.test(icon || "");
 
 const loadApps = async () => {
   apps.value = await appServiceMobile.getMyApps();
@@ -176,7 +178,7 @@ onMounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: var(--mobile-bg-page);
+  color: var(--el-color-white, #fff);
 
   img {
     width: 100%;

@@ -440,7 +440,7 @@ function isDepartmentField(type?: string) {
   }
 
   span {
-    color: var(--el-color-warning, #e6a23c);
+    color: var(--et-color-warning);
     font-size: 13px;
   }
 }

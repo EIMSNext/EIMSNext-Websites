@@ -1,7 +1,5 @@
 import formCreateMobile from '@eimsnext/form-render-vant';
-import fcSelect from '@eimsnext/form-render-elplus';
-import fcTree from '@eimsnext/form-render-elplus';
-import fcUpload from '@eimsnext/form-render-elplus';
+import '@eimsnext/form-render-vant/dist/index.css';
 import { formulas } from '@eimsnext/utils';
 import StepForm from '../components/mobile/stepForm/StepForm.vue';
 import Popup from '../components/mobile/popup/Popup.vue';
@@ -12,7 +10,7 @@ import Cell from '../components/cell/Cell.vue';
 import Value from '../components/value/Value.vue';
 import FcCity from '../components/mobile/City.vue';
 import Slot from '../components/slotComponent/SlotComponent.vue';
-import {is} from '@eimsnext/form-render-core';
+import {getFilledTextColor, is} from '@eimsnext/form-render-core';
 import Json from '../components/jsonComponent/JsonComponent.vue';
 import InlineForm from '../components/InlineForm.vue';
 import Echarts from '../components/echarts/Echarts.vue';
@@ -85,6 +83,24 @@ const findCheckboxLabel = function (find, data) {
     });
 };
 
+const optionValue = option => option && typeof option === 'object' ? option.value : option;
+const optionLabel = option => option && typeof option === 'object'
+    ? option.label || option.text || option.value || ''
+    : option || '';
+const renderOptionValue = (h, values, data, colorEnabled) => {
+    const children = [];
+    values.forEach((value, index) => {
+        const option = data.find(item => String(optionValue(item)) === String(optionValue(value)));
+        if (index) children.push(', ');
+        if (colorEnabled && option?.color) {
+            children.push(h('span', {class: 'fc-option-preview-tag', style: {backgroundColor: option.color, color: getFilledTextColor()}}, [optionLabel(option)]));
+        } else {
+            children.push(optionLabel(option || value));
+        }
+    });
+    return children;
+};
+
 function toArray(val) {
     if (!val) {
         return [];
@@ -110,11 +126,14 @@ export function useAdvanced(formCreate) {
             const type = ctx.type;
             const subForm = ctx.$handle.subForm[ctx.id];
             const readMode = ctx.prop.readMode;
+            let renderedValue;
             if (readMode === false || readMode === 'custom' || !ctx.input || ctx.rule.subForm || (Array.isArray(subForm) ? subForm.length : subForm) || ['fcGroup', 'fcSubForm', 'tableform', 'stepForm', 'upload'].indexOf(ctx.trueType) > -1) {
                 return ctx.parser.render(_, ctx);
             }
-            if (['radio', 'select', 'checkbox'].indexOf(type) > -1) {
-                val = findCheckboxLabel([...toArray(val)], ctx.prop.props.options || ctx.prop.props.formCreateInject.options || []).join(', ');
+            if (['radio', 'select', 'select2', 'checkbox'].indexOf(type) > -1) {
+                const data = ctx.prop.props.options || ctx.prop.props.formCreateInject.options || [];
+                renderedValue = renderOptionValue(h, [...toArray(val)], data, ctx.prop.props.optionColor);
+                val = findCheckboxLabel([...toArray(val)], data).join(', ');
             } else if (['timePicker', 'datePicker', 'slider'].indexOf(type) > -1) {
                 val = Array.isArray(val) ? val.join(' - ') : val;
             } else if (type === 'cascader') {
@@ -140,7 +159,7 @@ export function useAdvanced(formCreate) {
                 val = val ? '是' : '否';
             }
 
-            return h('span', {class: '_fc-read-view'}, ['' + (val == null ? '' : val)]);
+            return h('span', {class: '_fc-read-view'}, renderedValue || ['' + (val == null ? '' : val)]);
         },
         updateWrap(ctx) {
             let style = ctx.prop?.wrap?.style;
@@ -194,12 +213,13 @@ export function useAdvanced(formCreate) {
             },
             select: {
                 mergeProp(ctx) {
+                    if (ctx.prop.options) {
+                        ctx.prop.props.options = ctx.prop.options;
+                    }
+                    ctx.prop.component = 'fc-select';
                     if (ctx.prop.props.multiple === true) {
-                        ctx.prop.component = fcSelect;
+                        return;
                     } else {
-                        if (ctx.prop.options) {
-                            ctx.prop.props.options = ctx.prop.options;
-                        }
                         ctx.prop.props.options = (ctx.prop.props.options || []).map(item => {
                             return {
                                 text: item.label,
@@ -217,7 +237,7 @@ export function useAdvanced(formCreate) {
             },
             timePicker: {
                 mergeProp(ctx) {
-                    ctx.prop.component = 'elTimePicker';
+                    ctx.prop.component = 'fc-time-picker';
                     const props = ctx.prop.props;
                     if (!props.valueFormat) {
                         props.valueFormat = 'HH:mm:ss';
@@ -226,7 +246,7 @@ export function useAdvanced(formCreate) {
             },
             datePicker: {
                 mergeProp(ctx) {
-                    ctx.prop.component = 'elDatePicker';
+                    ctx.prop.component = 'fc-date-picker';
                     const props = ctx.prop.props;
                     if (!props.valueFormat) {
                         props.valueFormat = DEFAULT_FORMATS[props.type] || DEFAULT_FORMATS['date'];
@@ -235,12 +255,12 @@ export function useAdvanced(formCreate) {
             },
             colorPicker: {
                 mergeProp(ctx) {
-                    ctx.prop.component = 'elColorPicker';
+                    ctx.prop.component = 'fc-color-picker';
                 }
             },
             cascader: {
                 mergeProp(ctx) {
-                    ctx.prop.component = 'elCascader';
+                    ctx.prop.component = 'fc-cascader';
                 }
             },
             divider: {
@@ -250,12 +270,19 @@ export function useAdvanced(formCreate) {
             },
             upload: {
                 mergeProp(ctx) {
-                    ctx.prop.component = fcUpload;
+                    ctx.prop.component = 'fc-uploader';
                 }
             },
             tree: {
                 mergeProp(ctx) {
-                    ctx.prop.component = fcTree;
+                    const props = ctx.prop.props;
+                    ctx.prop.component = 'fc-cascader';
+                    props.options = props.data || [];
+                    props.fieldNames = {
+                        text: props.props?.label || 'label',
+                        value: props.nodeKey || 'id',
+                        children: 'children',
+                    };
                 }
             },
             row: {

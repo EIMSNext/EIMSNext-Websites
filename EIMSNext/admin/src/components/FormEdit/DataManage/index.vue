@@ -114,26 +114,12 @@
       <DataField :model-value="fieldList" :formId="formDef.id" @ok="setField" @cancel="showField = false" />
     </el-popover>
 
-    <div class="page-head">
-      <div class="page-copy">
-        <div class="page-title">{{ t("admin.formEdit.dataManageTitle") }}</div>
-        <div class="page-desc">{{ t("admin.formEdit.dataManageDesc") }}</div>
-      </div>
-      <div class="page-head-actions">
-        <el-button class="draft-button" @click="showDraftDrawer = true">
-          <et-icon icon="el-document" />
-          {{ t("admin.formEdit.dataManageDraft") }}
-        </el-button>
-        <el-button class="trash-button" @click="showTrashDrawer = true">
-          <et-icon icon="el-delete" />
-          {{ t("admin.formEdit.dataManageTrash") }}
-          <span v-if="trashTotalRef > 0" class="trash-count">{{ trashTotalRef }}</span>
-        </el-button>
-      </div>
-    </div>
-
     <div class="toolbar-head">
-      <et-toolbar class="form-list-toolbar" :left-group="leftBars" :right-group="rightBars" @command="toolbarHandler" />
+      <et-toolbar
+        class="form-list-toolbar form-list-toolbar-leading"
+        :left-group="leftBars"
+        @command="toolbarHandler"
+      />
       <FormDataSearchBar
         :keyword="searchState.keyword"
         :selected-fields="searchState.selectedFields"
@@ -142,6 +128,11 @@
         @update:keyword="searchState.keyword = $event"
         @update:selected-fields="searchState.selectedFields = $event"
         @search="handleSearch"
+      />
+      <et-toolbar
+        class="form-list-toolbar form-list-toolbar-trailing"
+        :right-group="rightBars"
+        @command="toolbarHandler"
       />
     </div>
 
@@ -446,6 +437,7 @@ const leftBars = ref<ToolbarItem[]>([
     type: "button",
     config: {
       text: "common.delete",
+      class: "delete-button",
       command: "delete",
       icon: "el-delete",
       visible: true,
@@ -461,6 +453,46 @@ const leftBars = ref<ToolbarItem[]>([
       visible: true,
       onCommand: () => {
         showImportDialog.value = true;
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "common.export",
+      class: "data-filter",
+      command: "export",
+      visible: true,
+      icon: "el-download",
+      onCommand: () => {
+        void exportCurrentData();
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "admin.formEdit.dataManageDraft",
+      class: "data-filter",
+      command: "draft",
+      visible: true,
+      icon: "el-document",
+      onCommand: () => {
+        showDraftDrawer.value = true;
+        void refreshDrafts();
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: "admin.formEdit.dataManageTrash",
+      class: "data-filter",
+      command: "trash",
+      visible: true,
+      icon: "el-delete",
+      onCommand: () => {
+        showTrashDrawer.value = true;
       },
     },
   },
@@ -486,22 +518,6 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "common.sort",
-      class: "data-filter",
-      command: "sort",
-      visible: true,
-      icon: "el-sort",
-      onCommand: (_cmd: string, e: MouseEvent) => {
-        sortBtnRef.value = e.currentTarget;
-        showFilter.value = false;
-        showField.value = false;
-        showSort.value = !showSort.value;
-      },
-    },
-  },
-  {
-    type: "button",
-    config: {
       text: "common.fields",
       class: "data-filter",
       command: "fields",
@@ -518,13 +534,16 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "common.export",
+      text: "common.sort",
       class: "data-filter",
-      command: "export",
+      command: "sort",
       visible: true,
-      icon: "el-download",
-      onCommand: () => {
-        void exportCurrentData();
+      icon: "el-sort",
+      onCommand: (_cmd: string, e: MouseEvent) => {
+        sortBtnRef.value = e.currentTarget;
+        showFilter.value = false;
+        showField.value = false;
+        showSort.value = !showSort.value;
       },
     },
   },
@@ -856,58 +875,27 @@ void handleQuery();
     var(--et-bg-page);
 }
 
-.page-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--et-space-16);
-  margin-bottom: var(--et-space-14);
-}
-
-.page-copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--et-space-6);
-}
-
-.page-title {
-  color: var(--et-text-primary);
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.page-desc {
-  color: var(--et-text-secondary);
-  font-size: 13px;
-}
-
-.trash-button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--et-space-6);
-  border-color: var(--et-border-color-light);
-  background: var(--et-bg-container);
-}
-
-.trash-count {
-  display: inline-flex;
-  min-width: 22px;
-  height: 22px;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--et-color-primary) 12%, transparent);
-  color: var(--et-color-primary);
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .toolbar-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--et-space-12);
+  min-height: 42px;
+  margin-bottom: var(--et-space-10);
+  padding: var(--et-space-6) var(--et-space-10);
+  border: 1px solid var(--el-border-color-lighter);
+  border-bottom: 0;
+  background: var(--el-bg-color);
+}
+
+.form-list-toolbar-leading {
+  flex: 1;
+  min-width: 0;
+}
+
+.form-list-toolbar-trailing {
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .data-shell {
@@ -990,13 +978,41 @@ void handleQuery();
   margin-top: var(--et-space-12);
 }
 
-:deep(.form-list-toolbar .toolbar-container) {
-  min-height: 42px;
-  margin-bottom: var(--et-space-10);
-  padding: var(--et-space-6) var(--et-space-10);
-  border: 1px solid var(--et-border-color-light);
-  border-bottom: 0;
-  background: var(--et-bg-container);
+:deep(.data-filter) {
+  margin-left: var(--et-space-0);
+}
+
+:deep(.form-list-toolbar.toolbar-container) {
+  margin-bottom: 0;
+  background: transparent;
+}
+
+:deep(.form-list-toolbar .left-group),
+:deep(.form-list-toolbar .right-group) {
+  align-items: center;
+  gap: 2px;
+}
+
+:deep(.form-list-toolbar .right-group) {
+  margin-left: 0;
+}
+
+:deep(.form-list-toolbar .toolbar-item.el-button),
+:deep(.form-list-toolbar .toolbar-dropdown) {
+  height: 32px;
+  padding: 0 var(--et-space-8);
+  border: 0;
+  box-shadow: none;
+}
+
+:deep(.form-list-toolbar .toolbar-item.el-button:not(.el-button--primary)),
+:deep(.form-list-toolbar .toolbar-dropdown) {
+  background: transparent;
+}
+
+:deep(.form-list-toolbar .toolbar-item.el-button:not(.el-button--primary):not(.is-disabled):hover),
+:deep(.form-list-toolbar .toolbar-dropdown:not(.is-disabled):hover) {
+  background: var(--el-fill-color-light);
 }
 
 :deep(.trash-drawer > .el-drawer) {
@@ -1018,11 +1034,17 @@ void handleQuery();
 }
 
 @media (max-width: 1280px) {
-  .page-head,
   .toolbar-head,
   .trash-header {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .form-list-toolbar-leading {
+    flex-basis: 100%;
+  }
+
+  .form-list-toolbar-trailing {
+    margin-left: auto;
   }
 
   .trash-header-actions {

@@ -70,7 +70,7 @@ import {
 } from "../NodeFieldList/type";
 import { nextTick, onMounted, ref, toRef, watch } from "vue";
 import { IFormFieldDef, splitSubField } from "@/FieldSelect/type";
-import { normalizeFormulaValue, validateFormulaFieldList } from "@/FlowDesigner/Dataflow/formula";
+import { normalizeFormulaValue, validateFormulaFieldList } from "@/FlowDesigner/EventFlow/formula";
 const { t } = useLocale();
 
 defineOptions({
@@ -213,7 +213,7 @@ const updateFieldSetting = () => {
 
   const validation = validateFormulaFieldList(
     selectedFields.value.items,
-    t("dataflow.formulaInferenceError"),
+    t("eventFlow.formulaInferenceError"),
   );
   errorMap.value = {};
   validation.errors.forEach((item) => {
@@ -223,7 +223,7 @@ const updateFieldSetting = () => {
     const valueField = item.value.fieldValue ?? item.value.formulaValue?.drivingField;
     const hasMissingFormulaRef = item.value.formulaValue?.refs?.some((ref) => ref.field?.missing);
     if (item.field.missing || valueField?.missing || hasMissingFormulaRef) {
-      errorMap.value[item.field.field] = t("dataflow.deletedField");
+      errorMap.value[item.field.field] = t("eventFlow.deletedField");
     }
   });
 };
@@ -239,8 +239,8 @@ const markMissingSelectedFields = () => {
     if (!item.field?.field || currentFields.size === 0) return;
     if (!currentFields.has(item.field.field)) {
       item.field.missing = true;
-      if (!item.field.label.includes(t("dataflow.deletedField"))) {
-        item.field.label = `${item.field.label || item.field.field}（${t("dataflow.deletedField")}）`;
+      if (!item.field.label.includes(t("eventFlow.deletedField"))) {
+        item.field.label = `${item.field.label || item.field.field}（${t("eventFlow.deletedField")}）`;
       }
     }
   });

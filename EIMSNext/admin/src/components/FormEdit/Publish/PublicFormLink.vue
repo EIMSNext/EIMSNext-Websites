@@ -2,12 +2,13 @@
   <div class="tab-content">
     <div class="link-row">
       <el-switch v-model="formlink.enabled" @change="markDirty" />
-      <el-input :model-value="submitUrl" readonly class="link-input" />
-      <el-button @click="copyText(submitUrl)">{{ t("common.copy") }}</el-button>
-      <el-button @click="openUrl(submitUrl)">{{ t("common.open") }}</el-button>
-      <el-button @click="showExtlink = !showExtlink">{{ t("publicpublish.extlink") }}</el-button>
+      <template v-if="formlink.enabled">
+        <ShareLinkBar :url="submitUrl" class="share-link" />
+        <el-button @click="showExtlink = !showExtlink">{{ t("publicpublish.extlink") }}</el-button>
+      </template>
     </div>
 
+    <template v-if="formlink.enabled">
     <div v-if="showExtlink" class="extlink-panel">
       <div class="extlink-header">
         <strong>{{ t("publicpublish.extlink") }}</strong>
@@ -20,7 +21,7 @@
         <span class="ext-name">{{ ext }}</span>
         <el-input :model-value="buildExtUrl(ext)" readonly />
         <el-button @click="copyText(buildExtUrl(ext))">{{ t("common.copy") }}</el-button>
-        <el-button @click="removeExtValue(ext)">{{ t("common.delete") }}</el-button>
+        <el-button class="delete-button" @click="removeExtValue(ext)">{{ t("common.delete") }}</el-button>
       </div>
       <el-input
         v-model="newExtValue"
@@ -91,6 +92,7 @@
     <el-button type="primary" @click="save">
       {{ t("common.save") }}
     </el-button>
+    </template>
   </div>
 </template>
 
@@ -106,6 +108,7 @@ import {
   PublicWechatAcquireMode,
 } from "@eimsnext/models";
 import { publicSettingService } from "@eimsnext/services";
+import { ShareLinkBar } from "@eimsnext/components";
 import { sha256 } from "@eimsnext/utils";
 import LimitSection from "./LimitSection.vue";
 
@@ -195,10 +198,6 @@ async function copyText(text: string) {
   ElMessage.success(t("common.copied"));
 }
 
-function openUrl(url: string) {
-  window.open(url, "_blank");
-}
-
 function onAccessCodeChange(v: string) {
   accessCodeInput.value = v;
   markDirty();
@@ -234,14 +233,14 @@ defineExpose({
 
 <style scoped lang="scss">
 .tab-content {
-  padding: var(--et-space-12) 0;
+  padding: var(--et-space-8) 0;
 }
 
 .link-row {
   align-items: center;
   display: flex;
-  gap: var(--et-space-12);
-  margin-bottom: var(--et-space-12);
+  gap: var(--et-space-8);
+  margin-bottom: var(--et-space-16);
 
   .link-input {
     flex: 1;
@@ -260,6 +259,10 @@ defineExpose({
   display: flex;
   gap: var(--et-space-8);
   margin-bottom: var(--et-space-8);
+
+  strong {
+    color: var(--et-text-primary);
+  }
 
   .extlink-sub {
     color: var(--et-text-secondary);
@@ -289,6 +292,10 @@ defineExpose({
   align-items: center;
   display: flex;
   gap: var(--et-space-12);
+
+  strong {
+    color: var(--et-text-primary);
+  }
 
   .sub-section__tip {
     color: var(--et-text-secondary);

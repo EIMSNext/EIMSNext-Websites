@@ -415,7 +415,7 @@ watch(
     border: none;
     border-radius: 50%;
     background-color: rgba(0, 0, 0, 0.24);
-    color: var(--et-text-on-primary);
+    color: var(--et-text-on-overlay);
     cursor: pointer;
     display: inline-flex;
     align-items: center;

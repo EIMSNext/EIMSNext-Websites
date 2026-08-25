@@ -2,8 +2,8 @@
   <MobilePage @back="goBack">
     <template #title>
       <div class="app-header-title">
-        <span class="app-title-icon">
-          <img v-if="app?.icon" :src="app.icon" alt="" />
+        <span class="app-title-icon" :style="{ backgroundColor: getAppIconColor(app) }">
+          <img v-if="isImageIcon(app?.icon)" :src="app?.icon" alt="" />
           <van-icon v-else name="apps-o" />
         </span>
         <span>{{ app?.name || t("mobile.formList.fallbackTitle") }}</span>
@@ -73,6 +73,8 @@ const filteredForms = computed(() => {
 
 const goBack = () => router.back();
 const goToFormData = (form: FormDef) => router.push(`/app/${appId}/form/${form.id}`);
+const getAppIconColor = (item?: AppDef) => item?.iconColor || "var(--et-color-primary)";
+const isImageIcon = (icon?: string) => /^(https?:|data:|blob:|\/)/i.test(icon || "");
 
 const loadApp = async () => {
   app.value = await appServiceMobile.get(appId);
@@ -142,6 +144,8 @@ onMounted(() => {
   height: 22px;
   align-items: center;
   justify-content: center;
+  border-radius: 6px;
+  color: var(--el-color-white, #fff);
 
   img {
     width: 100%;

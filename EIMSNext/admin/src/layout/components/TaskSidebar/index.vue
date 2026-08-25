@@ -271,6 +271,7 @@ onBeforeUnmount(() => {
   padding: var(--et-space-15);
   font-size: var(--et-font-size-16);
   align-items: center;
+  color: var(--et-text-primary);
 }
 
 .form-action {
@@ -285,6 +286,28 @@ onBeforeUnmount(() => {
 
 .app-menu-text {
   margin-left: var(--et-space-5);
+}
+
+.task-sidebar-menu {
+  --el-menu-text-color: var(--et-text-primary);
+  --el-menu-active-color: var(--et-color-primary);
+  --el-menu-hover-text-color: var(--et-color-primary);
+  --el-menu-hover-bg-color: var(--et-bg-primary-soft);
+}
+
+.task-sidebar-menu :deep(.el-menu-item:hover),
+.task-sidebar-menu :deep(.el-menu-item.is-active),
+.task-sidebar-menu :deep(.el-sub-menu__title:hover),
+.task-sidebar-menu :deep(.el-sub-menu.is-active > .el-sub-menu__title) {
+  background-color: var(--et-bg-primary-soft) !important;
+  color: var(--et-color-primary) !important;
+}
+
+.task-sidebar-menu :deep(.el-menu-item:hover .step-image),
+.task-sidebar-menu :deep(.el-menu-item.is-active .step-image),
+.task-sidebar-menu :deep(.el-sub-menu__title:hover .step-image),
+.task-sidebar-menu :deep(.el-sub-menu.is-active > .el-sub-menu__title .step-image) {
+  color: var(--et-color-primary) !important;
 }
 
 :deep(.el-sub-menu__title) {

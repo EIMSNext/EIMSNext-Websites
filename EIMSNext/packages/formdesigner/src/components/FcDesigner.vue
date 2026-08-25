@@ -594,9 +594,9 @@
                 <div
                   v-if="isgod && activeRule"
                   class="_fc-r-name-config"
-                  style="margin-bottom: 8px"
+                  style="margin-bottom: 6px"
                 >
-                  <div style="margin-bottom: 10px">
+                  <div style="margin-bottom: 6px">
                     <span class="_fc-field-title"> 字段标识 </span>
                   </div>
                   <FieldInput
@@ -773,77 +773,51 @@
               </el-main>
             </el-container>
           </el-aside>
-          <el-dialog
+          <el-drawer
             v-model="preview.state"
-            width="80%"
-            class="_fd-preview-dialog formdatadialog"
+            direction="btt"
+            size="95%"
+            :with-header="false"
+            :destroy-on-close="true"
+            class="_fd-preview-drawer formdatadialog"
             append-to-body
           >
-            <el-tabs class="_fd-preview-tabs" v-model="previewStatus">
-              <el-tab-pane
-                :label="t('form.formMode')"
-                name="form"
-              ></el-tab-pane>
-              <el-tab-pane
-                :label="t('form.previewMode')"
-                name="preview"
-              ></el-tab-pane>
-              <!-- <el-tab-pane :label="t('form.componentMode')" name="component"></el-tab-pane>
-                            <el-tab-pane :label="t('form.sfcMode')" name="sfc"
-                                v-if="previewDevice !== 'mobile'"></el-tab-pane> -->
-            </el-tabs>
-            <div
-              class="_fd-preview-device"
-              v-if="previewStatus !== 'sfc' && !onlyPC"
-            >
-              <div
-                :class="{ active: previewDevice === 'pc' }"
-                @click="previewDevice = 'pc'"
-              >
-                <i class="fc-icon icon-pc2"></i>{{ t("props.pc") }}
-              </div>
-              <div
-                :class="{ active: previewDevice === 'mobile' }"
-                @click="previewDevice = 'mobile'"
-              >
-                <i class="fc-icon icon-mobile2"></i>{{ t("props.mobile") }}
-              </div>
-            </div>
-            <div
-              class="_fd-preview-copy"
-              v-if="['component', 'sfc'].indexOf(previewStatus) > -1"
-              @click="copyCode"
-            >
-              <i class="fc-icon icon-copy"></i>
-            </div>
-            <template
-              v-if="previewStatus === 'form' || previewStatus === 'preview'"
-            >
-              <template v-if="previewDevice === 'mobile'">
-                <div class="_fd-preview-mobile">
-                  <div>
-                    <ViewFormMobile
-                      driver="elm"
-                      :rule="preview.rule"
-                      :option="preview.option"
-                      @submit="previewSubmit"
-                      @reset="previewReset"
-                      v-model:api="preview.api"
-                      v-if="preview.state"
-                    >
-                      <template v-for="(_, name) in $slots" #[name]="scope">
-                        <slot :name="name" v-bind="scope ?? {}" />
-                      </template>
-                    </ViewFormMobile>
-                  </div>
-                </div>
-              </template>
-              <template v-else>
-                <div
-                  class="data-container"
-                  style="margin: 10px; height: calc(100vh - 150px)"
+            <div class="_fd-preview-toolbar">
+              <div class="_fd-preview-device" v-if="!onlyPC">
+                <button
+                  type="button"
+                  :class="{ active: previewDevice === 'pc' }"
+                  :title="t('props.pc')"
+                  :aria-label="t('props.pc')"
+                  @click="previewDevice = 'pc'"
                 >
-                  <ViewForm
+                  <i class="fc-icon icon-pc"></i>
+                </button>
+                <button
+                  type="button"
+                  :class="{ active: previewDevice === 'mobile' }"
+                  :title="t('props.mobile')"
+                  :aria-label="t('props.mobile')"
+                  @click="previewDevice = 'mobile'"
+                >
+                  <i class="fc-icon icon-mobile"></i>
+                </button>
+              </div>
+              <button
+                class="_fd-preview-close"
+                type="button"
+                :title="t('props.close')"
+                :aria-label="t('props.close')"
+                @click="preview.state = false"
+              >
+                <et-icon icon="el-Close" />
+              </button>
+            </div>
+            <template v-if="previewDevice === 'mobile'">
+              <div class="_fd-preview-mobile">
+                <div :id="previewPopupTarget">
+                  <ViewFormMobile
+                    driver="elm"
                     :rule="preview.rule"
                     :option="preview.option"
                     @submit="previewSubmit"
@@ -854,22 +828,27 @@
                     <template v-for="(_, name) in $slots" #[name]="scope">
                       <slot :name="name" v-bind="scope ?? {}" />
                     </template>
-                  </ViewForm>
+                  </ViewFormMobile>
                 </div>
-              </template>
+              </div>
             </template>
-            <pre
-              class="_fd-preview-code"
-              ref="previewCode"
-              v-else-if="previewStatus === 'component'"
-            ><code
-            v-html="previewDevice === 'mobile' ? preview.mobileHtml : preview.html"></code></pre>
-            <pre
-              class="_fd-preview-code"
-              ref="previewCode"
-              v-else
-            ><code v-html="preview.sfc"></code></pre>
-          </el-dialog>
+            <template v-else>
+              <div class="data-container">
+                <ViewForm
+                  :rule="preview.rule"
+                  :option="preview.option"
+                  @submit="previewSubmit"
+                  @reset="previewReset"
+                  v-model:api="preview.api"
+                  v-if="preview.state"
+                >
+                  <template v-for="(_, name) in $slots" #[name]="scope">
+                    <slot :name="name" v-bind="scope ?? {}" />
+                  </template>
+                </ViewForm>
+              </div>
+            </template>
+          </el-drawer>
         </el-container>
       </el-main>
       <FieldRecycleBin
@@ -1105,7 +1084,6 @@ export default defineComponent({
     provide("designer", vm);
 
     const configRef = toRef(props, "config", {});
-    const theme = toRef(props, "theme");
     const fieldRef = toRef(props, "field", []);
     const formListRef = toRef(props, "list", []);
     const baseRule = toRef(configRef.value, "baseRule", null);
@@ -1177,14 +1155,6 @@ export default defineComponent({
         })
         .join(" ");
     });
-    watch(theme, (n, o) => {
-      if (o) {
-        document.body.classList.remove("fd-theme-" + o);
-      }
-      if (n) {
-        document.body.classList.add("fd-theme-" + n);
-      }
-    });
     let _t = globalT;
     if (locale.value) {
       _t = useLocale(locale).t;
@@ -1239,8 +1209,8 @@ export default defineComponent({
       dragRuleList: {},
       eventShow: false,
       unloadStatus: false,
-      previewStatus: "form",
       previewDevice: "pc",
+      previewPopupTarget: `fc-preview-${uniqueId8()}`,
       t,
       preview: {
         state: false,
@@ -1465,18 +1435,8 @@ export default defineComponent({
       function (n) {
         if (!n) {
           nextTick(() => {
-            data.previewStatus = "form";
             data.preview.rule = data.preview.option = null;
           });
-        }
-      }
-    );
-
-    watch(
-      () => data.previewStatus,
-      (n) => {
-        if (data.preview.rule) {
-          data.preview.option.preview = n === "preview";
         }
       }
     );
@@ -2308,6 +2268,15 @@ export default defineComponent({
         const options = methods.getOptionsJson();
         const useV2 = methods.getConfig("useTemplate", false);
         data.preview.option = designerForm.parseJson(options);
+        data.preview.option.preview = false;
+        // Preview actions are owned by the host page after the form redesign.
+        // Keep the configured buttons in exported options, but never render them
+        // inside the designer's PC/mobile preview.
+        data.preview.option.submitBtn = false;
+        data.preview.option.resetBtn = false;
+        // Preview overlays must use the document body. A target rendered inside
+        // this component tree is not guaranteed to exist before Vant mounts.
+        delete data.preview.option.popupContainer;
         if (!data.activePage.default) {
           data.preview.option.formData = deepCopy(methods.getPreviewFormData());
         }
@@ -2690,6 +2659,12 @@ export default defineComponent({
           rule._loadData = rule.effect.loadData;
           delete rule.effect.loadData;
         }
+        if (rule.type === "radio" || rule.type === "checkbox") {
+          if (rule.effect) {
+            delete rule.effect.fetch;
+            delete rule.effect.source;
+          }
+        }
         // 去掉空的fetch字段
         if (rule.effect?.fetch === "" || rule.effect?.fetch === undefined) {
           delete rule.effect.fetch;
@@ -2759,6 +2734,12 @@ export default defineComponent({
           } else {
             methods.tidyRule(rule);
           }
+          if (rule.type === "radio" || rule.type === "checkbox") {
+            if (rule.effect) {
+              delete rule.effect.fetch;
+              delete rule.effect.source;
+            }
+          }
           loadRule.push(rule);
         });
         return loadRule;
@@ -2820,6 +2801,12 @@ export default defineComponent({
           if (rule._loadData) {
             rule.$loadData = rule._loadData;
             delete rule._loadData;
+          }
+          if (rule.type === "radio" || rule.type === "checkbox") {
+            if (rule.effect) {
+              delete rule.effect.fetch;
+              delete rule.effect.source;
+            }
           }
           rule.props &&
             Object.keys(rule.props).forEach((k) => {
@@ -4834,15 +4821,17 @@ export default defineComponent({
     };
   },
   mounted() {
-    if (this.theme) {
-      document.body.classList.add("fd-theme-" + this.theme);
-    }
+    // Legacy fd-theme-* classes hard-code colors and must not override the
+    // application's runtime theme variables. Clear any class left by an older
+    // designer instance before rendering.
+    document.body.classList.remove("fd-theme-purple", "fd-theme-orange", "fd-theme-pink", "fd-theme-green");
     if (this.config?.hotKey !== false) {
       document.addEventListener("keydown", this.bindHotkey);
       document.addEventListener("paste", this.bindPaste);
     }
   },
   unmounted() {
+    document.body.classList.remove("fd-theme-purple", "fd-theme-orange", "fd-theme-pink", "fd-theme-green");
     document.removeEventListener("keydown", this.bindHotkey);
     document.removeEventListener("paste", this.bindPaste);
   },

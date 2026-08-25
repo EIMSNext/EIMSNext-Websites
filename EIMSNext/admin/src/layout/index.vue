@@ -5,7 +5,7 @@
         <NavBar />
       </el-header>
       <el-container class="layout-main-shell">
-        <el-aside width="45px" class="main-left-menu">
+        <el-aside width="50px" class="main-left-menu">
           <el-tooltip :content="t('admin.workbench.title')" placement="right" :hide-after="0">
             <router-link custom :to="{ path: '/workbench' }" v-slot="{ navigate }">
               <div class="main-left-menu-item" @click="navigate">

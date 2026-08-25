@@ -112,6 +112,20 @@
               <div class="menu-label">组件</div>
               <div class="menu-group">
                 <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Image)"
+                    @drag="dashItemDrag($event, DashItemType.Image)" @dragend="handlePaletteDrop($event, DashItemType.Image)" unselectable="on">
+                    <et-icon icon="el-Picture" class="line-icon" />
+                    <div class="line-text">{{ t("admin.dashboardDesigner.imageComponent") }}</div>
+                  </div>
+                </div>
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Text)"
+                    @drag="dashItemDrag($event, DashItemType.Text)" @dragend="handlePaletteDrop($event, DashItemType.Text)" unselectable="on">
+                    <et-icon icon="el-Document" class="line-icon" />
+                    <div class="line-text">{{ t("admin.dashboardDesigner.textComponent") }}</div>
+                  </div>
+                </div>
+                <div class="menu-line">
                   <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.LayoutContainer)"
                     @drag="dashItemDrag($event, DashItemType.LayoutContainer)" @dragend="handlePaletteDrop($event, DashItemType.LayoutContainer)" unselectable="on">
                     <et-icon icon="el-Grid" class="line-icon" />
@@ -211,18 +225,20 @@
                     <div class="line-text">{{ t("admin.dashboardDesigner.filterWidget") }}</div>
                   </div>
                 </div>
-                <!--    <div class="menu-line">
-                  <div class="line-content" draggable="true" unselectable="on">
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.QuickFilter)"
+                    @drag="dashItemDrag($event, DashItemType.QuickFilter)" @dragend="handlePaletteDrop($event, DashItemType.QuickFilter)" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-combine-filter"></i></div>
-                    <div class="line-text">快捷筛选</div>
+                    <div class="line-text">{{ t("admin.dashboardDesigner.quickFilter") }}</div>
                   </div>
                 </div>
-                <div class="menu-line disable">
-                  <div class="line-content" draggable="false" unselectable="on">
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.FilterButton)"
+                    @drag="dashItemDrag($event, DashItemType.FilterButton)" @dragend="handlePaletteDrop($event, DashItemType.FilterButton)" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-filter-add"></i></div>
-                    <div class="line-text">筛选按钮</div>
+                    <div class="line-text">{{ t("admin.dashboardDesigner.filterButton") }}</div>
                   </div>
-                </div> -->
+                </div>
               </div>
             </div>
             <!-- <div class="sidebar-toggle"><i class="x-icon iconfont-fx-pc icon-sidebar"></i></div> -->
@@ -244,7 +260,8 @@
                 :is-view="false" @hide="handleItemHide(state.items[item.i])" @edit="handleItemEdit(state.items[item.i])"
                 @copy="handleItemCopy(state.items[item.i])" @delete="handleItemDelete(state.items[item.i])"
                 @update-layout="updateNestedLayout" @update-setting="updateContainerSetting"
-                @update-realtime-setting="updateRealTimeSetting" />
+                @update-realtime-setting="updateRealTimeSetting" @update-image-setting="updateImageSetting"
+                @update-text-setting="updateTextSetting" />
             </grid-item>
           </grid-layout>
         </div>
@@ -259,6 +276,8 @@
   <DetailTableDesigner v-if="dashItemDefRef" v-model="showDetailTableEditor" :dash-item-def="dashItemDefRef" />
   <FilterDesigner v-if="dashItemDefRef" v-model="showFilterEditor" :dash-item-def="dashItemDefRef"
     :chart-targets="chartTargets" :binding-candidates="bindingCandidates" />
+  <QuickFilterSettings v-if="dashItemDefRef && quickFilterSettingRef" v-model="showQuickFilterEditor" :setting="quickFilterSettingRef"
+    :chart-targets="chartTargets" :binding-candidates="bindingCandidates" @updated="updateQuickFilterSetting" />
 </template>
 <script setup lang="ts">
 import { buildFieldListItems, EtDrawer, IFormFieldDef } from "@eimsnext/components";
@@ -289,6 +308,11 @@ import { useDashboardDragDrop } from "./useDashboardDragDrop";
 import { escapeODataString } from "@/utils/odata";
 import { createDefaultLayoutContainerSetting, ILayoutContainerSetting, parseLayoutContainerSetting } from "./LayoutContainer/type";
 import { createDefaultRealTimeSetting, IRealTimeSetting } from "./RealTime/type";
+import { createDefaultDashboardImageSetting, IDashboardImageSetting } from "./Image/type";
+import { createDefaultDashboardTextSetting, IDashboardTextSetting } from "./Text/type";
+import QuickFilterSettings from "./QuickFilter/QuickFilterSettings.vue";
+import { createDefaultFilterButtonSetting, createDefaultQuickFilterSetting, parseQuickFilterSetting } from "./QuickFilter/type";
+import { DashboardQuickFilterSetting } from "@eimsnext/models";
 const { t } = useI18n();
 
 defineOptions({
@@ -316,6 +340,10 @@ const dataSource = ref<IDataSource>();
 const showChartEditor = ref(false);
 const showDetailTableEditor = ref(false);
 const showFilterEditor = ref(false);
+const showQuickFilterEditor = ref(false);
+const quickFilterSettingRef = computed(() => dashItemDefRef.value?.itemType === DashItemType.QuickFilter
+  ? parseQuickFilterSetting(dashItemDefRef.value.details)
+  : undefined);
 
 const state = reactive<IGridLayoutState>({
   layout: [],
@@ -479,6 +507,10 @@ const handlePaletteDrop = async (e: DragEvent, type: DashItemType) => {
   let details = "{}";
   if (type === DashItemType.LayoutContainer) details = JSON.stringify(createDefaultLayoutContainerSetting());
   if (type === DashItemType.RealTime) details = JSON.stringify(createDefaultRealTimeSetting());
+  if (type === DashItemType.Image) details = JSON.stringify(createDefaultDashboardImageSetting());
+  if (type === DashItemType.Text) details = JSON.stringify(createDefaultDashboardTextSetting());
+  if (type === DashItemType.QuickFilter) details = JSON.stringify(createDefaultQuickFilterSetting(t("admin.dashboardDesigner.quickFilter")));
+  if (type === DashItemType.FilterButton) details = JSON.stringify(createDefaultFilterButtonSetting());
   await createNewDashItem(type, details, layoutId);
 };
 
@@ -506,6 +538,18 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
       break;
     case DashItemType.RealTime:
       name = t("admin.dashboardDesigner.realTime");
+      break;
+    case DashItemType.Image:
+      name = t("admin.dashboardDesigner.imageComponent");
+      break;
+    case DashItemType.Text:
+      name = t("admin.dashboardDesigner.textComponent");
+      break;
+    case DashItemType.QuickFilter:
+      name = t("admin.dashboardDesigner.quickFilter");
+      break;
+    case DashItemType.FilterButton:
+      name = t("admin.dashboardDesigner.filterButton");
       break;
     default:
       name = t("admin.untitledChart");
@@ -567,9 +611,15 @@ const handleItemEdit = (item: DashboardItemDef) => {
   showChartEditor.value = false;
   showDetailTableEditor.value = false;
   showFilterEditor.value = false;
+  showQuickFilterEditor.value = false;
   if (item.itemType == DashItemType.Filter) {
     loadBindingCandidates();
     showFilterEditor.value = true;
+  } else if (item.itemType === DashItemType.QuickFilter) {
+    loadBindingCandidates();
+    showQuickFilterEditor.value = true;
+  } else if (item.itemType === DashItemType.FilterButton) {
+    return;
   } else if (item.itemType == DashItemType.DetailTable) {
     showDetailTableEditor.value = true;
   } else {
@@ -606,6 +656,31 @@ const updateRealTimeSetting = async (item: DashboardItemDef, setting: IRealTimeS
     details: JSON.stringify(setting),
   });
   state.items[item.layoutId] = updated;
+};
+const updateImageSetting = async (item: DashboardItemDef, setting: IDashboardImageSetting) => {
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    details: JSON.stringify(setting),
+  });
+  state.items[item.layoutId] = updated;
+};
+const updateTextSetting = async (item: DashboardItemDef, setting: IDashboardTextSetting) => {
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    details: JSON.stringify(setting),
+  });
+  state.items[item.layoutId] = updated;
+};
+const updateQuickFilterSetting = async (setting: DashboardQuickFilterSetting) => {
+  const item = dashItemDefRef.value;
+  if (!item) return;
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    name: setting.name,
+    details: JSON.stringify(setting),
+  });
+  dashItemDefRef.value = updated;
+  state.items[updated.layoutId] = updated;
 };
 
 watch(

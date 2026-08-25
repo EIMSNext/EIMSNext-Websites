@@ -1,31 +1,26 @@
 <template>
-    <Layout>
+    <et-drawer v-model="drawerVisible" :closing="beforeClose" @close="close">
+      <template #title>
+        <span class="drawer-title">{{ t("admin.workbench.customize") }}</span>
+      </template>
+      <template #top-right>
+        <el-link type="primary" :underline="false" class="drawer-help">{{ t("admin.workbench.help") }}</el-link>
+        <!-- <el-button-group>
+          <el-button type="primary" plain>
+            <et-icon icon="el-Monitor" />
+          </el-button>
+          <el-button plain>
+            <et-icon icon="el-Iphone" />
+          </el-button>
+        </el-button-group>
+        <el-button disabled>
+          <et-icon icon="el-document" />
+          {{ t("admin.workbench.pageStyle") }}
+        </el-button> -->
+        <el-button @click="preview">{{ t("common.preview") }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ t("common.save") }}</el-button>
+      </template>
       <div class="workbench-designer">
-        <div class="designer-header">
-          <div class="header-title">
-            <el-button link @click="back">
-              <et-icon icon="el-arrowLeft" />
-            </el-button>
-            <span>{{ t("admin.workbench.customize") }}</span>
-          </div>
-          <el-link type="primary" :underline="false">{{ t("admin.workbench.help") }}</el-link>
-          <div class="header-actions">
-            <el-button-group>
-              <el-button type="primary" plain>
-                <et-icon icon="el-Monitor" />
-              </el-button>
-              <el-button plain>
-                <et-icon icon="el-Iphone" />
-              </el-button>
-            </el-button-group>
-            <el-button disabled>
-              <et-icon icon="el-document" />
-              {{ t("admin.workbench.pageStyle") }}
-            </el-button>
-            <el-button @click="preview">{{ t("common.preview") }}</el-button>
-            <el-button type="primary" :loading="saving" @click="save">{{ t("common.save") }}</el-button>
-          </div>
-        </div>
 
         <div class="designer-body">
           <aside class="component-panel">
@@ -58,6 +53,7 @@
             <div class="canvas">
               <grid-layout
                 v-model:layout="editableLayout"
+                class="workbench-designer-grid"
                 :col-num="24"
                 :row-height="24"
                 :is-draggable="true"
@@ -89,8 +85,6 @@
                     :item="item"
                     editable
                     @remove="removeWidget(item)"
-                    @configure-chart="openChartDialog(item)"
-                    @add-favorite="showFavoriteDialog = true"
                   />
                 </grid-item>
               </grid-layout>
@@ -98,13 +92,47 @@
           </main>
         </div>
       </div>
-    </Layout>
-    <AddFavoriteDialog v-model="showFavoriteDialog" />
-    <ChartSelectDialog
-      v-model="showChartDialog"
-      :dashboard-item-id="activeChartItem?.config?.dashboardItemId"
-      @select="handleChartSelected"
-    />
+    </et-drawer>
+    <el-drawer v-model="previewVisible" class="workbench-preview-drawer" direction="btt" size="95%" append-to-body :with-header="false" :show-close="false">
+      <div class="workbench-preview-shell">
+        <div class="workbench-preview-toolbar">
+          <div class="workbench-preview-device" role="group">
+            <button
+              type="button"
+              :class="{ active: previewDevice === 'pc' }"
+              :title="t('props.pc')"
+              :aria-label="t('props.pc')"
+              @click="previewDevice = 'pc'"
+            >
+              <et-icon icon="el-Monitor" />
+            </button>
+            <button
+              type="button"
+              :class="{ active: previewDevice === 'mobile' }"
+              :title="t('props.mobile')"
+              :aria-label="t('props.mobile')"
+              @click="previewDevice = 'mobile'"
+            >
+              <et-icon icon="el-Iphone" />
+            </button>
+          </div>
+          <button type="button" class="workbench-preview-close" :title="t('common.close')" :aria-label="t('common.close')" @click="previewVisible = false">
+            <et-icon icon="el-Close" size="20px" />
+          </button>
+        </div>
+        <div class="workbench-preview-body" :class="{ 'is-mobile': previewDevice === 'mobile' }">
+          <div class="workbench-preview-viewport">
+            <div class="workbench-preview">
+              <grid-layout v-model:layout="previewLayout" class="workbench-preview-grid" :col-num="24" :row-height="24" :margin="[16, 16]" :is-draggable="false" :is-resizable="false" :is-bounded="true" :vertical-compact="true" :use-css-transforms="true" :responsive="false">
+                <grid-item v-for="item in previewLayout" :key="item.i" v-bind="item" :minW="item.minW || 5" :minH="1" :maxW="24" :maxH="999">
+                  <WorkbenchWidgetRenderer :item="item" preview @content-height="syncPreviewHeight(item.i, $event)" />
+                </grid-item>
+              </grid-layout>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-drawer>
 </template>
 
 <script setup lang="ts">
@@ -112,7 +140,6 @@ import type { WorkbenchLayoutItem, WorkbenchWidgetType } from "@eimsnext/models"
 import { UserType } from "@eimsnext/models";
 import { useUserStore } from "@eimsnext/store";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
-import Layout from "@/layout/index.vue";
 import {
   cloneWorkbenchLayout,
   createWorkbenchWidget,
@@ -122,8 +149,6 @@ import {
   WIDGET_FIXED_HEIGHT,
 } from "@/store";
 import WorkbenchWidgetRenderer from "./components/WorkbenchWidgetRenderer.vue";
-import AddFavoriteDialog from "./components/AddFavoriteDialog.vue";
-import ChartSelectDialog from "./components/ChartSelectDialog.vue";
 import { useI18n } from "vue-i18n";
 
 defineOptions({
@@ -139,16 +164,20 @@ const { layout } = storeToRefs(workbenchStore);
 const editableLayout = ref<WorkbenchLayoutItem[]>([]);
 const saving = ref(false);
 const isDirty = ref(false);
-const showFavoriteDialog = ref(false);
-const showChartDialog = ref(false);
-const activeChartItem = ref<WorkbenchLayoutItem>();
+const drawerVisible = ref(true);
+const previewVisible = ref(false);
+const previewLayout = ref<WorkbenchLayoutItem[]>([]);
+const previewDevice = ref<"pc" | "mobile">("pc");
+const skipRouteLeave = ref(false);
+const GRID_ROW_HEIGHT = 24;
+const GRID_ROW_GAP = 16;
 
 const enabledComponents = computed<{ type: WorkbenchWidgetType; label: string; icon: string }[]>(() => [
-  { type: "flowCenter", label: t("admin.flowcenter"), icon: "icon-flow" },
+  { type: "flowCenter", label: t("admin.flowcenter"), icon: "icon-flowdefault" },
   { type: "myApps", label: t("admin.myApp"), icon: "icon-appdefault" },
-  { type: "chartBoard", label: t("admin.workbench.chartBoard"), icon: "el-DataAnalysis" },
   { type: "recent", label: t("admin.workbench.recent"), icon: "el-clock" },
   { type: "favorites", label: t("admin.workbench.favorites"), icon: "el-star" },
+  { type: "chartBoard", label: t("admin.workbench.myChart"), icon: "el-DataAnalysis" },
 ]);
 
 const disabledComponents = computed(() => [
@@ -166,7 +195,7 @@ const existingTypes = computed(
 
 const canAdd = (type: WorkbenchWidgetType) => {
   if (type === "flowCenter" || type === "myApps") return false;
-  if (type === "recent" || type === "favorites") {
+  if (type === "recent" || type === "favorites" || type === "chartBoard") {
     return !existingTypes.value.has(type);
   }
   return true;
@@ -191,33 +220,13 @@ const addWidget = (type: WorkbenchWidgetType) => {
   if (!canAdd(type)) return;
 
   const bottom = editableLayout.value.reduce((value, item) => Math.max(value, item.y + item.h), 0);
-  const item = createWorkbenchWidget(type, { y: bottom });
-  editableLayout.value.push(item);
+  editableLayout.value.push(createWorkbenchWidget(type, { y: bottom }));
 
-  if (type === "chartBoard") {
-    openChartDialog(item);
-  }
 };
 
 const removeWidget = (item: WorkbenchLayoutItem) => {
   if (isFixedWorkbenchWidget(item.type)) return;
   editableLayout.value = editableLayout.value.filter((current) => current.i !== item.i);
-};
-
-const openChartDialog = (item: WorkbenchLayoutItem) => {
-  if (item.type !== "chartBoard") return;
-  activeChartItem.value = item;
-  showChartDialog.value = true;
-};
-
-const handleChartSelected = (value: { dashboardId: string; dashboardItemId: string; title: string }) => {
-  if (!activeChartItem.value) return;
-  activeChartItem.value.config = {
-    ...activeChartItem.value.config,
-    dashboardId: value.dashboardId,
-    dashboardItemId: value.dashboardItemId,
-    title: value.title,
-  };
 };
 
 const getMinHeight = (item: WorkbenchLayoutItem) => {
@@ -257,11 +266,37 @@ const save = async () => {
 };
 
 const preview = async () => {
-  await save();
-  router.push("/workbench");
+  previewLayout.value = cloneWorkbenchLayout(editableLayout.value);
+  previewDevice.value = "pc";
+  previewVisible.value = true;
 };
 
-const back = async () => {
+const syncPreviewHeight = (id: string, height: number) => {
+  const item = previewLayout.value.find((current) => current.i === id);
+  if (!item) return;
+  const nextHeight = Math.max(
+    1,
+    Math.ceil((height + GRID_ROW_GAP) / (GRID_ROW_HEIGHT + GRID_ROW_GAP))
+  );
+  if (item.h === nextHeight) return;
+
+  const nextLayout = previewLayout.value.map((current) =>
+    current.i === id ? { ...current, h: nextHeight } : { ...current }
+  );
+  const ordered = [...nextLayout].sort((left, right) => left.y - right.y || left.x - right.x);
+  const placed: WorkbenchLayoutItem[] = [];
+  ordered.forEach((current) => {
+    current.y = placed.reduce((nextY, previous) => {
+      const overlapsX =
+        current.x < previous.x + previous.w && previous.x < current.x + current.w;
+      return overlapsX ? Math.max(nextY, previous.y + previous.h) : nextY;
+    }, 0);
+    placed.push(current);
+  });
+  previewLayout.value = nextLayout;
+};
+
+const beforeClose = async (): Promise<boolean> => {
   if (isDirty.value) {
     try {
       await ElMessageBox.confirm(
@@ -270,11 +305,24 @@ const back = async () => {
         { type: "warning" }
       );
     } catch {
-      return;
+      return false;
     }
   }
+  return true;
+};
+
+const close = () => {
+  skipRouteLeave.value = true;
   router.push("/workbench");
 };
+
+onBeforeRouteLeave(async (_to, _from, next) => {
+  if (skipRouteLeave.value || (await beforeClose())) {
+    next();
+  } else {
+    next(false);
+  }
+});
 
 const beforeUnload = (e: BeforeUnloadEvent) => {
   if (isDirty.value) {
@@ -319,38 +367,143 @@ watch(layout, syncLayout, { deep: true });
 <style lang="scss" scoped>
 .workbench-designer {
   background: var(--et-bg-page);
-  min-height: calc(100vh - var(--et-size-50));
+  height: 100%;
+  min-height: 0;
 }
 
-.designer-header {
+.workbench-preview {
+  background: var(--et-bg-page);
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: auto;
+}
+
+.workbench-preview-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.workbench-preview-toolbar {
   align-items: center;
   background: var(--et-bg-container);
   border-bottom: 1px solid var(--et-border-color);
+  box-sizing: border-box;
   display: flex;
-  gap: var(--et-space-24);
-  height: var(--et-size-56);
-  padding: 0 var(--et-space-18);
+  flex: 0 0 50px;
+  justify-content: center;
+  position: relative;
 }
 
-.header-title {
+.workbench-preview-device {
   align-items: center;
-  color: var(--et-text-primary);
+  background: var(--et-bg-page);
+  border-radius: var(--et-radius-4);
   display: flex;
+  gap: 2px;
+  padding: 2px;
+}
+
+.workbench-preview-device > button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--et-radius-4);
+  color: var(--et-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  width: 72px;
+}
+
+.workbench-preview-device > button.active {
+  background: var(--et-bg-container);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+  color: var(--et-color-primary);
+}
+
+.workbench-preview-body {
+  align-items: stretch;
+  background: var(--et-bg-page);
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: stretch;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--et-space-10);
+}
+
+.workbench-preview-viewport {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.workbench-preview-body.is-mobile {
+  align-items: center;
+  justify-content: center;
+  padding: var(--et-space-10);
+}
+
+.workbench-preview-body.is-mobile .workbench-preview-viewport {
+  border: 6px solid var(--et-border-color);
+  border-radius: 24px;
+  box-sizing: border-box;
+  flex: 0 1 350px;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workbench-preview-grid { min-height: 100%; }
+
+.workbench-preview-close {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--et-text-primary);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  padding: var(--et-space-6);
+  position: absolute;
+  right: var(--et-space-16);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+:global(.workbench-preview-drawer.el-drawer) {
+  border-radius: 0;
+  padding: 0;
+}
+
+:global(.workbench-preview-drawer .el-drawer__body) {
+  overflow: hidden;
+  padding: 0;
+}
+
+.drawer-title {
+  color: var(--et-text-primary);
   font-size: var(--et-font-size-16);
   font-weight: 700;
-  gap: var(--et-space-8);
 }
 
-.header-actions {
-  align-items: center;
-  display: flex;
-  gap: var(--et-space-10);
-  margin-left: auto;
+.drawer-help {
+  margin-right: var(--et-space-12);
 }
 
 .designer-body {
   display: flex;
-  min-height: calc(100vh - var(--et-size-106));
+  height: 100%;
+  min-height: 0;
 }
 
 .component-panel {
@@ -405,18 +558,18 @@ watch(layout, syncLayout, { deep: true });
   flex: 1;
   min-width: 0;
   overflow: auto;
-  padding: var(--et-space-24);
+  padding: 0;
 }
 
 .canvas {
-  min-height: calc(100vh - var(--et-size-160));
+  min-height: 100%;
 }
 
-:deep(.vue-grid-layout) {
-  min-height: calc(100vh - var(--et-size-160));
+.workbench-designer-grid {
+  min-height: 100%;
 }
 
-:deep(.vue-grid-item) {
+:deep(.workbench-designer-grid > .vue-grid-item) {
   overflow: visible;
 }
 </style>

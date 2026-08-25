@@ -26,12 +26,19 @@
       @ok="saveScope"
       @cancel="showScope = false"
     />
-    <AdvanceLayout :title="t('admin.formListView.styleTitle')" :desc="t('admin.formListView.styleDesc')">
+    <AdvanceLayout
+      :title="t('admin.formListView.styleTitle')"
+      :desc="t('admin.formListView.styleDesc')"
+    >
       <div class="view-panel">
         <div class="panel-header">
-          <el-button type="primary" icon="plus" @click="createView">{{ t("admin.formListView.createView") }}</el-button>
+          <el-button type="primary" icon="plus" @click="createView">
+            {{ t("admin.formListView.createView") }}
+          </el-button>
         </div>
-        <div v-if="views.length === 0" class="empty-view">{{ t("admin.formListView.emptyViews") }}</div>
+        <div v-if="views.length === 0" class="empty-view">
+          {{ t("admin.formListView.emptyViews") }}
+        </div>
         <div v-else class="view-grid">
           <div v-for="view in views" :key="view.id" class="view-card">
             <div class="view-card-header">
@@ -100,7 +107,13 @@ import { computed, onBeforeMount, ref } from "vue";
 import buildQuery from "odata-query";
 import { CopyDocument, Delete, Edit, Lock, MoreFilled } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
-import { AuthGroup, FormDef, FormListView, FormListViewRequest, FormListViewType } from "@eimsnext/models";
+import {
+  AuthGroup,
+  FormDef,
+  FormListView,
+  FormListViewRequest,
+  FormListViewType,
+} from "@eimsnext/models";
 import { authGroupService, formListViewService } from "@eimsnext/services";
 import { MessageIcon } from "@eimsnext/components";
 import AdvanceLayout from "../Advanced/AdvanceLayout.vue";
@@ -121,12 +134,15 @@ const editingView = ref<FormListView>();
 const selectedView = ref<FormListView>();
 
 const nextSortIndex = computed(() => {
-  const max = views.value.length > 0 ? Math.max(...views.value.map((view) => view.sortIndex || 0)) : 0;
+  const max =
+    views.value.length > 0 ? Math.max(...views.value.map((view) => view.sortIndex || 0)) : 0;
   return max + 100;
 });
 
 const loadViews = async () => {
-  views.value = await formListViewService.query<FormListView>(`$filter=formid eq '${props.formDef.id}'&$orderby=sortIndex asc,createTime asc`);
+  views.value = await formListViewService.query<FormListView>(
+    `$filter=formid eq '${props.formDef.id}'&$orderby=sortIndex asc,createTime asc`
+  );
 };
 
 const loadAuthGroups = async () => {
@@ -151,7 +167,10 @@ const saveView = async (request: FormListViewRequest) => {
 
 const saveScope = async (authGroupIds: string[]) => {
   if (!selectedView.value) return;
-  await formListViewService.patch<FormListViewRequest>(selectedView.value.id, { id: selectedView.value.id, authGroupIds });
+  await formListViewService.patch<FormListViewRequest>(selectedView.value.id, {
+    id: selectedView.value.id,
+    authGroupIds,
+  });
   showScope.value = false;
   await loadViews();
 };
@@ -199,8 +218,11 @@ const execDelete = async () => {
 };
 
 const scopeText = (view: FormListView) => {
-  if (!view.authGroupIds || view.authGroupIds.length === 0) return t("admin.formListView.allAuthGroups");
-  const names = authGroups.value.filter((group) => view.authGroupIds?.includes(group.id)).map((group) => group.name);
+  if (!view.authGroupIds || view.authGroupIds.length === 0)
+    return t("admin.formListView.allAuthGroups");
+  const names = authGroups.value
+    .filter((group) => view.authGroupIds?.includes(group.id))
+    .map((group) => group.name);
   return names.join(t("common.listSeparator")) || t("admin.formListView.allAuthGroups");
 };
 
@@ -218,10 +240,6 @@ onBeforeMount(async () => {
 <style lang="scss" scoped>
 .view-publish {
   height: 100%;
-}
-
-.view-panel {
-  padding: var(--et-space-20);
 }
 
 .panel-header {

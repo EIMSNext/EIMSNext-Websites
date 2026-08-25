@@ -6,8 +6,14 @@
     :usingFlow="usingWorkflow"
     @close="showFormEditor = false"
   />
+  <DashboardDesigner
+    v-if="showDashboardEditor && newDashboard"
+    :model-value="showDashboardEditor"
+    :dash-def="newDashboard"
+    @update:model-value="handleDashboardEditorVisible"
+  />
   <Layout>
-    <div class="empty-app">
+    <div v-if="showEmptyPage" class="empty-app">
       <div class="empty-content">
         <div class="empty-tips">
           <div class="empty-title">{{ $t("admin.appPage.createPlaceholder") }}</div>
@@ -16,7 +22,7 @@
         <div v-if="canManageCurrentApp" class="creator-container">
           <div class="creator-item" @click="createForm(false)">
             <div class="tip-icon generic">
-              <div class="create-icon generic"></div>
+              <et-icon class="create-icon" icon="icon-formdefault" size="72px" />
               <div class="tip-title">{{ $t("admin.appPage.newForm") }}</div>
             </div>
             <div class="tip-desc">{{ $t("admin.appPage.newFormDesc") }}</div>
@@ -24,10 +30,17 @@
 
           <div class="creator-item" @click="createForm(true)">
             <div class="tip-icon flow">
-              <div class="create-icon flow"></div>
+              <et-icon class="create-icon" icon="icon-flowdefault" size="72px" />
               <div class="tip-title">{{ $t("admin.appPage.newFlowForm") }}</div>
             </div>
             <div class="tip-desc">{{ $t("admin.appPage.newFlowFormDesc") }}</div>
+          </div>
+          <div class="creator-item" @click="createDashboard">
+            <div class="tip-icon dashboard">
+              <et-icon class="create-icon" icon="icon-dshdefault" size="72px" />
+              <div class="tip-title">{{ $t("admin.newDashboard") }}</div>
+            </div>
+            <div class="tip-desc">{{ $t("admin.appPage.newDashboardDesc") }}</div>
           </div>
         </div>
         <el-empty v-else :description="$t('common.noPermission')" />
@@ -40,8 +53,16 @@ import Layout from "@/layout/index.vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore, useFormStore, useContextStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
-import { AppDef, FormDef, FormDefRequest, UserType } from "@eimsnext/models";
-import { formDefService, systemService } from "@eimsnext/services";
+import DashboardDesigner from "@/components/DashboardDesigner/index.vue";
+import {
+  AppDef,
+  DashboardDef,
+  DashboardDefRequest,
+  FormDef,
+  FormDefRequest,
+  UserType,
+} from "@eimsnext/models";
+import { dashboardDefService, formDefService, systemService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
 import { resolveAppEntryPath } from "@/utils/appEntry";
@@ -54,28 +75,46 @@ const formStore = useFormStore();
 const contextStore = useContextStore();
 const userStore = useUserStore();
 const route = useRoute();
-let appId = route.params.appId.toString();
+const appId = computed(() => String(route.params.appId || ""));
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
+const newDashboard = ref<DashboardDef>();
+const showDashboardEditor = ref(false);
 const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
 const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
 
 const app = ref<AppDef>();
+let appLoadSequence = 0;
+const showEmptyPage = ref(false);
 
-onBeforeMount(async () => {
-  await contextStore.setAppId(appId);
+const loadAppEntry = async () => {
+  const sequence = ++appLoadSequence;
+  const targetAppId = appId.value;
+  if (!targetAppId) return;
+
+  showEmptyPage.value = false;
+  await contextStore.setAppId(targetAppId);
   await loadAdminPermissions();
-  const resolvedApp = await appStore.get(contextStore.appId, false);
+  const resolvedApp = await appStore.get(targetAppId, false);
+  if (sequence !== appLoadSequence || targetAppId !== appId.value) return;
+
   app.value = resolvedApp;
   if (resolvedApp) {
-    const visibleMenuIds = await getVisibleMenuIds(contextStore.appId);
+    const visibleMenuIds = await getVisibleMenuIds(targetAppId);
+    if (sequence !== appLoadSequence || targetAppId !== appId.value) return;
+
     const path = resolveAppEntryPath(resolvedApp, visibleMenuIds);
     if (path !== route.fullPath) {
-      router.replace(path);
+      await router.replace(path);
       return;
     }
+
+    // 决议后仍停留本页：该应用确实没有可用入口，显示空应用占位
+    showEmptyPage.value = true;
   }
-});
+};
+
+watch(appId, () => void loadAppEntry(), { immediate: true });
 
 async function getVisibleMenuIds(appId: string) {
   const unrestrictedUserTypes = [
@@ -104,8 +143,7 @@ const createForm = (usingFlow: boolean) => {
     name: t("admin.untitledForm"),
     content: {
       layout: "[]",
-      options:
-        `{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"${t('common.reset')}"},"submitBtn":{"show":false,"innerText":"${t('common.submit')}"}}`,
+      options: `{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"${t("common.reset")}"},"submitBtn":{"show":false,"innerText":"${t("common.submit")}"}}`,
     },
     usingWorkflow: usingFlow,
   };
@@ -117,6 +155,30 @@ const createForm = (usingFlow: boolean) => {
 
     showFormEditor.value = true;
   });
+};
+
+const createDashboard = () => {
+  if (!canManageCurrentApp.value) return;
+
+  const req: DashboardDefRequest = {
+    id: "",
+    appId: contextStore.appId,
+    name: t("admin.untitledDashboard"),
+    layout: "[]",
+  };
+
+  dashboardDefService.post<DashboardDef>(req).then((resp) => {
+    newDashboard.value = resp;
+    contextStore.setAppChanged();
+    showDashboardEditor.value = true;
+  });
+};
+
+const handleDashboardEditorVisible = (visible: boolean) => {
+  showDashboardEditor.value = visible;
+  if (!visible && newDashboard.value) {
+    void router.replace(`/app/${contextStore.appId}/dash/${newDashboard.value.id}`);
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -148,6 +210,7 @@ const createForm = (usingFlow: boolean) => {
         font-size: var(--et-font-size-16);
         font-weight: 700;
         line-height: var(--et-line-height-22);
+        color: var(--et-text-primary);
       }
     }
 
@@ -173,19 +236,36 @@ const createForm = (usingFlow: boolean) => {
           width: var(--et-size-250);
 
           .create-icon {
-            background-repeat: no-repeat;
-            background-size: cover;
+            display: flex;
             height: var(--et-size-110);
             margin: var(--et-space-42) auto var(--et-space-14);
             width: var(--et-size-90);
+            align-items: center;
+            justify-content: center;
           }
 
           &.flow {
             background: var(--et-bg-warning-soft);
+
+            .create-icon {
+              color: var(--et-color-warning);
+            }
           }
 
           &.generic {
             background: var(--et-bg-info-soft);
+
+            .create-icon {
+              color: var(--et-color-primary);
+            }
+          }
+
+          &.dashboard {
+            background: var(--et-bg-success-soft);
+
+            .create-icon {
+              color: var(--et-color-success);
+            }
           }
 
           .tip-title {
@@ -193,6 +273,7 @@ const createForm = (usingFlow: boolean) => {
             font-size: var(--et-font-size-16);
             font-weight: 700;
             line-height: var(--et-line-height-22);
+            color: var(--et-text-primary);
           }
         }
 

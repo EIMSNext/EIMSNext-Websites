@@ -34,6 +34,10 @@ export default {
     sourceScope: {
       type: String,
       default: 'currentApp'
+    },
+    resetDataSelectConfig: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -47,7 +51,7 @@ export default {
   },
   computed: {
     computedPlaceholder() {
-      return this.placeholder || this.designer?.setupState?.t?.('dataflow.selectForm') || '选择表单';
+      return this.placeholder || this.designer?.setupState?.t?.('eventFlow.selectForm') || '选择表单';
     }
   },
   methods: {
@@ -115,6 +119,17 @@ export default {
       }
     },
     handleChange(value) {
+      if (this.resetDataSelectConfig && value !== this.value) {
+        const props = this.designer?.setupState?.activeRule?.props;
+        if (props) {
+          props.selectionProcess = {
+            buttonText: this.designer?.setupState?.t?.('com.dataselect.selectData') || '选择数据',
+            tableFields: [],
+          };
+          props.displayConfig = { fields: [] };
+          props.fillConfig = { mappings: [] };
+        }
+      }
       this.$emit('input', value);
       this.$emit('change', value);
     }

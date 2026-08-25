@@ -43,7 +43,7 @@ function back() {
   .pan-back-btn {
     background: var(--et-color-success);
     border: none !important;
-    color: var(--et-text-on-primary);
+    color: var(--et-text-on-success);
 
     &:hover {
       background: var(--et-color-success-light-3);
@@ -65,6 +65,14 @@ function back() {
     font-size: var(--et-size-60);
     font-weight: 700;
     color: var(--et-text-primary);
+  }
+
+  h2 {
+    color: var(--et-text-primary);
+  }
+
+  h6 {
+    color: var(--et-text-secondary);
   }
 
   .list-unstyled {

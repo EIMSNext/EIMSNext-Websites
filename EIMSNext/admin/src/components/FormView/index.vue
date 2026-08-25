@@ -70,7 +70,36 @@ const props = withDefaults(
 );
 
 const fcInst = ref<any>(null);
-const rules = ref(formCreate.parseJson(props.def.layout!));
+const optionFieldTypes = new Set([
+  FieldType.Radio,
+  FieldType.CheckBox,
+  FieldType.Select1,
+  FieldType.Select2,
+]);
+
+const clearExistingOptionDefaults = (nodes: any[]) => {
+  nodes.forEach((rule) => {
+    if (rule && optionFieldTypes.has(rule.type) && rule.field) {
+      rule.value = rule.type === FieldType.CheckBox || rule.type === FieldType.Select2 ? [] : undefined;
+    }
+    if (Array.isArray(rule?.children)) clearExistingOptionDefaults(rule.children);
+    if (Array.isArray(rule?.columns)) clearExistingOptionDefaults(rule.columns);
+    if (Array.isArray(rule?.rule)) clearExistingOptionDefaults(rule.rule);
+    if (Array.isArray(rule?.subForm)) clearExistingOptionDefaults(rule.subForm);
+    if (Array.isArray(rule?.props?.columns)) {
+      rule.props.columns.forEach((column: any) => {
+        if (Array.isArray(column?.rule)) clearExistingOptionDefaults(column.rule);
+      });
+    }
+  });
+};
+
+const parsedRules = formCreate.parseJson(props.def.layout!);
+const isExistingData = !!props.data?.id && !props.isNewData;
+if (isExistingData) {
+  clearExistingOptionDefaults(parsedRules);
+}
+const rules = ref(parsedRules);
 const parsedOptions: any = formCreate.parseJson(props.def.options!);
 if (props.isPublic && props.publicToken) {
   const originalBeforeFetch = parsedOptions.beforeFetch;
@@ -108,6 +137,7 @@ watch(
 
 if (props.fieldPerms !== undefined) {
   let layout = formCreate.parseJson(props.def.layout!);
+  if (isExistingData) clearExistingOptionDefaults(layout);
   layout.forEach((x) => {
     if (x.type == FieldType.TableForm) {
       let perm = props.fieldPerms?.find((p) => p.id == x.field);

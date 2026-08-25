@@ -1,5 +1,5 @@
 import getConfig from "./config";
-import { mergeProps, is, hasProperty, extend } from "@eimsnext/form-render-core";
+import { mergeProps, is, hasProperty, extend, getFilledTextColor } from "@eimsnext/form-render-core";
 import { showNotify } from "vant";
 
 function tidy(props, name) {
@@ -25,7 +25,44 @@ function tidyRule(rule) {
   return _rule;
 }
 
+const optionValue = (option) => option && typeof option === "object" ? option.value : option;
+const optionLabel = (option) => option && typeof option === "object"
+  ? option.label || option.text || option.value || ""
+  : option || "";
+
+function renderOptionPreview(ctx) {
+  const type = ctx.type;
+  const props = ctx.prop?.props || {};
+  if (!props.optionColor || !["radio", "checkbox", "select", "select2"].includes(type)) return null;
+  const data = props.options || props.formCreateInject?.options || [];
+  const values = Array.isArray(ctx.rule?.value) ? ctx.rule.value : [ctx.rule?.value];
+  const children = [];
+  values.forEach((value, index) => {
+    if (value === undefined || value === null || value === "") return;
+    const option = data.find(
+      (item) => String(optionValue(item)) === String(optionValue(value)),
+    );
+    if (index && children.length) children.push(", ");
+    if (option?.color) {
+      children.push(ctx.$render.vNode.h("span", {
+        class: "fc-option-preview-tag",
+        style: { backgroundColor: option.color, color: getFilledTextColor() },
+      }, [optionLabel(option)]));
+    } else {
+      children.push(optionLabel(option || value));
+    }
+  });
+  return ctx.$render.vNode.h("span", { class: "_fc-read-view" }, children);
+}
+
 export default {
+  defaultPreview(ctx, children) {
+    if (ctx.prop?.readMode !== false && ctx.prop?.readMode !== "custom") {
+      const preview = renderOptionPreview(ctx);
+      if (preview) return preview;
+    }
+    return ctx.parser.render(children, ctx);
+  },
   validate() {
     const form = this.form();
     if (form) {
@@ -149,32 +186,53 @@ export default {
   },
   makeWrap(ctx, children) {
     const rule = ctx.prop;
+    const wrap = { ...(rule.wrap || {}) };
     const uni = `${this.key}${ctx.key}`;
     const col = rule.col;
-    const isTitle = this.isTitle(rule) && rule.wrap.title !== false;
+    const isTitle = this.isTitle(rule) && wrap.title !== false;
     const { col: _col } = this.rule.props;
-    delete rule.wrap.title;
-    const item = isFalse(rule.wrap.show)
-      ? children
+    delete wrap.title;
+    const layoutClass = this.getLayoutClass(ctx);
+    const component = this.$r(
+      {
+        type: "div",
+        class: "field-component",
+        key: `${uni}fc`,
+      },
+      { default: () => children }
+    );
+    const item = isFalse(wrap.show)
+      ? this.$r(
+          {
+            type: "div",
+            class: this.$render.mergeClass(rule.className, "field-layout-raw"),
+            key: `${uni}raw`,
+          },
+          { default: () => component }
+        )
       : this.$r(
           mergeProps([
-            rule.wrap,
+            wrap,
             {
               props: {
                 modelValue: ctx.rule.value,
                 label: isTitle ? rule.title.title : undefined,
-                ...tidyRule(rule.wrap || {}),
+                ...tidyRule(wrap),
+                labelClass: "field-label",
                 name: ctx.id,
                 rules: ctx.injectValidate(),
               },
-              class: this.$render.mergeClass(rule.className, "fc-form-item"),
+              class: this.$render.mergeClass(
+                rule.className,
+                `fc-form-item field-layout-content ${layoutClass}`
+              ),
               key: `${uni}fi`,
               ref: ctx.wrapRef,
               type: "formItem",
             },
           ]),
           {
-            input: () => children,
+            input: () => component,
             ...(isTitle ? { label: () => this.makeInfo(rule, uni, ctx) } : {}),
           }
         );
@@ -186,6 +244,36 @@ export default {
     if (this.options.form.title === false) return false;
     const title = rule.title;
     return !((!title.title && !title.native) || isFalse(title.show));
+  },
+  getLayoutClass(ctx) {
+    const type = String(ctx.originType || ctx.rule?.type || ctx.type || ctx.trueType || "").toLowerCase();
+    const multiTypes = [
+      "textarea",
+      "checkbox",
+      "radio",
+      "employee2",
+      "department2",
+      "upload",
+      "imageupload",
+      "fileupload",
+      "query",
+      "dataselect",
+      "group",
+      "array",
+      "subform",
+      "object",
+      "tableform",
+      "editor",
+    ];
+    const distribution =
+      ctx.prop?.props?.distribution ||
+      ctx.prop?.props?.direction ||
+      ctx.prop?.distribution ||
+      ctx.prop?.direction;
+    const multi = multiTypes.includes(type) &&
+      (type !== "radio" && type !== "checkbox" || distribution === "vertical");
+    const noLabel = !this.isTitle(ctx.prop);
+    return `field-layout-${multi ? "multi" : "single"}${noLabel ? " field-layout-no-label" : ""}`;
   },
   makeInfo(rule, uni, ctx) {
     const titleProp = { ...rule.title };
@@ -218,7 +306,7 @@ export default {
       {
         props: tidyRule(titleProp),
         key: `${uni}tit`,
-        class: "fc-form-title",
+        class: "fc-form-title field-name",
         type: titleProp.type || "span",
       },
     ]);

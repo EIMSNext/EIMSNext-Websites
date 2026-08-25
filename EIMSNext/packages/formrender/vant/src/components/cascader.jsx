@@ -6,6 +6,7 @@ export default defineComponent({
     name: NAME,
     inheritAttrs: false,
     props: {
+        formCreateInject: Object,
         placeholder: String,
         disabled: Boolean,
         clearable: Boolean,
@@ -95,7 +96,8 @@ export default defineComponent({
                 model-value={this.inputValue} border={false} isLink v-slots={{
                     'right-icon': clearIcon
                 }}/>
-            <van-popup show={this.show} onUpdate:show={(v) => this.show = v} round position="bottom">
+            <van-popup show={this.show} onUpdate:show={(v) => this.show = v} round position="bottom"
+                teleport={this.formCreateInject?.popupContainer ?? undefined}>
                 <van-cascader
                     {...this.$attrs}
                     modelValue={this.modelValue}

@@ -1,4 +1,5 @@
 import {defineComponent, toRef} from 'vue';
+import { getFilledTextColor } from '@eimsnext/form-render-core';
 
 const NAME = 'fcRadio';
 
@@ -8,6 +9,10 @@ export default defineComponent({
     props: {
         modelValue: [String, Number],
         options: Array,
+        distribution: String,
+        direction: String,
+        formCreateInject: Object,
+        optionColor: Boolean,
     },
     emits: ['update:modelValue', 'change'],
     setup(props, _) {
@@ -24,14 +29,23 @@ export default defineComponent({
         }
     },
     render() {
-        return <van-radio-group direction="horizontal" {...this.$attrs} modelValue={this.modelValue}
+        const options = this.options || this.formCreateInject?.options || [];
+        const direction = (this.distribution || this.direction) === 'vertical' ? 'vertical' : 'horizontal';
+        return <van-radio-group direction={direction} {...this.$attrs} modelValue={this.modelValue}
             onUpdate:modelValue={this.onInput}>
-            {(this.options || []).map(opt => {
-                const tmp = {...opt};
-                const {text, value} = opt;
+            {options.map(opt => {
+                const normalized = typeof opt === 'object' ? opt : {label: opt, value: opt};
+                const tmp = {...normalized};
+                const {text, label, value, color} = normalized;
                 delete tmp.text;
+                delete tmp.label;
                 delete tmp.value;
-                return <van-radio name={value} {...tmp}>{text || opt.label || value}</van-radio>
+                delete tmp.color;
+                return <van-radio name={value} {...tmp}>
+                    <span class={['fc-option-label', this.optionColor && color ? 'is-colored' : '']} style={this.optionColor && color ? {'--fc-option-color': color, '--fc-option-text-color': getFilledTextColor()} : undefined}>
+                        {text || label || value}
+                    </span>
+                </van-radio>
             })}
         </van-radio-group>
     }

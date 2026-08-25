@@ -630,7 +630,7 @@ onBeforeMount(async () => {
   height: 28px;
   border-radius: 50%;
   background: var(--et-color-danger);
-  color: var(--et-text-on-primary);
+  color: var(--et-text-on-danger);
   font-size: 13px;
   font-weight: 700;
 }

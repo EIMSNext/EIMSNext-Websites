@@ -26,7 +26,7 @@
               <template #action>
                 <div class="flow-header">
                   <el-button @click="edit(notify)">{{ t("common.edit") }}</el-button>
-                  <el-button @click="remove(notify)">{{ t("common.delete") }}</el-button>
+                  <el-button class="delete-button" @click="remove(notify)">{{ t("common.delete") }}</el-button>
                   <el-switch :model-value="!notify.disabled" @change="toggleDisable(notify)"></el-switch>
                 </div>
               </template>

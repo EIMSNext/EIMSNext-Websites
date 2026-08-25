@@ -5,6 +5,7 @@ import {
   FormDef,
   FormData,
   SystemField,
+  isSystemField,
   getDataTitle,
   getCreateBy,
   getCreateTime,
@@ -150,7 +151,10 @@ export const createDataSelectQuery = ({ formId, page, pageSize, filter, fields }
             { field: "formId", visible: true },
             ...fields
               .filter((field, index, values) => values.findIndex((item) => item.field === field.field) === index)
-              .map((field) => ({ field: `data.${field.field}`, visible: true })),
+              .map((field) => ({
+                field: isSystemField(field.field) ? field.field : `data.${field.field}`,
+                visible: true,
+              })),
           ],
         }
       : {}),
@@ -300,7 +304,7 @@ export const formatDataSelectValue = (
   field?: IDataSelectField,
   options?: { t?: (key: string) => string },
 ) => {
-  if (field?.field === SystemField.FlowStatus || field?.type === (getFlowStatus("流程状态").type as FieldType)) {
+  if (field?.field === SystemField.FlowStatus) {
     const status = flowStatusArray(options?.t).find((item) => item.id === value);
     return status ? (options?.t ? options.t(status.i18n) : status.label) : stringifyDataSelectValue(value);
   }
@@ -308,6 +312,18 @@ export const formatDataSelectValue = (
   if (field?.type === FieldType.TimeStamp && value) {
     const format = field.format || "YYYY-MM-DD HH:mm:ss";
     return dayjs(Number(value)).isValid() ? dayjs(Number(value)).format(format) : stringifyDataSelectValue(value);
+  }
+
+  if (field?.options?.length) {
+    const values = Array.isArray(value) ? value : [value];
+    return values
+      .map((item) => {
+        const raw = item && typeof item === "object" ? item.value : item;
+        const option = field.options?.find((candidate) => candidate.value === raw);
+        return option?.label ?? stringifyDataSelectValue(item);
+      })
+      .filter(Boolean)
+      .join(", ");
   }
 
   if (field?.type === FieldType.ImageUpload) {

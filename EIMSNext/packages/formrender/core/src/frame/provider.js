@@ -10,6 +10,7 @@ import {
 } from "../utils";
 import { byCtx, deepGet, invoke } from "./util";
 import { nextTick } from "vue";
+import { buildDynamicSelectQuery, mapDynamicSelectOptions } from "@eimsnext/utils";
 
 const loadData = function (fc) {
   const loadData = {
@@ -179,6 +180,10 @@ const fetch = function (fc) {
   }
 
   function run(inject, rule, api) {
+    if (["radio", "checkbox", "fcRadio", "fcCheckbox", "fc-radio", "fc-checkbox"].includes(rule.type)) {
+      fetchAttr.deleted(inject);
+      return;
+    }
     let option = inject.value;
     fetchAttr.deleted(inject);
     if (is.Function(option)) {
@@ -228,50 +233,29 @@ const fetch = function (fc) {
         }
       };
       
-      // 确定表单ID和字段
-      const formId = option.formId || option.label?.formId || option.value?.formId;
-      const labelField = option.label?.field;
-      const valueField = option.value?.field;
-      
-      // 只有当同时有表单ID和字段时才执行数据获取
-      if (!formId || (!labelField && !valueField)) {
+      const queryData = buildDynamicSelectQuery(option);
+      if (!queryData) {
         set([]);
         return;
       }
       
       // 直接使用fc.create.fetch来获取数据，不依赖外部的formDataService
-      const fetchFormData = () => {
-        // 构建查询URL和参数，使用系统期望的格式
+      let requestId = 0;
+      const fetchFormData = (keyword) => {
+        const currentRequestId = ++requestId;
         const url = `/FormData/$query`;
-        // 构建系统期望的查询条件格式
-        const queryData = {
-          skip: 0,
-          take: 1000, // 限制获取的数据量，可根据实际情况调整
-          scope: {},
-          select: [
-            { field: "id", visible: true },
-            { field: "appId", visible: true },
-            { field: "formId", visible: true },
-            ...(labelField ? [{ field: `data.${labelField}`, visible: true }] : []),
-            ...(valueField && valueField !== labelField ? [{ field: `data.${valueField}`, visible: true }] : []),
-          ],
-          sort: [{ field: "createTime", dir: -1 }],
-          filter: {
-            rel: "and",
-            items: [
-              { field: "formId", type: "none", op: "eq", value: formId },
-              {}
-            ]
-          }
-        };
-        
-        // 使用form-render-core的fetch函数获取数据，使用POST请求并将查询条件作为data参数发送
+        const request = buildDynamicSelectQuery(option, keyword);
+        if (!request) {
+          set([]);
+          return;
+        }
         api.fetch({
           action: url,
           method: 'post',
-          data: queryData,
+          data: request,
           dataType: 'json',
           onSuccess: (body) => {
+            if (currentRequestId !== requestId) return;
             if (check()) return;
             
             // 提取数据数组，支持多种数据结构
@@ -290,58 +274,10 @@ const fetch = function (fc) {
               data = body;
             }
             
-            // 提取指定字段的值并去重
-            const fieldValues = [];
-            const seen = new Set();
-            
-            data.forEach((item) => {
-              // 获取表单数据中的指定字段值，处理 data 嵌套结构
-              let label, value;
-              try {
-                // 获取 data 字段，确保是对象类型
-                const itemData = item.data || {};
-                
-                // 获取 label 字段值
-                const labelValue = itemData[labelField];
-                if (labelValue && typeof labelValue === 'object') {
-                  // 如果是对象类型，使用 label 属性作为显示值
-                  label = labelValue.label;
-                } else {
-                  // 如果是基本类型，直接使用
-                  label = labelValue;
-                }
-                
-                // 获取 value 字段值
-                const valueValue = itemData[valueField];
-                if (valueValue && typeof valueValue === 'object') {
-                  // 如果是对象类型，使用 value 属性作为值
-                  value = valueValue.value;
-                } else {
-                  // 如果是基本类型，直接使用
-                  value = valueValue;
-                }
-              } catch (e) {
-                // 如果访问失败，使用 undefined
-                label = undefined;
-                value = undefined;
-              }
-              
-              if (label !== undefined && label !== null && value !== undefined && value !== null) {
-                const strValue = String(value);
-                if (!seen.has(strValue)) {
-                  seen.add(strValue);
-                  fieldValues.push({
-                    label: label,
-                    value: value
-                  });
-                }
-              }
-            });
-            
-            // 设置为下拉框的选项数据
-            set(fieldValues);
+            set(mapDynamicSelectOptions(data, option));
           },
           onError: (e) => {
+            if (currentRequestId !== requestId) return;
             if (check()) return;
             console.error('Failed to fetch form data:', e);
             set([]);
@@ -349,6 +285,13 @@ const fetch = function (fc) {
         });
       };
       
+      const runtimeProps = inject.getProp().props || {};
+      inject.getProp().props = {
+        ...runtimeProps,
+        remote: true,
+        remoteMethod: fetchFormData,
+      };
+
       // 立即执行一次数据获取
       fetchFormData();
       

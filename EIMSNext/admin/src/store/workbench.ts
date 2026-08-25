@@ -1,5 +1,5 @@
-import { nanoid } from "nanoid";
 import type {
+  WorkbenchChartLayoutItem,
   WorkbenchCatalogApp,
   WorkbenchConfig,
   WorkbenchConfigRequest,
@@ -19,12 +19,13 @@ import { store } from "@eimsnext/store";
 export const WORKBENCH_COLS = 24;
 
 export const FIXED_WORKBENCH_WIDGETS: WorkbenchWidgetType[] = ["flowCenter", "myApps"];
+const REQUIRED_WORKBENCH_WIDGETS: WorkbenchWidgetType[] = ["flowCenter", "myApps"];
 
 export const WIDGET_FIXED_HEIGHT: Partial<Record<WorkbenchWidgetType, number>> = {
-  flowCenter: 7,
-  myApps: 10,
-  recent: 7,
-  favorites: 7,
+  flowCenter: 4,
+  myApps: 8,
+  recent: 4,
+  favorites: 4,
 };
 
 export const WORKBENCH_FAVORITES_CHANGED_EVENT = "workbench:favorites-changed";
@@ -49,28 +50,39 @@ export const createDefaultWorkbenchLayout = (): WorkbenchLayoutItem[] => [
     w: 6,
     h: WIDGET_FIXED_HEIGHT.favorites!,
     minW: 5,
-    minH: WIDGET_FIXED_HEIGHT.favorites!,
+    minH: 3,
   },
   {
     i: "myApps",
     type: "myApps",
     x: 0,
-    y: 7,
+    y: 4,
     w: 18,
     h: WIDGET_FIXED_HEIGHT.myApps!,
     minW: 10,
-    minH: WIDGET_FIXED_HEIGHT.myApps!,
+    minH: 6,
     locked: true,
   },
   {
     i: "recent",
     type: "recent",
     x: 18,
-    y: 7,
+    y: 4,
     w: 6,
     h: WIDGET_FIXED_HEIGHT.recent!,
     minW: 5,
-    minH: WIDGET_FIXED_HEIGHT.recent!,
+    minH: 3,
+  },
+  {
+    i: "chartBoard",
+    type: "chartBoard",
+    x: 0,
+    y: 12,
+    w: 18,
+    h: 9,
+    minW: 6,
+    minH: 5,
+    locked: true,
   },
 ];
 
@@ -90,17 +102,15 @@ export const createWorkbenchWidget = (
   overrides: Partial<WorkbenchLayoutItem> = {}
 ): WorkbenchLayoutItem => {
   const defaultItem = createDefaultWorkbenchLayout().find((x) => x.type === type);
-  const id = `${type}_${nanoid(8)}`;
-
   return {
-    i: type === "flowCenter" || type === "myApps" ? type : id,
+    i: type === "flowCenter" || type === "myApps" || type === "chartBoard" ? type : `${type}_${Date.now()}`,
     type,
     x: 0,
     y: 999,
     w: type === "chartBoard" ? 12 : defaultItem?.w || 6,
-    h: type === "chartBoard" ? 9 : WIDGET_FIXED_HEIGHT[type] || defaultItem?.h || 7,
+    h: type === "chartBoard" ? 9 : defaultItem?.h || WIDGET_FIXED_HEIGHT[type] || 7,
     minW: type === "chartBoard" ? 6 : defaultItem?.minW || 5,
-    minH: type === "chartBoard" ? 5 : WIDGET_FIXED_HEIGHT[type] || defaultItem?.minH || 5,
+    minH: type === "chartBoard" ? 5 : defaultItem?.minH || 5,
     locked: isFixedWorkbenchWidget(type),
     ...defaultItem,
     ...overrides,
@@ -108,20 +118,71 @@ export const createWorkbenchWidget = (
 };
 
 export const normalizeWorkbenchLayout = (layout: WorkbenchLayoutItem[]) => {
-  const next = layout
+  const hasLegacyFlowRows = layout.some(
+    (item) => item.type === "flowCenter" && item.h === 7
+  );
+  const chartWidgets = layout.filter((item) => item.type === "chartBoard");
+  const primaryChartWidget = chartWidgets.find((item) => item.i === "chartBoard") || chartWidgets[0];
+  const chartItems = chartWidgets
+    .flatMap((item) => {
+      if (item.config?.charts?.length) return item.config.charts;
+      if (!item.config?.dashboardItemId || !item.config.dashboardId) return [];
+      return [{
+        i: `chart_${item.config.dashboardItemId}`,
+        x: 0,
+        y: 0,
+        w: 24,
+        h: 9,
+        minW: 6,
+        minH: 5,
+        dashboardId: item.config.dashboardId,
+        dashboardItemId: item.config.dashboardItemId,
+        title: item.config.title || "",
+      } satisfies WorkbenchChartLayoutItem];
+    })
+    .filter(
+      (chart, index, charts) =>
+        charts.findIndex((item) => item.dashboardItemId === chart.dashboardItemId) === index
+    );
+  const sourceLayout = [
+    ...layout.filter((item) => item.type !== "chartBoard"),
+    ...(primaryChartWidget
+      ? [{
+          ...primaryChartWidget,
+          i: "chartBoard",
+          config: {
+            ...primaryChartWidget.config,
+            dashboardId: undefined,
+            dashboardItemId: undefined,
+            charts: chartItems,
+          },
+        }]
+      : []),
+  ];
+
+  const next = sourceLayout
     .filter((item) => supportedTypes.includes(item.type))
     .map((item) => {
       const normalized: WorkbenchLayoutItem = {
         ...item,
         minW: item.minW || (item.type === "chartBoard" ? 6 : 5),
-        minH: item.minH || (item.type === "chartBoard" ? 5 : WIDGET_FIXED_HEIGHT[item.type] || 5),
+        minH: item.minH || (item.type === "chartBoard" ? 5 : 3),
         locked: isFixedWorkbenchWidget(item.type),
       };
 
-      if (item.type !== "chartBoard") {
-        normalized.h = WIDGET_FIXED_HEIGHT[item.type] || item.h;
+      if (item.type === "flowCenter") {
+        normalized.y = 0;
+        normalized.h = WIDGET_FIXED_HEIGHT.flowCenter!;
         normalized.minH = normalized.h;
         normalized.maxH = normalized.h;
+      }
+
+      if (item.type === "myApps") {
+        normalized.y = WIDGET_FIXED_HEIGHT.flowCenter!;
+      }
+
+      if (item.type === "chartBoard" && hasLegacyFlowRows && item.y === 15) {
+        normalized.y = WIDGET_FIXED_HEIGHT.flowCenter! + (WIDGET_FIXED_HEIGHT.myApps || 8);
       }
 
       return normalized;
@@ -130,7 +191,7 @@ export const normalizeWorkbenchLayout = (layout: WorkbenchLayoutItem[]) => {
   let cursorY = next.reduce((value, item) => Math.max(value, item.y + item.h), 0);
   const defaults = createDefaultWorkbenchLayout();
 
-  FIXED_WORKBENCH_WIDGETS.forEach((type) => {
+  REQUIRED_WORKBENCH_WIDGETS.forEach((type) => {
     if (!next.some((item) => item.type === type)) {
       const item = defaults.find((x) => x.type === type)!;
       next.push({ ...item, y: cursorY });

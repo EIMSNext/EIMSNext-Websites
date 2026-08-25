@@ -9,7 +9,7 @@
       </el-popover>
       <el-tooltip :disabled="!hasChildren" content="容器内存在组件，不能删除" placement="top">
         <span>
-          <el-button link :disabled="hasChildren" :title="t('common.delete')" @click="emit('delete', itemDef)"><et-icon icon="el-delete" /></el-button>
+          <el-button link class="delete-button" :disabled="hasChildren" :title="t('common.delete')" @click="emit('delete', itemDef)"><et-icon icon="el-delete" /></el-button>
         </span>
       </el-tooltip>
     </div>
@@ -49,9 +49,13 @@ const emit = defineEmits<{
   "update-layout": [layout: IGridLayoutItem[]];
   "update-setting": [item: DashboardItemDef, setting: ILayoutContainerSetting, name: string];
   "update-realtime-setting": [item: DashboardItemDef, setting: Record<string, any>];
+  "update-image-setting": [item: DashboardItemDef, setting: Record<string, any>];
+  "update-text-setting": [item: DashboardItemDef, setting: Record<string, any>];
   edit: [item: DashboardItemDef];
   delete: [item: DashboardItemDef];
   "filter-change": [payload: { itemId: string; value: any }];
+  "quick-filter-change": [payload: { itemId: string; option?: any }];
+  "apply-filters": [payload: { itemId: string }];
 }>();
 
 const settingsVisible = ref(false);
@@ -119,7 +123,11 @@ const ContainerGrid = defineComponent({
           externalFilter: props.externalFilters[props.items[layoutItem.i].id], layout: props.layout, items: props.items,
           onEdit: (item: DashboardItemDef) => emit("edit", item), onDelete: (item: DashboardItemDef) => emit("delete", item),
           onFilterChange: (payload: { itemId: string; value: any }) => emit("filter-change", payload),
+          onQuickFilterChange: (payload: { itemId: string; option?: any }) => emit("quick-filter-change", payload),
+          onApplyFilters: (payload: { itemId: string }) => emit("apply-filters", payload),
           onUpdateRealtimeSetting: (item: DashboardItemDef, setting: Record<string, any>) => emit("update-realtime-setting", item, setting),
+          onUpdateImageSetting: (item: DashboardItemDef, setting: Record<string, any>) => emit("update-image-setting", item, setting),
+          onUpdateTextSetting: (item: DashboardItemDef, setting: Record<string, any>) => emit("update-text-setting", item, setting),
         }) : null,
       }))
     });

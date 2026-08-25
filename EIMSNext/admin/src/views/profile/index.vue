@@ -775,6 +775,7 @@ onUnmounted(() => {
             flex-shrink: 0;
             font-weight: 600;
             line-height: var(--et-line-height-24);
+            color: var(--et-text-primary);
           }
         }
 

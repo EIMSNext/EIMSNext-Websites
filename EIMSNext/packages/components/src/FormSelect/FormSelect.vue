@@ -1,5 +1,5 @@
 <template>
-  <el-select v-model="value" size="default" :placeholder="t('dataflow.selectForm')" @change="onInput">
+  <el-select v-model="value" size="default" :placeholder="t('eventFlow.selectForm')" @change="onInput">
     <el-option v-for="item in formList" :key="item.id" :label="item.label" :value="item.id" />
   </el-select>
 </template>

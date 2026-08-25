@@ -1,5 +1,9 @@
 /* 暗黑模式通过 CSS 自定义变量，官方链接：https://element-plus.org/zh-CN/guide/dark-mode.html#%E9%80%9A%E8%BF%87-css */
 html.dark {
+  /* 暗黑模式默认文字色必须用中性色。历史构建里曾误设为 var(--et-color-primary)，
+     导致所有继承默认色（未显式设 color）的文字在暗黑下呈现主题色，此处显式兜底覆盖。 */
+  color: var(--et-text-primary);
+
   .el-table {
     /* 自定义表格选中高亮时当前行的背景颜色 */
     --el-table-current-row-bg-color: var(--el-fill-color-light);
@@ -74,6 +78,13 @@ html.dark {
   .el-cascader-node.is-selectable.in-checked-path,
   .el-cascader-node.is-active {
     background-color: var(--et-bg-hover) !important;
+    color: var(--et-text-primary);
+  }
+
+  // 抽屉 / 对话框容器在暗黑下沿用默认浅文字会失效，显式兜底
+  .el-drawer,
+  .el-dialog {
+    background-color: var(--et-bg-container);
     color: var(--et-text-primary);
   }
 }

@@ -6,7 +6,7 @@ import {
   toRef,
   watch,
 } from "vue";
-import { getSlot } from "@eimsnext/form-render-core";
+import { getFilledTextColor, getSlot } from "@eimsnext/form-render-core";
 
 const NAME = "fcRadio";
 
@@ -23,10 +23,15 @@ export default defineComponent({
     type: String,
     input: Boolean,
     inputValue: String,
+    optionColor: Boolean,
+    distribution: {
+      type: String,
+    },
+    direction: String,
   },
   emits: ["update:modelValue", "fc.el"],
   setup(props, _) {
-    const options = toRef(props.formCreateInject, "options", []);
+    const injectedOptions = computed(() => props.formCreateInject?.options);
     const opt = toRef(props, "options");
     const value = toRef(props, "modelValue");
     const inputValue = toRef(props, "inputValue", "");
@@ -41,11 +46,19 @@ export default defineComponent({
       updateCustomValue(n);
     });
     const _options = computed(() => {
-      let arr = options.value || [];
-      if (opt.value) {
-        arr = opt.value || [];
-      }
-      return Array.isArray(arr) ? arr : [];
+      const source = opt.value ?? injectedOptions.value ?? [];
+      return Array.isArray(source)
+        ? source.map((option) => {
+            if (option && typeof option === "object") {
+              return {
+                ...option,
+                value: option.value ?? option.label,
+                label: option.label ?? option.value,
+              };
+            }
+            return { value: option, label: option };
+          })
+        : [];
     });
 
     // 将接收到的对象类型的值转换为value值，以便Element Plus组件能够正确识别选中的选项
@@ -76,8 +89,13 @@ export default defineComponent({
     const onInput = (n) => {
       // 根据value值找到对应的选项对象
       const selectedOption = _options.value.find(opt => opt.value === n);
-      // 如果找到，返回完整的选项对象，否则返回原始值
-      _.emit("update:modelValue", selectedOption || n);
+      // Color is presentation-only and must never be persisted as form data.
+      if (selectedOption) {
+        const { color, ...formValue } = selectedOption;
+        _.emit("update:modelValue", formValue);
+        return;
+      }
+      _.emit("update:modelValue", n);
     };
     const updateCustomValue = (n) => {
       const o = customValue.value;
@@ -116,9 +134,16 @@ export default defineComponent({
   render() {
     const name = this.type === "button" ? "ElRadioButton" : "ElRadio";
     const Type = resolveComponent(name);
+    const distribution = this.distribution || this.direction || "horizontal";
+    const groupClass = [
+      this.$attrs.class,
+      "fc-radio-group",
+      `fc-radio-group--${distribution}`,
+    ];
     return (
       <ElRadioGroup
         {...this.$attrs}
+        class={groupClass}
         modelValue={this.computedValue}
         v-slots={getSlot(this.$slots, ["default"])}
         onUpdate:modelValue={this.onInput}
@@ -127,8 +152,10 @@ export default defineComponent({
         {this.options.map((opt, index) => {
           const props = { ...opt };
           const label = props.label;
+          const color = props.color;
           delete props.value;
           delete props.label;
+          delete props.color;
           // 直接使用value属性作为label和value，确保能够正确比较
           return (
             <Type
@@ -137,7 +164,15 @@ export default defineComponent({
               value={opt.value}
               key={name + index + "-" + (opt.value || index)}
             >
-              {label || opt.value || ""}
+              <span
+                class={[
+                  "fc-option-label",
+                  this.optionColor && color ? "is-colored" : "",
+                ]}
+                style={this.optionColor && color ? { "--fc-option-color": color, "--fc-option-text-color": getFilledTextColor() } : undefined}
+              >
+                {label || opt.value || ""}
+              </span>
             </Type>
           );
         })}
