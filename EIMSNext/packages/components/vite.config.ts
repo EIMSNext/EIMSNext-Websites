@@ -15,8 +15,14 @@ export default defineConfig({
     rollupOptions: {
       external: [
         "vue",
+        "vue-i18n",
         "element-plus",
         "lodash-es",
+        "codemirror",
+        "codemirror/lib/codemirror",
+        "dayjs",
+        "odata-query",
+        "qr-code-styling",
         "@element-plus/icons-vue",
         "@eimsnext/utils",
         "@eimsnext/models",

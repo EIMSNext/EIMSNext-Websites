@@ -10,7 +10,7 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     rollupOptions: {
-      external: ["axios", "qs", "lodash-es", "nanoid"],
+      external: ["axios", "qs", "lodash-es", "mitt", "nanoid"],
       input: ["index.ts"],
       output: {
         compact: true,
