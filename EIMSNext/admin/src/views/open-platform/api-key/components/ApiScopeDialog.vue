@@ -178,8 +178,8 @@ function resourceIcon(code: ResourceCode): string {
   switch (code) {
     case "employee":
     case "department":
-    case "role":
-    case "roleGroup":
+    case "employeeGroup":
+    case "employeeGroupCategory":
       return "el-User";
     case "appdef":
     case "formdef":

@@ -100,7 +100,7 @@ export default function createStore<T extends IIdentity>(id: string, url: string
       items.value = initData;
     };
 
-    bus.on("auth:logout", clear);
+    bus.on("identity:logout", clear);
 
     return { loading, items, load, get, update, remove, clear };
   });

@@ -9,13 +9,13 @@
   ></AddEditDept>
   <et-confirm-dialog
     v-model="showDeleteDialog"
-    :title="$t('role.confirmDelete')"
+    :title="$t('employeeGroup.confirmDelete')"
     :showNoSave="false"
     :okText="$t('common.confirm')"
     @cancel="showDeleteDialog = false"
     @ok="handleDeleteConfirm"
   >
-    {{ $t("role.confirmDeleteData") }}
+    {{ $t("employeeGroup.confirmDeleteData") }}
   </et-confirm-dialog>
   <el-card shadow="never" class="dept-card">
     <el-input
@@ -23,7 +23,7 @@
       class="search-input"
       prefix-icon="Search"
       clearable
-      :placeholder="$t('role.searchPlaceholder')"
+      :placeholder="$t('employeeGroup.searchPlaceholder')"
     />
     <el-tree
       ref="deptTreeRef"

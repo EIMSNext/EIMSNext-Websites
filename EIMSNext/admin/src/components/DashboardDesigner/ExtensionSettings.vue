@@ -135,7 +135,7 @@ const scheduleSettings = ref<TriggerTimeSettingsValue>(
 );
 
 const memberOptions = {
-  showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
+  showTabs: MemberTabs.Department | MemberTabs.EmployeeGroup | MemberTabs.Employee,
   cascadedDept: true,
   showCascade: true,
 };

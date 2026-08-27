@@ -109,7 +109,7 @@ const selectedTargetTags = ref<ISelectedTag[]>([]);
 
 const memberOptions = computed(() => ({
   multiple: false,
-  showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
+  showTabs: MemberTabs.Department | MemberTabs.EmployeeGroup | MemberTabs.Employee,
 }));
 
 const dialogTitle = computed(() => {
@@ -157,7 +157,7 @@ const convertCandidateToTag = (candidate: { candidateId: string; candidateName?:
       type = DataItemType.Employee;
       break;
     case 3:
-      type = DataItemType.Role;
+      type = DataItemType.EmployeeGroup;
       break;
   }
 

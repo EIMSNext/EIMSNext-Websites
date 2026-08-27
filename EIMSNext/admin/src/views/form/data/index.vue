@@ -382,8 +382,8 @@ watch(showPdfPreview, (visible) => {
 onBeforeMount(async () => {
   const formId = route.params.formId.toString();
   const dataId = route.params.dataId.toString();
-  const authGroupId = (route.query.authGroupId as string) || undefined;
-  const queryParams = authGroupId ? { authGroupId } : undefined;
+  const permissionGroupId = (route.query.permissionGroupId as string) || undefined;
+  const queryParams = permissionGroupId ? { permissionGroupId } : undefined;
   loading.value = true;
 
   try {
@@ -397,7 +397,7 @@ onBeforeMount(async () => {
           top: 20,
         })
       ),
-      formDataService.getChangeLogs(dataId, 0, 20, authGroupId, { silentError: true }),
+      formDataService.getChangeLogs(dataId, 0, 20, permissionGroupId, { silentError: true }),
     ]);
 
     if (form) {

@@ -690,7 +690,7 @@ export enum CandidateType {
   Unknown,
   Department,
   Employee,
-  Role,
+  EmployeeGroup,
   Dynamic,
   FormField,
 }

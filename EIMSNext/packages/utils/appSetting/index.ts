@@ -1,7 +1,7 @@
 export interface IAppSetting {
   clientId: string;
   publicClientId: string;
-  authUrl: string;
+  identityUrl: string;
   apiUrl: string;
   uploadUrl: string;
   tokenKey: string;
@@ -13,7 +13,7 @@ export interface IAppSetting {
 class AppSetting implements IAppSetting {
   clientId: string = "EIMSD160507G0401S171201B1014Next";
   publicClientId: string = "eimsnext.public";
-  authUrl: string = "https://auth.eimsnext.com";
+  identityUrl: string = "https://identity.eimsnext.com";
   apiUrl: string = "https://api.eimsnext.com";
   uploadUrl: string = "https://file.eimsnext.com";
   tokenKey: string = "jat";
@@ -26,12 +26,12 @@ class AppSetting implements IAppSetting {
   }
 }
 
-export function getAuthUrl(url: string, isApi: boolean = true) {
+export function getIdentityUrl(url: string, isApi: boolean = true) {
   return url.startsWith("http")
     ? url
     : isApi
-      ? `${appSetting.authUrl}/api${url}`
-      : `${appSetting.authUrl}${url}`;
+      ? `${appSetting.identityUrl}/api${url}`
+      : `${appSetting.identityUrl}${url}`;
 }
 
 export function getApiUrl(url: string, ver: string = "v1") {

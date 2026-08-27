@@ -42,7 +42,7 @@
 </template>
 <script setup lang="ts">
 import formCreate from "@eimsnext/form-render-elplus";
-import { FieldType, FormContent, FormData, IFieldPerm } from "@eimsnext/models";
+import { FieldType, FormContent, FormData, FormFieldPermission } from "@eimsnext/models";
 import { FormActionSettings, FormCustomAction } from "./type";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
@@ -60,7 +60,7 @@ const props = withDefaults(
     publicToken?: string;
     isNewData?: boolean;
     actions?: FormActionSettings;
-    fieldPerms?: IFieldPerm[];
+    formFieldPermissions?: FormFieldPermission[];
   }>(),
   {
     isView: false,
@@ -135,12 +135,12 @@ watch(
   }
 );
 
-if (props.fieldPerms !== undefined) {
+if (props.formFieldPermissions !== undefined) {
   let layout = formCreate.parseJson(props.def.layout!);
   if (isExistingData) clearExistingOptionDefaults(layout);
   layout.forEach((x) => {
     if (x.type == FieldType.TableForm) {
-      let perm = props.fieldPerms?.find((p) => p.id == x.field);
+      let perm = props.formFieldPermissions?.find((p) => p.id == x.field);
       if (perm) {
         x.hidden = x.hidden === true || !perm.visible;
         const tableProps: Record<string, any> = typeof x.props === "object" ? x.props : {};
@@ -161,7 +161,7 @@ if (props.fieldPerms !== undefined) {
         xProps.columns.forEach((c: any) => {
           if (c.rule && c.rule.length > 0) {
             let f = c.rule[0];
-            let fPerm = props.fieldPerms?.find((p) => p.id == `${x.field}>${f.field}`);
+            let fPerm = props.formFieldPermissions?.find((p) => p.id == `${x.field}>${f.field}`);
             if (fPerm) {
               c.hidden = c.hidden === true || !fPerm.visible;
               f.hidden = f.hidden === true || !fPerm.visible;
@@ -178,7 +178,7 @@ if (props.fieldPerms !== undefined) {
         });
       }
     } else {
-      let perm = props.fieldPerms?.find((p) => p.id == x.field);
+      let perm = props.formFieldPermissions?.find((p) => p.id == x.field);
       if (perm) {
         x.hidden = x.hidden === true || !perm.visible;
         const fieldProps: Record<string, any> = typeof x.props === "object" ? x.props : {};

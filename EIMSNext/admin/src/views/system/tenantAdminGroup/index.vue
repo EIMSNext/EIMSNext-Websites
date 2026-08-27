@@ -1,6 +1,6 @@
 <template>
   <div class="admin-page">
-    <AdminGroupEditDialog
+    <TenantAdminGroupEditDialog
       v-model="showGroupDialog"
       :group="editingGroup"
       :type="editingType"
@@ -16,7 +16,7 @@
       v-model="showContactDialog"
       :value="contactDraft"
       :dept-tags="contactDeptTags"
-      :role-tags="contactRoleTags"
+      :employee-group-tags="contactEmployeeGroupTags"
       @ok="setContactPermission"
     />
     <member-select-dialog
@@ -29,31 +29,31 @@
 
     <aside class="admin-sidebar">
       <section class="sidebar-section">
-        <div class="section-label">{{ t("admin.adminGroup.sysAdminGroup") }}</div>
+        <div class="section-label">{{ t("admin.tenantAdminGroup.sysTenantAdminGroup") }}</div>
         <button
           class="tree-node system-node"
           :class="{ active: selectedKind === 'system' }"
           @click="selectSystemAdmins"
         >
           <et-icon icon="icon-admin" color="var(--et-color-primary)" />
-          <span>{{ t("admin.adminGroup.sysAdmin") }}</span>
+          <span>{{ t("admin.tenantAdminGroup.sysAdmin") }}</span>
         </button>
       </section>
 
       <section class="sidebar-section normal-section">
         <div class="section-header">
-          <span class="section-label">{{ t("admin.adminGroup.normalGroup") }}</span>
+          <span class="section-label">{{ t("admin.tenantAdminGroup.normalGroup") }}</span>
           <el-dropdown trigger="click">
             <el-button class="add-button" type="primary">
               <et-icon icon="el-plus" />
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="openCreate(AdminGroupType.Folder)">
-                  {{ t("admin.adminGroup.group") }}
+                <el-dropdown-item @click="openCreate(TenantAdminGroupType.Folder)">
+                  {{ t("admin.tenantAdminGroup.group") }}
                 </el-dropdown-item>
-                <el-dropdown-item @click="openCreate(AdminGroupType.Normal)">
-                  {{ t("admin.adminGroup.adminGroup") }}
+                <el-dropdown-item @click="openCreate(TenantAdminGroupType.Normal)">
+                  {{ t("admin.tenantAdminGroup.tenantAdminGroup") }}
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -63,7 +63,7 @@
           v-model="keyword"
           class="group-search"
           clearable
-          :placeholder="t('admin.adminGroup.selectGroup')"
+          :placeholder="t('admin.tenantAdminGroup.selectGroup')"
         >
           <template #prefix>
             <et-icon icon="el-UserFilled" />
@@ -82,7 +82,7 @@
           >
             <template #item="{ element }">
               <div class="tree-drag-item">
-                <div v-if="element.type === AdminGroupType.Folder" class="folder-node">
+                <div v-if="element.type === TenantAdminGroupType.Folder" class="folder-node">
                   <div
                     class="tree-node folder-title group-drop-target"
                     :class="{ active: selectedGroup?.id === element.id }"
@@ -148,98 +148,98 @@
     <main class="admin-main">
       <template v-if="selectedKind === 'system'">
         <header class="content-header">
-          <strong>{{ t("admin.adminGroup.sysAdmin") }}</strong>
-          <span>{{ t("admin.adminGroup.sysAdminDesc") }}</span>
+          <strong>{{ t("admin.tenantAdminGroup.sysAdmin") }}</strong>
+          <span>{{ t("admin.tenantAdminGroup.sysAdminDesc") }}</span>
         </header>
         <section class="form-section">
-          <div class="form-label">{{ t("admin.adminGroup.admin") }}</div>
+          <div class="form-label">{{ t("admin.tenantAdminGroup.admin") }}</div>
           <selected-tags
             :model-value="systemAdminTags"
             :editable="true"
-            :empty-text="t('admin.adminGroup.selectAdmin')"
+            :empty-text="t('admin.tenantAdminGroup.selectAdmin')"
             class="select-box"
             @editTag="openSystemEmployeeSelect"
           />
         </section>
         <div class="footer-actions">
           <el-button type="primary" :loading="saving" @click="saveSystemAdmins">
-            {{ t("admin.adminGroup.save") }}
+            {{ t("admin.tenantAdminGroup.save") }}
           </el-button>
         </div>
       </template>
 
-      <template v-else-if="selectedGroup && selectedGroup.type === AdminGroupType.Normal">
+      <template v-else-if="selectedGroup && selectedGroup.type === TenantAdminGroupType.Normal">
         <header class="content-header">
           <strong>{{ selectedGroup.name }}</strong>
         </header>
         <section class="form-section">
-          <div class="form-label">{{ t("admin.adminGroup.admin") }}</div>
+          <div class="form-label">{{ t("admin.tenantAdminGroup.admin") }}</div>
           <selected-tags
             :model-value="employeeTags"
             :editable="true"
-            :empty-text="t('admin.adminGroup.selectAdmin')"
+            :empty-text="t('admin.tenantAdminGroup.selectAdmin')"
             class="select-box"
             @editTag="openEmployeeSelect"
           />
         </section>
 
         <section class="form-section">
-          <div class="form-label">{{ t("admin.adminGroup.appManage") }}</div>
+          <div class="form-label">{{ t("admin.tenantAdminGroup.appManage") }}</div>
           <div class="config-content">
             <div class="config-item">
               <selected-tags
                 :model-value="appTags"
                 :editable="true"
-                :empty-text="t('admin.adminGroup.selectApp')"
+                :empty-text="t('admin.tenantAdminGroup.selectApp')"
                 class="select-box compact"
                 @editTag="showAppDialog = true"
               />
               <el-checkbox v-model="draft.canCreateOrDeleteApp">
-                {{ t("admin.adminGroup.canAddDeleteApp") }}
+                {{ t("admin.tenantAdminGroup.canAddDeleteApp") }}
               </el-checkbox>
             </div>
             <div class="config-item">
               <div class="scope-row">
-                <span class="scope-label">{{ t("admin.adminGroup.optionalDept") }}</span>
+                <span class="scope-label">{{ t("admin.tenantAdminGroup.optionalDept") }}</span>
                 <el-radio-group v-model="draft.appDepartmentScopeMode">
-                  <el-radio :value="ScopeMode.All">{{ t("admin.adminGroup.allDepts") }}</el-radio>
+                  <el-radio :value="ScopeMode.All">{{ t("admin.tenantAdminGroup.allDepts") }}</el-radio>
                   <el-radio :value="ScopeMode.Partial">
-                    {{ t("admin.adminGroup.partialDepts") }}
+                    {{ t("admin.tenantAdminGroup.partialDepts") }}
                   </el-radio>
                 </el-radio-group>
               </div>
               <selected-tags
                 :model-value="appDeptTags"
                 :editable="draft.appDepartmentScopeMode === ScopeMode.Partial"
-                :empty-text="t('admin.adminGroup.selectDept')"
+                :empty-text="t('admin.tenantAdminGroup.selectDept')"
                 class="select-box"
                 @editTag="openAppDeptSelect"
               />
             </div>
             <div class="config-item">
               <div class="scope-row">
-                <span class="scope-label">{{ t("admin.adminGroup.optionalRole") }}</span>
-                <el-radio-group v-model="draft.appRoleScopeMode">
-                  <el-radio :value="ScopeMode.All">{{ t("admin.adminGroup.allRoles") }}</el-radio>
+                <span class="scope-label">{{ t("admin.tenantAdminGroup.optionalEmployeeGroup") }}</span>
+                <el-radio-group v-model="draft.appEmployeeGroupScopeMode">
+                  <el-radio :value="ScopeMode.All">{{ t("admin.tenantAdminGroup.allEmployeeGroups") }}</el-radio>
                   <el-radio :value="ScopeMode.Partial">
-                    {{ t("admin.adminGroup.partialRoles") }}
+                    {{ t("admin.tenantAdminGroup.partialEmployeeGroups") }}
                   </el-radio>
                 </el-radio-group>
               </div>
               <selected-tags
-                :model-value="appRoleTags"
-                :editable="draft.appRoleScopeMode === ScopeMode.Partial"
-                :empty-text="t('admin.adminGroup.selectRole')"
+                :model-value="appEmployeeGroupTags"
+                :editable="draft.appEmployeeGroupScopeMode === ScopeMode.Partial"
+                :empty-text="t('admin.tenantAdminGroup.selectEmployeeGroup')"
                 class="select-box"
-                @editTag="openAppRoleSelect"
+                @editTag="openAppEmployeeGroupSelect"
               />
             </div>
           </div>
         </section>
 
         <section class="contact-section">
-          <div class="form-label">{{ t("admin.adminGroup.contactTitle") }}</div>
-          <div class="contact-desc">{{ t("admin.adminGroup.contactDesc") }}</div>
+          <div class="form-label">{{ t("admin.tenantAdminGroup.contactTitle") }}</div>
+          <div class="contact-desc">{{ t("admin.tenantAdminGroup.contactDesc") }}</div>
           <div class="contact-card">
             <div class="contact-card-header">
               <strong>{{ selectedGroup.name }}</strong>
@@ -254,7 +254,7 @@
             </div>
             <div class="contact-card-body">
               <div class="summary-row">
-                <strong>{{ t("admin.adminGroup.internalDept") }}</strong>
+                <strong>{{ t("admin.tenantAdminGroup.internalDept") }}</strong>
                 <span>{{ contactDepartmentSummary }}</span>
               </div>
               <selected-tags
@@ -262,12 +262,12 @@
                 :model-value="contactDeptTags"
               />
               <div class="summary-row">
-                <strong>{{ t("admin.adminGroup.internalRole") }}</strong>
-                <span>{{ contactRoleSummary }}</span>
+                <strong>{{ t("admin.tenantAdminGroup.internalEmployeeGroup") }}</strong>
+                <span>{{ contactEmployeeGroupSummary }}</span>
               </div>
               <selected-tags
-                v-if="draft.contactRoleScopeMode === ScopeMode.Partial"
-                :model-value="contactRoleTags"
+                v-if="draft.contactEmployeeGroupScopeMode === ScopeMode.Partial"
+                :model-value="contactEmployeeGroupTags"
               />
             </div>
           </div>
@@ -275,24 +275,24 @@
 
         <div class="footer-actions">
           <el-button @click="openEdit(selectedGroup)">
-            {{ t("admin.adminGroup.editName") }}
+            {{ t("admin.tenantAdminGroup.editName") }}
           </el-button>
           <el-button type="danger" plain @click="deleteGroup(selectedGroup)">
-            {{ t("admin.adminGroup.delete") }}
+            {{ t("admin.tenantAdminGroup.delete") }}
           </el-button>
           <el-button type="primary" :loading="saving" @click="savePermissions">
-            {{ t("admin.adminGroup.save") }}
+            {{ t("admin.tenantAdminGroup.save") }}
           </el-button>
         </div>
       </template>
 
-      <template v-else-if="selectedGroup?.type === AdminGroupType.Folder">
+      <template v-else-if="selectedGroup?.type === TenantAdminGroupType.Folder">
         <header class="content-header">
           <strong>{{ selectedGroup.name }}</strong>
-          <span>{{ t("admin.adminGroup.groupDesc") }}</span>
+          <span>{{ t("admin.tenantAdminGroup.groupDesc") }}</span>
         </header>
       </template>
-      <el-empty v-else :description="t('admin.adminGroup.pleaseSelectGroup')" />
+      <el-empty v-else :description="t('admin.tenantAdminGroup.pleaseSelectGroup')" />
     </main>
   </div>
 </template>
@@ -300,25 +300,25 @@
 <script setup lang="ts">
 import AppSelectDialog from "./AppSelectDialog.vue";
 import ContactPermissionDialog from "./ContactPermissionDialog.vue";
-import AdminGroupEditDialog from "./AdminGroupEditDialog.vue";
+import TenantAdminGroupEditDialog from "./TenantAdminGroupEditDialog.vue";
 import {
-  AdminGroup,
-  AdminPermissionSnapshot,
-  AdminGroupRequest,
-  AdminGroupType,
+  TenantAdminGroup,
+  TenantAccessSnapshot,
+  TenantAdminGroupRequest,
+  TenantAdminGroupType,
   AppDef,
   Department,
   Employee,
   PermissionLevel,
-  Role,
+  EmployeeGroup,
   ScopeMode,
 } from "@eimsnext/models";
 import {
-  adminGroupService,
+  tenantAdminGroupService,
   appDefService,
   departmentService,
   employeeService,
-  roleService,
+  employeeGroupService,
   systemService,
 } from "@eimsnext/services";
 import {
@@ -339,42 +339,42 @@ defineOptions({
 
 const { t } = useI18n();
 
-type AdminTreeItem = AdminGroup & { children: AdminTreeItem[] };
-type MemberDialogTarget = "systemEmployees" | "employees" | "appDepartments" | "appRoles";
+type AdminTreeItem = TenantAdminGroup & { children: AdminTreeItem[] };
+type MemberDialogTarget = "systemEmployees" | "employees" | "appDepartments" | "appEmployeeGroups";
 type AdminPermissionDraft = Pick<
-  AdminGroup,
+  TenantAdminGroup,
   | "employeeIds"
   | "appIds"
   | "canCreateOrDeleteApp"
   | "appDepartmentScopeMode"
   | "appDepartmentIds"
-  | "appRoleScopeMode"
-  | "appRoleIds"
+  | "appEmployeeGroupScopeMode"
+  | "appEmployeeGroupIds"
   | "contactDepartmentPermission"
   | "contactDepartmentScopeMode"
   | "contactDepartmentIds"
-  | "contactRolePermission"
-  | "contactRoleScopeMode"
-  | "contactRoleIds"
+  | "contactEmployeeGroupPermission"
+  | "contactEmployeeGroupScopeMode"
+  | "contactEmployeeGroupIds"
 >;
 
 const loading = ref(false);
 const saving = ref(false);
-const adminPermissions = ref<AdminPermissionSnapshot>();
+const adminPermissions = ref<TenantAccessSnapshot>();
 const keyword = ref("");
-const groups = ref<AdminGroup[]>([]);
+const groups = ref<TenantAdminGroup[]>([]);
 const treeItems = ref<AdminTreeItem[]>([]);
 const employees = ref<Employee[]>([]);
 const departments = ref<Department[]>([]);
-const roles = ref<Role[]>([]);
+const employeeGroups = ref<EmployeeGroup[]>([]);
 const apps = ref<AppDef[]>([]);
 const selectedKind = ref<"system" | "normal">("system");
 const selectedGroupId = ref("");
-const systemGroup = ref<AdminGroup>();
+const systemGroup = ref<TenantAdminGroup>();
 const systemEmployeeIds = ref<string[]>([]);
 const showGroupDialog = ref(false);
-const editingGroup = ref<AdminGroup>();
-const editingType = ref<AdminGroupType>(AdminGroupType.Normal);
+const editingGroup = ref<TenantAdminGroup>();
+const editingType = ref<TenantAdminGroupType>(TenantAdminGroupType.Normal);
 const showAppDialog = ref(false);
 const showContactDialog = ref(false);
 const showMemberDialog = ref(false);
@@ -388,21 +388,21 @@ const emptyDraft = (): AdminPermissionDraft => ({
   canCreateOrDeleteApp: false,
   appDepartmentScopeMode: ScopeMode.All,
   appDepartmentIds: [],
-  appRoleScopeMode: ScopeMode.All,
-  appRoleIds: [],
+  appEmployeeGroupScopeMode: ScopeMode.All,
+  appEmployeeGroupIds: [],
   contactDepartmentPermission: PermissionLevel.None,
   contactDepartmentScopeMode: ScopeMode.All,
   contactDepartmentIds: [],
-  contactRolePermission: PermissionLevel.None,
-  contactRoleScopeMode: ScopeMode.All,
-  contactRoleIds: [],
+  contactEmployeeGroupPermission: PermissionLevel.None,
+  contactEmployeeGroupScopeMode: ScopeMode.All,
+  contactEmployeeGroupIds: [],
 });
 
 const draft = ref<AdminPermissionDraft>(emptyDraft());
 
-const normalizeGroup = (group: AdminGroup): AdminGroup => ({
+const normalizeGroup = (group: TenantAdminGroup): TenantAdminGroup => ({
   ...group,
-  type: String(group.type ?? AdminGroupType.Normal) as AdminGroupType,
+  type: String(group.type ?? TenantAdminGroupType.Normal) as TenantAdminGroupType,
   parentId: group.parentId || "",
   sortValue: group.sortValue || 0,
   employeeIds: group.employeeIds || [],
@@ -410,8 +410,8 @@ const normalizeGroup = (group: AdminGroup): AdminGroup => ({
   canCreateOrDeleteApp: !!group.canCreateOrDeleteApp,
   appDepartmentScopeMode: String(group.appDepartmentScopeMode ?? ScopeMode.All) as ScopeMode,
   appDepartmentIds: group.appDepartmentIds || [],
-  appRoleScopeMode: String(group.appRoleScopeMode ?? ScopeMode.All) as ScopeMode,
-  appRoleIds: group.appRoleIds || [],
+  appEmployeeGroupScopeMode: String(group.appEmployeeGroupScopeMode ?? ScopeMode.All) as ScopeMode,
+  appEmployeeGroupIds: group.appEmployeeGroupIds || [],
   contactDepartmentPermission: String(
     group.contactDepartmentPermission ?? PermissionLevel.None
   ) as PermissionLevel,
@@ -419,11 +419,11 @@ const normalizeGroup = (group: AdminGroup): AdminGroup => ({
     group.contactDepartmentScopeMode ?? ScopeMode.All
   ) as ScopeMode,
   contactDepartmentIds: group.contactDepartmentIds || [],
-  contactRolePermission: String(
-    group.contactRolePermission ?? PermissionLevel.None
+  contactEmployeeGroupPermission: String(
+    group.contactEmployeeGroupPermission ?? PermissionLevel.None
   ) as PermissionLevel,
-  contactRoleScopeMode: String(group.contactRoleScopeMode ?? ScopeMode.All) as ScopeMode,
-  contactRoleIds: group.contactRoleIds || [],
+  contactEmployeeGroupScopeMode: String(group.contactEmployeeGroupScopeMode ?? ScopeMode.All) as ScopeMode,
+  contactEmployeeGroupIds: group.contactEmployeeGroupIds || [],
 });
 
 const selectedGroup = computed(() =>
@@ -432,7 +432,7 @@ const selectedGroup = computed(() =>
 
 const filteredGroups = computed(() => {
   const kw = keyword.value.trim();
-  const normalGroups = groups.value.filter((group) => group.type !== AdminGroupType.System);
+  const normalGroups = groups.value.filter((group) => group.type !== TenantAdminGroupType.System);
   if (!kw) return normalGroups;
   const folderIds = new Set(
     normalGroups
@@ -443,16 +443,16 @@ const filteredGroups = computed(() => {
   return normalGroups.filter((group) => group.name.includes(kw) || folderIds.has(group.id));
 });
 
-const buildTree = (source: AdminGroup[]): AdminTreeItem[] => {
+const buildTree = (source: TenantAdminGroup[]): AdminTreeItem[] => {
   const folders = source
-    .filter((group) => group.type === AdminGroupType.Folder)
+    .filter((group) => group.type === TenantAdminGroupType.Folder)
     .sort((a, b) => (a.sortValue || 0) - (b.sortValue || 0))
     .map((group) => ({ ...group, children: [] as AdminTreeItem[] }));
   const folderMap = new Map(folders.map((folder) => [folder.id, folder]));
   const roots: AdminTreeItem[] = [...folders];
 
   source
-    .filter((group) => group.type === AdminGroupType.Normal)
+    .filter((group) => group.type === TenantAdminGroupType.Normal)
     .sort((a, b) => (a.sortValue || 0) - (b.sortValue || 0))
     .forEach((group) => {
       const node = { ...group, children: [] as AdminTreeItem[] };
@@ -474,9 +474,9 @@ const idMap = <T extends { id: string }>(items: T[]) =>
 const employeeTags = computed(() => idsToEmployeeTags(draft.value.employeeIds));
 const systemAdminTags = computed(() => idsToEmployeeTags(systemEmployeeIds.value));
 const appDeptTags = computed(() => idsToDeptTags(draft.value.appDepartmentIds));
-const appRoleTags = computed(() => idsToRoleTags(draft.value.appRoleIds));
+const appEmployeeGroupTags = computed(() => idsToEmployeeGroupTags(draft.value.appEmployeeGroupIds));
 const contactDeptTags = computed(() => idsToDeptTags(draft.value.contactDepartmentIds));
-const contactRoleTags = computed(() => idsToRoleTags(draft.value.contactRoleIds));
+const contactEmployeeGroupTags = computed(() => idsToEmployeeGroupTags(draft.value.contactEmployeeGroupIds));
 const appTags = computed<ISelectedTag[]>(() => {
   const map = idMap(apps.value);
   return draft.value.appIds.map((id) => {
@@ -519,15 +519,15 @@ const idsToDeptTags = (ids: string[]): ISelectedTag[] => {
   });
 };
 
-const idsToRoleTags = (ids: string[]): ISelectedTag[] => {
-  const map = idMap(roles.value);
+const idsToEmployeeGroupTags = (ids: string[]): ISelectedTag[] => {
+  const map = idMap(employeeGroups.value);
   return ids.map((id) => {
-    const role = map.get(id);
+    const employeeGroup = map.get(id);
     return {
       id,
-      label: role?.name || id,
-      type: DataItemType.Role,
-      data: role,
+      label: employeeGroup?.name || id,
+      type: DataItemType.EmployeeGroup,
+      data: employeeGroup,
     };
   });
 };
@@ -536,7 +536,7 @@ const memberDialogOptions = computed(() => {
   const adminScope = adminPermissions.value?.isNormalAdmin ?? true;
   if (memberDialogTarget.value === "appDepartments")
     return { showTabs: MemberTabs.Department, adminScope };
-  if (memberDialogTarget.value === "appRoles") return { showTabs: MemberTabs.Role, adminScope };
+  if (memberDialogTarget.value === "appEmployeeGroups") return { showTabs: MemberTabs.EmployeeGroup, adminScope };
   return { showTabs: MemberTabs.Employee, adminScope };
 });
 
@@ -546,8 +546,8 @@ const memberDialogTags = computed(() => {
       return systemAdminTags.value;
     case "appDepartments":
       return appDeptTags.value;
-    case "appRoles":
-      return appRoleTags.value;
+    case "appEmployeeGroups":
+      return appEmployeeGroupTags.value;
     default:
       return employeeTags.value;
   }
@@ -557,69 +557,69 @@ const contactDraft = computed(() => ({
   contactDepartmentPermission: draft.value.contactDepartmentPermission,
   contactDepartmentScopeMode: draft.value.contactDepartmentScopeMode,
   contactDepartmentIds: draft.value.contactDepartmentIds,
-  contactRolePermission: draft.value.contactRolePermission,
-  contactRoleScopeMode: draft.value.contactRoleScopeMode,
-  contactRoleIds: draft.value.contactRoleIds,
+  contactEmployeeGroupPermission: draft.value.contactEmployeeGroupPermission,
+  contactEmployeeGroupScopeMode: draft.value.contactEmployeeGroupScopeMode,
+  contactEmployeeGroupIds: draft.value.contactEmployeeGroupIds,
   contactDepartmentEnabled: draft.value.contactDepartmentPermission === PermissionLevel.Manage,
 }));
 
 const contactDepartmentSummary = computed(() => {
   if (draft.value.contactDepartmentPermission === PermissionLevel.None)
-    return t("admin.adminGroup.notConfigured");
+    return t("admin.tenantAdminGroup.notConfigured");
   return draft.value.contactDepartmentScopeMode === ScopeMode.All
-    ? t("admin.adminGroup.viewManageAllDept")
-    : t("admin.adminGroup.viewManagePartialDept");
+    ? t("admin.tenantAdminGroup.viewManageAllDept")
+    : t("admin.tenantAdminGroup.viewManagePartialDept");
 });
 
-const contactRoleSummary = computed(() => {
-  if (draft.value.contactRolePermission === PermissionLevel.None)
-    return t("admin.adminGroup.notConfigured");
+const contactEmployeeGroupSummary = computed(() => {
+  if (draft.value.contactEmployeeGroupPermission === PermissionLevel.None)
+    return t("admin.tenantAdminGroup.notConfigured");
   const level =
-    draft.value.contactRolePermission === PermissionLevel.Manage
-      ? t("admin.adminGroup.viewManage")
-      : t("admin.adminGroup.visible");
+    draft.value.contactEmployeeGroupPermission === PermissionLevel.Manage
+      ? t("admin.tenantAdminGroup.viewManage")
+      : t("admin.tenantAdminGroup.visible");
   const scope =
-    draft.value.contactRoleScopeMode === ScopeMode.All
-      ? t("admin.adminGroup.allRoles")
-      : t("admin.adminGroup.partialRoles");
+    draft.value.contactEmployeeGroupScopeMode === ScopeMode.All
+      ? t("admin.tenantAdminGroup.allEmployeeGroups")
+      : t("admin.tenantAdminGroup.partialEmployeeGroups");
   return `${level}-${scope}`;
 });
 
 const loadData = async () => {
   loading.value = true;
   try {
-    const [adminGroups, empList, deptList, roleList, appList, permissions] = await Promise.all([
-      adminGroupService.query<AdminGroup>(),
+    const [tenantAdminGroups, empList, deptList, employeeGroupList, appList, permissions] = await Promise.all([
+      tenantAdminGroupService.query<TenantAdminGroup>(),
       employeeService.query<Employee>("$filter=status eq 0&adminScope=true"),
       departmentService.query<Department>("adminScope=true"),
-      roleService.query<Role>("adminScope=true"),
+      employeeGroupService.query<EmployeeGroup>("adminScope=true"),
       appDefService.query<AppDef>(),
       systemService.getAdminPermissions(),
     ]);
 
     adminPermissions.value = permissions;
-    groups.value = adminGroups.map(normalizeGroup);
+    groups.value = tenantAdminGroups.map(normalizeGroup);
     refreshTree();
-    systemGroup.value = groups.value.find((group) => group.type === AdminGroupType.System);
+    systemGroup.value = groups.value.find((group) => group.type === TenantAdminGroupType.System);
     systemEmployeeIds.value = systemGroup.value?.employeeIds
       ? [...systemGroup.value.employeeIds]
       : [];
     employees.value = empList;
     departments.value = deptList;
-    roles.value = roleList;
+    employeeGroups.value = employeeGroupList;
     apps.value = appList;
 
     if (selectedKind.value === "normal" && !selectedGroup.value) {
       selectedGroupId.value =
-        groups.value.find((group) => group.type === AdminGroupType.Normal)?.id || "";
+        groups.value.find((group) => group.type === TenantAdminGroupType.Normal)?.id || "";
     }
   } finally {
     loading.value = false;
   }
 };
 
-const syncDraft = (group?: AdminGroup) => {
-  if (!group || group.type !== AdminGroupType.Normal) {
+const syncDraft = (group?: TenantAdminGroup) => {
+  if (!group || group.type !== TenantAdminGroupType.Normal) {
     draft.value = emptyDraft();
     return;
   }
@@ -630,14 +630,14 @@ const syncDraft = (group?: AdminGroup) => {
     canCreateOrDeleteApp: group.canCreateOrDeleteApp,
     appDepartmentScopeMode: group.appDepartmentScopeMode,
     appDepartmentIds: [...group.appDepartmentIds],
-    appRoleScopeMode: group.appRoleScopeMode,
-    appRoleIds: [...group.appRoleIds],
+    appEmployeeGroupScopeMode: group.appEmployeeGroupScopeMode,
+    appEmployeeGroupIds: [...group.appEmployeeGroupIds],
     contactDepartmentPermission: group.contactDepartmentPermission,
     contactDepartmentScopeMode: group.contactDepartmentScopeMode,
     contactDepartmentIds: [...group.contactDepartmentIds],
-    contactRolePermission: group.contactRolePermission,
-    contactRoleScopeMode: group.contactRoleScopeMode,
-    contactRoleIds: [...group.contactRoleIds],
+    contactEmployeeGroupPermission: group.contactEmployeeGroupPermission,
+    contactEmployeeGroupScopeMode: group.contactEmployeeGroupScopeMode,
+    contactEmployeeGroupIds: [...group.contactEmployeeGroupIds],
   };
 };
 
@@ -646,19 +646,19 @@ const selectSystemAdmins = () => {
   selectedGroupId.value = "";
 };
 
-const selectGroup = (group: AdminGroup) => {
+const selectGroup = (group: TenantAdminGroup) => {
   selectedKind.value = "normal";
   selectedGroupId.value = group.id;
   syncDraft(group);
 };
 
-const openCreate = (type: AdminGroupType) => {
+const openCreate = (type: TenantAdminGroupType) => {
   editingGroup.value = undefined;
   editingType.value = type;
   showGroupDialog.value = true;
 };
 
-const openEdit = (group: AdminGroup) => {
+const openEdit = (group: TenantAdminGroup) => {
   editingGroup.value = group;
   editingType.value = group.type;
   showGroupDialog.value = true;
@@ -666,7 +666,7 @@ const openEdit = (group: AdminGroup) => {
 
 const saveGroupInfo = async (form: { name: string; description: string }) => {
   if (editingGroup.value) {
-    const updated = await adminGroupService.patch<AdminGroup>(editingGroup.value.id, {
+    const updated = await tenantAdminGroupService.patch<TenantAdminGroup>(editingGroup.value.id, {
       id: editingGroup.value.id,
       name: form.name,
       description: form.description,
@@ -678,7 +678,7 @@ const saveGroupInfo = async (form: { name: string; description: string }) => {
     return;
   }
 
-  const created = await adminGroupService.post<AdminGroup>({
+  const created = await tenantAdminGroupService.post<TenantAdminGroup>({
     id: "",
     name: form.name,
     description: form.description,
@@ -688,19 +688,19 @@ const saveGroupInfo = async (form: { name: string; description: string }) => {
   });
   groups.value.push(normalizeGroup(created));
   refreshTree();
-  if (created.type === AdminGroupType.Normal) selectGroup(normalizeGroup(created));
+  if (created.type === TenantAdminGroupType.Normal) selectGroup(normalizeGroup(created));
 };
 
-const deleteGroup = async (group: AdminGroup) => {
+const deleteGroup = async (group: TenantAdminGroup) => {
   if (
-    group.type === AdminGroupType.Folder &&
+    group.type === TenantAdminGroupType.Folder &&
     groups.value.some((item) => item.parentId === group.id)
   ) {
-    ElMessage.warning(t("admin.adminGroup.cannotDeleteWithSubgroups"));
+    ElMessage.warning(t("admin.tenantAdminGroup.cannotDeleteWithSubgroups"));
     return;
   }
 
-  await adminGroupService.delete(group.id);
+  await tenantAdminGroupService.delete(group.id);
   groups.value = groups.value.filter((item) => item.id !== group.id);
   refreshTree();
   if (selectedGroupId.value === group.id) {
@@ -725,8 +725,8 @@ const openAppDeptSelect = () => {
   showMemberDialog.value = true;
 };
 
-const openAppRoleSelect = () => {
-  memberDialogTarget.value = "appRoles";
+const openAppEmployeeGroupSelect = () => {
+  memberDialogTarget.value = "appEmployeeGroups";
   showMemberDialog.value = true;
 };
 
@@ -742,9 +742,9 @@ const finishMemberSelect = (tags: ISelectedTag[]) => {
         .filter((tag) => tag.type === DataItemType.Department)
         .map((tag) => tag.id);
       break;
-    case "appRoles":
-      draft.value.appRoleIds = tags
-        .filter((tag) => tag.type === DataItemType.Role)
+    case "appEmployeeGroups":
+      draft.value.appEmployeeGroupIds = tags
+        .filter((tag) => tag.type === DataItemType.EmployeeGroup)
         .map((tag) => tag.id);
       break;
     default:
@@ -765,34 +765,34 @@ const setContactPermission = (value: Partial<AdminPermissionDraft>) => {
     value.contactDepartmentPermission || PermissionLevel.None;
   draft.value.contactDepartmentScopeMode = value.contactDepartmentScopeMode || ScopeMode.All;
   draft.value.contactDepartmentIds = [...(value.contactDepartmentIds || [])];
-  draft.value.contactRolePermission = value.contactRolePermission || PermissionLevel.None;
-  draft.value.contactRoleScopeMode = value.contactRoleScopeMode || ScopeMode.All;
-  draft.value.contactRoleIds = [...(value.contactRoleIds || [])];
+  draft.value.contactEmployeeGroupPermission = value.contactEmployeeGroupPermission || PermissionLevel.None;
+  draft.value.contactEmployeeGroupScopeMode = value.contactEmployeeGroupScopeMode || ScopeMode.All;
+  draft.value.contactEmployeeGroupIds = [...(value.contactEmployeeGroupIds || [])];
 };
 
 const clearContactPermission = () => {
   draft.value.contactDepartmentPermission = PermissionLevel.None;
   draft.value.contactDepartmentScopeMode = ScopeMode.All;
   draft.value.contactDepartmentIds = [];
-  draft.value.contactRolePermission = PermissionLevel.None;
-  draft.value.contactRoleScopeMode = ScopeMode.All;
-  draft.value.contactRoleIds = [];
+  draft.value.contactEmployeeGroupPermission = PermissionLevel.None;
+  draft.value.contactEmployeeGroupScopeMode = ScopeMode.All;
+  draft.value.contactEmployeeGroupIds = [];
 };
 
 const saveSystemAdmins = async () => {
   if (!systemGroup.value?.id) {
-    ElMessage.warning(t("admin.adminGroup.missingSysAdminGroup"));
+    ElMessage.warning(t("admin.tenantAdminGroup.missingSysTenantAdminGroup"));
     return;
   }
 
   if (systemEmployeeIds.value.length > 5) {
-    ElMessage.warning(t("admin.adminGroup.max5SysAdmins"));
+    ElMessage.warning(t("admin.tenantAdminGroup.max5SysAdmins"));
     return;
   }
 
   saving.value = true;
   try {
-    const group = await adminGroupService.patch<AdminGroup>(systemGroup.value.id, {
+    const group = await tenantAdminGroupService.patch<TenantAdminGroup>(systemGroup.value.id, {
       id: systemGroup.value.id,
       employeeIds: systemEmployeeIds.value,
     });
@@ -800,38 +800,38 @@ const saveSystemAdmins = async () => {
     const index = groups.value.findIndex((item) => item.id === group.id);
     if (index > -1) groups.value[index] = normalizeGroup(group);
     else groups.value.push(normalizeGroup(group));
-    ElMessage.success(t("admin.adminGroup.saveSuccess"));
+    ElMessage.success(t("admin.tenantAdminGroup.saveSuccess"));
   } finally {
     saving.value = false;
   }
 };
 
 const savePermissions = async () => {
-  if (!selectedGroup.value || selectedGroup.value.type !== AdminGroupType.Normal) return;
+  if (!selectedGroup.value || selectedGroup.value.type !== TenantAdminGroupType.Normal) return;
 
   saving.value = true;
   try {
-    const payload: AdminGroupRequest = {
+    const payload: TenantAdminGroupRequest = {
       id: selectedGroup.value.id,
       employeeIds: draft.value.employeeIds,
       appIds: draft.value.appIds,
       canCreateOrDeleteApp: draft.value.canCreateOrDeleteApp,
       appDepartmentScopeMode: draft.value.appDepartmentScopeMode,
       appDepartmentIds: draft.value.appDepartmentIds,
-      appRoleScopeMode: draft.value.appRoleScopeMode,
-      appRoleIds: draft.value.appRoleIds,
+      appEmployeeGroupScopeMode: draft.value.appEmployeeGroupScopeMode,
+      appEmployeeGroupIds: draft.value.appEmployeeGroupIds,
       contactDepartmentPermission: draft.value.contactDepartmentPermission,
       contactDepartmentScopeMode: draft.value.contactDepartmentScopeMode,
       contactDepartmentIds: draft.value.contactDepartmentIds,
-      contactRolePermission: draft.value.contactRolePermission,
-      contactRoleScopeMode: draft.value.contactRoleScopeMode,
-      contactRoleIds: draft.value.contactRoleIds,
+      contactEmployeeGroupPermission: draft.value.contactEmployeeGroupPermission,
+      contactEmployeeGroupScopeMode: draft.value.contactEmployeeGroupScopeMode,
+      contactEmployeeGroupIds: draft.value.contactEmployeeGroupIds,
     };
-    const updated = await adminGroupService.patch<AdminGroup>(selectedGroup.value.id, payload);
+    const updated = await tenantAdminGroupService.patch<TenantAdminGroup>(selectedGroup.value.id, payload);
     const index = groups.value.findIndex((group) => group.id === updated.id);
     if (index > -1) groups.value[index] = normalizeGroup(updated);
     syncDraft(normalizeGroup(updated));
-    ElMessage.success(t("admin.adminGroup.saveSuccess"));
+    ElMessage.success(t("admin.tenantAdminGroup.saveSuccess"));
   } finally {
     saving.value = false;
   }
@@ -858,7 +858,7 @@ const getDragResult = (source: AdminTreeItem) => {
   }
 
   for (const folder of treeItems.value) {
-    if (folder.type !== AdminGroupType.Folder) continue;
+    if (folder.type !== TenantAdminGroupType.Folder) continue;
     const childIndex = folder.children.findIndex((item) => item.id === source.id);
     if (childIndex > -1) return { parentId: folder.id, siblings: folder.children };
   }
@@ -870,7 +870,7 @@ const moveGroup = async (source: AdminTreeItem, parentId: string, siblings: Admi
   const index = siblings.findIndex((item) => item.id === source.id);
   if (index < 0) return;
 
-  await adminGroupService.move({
+  await tenantAdminGroupService.move({
     id: source.id,
     parentId,
     previousId: siblings[index - 1]?.id || "",
@@ -911,24 +911,24 @@ const handleRootMove = (event: {
     !!event.originalEvent.target.closest(".group-drop-target");
   return !(
     onFolderTitle &&
-    target.type === AdminGroupType.Folder &&
-    source.type === AdminGroupType.Normal
+    target.type === TenantAdminGroupType.Folder &&
+    source.type === TenantAdminGroupType.Normal
   );
 };
 
 const handleChildMove = () =>
-  !keyword.value.trim() && draggingGroup.value?.type === AdminGroupType.Normal;
+  !keyword.value.trim() && draggingGroup.value?.type === TenantAdminGroupType.Normal;
 
 const dropToFolder = async (folder: AdminTreeItem) => {
   if (keyword.value.trim()) {
-    ElMessage.warning(t("admin.adminGroup.clearSearchBeforeSort"));
+    ElMessage.warning(t("admin.tenantAdminGroup.clearSearchBeforeSort"));
     return;
   }
 
   const source = draggingGroup.value;
-  if (!source || source.type !== AdminGroupType.Normal || source.id === folder.id) return;
+  if (!source || source.type !== TenantAdminGroupType.Normal || source.id === folder.id) return;
   clearDragging();
-  await adminGroupService.move({
+  await tenantAdminGroupService.move({
     id: source.id,
     parentId: folder.id,
     previousId: folder.children.at(-1)?.id || "",

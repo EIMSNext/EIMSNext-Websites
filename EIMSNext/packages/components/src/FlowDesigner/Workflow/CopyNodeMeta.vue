@@ -17,7 +17,7 @@
       :member-options="{
         showTabs:
           MemberTabs.Department |
-          MemberTabs.Role |
+          MemberTabs.EmployeeGroup |
           MemberTabs.Employee |
           MemberTabs.Dynamic,
         cascadedDept: true,

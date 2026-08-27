@@ -1,32 +1,32 @@
-﻿import { CorpModelBase, IdBase } from "./modelBase";
+import { CorpModelBase, IdBase } from "./modelBase";
 
-export interface AuthGroupRequest extends IdBase {
+export interface FormDataPermissionGroupRequest extends IdBase {
   appId?: string;
   formId?: string;
   name?: string;
   desc?: string;
-  type?: AuthGroupType;
+  type?: FormDataPermissionMode;
   members?: Member[];
-  dataPerms?: DataPerms;
+  formDataPermissions?: FormDataPermissions;
   dataFilter?: string;
-  fieldPerms?: IFieldPerm[];
+  formFieldPermissions?: FormFieldPermission[];
   disabled?: boolean;
 }
 
-export interface AuthGroup extends CorpModelBase {
+export interface FormDataPermissionGroup extends CorpModelBase {
   appId: string;
   formId: string;
   name: string;
   desc?: string;
-  type: AuthGroupType;
+  type: FormDataPermissionMode;
   members?: Member[];
-  dataPerms: DataPerms;
+  formDataPermissions: FormDataPermissions;
   dataFilter?: string;
-  fieldPerms?: IFieldPerm[];
+  formFieldPermissions?: FormFieldPermission[];
   disabled: boolean;
 }
 
-export enum AuthGroupType {
+export enum FormDataPermissionMode {
   ManageSelfData = "0",
   ViewAllData = "1",
   ManageAllData = "2",
@@ -45,10 +45,10 @@ export enum MemberType {
   None = "0",
   Department = "1",
   Employee = "2",
-  Role = "3",
+  EmployeeGroup = "3",
 }
 
-export enum DataPerms {
+export enum FormDataPermissions {
   None = 0,
   View = 1 << 0,
   AddNew = 1 << 1,
@@ -60,7 +60,7 @@ export enum DataPerms {
   All = (1 << 7) - 1,
 }
 
-export interface IFieldPerm {
+export interface FormFieldPermission {
   id: string;
   visible: boolean;
   editable: boolean;

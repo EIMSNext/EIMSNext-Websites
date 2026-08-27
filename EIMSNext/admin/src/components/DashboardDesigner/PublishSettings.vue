@@ -122,7 +122,7 @@ const publicDashboard = ref<PublicDashboardSetting>({});
 const accessCodeInput = ref("");
 
 const memberOptions = {
-  showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
+  showTabs: MemberTabs.Department | MemberTabs.EmployeeGroup | MemberTabs.Employee,
   cascadedDept: true,
   showCascade: true,
 };
@@ -260,14 +260,14 @@ function tagsToMembers(tags: ISelectedTag[]): Member[] {
 
 function memberTypeToDataItemType(type: MemberType): DataItemType {
   if (type === MemberType.Department) return DataItemType.Department;
-  if (type === MemberType.Role) return DataItemType.Role;
+  if (type === MemberType.EmployeeGroup) return DataItemType.EmployeeGroup;
   if (type === MemberType.Employee) return DataItemType.Employee;
   return DataItemType.Unknown;
 }
 
 function dataItemTypeToMemberType(type: DataItemType): MemberType {
   if (type === DataItemType.Department) return MemberType.Department;
-  if (type === DataItemType.Role) return MemberType.Role;
+  if (type === DataItemType.EmployeeGroup) return MemberType.EmployeeGroup;
   if (type === DataItemType.Employee) return MemberType.Employee;
   return MemberType.None;
 }

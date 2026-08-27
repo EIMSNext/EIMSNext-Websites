@@ -2,7 +2,7 @@ import { AccessToken } from "./token";
 import accessToken from "./token";
 import { HttpRequest } from "./httpRequest";
 import { HttpClient } from "./httpClient";
-import { AuthClient } from "./authClient";
+import { IdentityClient } from "./identityClient";
 import { ApiClient } from "./apiClient";
 import { ODataClient } from "./odataClient";
 import { UploadClient } from "./uploadClient";
@@ -22,7 +22,7 @@ export {
   AccessToken,
   HttpRequest,
   HttpClient,
-  AuthClient,
+  IdentityClient,
   ApiClient,
   ODataClient,
   UploadClient,

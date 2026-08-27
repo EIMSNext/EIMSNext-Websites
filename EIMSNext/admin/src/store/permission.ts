@@ -139,7 +139,7 @@ export const usePermissionStore = defineStore("permission", () => {
     isRoutesLoaded.value = false;
   };
 
-  bus.on("auth:logout", () => {
+  bus.on("identity:logout", () => {
     resetRouter();
   });
 

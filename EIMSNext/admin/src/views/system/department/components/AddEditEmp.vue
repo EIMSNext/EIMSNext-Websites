@@ -140,7 +140,7 @@ const rules = reactive({
     },
   ],
   departments: [{ required: true, message: t("admin.department.messages.deptRequired"), trigger: "change" }],
-  inviteId: [{ message: t("admin.department.messages.roleRequired"), trigger: "blur" }],
+  inviteId: [{ message: t("admin.department.messages.employeeGroupRequired"), trigger: "blur" }],
 });
 
 onBeforeMount(() => {

@@ -21,7 +21,7 @@
       </div>
       <div class="scope-list-panel">
         <div class="scope-list-toolbar">
-          <div class="scope-list-title">{{ t("admin.formListView.authGroups") }}</div>
+          <div class="scope-list-title">{{ t("admin.formListView.permissionGroups") }}</div>
           <el-input v-model="keyword" class="scope-search" :placeholder="t('common.search')" clearable>
             <template #prefix>
               <el-icon><Search /></el-icon>
@@ -53,13 +53,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { Lock, Search } from "@element-plus/icons-vue";
-import { AuthGroup, FormListView } from "@eimsnext/models";
+import { FormDataPermissionGroup, FormListView } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   modelValue: boolean;
   view: FormListView;
-  authGroups: AuthGroup[];
+  permissionGroups: FormDataPermissionGroup[];
 }>();
 
 const emit = defineEmits(["update:modelValue", "ok", "cancel"]);
@@ -70,19 +70,19 @@ const keyword = ref("");
 watch(
   () => props.view,
   () => {
-    selectedIds.value = [...(props.view.authGroupIds || [])];
+    selectedIds.value = [...(props.view.permissionGroupIds || [])];
   },
   { immediate: true },
 );
 
 const filteredGroups = computed(() => {
   const key = keyword.value.trim();
-  if (!key) return props.authGroups;
-  return props.authGroups.filter((group) => group.name.includes(key));
+  if (!key) return props.permissionGroups;
+  return props.permissionGroups.filter((group) => group.name.includes(key));
 });
 
-const selectedGroups = computed(() => props.authGroups.filter((group) => selectedIds.value.includes(group.id)));
-const isAllSelected = computed(() => props.authGroups.length > 0 && props.authGroups.every((group) => selectedIds.value.includes(group.id)));
+const selectedGroups = computed(() => props.permissionGroups.filter((group) => selectedIds.value.includes(group.id)));
+const isAllSelected = computed(() => props.permissionGroups.length > 0 && props.permissionGroups.every((group) => selectedIds.value.includes(group.id)));
 
 const toggleGroup = (id: string, checked: boolean) => {
   selectedIds.value = checked
@@ -91,7 +91,7 @@ const toggleGroup = (id: string, checked: boolean) => {
 };
 
 const selectAll = () => {
-  selectedIds.value = isAllSelected.value ? [] : props.authGroups.map((group) => group.id);
+  selectedIds.value = isAllSelected.value ? [] : props.permissionGroups.map((group) => group.id);
 };
 
 const save = () => {

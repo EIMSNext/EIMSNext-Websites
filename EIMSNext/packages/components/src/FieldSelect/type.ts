@@ -9,7 +9,7 @@ import {
   getFlowStatus,
   getCreateBy,
   getCreateTime,
-  IFieldPerm,
+  FormFieldPermission,
   ValueOption,
 } from "@eimsnext/models";
 

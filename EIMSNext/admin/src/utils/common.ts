@@ -1,9 +1,9 @@
 import {
   AppDef,
   AppMenu,
-  AuthGroup,
-  AuthGroupType,
-  DataPerms,
+  FormDataPermissionGroup,
+  FormDataPermissionMode,
+  FormDataPermissions,
   FormDef,
   FormType,
 } from "@eimsnext/models";
@@ -11,23 +11,23 @@ import { useFormStore } from "@eimsnext/store";
 import { appSetting, FlagEnum } from "@eimsnext/utils";
 import dayjs from "dayjs";
 
-export function getAuthGroupDataPerms(authGrp?: AuthGroup) {
-  if (authGrp) {
-    switch (authGrp.type) {
-      case AuthGroupType.ManageSelfData:
-      case AuthGroupType.ManageAllData:
-        return DataPerms.All;
-      case AuthGroupType.ViewAllData:
-        return DataPerms.View;
+export function getFormDataPermissionGroupFormDataPermissions(permissionGroup?: FormDataPermissionGroup) {
+  if (permissionGroup) {
+    switch (permissionGroup.type) {
+      case FormDataPermissionMode.ManageSelfData:
+      case FormDataPermissionMode.ManageAllData:
+        return FormDataPermissions.All;
+      case FormDataPermissionMode.ViewAllData:
+        return FormDataPermissions.View;
       default:
-        return authGrp.dataPerms;
+        return permissionGroup.formDataPermissions;
     }
   }
 
   return undefined;
 }
-export function hasDataPerm(needPerm: DataPerms, dataPerms?: DataPerms) {
-  return (dataPerms && FlagEnum.has(dataPerms, needPerm)) == true;
+export function hasDataPerm(needPerm: FormDataPermissions, formDataPermissions?: FormDataPermissions) {
+  return (formDataPermissions && FlagEnum.has(formDataPermissions, needPerm)) == true;
 }
 
 export function getAppIcon(app?: AppDef) {
@@ -117,3 +117,4 @@ export function translateRouteTitle(t: any, title: string, te?: (key: string) =>
   const routeKey = `route.${title}`;
   return te(routeKey) ? t(routeKey) : title;
 }
+

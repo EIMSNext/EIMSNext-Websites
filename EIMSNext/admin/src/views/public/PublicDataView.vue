@@ -21,7 +21,7 @@
         :data="data"
         :is-view="true"
         :is-public="true"
-        :field-perms="fieldPerms"
+        :field-perms="formFieldPermissions"
       />
     </div>
 
@@ -53,7 +53,7 @@ import {
 import FormView from "@/components/FormView/index.vue";
 import { PublicNotFound, bootstrapWithToken, toAccessCodeError, usePublicHttp, type PublicHttp } from "./shared";
 import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
-import { IFieldPerm } from "@eimsnext/models";
+import { FormFieldPermission } from "@eimsnext/models";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -97,7 +97,7 @@ const unsupportedFields = ref<FieldDef[]>([]);
 const loading = ref(false);
 const formViewKey = ref("");
 
-const fieldPerms = computed<IFieldPerm[] | undefined>(() => {
+const formFieldPermissions = computed<FormFieldPermission[] | undefined>(() => {
   if (props.allowedFields?.length) {
     return props.allowedFields.map((field) => ({ id: field, visible: true, editable: false }));
   }

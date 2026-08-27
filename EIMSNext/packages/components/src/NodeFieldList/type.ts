@@ -5,7 +5,7 @@ import {
   toFormFieldDef,
 } from "../FieldSelect/type";
 import { DataItemType, ITreeNode } from "../common";
-import { FieldDef, FieldType, FormDef, IFieldPerm } from "@eimsnext/models";
+import { FieldDef, FieldType, FormDef, FormFieldPermission } from "@eimsnext/models";
 
 export interface INodeForm {
   nodeId: string;
@@ -39,7 +39,7 @@ export interface IFormFieldMap {
 export interface IFieldLimit {
   limitField?: string;
   limitType?: FieldLimitType;
-  fieldPerms?: IFieldPerm[];
+  formFieldPermissions?: FormFieldPermission[];
   excludeFieldTypes?: FieldType[];
 }
 export enum FieldLimitType {
@@ -121,8 +121,8 @@ export function buildNodeFieldTree(
   const fieldDataType = getConditionFieldType(fieldDef?.type);
   const fieldMapping = setting.fieldMapping || {};
   const canViewField = (field: string) =>
-    setting.fieldLimit?.fieldPerms === undefined ||
-    setting.fieldLimit.fieldPerms.some((permission) => permission.id === field && permission.visible);
+    setting.fieldLimit?.formFieldPermissions === undefined ||
+    setting.fieldLimit.formFieldPermissions.some((permission) => permission.id === field && permission.visible);
   const hasFieldMapping =
     setting.fieldMapping != null && setting.fieldMapping != undefined;
 

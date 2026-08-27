@@ -8,8 +8,8 @@ import {
 } from "@eimsnext/models";
 import {
   appDefService,
-  authGroupService,
-  authService,
+  formDataPermissionGroupService,
+  identityService,
   formDataService,
   formDefService,
   formListViewService,
@@ -32,9 +32,9 @@ const buildODataQuery = (filter?: string, skip = 0, top = 20, orderby?: string) 
   return query;
 };
 
-export const mobileAuthService = {
+export const mobileIdentityService = {
   login(request: LoginRequest) {
-    return authService.login(request);
+    return identityService.login(request);
   },
   getCurrentUser() {
     return systemService.getCurrentUser();
@@ -66,23 +66,23 @@ export const formListViewServiceMobile = {
 };
 
 export const formDataServiceMobile = {
-  query(formId: string, skip = 0, top = 20, filter?: any, sort?: any, authGroupId?: string): Promise<FormData[]> {
+  query(formId: string, skip = 0, top = 20, filter?: any, sort?: any, permissionGroupId?: string): Promise<FormData[]> {
     return formDataService.dynamicQuery<FormData>({
       skip,
       take: top,
       filter: filter || `formId eq '${formId}'`,
       sort: sort || "createTime desc",
-      scope: authGroupId ? { authGroupId } : undefined,
+      scope: permissionGroupId ? { permissionGroupId } : undefined,
     });
   },
-  count(formId: string, filter?: any, authGroupId?: string): Promise<number> {
+  count(formId: string, filter?: any, permissionGroupId?: string): Promise<number> {
     return formDataService.dynamicCount({
       filter: filter || `formId eq '${formId}'`,
-      scope: authGroupId ? { authGroupId } : undefined,
+      scope: permissionGroupId ? { permissionGroupId } : undefined,
     });
   },
-  get(dataId: string, authGroupId?: string): Promise<FormData> {
-    return formDataService.get<FormData>(dataId, authGroupId ? { authGroupId } : undefined);
+  get(dataId: string, permissionGroupId?: string): Promise<FormData> {
+    return formDataService.get<FormData>(dataId, permissionGroupId ? { permissionGroupId } : undefined);
   },
   post(form: FormDef, data: Record<string, unknown>, action: DataAction): Promise<FormData> {
     return formDataService.post<FormData>({
@@ -104,9 +104,9 @@ export const formDataServiceMobile = {
   },
 };
 
-export const authGroupServiceMobile = {
+export const formDataPermissionGroupServiceMobile = {
   getAssigned(formId: string) {
-    return authGroupService.getAssigned(formId);
+    return formDataPermissionGroupService.getAssigned(formId);
   },
 };
 

@@ -1,7 +1,7 @@
 import { CorpModelBase } from "./modelBase";
 
 export enum ExportType {
-  AuditLogin = 0,
+  IdentityLoginAudit = 0,
   AuditLog = 1,
   FormData = 2,
 }
@@ -30,7 +30,7 @@ export interface ExportColumn {
   type: ExportColumnType;
 }
 
-export interface AuditLoginExportRequest {
+export interface IdentityLoginAuditExportRequest {
   format: ExportFormat;
   columns: ExportColumn[];
   userName?: string;
@@ -53,7 +53,7 @@ export interface FormDataExportRequest {
   columns: ExportColumn[];
   formId: string;
   filter?: any;
-  authGroupId?: string;
+  permissionGroupId?: string;
   keyword?: string;
   searchFields?: string[];
   includeDeleted?: boolean;

@@ -48,7 +48,7 @@ import enUS from 'vant/es/locale/lang/en-US'
 import zhCN from 'vant/es/locale/lang/zh-CN'
 import { useI18n } from 'vue-i18n'
 import type { LoginRequest } from '@eimsnext/services'
-import { mobileAuthService } from '@/services/mobileService'
+import { mobileIdentityService } from '@/services/mobileService'
 import { toggleDarkMode } from '@eimsnext/utils'
 import { useUserStoreHook } from '@eimsnext/store'
 
@@ -89,7 +89,7 @@ const toggleTheme = () => {
 const handleLogin = async () => {
   loading.value = true
   try {
-    await mobileAuthService.login(loginData.value)
+    await mobileIdentityService.login(loginData.value)
     try {
       await useUserStoreHook().initialize(true)
     } catch (e) {

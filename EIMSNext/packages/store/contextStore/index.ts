@@ -111,7 +111,7 @@ export const useContextStore = defineStore("context", () => {
     updateAppChanged();
   };
 
-  bus.on("auth:logout", clearAll);
+  bus.on("identity:logout", clearAll);
 
   return {
     corpId,

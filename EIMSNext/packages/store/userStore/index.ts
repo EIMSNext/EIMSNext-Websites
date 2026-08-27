@@ -3,7 +3,7 @@ import { accessToken, http, bus } from "@eimsnext/utils";
 import { CurrentUser, UserType } from "@eimsnext/models";
 import { useStorage } from "@vueuse/core";
 import { store } from "../setup";
-import { authService, systemService, LoginRequest } from "@eimsnext/services";
+import { identityService, systemService, LoginRequest } from "@eimsnext/services";
 import { useAppStoreHook } from "../genericStore/appDefStore";
 import { useFormStoreHook } from "../genericStore/formStore";
 import { useDeptStoreHook } from "../genericStore/deptStore";
@@ -54,7 +54,7 @@ export const useUserStore = defineStore("currentuser", () => {
   };
 
   const login = (request: LoginRequest) => {
-    return authService.login(request);
+    return identityService.login(request);
   };
 
   // const switchCorp = () => { }
@@ -62,7 +62,7 @@ export const useUserStore = defineStore("currentuser", () => {
   const logout = async () => {
     try {
       if (accessToken.get()) {
-        await authService.logout();
+        await identityService.logout();
       }
     } catch {
       // Local session cleanup must complete even when the server rejects an expired token.
@@ -70,7 +70,7 @@ export const useUserStore = defineStore("currentuser", () => {
       accessToken.clear();
       currentUser.value = new CurrentUser();
       initialized.value = false;
-      bus.emit("auth:logout");
+      bus.emit("identity:logout");
     }
   };
   //getters

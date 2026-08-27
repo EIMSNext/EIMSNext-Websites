@@ -45,8 +45,8 @@
           v-if="showRawDialog && selectedDataId && formDef && (!setting.inheritDataActionPerms || !rawDialogLoading)"
           :formId="setting.datasource.id"
           :dataId="selectedDataId"
-          :dataPerms="rawDataPerms"
-          :fieldPerms="rawFieldPerms"
+          :formDataPermissions="rawFormDataPermissions"
+          :formFieldPermissions="rawFormFieldPermissions"
           @ok="handleRawDetailOk"
         />
       </div>
@@ -125,13 +125,13 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { buildFieldListItems, buildSortFieldListItems, findFieldDef, flattenDataItem, formatFormValue, IConditionList, IFieldSortList, toDynamicFilter } from "@eimsnext/components";
 import {
-  DataPerms,
+  FormDataPermissions,
   DashboardItemDef,
   FieldType,
   FlowStatus,
   FormData,
   FormDef,
-  IFieldPerm,
+  FormFieldPermission,
   ITableColumn,
   SystemField,
 } from "@eimsnext/models";
@@ -196,7 +196,7 @@ const showRawDialog = ref(false);
 const rawDialogLoading = ref(false);
 const selectedDataId = ref("");
 const permissionScope = ref<IFormDataPermissionScopeResponse>();
-const noAccessFieldPerms = ref<IFieldPerm[]>([]);
+const noAccessFormFieldPermissions = ref<FormFieldPermission[]>([]);
 
 const flowStatusMap: Record<number, string> = {
   [FlowStatus.Draft]: "draft",
@@ -211,27 +211,27 @@ const effectiveFixedColumns = computed(() => {
   return isMobile.value ? props.setting.fixedMobileColumns || 0 : props.setting.fixedLeftColumns || 0;
 });
 
-const rawDataPerms = computed(() => {
-  return props.setting.inheritDataActionPerms ? permissionScope.value?.dataPerms ?? DataPerms.None : DataPerms.None;
+const rawFormDataPermissions = computed(() => {
+  return props.setting.inheritDataActionPerms ? permissionScope.value?.formDataPermissions ?? FormDataPermissions.None : FormDataPermissions.None;
 });
 
-const rawFieldPerms = computed<IFieldPerm[] | undefined>(() => {
+const rawFormFieldPermissions = computed<FormFieldPermission[] | undefined>(() => {
   if (!props.setting.inheritDataActionPerms) {
     return undefined;
   }
 
-  if (permissionScope.value?.dataPerms === DataPerms.None && (permissionScope.value.fieldPerms?.length || 0) === 0) {
-    return noAccessFieldPerms.value;
+  if (permissionScope.value?.formDataPermissions === FormDataPermissions.None && (permissionScope.value.formFieldPermissions?.length || 0) === 0) {
+    return noAccessFormFieldPermissions.value;
   }
 
-  return permissionScope.value?.fieldPerms || undefined;
+  return permissionScope.value?.formFieldPermissions || undefined;
 });
 
 const updateViewportState = () => {
   isMobile.value = window.innerWidth <= 768;
 };
 
-const buildNoAccessFieldPerms = (form: FormDef): IFieldPerm[] => {
+const buildNoAccessFormFieldPermissions = (form: FormDef): FormFieldPermission[] => {
   return buildFieldListItems(form.id, form.content?.items || [], !!form.usingWorkflow, undefined, { t } as any)
     .map((item) => item.data)
     .filter(Boolean)
@@ -262,7 +262,7 @@ const loadFormContext = async () => {
     formDef.value = undefined;
     columns.value = [];
     sortFields.value = [];
-    noAccessFieldPerms.value = [];
+    noAccessFormFieldPermissions.value = [];
     return;
   }
 
@@ -273,7 +273,7 @@ const loadFormContext = async () => {
   if (!form) {
     columns.value = [];
     sortFields.value = [];
-    noAccessFieldPerms.value = [];
+    noAccessFormFieldPermissions.value = [];
     return;
   }
 
@@ -292,7 +292,7 @@ const loadFormContext = async () => {
       .map((item) => item.data)
       .filter(Boolean);
   }
-  noAccessFieldPerms.value = buildNoAccessFieldPerms(form);
+  noAccessFormFieldPermissions.value = buildNoAccessFormFieldPermissions(form);
 };
 
 const buildQueryOptions = null; // (legacy formDataService path removed — use buildAggRequest)
@@ -513,8 +513,8 @@ const openRawData = async (record: FormData) => {
     }
   } catch {
     permissionScope.value = {
-      dataPerms: DataPerms.None,
-      fieldPerms: [],
+      formDataPermissions: FormDataPermissions.None,
+      formFieldPermissions: [],
     };
   } finally {
     rawDialogLoading.value = false;

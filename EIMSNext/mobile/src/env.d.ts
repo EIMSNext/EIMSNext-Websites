@@ -9,7 +9,7 @@ declare global {
     appSetting?: {
       clientId?: string;
       publicClientId?: string;
-      authUrl?: string;
+      identityUrl?: string;
       apiUrl?: string;
       uploadUrl?: string;
       tokenKey?: string;

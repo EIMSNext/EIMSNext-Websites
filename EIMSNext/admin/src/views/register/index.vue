@@ -118,7 +118,7 @@ import router from "@/router";
 import { Themes } from "@/enums/Themes";
 import { useSettingsStore } from "@/store";
 import { useUserStore } from "@eimsnext/store";
-import { authService, LoginRequest } from "@eimsnext/services";
+import { identityService, LoginRequest } from "@eimsnext/services";
 import { getPasswordStrengthMessage, getPasswordStrengthState, isStrongPassword } from "@/utils/password";
 
 type RegisterType = "phone" | "email";
@@ -225,7 +225,7 @@ async function handleSendCode() {
   }
 
   const target = registerType.value === "phone" ? registerForm.phone : registerForm.email;
-  await authService.sendRegCode({
+  await identityService.sendRegCode({
     type: registerType.value,
     target,
   });
@@ -241,7 +241,7 @@ async function handleRegisterSubmit() {
 
   loading.value = true;
   try {
-    await authService.register({
+    await identityService.register({
       type: registerType.value,
       phone: registerType.value === "phone" ? registerForm.phone : undefined,
       email: registerType.value === "email" ? registerForm.email : undefined,

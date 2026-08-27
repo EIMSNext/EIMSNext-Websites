@@ -71,11 +71,11 @@ export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
     dataId: string,
     skip = 0,
     top = 20,
-    authGroupId?: string,
+    permissionGroupId?: string,
     options?: { silentError?: boolean }
   ): Promise<FormDataChangeLog[]> {
     const params: Record<string, unknown> = { skip, top };
-    if (authGroupId) params.authGroupId = authGroupId;
+    if (permissionGroupId) params.permissionGroupId = permissionGroupId;
 
     const result = await this.http().api.get<{ value: FormDataChangeLog[] }>(
       `/FormData/${dataId}/changelog`,
@@ -86,9 +86,9 @@ export class FormDataService extends ApiServiceBase<FormData, FormDataRequest> {
     return result.value;
   }
 
-  countChangeLogs(dataId: string, authGroupId?: string): Promise<number> {
+  countChangeLogs(dataId: string, permissionGroupId?: string): Promise<number> {
     const params: Record<string, unknown> = {};
-    if (authGroupId) params.authGroupId = authGroupId;
+    if (permissionGroupId) params.permissionGroupId = permissionGroupId;
 
     return this.http().api.get<number>(`/FormData/${dataId}/changelog/$count`, params);
   }

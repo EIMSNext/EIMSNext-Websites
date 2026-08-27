@@ -121,8 +121,8 @@ export function convertItemTypeToCandidateType(tagType: DataItemType): Candidate
     case DataItemType.Department:
       candidateType = CandidateType.Department;
       break;
-    case DataItemType.Role:
-      candidateType = CandidateType.Role;
+    case DataItemType.EmployeeGroup:
+      candidateType = CandidateType.EmployeeGroup;
       break;
     case DataItemType.Employee:
       candidateType = CandidateType.Employee;
@@ -144,8 +144,8 @@ export function convertCandidateTypeToItemType(
     case CandidateType.Department:
       tagType = DataItemType.Department;
       break;
-    case CandidateType.Role:
-      tagType = DataItemType.Role;
+    case CandidateType.EmployeeGroup:
+      tagType = DataItemType.EmployeeGroup;
       break;
     case CandidateType.Employee:
       tagType = DataItemType.Employee;

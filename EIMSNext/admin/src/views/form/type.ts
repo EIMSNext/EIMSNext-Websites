@@ -2,7 +2,7 @@ import { IFormFieldDef } from "@eimsnext/components";
 import {
   FieldDef,
   FieldType,
-  IFieldPerm,
+  FormFieldPermission,
   SystemField,
   getDataTitle,
   getCreateBy,
@@ -18,12 +18,12 @@ export function buildColumns(
   fields: FieldDef[],
   usingWf: boolean,
   displayFields: IFormFieldDef[],
-  fieldPerms?: IFieldPerm[],
+  formFieldPermissions?: FormFieldPermission[],
   t?: (key: string) => string,
 ): ITableColumn[] {
   const canViewField = (field: string) =>
-    fieldPerms === undefined ||
-    fieldPerms.some((permission) => permission.id === field && permission.visible);
+    formFieldPermissions === undefined ||
+    formFieldPermissions.some((permission) => permission.id === field && permission.visible);
   const getSystemFieldLabel = (key: "dataTitle" | "flowStatus" | "createBy" | "createTime") =>
     t ? t(`comp.fieldBlock.systemFields.${key}`) : ({
       dataTitle: "数据标题",
@@ -31,7 +31,7 @@ export function buildColumns(
       createBy: "提交人",
       createTime: "提交时间",
     }[key]);
-  const dispalyAll = displayFields.length == 0 && fieldPerms === undefined;
+  const dispalyAll = displayFields.length == 0 && formFieldPermissions === undefined;
   const subDisplayFields = new Dictionary();
   displayFields.forEach((d) => {
     if (d.isSubField) {
@@ -103,7 +103,7 @@ export function buildColumns(
           x.columns,
           dispalyAll,
           subDisplayFields.get(x.field),
-          fieldPerms,
+          formFieldPermissions,
         );
       } else {
         col.width = 120;
@@ -144,7 +144,7 @@ function buildSubColumns(
   fields: FieldDef[],
   dispalyAll: boolean,
   subDisplayFields?: IFormFieldDef[],
-  fieldPerms?: IFieldPerm[],
+  formFieldPermissions?: FormFieldPermission[],
 ): ITableColumn[] {
   const columns: ITableColumn[] = [];
   if (dispalyAll || subDisplayFields) {
@@ -154,8 +154,8 @@ function buildSubColumns(
       }
 
       const fieldId = `${pField}>${x.field}`;
-      const canView = fieldPerms === undefined ||
-        fieldPerms.some((permission) => permission.id === fieldId && permission.visible);
+      const canView = formFieldPermissions === undefined ||
+        formFieldPermissions.some((permission) => permission.id === fieldId && permission.visible);
       if (canView && (dispalyAll || subDisplayFields?.find((d) => d.field == x.field))) {
         let col: ITableColumn = {
           field: x.field,
@@ -165,7 +165,7 @@ function buildSubColumns(
           oriField: `${pField}>${x.field}`,
         };
         if (x.columns && x.columns.length > 0) {
-          col.children = buildSubColumns(fieldId, x.columns, dispalyAll, undefined, fieldPerms);
+          col.children = buildSubColumns(fieldId, x.columns, dispalyAll, undefined, formFieldPermissions);
         } else {
           col.width = 120;
         }

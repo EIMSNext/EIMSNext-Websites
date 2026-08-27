@@ -1,5 +1,5 @@
 window.appSetting = {
-  authUrl: "http://localhost:9999/jlauth",
+  identityUrl: "http://localhost:9999/jlauth",
   // apiUrl: "https://localhost:8899",
   apiUrl: "http://localhost:9999/jlapi",
   uploadUrl: "http://localhost:9999/jlupload",

@@ -1,6 +1,6 @@
 import { CorpModelBase, IdBase } from "./modelBase";
 
-export enum AdminGroupType {
+export enum TenantAdminGroupType {
   Normal = "0",
   Folder = "1",
   System = "2",
@@ -17,10 +17,10 @@ export enum PermissionLevel {
   Manage = "2",
 }
 
-export interface AdminGroupRequest extends IdBase {
+export interface TenantAdminGroupRequest extends IdBase {
   name?: string;
   description?: string;
-  type?: AdminGroupType;
+  type?: TenantAdminGroupType;
   parentId?: string;
   sortValue?: number;
   employeeIds?: string[];
@@ -28,20 +28,20 @@ export interface AdminGroupRequest extends IdBase {
   canCreateOrDeleteApp?: boolean;
   appDepartmentScopeMode?: ScopeMode;
   appDepartmentIds?: string[];
-  appRoleScopeMode?: ScopeMode;
-  appRoleIds?: string[];
+  appEmployeeGroupScopeMode?: ScopeMode;
+  appEmployeeGroupIds?: string[];
   contactDepartmentPermission?: PermissionLevel;
   contactDepartmentScopeMode?: ScopeMode;
   contactDepartmentIds?: string[];
-  contactRolePermission?: PermissionLevel;
-  contactRoleScopeMode?: ScopeMode;
-  contactRoleIds?: string[];
+  contactEmployeeGroupPermission?: PermissionLevel;
+  contactEmployeeGroupScopeMode?: ScopeMode;
+  contactEmployeeGroupIds?: string[];
 }
 
-export interface AdminGroup extends CorpModelBase {
+export interface TenantAdminGroup extends CorpModelBase {
   name: string;
   description?: string;
-  type: AdminGroupType;
+  type: TenantAdminGroupType;
   parentId: string;
   sortValue: number;
   employeeIds: string[];
@@ -49,36 +49,36 @@ export interface AdminGroup extends CorpModelBase {
   canCreateOrDeleteApp: boolean;
   appDepartmentScopeMode: ScopeMode;
   appDepartmentIds: string[];
-  appRoleScopeMode: ScopeMode;
-  appRoleIds: string[];
+  appEmployeeGroupScopeMode: ScopeMode;
+  appEmployeeGroupIds: string[];
   contactDepartmentPermission: PermissionLevel;
   contactDepartmentScopeMode: ScopeMode;
   contactDepartmentIds: string[];
-  contactRolePermission: PermissionLevel;
-  contactRoleScopeMode: ScopeMode;
-  contactRoleIds: string[];
+  contactEmployeeGroupPermission: PermissionLevel;
+  contactEmployeeGroupScopeMode: ScopeMode;
+  contactEmployeeGroupIds: string[];
 }
 
-export interface AdminPermissionSnapshot {
+export interface TenantAccessSnapshot {
   isNormalAdmin: boolean;
   canCreateOrDeleteApp: boolean;
   manageableAppIds: string[];
   deletableAppIds: string[];
   appDepartmentScopeMode: ScopeMode;
   appDepartmentIds: string[];
-  appRoleScopeMode: ScopeMode;
-  appRoleIds: string[];
+  appEmployeeGroupScopeMode: ScopeMode;
+  appEmployeeGroupIds: string[];
   contactViewDepartmentScopeMode: ScopeMode;
   contactViewDepartmentIds: string[];
   contactManageDepartmentScopeMode: ScopeMode;
   contactManageDepartmentIds: string[];
-  contactViewRoleScopeMode: ScopeMode;
-  contactViewRoleIds: string[];
-  contactManageRoleScopeMode: ScopeMode;
-  contactManageRoleIds: string[];
+  contactViewEmployeeGroupScopeMode: ScopeMode;
+  contactViewEmployeeGroupIds: string[];
+  contactManageEmployeeGroupScopeMode: ScopeMode;
+  contactManageEmployeeGroupIds: string[];
 }
 
-export interface MoveAdminGroupRequest {
+export interface MoveTenantAdminGroupRequest {
   id: string;
   parentId: string;
   previousId?: string;

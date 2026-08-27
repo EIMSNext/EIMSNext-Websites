@@ -321,7 +321,7 @@ async function buildPublicSystemValues(): Promise<Record<string, any>> {
 }
 
 async function loadWechatUserInfo(): Promise<any> {
-  return await http.auth.post(
+  return await http.identity.post(
     "/WeChat/UserInfo",
     {
       code: wechatCode.value,

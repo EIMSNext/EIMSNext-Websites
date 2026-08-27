@@ -1,4 +1,4 @@
-import { Member } from "./authGroup";
+import { Member } from "./formDataPermissionGroup";
 import { CorpModelBase, IdBase } from "./modelBase";
 
 export interface DashboardDefRequest extends IdBase {

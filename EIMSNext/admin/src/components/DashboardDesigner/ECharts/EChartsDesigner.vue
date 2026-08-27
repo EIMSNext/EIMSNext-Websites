@@ -24,7 +24,7 @@
               <span>{{ t("admin.dashboardChartDesigner.dataAccess") }}</span>
             </div>
             <div class="data-source-title">
-              <el-select v-model="selectedRole" @change="roleChanged">
+              <el-select v-model="selectedEmployeeGroup" @change="employeeGroupChanged">
                 <el-option :label="t('admin.dashboardChartDesigner.allFormData')" value="1"></el-option>
                 <el-option :label="t('admin.dashboardChartDesigner.inheritFormPerms')" value="2"></el-option>
               </el-select>
@@ -347,7 +347,7 @@ const props = defineProps<{
 
 const chartConfigs = getChartConfigs();
 const chartSetting = reactive<IChartSetting>(JSON.parse(props.dashItemDef.details));
-const selectedRole = ref("1");
+const selectedEmployeeGroup = ref("1");
 const formItem = ref<IFormItem>();
 const formStore = useFormStore();
 const formDef = ref<FormDef>();
@@ -416,7 +416,7 @@ const handleSourceOk = async (source: IDataSource) => {
   populateDatasourceFields();
 };
 
-const roleChanged = () => {};
+const employeeGroupChanged = () => {};
 
 const activeCollItems = ref(["charttype"]);
 const activeSettingItems = ref(["chartsubtype", "datatake"]);

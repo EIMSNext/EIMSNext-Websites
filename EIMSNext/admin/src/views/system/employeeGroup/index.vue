@@ -1,10 +1,10 @@
 <!-- 用户管理 -->
 <template>
-  <div class="role-manager-container">
+  <div class="employeeGroup-manager-container">
     <div class="main-row">
-      <!-- 角色树 -->
-      <div class="role-tree-col">
-        <role-tree :editable="isUnrestrictedAdmin" admin-scope @role-click="handleRoleQuery" />
+      <!-- 员工组树 -->
+      <div class="employeeGroup-tree-col">
+        <employeeGroup-tree :editable="isUnrestrictedAdmin" admin-scope @employeeGroup-click="handleEmployeeGroupQuery" />
       </div>
       <!-- 用户列表 -->
       <div class="emp-list-col">
@@ -24,11 +24,11 @@
               @selection-change="handleSelectionChange"
             >
               <el-table-column type="selection" width="40" />
-          <el-table-column :label="$t('admin.role.name')" width="150" prop="empName" />
-          <el-table-column :label="$t('admin.role.code')" width="150" prop="code" />
+          <el-table-column :label="$t('admin.employeeGroup.name')" width="150" prop="empName" />
+          <el-table-column :label="$t('admin.employeeGroup.code')" width="150" prop="code" />
           <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
           <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
-          <el-table-column :label="$t('admin.role.dept')">
+          <el-table-column :label="$t('admin.employeeGroup.dept')">
             <template #default="scope">
               {{ formatDepartments(scope.row as Employee) }}
             </template>
@@ -90,8 +90,8 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { AdminPermissionSnapshot, Employee, FieldType, Role, ScopeMode, UserType } from "@eimsnext/models";
-import { SortDirection, employeeService, roleService, systemService } from "@eimsnext/services";
+import { TenantAccessSnapshot, Employee, FieldType, EmployeeGroup, ScopeMode, UserType } from "@eimsnext/models";
+import { SortDirection, employeeService, employeeGroupService, systemService } from "@eimsnext/services";
 import { useUserStore } from "@eimsnext/store";
 import buildQuery from "odata-query";
 import {
@@ -111,7 +111,7 @@ const { t } = useI18n();
 const userStore = useUserStore();
 
 defineOptions({
-  name: "RoleManager",
+  name: "EmployeeGroupManager",
   inheritAttrs: false,
 });
 
@@ -123,7 +123,7 @@ const showSort = ref(false);
 const sortList = ref<IFieldSortList>({
   items: [
     {
-      field: { formId: "employee", field: "empName", label: t("admin.role.name"), type: FieldType.Input },
+      field: { formId: "employee", field: "empName", label: t("admin.employeeGroup.name"), type: FieldType.Input },
       sort: SortDirection.Asc,
     },
   ],
@@ -145,7 +145,7 @@ const leftBars = ref<ToolbarItem[]>([
       visible: true,
       icon: "el-plus",
       onCommand: () => {
-        if (!canManageRoleMembers.value) return;
+        if (!canManageEmployeeGroupMembers.value) return;
 
         showMemberDialog.value = true;
       },
@@ -154,14 +154,14 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: t("admin.role.toolbar.remove"),
+      text: t("admin.employeeGroup.toolbar.remove"),
       class: "delete-button",
       command: "delete",
       visible: true,
       icon: "el-delete",
       disabled: true,
       onCommand: async () => {
-        if (!canManageRoleMembers.value) return;
+        if (!canManageEmployeeGroupMembers.value) return;
 
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(
@@ -169,9 +169,9 @@ const leftBars = ref<ToolbarItem[]>([
             { title: t("common.message.deleteConfirm_Title") }
           );
           if (confirm == ConfirmResult.Yes) {
-            await roleService
+            await employeeGroupService
               .removeEmps(
-                roleId.value,
+                employeeGroupId.value,
                 checkedDatas.value.map((x) => x.id)
               )
               .then(() => {
@@ -243,15 +243,15 @@ const toolbarHandler = (cmd: string, e: MouseEvent) => {
 };
 
 const finishSelect = (tags: ISelectedTag[]) => {
-  if (!canManageRoleMembers.value) {
+  if (!canManageEmployeeGroupMembers.value) {
     showMemberDialog.value = false;
     return;
   }
 
   if (tags.length > 0) {
-    roleService
+    employeeGroupService
       .addEmps(
-        roleId.value,
+        employeeGroupId.value,
         tags.map((x) => x.id)
       )
       .then(() => handleQuery());
@@ -279,9 +279,9 @@ const setSort = (sort: IFieldSortList) => {
 const updateQueryParams = () => {
   let statusFilter = { status: { eq: 0 } };
   let preFilter: any = statusFilter;
-  if (roleId.value) {
+  if (employeeGroupId.value) {
     preFilter = {
-      and: [statusFilter, `roles/any(r: r/roleId eq '${roleId.value}')`],
+      and: [statusFilter, `employeeGroups/any(r: r/employeeGroupId eq '${employeeGroupId.value}')`],
     };
   }
 
@@ -302,8 +302,8 @@ const queryParams = ref<ODataQuery<Employee>>({
 const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
-const roleId = ref("");
-const adminPermissions = ref<AdminPermissionSnapshot>();
+const employeeGroupId = ref("");
+const adminPermissions = ref<TenantAccessSnapshot>();
 const isUnrestrictedAdmin = computed(() =>
   [
     UserType.System,
@@ -312,12 +312,12 @@ const isUnrestrictedAdmin = computed(() =>
     UserType.CorpAdmin,
   ].includes(userStore.currentUser.userType),
 );
-const canManageCurrentRole = computed(() => {
+const canManageCurrentEmployeeGroup = computed(() => {
   if (isUnrestrictedAdmin.value) return true;
   const permissions = adminPermissions.value;
-  if (!roleId.value || !permissions?.isNormalAdmin) return false;
-  if (permissions.contactManageRoleScopeMode === ScopeMode.All) return true;
-  return permissions.contactManageRoleIds.includes(roleId.value);
+  if (!employeeGroupId.value || !permissions?.isNormalAdmin) return false;
+  if (permissions.contactManageEmployeeGroupScopeMode === ScopeMode.All) return true;
+  return permissions.contactManageEmployeeGroupIds.includes(employeeGroupId.value);
 });
 const hasManageDepartmentScope = computed(() => {
   if (isUnrestrictedAdmin.value) return true;
@@ -325,7 +325,7 @@ const hasManageDepartmentScope = computed(() => {
   if (!permissions?.isNormalAdmin) return false;
   return permissions.contactManageDepartmentScopeMode === ScopeMode.All || permissions.contactManageDepartmentIds.length > 0;
 });
-const canManageRoleMembers = computed(() => canManageCurrentRole.value && hasManageDepartmentScope.value);
+const canManageEmployeeGroupMembers = computed(() => canManageCurrentEmployeeGroup.value && hasManageDepartmentScope.value);
 const canManageEmployeeDepartment = (departmentId?: string) => {
   if (isUnrestrictedAdmin.value) return true;
   const permissions = adminPermissions.value;
@@ -359,24 +359,24 @@ const pageChanged = (curPage: number, pSize: number) => {
 const syncManageToolbar = () => {
   const addBar = leftBars.value.find((x) => x.config.command == "add");
   const deleteBar = leftBars.value.find((x) => x.config.command == "delete");
-  if (addBar) addBar.config.visible = canManageRoleMembers.value;
+  if (addBar) addBar.config.visible = canManageEmployeeGroupMembers.value;
   if (deleteBar) {
-    deleteBar.config.visible = canManageRoleMembers.value;
+    deleteBar.config.visible = canManageEmployeeGroupMembers.value;
     deleteBar.config.disabled =
-      !canManageRoleMembers.value ||
+      !canManageEmployeeGroupMembers.value ||
       checkedDatas.value.length == 0 ||
       checkedDatas.value.some((emp: Employee) => (emp.depts ?? []).every((d) => !canManageEmployeeDepartment(d.deptId)));
   }
 };
-const handleRoleQuery = (role?: Role) => {
-  roleId.value = role?.id ?? "";
+const handleEmployeeGroupQuery = (employeeGroup?: EmployeeGroup) => {
+  employeeGroupId.value = employeeGroup?.id ?? "";
 
   updateQueryParams();
   syncManageToolbar();
   handleQuery();
 };
 const handleQuery = () => {
-  if (!roleId.value) {
+  if (!employeeGroupId.value) {
     totalRef.value = 0;
     dataRef.value = [];
     return;
@@ -427,7 +427,7 @@ const showDetails = (row: FormData, column: any) => {
   // }
 };
 
-watch([canManageCurrentRole, hasManageDepartmentScope], () => {
+watch([canManageCurrentEmployeeGroup, hasManageDepartmentScope], () => {
   syncManageToolbar();
 });
 
@@ -439,7 +439,7 @@ onMounted(async () => {
 </script>
 <style lang="scss" scoped>
 // 主容器样式
-.role-manager-container {
+.employeeGroup-manager-container {
   height: 100vh;
   overflow-x: auto;
   overflow-y: hidden;
@@ -458,8 +458,8 @@ onMounted(async () => {
   gap: var(--et-space-20); // 替代el-row的gutter
 }
 
-// 角色树列样式
-.role-tree-col {
+// 员工组树列样式
+.employeeGroup-tree-col {
   height: 100%;
   display: flex;
   flex-direction: column;
