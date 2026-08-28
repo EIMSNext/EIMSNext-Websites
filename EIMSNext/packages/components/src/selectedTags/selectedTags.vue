@@ -74,8 +74,8 @@ const getTagIcon = (tag: ISelectedTag) => {
       case DataItemType.Department:
         icon = "icon-organization";
         break;
-      case DataItemType.Role:
-        icon = "icon-role";
+      case DataItemType.EmployeeGroup:
+        icon = "icon-employee-group";
         break;
       default:
         icon = "el-UserFilled";

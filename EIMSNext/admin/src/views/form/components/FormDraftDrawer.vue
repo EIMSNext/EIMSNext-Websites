@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
 import { useI18n } from "vue-i18n";
-import { FormData, FormDef, IFieldPerm } from "@eimsnext/models";
+import { FormData, FormDef, FormFieldPermission } from "@eimsnext/models";
 import SimplePagination from "@/components/SimplePagination/index.vue";
 
 type PreviewItem = {
@@ -84,7 +84,7 @@ const props = withDefaults(defineProps<{
   pageSize: number;
   hasNext: boolean;
   formDef: FormDef;
-  fieldPerms?: IFieldPerm[];
+  formFieldPermissions?: FormFieldPermission[];
   canDelete?: boolean;
 }>(), {
   canDelete: true,
@@ -114,8 +114,8 @@ const previewItems = (row: FormData): PreviewItem[] => {
 
   for (const field of props.formDef.content?.items || []) {
     if (result.length >= 3) break;
-    if (props.fieldPerms !== undefined &&
-      !props.fieldPerms.some((permission) => permission.id === field.field && permission.visible)) continue;
+    if (props.formFieldPermissions !== undefined &&
+      !props.formFieldPermissions.some((permission) => permission.id === field.field && permission.visible)) continue;
     const value = values[field.field];
     if (value === null || value === undefined || value === "") continue;
 

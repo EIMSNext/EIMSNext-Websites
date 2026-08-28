@@ -16,8 +16,8 @@ export interface UserPageVO {
   mobile?: string;
   /** 用户昵称 */
   nickname?: string;
-  /** 角色名称，多个使用英文逗号(,)分割 */
-  roleNames?: string;
+  /** 员工组名称，多个使用英文逗号(,)分割 */
+  employeeGroupNames?: string;
   /** 用户状态(1:启用;0:禁用) */
   status?: number;
   /** 用户名 */
@@ -40,8 +40,8 @@ export interface UserForm {
   mobile?: string;
   /** 昵称 */
   nickname?: string;
-  /** 角色ID集合 */
-  roleIds?: number[];
+  /** 员工组 ID 集合 */
+  employeeGroupIds?: number[];
   /** 用户状态(1:正常;0:禁用) */
   status?: number;
   /** 用户名 */
@@ -74,8 +74,8 @@ export interface UserProfileVO {
   /** 部门名称 */
   deptName?: string;
 
-  /** 角色名称，多个使用英文逗号(,)分割 */
-  roleNames?: string;
+  /** 员工组名称，多个使用英文逗号(,)分割 */
+  employeeGroupNames?: string;
 
   /** 创建时间 */
   createTime?: Date;

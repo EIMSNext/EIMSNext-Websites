@@ -28,7 +28,7 @@
   <template v-else>
     <et-toolbar class="form-data-toolbar" type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
     <FormView v-if="formDef && formData" :def="formDef.content!" :data="formData" :isView="isView" :actions="actions"
-      :fieldPerms="fieldPerms" class="editdata" @draft="saveDraft" @submit="submitData"></FormView>
+      :formFieldPermissions="formFieldPermissions" class="editdata" @draft="saveDraft" @submit="submitData"></FormView>
   </template>
   <div ref="printTrigger" v-print="printConfig" class="print-trigger">
     <FormPrintDiv v-model="printConfig.showPrintDiv" :title="formDef?.name" :printData="formPrintData"></FormPrintDiv>
@@ -46,8 +46,8 @@ import {
   FormDataRequest,
   DataAction,
   FlowStatus,
-  IFieldPerm,
-  DataPerms,
+  FormFieldPermission,
+  FormDataPermissions,
   FormDef,
   PrintDef,
   WorkflowActionStatus,
@@ -70,9 +70,9 @@ const props = withDefaults(
   defineProps<{
     formId: string;
     dataId: string;
-    dataPerms?: DataPerms;
-    fieldPerms?: IFieldPerm[];
-    authGroupId?: string;
+    formDataPermissions?: FormDataPermissions;
+    formFieldPermissions?: FormFieldPermission[];
+    permissionGroupId?: string;
   }>(),
   {}
 );
@@ -91,9 +91,9 @@ const route = useRoute();
 const router = useRouter();
 const loadError = ref(false);
 
-const canEdit = computed(() => hasDataPerm(DataPerms.Edit, props.dataPerms));
+const canEdit = computed(() => hasDataPerm(FormDataPermissions.Edit, props.formDataPermissions));
 const canRemove = computed(() =>
-  hasDataPerm(DataPerms.Remove, props.dataPerms)
+  hasDataPerm(FormDataPermissions.Remove, props.formDataPermissions)
 );
 
 const printConfig = ref(getPrintConfig(false));
@@ -276,7 +276,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
         await workflowService.withdraw({
           dataId: props.dataId,
         });
-        const data = await formDataService.get<FormData>(props.dataId, props.authGroupId ? { authGroupId: props.authGroupId } : undefined);
+        const data = await formDataService.get<FormData>(props.dataId, props.permissionGroupId ? { permissionGroupId: props.permissionGroupId } : undefined);
         formData.value = data;
         actionStatus.value = { canWithdraw: false, canUrge: false };
         editDisabled.value = false;
@@ -368,7 +368,7 @@ const generatePrintData = () => {
   let printData: IPrintData = {
     formDef: formDef.value!,
     formData: formData.value!,
-    fieldPerms: props.fieldPerms,
+    formFieldPermissions: props.formFieldPermissions,
   };
   formPrintData.value = printData;
 };
@@ -392,7 +392,7 @@ onBeforeMount(async () => {
     if (!form) throw new Error("Form definition is unavailable");
     formDef.value = form;
     await loadPrintDefs(form.id);
-    const data = await formDataService.get<FormData>(props.dataId, props.authGroupId ? { authGroupId: props.authGroupId } : undefined);
+    const data = await formDataService.get<FormData>(props.dataId, props.permissionGroupId ? { permissionGroupId: props.permissionGroupId } : undefined);
     if (!data) throw new Error("Form data is unavailable");
     formData.value = data;
     const workflowLocked = !!(formDef.value?.usingWorkflow && formData.value.flowStatus != FlowStatus.Draft);

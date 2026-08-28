@@ -7,8 +7,8 @@ export const convertMemberTypeToTagType = (mType: MemberType): DataItemType => {
             return DataItemType.Department;
         case MemberType.Employee:
             return DataItemType.Employee;
-        case MemberType.Role:
-            return DataItemType.Role;
+        case MemberType.EmployeeGroup:
+            return DataItemType.EmployeeGroup;
         default:
             return DataItemType.Unknown;
     }
@@ -19,8 +19,8 @@ export const convertTagTypeToMemberType = (tType: DataItemType): MemberType => {
             return MemberType.Department;
         case DataItemType.Employee:
             return MemberType.Employee;
-        case DataItemType.Role:
-            return MemberType.Role;
+        case DataItemType.EmployeeGroup:
+            return MemberType.EmployeeGroup;
         default:
             return MemberType.None;
     }

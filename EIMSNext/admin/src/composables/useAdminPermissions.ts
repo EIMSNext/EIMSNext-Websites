@@ -1,27 +1,27 @@
-import { AdminPermissionSnapshot, ScopeMode, UserType } from "@eimsnext/models";
+import { TenantAccessSnapshot, ScopeMode, UserType } from "@eimsnext/models";
 import { systemService } from "@eimsnext/services";
 import { useUserStore } from "@eimsnext/store";
 
-const snapshot = ref<AdminPermissionSnapshot>();
-let loadPromise: Promise<AdminPermissionSnapshot> | undefined;
+const snapshot = ref<TenantAccessSnapshot>();
+let loadPromise: Promise<TenantAccessSnapshot> | undefined;
 
-const createEmptySnapshot = (): AdminPermissionSnapshot => ({
+const createEmptySnapshot = (): TenantAccessSnapshot => ({
   isNormalAdmin: false,
   canCreateOrDeleteApp: false,
   manageableAppIds: [],
   deletableAppIds: [],
   appDepartmentScopeMode: ScopeMode.Partial,
   appDepartmentIds: [],
-  appRoleScopeMode: ScopeMode.Partial,
-  appRoleIds: [],
+  appEmployeeGroupScopeMode: ScopeMode.Partial,
+  appEmployeeGroupIds: [],
   contactViewDepartmentScopeMode: ScopeMode.Partial,
   contactViewDepartmentIds: [],
   contactManageDepartmentScopeMode: ScopeMode.Partial,
   contactManageDepartmentIds: [],
-  contactViewRoleScopeMode: ScopeMode.Partial,
-  contactViewRoleIds: [],
-  contactManageRoleScopeMode: ScopeMode.Partial,
-  contactManageRoleIds: [],
+  contactViewEmployeeGroupScopeMode: ScopeMode.Partial,
+  contactViewEmployeeGroupIds: [],
+  contactManageEmployeeGroupScopeMode: ScopeMode.Partial,
+  contactManageEmployeeGroupIds: [],
 });
 
 export const useAdminPermissions = () => {

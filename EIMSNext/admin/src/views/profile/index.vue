@@ -222,7 +222,7 @@
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore, useContextStore } from "@eimsnext/store";
-import { authProfileService, systemService } from "@eimsnext/services";
+import { identityProfileService, systemService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
@@ -436,7 +436,7 @@ const submitDialog = async () => {
   try {
     if (dialogStep.value === "verify") {
       await validateVerifyForm();
-      const result = (await authProfileService.verifyIdentity({
+      const result = (await identityProfileService.verifyIdentity({
         type: verifyMethod.value,
         password: verifyMethod.value === "password" ? verifyForm.password : undefined,
         code: verifyMethod.value !== "password" ? verifyForm.code : undefined,
@@ -464,7 +464,7 @@ const submitDialog = async () => {
 const submitAction = async () => {
   switch (dialogMode.value) {
     case "change-password":
-      await authProfileService.changePassword({
+      await identityProfileService.changePassword({
         verifyToken: verifyToken.value,
         newPassword: actionForm.newPassword,
         confirmPassword: actionForm.confirmPassword,
@@ -472,7 +472,7 @@ const submitAction = async () => {
       break;
     case "change-phone":
     case "bind-phone":
-      await authProfileService.changePhone({
+      await identityProfileService.changePhone({
         verifyToken: verifyToken.value,
         phone: actionForm.phone,
         code: actionForm.code,
@@ -480,17 +480,17 @@ const submitAction = async () => {
       break;
     case "change-email":
     case "bind-email":
-      await authProfileService.changeEmail({
+      await identityProfileService.changeEmail({
         verifyToken: verifyToken.value,
         email: actionForm.email,
         code: actionForm.code,
       });
       break;
     case "unbind-phone":
-      await authProfileService.unbindPhone({ verifyToken: verifyToken.value });
+      await identityProfileService.unbindPhone({ verifyToken: verifyToken.value });
       break;
     case "unbind-email":
-      await authProfileService.unbindEmail({ verifyToken: verifyToken.value });
+      await identityProfileService.unbindEmail({ verifyToken: verifyToken.value });
       break;
   }
 };
@@ -506,7 +506,7 @@ const sendVerifyCode = async () => {
     return;
   }
 
-  await authProfileService.sendPinCode({
+  await identityProfileService.sendPinCode({
     type: verifyMethod.value,
     usage: "verify",
     target,
@@ -532,7 +532,7 @@ const sendActionCode = async (type: "phone" | "email") => {
     return;
   }
 
-  await authProfileService.sendPinCode({
+  await identityProfileService.sendPinCode({
     type,
     usage: "bind",
     target,

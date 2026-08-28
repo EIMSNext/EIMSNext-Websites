@@ -1,7 +1,7 @@
 import { AxiosHeaders } from "axios";
 import { appSetting } from "../appSetting";
 import { ApiClient } from "./apiClient";
-import { AuthClient } from "./authClient";
+import { IdentityClient } from "./identityClient";
 import { HttpRequest } from "./httpRequest";
 import { ODataClient } from "./odataClient";
 import { UploadClient } from "./uploadClient";
@@ -9,7 +9,7 @@ import { HttpRequestConfig } from "./interface";
 import { deepMerge } from "../type";
 
 export class HttpClient {
-  auth: AuthClient;
+  identity: IdentityClient;
   api: ApiClient;
   odata: ODataClient;
   upload: UploadClient;
@@ -21,22 +21,22 @@ export class HttpClient {
       timeout: appSetting.httpTimeout ?? 300000,
     };
 
-    this.auth = new AuthClient(new HttpRequest(defaultConfig));
+    this.identity = new IdentityClient(new HttpRequest(defaultConfig));
     this.api = new ApiClient(new HttpRequest(defaultConfig));
     this.odata = new ODataClient(new HttpRequest(defaultConfig));
     this.upload = new UploadClient(new HttpRequest(defaultConfig));
     this.httpRequest = new HttpRequest(defaultConfig);
   }
 
-  setConfig(authConfig?: HttpRequestConfig, apiConfig?: HttpRequestConfig) {
+  setConfig(identityConfig?: HttpRequestConfig, apiConfig?: HttpRequestConfig) {
     const defaultConfig: HttpRequestConfig = {
       headers: new AxiosHeaders(),
       timeout: appSetting.httpTimeout ?? 300000,
     };
 
-    this.auth = new AuthClient(
+    this.identity = new IdentityClient(
       new HttpRequest(
-        authConfig ? deepMerge(authConfig, defaultConfig) : defaultConfig,
+        identityConfig ? deepMerge(identityConfig, defaultConfig) : defaultConfig,
       ),
     );
 

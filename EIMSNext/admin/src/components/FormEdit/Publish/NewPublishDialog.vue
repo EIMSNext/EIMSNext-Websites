@@ -14,24 +14,24 @@
       </div>
       <div class="auth-group-select">
         <div class="item-title">{{ t("admin.publishEditor.memberPermission") }}</div>
-        <el-select v-model="newAuthGrp.type">
-          <el-option :label="t('admin.publishEditor.manageSelfData')" :value="AuthGroupType.ManageSelfData"></el-option>
-          <el-option :label="t('admin.publishEditor.viewAllData')" :value="AuthGroupType.ViewAllData"></el-option>
-          <el-option :label="t('admin.publishEditor.manageAllData')" :value="AuthGroupType.ManageAllData"></el-option>
-          <el-option :label="t('admin.publishEditor.custom')" :value="AuthGroupType.Custom"></el-option>
+        <el-select v-model="newPermissionGroup.type">
+          <el-option :label="t('admin.publishEditor.manageSelfData')" :value="FormDataPermissionMode.ManageSelfData"></el-option>
+          <el-option :label="t('admin.publishEditor.viewAllData')" :value="FormDataPermissionMode.ViewAllData"></el-option>
+          <el-option :label="t('admin.publishEditor.manageAllData')" :value="FormDataPermissionMode.ManageAllData"></el-option>
+          <el-option :label="t('admin.publishEditor.custom')" :value="FormDataPermissionMode.Custom"></el-option>
         </el-select>
       </div>
-      <AuthGroupEditor
-        v-if="newAuthGrp.type == AuthGroupType.Custom"
-        v-model="newAuthGrp"
+      <FormDataPermissionGroupEditor
+        v-if="newPermissionGroup.type == FormDataPermissionMode.Custom"
+        v-model="newPermissionGroup"
         :form-def="formDef"
         class="auth-group-editor"
-      ></AuthGroupEditor>
+      ></FormDataPermissionGroupEditor>
       <MemberSelectDialog
         v-model="showMemberDialog"
         :tags="members"
         :memberOptions="{
-          showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
+          showTabs: MemberTabs.Department | MemberTabs.EmployeeGroup | MemberTabs.Employee,
           multiple: true,
           cascadedDept: true,
           showCascade: true,
@@ -46,18 +46,18 @@
 <script setup lang="ts">
 import {
   FormDef,
-  AuthGroup,
-  DataPerms,
-  AuthGroupType,
-  AuthGroupRequest,
+  FormDataPermissionGroup,
+  FormDataPermissions,
+  FormDataPermissionMode,
+  FormDataPermissionGroupRequest,
   Member,
   MemberType,
 } from "@eimsnext/models";
 import { ISelectedTag, SelectedTags, MemberSelectDialog, MemberTabs } from "@eimsnext/components";
-import AuthGroupEditor from "./AuthGroupEditor.vue";
+import FormDataPermissionGroupEditor from "./FormDataPermissionGroupEditor.vue";
 
 import { useI18n } from "vue-i18n";
-import { authGroupService } from "@eimsnext/services";
+import { formDataPermissionGroupService } from "@eimsnext/services";
 import { convertMemberTypeToTagType, convertTagTypeToMemberType } from "./type";
 const { t } = useI18n();
 
@@ -67,28 +67,28 @@ defineOptions({
 
 const props = defineProps<{
   modelValue: boolean;
-  authGroup?: AuthGroup;
+  permissionGroup?: FormDataPermissionGroup;
   formDef: FormDef;
-  limit?: { depts?: ISelectedTag[]; roles?: ISelectedTag[] };
+  limit?: { depts?: ISelectedTag[]; employeeGroups?: ISelectedTag[] };
 }>();
 
 const limit = computed(() => props.limit);
 
-const newAuthGrp = toRef(
-  props.authGroup ?? {
+const newPermissionGroup = toRef(
+  props.permissionGroup ?? {
     id: "",
     name: t("admin.publishEditor.manageSelfData"),
     appId: props.formDef.appId,
     formId: props.formDef.id,
-    type: AuthGroupType.ManageSelfData,
-    dataPerms: DataPerms.None,
+    type: FormDataPermissionMode.ManageSelfData,
+    formDataPermissions: FormDataPermissions.None,
     disabled: false,
   }
 );
 
 const members = ref<ISelectedTag[]>([]);
-if (newAuthGrp.value.members)
-  members.value = newAuthGrp.value.members.map<ISelectedTag>((x) => {
+if (newPermissionGroup.value.members)
+  members.value = newPermissionGroup.value.members.map<ISelectedTag>((x) => {
     return {
       id: x.id,
       value: x.value,
@@ -108,15 +108,15 @@ const finishSelect = (tags: ISelectedTag[]) => {
   showMemberDialog.value = false;
 };
 
-const authGroupTypeName = (type: AuthGroupType) => {
+const permissionGroupTypeName = (type: FormDataPermissionMode) => {
   switch (type) {
-    case AuthGroupType.ManageSelfData:
+    case FormDataPermissionMode.ManageSelfData:
       return "ManageSelfData";
-    case AuthGroupType.ViewAllData:
+    case FormDataPermissionMode.ViewAllData:
       return "ViewAllData";
-    case AuthGroupType.ManageAllData:
+    case FormDataPermissionMode.ManageAllData:
       return "ManageAllData";
-    case AuthGroupType.Custom:
+    case FormDataPermissionMode.Custom:
       return "Custom";
     default:
       return type;
@@ -129,13 +129,13 @@ const cancel = () => {
   emit("close", false);
 };
 const save = async () => {
-  let req: AuthGroupRequest = {
-    id: newAuthGrp.value.id,
+  let req: FormDataPermissionGroupRequest = {
+    id: newPermissionGroup.value.id,
     appId: props.formDef.appId,
     formId: props.formDef.id,
-    name: newAuthGrp.value.name,
-    desc: newAuthGrp.value.desc,
-    type: authGroupTypeName(newAuthGrp.value.type) as AuthGroupType,
+    name: newPermissionGroup.value.name,
+    desc: newPermissionGroup.value.desc,
+    type: permissionGroupTypeName(newPermissionGroup.value.type) as FormDataPermissionMode,
     members: members.value.map<Member>((x) => {
       return {
         id: x.id,
@@ -145,15 +145,15 @@ const save = async () => {
         cascadedDept: x.cascadedDept ?? false,
       };
     }),
-    dataPerms: newAuthGrp.value.dataPerms,
-    dataFilter: newAuthGrp.value.dataFilter,
-    disabled: newAuthGrp.value.disabled,
-    fieldPerms: newAuthGrp.value.fieldPerms,
+    formDataPermissions: newPermissionGroup.value.formDataPermissions,
+    dataFilter: newPermissionGroup.value.dataFilter,
+    disabled: newPermissionGroup.value.disabled,
+    formFieldPermissions: newPermissionGroup.value.formFieldPermissions,
   };
 
   const request = req.id
-    ? authGroupService.put<AuthGroupRequest>(req.id, req)
-    : authGroupService.post<AuthGroupRequest>(req);
+    ? formDataPermissionGroupService.put<FormDataPermissionGroupRequest>(req.id, req)
+    : formDataPermissionGroupService.post<FormDataPermissionGroupRequest>(req);
 
   await request.then(() => {
     ElMessage.success(t("common.saveSuccess"));
@@ -183,3 +183,4 @@ const save = async () => {
   height: var(--et-size-280);
 }
 </style>
+

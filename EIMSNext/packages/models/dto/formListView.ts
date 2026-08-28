@@ -24,7 +24,7 @@ export interface FormListViewRequest extends IdBase {
   pcType?: FormListViewType;
   mobileType?: MobileFormListViewType;
   sortIndex?: number;
-  authGroupIds?: string[];
+  permissionGroupIds?: string[];
   settings?: string;
   defaultFilter?: string;
   defaultSort?: string;
@@ -38,7 +38,7 @@ export interface FormListView extends CorpModelBase {
   pcType: FormListViewType;
   mobileType: MobileFormListViewType;
   sortIndex: number;
-  authGroupIds?: string[];
+  permissionGroupIds?: string[];
   settings?: string;
   defaultFilter?: string;
   defaultSort?: string;

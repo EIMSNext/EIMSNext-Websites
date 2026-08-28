@@ -40,14 +40,14 @@ export const Resources: ResourceSpec[] = [
     actions: standardActions(),
   },
   {
-    code: "role",
-    label: "角色",
+    code: "employeeGroup",
+    label: "员工组",
     group: "contacts",
     actions: standardActions(),
   },
   {
-    code: "roleGroup",
-    label: "角色组",
+    code: "employeeGroupCategory",
+    label: "员工组分类",
     group: "contacts",
     actions: standardActions(),
   },
@@ -109,3 +109,4 @@ function standardActions(): ResourceActionItem[] {
 export function findResource(code: ResourceCode): ResourceSpec | undefined {
   return Resources.find((r) => r.code === code);
 }
+

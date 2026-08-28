@@ -132,7 +132,7 @@ export const useFormStore = defineStore("forms", () => {
     return forms;
   };
 
-  bus.on("auth:logout", clear);
+  bus.on("identity:logout", clear);
 
   return { loading, items, load, get, update, remove, clear, includeCrossFormsByAppId, loadFormsIncludeCross };
 });

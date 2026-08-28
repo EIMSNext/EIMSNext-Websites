@@ -16,7 +16,7 @@
       </div>
     </et-dialog>
     <member-select-dialog v-model="showMemberDialog"
-      :member-options="{ multiple: true, showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee, cascadedDept: true, showCascade: true }"
+      :member-options="{ multiple: true, showTabs: MemberTabs.Department | MemberTabs.EmployeeGroup | MemberTabs.Employee, cascadedDept: true, showCascade: true }"
       @ok="finishSelect" />
     <et-confirm-dialog v-model="showConfirmDialog" :icon="MessageIcon.Error" @ok="onConfirmed">
       <div>效果如何</div>
@@ -72,13 +72,13 @@ const title = ref("标题");
 const selected = ref([
   { id: "111", label: "aaa", type: DataItemType.Employee },
   { id: "222", label: "bbb", type: DataItemType.Department },
-  { id: "333", label: "ccc", type: DataItemType.Role, error: true },
+  { id: "333", label: "ccc", type: DataItemType.EmployeeGroup, error: true },
 ]);
 
 const changeTags = () => {
   selected.value = [
     { id: "222", label: "bbb", type: DataItemType.Department },
-    { id: "333", label: "ccc", type: DataItemType.Role, error: true },
+    { id: "333", label: "ccc", type: DataItemType.EmployeeGroup, error: true },
   ];
 };
 

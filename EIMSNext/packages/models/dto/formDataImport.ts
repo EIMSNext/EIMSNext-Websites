@@ -34,7 +34,7 @@ export interface FormDataImportMappingItem {
 export interface FormDataImportStartRequest {
   appId: string;
   formId: string;
-  authGroupId?: string;
+  permissionGroupId?: string;
   mode: FormDataImportMode;
   triggerValidation: boolean;
   triggerWorkflow: boolean;

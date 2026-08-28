@@ -188,7 +188,7 @@ const draft = reactive<FormListViewRequest>({
   pcType: FormListViewType.Table,
   mobileType: MobileFormListViewType.Table,
   sortIndex: props.sortIndex,
-  authGroupIds: [],
+  permissionGroupIds: [],
   settings: "",
   disabled: false,
 });
@@ -257,7 +257,7 @@ watch(
       pcType: props.view.pcType,
       mobileType: props.view.mobileType,
       sortIndex: props.view.sortIndex,
-      authGroupIds: [...(props.view.authGroupIds || [])],
+      permissionGroupIds: [...(props.view.permissionGroupIds || [])],
       disabled: props.view.disabled,
     });
     Object.assign(settings, parseViewSettings(props.view.settings));

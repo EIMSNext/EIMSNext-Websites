@@ -39,19 +39,19 @@ import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { showToast } from "vant";
 import { useI18n } from "vue-i18n";
-import { DataAction, DataPerms, type AuthGroup, type FormData, type FormDef, type IFieldPerm } from "@eimsnext/models";
+import { DataAction, FormDataPermissions, type FormDataPermissionGroup, type FormData, type FormDef, type FormFieldPermission } from "@eimsnext/models";
 import FormCreateMobile from "@eimsnext/form-render-vant";
 import { FlagEnum } from "@eimsnext/utils";
 import MobileFormRenderer from "@/components/form/MobileFormRenderer.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
-import { authGroupServiceMobile, formDataServiceMobile, formServiceMobile } from "@/services/mobileService";
+import { formDataPermissionGroupServiceMobile, formDataServiceMobile, formServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 const formId = route.params.formId as string;
 const dataId = route.params.dataId as string | undefined;
-const authGroupId = computed(() => String(route.query.authGroupId || ""));
+const permissionGroupId = computed(() => String(route.query.permissionGroupId || ""));
 
 const loading = ref(false);
 const saving = ref(false);
@@ -60,18 +60,18 @@ const formDef = ref<FormDef>();
 const formData = ref<Record<string, unknown>>({});
 const currentData = ref<FormData>();
 const loadError = ref(false);
-const authGroup = ref<AuthGroup>();
-const fieldPerms = computed<IFieldPerm[] | undefined>(() => authGroup.value?.fieldPerms);
+const permissionGroup = ref<FormDataPermissionGroup>();
+const formFieldPermissions = computed<FormFieldPermission[] | undefined>(() => permissionGroup.value?.formFieldPermissions);
 
 const isAdd = computed(() => !dataId || Boolean(route.meta.isAdd));
-const canAdd = computed(() => !authGroup.value || FlagEnum.has(authGroup.value.dataPerms, DataPerms.AddNew));
-const canEdit = computed(() => !authGroup.value || FlagEnum.has(authGroup.value.dataPerms, DataPerms.Edit));
+const canAdd = computed(() => !permissionGroup.value || FlagEnum.has(permissionGroup.value.formDataPermissions, FormDataPermissions.AddNew));
+const canEdit = computed(() => !permissionGroup.value || FlagEnum.has(permissionGroup.value.formDataPermissions, FormDataPermissions.Edit));
 const renderRule = computed(() => {
   const layout = formDef.value?.content?.layout;
   if (!layout) return [];
   try {
     const rules = FormCreateMobile.parseJson(layout);
-    return reactive(applyFieldPermissions(rules, fieldPerms.value, isAdd.value));
+    return reactive(applyFieldPermissions(rules, formFieldPermissions.value, isAdd.value));
   } catch {
     return [];
   }
@@ -110,10 +110,10 @@ const loadData = async () => {
   try {
     formDef.value = await formServiceMobile.get(formId);
     if (!formDef.value) throw new Error("Form definition is unavailable");
-    const groups = await authGroupServiceMobile.getAssigned(formId);
-    authGroup.value = groups.find((group) => group.id === authGroupId.value);
+    const groups = await formDataPermissionGroupServiceMobile.getAssigned(formId);
+    permissionGroup.value = groups.find((group) => group.id === permissionGroupId.value);
     if (!isAdd.value && dataId) {
-      const data = await formDataServiceMobile.get(dataId, authGroupId.value || undefined);
+      const data = await formDataServiceMobile.get(dataId, permissionGroupId.value || undefined);
       if (!data) throw new Error("Form data is unavailable");
       currentData.value = data;
       formData.value = data.data || {};
@@ -129,7 +129,7 @@ onMounted(() => {
   void loadData();
 });
 
-function applyFieldPermissions(rules: any[], permissions: IFieldPerm[] | undefined, isNewData: boolean) {
+function applyFieldPermissions(rules: any[], permissions: FormFieldPermission[] | undefined, isNewData: boolean) {
   if (permissions === undefined) return rules;
 
   return rules.map((rule) => {

@@ -38,6 +38,6 @@ let httpConfig: HttpRequestConfig = {
 };
 http.setConfig(httpConfig, httpConfig);
 
-await http.auth.login("12345678901", "123456");
+await http.identity.login("12345678901", "123456");
 
 app.mount("#app");

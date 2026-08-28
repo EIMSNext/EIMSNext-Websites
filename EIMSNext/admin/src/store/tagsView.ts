@@ -264,7 +264,7 @@ export const useTagsViewStore = defineStore("tagsView", () => {
     }
   }
 
-  bus.on("auth:logout", () => {
+  bus.on("identity:logout", () => {
     const affixTags = visitedViews.value.filter((tag) => tag?.affix);
     visitedViews.value = affixTags;
     cachedViews.value = [];

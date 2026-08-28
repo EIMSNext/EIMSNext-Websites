@@ -17,8 +17,8 @@ export class CurrentUser {
   apps?: App[];
   /** 头像URL */
   avatar?: string;
-  /** 角色 */
-  roles: string[] = [];
+  /** 员工组 */
+  employeeGroups: string[] = [];
   /** 权限 */
   perms: string[] = [];
 }

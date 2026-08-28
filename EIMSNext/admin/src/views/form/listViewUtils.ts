@@ -52,7 +52,7 @@ export const createDefaultFormListView = (formDef: FormDef, t: (key: string) => 
   pcType: FormListViewType.Table,
   mobileType: MobileFormListViewType.Table,
   sortIndex: 0,
-  authGroupIds: [],
+  permissionGroupIds: [],
   disabled: false,
   settings: JSON.stringify({
     table: {

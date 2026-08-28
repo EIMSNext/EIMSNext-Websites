@@ -245,7 +245,7 @@ const tempChangeFields = ref<string[]>([]);
 const syncingFromModel = ref(false);
 
 const memberOptions = {
-  showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
+  showTabs: MemberTabs.Department | MemberTabs.EmployeeGroup | MemberTabs.Employee,
   cascadedDept: true,
   showCascade: true,
 };

@@ -70,12 +70,12 @@ const menuGroups = computed<SysMenuGroup[]>(() => {
       title: "admin.shellMenu.contacts",
       items: [
         { path: "department", icon: "icon-organization", label: "admin.shellMenu.org" },
-        { path: "role", icon: "icon-role", label: "admin.shellMenu.role" },
+        { path: "employeeGroup", icon: "icon-employee-group", label: "admin.shellMenu.employeeGroup" },
       ],
     },
     {
       title: "admin.shellMenu.permissionCenter",
-      items: [{ path: "admin", icon: "icon-admin", label: "admin.shellMenu.admin", visible: isUnrestrictedAdmin.value }],
+      items: [{ path: "tenant-admin-group", icon: "icon-admin", label: "admin.shellMenu.admin", visible: isUnrestrictedAdmin.value }],
     },
     {
       title: "admin.shellMenu.logAudit",

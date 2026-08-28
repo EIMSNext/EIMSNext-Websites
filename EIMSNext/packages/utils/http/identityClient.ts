@@ -1,5 +1,5 @@
 import { AxiosHeaders } from "axios";
-import { appSetting, getAuthUrl } from "../appSetting";
+import { appSetting, getIdentityUrl } from "../appSetting";
 import { HttpRequest } from "./httpRequest";
 import { ContentType } from "./interface";
 import accessToken from "./token";
@@ -20,7 +20,7 @@ export class PublicTokenExpiredError extends PublicTokenError {
   }
 }
 
-export class AuthClient {
+export class IdentityClient {
   private httpRequest: HttpRequest;
   constructor(request: HttpRequest) {
     this.httpRequest = request;
@@ -50,7 +50,7 @@ export class AuthClient {
       password = accessCode;
     } else {
       const challenge = await this.httpRequest.get<{ password: string; expiresAt: number }>({
-        url: `${appSetting.authUrl}/api/public/challenge`,
+        url: `${appSetting.identityUrl}/api/public/challenge`,
         params: { targetId },
         withToken: false,
         headers: new AxiosHeaders(),
@@ -69,7 +69,7 @@ export class AuthClient {
         password,
         "public",
         false,
-        `${appSetting.authUrl}/public/token`,
+        `${appSetting.identityUrl}/public/token`,
         { scope: String(publicScope) },
         appSetting.publicClientId,
       )) as { access_token: string; expires_in: number; [k: string]: any };
@@ -107,7 +107,7 @@ export class AuthClient {
       ...(extraFields || {}),
     };
     const encrypted = utf8ToBase64(JSON.stringify(payload));
-    const url = endpoint || `${appSetting.authUrl}/auth/login`;
+    const url = endpoint || `${appSetting.identityUrl}/identity/login`;
     const headers = new AxiosHeaders();
     headers.setContentType(ContentType.FORM_URLENCODED);
     return new Promise((resolve, reject) => {
@@ -127,7 +127,7 @@ export class AuthClient {
   }
 
   get<T = any>(url: string, params?: any, withToken?: boolean) {
-    return this.httpRequest.get<T>({ url: getAuthUrl(url), params, withToken, headers: new AxiosHeaders() });
+    return this.httpRequest.get<T>({ url: getIdentityUrl(url), params, withToken, headers: new AxiosHeaders() });
   }
 
   post<T = any>(
@@ -136,7 +136,7 @@ export class AuthClient {
     contentType: ContentType = ContentType.JSON,
     withToken?: boolean,
   ) {
-    url = getAuthUrl(url, false);
+    url = getIdentityUrl(url, false);
     let headers = new AxiosHeaders();
     headers.setContentType(contentType);
     return this.httpRequest.post<T>({ url, data, headers, withToken });

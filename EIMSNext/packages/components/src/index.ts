@@ -23,7 +23,7 @@ import {
   EventFlowDiagram,
   EventFlowMetaEditor,
 } from "./FlowDesigner";
-import { EtFieldPerms } from "./FieldPerms";
+import { EtFormFieldPermissions } from "./FieldPerms";
 import { UserAvatar } from "./avatar";
 import { SortList, SortItem } from "./SortList";
 import { FieldSelectList } from "./FieldSelectList";
@@ -91,7 +91,7 @@ export default [
   WorkflowMetaEditor,
   EventFlowDiagram,
   EventFlowMetaEditor,
-  EtFieldPerms,
+  EtFormFieldPermissions,
   UserAvatar,
   SortList,
   SortItem,

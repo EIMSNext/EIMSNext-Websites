@@ -22,7 +22,7 @@
       v-if="showScope"
       v-model="showScope"
       :view="selectedView!"
-      :auth-groups="authGroups"
+      :permission-groups="permissionGroups"
       @ok="saveScope"
       @cancel="showScope = false"
     />
@@ -108,13 +108,13 @@ import buildQuery from "odata-query";
 import { CopyDocument, Delete, Edit, Lock, MoreFilled } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
 import {
-  AuthGroup,
+  FormDataPermissionGroup,
   FormDef,
   FormListView,
   FormListViewRequest,
   FormListViewType,
 } from "@eimsnext/models";
-import { authGroupService, formListViewService } from "@eimsnext/services";
+import { formDataPermissionGroupService, formListViewService } from "@eimsnext/services";
 import { MessageIcon } from "@eimsnext/components";
 import AdvanceLayout from "../Advanced/AdvanceLayout.vue";
 import ViewEditorDialog from "./ViewEditorDialog.vue";
@@ -126,7 +126,7 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const views = ref<FormListView[]>([]);
-const authGroups = ref<AuthGroup[]>([]);
+const permissionGroups = ref<FormDataPermissionGroup[]>([]);
 const showEditor = ref(false);
 const showScope = ref(false);
 const showDeleteConfirm = ref(false);
@@ -145,9 +145,9 @@ const loadViews = async () => {
   );
 };
 
-const loadAuthGroups = async () => {
+const loadFormDataPermissionGroups = async () => {
   const query = buildQuery({ filter: { formId: props.formDef.id } });
-  authGroups.value = await authGroupService.query<AuthGroup>(query);
+  permissionGroups.value = await formDataPermissionGroupService.query<FormDataPermissionGroup>(query);
 };
 
 const createView = () => {
@@ -165,11 +165,11 @@ const saveView = async (request: FormListViewRequest) => {
   await loadViews();
 };
 
-const saveScope = async (authGroupIds: string[]) => {
+const saveScope = async (permissionGroupIds: string[]) => {
   if (!selectedView.value) return;
   await formListViewService.patch<FormListViewRequest>(selectedView.value.id, {
     id: selectedView.value.id,
-    authGroupIds,
+    permissionGroupIds,
   });
   showScope.value = false;
   await loadViews();
@@ -191,7 +191,7 @@ const handleCommand = async (command: string, view: FormListView) => {
       pcType: view.pcType,
       mobileType: view.mobileType,
       sortIndex: nextSortIndex.value,
-      authGroupIds: [...(view.authGroupIds || [])],
+      permissionGroupIds: [...(view.permissionGroupIds || [])],
       settings: view.settings,
       defaultFilter: view.defaultFilter,
       defaultSort: view.defaultSort,
@@ -218,12 +218,12 @@ const execDelete = async () => {
 };
 
 const scopeText = (view: FormListView) => {
-  if (!view.authGroupIds || view.authGroupIds.length === 0)
-    return t("admin.formListView.allAuthGroups");
-  const names = authGroups.value
-    .filter((group) => view.authGroupIds?.includes(group.id))
+  if (!view.permissionGroupIds || view.permissionGroupIds.length === 0)
+    return t("admin.formListView.allFormDataPermissionGroups");
+  const names = permissionGroups.value
+    .filter((group) => view.permissionGroupIds?.includes(group.id))
     .map((group) => group.name);
-  return names.join(t("common.listSeparator")) || t("admin.formListView.allAuthGroups");
+  return names.join(t("common.listSeparator")) || t("admin.formListView.allFormDataPermissionGroups");
 };
 
 const thumbClass = (view: FormListView) => ({
@@ -233,7 +233,7 @@ const thumbClass = (view: FormListView) => ({
 });
 
 onBeforeMount(async () => {
-  await Promise.all([loadViews(), loadAuthGroups()]);
+  await Promise.all([loadViews(), loadFormDataPermissionGroups()]);
 });
 </script>
 

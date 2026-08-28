@@ -11,7 +11,7 @@
 </template>
 <script setup lang="ts">
 import { IConditionList } from "@eimsnext/components";
-import { FieldType, IFieldPerm } from "@eimsnext/models";
+import { FieldType, FormFieldPermission } from "@eimsnext/models";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -24,7 +24,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: IConditionList;
     formId: string;
-    fieldPerms?: IFieldPerm[];
+    formFieldPermissions?: FormFieldPermission[];
   }>(),
   {}
 );
@@ -36,7 +36,7 @@ const filterFieldBuildSetting = computed(() => ({
   matchType: false,
   fieldLimit: {
     excludeFieldTypes: [FieldType.DataSelect],
-    fieldPerms: props.fieldPerms,
+    formFieldPermissions: props.formFieldPermissions,
   },
 }));
 const onChange = (filter: IConditionList) => {

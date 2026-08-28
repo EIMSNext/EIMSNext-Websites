@@ -171,7 +171,7 @@ export class HttpRequest {
     try {
       accessToken.clear();
       const path = this.currentPath();
-      bus.emit("auth:logout", { reason: "401", path });
+      bus.emit("identity:logout", { reason: "401", path });
       if (typeof window !== "undefined" && path !== "/login" && !path.startsWith("/login?")) {
         const redirect = encodeURIComponent(path);
         window.location.assign(`/#/login?redirect=${redirect}`);

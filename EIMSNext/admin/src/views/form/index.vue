@@ -24,7 +24,7 @@
     <et-dialog v-model="showAddDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
       :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
-        <AddFormData :formId="formId" :isView="false" :fieldPerms="fieldPerms" @save="onDataSaved"
+        <AddFormData :formId="formId" :isView="false" :formFieldPermissions="formFieldPermissions" @save="onDataSaved"
           @submit="onDataSaved"></AddFormData>
       </div>
     </et-dialog>
@@ -32,8 +32,8 @@
       v-if="formDef"
       v-model="showImportDialog"
       :form-def="formDef"
-      :auth-group-id="curAuthGrp?.id"
-      :field-perms="fieldPerms"
+      :permission-group-id="curPermissionGroup?.id"
+      :field-perms="formFieldPermissions"
       @imported="handleQuery"
     />
     <EtConfirmDialog v-model="showDeleteConfirmDialog" :title="t('common.message.deleteConfirm_Title')"
@@ -43,21 +43,21 @@
     <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="detailsDialogTitle" :show-footer="false"
       :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
-        <FormDataView :formId="formId" :dataId="selectedData!.id" :dataPerms="dataPerms" :fieldPerms="fieldPerms" :authGroupId="curAuthGrp?.id"
+        <FormDataView :formId="formId" :dataId="selectedData!.id" :formDataPermissions="formDataPermissions" :formFieldPermissions="formFieldPermissions" :permissionGroupId="curPermissionGroup?.id"
           @ok="handleViewOk"></FormDataView>
       </div>
     </et-dialog>
     <el-popover :visible="showFilter" :virtual-ref="filterBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataFilter :model-value="condList" :formId="formId" :field-perms="fieldPerms" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
+      <DataFilter :model-value="condList" :formId="formId" :field-perms="formFieldPermissions" @ok="setFilter" @cancel="showFilter = false"></DataFilter>
     </el-popover>
     <el-popover :visible="showSort" :virtual-ref="sortBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataSort :model-value="sortList" :formId="formId" :field-perms="fieldPerms" @ok="setSort" @cancel="showSort = false"></DataSort>
+      <DataSort :model-value="sortList" :formId="formId" :field-perms="formFieldPermissions" @ok="setSort" @cancel="showSort = false"></DataSort>
     </el-popover>
     <el-popover :visible="showField" :virtual-ref="fieldBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataField :model-value="fieldList" :formId="formId" :field-perms="fieldPerms" @ok="setField" @cancel="showField = false"></DataField>
+      <DataField :model-value="fieldList" :formId="formId" :field-perms="formFieldPermissions" @ok="setField" @cancel="showField = false"></DataField>
     </el-popover>
     <div class="toolbar-head">
       <et-toolbar
@@ -92,7 +92,7 @@
       :page-size="draftPageSize"
       :has-next="draftHasNext"
       :form-def="formDef"
-      :field-perms="fieldPerms"
+      :field-perms="formFieldPermissions"
       :can-delete="canRemove"
       @refresh="refreshDrafts"
       @page-change="draftPageChanged"
@@ -157,9 +157,9 @@ import {
   getCreateTime,
   getFlowStatus,
   getUpdateTime,
-  AuthGroup,
-  IFieldPerm,
-  DataPerms,
+  FormDataPermissionGroup,
+  FormFieldPermission,
+  FormDataPermissions,
   FormListView,
   FormListViewField,
   FormListViewSettings,
@@ -169,7 +169,7 @@ import { ITableColumn, buildColumns } from "./type";
 import {
   IDynamicFindOptions,
   IDataScope,
-  authGroupService,
+  formDataPermissionGroupService,
   formDataService,
   formListViewService,
 } from "@eimsnext/services";
@@ -182,7 +182,7 @@ import {
   IFormFieldDef,
   IToolbarItemDropdownItem,
 } from "@eimsnext/components";
-import { getAuthGroupDataPerms, hasDataPerm } from "@/utils/common";
+import { getFormDataPermissionGroupFormDataPermissions, hasDataPerm } from "@/utils/common";
 import Pagination from "../../components/Pagination/index.vue";
 import { useI18n } from "vue-i18n";
 import FormDraftDrawer from "./components/FormDraftDrawer.vue";
@@ -232,14 +232,14 @@ const formDef = ref<FormDef>();
 const filterBtnRef = ref();
 const sortBtnRef = ref();
 const fieldBtnRef = ref();
-const authGrps = ref<AuthGroup[]>([]);
-const curAuthGrp = ref<AuthGroup>();
-const fieldPerms = ref<IFieldPerm[]>();
+const permissionGroups = ref<FormDataPermissionGroup[]>([]);
+const curPermissionGroup = ref<FormDataPermissionGroup>();
+const formFieldPermissions = ref<FormFieldPermission[]>();
 const canManageCurrentApp = ref(false);
 const permissionsReady = ref(false);
 const canViewField = (field: string) =>
-  fieldPerms.value === undefined ||
-  fieldPerms.value.some((permission) => permission.id === field && permission.visible);
+  formFieldPermissions.value === undefined ||
+  formFieldPermissions.value.some((permission) => permission.id === field && permission.visible);
 const restrictConditionToVisibleFields = (condition: IConditionList): IConditionList | undefined => {
   if (condition.field?.field && !canViewField(condition.field.field)) return undefined;
   if (condition.value?.fieldValue?.field && !canViewField(condition.value.fieldValue.field)) return undefined;
@@ -257,7 +257,7 @@ const visibleSort = (sort: IFieldSortList): IFieldSortList => ({
   items: sort.items.filter((item) => canViewField(item.field.field)),
 });
 const currentDataScope = (): IDataScope | undefined => {
-  if (curAuthGrp.value?.id) return { authGroupId: curAuthGrp.value.id };
+  if (curPermissionGroup.value?.id) return { permissionGroupId: curPermissionGroup.value.id };
   if (usesAdminAllPermissions.value) return undefined;
   return { formId, inheritMemberPermissions: true };
 };
@@ -275,28 +275,28 @@ const { currentUser } = userStore;
 const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
 
 const usesAdminAllPermissions = computed(
-  () => permissionsReady.value && authGrps.value.length === 0 && canManageCurrentApp.value,
+  () => permissionsReady.value && permissionGroups.value.length === 0 && canManageCurrentApp.value,
 );
-const dataPerms = computed(() =>
-  curAuthGrp.value
-    ? getAuthGroupDataPerms(curAuthGrp.value)
+const formDataPermissions = computed(() =>
+  curPermissionGroup.value
+    ? getFormDataPermissionGroupFormDataPermissions(curPermissionGroup.value)
     : usesAdminAllPermissions.value
-      ? DataPerms.All
-      : DataPerms.None,
+      ? FormDataPermissions.All
+      : FormDataPermissions.None,
 );
-const canAdd = computed(() => hasDataPerm(DataPerms.AddNew, dataPerms.value));
-const canImport = computed(() => hasDataPerm(DataPerms.Import, dataPerms.value));
-const canExport = computed(() => hasDataPerm(DataPerms.Export, dataPerms.value));
+const canAdd = computed(() => hasDataPerm(FormDataPermissions.AddNew, formDataPermissions.value));
+const canImport = computed(() => hasDataPerm(FormDataPermissions.Import, formDataPermissions.value));
+const canExport = computed(() => hasDataPerm(FormDataPermissions.Export, formDataPermissions.value));
 const canRemove = computed(() =>
-  hasDataPerm(DataPerms.Remove, dataPerms.value)
+  hasDataPerm(FormDataPermissions.Remove, formDataPermissions.value)
 );
 const visibleCustomViews = computed(() => {
-  const authGroupId = curAuthGrp.value?.id;
+  const permissionGroupId = curPermissionGroup.value?.id;
   return listViews.value.filter((view) => {
     if (view.id === "__default") return false;
     if (view.disabled) return false;
-    if (!authGroupId || !view.authGroupIds || view.authGroupIds.length === 0) return true;
-    return view.authGroupIds.includes(authGroupId);
+    if (!permissionGroupId || !view.permissionGroupIds || view.permissionGroupIds.length === 0) return true;
+    return view.permissionGroupIds.includes(permissionGroupId);
   });
 });
 
@@ -313,13 +313,13 @@ const leftBars = ref<ToolbarItem[]>([
     type: "dropdown",
     config: {
       text: "admin.formList.selectPermGroup",
-      class: "auth-gropu-filter",
+      class: "permission-group-filter",
       command: "authgrp",
       visible: false,
       showDynamicText: true,
       onCommand: (cmd) => {
-        curAuthGrp.value = authGrps.value.find((x) => x.id == cmd);
-        fieldPerms.value = curAuthGrp.value ? (curAuthGrp.value.fieldPerms ?? []) : [];
+        curPermissionGroup.value = permissionGroups.value.find((x) => x.id == cmd);
+        formFieldPermissions.value = curPermissionGroup.value ? (curPermissionGroup.value.formFieldPermissions ?? []) : [];
         showFilter.value = showSort.value = showField.value = false;
         checkedDatas.value = [];
         const deleteItem = leftBars.value.find((x) => x.config.command === "delete");
@@ -492,7 +492,7 @@ const submitExport = async () => {
       columns: selectedColumns,
       formId,
       filter: queryParams.value.filter,
-      authGroupId: curAuthGrp.value?.id,
+      permissionGroupId: curPermissionGroup.value?.id,
       keyword: queryParams.value.keyword,
       searchFields: queryParams.value.searchFields,
       includeDeleted: false,
@@ -519,11 +519,11 @@ const loadFormContext = async () => {
   await loadAdminPermissions();
   canManageCurrentApp.value = canManageAppId(form.appId);
 
-  const assignedGroups = await authGroupService.getAssigned(form.id);
-  authGrps.value = assignedGroups;
-  curAuthGrp.value = assignedGroups[0];
-  fieldPerms.value = curAuthGrp.value
-    ? (curAuthGrp.value.fieldPerms ?? [])
+  const assignedGroups = await formDataPermissionGroupService.getAssigned(form.id);
+  permissionGroups.value = assignedGroups;
+  curPermissionGroup.value = assignedGroups[0];
+  formFieldPermissions.value = curPermissionGroup.value
+    ? (curPermissionGroup.value.formFieldPermissions ?? [])
     : canManageCurrentApp.value
       ? undefined
       : [];
@@ -619,7 +619,7 @@ const applyCurrentView = (preferredViewId?: string) => {
   curListViewSettings.value = parseViewSettings(nextView.settings);
 
   const requestedFields = getViewDisplayFields(formDef.value, nextView, curListViewSettings.value, t);
-  const sourceFields = requestedFields.length === 0 && fieldPerms.value !== undefined
+  const sourceFields = requestedFields.length === 0 && formFieldPermissions.value !== undefined
     ? buildAllViewFields(formDef.value, t)
     : requestedFields;
   const displayFields = sourceFields.filter((field) => canViewField(field.field));
@@ -635,12 +635,12 @@ const applyCurrentView = (preferredViewId?: string) => {
   sortList.value = visibleSort(parseSort(formId, nextView.defaultSort, t));
   pageNum.value = 1;
 
-  initChildrenField(formDef.value.content?.items || [], fieldList.value, fieldPerms.value);
+  initChildrenField(formDef.value.content?.items || [], fieldList.value, formFieldPermissions.value);
   columns.value = buildColumns(
     formDef.value.content?.items || [],
     formDef.value.usingWorkflow,
     fieldList.value,
-    fieldPerms.value,
+    formFieldPermissions.value,
     t,
   );
   updateQueryParams();
@@ -934,7 +934,7 @@ const spanMap = ref<number[]>([]);
 const initChildrenField = (
   fields: FieldDef[],
   displayFields: IFormFieldDef[],
-  fieldPerms?: IFieldPerm[]
+  formFieldPermissions?: FormFieldPermission[]
 ) => {
   childrenFields.value = [];
   fields.forEach((x) => {
@@ -1181,7 +1181,7 @@ onUnmounted(() => {
   background: var(--el-fill-color-light);
 }
 
-:deep(.auth-gropu-filter) {
+:deep(.permission-group-filter) {
   line-height: var(--et-line-height-32);
   padding: 0 var(--et-space-8);
   margin-right: var(--et-space-10);
@@ -1221,3 +1221,4 @@ onUnmounted(() => {
   margin-right: var(--et-space-4);
 }
 </style>
+

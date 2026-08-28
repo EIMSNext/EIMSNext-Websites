@@ -7,14 +7,14 @@
             <div class="ag-desc">{{ t("admin.publishEditor.nameInfoDesc") }}</div>
             <div class="ag-name">
               <el-input
-                v-model="authGrp.name"
+                v-model="permissionGroup.name"
                 :placeholder="t('admin.publishEditor.namePlaceholder')"
                 autocomplete="new-password"
               />
             </div>
             <div class="ag-describe">
               <el-input
-                v-model="authGrp.desc"
+                v-model="permissionGroup.desc"
                 type="textarea"
                 class="ag-desc-textarea"
                 :placeholder="t('admin.publishEditor.descPlaceholder')"
@@ -29,51 +29,51 @@
             <div class="ag-desc">{{ t("admin.publishEditor.dataPermDesc") }}</div>
             <div class="data-perms-group">
               <el-checkbox
-                :modelValue="dataPerms == DataPerms.All"
-                :indeterminate="dataPerms != DataPerms.All && dataPerms > 0"
-                @change="(val) => dataPermsChanged(DataPerms.All, val)"
+                :modelValue="formDataPermissions == FormDataPermissions.All"
+                :indeterminate="formDataPermissions != FormDataPermissions.All && formDataPermissions > 0"
+                @change="(val) => formDataPermissionsChanged(FormDataPermissions.All, val)"
               >
                 {{ t("admin.publishEditor.selectAll") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canView"
-                @change="(val) => dataPermsChanged(DataPerms.View, val)"
+                @change="(val) => formDataPermissionsChanged(FormDataPermissions.View, val)"
               >
                 {{ t("admin.publishEditor.view") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canAddNew"
-                @change="(val) => dataPermsChanged(DataPerms.AddNew, val)"
+                @change="(val) => formDataPermissionsChanged(FormDataPermissions.AddNew, val)"
               >
                 {{ t("admin.publishEditor.add") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canCopy"
-                @change="(val) => dataPermsChanged(DataPerms.Copy, val)"
+                @change="(val) => formDataPermissionsChanged(FormDataPermissions.Copy, val)"
               >
                 {{ t("admin.publishEditor.copy") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canEdit"
-                @change="(val) => dataPermsChanged(DataPerms.Edit, val)"
+                @change="(val) => formDataPermissionsChanged(FormDataPermissions.Edit, val)"
               >
                 {{ t("admin.publishEditor.edit") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canRemove"
-                @change="(val) => dataPermsChanged(DataPerms.Remove, val)"
+                @change="(val) => formDataPermissionsChanged(FormDataPermissions.Remove, val)"
               >
                 {{ t("admin.publishEditor.remove") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canImport"
-                @change="(val) => dataPermsChanged(DataPerms.Import, val)"
+                @change="(val) => formDataPermissionsChanged(FormDataPermissions.Import, val)"
               >
                 {{ t("admin.publishEditor.import") }}
               </el-checkbox>
               <el-checkbox
                 :modelValue="canExport"
-                @change="(val) => dataPermsChanged(DataPerms.Export, val)"
+                @change="(val) => formDataPermissionsChanged(FormDataPermissions.Export, val)"
               >
                 {{ t("admin.publishEditor.export") }}
               </el-checkbox>
@@ -97,56 +97,56 @@
         </div>
       </el-tab-pane>
       <el-tab-pane :label="t('admin.publishEditor.fieldPerm')" name="fieldperm" class="ag-panel">
-        <EtFieldPerms
-          v-model="fieldPerms"
+        <EtFormFieldPermissions
+          v-model="formFieldPermissions"
           :fields="formDef.content?.items"
           class="field-perms-panel"
-          @change="fieldPermsChanged"
-        ></EtFieldPerms>
+          @change="formFieldPermissionsChanged"
+        ></EtFormFieldPermissions>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 <script setup lang="ts">
-import { EventFlowDiagram, IConditionList, IFieldPermItem } from "@eimsnext/components";
-import { FormDef, AuthGroup, DataPerms, AuthGroupType, IFieldPerm } from "@eimsnext/models";
+import { EventFlowDiagram, IConditionList, FormFieldPermissionItem } from "@eimsnext/components";
+import { FormDef, FormDataPermissionGroup, FormDataPermissions, FormDataPermissionMode, FormFieldPermission } from "@eimsnext/models";
 import { FlagEnum, uniqueId } from "@eimsnext/utils";
 
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 defineOptions({
-  name: "AuthGroupEditor",
+  name: "FormDataPermissionGroupEditor",
 });
 
 const props = defineProps<{
-  modelValue: AuthGroup;
+  modelValue: FormDataPermissionGroup;
   formDef: FormDef;
 }>();
 
 const activeName = ref("name");
 
-const authGrp = toRef(props.modelValue);
-const dataPerms = ref(authGrp.value.dataPerms);
-const dataPermsChanged = (perm: DataPerms, checked: any) => {
+const permissionGroup = toRef(props.modelValue);
+const formDataPermissions = ref(permissionGroup.value.formDataPermissions);
+const formDataPermissionsChanged = (perm: FormDataPermissions, checked: any) => {
   if (checked) {
-    dataPerms.value = FlagEnum.combine(dataPerms.value, DataPerms.View, perm);
+    formDataPermissions.value = FlagEnum.combine(formDataPermissions.value, FormDataPermissions.View, perm);
   } else {
-    if (perm == DataPerms.View) dataPerms.value = DataPerms.None;
-    else dataPerms.value = FlagEnum.remove(dataPerms.value, perm);
+    if (perm == FormDataPermissions.View) formDataPermissions.value = FormDataPermissions.None;
+    else formDataPermissions.value = FlagEnum.remove(formDataPermissions.value, perm);
   }
 
-  authGrp.value.dataPerms = dataPerms.value;
-  emit("update:modelValue", authGrp.value);
+  permissionGroup.value.formDataPermissions = formDataPermissions.value;
+  emit("update:modelValue", permissionGroup.value);
 };
 
-const canView = computed(() => FlagEnum.has(dataPerms.value, DataPerms.View));
-const canAddNew = computed(() => FlagEnum.has(dataPerms.value, DataPerms.AddNew));
-const canEdit = computed(() => FlagEnum.has(dataPerms.value, DataPerms.Edit));
-const canCopy = computed(() => FlagEnum.has(dataPerms.value, DataPerms.Copy));
-const canRemove = computed(() => FlagEnum.has(dataPerms.value, DataPerms.Remove));
-const canImport = computed(() => FlagEnum.has(dataPerms.value, DataPerms.Import));
-const canExport = computed(() => FlagEnum.has(dataPerms.value, DataPerms.Export));
+const canView = computed(() => FlagEnum.has(formDataPermissions.value, FormDataPermissions.View));
+const canAddNew = computed(() => FlagEnum.has(formDataPermissions.value, FormDataPermissions.AddNew));
+const canEdit = computed(() => FlagEnum.has(formDataPermissions.value, FormDataPermissions.Edit));
+const canCopy = computed(() => FlagEnum.has(formDataPermissions.value, FormDataPermissions.Copy));
+const canRemove = computed(() => FlagEnum.has(formDataPermissions.value, FormDataPermissions.Remove));
+const canImport = computed(() => FlagEnum.has(formDataPermissions.value, FormDataPermissions.Import));
+const canExport = computed(() => FlagEnum.has(formDataPermissions.value, FormDataPermissions.Export));
 
 const dataFilter = ref<IConditionList>(
   props.modelValue.dataFilter
@@ -154,24 +154,24 @@ const dataFilter = ref<IConditionList>(
     : { id: uniqueId(), rel: "and", items: [] }
 );
 const dataFilterChanged = (condList: IConditionList) => {
-  authGrp.value.dataFilter = JSON.stringify(condList);
-  emit("update:modelValue", authGrp.value);
+  permissionGroup.value.dataFilter = JSON.stringify(condList);
+  emit("update:modelValue", permissionGroup.value);
 };
 
 const dataFilterClear = () => {
   dataFilter.value.items = [];
-  authGrp.value.dataFilter = JSON.stringify(dataFilter.value);
-  emit("update:modelValue", authGrp.value);
+  permissionGroup.value.dataFilter = JSON.stringify(dataFilter.value);
+  emit("update:modelValue", permissionGroup.value);
 };
 
-const fieldPerms = ref<IFieldPermItem[]>([]);
-if (props.modelValue.fieldPerms) {
-  fieldPerms.value = props.modelValue.fieldPerms as IFieldPermItem[];
+const formFieldPermissions = ref<FormFieldPermissionItem[]>([]);
+if (props.modelValue.formFieldPermissions) {
+  formFieldPermissions.value = props.modelValue.formFieldPermissions as FormFieldPermissionItem[];
 }
 
-const fieldPermsChanged = (value: IFieldPermItem[]) => {
-  props.modelValue.fieldPerms = value as IFieldPerm[];
-  emit("update:modelValue", authGrp.value);
+const formFieldPermissionsChanged = (value: FormFieldPermissionItem[]) => {
+  props.modelValue.formFieldPermissions = value as FormFieldPermission[];
+  emit("update:modelValue", permissionGroup.value);
 };
 
 const emit = defineEmits(["update:modelValue"]);
@@ -244,3 +244,4 @@ const emit = defineEmits(["update:modelValue"]);
   height: 90%;
 }
 </style>
+

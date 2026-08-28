@@ -62,7 +62,7 @@
 import InternalPublish from "@/components/FormEdit/Publish/InternalPublish.vue";
 import { convertMemberTypeToTagType, convertTagTypeToMemberType } from "@/components/FormEdit/Publish/type";
 import {
-  AdminPermissionSnapshot,
+  TenantAccessSnapshot,
   DashboardDef,
   DashboardDefRequest,
   FormDef,
@@ -88,22 +88,22 @@ const selectedDashboard = ref<DashboardDef>();
 const dashboardTags = ref<ISelectedTag[]>([]);
 const dashboardPublishEnabled = ref(false);
 const showMemberDialog = ref(false);
-const adminPermissions = ref<AdminPermissionSnapshot>();
+const adminPermissions = ref<TenantAccessSnapshot>();
 
 const memberOptions = {
-  showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
+  showTabs: MemberTabs.Department | MemberTabs.EmployeeGroup | MemberTabs.Employee,
   cascadedDept: true,
   showCascade: true,
 };
 
 const publishMemberLimit = computed(() => {
   const permissions = adminPermissions.value;
-  if (!permissions?.isNormalAdmin || permissions.appRoleScopeMode !== "1") return undefined;
+  if (!permissions?.isNormalAdmin || permissions.appEmployeeGroupScopeMode !== "1") return undefined;
   return {
-    roles: permissions.appRoleIds.map((id) => ({
+    employeeGroups: permissions.appEmployeeGroupIds.map((id) => ({
       id,
       label: id,
-      type: DataItemType.Role,
+      type: DataItemType.EmployeeGroup,
     })),
   };
 });

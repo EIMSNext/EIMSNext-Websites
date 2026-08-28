@@ -1,37 +1,37 @@
 <template>
-  <AddEditRoleGroup
+  <AddEditEmployeeGroupCategory
     v-if="showAddEditGroupDialog"
     :edit="editMode"
-    :p-group="currentGroup"
+    :p-category="currentGroup"
     @cancel="showAddEditGroupDialog = false"
     @ok="handleGroupSaved"
   />
-  <AddEditRole
-    v-if="showAddEditRoleDialog"
+  <AddEditEmployeeGroup
+    v-if="showAddEditEmployeeGroupDialog"
     :edit="editMode"
-    :p-group="currentGroup!"
-    :p-role="selectedRole"
-    @cancel="showAddEditRoleDialog = false"
-    @ok="handleRoleSaved"
+    :p-category="currentGroup!"
+    :p-empgrp="selectedEmployeeGroup"
+    @cancel="showAddEditEmployeeGroupDialog = false"
+    @ok="handleEmployeeGroupSaved"
   />
   <et-confirm-dialog
     v-model="showDeleteDialog"
-    :title="$t('role.confirmDelete')"
+    :title="$t('employeeGroup.confirmDelete')"
     :showNoSave="false"
     :okText="$t('common.confirm')"
     @cancel="showDeleteDialog = false"
     @ok="handleDeleteConfirm"
   >
-    {{ $t("role.confirmDeleteData") }}
+    {{ $t("employeeGroup.confirmDeleteData") }}
   </et-confirm-dialog>
-  <el-card shadow="never" class="role-card">
+  <el-card shadow="never" class="employeeGroup-card">
     <div class="form-action">
-      <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable :placeholder="$t('role.searchPlaceholder')" />
+      <el-input v-model="keyword" class="search-input" prefix-icon="Search" clearable :placeholder="$t('employeeGroup.searchPlaceholder')" />
       <el-button v-if="editable" @click="handleAddGroupClick">
         <et-icon icon="el-plus" />
       </el-button>
     </div>
-    <div class="role-tree">
+    <div class="employeeGroup-tree">
       <Draggable
         :list="treeItems"
         item-key="id"
@@ -48,7 +48,7 @@
             <template v-if="element.kind === 'group'">
               <div
                 class="node-data group-drop-target"
-                :class="{ selected: currentGroup?.id === element.id && !selectedRole }"
+                :class="{ selected: currentGroup?.id === element.id && !selectedEmployeeGroup }"
                 :title="element.label"
                 @dragover.prevent
                 @drop.stop.prevent="dropToGroup(element)"
@@ -58,7 +58,7 @@
                   <et-icon icon="el-folder" icon-class="node-icon" />
                   <span class="node-label">{{ element.label }}</span>
                   <div v-if="editable" class="node-action">
-                    <et-icon icon="el-Plus" class="action-item" @click.stop="handleAddRoleClick(element)" />
+                    <et-icon icon="el-Plus" class="action-item" @click.stop="handleAddEmployeeGroupClick(element)" />
                     <et-icon icon="el-Edit" class="action-item" @click.stop="handleEditClick(element)" />
                     <et-icon icon="el-Delete" class="action-item" @click.stop="handleDeleteClick(element)" />
                   </div>
@@ -77,9 +77,9 @@
               >
                 <template #item="{ element: child }">
                   <div class="tree-drag-item child">
-                    <div class="node-data" :class="{ selected: selectedRole?.id === child.id }" :title="child.label" @click="handleNodeClick(child)">
+                    <div class="node-data" :class="{ selected: selectedEmployeeGroup?.id === child.id }" :title="child.label" @click="handleNodeClick(child)">
                       <div class="node-wrapper">
-                        <et-icon icon="icon-role" icon-class="node-icon" />
+                        <et-icon icon="icon-employee-group" icon-class="node-icon" />
                         <span class="node-label">{{ child.label }}</span>
                         <div v-if="editable" class="node-action">
                           <et-icon icon="el-Edit" class="action-item" @click.stop="handleEditClick(child)" />
@@ -91,9 +91,9 @@
                 </template>
               </Draggable>
             </template>
-            <div v-else class="node-data" :class="{ selected: selectedRole?.id === element.id }" :title="element.label" @click="handleNodeClick(element)">
+            <div v-else class="node-data" :class="{ selected: selectedEmployeeGroup?.id === element.id }" :title="element.label" @click="handleNodeClick(element)">
               <div class="node-wrapper">
-                <et-icon icon="icon-role" icon-class="node-icon" />
+                <et-icon icon="icon-employee-group" icon-class="node-icon" />
                 <span class="node-label">{{ element.label }}</span>
                 <div v-if="editable" class="node-action">
                   <et-icon icon="el-Edit" class="action-item" @click.stop="handleEditClick(element)" />
@@ -109,21 +109,21 @@
 </template>
 
 <script setup lang="ts">
-import { RoleGroup, Role } from "@eimsnext/models";
-import { roleGroupService, roleService } from "@eimsnext/services";
+import { EmployeeGroupCategory, EmployeeGroup } from "@eimsnext/models";
+import { employeeGroupCategoryService, employeeGroupService } from "@eimsnext/services";
 import Draggable from "vuedraggable";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 
-type RoleTreeNode = {
+type EmployeeGroupTreeNode = {
   id: string;
   label: string;
-  kind: "group" | "role";
-  data: RoleGroup | Role;
+  kind: "group" | "employeeGroup";
+  data: EmployeeGroupCategory | EmployeeGroup;
   sortValue: number;
-  children: RoleTreeNode[];
+  children: EmployeeGroupTreeNode[];
 };
 
 const props = defineProps({
@@ -137,21 +137,21 @@ const props = defineProps({
   },
 });
 
-const treeItems = ref<RoleTreeNode[]>([]);
-const allGroups = ref<RoleGroup[]>([]);
-const allRoles = ref<Role[]>([]);
+const treeItems = ref<EmployeeGroupTreeNode[]>([]);
+const allGroups = ref<EmployeeGroupCategory[]>([]);
+const allEmployeeGroups = ref<EmployeeGroup[]>([]);
 const keyword = ref("");
-const currentGroup = ref<RoleGroup>();
-const selectedRole = ref<Role>();
-const showAddEditRoleDialog = ref(false);
+const currentGroup = ref<EmployeeGroupCategory>();
+const selectedEmployeeGroup = ref<EmployeeGroup>();
+const showAddEditEmployeeGroupDialog = ref(false);
 const showAddEditGroupDialog = ref(false);
 const editMode = ref(false);
 const showDeleteDialog = ref(false);
-const toDeleteNode = ref<RoleTreeNode>();
-const draggingNode = ref<RoleTreeNode>();
-const dragGroup = { name: "role-tree", pull: true, put: true };
+const toDeleteNode = ref<EmployeeGroupTreeNode>();
+const draggingNode = ref<EmployeeGroupTreeNode>();
+const dragGroup = { name: "employeeGroup-tree", pull: true, put: true };
 
-const emit = defineEmits(["role-click"]);
+const emit = defineEmits(["employeeGroup-click"]);
 
 onBeforeMount(() => {
   loadData();
@@ -162,18 +162,18 @@ watch(keyword, () => {
 });
 
 const loadData = () => {
-  let roleGroups: RoleGroup[] = [];
-  let roles: Role[] = [];
+  let employeeGroupCategorys: EmployeeGroupCategory[] = [];
+  let employeeGroups: EmployeeGroup[] = [];
   Promise.all([
-    roleGroupService.query<RoleGroup>(props.adminScope ? "adminScope=true" : "").then((data) => {
-      roleGroups = data;
+    employeeGroupCategoryService.query<EmployeeGroupCategory>(props.adminScope ? "adminScope=true" : "").then((data) => {
+      employeeGroupCategorys = data;
     }),
-    roleService.query<Role>(props.adminScope ? "adminScope=true" : "").then((data) => {
-      roles = data;
+    employeeGroupService.query<EmployeeGroup>(props.adminScope ? "adminScope=true" : "").then((data) => {
+      employeeGroups = data;
     }),
   ]).then(() => {
-    allGroups.value = roleGroups;
-    allRoles.value = roles;
+    allGroups.value = employeeGroupCategorys;
+    allEmployeeGroups.value = employeeGroups;
     refreshTree();
   });
 };
@@ -184,7 +184,7 @@ const refreshTree = () => {
   const folders = allGroups.value
     .slice()
     .sort((a, b) => (a.sortValue || 0) - (b.sortValue || 0))
-    .map<RoleTreeNode>((group) => ({
+    .map<EmployeeGroupTreeNode>((group) => ({
       id: group.id,
       label: group.name,
       kind: "group",
@@ -193,21 +193,21 @@ const refreshTree = () => {
       children: [],
     }));
   const folderMap = new Map(folders.map((folder) => [folder.id, folder]));
-  const roots: RoleTreeNode[] = [...folders];
+  const roots: EmployeeGroupTreeNode[] = [...folders];
 
-  allRoles.value
+  allEmployeeGroups.value
     .slice()
     .sort((a, b) => (a.sortValue || 0) - (b.sortValue || 0))
-    .forEach((role) => {
-      const node: RoleTreeNode = {
-        id: role.id,
-        label: role.name,
-        kind: "role",
-        data: role,
-        sortValue: role.sortValue || 0,
+    .forEach((employeeGroup) => {
+      const node: EmployeeGroupTreeNode = {
+        id: employeeGroup.id,
+        label: employeeGroup.name,
+        kind: "employeeGroup",
+        data: employeeGroup,
+        sortValue: employeeGroup.sortValue || 0,
         children: [],
       };
-      const parent = folderMap.get(role.roleGroupId);
+      const parent = folderMap.get(employeeGroup.employeeGroupCategoryId);
       if (parent) parent.children.push(node);
       else roots.push(node);
     });
@@ -215,25 +215,25 @@ const refreshTree = () => {
   const filtered = keyword.value
     ? roots
         .map((node) => {
-          if (node.kind === "role") return matchKeyword(node.label) ? node : undefined;
+          if (node.kind === "employeeGroup") return matchKeyword(node.label) ? node : undefined;
           const children = node.children.filter((child) => matchKeyword(child.label));
           if (matchKeyword(node.label) || children.length > 0) return { ...node, children };
           return undefined;
         })
-        .filter((node): node is RoleTreeNode => !!node)
+        .filter((node): node is EmployeeGroupTreeNode => !!node)
     : roots;
 
   treeItems.value = filtered.sort((a, b) => (a.sortValue || 0) - (b.sortValue || 0));
 };
 
-const handleNodeClick = (node: RoleTreeNode) => {
-  if (node.kind === "role") {
-    selectedRole.value = node.data as Role;
-    currentGroup.value = allGroups.value.find((x) => x.id === selectedRole.value?.roleGroupId);
-    emit("role-click", node.data);
+const handleNodeClick = (node: EmployeeGroupTreeNode) => {
+  if (node.kind === "employeeGroup") {
+    selectedEmployeeGroup.value = node.data as EmployeeGroup;
+    currentGroup.value = allGroups.value.find((x) => x.id === selectedEmployeeGroup.value?.employeeGroupCategoryId);
+    emit("employeeGroup-click", node.data);
   } else {
-    selectedRole.value = undefined;
-    currentGroup.value = node.data as RoleGroup;
+    selectedEmployeeGroup.value = undefined;
+    currentGroup.value = node.data as EmployeeGroupCategory;
   }
 };
 
@@ -243,20 +243,20 @@ const handleAddGroupClick = () => {
   showAddEditGroupDialog.value = true;
 };
 
-const handleAddRoleClick = (node: RoleTreeNode) => {
+const handleAddEmployeeGroupClick = (node: EmployeeGroupTreeNode) => {
   editMode.value = false;
-  currentGroup.value = node.data as RoleGroup;
-  showAddEditRoleDialog.value = true;
+  currentGroup.value = node.data as EmployeeGroupCategory;
+  showAddEditEmployeeGroupDialog.value = true;
 };
 
-const handleEditClick = (node: RoleTreeNode) => {
+const handleEditClick = (node: EmployeeGroupTreeNode) => {
   editMode.value = true;
-  if (node.kind === "role") {
-    selectedRole.value = node.data as Role;
-    currentGroup.value = allGroups.value.find((x) => x.id === selectedRole.value?.roleGroupId);
-    showAddEditRoleDialog.value = true;
+  if (node.kind === "employeeGroup") {
+    selectedEmployeeGroup.value = node.data as EmployeeGroup;
+    currentGroup.value = allGroups.value.find((x) => x.id === selectedEmployeeGroup.value?.employeeGroupCategoryId);
+    showAddEditEmployeeGroupDialog.value = true;
   } else {
-    currentGroup.value = node.data as RoleGroup;
+    currentGroup.value = node.data as EmployeeGroupCategory;
     showAddEditGroupDialog.value = true;
   }
 };
@@ -266,12 +266,12 @@ const handleGroupSaved = () => {
   loadData();
 };
 
-const handleRoleSaved = () => {
-  showAddEditRoleDialog.value = false;
+const handleEmployeeGroupSaved = () => {
+  showAddEditEmployeeGroupDialog.value = false;
   loadData();
 };
 
-const handleDeleteClick = (node: RoleTreeNode) => {
+const handleDeleteClick = (node: EmployeeGroupTreeNode) => {
   toDeleteNode.value = node;
   showDeleteDialog.value = true;
 };
@@ -279,15 +279,15 @@ const handleDeleteClick = (node: RoleTreeNode) => {
 const handleDeleteConfirm = async () => {
   if (!toDeleteNode.value) return;
   if (toDeleteNode.value.kind === "group" && toDeleteNode.value.children.length > 0) {
-    ElMessage.warning(t('comp.addEditRoleGroup.cannotDeleteWithRoles'));
+    ElMessage.warning(t('comp.addEditEmployeeGroupCategory.cannotDeleteWithEmployeeGroups'));
     showDeleteDialog.value = false;
     return;
   }
 
-  if (toDeleteNode.value.kind === "role") {
-    await roleService.delete(toDeleteNode.value.id);
+  if (toDeleteNode.value.kind === "employeeGroup") {
+    await employeeGroupService.delete(toDeleteNode.value.id);
   } else {
-    await roleGroupService.delete(toDeleteNode.value.id);
+    await employeeGroupCategoryService.delete(toDeleteNode.value.id);
   }
 
   loadData();
@@ -299,7 +299,7 @@ const handleRootDragStart = (event: { oldIndex?: number }) => {
   draggingNode.value = treeItems.value[event.oldIndex];
 };
 
-const handleChildDragStart = (group: RoleTreeNode, event: { oldIndex?: number }) => {
+const handleChildDragStart = (group: EmployeeGroupTreeNode, event: { oldIndex?: number }) => {
   if (event.oldIndex === undefined) return;
   draggingNode.value = group.children[event.oldIndex];
 };
@@ -308,29 +308,29 @@ const clearDragging = () => {
   draggingNode.value = undefined;
 };
 
-const getDragResult = (source: RoleTreeNode) => {
+const getDragResult = (source: EmployeeGroupTreeNode) => {
   const rootIndex = treeItems.value.findIndex((item) => item.id === source.id);
   if (rootIndex > -1) {
-    return { roleGroupId: "", siblings: treeItems.value };
+    return { employeeGroupCategoryId: "", siblings: treeItems.value };
   }
 
   for (const group of treeItems.value) {
     if (group.kind !== "group") continue;
     const childIndex = group.children.findIndex((item) => item.id === source.id);
-    if (childIndex > -1) return { roleGroupId: group.id, siblings: group.children };
+    if (childIndex > -1) return { employeeGroupCategoryId: group.id, siblings: group.children };
   }
 
   return undefined;
 };
 
-const moveNode = async (source: RoleTreeNode, roleGroupId: string, siblings: RoleTreeNode[]) => {
+const moveNode = async (source: EmployeeGroupTreeNode, employeeGroupCategoryId: string, siblings: EmployeeGroupTreeNode[]) => {
   const index = siblings.findIndex((item) => item.id === source.id);
   if (index < 0) return;
 
-  await roleService.move({
+  await employeeGroupService.move({
     id: source.id,
     isGroup: source.kind === "group",
-    roleGroupId,
+    employeeGroupCategoryId,
     previousId: siblings[index - 1]?.id || "",
     nextId: siblings[index + 1]?.id || "",
   });
@@ -353,33 +353,33 @@ const handleDragEnd = async () => {
     return;
   }
 
-  await moveNode(source, result.roleGroupId, result.siblings);
+  await moveNode(source, result.employeeGroupCategoryId, result.siblings);
 };
 
-const handleRootMove = (event: { relatedContext?: { element?: RoleTreeNode }; originalEvent?: { target?: EventTarget | null } }) => {
+const handleRootMove = (event: { relatedContext?: { element?: EmployeeGroupTreeNode }; originalEvent?: { target?: EventTarget | null } }) => {
   if (keyword.value.trim()) return false;
   const target = event.relatedContext?.element;
   const source = draggingNode.value;
   if (!source || !target) return true;
   const onGroupTitle = event.originalEvent?.target instanceof HTMLElement && !!event.originalEvent.target.closest(".group-drop-target");
-  return !(onGroupTitle && target.kind === "group" && source.kind === "role");
+  return !(onGroupTitle && target.kind === "group" && source.kind === "employeeGroup");
 };
 
-const handleChildMove = () => !keyword.value.trim() && draggingNode.value?.kind === "role";
+const handleChildMove = () => !keyword.value.trim() && draggingNode.value?.kind === "employeeGroup";
 
-const dropToGroup = async (group: RoleTreeNode) => {
+const dropToGroup = async (group: EmployeeGroupTreeNode) => {
   if (keyword.value.trim()) {
-    ElMessage.warning(t('admin.adminGroup.clearSearchBeforeSort'));
+    ElMessage.warning(t('admin.tenantAdminGroup.clearSearchBeforeSort'));
     return;
   }
 
   const source = draggingNode.value;
-  if (!source || source.kind !== "role") return;
+  if (!source || source.kind !== "employeeGroup") return;
   clearDragging();
-  await roleService.move({
+  await employeeGroupService.move({
     id: source.id,
     isGroup: false,
-    roleGroupId: group.id,
+    employeeGroupCategoryId: group.id,
     previousId: group.children.at(-1)?.id || "",
     nextId: "",
   });
@@ -395,7 +395,7 @@ const dropToGroup = async (group: RoleTreeNode) => {
   box-sizing: border-box;
 }
 
-.role-card {
+.employeeGroup-card {
   border: none;
   height: 100%;
   display: flex;
@@ -405,7 +405,7 @@ const dropToGroup = async (group: RoleTreeNode) => {
   padding: var(--et-space-0);
 }
 
-.role-tree {
+.employeeGroup-tree {
   flex: 1;
   overflow-x: auto;
   overflow-y: auto;

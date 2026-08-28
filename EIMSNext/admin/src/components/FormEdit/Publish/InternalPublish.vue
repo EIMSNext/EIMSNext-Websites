@@ -13,14 +13,14 @@
     <NewPublishDialog
       v-if="showDialog"
       v-model="showDialog"
-      :authGroup="selectedGrp"
+      :permissionGroup="selectedGrp"
       :formDef="formDef"
       :limit="limit"
       destroy-on-close
       @close="close"
     />
     <AdvanceLayout :title="t('admin.publish.internal')" :desc="t('admin.internalPublish.desc')">
-      <div class="auth-grp-container">
+      <div class="permission-group-container">
         <div class="panel-header">
           <div class="header-left">
             <el-button type="primary" icon="plus" @click="addNew()">{{ t("admin.internalPublish.newGroup") }}</el-button>
@@ -28,25 +28,25 @@
           <div class="header-right"></div>
         </div>
         <div>
-          <el-space direction="vertical" class="auth-grp-space">
-            <template v-for="authGrp in authGrps">
-              <et-card class="auth-grp-card" :title="authGrp.name">
+          <el-space direction="vertical" class="permission-group-space">
+            <template v-for="permissionGroup in permissionGroups">
+              <et-card class="permission-group-card" :title="permissionGroup.name">
                 <template #action>
-                  <div class="auth-grp-header">
-                    <el-button @click="edit(authGrp)">{{ t("common.edit") }}</el-button>
-                    <el-button class="delete-button" @click="remove(authGrp)">{{ t("common.delete") }}</el-button>
+                  <div class="permission-group-header">
+                    <el-button @click="edit(permissionGroup)">{{ t("common.edit") }}</el-button>
+                    <el-button class="delete-button" @click="remove(permissionGroup)">{{ t("common.delete") }}</el-button>
                     <el-switch
-                      :model-value="!authGrp.disabled"
-                      @change="toggleDisable(authGrp)"
+                      :model-value="!permissionGroup.disabled"
+                      @change="toggleDisable(permissionGroup)"
                     ></el-switch>
                   </div>
                 </template>
-                <div class="auth-grp-content">
+                <div class="permission-group-content">
                   <selected-tags
-                    :modelValue="convertMembersToTags(authGrp.members)"
+                    :modelValue="convertMembersToTags(permissionGroup.members)"
                     :editable="true"
                     :empty-text="t('comp.emptyMember')"
-                    @editTag="editTag(authGrp)"
+                    @editTag="editTag(permissionGroup)"
                   />
                 </div>
               </et-card>
@@ -60,7 +60,7 @@
       v-model="showMemberDialog"
       :tags="selectedMemberTags"
       :memberOptions="{
-        showTabs: MemberTabs.Department | MemberTabs.Role | MemberTabs.Employee,
+        showTabs: MemberTabs.Department | MemberTabs.EmployeeGroup | MemberTabs.Employee,
         multiple: true,
         cascadedDept: true,
         showCascade: true,
@@ -74,13 +74,13 @@
 <script setup lang="ts">
 import {
   FormDef,
-  AuthGroup,
-  DataPerms,
-  AuthGroupType,
+  FormDataPermissionGroup,
+  FormDataPermissions,
+  FormDataPermissionMode,
   Member,
-  AuthGroupRequest,
+  FormDataPermissionGroupRequest,
 } from "@eimsnext/models";
-import { authGroupService } from "@eimsnext/services";
+import { formDataPermissionGroupService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import AdvanceLayout from "../Advanced/AdvanceLayout.vue";
 import { ISelectedTag, MemberTabs, MessageIcon } from "@eimsnext/components";
@@ -95,20 +95,20 @@ defineOptions({
 
 const props = defineProps<{
   formDef: FormDef;
-  limit?: { depts?: ISelectedTag[]; roles?: ISelectedTag[] };
+  limit?: { depts?: ISelectedTag[]; employeeGroups?: ISelectedTag[] };
 }>();
 
 const showDialog = ref(false);
 const showMemberDialog = ref(false);
 const showDeleteConfirmDialog = ref(false);
-const authGrps = ref<AuthGroup[]>([]);
-const selectedGrp = ref<AuthGroup>();
+const permissionGroups = ref<FormDataPermissionGroup[]>([]);
+const selectedGrp = ref<FormDataPermissionGroup>();
 const selectedMemberTags = ref<ISelectedTag[]>([]);
 
-const loadAuthGroups = (formId: string) => {
+const loadFormDataPermissionGroups = (formId: string) => {
   let query = buildQuery({ filter: { formId: formId } });
-  authGroupService.query<AuthGroup>(query).then((res) => {
-    authGrps.value = res;
+  formDataPermissionGroupService.query<FormDataPermissionGroup>(query).then((res) => {
+    permissionGroups.value = res;
   });
 };
 
@@ -130,23 +130,23 @@ const addNew = () => {
   showDialog.value = true;
 };
 
-const edit = (grp: AuthGroup) => {
+const edit = (grp: FormDataPermissionGroup) => {
   selectedGrp.value = grp;
   showDialog.value = true;
 };
 
-const remove = (grp: AuthGroup) => {
+const remove = (grp: FormDataPermissionGroup) => {
   selectedGrp.value = grp;
   showDeleteConfirmDialog.value = true;
 };
 const execDelete = () => {
-  authGroupService.delete<AuthGroup>(selectedGrp.value!.id).then(() => {
-    loadAuthGroups(props.formDef.id);
+  formDataPermissionGroupService.delete<FormDataPermissionGroup>(selectedGrp.value!.id).then(() => {
+    loadFormDataPermissionGroups(props.formDef.id);
     showDeleteConfirmDialog.value = false;
   });
 };
-const toggleDisable = (grp: AuthGroup) => {
-  authGroupService.patch<AuthGroup>(grp.id, { id: grp.id, disabled: !grp.disabled }).then(() => {
+const toggleDisable = (grp: FormDataPermissionGroup) => {
+  formDataPermissionGroupService.patch<FormDataPermissionGroup>(grp.id, { id: grp.id, disabled: !grp.disabled }).then(() => {
     grp.disabled = !grp.disabled;
   });
 };
@@ -154,10 +154,10 @@ const toggleDisable = (grp: AuthGroup) => {
 function close(reload: boolean) {
   showDialog.value = false;
 
-  if (reload) loadAuthGroups(props.formDef.id);
+  if (reload) loadFormDataPermissionGroups(props.formDef.id);
 }
 
-const editTag = (grp: AuthGroup) => {
+const editTag = (grp: FormDataPermissionGroup) => {
   selectedGrp.value = grp;
   selectedMemberTags.value = convertMembersToTags(grp.members);
   showMemberDialog.value = true;
@@ -171,24 +171,24 @@ const finishSelect = (tags: ISelectedTag[]) => {
     cascadedDept: x.cascadedDept ?? false,
   }));
 
-  let req: AuthGroupRequest = {
+  let req: FormDataPermissionGroupRequest = {
     id: selectedGrp.value!.id,
     members: newMembers,
   };
-  authGroupService.patch<AuthGroupRequest>(req.id, req).then(() => {
-    authGrps.value.find((x) => x.id == req.id)!.members = newMembers;
+  formDataPermissionGroupService.patch<FormDataPermissionGroupRequest>(req.id, req).then(() => {
+    permissionGroups.value.find((x) => x.id == req.id)!.members = newMembers;
     showMemberDialog.value = false;
   });
 };
 
 onBeforeMount(() => {
   if (props.formDef) {
-    loadAuthGroups(props.formDef.id);
+    loadFormDataPermissionGroups(props.formDef.id);
   }
 });
 </script>
 <style lang="scss" scoped>
-.auth-grp-container {
+.permission-group-container {
   display: flex;
   flex-direction: column;
 
@@ -199,19 +199,19 @@ onBeforeMount(() => {
     padding-bottom: var(--et-space-16);
   }
 
-  .auth-grp-space {
+  .permission-group-space {
     width: 100%;
     align-items: normal !important;
   }
 
-  .auth-grp-card {
+  .permission-group-card {
     width: 100%;
 
-    .auth-grp-header {
+    .permission-group-header {
       display: flex;
       justify-content: space-between;
 
-      .auth-grp-name {
+      .permission-group-name {
         font-size: var(--et-font-size-15);
         font-weight: 600;
         max-width: 50%;
@@ -226,9 +226,10 @@ onBeforeMount(() => {
       }
     }
 
-    .auth-grp-content {
+    .permission-group-content {
       padding: var(--et-space-5) 0;
     }
   }
 }
 </style>
+

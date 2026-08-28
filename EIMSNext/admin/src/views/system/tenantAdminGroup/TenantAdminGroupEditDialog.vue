@@ -19,18 +19,18 @@
 </template>
 
 <script setup lang="ts">
-import { AdminGroup, AdminGroupType } from "@eimsnext/models";
+import { TenantAdminGroup, TenantAdminGroupType } from "@eimsnext/models";
 import { FormInstance, FormRules } from "element-plus";
 import { useI18n } from "vue-i18n";
 
 defineOptions({
-  name: "AdminGroupEditDialog",
+  name: "TenantAdminGroupEditDialog",
 });
 
 const props = defineProps<{
   modelValue: boolean;
-  group?: AdminGroup;
-  type: AdminGroupType;
+  group?: TenantAdminGroup;
+  type: TenantAdminGroupType;
 }>();
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
@@ -43,7 +43,7 @@ const formData = ref({
 
 const title = computed(() => {
   if (props.group) return t("common.edit");
-  return props.type === AdminGroupType.Folder ? t("admin.adminGroup.addFolder") : t("admin.adminGroup.addGroup");
+  return props.type === TenantAdminGroupType.Folder ? t("admin.tenantAdminGroup.addFolder") : t("admin.tenantAdminGroup.addGroup");
 });
 
 const rules: FormRules = {

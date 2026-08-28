@@ -1,5 +1,5 @@
 <template>
-  <FormView :def="formDef" :data="formData" :isView="isView" :isNewData="!data?.id" :actions="actions" :fieldPerms="fieldPerms"
+  <FormView :def="formDef" :data="formData" :isView="isView" :isNewData="!data?.id" :actions="actions" :formFieldPermissions="formFieldPermissions"
     @draft="saveDraft" @submit="submitData">
   </FormView>
 </template>
@@ -9,7 +9,7 @@ defineOptions({
 });
 
 import { ref, watch } from "vue";
-import { FormDef, FormData, FormContent, FormDataRequest, DataAction, IFieldPerm } from "@eimsnext/models";
+import { FormDef, FormData, FormContent, FormDataRequest, DataAction, FormFieldPermission } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { bus } from "@eimsnext/utils";
@@ -23,7 +23,7 @@ const props = withDefaults(
     formId: string;
     isView: boolean;
     data?: FormData;
-    fieldPerms?: IFieldPerm[]
+    formFieldPermissions?: FormFieldPermission[]
   }>(),
   {
     isView: false,

@@ -1,7 +1,7 @@
 import mitt from "mitt";
 
 export type AppEvents = {
-  "auth:logout": { reason?: string; path?: string } | undefined;
+  "identity:logout": { reason?: string; path?: string } | undefined;
   "corp:changed": string;
   "app:changed": undefined;
   "data:saved": { formId: string };

@@ -40,7 +40,7 @@
     </div>
 
     <el-tabs v-model="activeConfigTab" class="node-config-tabs">
-      <!-- <el-tab-pane :label="t('workflow.fieldPerms')" name="fieldPerms" /> -->
+      <!-- <el-tab-pane :label="t('workflow.formFieldPermissions')" name="formFieldPermissions" /> -->
       <el-tab-pane :label="t('workflow.nodeActions')" name="nodeActions">
         <div class="node-actions-panel">
           <div>
@@ -417,7 +417,7 @@ const dynamicMembers = ref<ISelectedTag[]>([]);
 const memberOptions = computed(() => ({
   showTabs:
     MemberTabs.Department |
-    MemberTabs.Role |
+    MemberTabs.EmployeeGroup |
     MemberTabs.Employee |
     MemberTabs.Dynamic,
   dynamicMembers: dynamicMembers.value,
@@ -430,7 +430,7 @@ const memberOptions = computed(() => ({
 const noApproverMemberOptions = computed(() => ({
   showTabs:
     MemberTabs.Department |
-    MemberTabs.Role |
+    MemberTabs.EmployeeGroup |
     MemberTabs.Employee |
     MemberTabs.Dynamic,
   dynamicMembers: dynamicMembers.value,

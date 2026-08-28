@@ -4,8 +4,8 @@ import { CorpModelBase, IdBase } from "./modelBase";
 export type ResourceCode =
   | "employee"
   | "department"
-  | "role"
-  | "roleGroup"
+  | "employeeGroup"
+  | "employeeGroupCategory"
   | "appdef"
   | "formdef"
   | "formdata"

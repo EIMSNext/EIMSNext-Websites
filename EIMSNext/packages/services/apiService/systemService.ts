@@ -1,5 +1,5 @@
 import {
-  AdminPermissionSnapshot,
+  TenantAccessSnapshot,
   CurrentUser,
   ECoinPrice,
   ECoinPriceBatchItem,
@@ -18,8 +18,8 @@ export class SystemService extends ServiceBase {
     return this.http().api.get<any>(`/system/AppMenuPerms?appId=${appId}`);
   }
 
-  getAdminPermissions(): Promise<AdminPermissionSnapshot> {
-    return this.http().api.get<AdminPermissionSnapshot>("/system/AdminPermissions");
+  getAdminPermissions(): Promise<TenantAccessSnapshot> {
+    return this.http().api.get<TenantAccessSnapshot>("/system/AdminPermissions");
   }
 
   switchCorp(corpId: string): Promise<any> {

@@ -1,4 +1,4 @@
-export interface IFieldPermItem {
+export interface FormFieldPermissionItem {
   id: string;
   visible: boolean;
   editable: boolean;

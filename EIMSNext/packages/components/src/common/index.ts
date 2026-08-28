@@ -10,9 +10,9 @@ export enum DataItemType {
   Unknown = 0,
   Department,
   Employee,
-  Role,
+  EmployeeGroup,
   Dynamic,
-  AuthGroup,
+  FormDataPermissionGroup,
   FlowNode,
   Print,
   App,
@@ -30,8 +30,8 @@ import {
   Department,
   Employee,
   FlowStatus,
-  Role,
-  RoleGroup,
+  EmployeeGroup,
+  EmployeeGroupCategory,
 } from "@eimsnext/models";
 
 export interface ITreeNode extends IDataItemView {
@@ -104,11 +104,11 @@ export function deptToTreeNode(dept: Department): ITreeNode {
   };
 }
 
-export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
+export function buildEmployeeGroupTree(groups: EmployeeGroupCategory[], employeeGroups: EmployeeGroup[]): ITreeNode[] {
   const attachChildren = (pNode: ITreeNode) => {
-    const children = roles.filter((x) => x.roleGroupId == pNode.id);
+    const children = employeeGroups.filter((x) => x.employeeGroupCategoryId == pNode.id);
     children.forEach((x) => {
-      const node: ITreeNode = roleToTreeNode(x);
+      const node: ITreeNode = employeeGroupToTreeNode(x);
       attachChildren(node);
       if (!pNode.children) pNode.children = [];
       pNode.children.push(node);
@@ -132,14 +132,14 @@ export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
 
   return treeNoes;
 }
-export function roleToTreeNode(role: Role): ITreeNode {
+export function employeeGroupToTreeNode(employeeGroup: EmployeeGroup): ITreeNode {
   return {
-    id: role.id,
-    label: role.name,
-    type: DataItemType.Role,
+    id: employeeGroup.id,
+    label: employeeGroup.name,
+    type: DataItemType.EmployeeGroup,
     children: [],
-    data: role,
-    icon: "el-role",
+    data: employeeGroup,
+    icon: "el-employeeGroup",
   };
 }
 

@@ -72,8 +72,8 @@ const generateTableHtml = () => {
 const getDisplayFields = () => {
     let fields: Record<string, boolean> = {};
 
-    if (props.printData?.fieldPerms) {
-        props.printData?.fieldPerms.forEach(x => {
+    if (props.printData?.formFieldPermissions) {
+        props.printData?.formFieldPermissions.forEach(x => {
             fields[x.id] = x.visible;
         });
     }
@@ -82,9 +82,9 @@ const getDisplayFields = () => {
 };
 
 const shouldDisplay = (p: FieldDef): boolean => {
-    if (!props.printData?.fieldPerms) return true;
+    if (!props.printData?.formFieldPermissions) return true;
 
-    let fp = props.printData?.fieldPerms.find(x => x.id == p.field)
+    let fp = props.printData?.formFieldPermissions.find(x => x.id == p.field)
     if (!fp) return true;
 
     return fp.visible;

@@ -3,8 +3,8 @@
     <!-- 表头 -->
     <div class="field-list-header">
       <span class="field-header">{{ $t("common.fields") }}</span>
-      <div class="field-view-col">{{ $t("comp.fieldPerms.view") }}</div>
-      <div class="field-edit-col">{{ $t("comp.fieldPerms.edit") }} <span class="tips">{{ $t("comp.fieldPerms.tips") }}</span></div>
+      <div class="field-view-col">{{ $t("comp.formFieldPermissions.view") }}</div>
+      <div class="field-edit-col">{{ $t("comp.formFieldPermissions.edit") }} <span class="tips">{{ $t("comp.formFieldPermissions.tips") }}</span></div>
     </div>
 
     <!-- 列表项 -->
@@ -68,15 +68,15 @@
                       <el-checkbox
                         :model-value="item.tableInsert"
                         @change="(val: boolean) => handleTablePermChange(item, 'tableInsert', val)"
-                      >{{ $t("comp.fieldPerms.addRecord") }}</el-checkbox>
+                      >{{ $t("comp.formFieldPermissions.addRecord") }}</el-checkbox>
                       <el-checkbox
                         :model-value="item.tableEdit"
                         @change="(val: boolean) => handleTablePermChange(item, 'tableEdit', val)"
-                      >{{ $t("comp.fieldPerms.editRecord") }}</el-checkbox>
+                      >{{ $t("comp.formFieldPermissions.editRecord") }}</el-checkbox>
                       <el-checkbox
                         :model-value="item.tableDelete"
                         @change="(val: boolean) => handleTablePermChange(item, 'tableDelete', val)"
-                      >{{ $t("comp.fieldPerms.deleteRecord") }}</el-checkbox>
+                      >{{ $t("comp.formFieldPermissions.deleteRecord") }}</el-checkbox>
                     </div>
                   </el-popover>
             </div>
@@ -90,19 +90,19 @@
 <script lang="ts" setup>
 import "./style/index.scss";
 import { computed, ref, watch } from "vue";
-import { IFieldPermItem } from "./type";
+import { FormFieldPermissionItem } from "./type";
 import { FieldDef, FieldType, isSystemField } from "@eimsnext/models";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 
 defineOptions({
-  name: "EtFieldPerms",
+  name: "EtFormFieldPermissions",
 });
 
 const props = withDefaults(
   defineProps<{
-    modelValue: IFieldPermItem[];
+    modelValue: FormFieldPermissionItem[];
     fields: FieldDef[];
     defaultVisbile?: boolean;
   }>(),
@@ -112,7 +112,7 @@ const props = withDefaults(
   },
 );
 
-interface IFieldPermListItem {
+interface FormFieldPermissionListItem {
   id: string;
   label: string;
   type: string;
@@ -126,26 +126,26 @@ interface IFieldPermListItem {
   tableDelete?: boolean;
 }
 
-const data = ref<IFieldPermListItem[]>([]);
+const data = ref<FormFieldPermissionListItem[]>([]);
 const emit = defineEmits(["update:modelValue", "change"]);
 
-const isTableFormItem = (item: IFieldPermListItem) => item.type === FieldType.TableForm;
+const isTableFormItem = (item: FormFieldPermissionListItem) => item.type === FieldType.TableForm;
 
 const getItem = (id: string) => data.value.find((item) => item.id === id);
 
 const getChildren = (parentId: string) =>
   data.value.filter((item) => item.parentId === parentId);
 
-const hasAnyTablePermission = (item: IFieldPermListItem) =>
+const hasAnyTablePermission = (item: FormFieldPermissionListItem) =>
   !!item.tableInsert || !!item.tableEdit || !!item.tableDelete;
 
-const setAllTablePermissions = (item: IFieldPermListItem, val: boolean) => {
+const setAllTablePermissions = (item: FormFieldPermissionListItem, val: boolean) => {
   item.tableInsert = val;
   item.tableEdit = val;
   item.tableDelete = val;
 };
 
-const applyItemRules = (item: IFieldPermListItem) => {
+const applyItemRules = (item: FormFieldPermissionListItem) => {
   if (item.system) {
     item.editable = false;
   }
@@ -207,7 +207,7 @@ const emitChange = () => {
   normalizeData();
 
   const modelValue = data.value.map((item) => {
-    const perm: IFieldPermItem = {
+    const perm: FormFieldPermissionItem = {
       id: item.id,
       visible: item.visible,
       editable: item.editable,
@@ -226,15 +226,15 @@ const emitChange = () => {
   emit("change", modelValue);
 };
 
-const buildListItems = (items: IFieldPermItem[]) => {
+const buildListItems = (items: FormFieldPermissionItem[]) => {
   const itemMap = new Map(items.map((item) => [item.id, item]));
-  const listItems: IFieldPermListItem[] = [];
+  const listItems: FormFieldPermissionListItem[] = [];
 
   props.fields.forEach((x) => {
     if (x.type === FieldType.TableForm) {
       if (x.columns && x.columns.length > 0) {
         const source = itemMap.get(x.field);
-        let li: IFieldPermListItem = {
+        let li: FormFieldPermissionListItem = {
           id: x.field,
           label: x.title,
           type: x.type,
@@ -252,7 +252,7 @@ const buildListItems = (items: IFieldPermItem[]) => {
         x.columns.forEach((s) => {
           const childId = `${x.field}>${s.field}`;
           const childSource = itemMap.get(childId);
-          let sub: IFieldPermListItem = {
+          let sub: FormFieldPermissionListItem = {
             id: childId,
             label: s.title,
             type: s.type,
@@ -316,7 +316,7 @@ const allEditableIndeterminate = computed(() => {
 });
 
 const handlePermChange = (
-  item: IFieldPermListItem,
+  item: FormFieldPermissionListItem,
   key: "visible" | "editable",
   val: boolean,
 ) => {
@@ -374,7 +374,7 @@ const handlePermChange = (
 };
 
 const handleTablePermChange = (
-  item: IFieldPermListItem,
+  item: FormFieldPermissionListItem,
   key: "tableInsert" | "tableEdit" | "tableDelete",
   val: boolean,
 ) => {

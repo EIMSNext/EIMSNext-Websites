@@ -273,7 +273,7 @@ import {
   FormDataImportStatus,
   FormDataImportStatusResponse,
   FormDef,
-  IFieldPerm,
+  FormFieldPermission,
 } from "@eimsnext/models";
 import { formDataService } from "@eimsnext/services";
 
@@ -297,8 +297,8 @@ type PreviewColumn = {
 const props = defineProps<{
   modelValue: boolean;
   formDef: FormDef;
-  authGroupId?: string;
-  fieldPerms?: IFieldPerm[];
+  permissionGroupId?: string;
+  formFieldPermissions?: FormFieldPermission[];
 }>();
 
 const emit = defineEmits<{
@@ -342,7 +342,7 @@ const dialogVisible = computed({
   set: (value: boolean) => emit("update:modelValue", value),
 });
 
-const importFields = computed(() => buildImportFields(props.formDef.content?.items || [], props.fieldPerms));
+const importFields = computed(() => buildImportFields(props.formDef.content?.items || [], props.formFieldPermissions));
 const previewSheets = computed(() => preview.value?.sheets || []);
 const currentSheet = computed(() => previewSheets.value.find((sheet) => sheet.name === sheetName.value) || previewSheets.value[0]);
 const maxHeaderRow = computed(() => Math.max(1, Math.min(currentSheet.value?.rows.length || 1, 30)));
@@ -491,14 +491,14 @@ function resetState() {
   stopPolling();
 }
 
-function buildImportFields(items: FieldDef[], fieldPerms?: IFieldPerm[]) {
+function buildImportFields(items: FieldDef[], formFieldPermissions?: FormFieldPermission[]) {
   const fields: ImportField[] = [];
   for (const field of items) {
     if (field.hidden || field.type === FieldType.Signature) continue;
     if (field.type === FieldType.TableForm) {
       for (const child of field.columns || []) {
         if (child.hidden || child.type === FieldType.Signature) continue;
-        if (!canImportField(child, field, fieldPerms)) continue;
+        if (!canImportField(child, field, formFieldPermissions)) continue;
         const title = `${field.title}.${child.title}`;
         const key = `${field.field}>${child.field}`;
         fields.push({
@@ -515,7 +515,7 @@ function buildImportFields(items: FieldDef[], fieldPerms?: IFieldPerm[]) {
       continue;
     }
 
-    if (!canImportField(field, undefined, fieldPerms)) continue;
+    if (!canImportField(field, undefined, formFieldPermissions)) continue;
     fields.push({
       field: field.field,
       title: field.title,
@@ -529,15 +529,15 @@ function buildImportFields(items: FieldDef[], fieldPerms?: IFieldPerm[]) {
   return fields;
 }
 
-function canImportField(field: FieldDef, parent?: FieldDef, fieldPerms?: IFieldPerm[]) {
-  if (fieldPerms === undefined) return true;
+function canImportField(field: FieldDef, parent?: FieldDef, formFieldPermissions?: FormFieldPermission[]) {
+  if (formFieldPermissions === undefined) return true;
   if (parent) {
-    const parentPerm = fieldPerms.find((perm) => perm.id === parent.field);
+    const parentPerm = formFieldPermissions.find((perm) => perm.id === parent.field);
     if (!parentPerm?.visible || !parentPerm.editable) return false;
   }
 
   const key = parent ? `${parent.field}>${field.field}` : field.field;
-  const perm = fieldPerms.find((item) => item.id === key);
+  const perm = formFieldPermissions.find((item) => item.id === key);
   return !!perm?.visible && !!perm.editable;
 }
 
@@ -689,7 +689,7 @@ async function startImport() {
     const response = await formDataService.startImport(selectedFile.value, {
       appId: props.formDef.appId,
       formId: props.formDef.id,
-      authGroupId: props.authGroupId,
+      permissionGroupId: props.permissionGroupId,
       mode: importMode.value,
       triggerValidation: triggerValidation.value,
       triggerWorkflow: props.formDef.usingWorkflow && triggerWorkflow.value,

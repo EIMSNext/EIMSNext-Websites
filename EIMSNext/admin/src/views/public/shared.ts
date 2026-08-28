@@ -187,7 +187,7 @@ export async function bootstrapWithToken(
   accessCode?: string,
 ): Promise<void> {
   try {
-    const tokenResult = (await http.auth.requestPublicToken(
+    const tokenResult = (await http.identity.requestPublicToken(
       targetId,
       accessCode,
       scope,
@@ -205,7 +205,7 @@ export async function bootstrapWithToken(
 
 // =============================================================
 // 5. accessCode 错误友好提示
-//    AuthClient 已经把 401 转成 PublicTokenError，这里再转成 AccessCodeInvalidError。
+//    IdentityClient 已经把 401 转成 PublicTokenError，这里再转成 AccessCodeInvalidError。
 // =============================================================
 
 export function toAccessCodeError(err: any): AccessCodeInvalidError | null {

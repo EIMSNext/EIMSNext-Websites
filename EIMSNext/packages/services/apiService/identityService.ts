@@ -1,8 +1,4 @@
-import {
-  LoginRequest,
-  RegisterRequest,
-  SendRegCodeRequest,
-} from "../requestModel";
+import { LoginRequest, RegisterRequest, SendRegCodeRequest } from "../requestModel";
 import { ServiceBase } from "../interface";
 
 export interface IntegrationAuthorizationUrlDto {
@@ -12,36 +8,32 @@ export interface IntegrationAuthorizationUrlDto {
   authorizationUrl?: string;
 }
 
-export class AuthService extends ServiceBase {
+export class IdentityService extends ServiceBase {
   login(request: LoginRequest) {
-    return this.http().auth.login(
-      request.username,
-      request.password,
-      request.grant_type
-    );
+    return this.http().identity.login(request.username, request.password, request.grant_type);
   }
 
   logout() {
-    return this.http().auth.post("/auth/logout", {});
+    return this.http().identity.post("/identity/logout", {});
   }
 
   sendRegCode(request: SendRegCodeRequest) {
-    return this.http().auth.post("/auth/sendRegCode", request);
+    return this.http().identity.post("/identity/sendRegCode", request);
   }
 
   sendLoginCode(request: SendRegCodeRequest) {
-    return this.http().auth.post("/auth/sendLoginCode", request);
+    return this.http().identity.post("/identity/sendLoginCode", request);
   }
 
   register(request: RegisterRequest) {
-    return this.http().auth.post("/auth/register", request);
+    return this.http().identity.post("/identity/register", request);
   }
-  
+
   async getIntegrationAuthorizationUrl(
     type: string,
-    state: string
+    state: string,
   ): Promise<IntegrationAuthorizationUrlDto> {
-    const result = await this.http().auth.get<
+    const result = await this.http().identity.get<
       IntegrationAuthorizationUrlDto & {
         AuthorizationUrl?: string;
         DisplayName?: string;
@@ -59,5 +51,5 @@ export class AuthService extends ServiceBase {
   }
 }
 
-const authService = new AuthService();
-export { authService };
+const identityService = new IdentityService();
+export { identityService };

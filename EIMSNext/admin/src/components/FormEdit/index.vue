@@ -36,7 +36,7 @@ import { TabPaneName } from "element-plus";
 import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
 import { useSystemStore } from "@/store/system";
-import { AdminPermissionSnapshot, FieldType, FormContent, FormDef, ScopeMode } from "@eimsnext/models";
+import { TenantAccessSnapshot, FieldType, FormContent, FormDef, ScopeMode } from "@eimsnext/models";
 import { useFormStore, useContextStore } from "@eimsnext/store";
 import { ConfirmResult, EtConfirm, MessageIcon } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
@@ -70,7 +70,7 @@ const locale = computed(() => systemStore.locale);
 
 const formName = ref(props.formDef.name);
 const formDefRef = ref<FormDef>(props.formDef);
-const adminPermissions = ref<AdminPermissionSnapshot>();
+const adminPermissions = ref<TenantAccessSnapshot>();
 const activeName = ref(props.initialTab || "formedit");
 const initialAdvancedTab = computed(() => props.initialAdvancedTab || "advanced-data");
 const loadedTabs = ref<Record<string, boolean>>({

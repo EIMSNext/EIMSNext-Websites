@@ -17,8 +17,8 @@ interface SystemRouteDef {
 
 const systemRoutes: SystemRouteDef[] = [
   { path: "department",  component: () => import("@/views/system/department/index.vue"),  allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.AppAdmin] },
-  { path: "role",        component: () => import("@/views/system/role/index.vue"),        title: "role",        allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.AppAdmin] },
-  { path: "admin",       component: () => import("@/views/system/admin/index.vue"),       title: "admin",       allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "employeeGroup",        component: () => import("@/views/system/employeeGroup/index.vue"),        title: "employeeGroup",        allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.AppAdmin] },
+  { path: "tenant-admin-group", component: () => import("@/views/system/tenantAdminGroup/index.vue"), title: "tenantAdminGroup", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "corp-log",    component: () => import("@/views/system/corp-log/index.vue"),    title: "corp-log",    allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "flow-manage", component: () => import("@/views/system/flow-manage/index.vue"), title: "flow-manage", allowedUserTypes: [UserType.CorpAdmin] },
   { path: "plugin",      component: () => import("@/views/system/plugin/index.vue"),      title: "plugin",      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.PlatAdmin] },

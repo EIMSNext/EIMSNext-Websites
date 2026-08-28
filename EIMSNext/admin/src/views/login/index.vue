@@ -84,7 +84,7 @@ import {
   useUserStore,
 } from "@eimsnext/store";
 import { LoginRequest } from "@eimsnext/services";
-import { authService } from "@eimsnext/services";
+import { identityService } from "@eimsnext/services";
 import { useLocale } from "element-plus";
 import { integrationLoginItems, type IntegrationLoginType } from "@/constants/integrationLogin";
 import { createIntegrationState, getLoginRedirect } from "@/utils/integrationLogin";
@@ -159,7 +159,7 @@ async function handleIntegrationLogin(type: IntegrationLoginType) {
   try {
     const redirect = getLoginRedirect(route.query.redirect);
     const state = createIntegrationState(type, redirect);
-    const result = await authService.getIntegrationAuthorizationUrl(type, state);
+    const result = await identityService.getIntegrationAuthorizationUrl(type, state);
     const authorizationUrl = result.authorizationUrl;
     if (!authorizationUrl) {
       throw new Error("该集成登录未启用或配置不完整");

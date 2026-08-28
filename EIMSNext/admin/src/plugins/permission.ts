@@ -179,14 +179,14 @@ function redirectToLogin(to: RouteLocationNormalized, next: NavigationGuardNext)
 
 /** 判断是否有权限 */
 export function hasAuth(value: string | string[], type: "button" | "role" = "button") {
-  const { roles, perms } = useUserStore().currentUser;
+  const { employeeGroups, perms } = useUserStore().currentUser;
 
   // 超级管理员 拥有所有权限
-  if (type === "button" && roles.includes("ROOT")) {
+  if (type === "button" && employeeGroups.includes("ROOT")) {
     return true;
   }
 
-  const auths = type === "button" ? perms : roles;
+  const auths = type === "button" ? perms : employeeGroups;
   return typeof value === "string"
     ? auths.includes(value)
     : value.some((perm) => auths.includes(perm));

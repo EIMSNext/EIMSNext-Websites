@@ -134,7 +134,7 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { AdminPermissionSnapshot, Department, Employee, FieldType, PlatformType, ScopeMode, UserType } from "@eimsnext/models";
+import { TenantAccessSnapshot, Department, Employee, FieldType, PlatformType, ScopeMode, UserType } from "@eimsnext/models";
 import {
   SortDirection,
   employeeService,
@@ -358,7 +358,7 @@ const totalRef = ref(0);
 const loading = ref(false);
 const empStatus = ref(0);
 const userStore = useUserStore();
-const adminPermissions = ref<AdminPermissionSnapshot>();
+const adminPermissions = ref<TenantAccessSnapshot>();
 const selectedDepartmentId = ref("");
 const isUnrestrictedAdmin = computed(() =>
   [
