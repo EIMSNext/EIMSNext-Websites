@@ -10,7 +10,7 @@
   >
       <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
         <el-form-item :label="$t('comp.addEditEmployeeGroup.employeeGroupCategory')">
-          <el-input :model-value="pGroup.name" readonly />
+          <el-input :model-value="pCategory.name" readonly />
         </el-form-item>
         <el-form-item :label="$t('comp.addEditEmployeeGroup.employeeGroupName')" prop="name">
           <el-input v-model="formData.name" :placeholder="$t('comp.addEditEmployeeGroup.employeeGroupNamePlaceholder')" />
@@ -34,8 +34,8 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     edit: boolean;
-    pGroup: EmployeeGroupCategory;
-    pEmployeeGroup?: EmployeeGroup;
+    pCategory: EmployeeGroupCategory;
+    pEmpgrp?: EmployeeGroup;
   }>(),
   {
     edit: false,
@@ -48,14 +48,14 @@ const title = props.edit ? t("comp.addEditEmployeeGroup.editEmployeeGroup") : t(
 const formData = ref<EmployeeGroup>({
   id: "",
   name: "",
-  employeeGroupCategoryId: props.pGroup.id,
+  employeeGroupCategoryId: props.pCategory.id,
   description: "",
   sortValue: -1,
 });
 const formRef = ref<FormInstance>();
-if (props.edit) formData.value = props.pEmployeeGroup!;
+if (props.edit) formData.value = props.pEmpgrp!;
 else {
-  formData.value.employeeGroupCategoryId = props.pGroup.id;
+  formData.value.employeeGroupCategoryId = props.pCategory.id;
 }
 const rules = reactive({
   name: [{ required: true, message: t("comp.addEditEmployeeGroup.employeeGroupNameRequired"), trigger: "blur" }],

@@ -30,7 +30,7 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     edit: boolean;
-    pGroup?: EmployeeGroupCategory;
+    pCategory?: EmployeeGroupCategory;
   }>(),
   {
     edit: false,
@@ -41,7 +41,7 @@ const showDialog = ref(true);
 const { t } = useI18n();
 const title = props.edit ? t("comp.addEditEmployeeGroupCategory.editGroup") : t("comp.addEditEmployeeGroupCategory.addGroup");
 const formData = ref<EmployeeGroupCategory>({ id: "", name: "", description: "", sortValue: -1 });
-if (props.edit) formData.value = props.pGroup!;
+if (props.edit) formData.value = props.pCategory!;
 
 const rules = reactive({
   name: [{ required: true, message: t("comp.addEditEmployeeGroupCategory.groupNameRequired"), trigger: "blur" }],

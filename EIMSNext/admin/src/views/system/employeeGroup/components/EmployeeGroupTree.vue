@@ -2,15 +2,15 @@
   <AddEditEmployeeGroupCategory
     v-if="showAddEditGroupDialog"
     :edit="editMode"
-    :p-group="currentGroup"
+    :p-category="currentGroup"
     @cancel="showAddEditGroupDialog = false"
     @ok="handleGroupSaved"
   />
   <AddEditEmployeeGroup
     v-if="showAddEditEmployeeGroupDialog"
     :edit="editMode"
-    :p-group="currentGroup!"
-    :p-role="selectedEmployeeGroup"
+    :p-category="currentGroup!"
+    :p-empgrp="selectedEmployeeGroup"
     @cancel="showAddEditEmployeeGroupDialog = false"
     @ok="handleEmployeeGroupSaved"
   />
