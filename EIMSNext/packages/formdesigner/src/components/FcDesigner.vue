@@ -2896,6 +2896,9 @@ export default defineComponent({
       isTableFormRule(rule) {
         return methods.isRuleName(rule, ["tableform"]);
       },
+      isSubFormRule(rule) {
+        return !!rule?._menu?.subForm;
+      },
       isTableFormBlockedMenu(menu) {
         if (!menu) {
           return false;
@@ -3144,6 +3147,12 @@ export default defineComponent({
         methods.handleChange("", field, value, _, fapi);
       },
       formOptChange(field, value) {
+        if (field === "_componentSpan") {
+          methods.applyComponentSpan(value);
+          // This is a one-shot bulk operation, not a persisted form option.
+          data.form.value = { ...data.form.value, [field]: "" };
+          return;
+        }
         data.form.value[field] = value;
         if (field.indexOf(">") === -1) {
           field = "form>" + field;
@@ -3160,6 +3169,28 @@ export default defineComponent({
           }
         });
         source[lastField] = value;
+      },
+      applyComponentSpan(span) {
+        const value = Number(span);
+        if (!value) return;
+
+        data.dragForm.api.all().forEach((rule) => {
+          if (
+            !rule?._menu ||
+            methods.isSubFormRule(rule) ||
+            methods.isInsideTableFormColumn(rule)
+          ) {
+            return;
+          }
+
+          rule.col = { ...(rule.col || {}), span: value };
+        });
+        data.dragForm.api.refresh();
+        if (data.activeRule) {
+          methods.updateRuleFormData();
+        }
+        methods.addOperationRecord();
+        methods.updateTree();
       },
       propRemoveField(field, _, fapi) {
         if (
@@ -3403,6 +3434,12 @@ export default defineComponent({
           ...(hiddenItemConfig?.[rule._menu.name] || []),
           ...(rule._menu.hiddenBaseField || []),
         ]);
+        if (
+          methods.isInsideTableFormColumn(rule) ||
+          methods.isSubFormRule(rule)
+        ) {
+          hiddenField.push("formCreateCol>span");
+        }
         const disabledField = uniqueArray([
           ...(disabledItemConfig?.default || []),
           ...(disabledItemConfig?.[rule._menu.name] || []),
@@ -3422,9 +3459,6 @@ export default defineComponent({
           nextTick(() => {
             data.propsForm.api.disabled(true, disabledField);
           });
-        }
-        if (methods.isInsideTableFormColumn(rule)) {
-          data.baseForm.api.hidden(true, "formCreateCol>span");
         }
         if (!methods.getConfig("showControl", true)) {
           data.baseForm.api.hidden(true, "_control");
@@ -4085,10 +4119,16 @@ export default defineComponent({
         if (menu.__fc__) {
           if (data.addRule) {
             methods.handleSortBefore();
-            const rule = data.addRule.children.splice(
-              data.addRule.children.indexOf(menu),
-              1
-            )[0];
+            const sourceIndex = data.addRule.children.indexOf(menu);
+            if (sourceIndex < 0) {
+              data.added = false;
+              return;
+            }
+            const rule = data.addRule.children.splice(sourceIndex, 1)[0];
+            if (!rule) {
+              data.added = false;
+              return;
+            }
             if (
               methods.getTableFormContextByChildren(children) &&
               methods.isTableFormBlockedRule(rule)
@@ -4134,15 +4174,20 @@ export default defineComponent({
         // console.log('top dragEnd')
         if (
           !data.added &&
-          !(data.moveRule === children && newIndex === oldIndex)
+          !(data.moveRule === children && newIndex === oldIndex) &&
+          Array.isArray(data.moveRule) &&
+          oldIndex >= 0 &&
+          oldIndex < data.moveRule.length
         ) {
           methods.handleSortBefore();
-          const rule = data.moveRule.splice(oldIndex, 1);
-          if (slot) {
-            rule[0].slot = slot;
+          const rule = data.moveRule.splice(oldIndex, 1)[0];
+          if (rule) {
+            if (slot) {
+              rule.slot = slot;
+            }
+            children.splice(newIndex, 0, rule);
+            methods.handleSortAfter({ rule });
           }
-          children.splice(newIndex, 0, rule[0]);
-          methods.handleSortAfter({ rule: rule[0] });
         }
         data.moveRule = null;
         data.addRule = null;
@@ -4211,7 +4256,9 @@ export default defineComponent({
         }
         methods.tidyRule(rule);
         rule.display = true;
-        rule.hidden = false;
+        if (rule.hidden === undefined) {
+          rule.hidden = false;
+        }
         rule._fc_drag_tag = config.name;
         if (config.container) {
           rule._fc_page_tag = config.name;
@@ -4342,6 +4389,21 @@ export default defineComponent({
         if (config.tool === false) {
           return rule;
         }
+        // Layout-only helpers such as tableFormColumn must not get their own
+        // DragTool. The actual field inside the column owns the toolbar.
+        if (config.drag === false) {
+          if (config.name === "tableFormColumn") {
+            rule.children.forEach((child) => {
+              if (child?.type === "DragTool") {
+                child.props = {
+                  ...(child.props || {}),
+                  tableFormColumnChild: true,
+                };
+              }
+            });
+          }
+          return rule;
+        }
         if (!config.inside && methods.isInsideTableFormColumn(rule)) {
           return rule;
         }
@@ -4357,6 +4419,8 @@ export default defineComponent({
           hidden: rule._hidden === true || rule._display === false,
           handleBtn: config.handleBtn,
           only,
+          subForm: !!config.subForm,
+          tableFormColumnChild: !!rule.tableFormColumnChild,
         };
         if (config.inside) {
           rule.children = methods.makeChildren([

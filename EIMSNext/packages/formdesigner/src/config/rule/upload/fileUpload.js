@@ -32,6 +32,7 @@ export default {
         action: "/upload",
         uploadType: "file",
         listType: "picture-card",
+        limit: 5,
         multiple: true,
         autoUpload: true,
         accept:

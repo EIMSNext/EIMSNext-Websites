@@ -89,11 +89,11 @@
           background-color: var(--et-color-primary);
           border-color: var(--et-color-primary);
 
-          &:hover,
-          &:focus-visible {
+          &:hover:not(.is-disabled),
+          &:focus-visible:not(.is-disabled) {
             color: var(--et-text-on-primary) !important;
-            background-color: var(--et-color-primary-hover);
-            border-color: var(--et-color-primary-hover);
+            background-color: color-mix(in srgb, var(--et-color-primary) 88%, #fff) !important;
+            border-color: color-mix(in srgb, var(--et-color-primary) 88%, #fff) !important;
           }
         }
       }

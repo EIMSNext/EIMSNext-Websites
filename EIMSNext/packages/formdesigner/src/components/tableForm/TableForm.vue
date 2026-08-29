@@ -59,6 +59,14 @@ export default {
             type: Boolean,
             default: true,
         },
+        editExisting: {
+            type: Boolean,
+            default: true,
+        },
+        insertable: {
+            type: Boolean,
+            default: true,
+        },
         initialRowsAreNew: {
             type: Boolean,
             default: false,
@@ -149,7 +157,7 @@ export default {
             });
         },
         isRowEditable(rowData) {
-            return this.editable !== false ||
+            return (this.editable !== false && (this.editExisting !== false || this.newRows.has(rowData))) ||
                 this.initialRowsAreNew === true ||
                 (!!rowData && typeof rowData === 'object' && this.newRows.has(rowData));
         },

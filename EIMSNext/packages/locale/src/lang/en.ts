@@ -2363,6 +2363,8 @@ export default {
     labelSuffix: "Label suffix",
     formItem: "Configure form item",
     formItemSpan: "Form item width",
+    operationPermission: "Operation permissions",
+    insertRecord: "Allow insert records",
     row: "Row",
     globalEvent: "Global event",
     globalFetch: "Global dataset",

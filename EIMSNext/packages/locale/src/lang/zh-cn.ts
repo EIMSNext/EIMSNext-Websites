@@ -2360,6 +2360,8 @@ export default {
     labelStyle: "标签的样式",
     labelSuffix: "标签的后缀",
     formItemSpan: "组件宽度",
+    operationPermission: "操作权限",
+    insertRecord: "可插入记录",
     row: "整行",
     formItem: "配置表单项",
     globalEvent: "全局事件",

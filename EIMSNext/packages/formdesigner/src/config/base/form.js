@@ -106,6 +106,12 @@ export default function form({ t }) {
       props: { title: t("form.inlineMessage") },
       wrap: { show: false },
     },
+    {
+      type: "SpanInput",
+      field: "_componentSpan",
+      value: "",
+      title: t("form.formItemSpan"),
+    },
     // {
     //   type: "switch",
     //   field: "_submitBtn>show",

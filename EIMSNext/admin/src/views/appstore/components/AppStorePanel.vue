@@ -23,9 +23,23 @@
       <div class="hero-search-card">
         <div class="hero-search-title">{{ $t("admin.appStore.findTemplates") }}</div>
         <div class="hero-search-subtitle">{{ $t("admin.appStore.filterDesc") }}</div>
-        <el-input v-model="keyword" class="search-input" :placeholder="$t('admin.appStore.searchPlaceholder')" @keyup.enter="loadProfiles">
+        <el-input
+          v-model="keyword"
+          class="search-input"
+          :placeholder="$t('admin.appStore.searchPlaceholder')"
+          @keyup.enter="loadProfiles"
+        >
           <template #append>
-            <el-button @click="loadProfiles">{{ $t("admin.appStore.search") }}</el-button>
+            <el-tooltip :content="$t('admin.appStore.search')" placement="top">
+              <button
+                class="search-btn"
+                type="button"
+                :aria-label="$t('admin.appStore.search')"
+                @click="loadProfiles"
+              >
+                <et-icon icon="el-search" size="16px" />
+              </button>
+            </el-tooltip>
           </template>
         </el-input>
       </div>
@@ -34,105 +48,178 @@
     <div v-loading="loading" class="market-layout">
       <aside class="market-sidebar">
         <div class="sidebar-section">
-          <div class="sidebar-section-title">{{ $t("admin.appStore.category") }}</div>
-          <button class="sidebar-item" :class="{ active: !activeCategory }" @click="setCategory('')">{{ $t("admin.appStore.allCategories") }}</button>
-          <button v-for="category in categories" :key="category" class="sidebar-item"
-            :class="{ active: activeCategory === category }" @click="setCategory(category)">
-            {{ category }}
-          </button>
+          <div class="sidebar-section-head">
+            <span class="sidebar-section-title">
+              <et-icon icon="el-Box" size="13px" />
+              {{ $t("admin.appStore.category") }}
+            </span>
+            <et-icon icon="el-ArrowUp" size="12px" />
+          </div>
+          <div class="sidebar-items">
+            <button
+              class="sidebar-item"
+              :class="{ active: !activeCategory }"
+              @click="setCategory('')"
+            >
+              {{ $t("admin.appStore.allCategories") }}
+            </button>
+            <button
+              v-for="category in categories"
+              :key="category"
+              class="sidebar-item"
+              :class="{ active: activeCategory === category }"
+              @click="setCategory(category)"
+            >
+              {{ category }}
+            </button>
+          </div>
         </div>
 
         <div class="sidebar-section">
-          <div class="sidebar-section-title">{{ $t("admin.appStore.industry") }}</div>
-          <button class="sidebar-item" :class="{ active: !activeIndustry }" @click="setIndustry('')">{{ $t("admin.appStore.allIndustries") }}</button>
-          <button v-for="industry in industries" :key="industry" class="sidebar-item"
-            :class="{ active: activeIndustry === industry }" @click="setIndustry(industry)">
-            {{ industry }}
-          </button>
+          <div class="sidebar-section-head">
+            <span class="sidebar-section-title">
+              <et-icon icon="el-Grid" size="13px" />
+              {{ $t("admin.appStore.industry") }}
+            </span>
+            <et-icon icon="el-ArrowUp" size="12px" />
+          </div>
+          <div class="sidebar-items">
+            <button
+              class="sidebar-item"
+              :class="{ active: !activeIndustry }"
+              @click="setIndustry('')"
+            >
+              {{ $t("admin.appStore.allIndustries") }}
+            </button>
+            <button
+              v-for="industry in industries"
+              :key="industry"
+              class="sidebar-item"
+              :class="{ active: activeIndustry === industry }"
+              @click="setIndustry(industry)"
+            >
+              {{ industry }}
+            </button>
+          </div>
         </div>
       </aside>
 
       <main class="market-content">
         <el-result v-if="loadError" icon="error" :title="$t('admin.appStore.loadFailed')">
           <template #extra>
-            <el-button type="primary" @click="loadProfiles">{{ $t("admin.appStore.retry") }}</el-button>
+            <el-button type="primary" @click="loadProfiles">
+              {{ $t("admin.appStore.retry") }}
+            </el-button>
           </template>
         </el-result>
         <template v-else>
           <section class="market-section">
-          <div class="section-head">
-            <div>
-              <div class="section-title">{{ $t("admin.appStore.featured") }}</div>
-              <div class="section-subtitle">{{ $t("admin.appStore.featuredDesc") }}</div>
+            <div class="section-head">
+              <div>
+                <div class="section-title">{{ $t("admin.appStore.featured") }}</div>
+                <div class="section-subtitle">{{ $t("admin.appStore.featuredDesc") }}</div>
+              </div>
+              <el-button link type="primary" @click="rotateFeatured">
+                {{ $t("admin.appStore.rotate") }}
+              </el-button>
             </div>
-            <el-button link type="primary" @click="rotateFeatured">{{ $t("admin.appStore.rotate") }}</el-button>
-          </div>
 
-          <div class="featured-grid">
-            <div v-for="item in featuredItems" :key="item.id" class="market-card featured-card"
-              @click="openDetail(item.id)">
-              <div class="market-cover">
-                <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
-                <div class="card-badges">
-                  <span v-if="item.isOfficial" class="badge badge-official">{{ $t("admin.official") }}</span>
-                  <span v-else-if="item.isHot" class="badge badge-hot">{{ $t("admin.hot") }}</span>
+            <div class="featured-grid">
+              <div
+                v-for="item in featuredItems"
+                :key="item.id"
+                class="market-card featured-card"
+                @click="openDetail(item.id)"
+              >
+                <div class="market-cover">
+                  <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
+                  <div class="card-badges">
+                    <span v-if="item.isOfficial" class="badge badge-official">
+                      {{ $t("admin.official") }}
+                    </span>
+                    <span v-else-if="item.isHot" class="badge badge-hot">
+                      {{ $t("admin.hot") }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="market-card-body">
+                  <div class="market-card-title">{{ item.name }}</div>
+                  <div class="market-card-desc">{{ item.summary }}</div>
+                  <div class="market-tags">
+                    <span
+                      v-for="tag in (item.tags || []).slice(0, 4)"
+                      :key="tag"
+                      class="market-tag"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
+                  <div class="market-meta">
+                    <span>{{ item.category || $t("admin.appStore.generalCategory") }}</span>
+                    <span>{{ item.installCount || 0 }} {{ $t("admin.appStore.installs") }}</span>
+                  </div>
                 </div>
               </div>
-
-              <div class="market-card-body">
-                <div class="market-card-title">{{ item.name }}</div>
-                <div class="market-card-desc">{{ item.summary }}</div>
-                <div class="market-tags">
-                  <span v-for="tag in (item.tags || []).slice(0, 4)" :key="tag" class="market-tag">{{ tag }}</span>
-                </div>
-                <div class="market-meta">
-                  <span>{{ item.category || $t("admin.appStore.generalCategory") }}</span>
-                  <span>{{ item.installCount || 0 }} {{ $t("admin.appStore.installs") }}</span>
-                </div>
-              </div>
             </div>
-          </div>
           </section>
 
           <section class="market-section">
-          <div class="section-head">
-            <div>
-              <div class="section-title">{{ $t("admin.appStore.allTemplates") }}</div>
-              <div class="section-subtitle">{{ $t("admin.appStore.allTemplatesDesc") }}</div>
-            </div>
-          </div>
-
-          <div class="market-grid">
-            <div v-for="item in profileItems" :key="item.id" class="market-card grid-card" @click="openDetail(item.id)">
-              <div class="market-cover compact">
-                <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
-                <div class="card-badges">
-                  <span v-if="item.isOfficial" class="badge badge-official">{{ $t("admin.official") }}</span>
-                </div>
-              </div>
-
-              <div class="market-card-body">
-                <div class="market-list-head">
-                  <div class="market-card-title">{{ item.name }}</div>
-                  <div class="market-card-extra">{{ item.author || $t("admin.developer") }}</div>
-                </div>
-                <div class="market-card-desc two-line">{{ item.summary }}</div>
-                <div class="market-tags small">
-                  <span v-for="tag in (item.tags || []).slice(0, 5)" :key="tag" class="market-tag">{{ tag }}</span>
-                </div>
-                <div class="market-meta">
-                  <span>{{ item.industry || $t("admin.appStore.generalIndustry") }}</span>
-                  <span>{{ item.installCount || 0 }} {{ $t("admin.appStore.installs") }}</span>
-                </div>
+            <div class="section-head">
+              <div>
+                <div class="section-title">{{ $t("admin.appStore.allTemplates") }}</div>
+                <div class="section-subtitle">{{ $t("admin.appStore.allTemplatesDesc") }}</div>
               </div>
             </div>
-          </div>
+
+            <div class="market-grid">
+              <div
+                v-for="item in profileItems"
+                :key="item.id"
+                class="market-card grid-card"
+                @click="openDetail(item.id)"
+              >
+                <div class="market-cover compact">
+                  <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
+                  <div class="card-badges">
+                    <span v-if="item.isOfficial" class="badge badge-official">
+                      {{ $t("admin.official") }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="market-card-body">
+                  <div class="market-list-head">
+                    <div class="market-card-title">{{ item.name }}</div>
+                    <div class="market-card-extra">{{ item.author || $t("admin.developer") }}</div>
+                  </div>
+                  <div class="market-card-desc two-line">{{ item.summary }}</div>
+                  <div class="market-tags small">
+                    <span
+                      v-for="tag in (item.tags || []).slice(0, 5)"
+                      :key="tag"
+                      class="market-tag"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
+                  <div class="market-meta">
+                    <span>{{ item.industry || $t("admin.appStore.generalIndustry") }}</span>
+                    <span>{{ item.installCount || 0 }} {{ $t("admin.appStore.installs") }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
         </template>
       </main>
     </div>
 
-    <AppStoreDetailDialog v-model="detailVisible" :app-id="selectedId" @install-success="handleInstallSuccess" />
+    <AppStoreDetailDialog
+      v-model="detailVisible"
+      :app-id="selectedId"
+      @install-success="handleInstallSuccess"
+    />
   </div>
 </template>
 
@@ -144,9 +231,7 @@ import AppStoreDetailDialog from "./AppStoreDetailDialog.vue";
 
 defineOptions({ name: "AppStorePanel" });
 
-const props = withDefaults(defineProps<{
-}>(), {
-});
+const props = withDefaults(defineProps<{}>(), {});
 
 const emit = defineEmits<{
   (e: "close"): void;
@@ -170,7 +255,9 @@ const detailVisible = ref(false);
 const categories = computed(() => knownCategories.value);
 const industries = computed(() => knownIndustries.value);
 const featuredPool = computed(() => {
-  const preferred = profileItems.value.filter((item: AppProfile) => item.isRecommended || item.isOfficial || item.isHot);
+  const preferred = profileItems.value.filter(
+    (item: AppProfile) => item.isRecommended || item.isOfficial || item.isHot
+  );
   return preferred.length > 0 ? preferred : profileItems.value;
 });
 const featuredItems = computed(() => {
@@ -197,8 +284,18 @@ async function loadProfiles() {
     if (requestId !== profileRequestId) return;
     profileItems.value = result.items || [];
     totalProfiles.value = result.total || 0;
-    knownCategories.value = Array.from(new Set([...knownCategories.value, ...profileItems.value.map(item => item.category).filter(Boolean)])) as string[];
-    knownIndustries.value = Array.from(new Set([...knownIndustries.value, ...profileItems.value.map(item => item.industry).filter(Boolean)])) as string[];
+    knownCategories.value = Array.from(
+      new Set([
+        ...knownCategories.value,
+        ...profileItems.value.map((item) => item.category).filter(Boolean),
+      ])
+    ) as string[];
+    knownIndustries.value = Array.from(
+      new Set([
+        ...knownIndustries.value,
+        ...profileItems.value.map((item) => item.industry).filter(Boolean),
+      ])
+    ) as string[];
     featuredStart.value = 0;
   } catch {
     if (requestId === profileRequestId) {
@@ -243,7 +340,8 @@ onMounted(loadProfiles);
 
 <style scoped lang="scss">
 .appstore-page {
-  width: 1000px;
+  width: 1100px;
+  padding: var(--et-space-20);
   min-height: 100%;
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
   color: var(--et-text-primary);
@@ -296,7 +394,7 @@ onMounted(loadProfiles);
 .hero-stat-value {
   display: block;
   font-size: 26px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .hero-stat-label {
@@ -317,8 +415,8 @@ onMounted(loadProfiles);
 }
 
 .hero-search-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .hero-search-subtitle {
@@ -328,65 +426,122 @@ onMounted(loadProfiles);
   line-height: 1.6;
 }
 
+:deep(.search-input .el-input-group__append) {
+  min-width: 44px;
+  padding: 0 14px;
+  border-color: var(--et-border-color);
+  background: color-mix(in srgb, var(--et-color-primary) 10%, var(--et-bg-container));
+}
+
+.search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--et-color-primary);
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.search-btn:hover,
+.search-btn:focus-visible {
+  background: color-mix(in srgb, var(--et-color-primary) 18%, transparent);
+  color: var(--et-color-primary);
+}
+
+.search-btn:active {
+  background: color-mix(in srgb, var(--et-color-primary) 26%, transparent);
+}
+
 .market-layout {
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 12px;
   align-items: start;
 }
 
 .market-sidebar {
   position: sticky;
   top: 20px;
-  padding: 20px;
-  border-radius: 20px;
+  padding: 10px 8px;
+  border-radius: 10px;
   background: color-mix(in srgb, var(--et-bg-container) 96%, transparent);
 }
 
-.sidebar-section+.sidebar-section {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid var(--et-border-color-light);
+.sidebar-section + .sidebar-section {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--et-border-color-light) 72%, transparent);
+}
+
+.sidebar-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  margin-bottom: 6px;
+  line-height: 40px;
 }
 
 .sidebar-section-title {
-  margin-bottom: 10px;
-  padding: 0 8px;
-  color: var(--et-text-secondary);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.sidebar-item {
-  width: 100%;
-  margin-bottom: 4px;
-  padding: 11px 12px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--et-text-primary);
-  text-align: left;
   font-size: 15px;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.sidebar-item:hover,
-.sidebar-item.active {
-  background: var(--et-bg-hover);
-  color: var(--et-text-primary);
   font-weight: 600;
 }
 
+.sidebar-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-item {
+  margin: 0 8px;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--et-text-secondary);
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.sidebar-item:hover {
+  background: var(--et-bg-hover);
+  color: var(--et-text-primary);
+}
+
+.sidebar-item.active {
+  background: var(--et-bg-primary-soft);
+  border-color: color-mix(in srgb, var(--et-color-primary) 18%, transparent);
+  color: var(--et-color-primary);
+}
+
 .market-content {
-  padding: 20px;
-  border-radius: 20px;
+  padding: 14px 16px 20px;
+  border-radius: 10px;
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
 }
 
-.market-section+.market-section {
-  margin-top: 28px;
+.market-section + .market-section {
+  margin-top: 24px;
 }
 
 .section-head {
@@ -394,17 +549,18 @@ onMounted(loadProfiles);
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .section-title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .section-subtitle {
   margin-top: 6px;
   color: var(--et-text-secondary);
+  font-size: 13px;
 }
 
 .featured-grid,
@@ -423,18 +579,21 @@ onMounted(loadProfiles);
 
 .market-card {
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
   color: inherit;
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
   cursor: pointer;
 }
 
 .market-card:hover {
-  transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--et-color-primary) 26%, var(--et-border-color-light));
-  box-shadow: 0 22px 36px color-mix(in srgb, var(--et-color-primary) 12%, transparent);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--et-color-primary) 22%, var(--et-border-color-light));
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--et-color-primary) 10%, transparent);
 }
 
 .market-cover {
@@ -479,42 +638,43 @@ onMounted(loadProfiles);
 }
 
 .market-card-body {
-  padding: 18px;
+  padding: 14px;
 }
 
 .market-card-title {
-  font-size: 27px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .grid-card .market-card-title {
-  font-size: 22px;
+  font-size: 14px;
 }
 
 .market-card-desc {
-  margin-top: 10px;
+  margin-top: 8px;
   color: var(--et-text-secondary);
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .market-card-desc.two-line {
-  min-height: 54px;
+  min-height: 42px;
 }
 
 .market-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .market-tags.small {
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .market-tag {
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--et-fill-color-light) 86%, transparent);
   color: var(--et-text-secondary);
@@ -530,14 +690,14 @@ onMounted(loadProfiles);
 }
 
 .market-meta {
-  margin-top: 16px;
+  margin-top: 12px;
   color: var(--et-text-tertiary);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .market-card-extra {
   color: var(--et-text-tertiary);
-  font-size: 13px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -564,10 +724,6 @@ onMounted(loadProfiles);
   background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
 }
 
-:global(html.dark) .sidebar-item.active {
-  color: var(--et-color-primary);
-}
-
 @media (max-width: 1200px) {
   .market-layout {
     grid-template-columns: 1fr;
@@ -577,10 +733,10 @@ onMounted(loadProfiles);
     position: static;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 10px;
   }
 
-  .sidebar-section+.sidebar-section {
+  .sidebar-section + .sidebar-section {
     margin-top: 0;
     padding-top: 0;
     border-top: 0;
@@ -597,9 +753,12 @@ onMounted(loadProfiles);
     grid-template-columns: 1fr;
   }
 
-  .hero-title,
-  .section-title {
+  .hero-title {
     font-size: 26px;
+  }
+
+  .section-title {
+    font-size: 18px;
   }
 
   .hero-stats {
@@ -607,7 +766,7 @@ onMounted(loadProfiles);
   }
 
   .market-content {
-    padding: 18px;
+    padding: 12px 14px 16px;
   }
 }
 </style>

@@ -33,7 +33,7 @@
           <et-icon
             icon="el-close"
             size="10px"
-            :color="isDeleted ? 'var(--et-text-on-primary)' : 'var(--et-color-primary)'"
+            :color="isDeleted ? 'var(--et-text-on-danger)' : 'var(--et-color-primary)'"
             @click.stop="onRemoveClick"
           />
         </div>

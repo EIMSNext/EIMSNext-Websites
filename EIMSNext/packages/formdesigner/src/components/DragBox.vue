@@ -2,6 +2,26 @@
 import {defineComponent, h} from 'vue';
 import draggable from 'vuedraggable/src/vuedraggable';
 
+const fallbackKeys = new WeakMap();
+let fallbackKeyIndex = 0;
+
+function getItemKey(element) {
+    const key = element?.__fc__?.key
+        || element?._fc_id
+        || element?.children?.[0]?.__fc__?.key
+        || element?.children?.[0]?._fc_id;
+    if (key) return key;
+
+    if (element && typeof element === 'object') {
+        if (!fallbackKeys.has(element)) {
+            fallbackKeys.set(element, `_fd_drag_${fallbackKeyIndex++}`);
+        }
+        return fallbackKeys.get(element);
+    }
+
+    return `_fd_missing_${fallbackKeyIndex++}`;
+}
+
 export default defineComponent({
     name: 'DragBox',
     props: ['rule', 'tag', 'formCreateInject', 'list'],
@@ -12,7 +32,10 @@ export default defineComponent({
             _class += ' drag-holder';
         }
         attrs.class = _class;
-        attrs.modelValue = ctx.$props.list || [...ctx.$props.formCreateInject.children];
+        // DragTool is the shared wrapper type for every canvas item. Its type
+        // is not a valid draggable key; use the underlying form-create key.
+        attrs.itemKey = getItemKey;
+        attrs.modelValue = (ctx.$props.list || [...ctx.$props.formCreateInject.children]).filter(Boolean);
 
         const keys = {};
         if (ctx.$slots.default) {

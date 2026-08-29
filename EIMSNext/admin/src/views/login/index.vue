@@ -120,25 +120,24 @@ const loginRules = computed(() => {
 
 // 登录
 async function handleLoginSubmit() {
-  loginFormRef.value?.validate((valid: boolean) => {
-    if (valid) {
-      loading.value = true;
-      userStore
-        .login(loginData.value)
-        .then(async () => {
-          await userStore.initialize(true);
+  if (loading.value) return;
 
-          const { path, queryParams } = parseRedirect();
-          router.push({ path: path, query: queryParams });
-        })
-        .catch(() => {
-          // The HTTP interceptor displays the server's business error.
-        })
-        .finally(() => {
-          loading.value = false;
-        });
-    }
-  });
+  const valid = await loginFormRef.value?.validate().catch(() => false);
+  if (!valid) return;
+
+  loading.value = true;
+  try {
+    await userStore.login(loginData.value);
+    await userStore.initialize(true);
+
+    const { path, queryParams } = parseRedirect();
+    // Keep the button disabled until the guarded route has finished resolving.
+    await router.replace({ path, query: queryParams });
+  } catch {
+    // The HTTP interceptor displays the server's business error.
+  } finally {
+    loading.value = false;
+  }
 }
 
 /**
@@ -151,7 +150,7 @@ function parseRedirect(): {
   queryParams: Record<string, string>;
 } {
   const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/";
+  const redirect = (query.redirect as string) ?? "/workbench";
 
   const url = new URL(redirect, window.location.origin);
   const path = url.pathname;
