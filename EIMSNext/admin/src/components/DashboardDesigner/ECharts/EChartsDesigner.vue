@@ -54,7 +54,11 @@
                 <template #item="{ element, index }">
                   <div class="field-wrapper" :title="element.label">
                     <div class="field-name">
-                      <et-icon size="16px" icon="el-copyDocument" class="mr-[8px]"></et-icon>
+                      <et-icon
+                        size="16px"
+                        :icon="fieldIcons[element.type] || 'fc-icon-input'"
+                        class="mr-[8px]"
+                      ></et-icon>
                       <span class="name">{{ element.label }}</span>
                     </div>
                     <!-- <div v-if="element.isComputed" class="tool-icons">
@@ -308,7 +312,7 @@
 import Draggable from "vuedraggable";
 import { IDataSource, IDataSourceField } from "../type";
 import { DashboardItemDef, FieldDef, FieldType, FormDef, FormType } from "@eimsnext/models";
-import { IConditionList, IFormItem, ISortItem, ISortList } from "@eimsnext/components";
+import { fieldIcons, IConditionList, IFormItem, ISortItem, ISortList } from "@eimsnext/components";
 import { useFormStore } from "@eimsnext/store";
 import DataSourceDialog from "../components/DataSourceDialog.vue";
 import {

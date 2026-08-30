@@ -18,7 +18,7 @@
       </div>
     </div>
     <div v-else class="workbench-empty" data-workbench-height-content>
-      {{ t("admin.workbench.recentEmpty") }}
+      {{ t("common.noData") }}
     </div>
   </et-card>
 </template>

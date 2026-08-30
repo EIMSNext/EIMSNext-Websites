@@ -2156,6 +2156,12 @@ export default {
     formulaEditor: "公式编辑器",
     formulaInfo: "函数说明",
     formulaExample: "函数示例",
+    fieldDataTypes: {
+      text: "文本",
+      number: "数字",
+      dateTime: "日期时间",
+      array: "数组",
+    },
     formulaInferenceError: "当前公式无法确定稳定的数据来源",
     formulaSaveDisabledTitle: "存在不可用公式",
     formulaSaveDisabledContent:

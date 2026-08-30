@@ -104,15 +104,14 @@
                       >
                         <div>
                           <template v-if="data.rule">
+                            <i
+                              class="fc-icon _fd-comp-field-icon"
+                              :class="getFieldIcon(data.rule)"
+                            ></i>
                             <span
                               v-if="data.rule._menu.subForm === 'object'"
                               class="_group"
                               >{ {{ t("props.group") }} }</span
-                            >
-                            <span
-                              v-if="data.rule._menu.subForm === 'array'"
-                              class="_subform"
-                              >[ {{ t("props.collection") }} ]</span
                             >
                           </template>
                           <span>{{
@@ -120,12 +119,11 @@
                           }}</span>
                         </div>
                         <span
-                          class="_fd-comp-id"
                           v-if="data.rule"
-                          @click.stop="setField(data)"
+                          class="_fd-comp-type"
+                          :class="`_fd-comp-type--${getFieldDataType(data.rule, data.parent)}`"
+                          >{{ getFieldDataTypeLabel(data.rule, data.parent) }}</span
                         >
-                          ID
-                        </span>
                       </div>
                     </template>
                   </el-tree>
@@ -192,6 +190,7 @@ import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror/lib/codemirror";
 import { defineComponent, markRaw } from "vue";
 import { formulaInfo, formulaTree } from "@eimsnext/utils";
+import { fieldIcons } from "@eimsnext/components";
 import { addAutoKeyMap, escapeRegExp } from "../../utils";
 import ConditionGroup from "./ConditionGroup.vue";
 import { is, deepCopy } from "@eimsnext/form-render-core";
@@ -387,6 +386,29 @@ export default defineComponent({
         rule.field ||
         rule._fc_id
       );
+    },
+    getFieldIcon(rule) {
+      return (fieldIcons[rule.type] || "fc-icon-input").replace("fc-", "");
+    },
+    getFieldDataType(rule, parent = []) {
+      const isArray =
+        rule?._menu?.subForm === "array" ||
+        parent.some((item) => item?._menu?.subForm === "array") ||
+        ["checkbox", "select2", "employee2", "department2", "tableform"].includes(rule.type);
+      if (isArray) return "array";
+      if (rule.type === "number") return "number";
+      if (rule.type === "timestamp") return "dateTime";
+      return "text";
+    },
+    getFieldDataTypeLabel(rule, parent) {
+      const type = this.getFieldDataType(rule, parent);
+      const key = `eventFlow.fieldDataTypes.${type}`;
+      const label = this.t(key);
+      return label === key
+        ? this.t(
+            `validate.types.${type === "dateTime" ? "date" : type === "text" ? "string" : type}`
+          )
+        : label;
     },
     setField(data) {
       if (data.disabled === true) {
@@ -748,14 +770,57 @@ export default defineComponent({
   font-size: 13px;
 }
 
-._fd-comp-node ._group {
-  color: #61affe;
-  font-weight: 700;
-  margin-right: 5px;
+._fd-comp-node > div:first-child {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-._fd-comp-node ._subform {
-  color: #fca130;
+._fd-comp-node > div:first-child > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+._fd-comp-field-icon {
+  margin-right: 5px;
+  color: var(--fc-text-color-2);
+}
+
+._fd-comp-type {
+  flex: 0 0 auto;
+  margin-left: auto;
+  margin-right: 5px;
+  padding: 0 5px;
+  border: 1px solid currentcolor;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+._fd-comp-type--text {
+  color: #f08a37;
+  background: color-mix(in srgb, #f08a37 10%, transparent);
+}
+
+._fd-comp-type--number {
+  color: var(--fc-style-color-1);
+  background: var(--fc-style-bg-color-1);
+}
+
+._fd-comp-type--dateTime {
+  color: var(--fc-style-color-2);
+  background: var(--fc-style-bg-color-2);
+}
+
+._fd-comp-type--array {
+  color: #ec4899;
+  background: color-mix(in srgb, #ec4899 10%, transparent);
+}
+
+._fd-comp-node ._group {
+  color: #61affe;
   font-weight: 700;
   margin-right: 5px;
 }
@@ -763,21 +828,6 @@ export default defineComponent({
 ._fd-comp-node.disabled {
   color: var(--fc-text-color-3);
   cursor: not-allowed;
-}
-
-._fd-comp-node.disabled ._fd-comp-id {
-  background-color: var(--fc-text-color-3);
-}
-
-._fd-comp-id {
-  height: 20px;
-  width: 20px;
-  color: var(--et-text-on-primary, #fff);
-  background-color: var(--fc-style-color-1);
-  text-align: center;
-  font-weight: 500;
-  line-height: 20px;
-  border-radius: 5px;
 }
 
 ._fd-comp-dialog .el-aside {

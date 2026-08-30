@@ -7,6 +7,7 @@
     :destroy-on-close="true"
     :append-to-body="true"
     :close-on-click-modal="false"
+    align-center
     @ok="submit"
   >
     <div class="formula-editor">
@@ -18,17 +19,42 @@
       </div>
       <div class="formula-bottom">
         <div class="formula-tree-panel">
-          <el-input v-model="fieldKeyword" :placeholder="t('comp.triggerNodeMeta.searchKeyword')" />
+          <el-input
+            v-model="fieldKeyword"
+            :placeholder="t('comp.triggerNodeMeta.searchKeyword')"
+          />
           <el-tree
             class="formula-tree"
             :data="filteredFieldTree"
             node-key="id"
             :expand-on-click-node="false"
             @node-click="onFieldClick"
-          />
+          >
+            <template #default="{ data }">
+              <div class="formula-tree-node">
+                <EtIcon
+                  v-if="data.field"
+                  :icon="data.icon || 'fc-icon-input'"
+                  icon-class="formula-field-icon"
+                />
+                <span class="formula-tree-label">{{ data.label }}</span>
+                <span
+                  v-if="data.field && data.dataType"
+                  :class="[
+                    'formula-tree-type',
+                    `formula-tree-type--${data.dataType}`,
+                  ]"
+                  >{{ t(`eventFlow.fieldDataTypes.${data.dataType}`) }}</span
+                >
+              </div>
+            </template>
+          </el-tree>
         </div>
         <div class="formula-tree-panel">
-          <el-input v-model="formulaKeyword" :placeholder="t('comp.triggerNodeMeta.searchKeyword')" />
+          <el-input
+            v-model="formulaKeyword"
+            :placeholder="t('comp.triggerNodeMeta.searchKeyword')"
+          />
           <el-tree
             class="formula-tree"
             :data="filteredFormulaTree"
@@ -38,7 +64,9 @@
           />
         </div>
         <div class="formula-info-panel">
-          <div v-if="currentFormulaInfo">{{ t("eventFlow.formulaInfo") }}: {{ currentFormulaInfo }}</div>
+          <div v-if="currentFormulaInfo">
+            {{ t("eventFlow.formulaInfo") }}: {{ currentFormulaInfo }}
+          </div>
           <div v-if="currentFormulaExample">
             {{ t("eventFlow.formulaExample") }}: {{ currentFormulaExample }}
           </div>
@@ -54,10 +82,15 @@ import CodeMirror from "codemirror";
 import "codemirror/addon/mode/simple";
 import { computed, markRaw, nextTick, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { formulaInfo, formulaTree, type IFormulaGroupMeta } from "@eimsnext/utils";
+import {
+  formulaInfo,
+  formulaTree,
+  type IFormulaGroupMeta,
+} from "@eimsnext/utils";
 import { INodeForm } from "@/NodeFieldList/type";
 import { IFormulaRef, IFormulaValue } from "@/FormFieldList/type";
 import { EtDialog } from "@/dialog";
+import { EtIcon } from "@/icon";
 import {
   buildEventFlowFieldTree,
   getFormulaFieldDisplayLabel,
@@ -241,9 +274,10 @@ watch(
   display: flex;
   flex-direction: column;
   gap: var(--et-space-10);
-  min-height: 620px;
   height: 620px;
+  max-height: calc(100vh - var(--et-size-180));
   overflow: hidden;
+  margin: var(--et-space-20);
 }
 
 .formula-script {
@@ -289,6 +323,55 @@ watch(
   padding: var(--et-space-5);
   overflow: auto;
   flex: 1;
+}
+
+.formula-tree-node {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+  gap: var(--et-space-5);
+}
+
+.formula-field-icon {
+  flex: 0 0 auto;
+  color: var(--et-text-secondary);
+}
+
+.formula-tree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.formula-tree-type {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: var(--et-font-size-12);
+  line-height: 18px;
+  padding: 0 var(--et-space-5);
+  border: 1px solid currentcolor;
+  border-radius: var(--et-radius-10);
+}
+
+.formula-tree-type--text {
+  color: #f08a37;
+  background: color-mix(in srgb, #f08a37 10%, transparent);
+}
+
+.formula-tree-type--number {
+  color: var(--et-color-primary);
+  background: color-mix(in srgb, var(--et-color-primary) 10%, transparent);
+}
+
+.formula-tree-type--dateTime {
+  color: var(--et-color-success);
+  background: color-mix(in srgb, var(--et-color-success) 10%, transparent);
+}
+
+.formula-tree-type--array {
+  color: #ec4899;
+  background: color-mix(in srgb, #ec4899 10%, transparent);
 }
 
 .formula-editor-dialog :deep(.el-dialog__body) {

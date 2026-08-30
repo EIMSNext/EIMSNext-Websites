@@ -80,7 +80,11 @@
                 <template #item="{ element }">
                   <div class="node-data" :title="data.label">
                     <div class="node-wrapper">
-                      <et-icon size="16px" icon="el-copyDocument" class="node-icon"></et-icon>
+                      <et-icon
+                        size="16px"
+                        :icon="fieldIcons[data.data?.type] || 'fc-icon-input'"
+                        class="node-icon"
+                      ></et-icon>
                       <span class="node-label">{{ data.label }}</span>
                     </div>
                   </div>
@@ -107,7 +111,7 @@
 <script setup lang="ts">
 import { useFormStore } from "@eimsnext/store";
 import { FieldDef, FieldType, FormDef, PrintDef, PrintDefRequest } from "@eimsnext/models";
-import { DataItemType, ITreeNode } from "@eimsnext/components";
+import { DataItemType, fieldIcons, ITreeNode } from "@eimsnext/components";
 import { EimsPrintAreaPlugin, type PrintOrientation } from "@eimsnext/print-plugins";
 import Draggable from "vuedraggable";
 import { customPrintService, PrintPreviewRequest, printDefService } from "@eimsnext/services";

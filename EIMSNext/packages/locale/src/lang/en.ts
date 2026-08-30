@@ -2156,6 +2156,12 @@ export default {
     formulaEditor: "Formula Editor",
     formulaInfo: "Formula Info",
     formulaExample: "Formula Example",
+    fieldDataTypes: {
+      text: "Text",
+      number: "Number",
+      dateTime: "Date/Time",
+      array: "Array",
+    },
     formulaInferenceError:
       "Unable to determine a stable data source for this formula",
     formulaSaveDisabledTitle: "Invalid formulas detected",
