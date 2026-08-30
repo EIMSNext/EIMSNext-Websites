@@ -72,8 +72,8 @@ export interface PublicWechatSetting {
 }
 
 export enum PublicWechatAcquireMode {
-  SilentOpenId = 0,
-  ExplicitGrant = 1,
+  SilentOpenId = "0",
+  ExplicitGrant = "1",
 }
 
 export interface PublicExtLinkSetting {

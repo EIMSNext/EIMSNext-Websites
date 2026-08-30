@@ -26,59 +26,73 @@
             </button>
           </div>
 
-          <div class="filter-group">
-            <div class="filter-title-row">
+          <div class="filter-group" :class="{ collapsed: categoryCollapsed }">
+            <button
+              class="filter-title-row"
+              type="button"
+              :aria-expanded="!categoryCollapsed"
+              @click="categoryCollapsed = !categoryCollapsed"
+            >
               <span class="filter-title">
                 <et-icon icon="el-Box" size="13" />
                 {{ $t("admin.plugin.toolType") }}
               </span>
-              <et-icon icon="el-ArrowUp" size="12" />
-            </div>
-            <div class="filter-items">
-              <button
-                class="filter-item"
-                :class="{ active: !activeCategory }"
-                @click="setCategory('')"
-              >
-                {{ $t("admin.plugin.latestPlugins") }}
-              </button>
-              <button
-                v-for="category in categories"
-                :key="category"
-                class="filter-item"
-                :class="{ active: activeCategory === category }"
-                @click="setCategory(category)"
-              >
-                {{ category }}
-              </button>
+              <et-icon class="toggle-icon" icon="el-ArrowUp" size="12" />
+            </button>
+            <div class="filter-collapse">
+              <div class="filter-items">
+                <button
+                  class="filter-item"
+                  :class="{ active: !activeCategory }"
+                  @click="setCategory('')"
+                >
+                  {{ $t("admin.plugin.latestPlugins") }}
+                </button>
+                <button
+                  v-for="category in categories"
+                  :key="category"
+                  class="filter-item"
+                  :class="{ active: activeCategory === category }"
+                  @click="setCategory(category)"
+                >
+                  {{ category }}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="filter-group">
-            <div class="filter-title-row">
+          <div class="filter-group" :class="{ collapsed: scenarioCollapsed }">
+            <button
+              class="filter-title-row"
+              type="button"
+              :aria-expanded="!scenarioCollapsed"
+              @click="scenarioCollapsed = !scenarioCollapsed"
+            >
               <span class="filter-title">
                 <et-icon icon="el-Grid" size="13" />
                 {{ $t("admin.plugin.bizScenario") }}
               </span>
-              <et-icon icon="el-ArrowUp" size="12" />
-            </div>
-            <div class="filter-items">
-              <button
-                class="filter-item"
-                :class="{ active: !activeScenario }"
-                @click="setScenario('')"
-              >
-                {{ $t("admin.plugin.allScenarios") }}
-              </button>
-              <button
-                v-for="scenario in scenarios"
-                :key="scenario"
-                class="filter-item"
-                :class="{ active: activeScenario === scenario }"
-                @click="setScenario(scenario)"
-              >
-                {{ scenario }}
-              </button>
+              <et-icon class="toggle-icon" icon="el-ArrowUp" size="12" />
+            </button>
+            <div class="filter-collapse">
+              <div class="filter-items">
+                <button
+                  class="filter-item"
+                  :class="{ active: !activeScenario }"
+                  @click="setScenario('')"
+                >
+                  {{ $t("admin.plugin.allScenarios") }}
+                </button>
+                <button
+                  v-for="scenario in scenarios"
+                  :key="scenario"
+                  class="filter-item"
+                  :class="{ active: activeScenario === scenario }"
+                  @click="setScenario(scenario)"
+                >
+                  {{ scenario }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -165,6 +179,8 @@ defineOptions({ name: "PluginStorePage" });
 const keyword = ref("");
 const activeCategory = ref("");
 const activeScenario = ref("");
+const categoryCollapsed = ref(false);
+const scenarioCollapsed = ref(false);
 const profileItems = ref<PluginProfile[]>([]);
 const detailVisible = ref(false);
 const selectedProfileId = ref("");
@@ -308,9 +324,27 @@ onMounted(loadProfiles);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
+  width: 100%;
+  padding: 4px 8px;
   margin-bottom: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--et-text-primary);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
   line-height: 40px;
+  transition: background-color 0.2s ease;
+}
+
+.filter-title-row:hover {
+  background: var(--et-bg-hover);
+}
+
+.filter-title-row:focus-visible {
+  background: var(--et-bg-hover);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--et-color-primary) 30%, transparent);
 }
 
 .filter-title {
@@ -321,10 +355,31 @@ onMounted(loadProfiles);
   font-weight: 500;
 }
 
+.toggle-icon {
+  color: var(--et-text-tertiary);
+  transition: transform 0.22s ease;
+}
+
+.filter-group.collapsed .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.filter-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.22s ease;
+}
+
+.filter-group.collapsed .filter-collapse {
+  grid-template-rows: 0fr;
+}
+
 .filter-items {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .filter-item {

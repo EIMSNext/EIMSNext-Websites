@@ -9,7 +9,14 @@
   >
     <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
-  <et-dialog v-model="showAddDialog" :title="t('eventFlow.newEventFlowDialog')" width="640px">
+  <et-dialog
+    v-model="showAddDialog"
+    class="no-foot-divider"
+    :title="t('eventFlow.newEventFlowDialog')"
+    width="640px"
+    destroy-on-close
+    @ok="confirmAdd"
+  >
     <div class="add-dialog">
       <div class="name-field">
         <div class="label">{{ t("eventFlow.eventFlowName") }}</div>
@@ -23,14 +30,18 @@
 
       <div class="section-label">{{ t("eventFlow.selectTriggerType") }}</div>
 
-      <div class="add-item" :class="{ active: newEventSource === EventSourceType.Form }" @click="newEventSource = EventSourceType.Form">
+      <div
+        class="add-item"
+        :class="{ active: newEventSource === EventSourceType.Form }"
+        @click="newEventSource = EventSourceType.Form"
+      >
         <div class="item-icon">
           <el-icon><Document /></el-icon>
         </div>
         <div class="item-body">
           <div class="title">{{ t("eventFlow.formTrigger") }}</div>
           <div class="desc">{{ t("eventFlow.formTriggerDesc") }}</div>
-          <div v-if="newEventSource === EventSourceType.Form" class="form-selector" @click.stop>
+          <!-- <div v-if="newEventSource === EventSourceType.Form" class="form-selector" @click.stop>
             <el-select
               :model-value="formDef.id"
               disabled
@@ -39,11 +50,15 @@
             >
               <el-option :label="formDef.name" :value="formDef.id" />
             </el-select>
-          </div>
+          </div> -->
         </div>
       </div>
 
-      <div class="add-item" :class="{ active: newEventSource === EventSourceType.Schedule }" @click="newEventSource = EventSourceType.Schedule">
+      <div
+        class="add-item"
+        :class="{ active: newEventSource === EventSourceType.Schedule }"
+        @click="newEventSource = EventSourceType.Schedule"
+      >
         <div class="item-icon icon-schedule">
           <el-icon><Clock /></el-icon>
         </div>
@@ -53,7 +68,11 @@
         </div>
       </div>
 
-      <div class="add-item" :class="{ active: newEventSource === EventSourceType.Http }" @click="newEventSource = EventSourceType.Http">
+      <div
+        class="add-item"
+        :class="{ active: newEventSource === EventSourceType.Http }"
+        @click="newEventSource = EventSourceType.Http"
+      >
         <div class="item-icon icon-http">
           <el-icon><Link /></el-icon>
         </div>
@@ -63,10 +82,6 @@
         </div>
       </div>
     </div>
-    <template #footer>
-      <el-button @click="showAddDialog = false">{{ t("common.cancel") }}</el-button>
-      <el-button type="primary" @click="confirmAdd">{{ t("common.ok") }}</el-button>
-    </template>
   </et-dialog>
   <et-drawer v-model="showDrawer" @close="close">
     <template #title>
@@ -78,13 +93,18 @@
     <template #title>
       <span>{{ t("eventFlow.executionLog") }}</span>
     </template>
-    <EventFlowRunLogView
-      v-if="logFlow"
-      :form-def="formDef"
-      :flow-def="logFlow"
-    />
+    <EventFlowRunLogView v-if="logFlow" :form-def="formDef" :flow-def="logFlow" />
   </et-drawer>
-  <AdvanceLayout :title="t('admin.advanced.eventFlow')" :desc="t('eventFlow.formTriggerDesc') + ' / ' + t('eventFlow.scheduleTriggerDesc') + ' / ' + t('eventFlow.httpTriggerDesc')">
+  <AdvanceLayout
+    :title="t('admin.advanced.eventFlow')"
+    :desc="
+      t('eventFlow.formTriggerDesc') +
+      ' / ' +
+      t('eventFlow.scheduleTriggerDesc') +
+      ' / ' +
+      t('eventFlow.httpTriggerDesc')
+    "
+  >
     <div class="flow-container">
       <div class="panel-header">
         <div class="header-left">
@@ -101,15 +121,21 @@
               <template #action>
                 <div class="flow-header">
                   <el-button @click="edit(flow)">{{ t("common.edit") }}</el-button>
-                  <el-button @click="viewLog(flow)">{{ t("eventFlow.viewExecutionLog") }}</el-button>
-                  <el-button class="delete-button" @click="remove(flow)">{{ t("common.delete") }}</el-button>
+                  <el-button @click="viewLog(flow)">
+                    {{ t("eventFlow.viewExecutionLog") }}
+                  </el-button>
+                  <el-button class="delete-button" @click="remove(flow)">
+                    {{ t("common.delete") }}
+                  </el-button>
                   <el-switch
                     :model-value="!flow.disabled"
                     @change="toggleDisable(flow)"
                   ></el-switch>
                 </div>
               </template>
-              <div class="flow-content">{{ t("admin.advanced.triggerPrefix") }}: {{ getTriggerSource(flow) }}</div>
+              <div class="flow-content">
+                {{ t("admin.advanced.triggerPrefix") }}: {{ getTriggerSource(flow) }}
+              </div>
             </et-card>
           </template>
         </el-space>
@@ -162,7 +188,7 @@ const getTriggerSource = (flow: WfDefinition) => {
     return props.formDef.name;
   }
 
-   if (flow.eventSource == EventSourceType.Http) {
+  if (flow.eventSource == EventSourceType.Http) {
     return t("eventFlow.httpTrigger");
   }
 
@@ -312,6 +338,7 @@ onBeforeMount(() => {
   display: flex;
   flex-direction: column;
   gap: var(--et-space-14);
+  padding: var(--et-space-20);
 }
 
 .name-field {

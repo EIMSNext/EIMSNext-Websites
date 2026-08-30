@@ -3230,7 +3230,39 @@ export default defineComponent({
         }
       },
       propChange(field, value, _, fapi) {
+        const rule = data.activeRule;
+        if (
+          methods.isTableFormRule(rule) &&
+          ["editable", "tableInsert", "tableEdit", "tableDelete"].includes(field) &&
+          rule.props?.[field] === value
+        ) {
+          return;
+        }
         methods.handleChange("props", field, value, _, fapi);
+        methods.syncTableFormPermissions(field, value);
+      },
+      syncTableFormPermissions(field, value) {
+        const rule = data.activeRule;
+        if (!methods.isTableFormRule(rule)) return;
+
+        if (field === "editable") {
+          const enabled = value === true;
+          rule.props.tableInsert = enabled;
+          rule.props.tableEdit = enabled;
+          rule.props.tableDelete = enabled;
+        } else if (["tableInsert", "tableEdit", "tableDelete"].includes(field)) {
+          const childEnabled = value === true;
+          rule.props[field] = childEnabled;
+          const permissions = ["tableInsert", "tableEdit", "tableDelete"];
+          const enabled = permissions.some((permission) =>
+            permission === field
+              ? childEnabled
+              : rule.props[permission] === true
+          );
+          rule.props.editable = enabled;
+        } else {
+          return;
+        }
       },
       computedChange(field, value, _, fapi) {
         methods.handleChange("_computed", field, value, _, fapi);

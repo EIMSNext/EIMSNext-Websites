@@ -3,7 +3,7 @@
     <el-badge type="warning" is-dot :hidden="!configured">
       <el-button class="_fd-plain-button" plain @click="openDrawer">
         <slot>
-          {{ btn || t('admin.appAdmin.set') }}
+          {{ btn || t('common.set') }}
         </slot>
       </el-button>
     </el-badge>

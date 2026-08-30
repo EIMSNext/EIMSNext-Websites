@@ -11,13 +11,13 @@
 
     <el-tabs v-model="activeName" :before-leave="tabChanging">
       <el-tab-pane :label="t('publicpublish.formlink')" name="formlink">
-        <PublicFormLink ref="formlinkRef" :form-def="formDef" :public-setting="formSetting" />
+        <PublicFormLink ref="formlinkRef" :form-def="formDef" :public-setting="formSetting" @saved="onPublicSettingSaved" />
       </el-tab-pane>
       <el-tab-pane :label="t('publicpublish.datalink')" name="datalink">
-        <PublicDataLink ref="datalinkRef" :form-def="formDef" :public-setting="formSetting" />
+        <PublicDataLink ref="datalinkRef" :form-def="formDef" :public-setting="formSetting" @saved="onPublicSettingSaved" />
       </el-tab-pane>
       <el-tab-pane :label="t('publicpublish.querylink')" name="querylink">
-        <PublicQueryLink ref="querylinkRef" :form-def="formDef" :public-setting="formSetting" />
+        <PublicQueryLink ref="querylinkRef" :form-def="formDef" :public-setting="formSetting" @saved="onPublicSettingSaved" />
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -44,6 +44,10 @@ const activeName = ref("formlink");
 const formlinkRef = ref<InstanceType<typeof PublicFormLink>>();
 const datalinkRef = ref<InstanceType<typeof PublicDataLink>>();
 const querylinkRef = ref<InstanceType<typeof PublicQueryLink>>();
+
+function onPublicSettingSaved(setting: PublicSetting) {
+  formSetting.value = setting;
+}
 
 const tabRefs: Record<string, Ref<{ isDirty: () => boolean; save: () => Promise<void> } | undefined>> = {
   formlink: formlinkRef,

@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="link-row">
-      <el-switch v-model="datalink.enabled" @change="markDirty" />
+      <el-switch v-model="datalink.enabled" @change="onEnabledChange" />
     </div>
 
     <template v-if="datalink.enabled">
@@ -29,20 +29,6 @@
           <el-button type="primary" @click="saveFormFieldPermissions">{{ t("common.save") }}</el-button>
         </template>
       </el-dialog>
-
-      <LimitSection
-        :enabled="datalink.accessCodeEnabled || false"
-        :access-code="accessCodeInput"
-        :expire-time="datalink.expireTime ?? null"
-        @update:enabled="datalink.accessCodeEnabled = $event; markDirty()"
-        @update:access-code="onAccessCodeChange"
-        @update:expire-time="datalink.expireTime = $event ?? undefined; markDirty()"
-        @change="markDirty"
-      />
-
-      <el-button type="primary" @click="save">
-        {{ t("common.save") }}
-      </el-button>
     </template>
   </div>
 </template>
@@ -59,8 +45,6 @@ import {
   PublicTargetType,
 } from "@eimsnext/models";
 import { publicSettingService } from "@eimsnext/services";
-import { sha256 } from "@eimsnext/utils";
-import LimitSection from "./LimitSection.vue";
 import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
 
 interface FormFieldPermissionItem {
@@ -79,14 +63,13 @@ const props = defineProps<{
   publicSetting: PublicSetting;
 }>();
 
+const emit = defineEmits<{ saved: [setting: PublicSetting] }>();
+
 const datalink = ref<PublicDataLinkSetting>({
   enabled: false,
-  accessCodeEnabled: false,
-  accessCodeHash: "",
   fields: [],
 });
 
-const accessCodeInput = ref("");
 const showFieldPermDialog = ref(false);
 const fieldPermSearch = ref("");
 const fieldPermItems = ref<FormFieldPermissionItem[]>([]);
@@ -132,9 +115,6 @@ watch(
   (setting) => {
     datalink.value = {
       enabled: setting.form?.dataLink?.enabled ?? false,
-      accessCodeEnabled: setting.form?.dataLink?.accessCodeEnabled ?? false,
-      accessCodeHash: setting.form?.dataLink?.accessCodeHash ?? "",
-      expireTime: setting.form?.dataLink?.expireTime,
       fields: [...(setting.form?.dataLink?.fields ?? [])],
     };
     fieldPermItems.value = (datalink.value.fields || []).map((field) => ({
@@ -151,9 +131,9 @@ function markDirty() {
   isDirtyState.value = true;
 }
 
-function onAccessCodeChange(v: string) {
-  accessCodeInput.value = v;
+async function onEnabledChange() {
   markDirty();
+  await save();
 }
 
 function openFormFieldPermissions() {
@@ -168,7 +148,7 @@ function mergeFormFieldPermissions(value: FormFieldPermissionItem[]) {
   fieldPermItems.value = fieldPermItems.value.map((item) => updates.get(item.id) || item);
 }
 
-function saveFormFieldPermissions() {
+async function saveFormFieldPermissions() {
   const permissions = new Map((datalink.value.fields || []).map((item) => [item.field, item]));
   fieldPermItems.value.forEach((item) => {
     permissions.set(item.id, { field: item.id, visible: item.visible, editable: item.editable });
@@ -181,6 +161,7 @@ function saveFormFieldPermissions() {
   fieldPermSearch.value = "";
   showFieldPermDialog.value = false;
   markDirty();
+  await save();
 }
 
 function filterPublicFields(fields: FieldDef[]) {
@@ -231,23 +212,23 @@ function isOrgField(type?: string) {
 }
 
 async function save() {
-  if (accessCodeInput.value) {
-    datalink.value.accessCodeHash = await sha256(accessCodeInput.value);
-    accessCodeInput.value = "";
-  }
   const updated = { ...props.publicSetting };
   updated.form = updated.form || ({} as any);
-  updated.form.dataLink = { ...datalink.value };
-  if (!accessCodeInput.value && !datalink.value.accessCodeHash) {
-    updated.form.dataLink.accessCodeEnabled = false;
-  }
-  await publicSettingService.patch<PublicSetting>(updated.id, {
+  updated.form.dataLink = {
+    ...datalink.value,
+    accessCodeEnabled: false,
+  };
+  const payload = {
     id: updated.id,
     appId: updated.appId,
     targetType: PublicTargetType.Form,
     targetId: updated.targetId,
     form: updated.form,
-  });
+  };
+  const saved = updated.id
+    ? await publicSettingService.patch<PublicSetting>(updated.id, payload)
+    : await publicSettingService.post<PublicSetting>(payload);
+  emit("saved", saved);
   isDirtyState.value = false;
   ElMessage.success(t("common.saveSuccess"));
 }

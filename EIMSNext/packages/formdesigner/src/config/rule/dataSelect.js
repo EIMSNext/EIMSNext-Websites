@@ -62,7 +62,7 @@ export default {
                 field: "selectionProcess",
                 title: "",
                 props: {
-                  btn: t("admin.appAdmin.set"),
+                  btn: t("common.set"),
                 },
               },
               { type: "GroupLabel", props: { title: t("com.dataselect.afterSelection") } },

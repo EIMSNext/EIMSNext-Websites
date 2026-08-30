@@ -37,6 +37,7 @@
 import { AppMenu, EditAppMenuRequest, FormType } from "@eimsnext/models";
 import { appDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
+import { getFormIcon } from "@/utils/common";
 
 const { t } = useI18n();
 
@@ -58,7 +59,7 @@ const title = computed(() =>
 
 const formData = ref({
   name: props.menu.title || "",
-  icon: props.menu.icon || "icon-formdefault",
+  icon: getFormIcon(props.menu),
   iconColor: props.menu.iconColor || "#1296db",
 });
 

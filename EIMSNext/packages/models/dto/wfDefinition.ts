@@ -121,6 +121,7 @@ export interface NodeActionConfig {
   enabled?: boolean;
   text?: string;
   candidates?: ApprovalCandidate[];
+  returnSetting?: ReturnSetting;
 }
 
 export type WorkflowNodeActionType = "submit" | "return" | "reject" | "draft" | "addsign" | "transfer";
@@ -130,6 +131,7 @@ export interface WorkflowNodeAction {
   enabled?: boolean;
   text?: string;
   candidates?: ApprovalCandidate[];
+  returnSetting?: ReturnSetting;
 }
 
 export enum ApproverType {

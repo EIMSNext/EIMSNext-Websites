@@ -1,81 +1,51 @@
 <template>
-    <div class="_fd-cdg-input">
-        <div class="_fd-cdg-item">
-            <div class="_fd-cdg-and">
-                <el-select size="default" v-model="mode" @change="onInput" v-if="list.length > 0">
-                    <el-option label="AND" value="AND"/>
-                    <el-option label="OR" value="OR"/>
+    <div class="fd-condition-list">
+        <div class="fd-condition-header">
+            <div class="fd-condition-title">
+                <span>{{ t('comp.meetCondition') }}</span>
+                <el-select v-if="list.length > 0" v-model="mode" size="small" class="fd-relation-select" @change="onInput">
+                    <el-option label="AND" value="AND" />
+                    <el-option label="OR" value="OR" />
                 </el-select>
+                <span>{{ t('comp.conditions') }}</span>
             </div>
-            <div class="_fd-cdg-options">
-                <template v-for="(item, idx) in list">
-                    <div class="_fd-cdg-option is-group" v-if="item.mode != null" :key="item.field + 'a' + idx + list.length">
-                        <ConditionGroup v-model="list[idx]" @change="onInput"></ConditionGroup>
-                        <i class="fc-icon icon-add-circle" :class="{disabled: list.length === 1}"
-                           @click="removeItem(idx)"></i>
-                    </div>
-                    <div class="_fd-cdg-option" v-else :key="idx">
-                        <el-select style="width: 85px;" size="default" v-model="item.type"
-                                   @change="changeType(item)">
-                            <el-option :label="t('props.field')" value="field"/>
-                            <el-option :label="t('props.variable')" value="variable"/>
-                        </el-select>
-                        <template v-if="item.type === 'variable'">
-                            <el-input class="_fd-cdg-variable" size="default" v-model="item.field" clearable
-                                      @change="changeField(item)" key="variable">
-                                <template #suffix>
-                                    <VariableConfig popover
-                                                    @confirm="(val) => selectVar(item, val)"></VariableConfig>
-                                </template>
-                            </el-input>
-                        </template>
-                        <template v-else>
-                            <RuleSelect class="_fd-cdg-field" size="default" onlyField valueType="field"
-                                        v-model="item.field" clearable :multiple="false"
-                                        @change="changeField(item)" key="field"></RuleSelect>
-                        </template>
-                        <el-select class="_fd-cdg-term" size="default" v-if="item.formula" v-model="item.condition"
-                                   @change="onInput">
-                            <el-option v-for="item in item.formula" :key="item.value" :label="item.label"
-                                       :value="item.value"/>
-                        </el-select>
-                        <div class="_fd-cfg-value"
-                             v-if="item.input && ['empty', 'notEmpty'].indexOf(item.condition) === -1">
-                            <template v-if="item.var">
-                                <RuleSelect class="_fd-cdg-field" size="default" onlyField valueType="field"
-                                            v-model="item.compare" clearable :multiple="false"
-                                            @change="onInput"></RuleSelect>
-                            </template>
-                            <template v-else-if="item.type === 'variable'">
-                                <ValueInput size="default" v-model="item.value" @change="onInput"></ValueInput>
-                            </template>
-                            <template v-else-if="item.condition === 'pattern'">
-                                <PatternInput size="default" :key="item.field" v-model="item.value"
-                                              @change="onInput"></PatternInput>
-                            </template>
-                            <template v-else>
-                                <ConditionInput v-bind="item.input" :key="item.field" v-model="item.value"
-                                                @change="onInput"></ConditionInput>
-                            </template>
-                            <el-checkbox v-model="item.var" size="default" :label="t('props.field')"/>
-                        </div>
-                        <i class="fc-icon icon-delete"
-                           @click="removeItem(idx)"></i>
-                    </div>
-                </template>
-            </div>
+            <i class="fc-icon icon-delete fd-delete" @click="$emit('remove', modelValue)" />
         </div>
-        <div class="_fd-cdg-btns">
-            <el-button link type="primary" @click="addItem">
-                <i class="fc-icon icon-add-circle"></i>
-                {{ t('computed.addCondition') }}
-            </el-button>
-            <el-button link type="primary" @click="addItemGroup">
-                <i class="fc-icon icon-add-circle"></i>
-                {{ t('computed.addGroup') }}
-            </el-button>
+        <div class="fd-condition-body">
+            <template v-for="(item, idx) in list" :key="item.field + '-' + idx + '-' + list.length">
+                <div v-if="item.mode != null" class="fd-condition-group">
+                    <ConditionGroup v-model="list[idx]" :level="level + 1" @change="onInput" />
+                    <i class="fc-icon icon-delete fd-group-delete" @click="removeItem(idx)" />
+                </div>
+                <div v-else class="fd-condition-row">
+                    <el-select v-model="item.type" size="default" class="fd-type-select" @change="changeType(item)">
+                        <el-option :label="t('props.field')" value="field" />
+                        <el-option :label="t('props.variable')" value="variable" />
+                    </el-select>
+                    <template v-if="item.type === 'variable'">
+                        <el-input v-model="item.field" class="fd-field-control" clearable @change="changeField(item)">
+                            <template #suffix><VariableConfig popover @confirm="(val) => selectVar(item, val)" /></template>
+                        </el-input>
+                    </template>
+                    <RuleSelect v-else v-model="item.field" class="fd-field-control" size="default" onlyField valueType="field" clearable :multiple="false" @change="changeField(item)" />
+                    <el-select v-if="item.formula" v-model="item.condition" size="default" class="fd-operator-select" @change="onInput">
+                        <el-option v-for="formula in item.formula" :key="formula.value" :label="formula.label" :value="formula.value" />
+                    </el-select>
+                    <div v-if="item.input && ['empty', 'notEmpty'].indexOf(item.condition) === -1" class="fd-value-control">
+                        <RuleSelect v-if="item.var" v-model="item.compare" class="fd-value-input" size="default" onlyField valueType="field" clearable :multiple="false" @change="onInput" />
+                        <ValueInput v-else-if="item.type === 'variable'" v-model="item.value" size="default" class="fd-value-input" @change="onInput" />
+                        <PatternInput v-else-if="item.condition === 'pattern'" v-model="item.value" :key="item.field" class="fd-value-input" size="default" @change="onInput" />
+                        <ConditionInput v-else v-model="item.value" v-bind="item.input" :key="item.field" class="fd-value-input" @change="onInput" />
+                        <el-checkbox v-model="item.var" size="default" :label="t('props.field')" @change="onInput" />
+                    </div>
+                    <i class="fc-icon icon-delete fd-row-delete" @click="removeItem(idx)" />
+                </div>
+            </template>
         </div>
-
+        <div class="fd-condition-actions">
+            <el-button link type="primary" @click="addItem"><i class="fc-icon icon-add-circle" />{{ t('computed.addCondition') }}</el-button>
+            <el-button v-if="level < maxLevel" link type="primary" @click="addItemGroup"><i class="fc-icon icon-add-circle" />{{ t('computed.addGroup') }}</el-button>
+        </div>
     </div>
 </template>
 
@@ -104,6 +74,10 @@ const ConditionGroup = defineComponent({
     emits: ['update:modelValue', 'change'],
     props: {
         modelValue: [Object, Array],
+        level: {
+            type: Number,
+            default: 1,
+        },
     },
     computed: {
         formulaLabel() {
@@ -136,6 +110,7 @@ const ConditionGroup = defineComponent({
         return {
             mode: 'AND',
             list: [],
+            maxLevel: 3,
             ConditionGroup: markRaw(ConditionGroup),
         }
     },
@@ -307,144 +282,94 @@ export default ConditionGroup;
 </script>
 
 <style>
-
-._fd-cdg-input {
+.fd-condition-list {
     display: flex;
     flex-direction: column;
+    border: 1px solid var(--fc-line-color-3);
+    border-radius: 6px;
+    background: var(--fc-bg-color-2);
 }
 
-._fd-cdg-btns {
-    margin-top: 10px;
-    margin-left: 30px;
-}
-
-._fd-cdg-btns .el-button {
-    color: var(--fc-text-color-2);
-}
-
-._fd-cdg-item {
-    display: flex;
-}
-
-._fd-cdg-item .el-select {
-    background-color: var(--fc-bg-color-2);
-}
-
-._fd-cdg-and {
-    display: flex;
-    width: 100px;
-    position: relative;
-    flex-shrink: 0;
-}
-
-._fd-cdg-and > .el-select {
-    position: absolute;
-    top: 50%;
-    left: -5px;
-    width: 80px;
-    margin-top: -16px;
-    z-index: 2;
-}
-
-._fd-cdg-and:before {
-    content: "";
-    position: absolute;
-    width: 1px;
-    left: 30px;
-    background-color: var(--fc-line-color-2);
-    top: 1px;
-    bottom: 1px;
-    margin-top: 14px;
-    margin-bottom: 16px;
-}
-
-._fd-cdg-options {
-    display: flex;
-    flex-direction: column;
-}
-
-._fd-cdg-option {
-    position: relative;
+.fd-condition-header {
+    min-height: 36px;
+    padding: 0 15px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    background: var(--fc-bg-color-3);
 }
 
-._fd-cdg-field {
-    width: 208px;
-}
-
-._fd-cdg-variable {
-    width: 208px;
-    height: 32px;
-}
-
-._fd-cdg-term {
-    width: 104px
-}
-
-._fd-cdg-option > ._fd-cfg-value {
-    width: 208px;
+.fd-condition-title {
     display: flex;
     align-items: center;
+    gap: 5px;
+    color: var(--fc-text-color-1);
+    font-size: 14px;
 }
 
-._fd-cdg-option > .fc-icon {
-    margin-left: 10px;
+.fd-relation-select {
+    width: 65px;
+}
+
+.fd-delete,
+.fd-row-delete,
+.fd-group-delete {
     cursor: pointer;
     color: var(--fc-text-color-2);
 }
 
-._fd-cdg-option > .fc-icon.disabled {
-    cursor: not-allowed;
+.fd-condition-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
 }
 
-._fd-cdg-option > ._fd-cfg-value > div {
-    width: 100%;
+.fd-condition-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 38px;
+    padding: 10px;
+    border: 1px dashed var(--fc-line-color-3);
+    border-radius: 3px;
+    background: var(--fc-bg-color-1);
 }
 
-._fd-cdg-option > .el-select + .el-select, ._fd-cdg-option > .el-input + .el-select, ._fd-cdg-option > .el-select + .el-input {
-    margin-left: 10px
+.fd-type-select { width: 85px; flex: 0 0 85px; }
+.fd-field-control { width: 208px; flex: 0 1 208px; }
+.fd-operator-select { width: 104px; flex: 0 0 104px; }
+.fd-value-control { display: flex; align-items: center; gap: 10px; flex: 1 1 208px; min-width: 0; }
+.fd-value-input { flex: 1 1 0; min-width: 120px; }
+
+.fd-condition-group {
+    position: relative;
+    margin-left: 30px;
+    padding: 10px;
+    border: 1px dashed var(--fc-line-color-3);
+    border-radius: 3px;
 }
 
-._fd-cfg-value {
-    margin-left: 10px;
-}
-
-._fd-cfg-value .el-checkbox {
-    margin-left: 10px;
-}
-
-._fd-cdg-option:before {
-    content: "";
+.fd-group-delete {
     position: absolute;
-    width: 105px;
-    height: 1px;
-    background-color: var(--fc-line-color-2);
-    left: -70px;
-    top: 50%;
-    margin-top: -1px;
+    top: 4px;
+    right: 4px;
 }
 
-._fd-cdg-option.is-group {
-    border: 1px dashed #ccd3db;
-    padding: 14px;
+.fd-condition-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px 10px 25px;
 }
 
-._fd-cdg-option.is-group > .fc-icon {
-    position: absolute;
-    right: -10px;
-    top: -10px;
-    z-index: 2;
-    transform: rotate(45deg);
-    font-size: 18px;
+.fd-condition-actions .el-button {
+    color: var(--fc-style-color-1);
 }
 
-._fd-cdg-option.is-group:before {
-    margin-top: -17px;
+@media (max-width: 700px) {
+    .fd-condition-row { flex-wrap: wrap; }
+    .fd-field-control { flex-basis: calc(100% - 95px); }
+    .fd-value-control { flex-basis: 100%; }
 }
-
-._fd-cdg-option + ._fd-cdg-option {
-    margin-top: 16px;
-}
-
 </style>

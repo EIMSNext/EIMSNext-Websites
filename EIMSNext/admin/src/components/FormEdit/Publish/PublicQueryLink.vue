@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="link-row">
-      <el-switch v-model="querylink.enabled" @change="markDirty" />
+      <el-switch v-model="querylink.enabled" @change="onEnabledChange" />
       <template v-if="querylink.enabled">
         <ShareLinkBar :url="querylinkUrl" class="share-link" />
         <el-button @click="showEmbed = true">{{ t("publicpublish.embed") }}</el-button>
@@ -45,25 +45,15 @@
       </el-select>
     </div>
 
-    <el-dialog v-model="showEmbed" :title="t('publicpublish.embed')" width="640px">
-      <p class="embed-desc">{{ t("publicpublish.embedDesc") }}</p>
-      <div class="embed-row">
-        <label class="embed-label">{{ t("publicpublish.embedLink") }}</label>
-        <el-input :model-value="querylinkUrl" readonly>
-          <template #append>
-            <el-button @click="copyText(querylinkUrl)">{{ t("common.copy") }}</el-button>
-          </template>
-        </el-input>
-      </div>
-      <div class="embed-row">
-        <label class="embed-label">{{ t("publicpublish.embedCode") }}</label>
-        <el-input v-model="iframeCode" type="textarea" :rows="2" readonly>
-          <template #append>
-            <el-button @click="copyText(iframeCode)">{{ t("common.copy") }}</el-button>
-          </template>
-        </el-input>
-      </div>
-    </el-dialog>
+    <et-dialog
+      v-model="showEmbed"
+      :title="t('publicpublish.embed')"
+      width="640px"
+      destroy-on-close
+      :show-footer="false"
+    >
+      <EmbedLinkContent :url="querylinkUrl" :description="t('publicpublish.embedDesc')" />
+    </et-dialog>
 
     <LimitSection
       :enabled="querylink.accessCodeEnabled || false"
@@ -97,6 +87,7 @@ import { publicSettingService } from "@eimsnext/services";
 import { ShareLinkBar } from "@eimsnext/components";
 import { sha256 } from "@eimsnext/utils";
 import LimitSection from "./LimitSection.vue";
+import EmbedLinkContent from "./EmbedLinkContent.vue";
 import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
 
 const { t } = useI18n();
@@ -105,6 +96,8 @@ const props = defineProps<{
   formDef: FormDef;
   publicSetting: PublicSetting;
 }>();
+
+const emit = defineEmits<{ saved: [setting: PublicSetting] }>();
 
 const querylink = ref<PublicQueryLinkSetting>({
   enabled: false,
@@ -120,10 +113,6 @@ const isDirtyState = ref(false);
 
 const querylinkUrl = computed(
   () => `${window.location.origin}${window.location.pathname}#/public/form/${props.formDef.id}/query`,
-);
-
-const iframeCode = computed(
-  () => `<iframe width="100%" height="100%" style="border: none;" src="${querylinkUrl.value}"></iframe>`,
 );
 
 const queryableFields = computed(() => flattenFields(props.formDef.content?.items || [], isPublicQueryField));
@@ -149,14 +138,14 @@ function markDirty() {
   isDirtyState.value = true;
 }
 
+async function onEnabledChange() {
+  markDirty();
+  await save();
+}
+
 function onAccessCodeChange(v: string) {
   accessCodeInput.value = v;
   markDirty();
-}
-
-async function copyText(text: string) {
-  await navigator.clipboard.writeText(text);
-  ElMessage.success(t("common.copied"));
 }
 
 function flattenFields(fields: FieldDef[], isSupported: (type?: FieldType | string) => boolean) {
@@ -207,13 +196,17 @@ async function save() {
   if (!accessCodeInput.value && !querylink.value.accessCodeHash) {
     updated.form.queryLink.accessCodeEnabled = false;
   }
-  await publicSettingService.patch<PublicSetting>(updated.id, {
+  const payload = {
     id: updated.id,
     appId: updated.appId,
     targetType: PublicTargetType.Form,
     targetId: updated.targetId,
     form: updated.form,
-  });
+  };
+  const saved = updated.id
+    ? await publicSettingService.patch<PublicSetting>(updated.id, payload)
+    : await publicSettingService.post<PublicSetting>(payload);
+  emit("saved", saved);
   isDirtyState.value = false;
   ElMessage.success(t("common.saveSuccess"));
 }
@@ -263,21 +256,4 @@ defineExpose({
   width: 100%;
 }
 
-.embed-desc {
-  color: var(--et-text-secondary);
-  font-size: var(--et-font-size-13);
-  margin-bottom: var(--et-space-12);
-}
-
-.embed-row {
-  margin-bottom: var(--et-space-12);
-}
-
-.embed-label {
-  color: var(--et-text-primary);
-  display: block;
-  font-size: var(--et-font-size-13);
-  font-weight: 600;
-  margin-bottom: var(--et-space-8);
-}
 </style>

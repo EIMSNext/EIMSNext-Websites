@@ -16,7 +16,22 @@ export default {
   event: ["change", "add", "delete", "handleClick"],
   drag: true,
   denyDrag: {
-    item: ["tableform", "divider", "fcRow", "col", "fcFlex", "fcFlex2", "fcCell", "tabs", "elTabPane", "collapse", "elCollapseItem", "fcTable", "elCard", "fcInlineForm"],
+    item: [
+      "tableform",
+      "divider",
+      "fcRow",
+      "col",
+      "fcFlex",
+      "fcFlex2",
+      "fcCell",
+      "tabs",
+      "elTabPane",
+      "collapse",
+      "elCollapseItem",
+      "fcTable",
+      "elCard",
+      "fcInlineForm",
+    ],
     menu: ["layout"],
   },
   subRender() {
@@ -26,6 +41,12 @@ export default {
     if (!rule.props) rule.props = {};
     delete rule.props.button;
     delete rule.props.page;
+    if (rule.props.tableInsert === undefined) rule.props.tableInsert = rule.props.addable !== false;
+    if (rule.props.tableEdit === undefined) rule.props.tableEdit = rule.props.editExisting !== false;
+    if (rule.props.tableDelete === undefined) rule.props.tableDelete = rule.props.deletable !== false;
+    delete rule.props.addable;
+    delete rule.props.editExisting;
+    delete rule.props.deletable;
     rule.props.max = 200;
     rule.props.stripe = true;
     rule.props.border = true;
@@ -33,11 +54,18 @@ export default {
     const columns = rule.props.columns || [];
     const unwrapColumnRule = (item) => {
       let current = item;
-      while (current && current.type === "DragTool" && Array.isArray(current.children) && current.children[0]) {
+      while (
+        current &&
+        current.type === "DragTool" &&
+        Array.isArray(current.children) &&
+        current.children[0]
+      ) {
         current = current.children[0];
       }
       if (current && current.type === "DragBox") {
-        const child = Array.isArray(current.children) ? current.children[0] : null;
+        const child = Array.isArray(current.children)
+          ? current.children[0]
+          : null;
         return child ? unwrapColumnRule(child) : null;
       }
       if (!current) {
@@ -72,6 +100,9 @@ export default {
     const children = rule.children || [];
     delete rule.props.button;
     delete rule.props.page;
+    delete rule.props.addable;
+    delete rule.props.editExisting;
+    delete rule.props.deletable;
     rule.props.max = 200;
     rule.props.stripe = true;
     rule.props.border = true;
@@ -105,18 +136,14 @@ export default {
         border: true,
         showIndex: true,
         editable: true,
-        editExisting: true,
-        addable: true,
-        insertable: true,
-        deletable: true,
+        tableInsert: true,
+        tableEdit: true,
+        tableDelete: true,
       },
       children: [],
     };
   },
   props(_, { t }) {
-    const propsT = function (list) {
-      return localeProps(t, name + ".props", list);
-    };
     return localeProps(t, name + ".props", [
       // {
       //   type: "select",
@@ -132,33 +159,27 @@ export default {
       //   field: "emptyText",
       // },
       { type: "GroupLabel", props: { title: t("form.operationPermission") } },
-      {
-        type: "CheckBoxInput",
-        field: "stripe",
-        hidden: true,
-        value: true,
-        wrap: { show: false },
-      },
-      {
-        type: "CheckBoxInput",
-        field: "border",
-        hidden: true,
-        value: true,
-        wrap: { show: false },
-      },
-      {
-        type: "CheckBoxInput",
-        field: "showIndex",
-        hidden: true,
-        value: true,
-        wrap: { show: false },
-      },
-      {
-        type: "CheckBoxInput",
-        field: "_hidden",
-        props: { title: t("props.hide") },
-        wrap: { show: false },
-      },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "stripe",
+      //   hidden: true,
+      //   value: true,
+      //   wrap: { show: false },
+      // },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "border",
+      //   hidden: true,
+      //   value: true,
+      //   wrap: { show: false },
+      // },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "showIndex",
+      //   hidden: true,
+      //   value: true,
+      //   wrap: { show: false },
+      // },
       {
         type: "CheckBoxInput",
         field: "editable",
@@ -167,14 +188,25 @@ export default {
         wrap: { show: false },
       },
       {
-        type: "ConfigItem",
-        props: { label: t("comp.formFieldPermissions.edit") },
-        children: propsT([
-          { type: "CheckBoxInput", field: "addable", props: { title: t("comp.formFieldPermissions.addRecord") }, wrap: { show: false } },
-          { type: "CheckBoxInput", field: "insertable", props: { title: t("form.insertRecord") }, wrap: { show: false } },
-          { type: "CheckBoxInput", field: "editExisting", props: { title: t("comp.formFieldPermissions.editRecord") }, wrap: { show: false } },
-          { type: "CheckBoxInput", field: "deletable", props: { title: t("comp.formFieldPermissions.deleteRecord") }, wrap: { show: false } },
-        ]),
+        type: "CheckBoxInput",
+        field: "tableInsert",
+        props: { title: t("comp.formFieldPermissions.addRecord") },
+        style: "padding-left: 24px",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "tableEdit",
+        props: { title: t("comp.formFieldPermissions.editRecord") },
+        style: "padding-left: 24px",
+        wrap: { show: false },
+      },
+      {
+        type: "CheckBoxInput",
+        field: "tableDelete",
+        props: { title: t("comp.formFieldPermissions.deleteRecord") },
+        style: "padding-left: 24px",
+        wrap: { show: false },
       },
     ]);
   },

@@ -61,7 +61,7 @@
               {{ t("computed.linkage.info.1") }}
             </div>
           </template>
-          <template v-else>
+          <!-- <template v-else>
             <div class="_fd-comp-title" style="margin-top: 30px">
               {{ t("computed.invert") }}
             </div>
@@ -69,7 +69,7 @@
               <el-radio :value="true">{{ invertLabel }}</el-radio>
               <el-radio :value="false">{{ validLabel }}</el-radio>
             </el-radio-group>
-          </template>
+          </template> -->
         </el-main>
       </el-container>
 

@@ -47,59 +47,73 @@
 
     <div v-loading="loading" class="market-layout">
       <aside class="market-sidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-section-head">
+        <div class="sidebar-section" :class="{ collapsed: categoryCollapsed }">
+          <button
+            class="sidebar-section-head"
+            type="button"
+            :aria-expanded="!categoryCollapsed"
+            @click="categoryCollapsed = !categoryCollapsed"
+          >
             <span class="sidebar-section-title">
               <et-icon icon="el-Box" size="13px" />
               {{ $t("admin.appStore.category") }}
             </span>
-            <et-icon icon="el-ArrowUp" size="12px" />
-          </div>
-          <div class="sidebar-items">
-            <button
-              class="sidebar-item"
-              :class="{ active: !activeCategory }"
-              @click="setCategory('')"
-            >
-              {{ $t("admin.appStore.allCategories") }}
-            </button>
-            <button
-              v-for="category in categories"
-              :key="category"
-              class="sidebar-item"
-              :class="{ active: activeCategory === category }"
-              @click="setCategory(category)"
-            >
-              {{ category }}
-            </button>
+            <et-icon class="toggle-icon" icon="el-ArrowUp" size="12px" />
+          </button>
+          <div class="sidebar-collapse">
+            <div class="sidebar-items">
+              <button
+                class="sidebar-item"
+                :class="{ active: !activeCategory }"
+                @click="setCategory('')"
+              >
+                {{ $t("admin.appStore.allCategories") }}
+              </button>
+              <button
+                v-for="category in categories"
+                :key="category"
+                class="sidebar-item"
+                :class="{ active: activeCategory === category }"
+                @click="setCategory(category)"
+              >
+                {{ category }}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="sidebar-section">
-          <div class="sidebar-section-head">
+        <div class="sidebar-section" :class="{ collapsed: industryCollapsed }">
+          <button
+            class="sidebar-section-head"
+            type="button"
+            :aria-expanded="!industryCollapsed"
+            @click="industryCollapsed = !industryCollapsed"
+          >
             <span class="sidebar-section-title">
               <et-icon icon="el-Grid" size="13px" />
               {{ $t("admin.appStore.industry") }}
             </span>
-            <et-icon icon="el-ArrowUp" size="12px" />
-          </div>
-          <div class="sidebar-items">
-            <button
-              class="sidebar-item"
-              :class="{ active: !activeIndustry }"
-              @click="setIndustry('')"
-            >
-              {{ $t("admin.appStore.allIndustries") }}
-            </button>
-            <button
-              v-for="industry in industries"
-              :key="industry"
-              class="sidebar-item"
-              :class="{ active: activeIndustry === industry }"
-              @click="setIndustry(industry)"
-            >
-              {{ industry }}
-            </button>
+            <et-icon class="toggle-icon" icon="el-ArrowUp" size="12px" />
+          </button>
+          <div class="sidebar-collapse">
+            <div class="sidebar-items">
+              <button
+                class="sidebar-item"
+                :class="{ active: !activeIndustry }"
+                @click="setIndustry('')"
+              >
+                {{ $t("admin.appStore.allIndustries") }}
+              </button>
+              <button
+                v-for="industry in industries"
+                :key="industry"
+                class="sidebar-item"
+                :class="{ active: activeIndustry === industry }"
+                @click="setIndustry(industry)"
+              >
+                {{ industry }}
+              </button>
+            </div>
           </div>
         </div>
       </aside>
@@ -241,6 +255,8 @@ const router = useRouter();
 const keyword = ref("");
 const activeCategory = ref("");
 const activeIndustry = ref("");
+const categoryCollapsed = ref(false);
+const industryCollapsed = ref(false);
 const profileItems = ref<AppProfile[]>([]);
 const totalProfiles = ref(0);
 const loading = ref(false);
@@ -487,9 +503,27 @@ onMounted(loadProfiles);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
+  width: 100%;
+  padding: 4px 8px;
   margin-bottom: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--et-text-primary);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
   line-height: 40px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-section-head:hover {
+  background: var(--et-bg-hover);
+}
+
+.sidebar-section-head:focus-visible {
+  background: var(--et-bg-hover);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--et-color-primary) 30%, transparent);
 }
 
 .sidebar-section-title {
@@ -501,10 +535,31 @@ onMounted(loadProfiles);
   font-weight: 600;
 }
 
+.toggle-icon {
+  color: var(--et-text-tertiary);
+  transition: transform 0.22s ease;
+}
+
+.sidebar-section.collapsed .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.sidebar-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.22s ease;
+}
+
+.sidebar-section.collapsed .sidebar-collapse {
+  grid-template-rows: 0fr;
+}
+
 .sidebar-items {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .sidebar-item {
