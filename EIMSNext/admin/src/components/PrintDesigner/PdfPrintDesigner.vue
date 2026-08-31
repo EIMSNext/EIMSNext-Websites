@@ -94,7 +94,38 @@
           </el-tree>
         </el-tab-pane>
         <el-tab-pane :label="t('admin.printDesigner.systemFields')" name="system" class="field-panel">
-          <div>system</div>
+          <el-tree
+            ref="systemFieldsTreeRef"
+            class="mt-2"
+            :data="systemFieldNodes"
+            item-key="id"
+            :props="{ children: 'children', label: 'label', disabled: '' }"
+            :expand-on-click-node="false"
+          >
+            <template #default="{ data }">
+              <Draggable
+                :list="[data]"
+                :sort="false"
+                ghost-class="ghost"
+                @start="onStart"
+                :group="{ name: 'fields', pull: 'clone', put: false }"
+                item-key="id"
+              >
+                <template #item="{ element }">
+                  <div class="node-data" :title="data.label">
+                    <div class="node-wrapper">
+                      <et-icon
+                        size="16px"
+                        :icon="fieldIcons[data.data?.type] || 'fc-icon-input'"
+                        class="node-icon"
+                      ></et-icon>
+                      <span class="node-label">{{ data.label }}</span>
+                    </div>
+                  </div>
+                </template>
+              </Draggable>
+            </template>
+          </el-tree>
         </el-tab-pane>
       </el-tabs>
       <div class="designer-stage">
@@ -350,6 +381,7 @@ const currentPrintDef = ref<PrintDef>(props.printDef);
 const activeTab = ref("form");
 const formStore = useFormStore();
 const formFieldNodes = ref<ITreeNode[]>([]);
+const systemFieldNodes = ref<ITreeNode[]>([]);
 const draggingNode = ref<ITreeNode>();
 const container = ref<HTMLElement | null>(null);
 const showPageSetupDialog = ref(false);
@@ -526,6 +558,7 @@ const ensureWorkbookApi = () => {
 
 const populateFields = () => {
   formFieldNodes.value = [];
+  systemFieldNodes.value = buildSystemFieldNodes();
 
   if (props.formDef.content && props.formDef.content.items) {
     props.formDef.content.items.forEach((x: FieldDef) => {
@@ -558,6 +591,42 @@ const populateFields = () => {
     });
   }
 };
+
+function buildSystemFieldNodes(): ITreeNode[] {
+  const fields: Array<{
+    id: string;
+    labelKey: string;
+    type: FieldType;
+    dataType?: "qrcode";
+  }> = [
+    { id: "createby", labelKey: "submitter", type: FieldType.Employee1 },
+    { id: "createtime", labelKey: "submittedAt", type: FieldType.TimeStamp },
+    { id: "updatetime", labelKey: "updatedAt", type: FieldType.TimeStamp },
+    { id: "ext", labelKey: "extensionField", type: FieldType.Input },
+    { id: "flowstatus", labelKey: "flowStatus", type: FieldType.Input },
+    { id: "currentnode", labelKey: "currentNode", type: FieldType.Input },
+    { id: "currentowner", labelKey: "currentOwner", type: FieldType.Employee1 },
+    { id: "internalqrcode", labelKey: "internalQrCode", type: FieldType.Input, dataType: "qrcode" },
+    { id: "externalqrcode", labelKey: "externalQrCode", type: FieldType.Input, dataType: "qrcode" },
+    { id: "printedby", labelKey: "printOperator", type: FieldType.Employee1 },
+    { id: "printedtime", labelKey: "printTime", type: FieldType.TimeStamp },
+    { id: "approvallogs>sequence", labelKey: "approvalSequence", type: FieldType.Number },
+    { id: "approvallogs>approvaltime", labelKey: "approvalTime", type: FieldType.TimeStamp },
+    { id: "approvallogs>nodename", labelKey: "approvalNodeName", type: FieldType.Input },
+    { id: "approvallogs>approver", labelKey: "approvalApprover", type: FieldType.Employee1 },
+    { id: "approvallogs>comment", labelKey: "approvalContent", type: FieldType.TextArea },
+    { id: "approvallogs>result", labelKey: "approvalResult", type: FieldType.Input },
+  ];
+
+  return fields.map((field) => ({
+    id: field.id,
+    value: field.id,
+    label: t(`admin.printDesigner.${field.labelKey}`),
+    fullLabel: t(`admin.printDesigner.${field.labelKey}`),
+    type: DataItemType.Field,
+    data: { type: field.type, printDataType: field.dataType || "field" },
+  }));
+}
 
 const loadUniverModules = async () => {
   if (loadedModules) {
@@ -797,7 +866,7 @@ const initSheet = async (data: Record<string, unknown>) => {
     if (cell) {
       cell.setValue(`\${${draggingNode.value.fullLabel}}`);
       const printMetadata: IPrintMetadata = {
-        dataType: "field",
+        dataType: draggingNode.value.data?.printDataType || "field",
         id: draggingNode.value.value!,
       };
 
