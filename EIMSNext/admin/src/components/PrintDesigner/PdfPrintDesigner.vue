@@ -101,9 +101,11 @@
             item-key="id"
             :props="{ children: 'children', label: 'label', disabled: '' }"
             :expand-on-click-node="false"
+            default-expand-all
           >
             <template #default="{ data }">
               <Draggable
+                v-if="data.value !== 'approvallogs'"
                 :list="[data]"
                 :sort="false"
                 ghost-class="ghost"
@@ -124,6 +126,16 @@
                   </div>
                 </template>
               </Draggable>
+              <div v-else class="node-data" :title="data.label">
+                <div class="node-wrapper">
+                  <et-icon
+                    size="16px"
+                    :icon="fieldIcons[data.data?.type] || 'fc-icon-input'"
+                    class="node-icon"
+                  ></et-icon>
+                  <span class="node-label">{{ data.label }}</span>
+                </div>
+              </div>
             </template>
           </el-tree>
         </el-tab-pane>
@@ -604,21 +616,13 @@ function buildSystemFieldNodes(): ITreeNode[] {
     { id: "updatetime", labelKey: "updatedAt", type: FieldType.TimeStamp },
     { id: "ext", labelKey: "extensionField", type: FieldType.Input },
     { id: "flowstatus", labelKey: "flowStatus", type: FieldType.Input },
-    { id: "currentnode", labelKey: "currentNode", type: FieldType.Input },
-    { id: "currentowner", labelKey: "currentOwner", type: FieldType.Employee1 },
     { id: "internalqrcode", labelKey: "internalQrCode", type: FieldType.Input, dataType: "qrcode" },
     { id: "externalqrcode", labelKey: "externalQrCode", type: FieldType.Input, dataType: "qrcode" },
     { id: "printedby", labelKey: "printOperator", type: FieldType.Employee1 },
     { id: "printedtime", labelKey: "printTime", type: FieldType.TimeStamp },
-    { id: "approvallogs>sequence", labelKey: "approvalSequence", type: FieldType.Number },
-    { id: "approvallogs>approvaltime", labelKey: "approvalTime", type: FieldType.TimeStamp },
-    { id: "approvallogs>nodename", labelKey: "approvalNodeName", type: FieldType.Input },
-    { id: "approvallogs>approver", labelKey: "approvalApprover", type: FieldType.Employee1 },
-    { id: "approvallogs>comment", labelKey: "approvalContent", type: FieldType.TextArea },
-    { id: "approvallogs>result", labelKey: "approvalResult", type: FieldType.Input },
   ];
 
-  return fields.map((field) => ({
+  const nodes: ITreeNode[] = fields.map((field) => ({
     id: field.id,
     value: field.id,
     label: t(`admin.printDesigner.${field.labelKey}`),
@@ -626,6 +630,57 @@ function buildSystemFieldNodes(): ITreeNode[] {
     type: DataItemType.Field,
     data: { type: field.type, printDataType: field.dataType || "field" },
   }));
+
+  if (!props.formDef.usingWorkflow) {
+    return nodes;
+  }
+
+  nodes.splice(5, 0,
+    {
+      id: "currentnode",
+      value: "currentnode",
+      label: t("admin.printDesigner.currentNode"),
+      fullLabel: t("admin.printDesigner.currentNode"),
+      type: DataItemType.Field,
+      data: { type: FieldType.Input, printDataType: "field" },
+    },
+    {
+      id: "currentowner",
+      value: "currentowner",
+      label: t("admin.printDesigner.currentOwner"),
+      fullLabel: t("admin.printDesigner.currentOwner"),
+      type: DataItemType.Field,
+      data: { type: FieldType.Employee1, printDataType: "field" },
+    },
+  );
+
+  const approvalFields = [
+    { id: "sequence", labelKey: "approvalSequence", type: FieldType.Number },
+    { id: "approvaltime", labelKey: "approvalTime", type: FieldType.TimeStamp },
+    { id: "nodename", labelKey: "approvalNodeName", type: FieldType.Input },
+    { id: "approver", labelKey: "approvalApprover", type: FieldType.Employee1 },
+    { id: "comment", labelKey: "approvalContent", type: FieldType.TextArea },
+    { id: "result", labelKey: "approvalResult", type: FieldType.Input },
+  ];
+  const approvalLabel = t("admin.printDesigner.approvalInfo");
+  nodes.push({
+    id: "approvallogs",
+    value: "approvallogs",
+    label: approvalLabel,
+    fullLabel: approvalLabel,
+    type: DataItemType.Field,
+    data: { type: FieldType.TableForm, printDataType: "field" },
+    children: approvalFields.map((field) => ({
+      id: `approvallogs-${field.id}`,
+      value: `approvallogs>${field.id}`,
+      label: t(`admin.printDesigner.${field.labelKey}`),
+      fullLabel: `${approvalLabel}.${t(`admin.printDesigner.${field.labelKey}`)}`,
+      type: DataItemType.Field,
+      data: { type: field.type, printDataType: "field" },
+    })),
+  });
+
+  return nodes;
 }
 
 const loadUniverModules = async () => {

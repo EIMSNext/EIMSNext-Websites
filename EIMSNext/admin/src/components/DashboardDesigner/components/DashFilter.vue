@@ -4,12 +4,13 @@
         </ConditionList>
         <div class="actions">
             <el-button type="primary" @click="onSearch">{{ t("common.filter") }}</el-button>
-            <el-button>{{ t("common.reset") }}</el-button>
+            <el-button @click="onReset">{{ t("common.reset") }}</el-button>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { IConditionList } from "@eimsnext/components";
+import { uniqueId } from "@eimsnext/utils";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -38,6 +39,9 @@ const onClear = () => {
 const emit = defineEmits(["ok", "cancel"]);
 const onSearch = () => {
     emit("ok", condList.value);
+};
+const onReset = () => {
+    condList.value = { id: uniqueId(), rel: "and", items: [] };
 };
 const onClickOutside = (e: MouseEvent) => {
     const target = e.target as HTMLElement;

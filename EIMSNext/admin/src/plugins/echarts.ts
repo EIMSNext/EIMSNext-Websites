@@ -1,5 +1,5 @@
 import * as echarts from "echarts/core";
-import { BarChart, GaugeChart, LineChart, PieChart } from "echarts/charts";
+import { BarChart, CustomChart, GaugeChart, LineChart, PieChart } from "echarts/charts";
 import {
   TitleComponent,
   TooltipComponent,
@@ -20,6 +20,7 @@ echarts.use([
   DataZoomComponent,
   LegendComponent,
   BarChart,
+  CustomChart,
   LineChart,
   PieChart,
   GaugeChart,

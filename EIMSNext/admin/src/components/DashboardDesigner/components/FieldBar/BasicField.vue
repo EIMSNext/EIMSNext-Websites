@@ -20,7 +20,7 @@
       </div>
     </el-popover>
     <el-dropdown :show-arrow="false" trigger="click" placement="bottom-start">
-      <div ref="triggerRef" :key="field.title" class="item dimension-item forbid">
+      <div ref="triggerRef" :key="field.title" class="item field-item forbid">
         <div class="item-text" :class="isDeleted ? 'style-red' : ''">
           <et-icon
             icon="el-arrowDown"
@@ -154,8 +154,18 @@ const onRemoveClick = () => {
   }
 }
 
-.dimension-item {
-  background-color: var(--et-color-primary-hover);
-  color: var(--et-color-primary);
+.field-item {
+  background-color: var(--et-bg-container);
+  border: 1px solid var(--et-border-color-light);
+  color: var(--et-text-primary);
+
+  &:hover {
+    background-color: var(--et-bg-hover);
+    border-color: var(--et-color-primary);
+  }
+
+  .item-text {
+    color: var(--et-text-primary);
+  }
 }
 </style>

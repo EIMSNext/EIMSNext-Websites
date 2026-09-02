@@ -124,6 +124,53 @@
             </Draggable>
           </div>
         </div>
+        <div
+          v-if="chartSetting.chartType === ChartType.Progress"
+          class="center-box progress-target-box"
+          :class="{ 'green-line': dropable.progressTarget }"
+        >
+          <div class="title">{{ t("admin.dashboardChartDesigner.targetValue") }}</div>
+          <div class="drag-target-container progress-target-container">
+            <Draggable
+              class="progress-target"
+              :list="progressTargetFields"
+              :sort="false"
+              :group="{ name: 'fields', pull: false, put: true }"
+              item-key="id"
+              @add="addProgressTarget"
+            >
+              <template #item="{ element }">
+                <div class="progress-target-tag" @click.stop="editProgressTarget">
+                  <span class="progress-target-check">✓</span>
+                  <span class="progress-target-label">{{ element.label || element.id }} ({{ getAggregateLabel(element.aggFun) }})</span>
+                  <button type="button" class="progress-target-remove" @click.stop="clearProgressTarget">
+                    <et-icon icon="el-close" size="12px" />
+                  </button>
+                </div>
+              </template>
+            </Draggable>
+            <div
+              v-if="!targetEditing && progressTargetFields.length === 0 && progressOptions.targetValue != null"
+              class="progress-target-tag"
+              @click.stop="editProgressTarget"
+            >
+              <span class="progress-target-check">✓</span>
+              <span class="progress-target-label">{{ t("admin.dashboardChartDesigner.manualTargetLabel", { value: progressOptions.targetValue }) }}</span>
+            </div>
+            <el-input-number
+              v-if="targetEditing"
+              v-model="progressOptions.targetValue"
+              class="progress-target-input"
+              :min="0.000001"
+              :controls="false"
+              :placeholder="t('admin.dashboardChartDesigner.manualTarget')"
+              @change="commitProgressManualTarget"
+            />
+            <span v-else-if="progressTargetFields.length === 0 && progressOptions.targetValue == null" class="progress-target-hint" @click="editProgressTarget">
+              {{ t("admin.dashboardChartDesigner.targetValueHint") }}
+            </span>
+          </div>
+        </div>
         <div class="center-box">
           <div class="title">{{ t("admin.dashboardChartDesigner.filter") }}</div>
           <div class="drag-target-container container-veidoo">
@@ -208,21 +255,6 @@
                     <i class="icon" :class="style.cssClass"></i>
                   </el-button>
                 </div>
-                <el-radio-group v-model="progressOptions.targetType">
-                  <el-radio value="metric">{{ t('admin.dashboardChartDesigner.targetMetric') }}</el-radio>
-                  <el-radio value="value">{{ t('admin.dashboardChartDesigner.manualTarget') }}</el-radio>
-                </el-radio-group>
-                <el-select v-if="progressOptions.targetType === 'metric'" v-model="progressTargetMetricId" :placeholder="t('admin.dashboardChartDesigner.selectTargetMetric')">
-                  <el-option v-for="metric in metricCandidates" :key="metric.id" :label="metric.label || metric.id" :value="metric.id" />
-                </el-select>
-                <el-select v-if="progressOptions.targetType === 'metric'" v-model="progressTargetAggFun">
-                  <el-option :label="t('admin.dashboardFieldBar.count')" value="count" />
-                  <el-option :label="t('admin.dashboardFieldBar.sum')" value="sum" />
-                  <el-option :label="t('admin.dashboardFieldBar.average')" value="avg" />
-                  <el-option :label="t('admin.dashboardFieldBar.max')" value="max" />
-                  <el-option :label="t('admin.dashboardFieldBar.min')" value="min" />
-                </el-select>
-                <el-input-number v-else v-model="progressOptions.targetValue" :min="0.000001" :controls="false" :placeholder="t('admin.dashboardChartDesigner.manualTarget')" />
                 <div class="setting-row">
                   <span>{{ t('admin.dashboardChartDesigner.decimalPlaces') }}</span>
                   <el-input-number v-model="progressOptions.decimalPlaces" :min="0" :max="6" :controls="false" />
@@ -415,6 +447,8 @@ const handleSourceOk = async (source: IDataSource) => {
     chartSetting.sort = { items: [] };
     chartSetting.filter = { id: uniqueId(), rel: "and", items: [] };
     chartSetting.progress = undefined;
+    progressTargetFields.value = [];
+    targetEditing.value = false;
   }
   showDataSourceDialog.value = false;
   populateDatasourceFields();
@@ -433,22 +467,56 @@ const progressStyles = [
   { id: "thin" as const, cssClass: "progress-thin" },
 ];
 const progressOptions = reactive({ targetType: "metric" as "metric" | "value", targetValue: undefined as number | undefined, decimalPlaces: 0, style: "ring" as "ring" | "semi" | "thin", showName: true, showActual: false, showTarget: false, showPercent: true });
+const progressTargetFields = ref<IDataSourceField[]>([]);
+const targetEditing = ref(false);
 const lineOptions = reactive({ smooth: false, showSymbol: true, xAxisLabelMode: "horizontal" as "horizontal" | "tilt" | "vertical", showAllLabels: false, showDataZoom: false, yAxisTitle: "", yAxisMin: null as number | null, yAxisMax: null as number | null, showDataLabel: false, labelOverlap: "adjust" as "adjust" | "hide" | "stagger" });
 const barOptions = reactive({ categoryAxisLabelMode: "horizontal" as "horizontal" | "tilt" | "vertical", showAllCategoryLabels: false, showDataZoom: false, valueAxisTitle: "", valueAxisMin: null as number | null, valueAxisMax: null as number | null, showDataLabel: false, labelOverlap: "adjust" as "adjust" | "hide" | "stagger" });
-const metricCandidates = computed(() => fields.value);
-const progressTargetMetricId = computed({
-  get: () => chartSetting.progress?.targetMetric?.id || "",
-  set: (id: string) => {
-    const target = metricCandidates.value.find((field) => field.id === id);
-    chartSetting.progress = { ...progressOptions, targetType: "metric", targetMetric: target ? { ...cloneDragField(target), aggFun: AggregateFun.Count } : undefined };
-  },
-});
-const progressTargetAggFun = computed({
-  get: () => chartSetting.progress?.targetMetric?.aggFun || AggregateFun.Count,
-  set: (aggFun: AggregateFun) => {
-    if (chartSetting.progress?.targetMetric) chartSetting.progress.targetMetric.aggFun = aggFun;
-  },
-});
+const syncProgressTargetField = () => {
+  const target = chartSetting.progress?.targetMetric;
+  progressTargetFields.value = target ? [{ ...target }] : [];
+};
+
+const addProgressTarget = () => {
+  const target = progressTargetFields.value.at(-1);
+  const targetMetric = target as (IDataSourceField & { aggFun?: AggregateFun }) | undefined;
+  progressTargetFields.value = target ? [target] : [];
+  targetEditing.value = false;
+  progressOptions.targetType = "metric";
+  progressOptions.targetValue = undefined;
+  chartSetting.progress = {
+    ...progressOptions,
+    targetType: "metric",
+    targetValue: undefined,
+    targetMetric: target ? { ...target, aggFun: targetMetric?.aggFun || (target.type === FieldType.Number ? AggregateFun.Sum : AggregateFun.Count) } : undefined,
+  };
+};
+
+const clearProgressTarget = () => {
+  progressTargetFields.value = [];
+  targetEditing.value = true;
+  progressOptions.targetType = "value";
+  progressOptions.targetValue = undefined;
+  chartSetting.progress = { ...progressOptions, targetType: "value", targetMetric: undefined };
+};
+
+const editProgressTarget = () => {
+  const currentManualTarget = progressOptions.targetType === "value" ? progressOptions.targetValue : undefined;
+  targetEditing.value = true;
+  progressOptions.targetType = "value";
+  progressOptions.targetValue = currentManualTarget;
+  chartSetting.progress = { ...progressOptions, targetType: "value", targetMetric: undefined };
+};
+
+const commitProgressManualTarget = () => {
+  targetEditing.value = false;
+  progressOptions.targetType = "value";
+  chartSetting.progress = { ...progressOptions, targetType: "value", targetMetric: undefined };
+};
+
+const getAggregateLabel = (aggFun?: AggregateFun) => {
+  const key = aggFun || AggregateFun.Count;
+  return t(`admin.dashboardFieldBar.${key}`);
+};
 
 const selectChartType = (cc: IChartConfig) => {
   chartConfig.value = cc;
@@ -485,6 +553,7 @@ const selectChartType = (cc: IChartConfig) => {
         ...progressOptions,
         targetMetric: chartSetting.progress?.targetMetric,
       };
+      syncProgressTargetField();
     }
   }
   if (cc.id !== ChartType.Indicator && cc.id !== ChartType.Progress && chartSetting.dimension1 && chartSetting.dimension1.length > 1) chartSetting.dimension1 = chartSetting.dimension1.slice(0, 1);
@@ -518,6 +587,8 @@ const dragMove = (e: SortableEvent) => {
     dropable.value.dimension2 = true;
   } else if (targetClass.includes("metrics")) {
     dropable.value.metrics = true;
+  } else if (targetClass.includes("progress-target")) {
+    dropable.value.progressTarget = true;
   }
 };
 
@@ -638,6 +709,7 @@ onMounted(() => {
   chartConfig.value = chartConfigs.find((config) => config.id === chartSetting.chartType);
   Object.assign(indicatorOptions, { showName: chartSetting.indicator?.showName ?? true, decimalPlaces: chartSetting.indicator?.decimalPlaces ?? 0 });
   Object.assign(progressOptions, { targetType: chartSetting.progress?.targetType ?? "metric", targetValue: chartSetting.progress?.targetValue, decimalPlaces: chartSetting.progress?.decimalPlaces ?? 0, style: chartSetting.progress?.style ?? "ring", showName: chartSetting.progress?.showName ?? true, showActual: chartSetting.progress?.showActual ?? false, showTarget: chartSetting.progress?.showTarget ?? false, showPercent: chartSetting.progress?.showPercent ?? true });
+  syncProgressTargetField();
   Object.assign(lineOptions, { smooth: chartSetting.line?.smooth ?? chartSetting.chartSubType === "smooth", showSymbol: chartSetting.line?.showSymbol ?? true, xAxisLabelMode: chartSetting.line?.xAxisLabelMode ?? "horizontal", showAllLabels: chartSetting.line?.showAllLabels ?? false, showDataZoom: chartSetting.line?.showDataZoom ?? false, yAxisTitle: chartSetting.line?.yAxisTitle ?? "", yAxisMin: chartSetting.line?.yAxisMin ?? null, yAxisMax: chartSetting.line?.yAxisMax ?? null, showDataLabel: chartSetting.line?.showDataLabel ?? false, labelOverlap: chartSetting.line?.labelOverlap ?? "adjust" });
   Object.assign(barOptions, { categoryAxisLabelMode: chartSetting.bar?.categoryAxisLabelMode ?? "horizontal", showAllCategoryLabels: chartSetting.bar?.showAllCategoryLabels ?? false, showDataZoom: chartSetting.bar?.showDataZoom ?? false, valueAxisTitle: chartSetting.bar?.valueAxisTitle ?? "", valueAxisMin: chartSetting.bar?.valueAxisMin ?? null, valueAxisMax: chartSetting.bar?.valueAxisMax ?? null, showDataLabel: chartSetting.bar?.showDataLabel ?? false, labelOverlap: chartSetting.bar?.labelOverlap ?? "adjust" });
 
@@ -1148,6 +1220,62 @@ watch(barOptions, (options) => {
 
 .center-echarts-main {
   min-width: var(--et-size-460);
+}
+
+.progress-target-container {
+  min-height: var(--et-size-40);
+}
+
+.progress-target {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--et-size-30);
+  display: flex;
+  align-items: center;
+}
+
+.progress-target-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--et-space-5);
+  max-width: 100%;
+  padding: 0 var(--et-space-8);
+  border-radius: var(--et-radius-20);
+  background: var(--et-color-primary);
+  color: var(--et-text-on-primary);
+  cursor: pointer;
+}
+
+.progress-target-check {
+  font-weight: 700;
+}
+
+.progress-target-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress-target-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.progress-target-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.progress-target-hint {
+  color: var(--et-text-secondary);
+  cursor: text;
+  font-size: var(--et-font-size-12);
 }
 
 .chart-type-tooltip {

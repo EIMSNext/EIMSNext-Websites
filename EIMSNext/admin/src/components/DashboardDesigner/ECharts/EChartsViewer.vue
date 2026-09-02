@@ -57,6 +57,7 @@ import { IConditionList, ISortItem, ISortList, toDynamicFilter } from "@eimsnext
 import DashSort from "../components/DashSort.vue";
 import { useI18n } from "vue-i18n";
 import { usePublicHttp } from "@/views/public/shared";
+import { buildWaterfallSeries } from "./waterfall";
 
 const { t } = useI18n();
 
@@ -188,7 +189,7 @@ const getChartOpts = async (setting: IChartSetting) => {
         : bar.labelOverlap === "stagger"
           ? (params: any) => (isHorizontal ? { dy: params.dataIndex % 2 ? 14 : 0 } : { dx: params.dataIndex % 2 ? 14 : 0 })
           : { moveOverlap: isHorizontal ? "shiftY" : "shiftX" };
-      const series = setting.metrics!.map((metric) => ({
+      let series = setting.metrics!.map((metric) => ({
         name: metric.title || metric.label || metric.id,
         type: "bar",
         data: ds[metricKey(metric)] || [],
@@ -197,14 +198,15 @@ const getChartOpts = async (setting: IChartSetting) => {
         labelLayout,
       }));
       if (chartSubType === "waterfall") {
-        const colors = [
-          primaryColor,
-          themeColor("--et-color-success", primaryColor),
-          themeColor("--et-color-danger", primaryColor),
-          themeColor("--et-color-warning", primaryColor),
-        ];
-        series.forEach((item: any) => {
-          item.data = item.data.map((value: number, index: number) => ({ value, itemStyle: { color: colors[index % colors.length] } }));
+        series = buildWaterfallSeries({
+          metrics: setting.metrics!,
+          data: ds,
+          isHorizontal,
+          positiveColor: themeColor("--et-color-success", primaryColor),
+          negativeColor: themeColor("--et-color-danger", primaryColor),
+          formatNumber,
+          labelShow: bar.showDataLabel ?? false,
+          labelLayout,
         });
       }
       const categoryAxis = {
@@ -338,7 +340,7 @@ const applyChartTheme = (opt: echarts.EChartsCoreOption | undefined): echarts.EC
   const tooltipBg = themeColor("--et-bg-container", isDark.value ? "#323232" : "#FFFFFF");
   const tooltipText = textColor;
 
-  return {
+  const themeDefaults = {
     backgroundColor: "transparent",
     textStyle: { color: textColor },
     title: { textStyle: { color: textColor }, subtextStyle: { color: textColor } },
@@ -358,8 +360,22 @@ const applyChartTheme = (opt: echarts.EChartsCoreOption | undefined): echarts.EC
       axisLabel: { color: textColor },
       splitLine: { lineStyle: { color: splitLineColor } },
     },
-    ...opt,
   };
+
+  const mergeOptions = (defaults: any, overrides: any): any => {
+    if (overrides === undefined || overrides === null) return overrides;
+    if (!defaults || typeof defaults !== "object" || typeof overrides !== "object" || Array.isArray(overrides)) {
+      return overrides;
+    }
+
+    const merged = { ...defaults };
+    Object.entries(overrides).forEach(([key, value]) => {
+      merged[key] = mergeOptions(defaults[key], value);
+    });
+    return merged;
+  };
+
+  return mergeOptions(themeDefaults, opt) as echarts.EChartsCoreOption;
 };
 
 watch(
