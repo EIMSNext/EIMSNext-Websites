@@ -34,6 +34,7 @@ import { DashboardItemDef, IGridLayoutItem } from "@eimsnext/models";
 import DashItemCard from "../components/DashItemCard.vue";
 import LayoutContainerSettings from "./LayoutContainerSettings.vue";
 import { ILayoutContainerSetting, parseLayoutContainerSetting } from "./type";
+import { getDashboardItemMinSize } from "../type";
 
 const { t } = useLocale();
 const props = withDefaults(defineProps<{
@@ -71,6 +72,7 @@ const activeLayout = computed<IGridLayoutItem[]>({
 });
 
 const tabHasItems = (tabId: string) => props.layout.some((item) => item.parentLayoutId === props.itemDef.layoutId && item.tabId === tabId);
+const getItemMinSize = (layoutItem: IGridLayoutItem) => getDashboardItemMinSize(layoutItem.type ?? props.items[layoutItem.i]?.itemType);
 const updateSetting = ({ name, setting: value }: { name: string; setting: ILayoutContainerSetting }) => {
   emit("update-setting", props.itemDef, value, name);
   settingsVisible.value = false;
@@ -110,13 +112,14 @@ const ContainerGrid = defineComponent({
       margin: [8, 8],
       responsive: true,
       dragIgnoreFrom: ".no-drag",
+      resizeIgnoreFrom: ".no-drag",
       class: "container-grid",
       "data-layout-container-id": props.itemDef.layoutId,
       "data-tab-id": setting.value.mode === "tabs" ? activeTab.value : undefined,
     }, {
       default: () => gridProps.layout.map((layoutItem) => h(GridItem, {
         key: layoutItem.i, x: layoutItem.x, y: layoutItem.y, w: layoutItem.w, h: layoutItem.h, i: layoutItem.i,
-        minW: 6, minH: 3, maxW: 24, maxH: 60, dragIgnoreFrom: ".no-drag",
+        minW: getItemMinSize(layoutItem).w, minH: getItemMinSize(layoutItem).h, maxW: 24, maxH: 60, dragIgnoreFrom: ".no-drag", resizeIgnoreFrom: ".no-drag",
       }, {
         default: () => props.items[layoutItem.i] ? h(DashItemCard, {
           itemDef: props.items[layoutItem.i], isView: props.isView, isPublic: props.isPublic, publicToken: props.publicToken,
@@ -137,10 +140,11 @@ const ContainerGrid = defineComponent({
 
 <style scoped lang="scss">
 .layout-container-card { position: relative; width: 100%; height: 100%; background: var(--et-bg-container); border: 2px solid var(--et-color-primary); box-sizing: border-box; overflow: hidden; }
+.layout-container-card:has(.text-editing), .layout-container-card:has(.text-editing) .container-body { overflow: visible; }
 .container-title { height: 40px; display: flex; align-items: center; padding: 0 var(--et-space-12); font-weight: 700; color: var(--et-text-primary); box-sizing: border-box; }
 .container-actions { position: absolute; top: 6px; right: 8px; z-index: 20; display: flex; gap: var(--et-space-4); padding: 0 var(--et-space-4); background: var(--et-bg-container); box-shadow: var(--et-shadow-overlay); }
 .container-body { height: 100%; overflow: hidden; }.container-body.has-title { height: calc(100% - 40px); }
 .container-tabs { height: 100%; padding: 0 var(--et-space-8); }.container-tabs :deep(.el-tabs__header) { margin: 0; }.container-tabs :deep(.el-tabs__content), .container-tabs :deep(.el-tab-pane) { height: calc(100% - 40px); }
 .container-tabs.style-boxed :deep(.el-tabs__item) { border: 1px solid var(--et-border-color); margin-right: 4px; }.container-tabs.style-filled :deep(.el-tabs__item.is-active) { color: #fff; background: var(--et-color-primary); border-radius: var(--et-radius-3); }.container-tabs.style-scroll :deep(.el-tabs__nav-wrap) { padding: 0 24px; }.container-tabs.style-scroll :deep(.el-tabs__nav-next), .container-tabs.style-scroll :deep(.el-tabs__nav-prev) { display: block; }
-.container-grid { min-height: 100%; }.container-grid :deep(.vue-grid-item) { overflow: hidden; }
+.container-grid { min-height: 100%; }.container-grid :deep(.vue-grid-item) { overflow: hidden; }.container-grid :deep(.vue-grid-item:has(.text-editing)) { overflow: visible; z-index: 20; }
 </style>

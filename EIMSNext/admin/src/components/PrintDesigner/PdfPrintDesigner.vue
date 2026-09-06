@@ -574,9 +574,10 @@ const populateFields = () => {
 
   if (props.formDef.content && props.formDef.content.items) {
     props.formDef.content.items.forEach((x: FieldDef) => {
+      const fieldId = x.field.toLowerCase();
       const node: ITreeNode = {
-        id: x.field,
-        value: x.field,
+        id: fieldId,
+        value: fieldId,
         label: x.title,
         fullLabel: x.title,
         type: DataItemType.Field,
@@ -586,9 +587,10 @@ const populateFields = () => {
       if (x.columns && x.columns.length > 0) {
         node.children = [];
         x.columns.forEach((y) => {
+          const subFieldId = y.field.toLowerCase();
           const subNode: ITreeNode = {
-            id: `${node.id}-${y.field}`,
-            value: `${node.id}>${y.field}`,
+            id: `${node.id}-${subFieldId}`,
+            value: `${node.id}>${subFieldId}`,
             label: y.title,
             fullLabel: `${node.label}.${y.title}`,
             type: DataItemType.Field,

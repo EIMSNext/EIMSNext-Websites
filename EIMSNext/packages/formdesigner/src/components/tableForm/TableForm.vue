@@ -441,7 +441,7 @@ export default {
                     this.rule[1].children.splice(idx, 1);
                 }
             })
-            if (!this.formCreateInject.preview && this.button.show !== false) {
+            if (!this.formCreateInject.preview && this.button?.show !== false && Array.isArray(this.button?.column)) {
                 this.rule[1].children.push({
                     type: 'el-table-column',
                     _tableHandle: true,

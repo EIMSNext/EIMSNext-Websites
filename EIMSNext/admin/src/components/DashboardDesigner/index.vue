@@ -250,15 +250,16 @@
           <grid-layout ref="gridRef" v-model:layout="rootLayout" :col-num="colNum" :col-width="colWidth"
             :row-height="rowHeight" :is-draggable="state.draggable" :is-resizable="state.resizable" :is-mirrored="false"
             :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true"
-            :responsive="true">
+            :responsive="true" resize-ignore-from=".no-drag">
             <grid-item v-for="item in rootLayout" :ref="(e) => setItemRef(item, e)" :x="item.x" :y="item.y"
               :w="item.w" :h="item.h" :i="item.i" :key="item.i" @resize="resizeEvent" @resized="resizedEvent"
               @moved="movedEvent" @container-resized="containerResizedEvent" :minW="getMinWidth(item)"
               :minH="getMinHeight(item)" :maxW="60" :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag"
+              resize-ignore-from=".no-drag"
               :class="{ edited: item.inEdit, gridNoTran: item.drag }" :style="{ 'z-index': getZIndex(item) }">
               <DashItemCard v-if="state.items[item.i]" :item-def="state.items[item.i]" :layout="state.layout" :items="state.items" :height="item.h" :width="item.w"
-                :is-view="false" @hide="handleItemHide(state.items[item.i])" @edit="handleItemEdit(state.items[item.i])"
-                @copy="handleItemCopy(state.items[item.i])" @delete="handleItemDelete(state.items[item.i])"
+                :is-view="false" @hide="handleItemHide($event)" @edit="handleItemEdit($event)"
+                @copy="handleItemCopy($event)" @delete="handleItemDelete($event)"
                 @update-layout="updateNestedLayout" @update-setting="updateContainerSetting"
                 @update-realtime-setting="updateRealTimeSetting" @update-image-setting="updateImageSetting"
                 @update-text-setting="updateTextSetting" />
@@ -282,7 +283,7 @@
 <script setup lang="ts">
 import { buildFieldListItems, EtDrawer, IFormFieldDef } from "@eimsnext/components";
 import DashItemCard from "./components/DashItemCard.vue";
-import { IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
+import { getDashboardItemMinSize, IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
 import { uniqueId } from "@eimsnext/utils";
 import { useContextStore } from "@eimsnext/store";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
@@ -371,8 +372,6 @@ const {
   gridDragOver,
   dashItemDrag,
   dashItemDrop,
-  getMinWidth,
-  getMinHeight,
   getMaxHeight,
   getZIndex,
   setupMouseTracking,
@@ -416,6 +415,10 @@ const containerResizedEvent = (
   newHPx: number,
   newWPx: number
 ) => { };
+
+const getItemType = (item: IGridLayoutItem) => item.type ?? state.items[item.i]?.itemType;
+const getMinWidth = (item: IGridLayoutItem) => getDashboardItemMinSize(getItemType(item)).w;
+const getMinHeight = (item: IGridLayoutItem) => getDashboardItemMinSize(getItemType(item)).h;
 
 const handleSourceCancel = async () => {
   showDataSourceDialog.value = false;
@@ -628,11 +631,21 @@ const handleItemEdit = (item: DashboardItemDef) => {
 };
 const handleItemCopy = (item: DashboardItemDef) => { };
 const handleItemDelete = async (item: DashboardItemDef) => {
-  const hasChildren = state.layout.some((layout) => layout.parentLayoutId === item.layoutId);
+  const childLayoutIds = new Set<string>();
+  const collectChildren = (parentId: string) => {
+    state.layout.forEach((layout) => {
+      if (layout.parentLayoutId !== parentId || childLayoutIds.has(layout.i)) return;
+      childLayoutIds.add(layout.i);
+      collectChildren(layout.i);
+    });
+  };
+  collectChildren(item.layoutId);
+  const hasChildren = childLayoutIds.size > 0;
   if (item.itemType === DashItemType.LayoutContainer && hasChildren) return;
   await dashboardItemDefService.delete(item.id);
-  state.layout = state.layout.filter((layout) => layout.i !== item.layoutId);
+  state.layout = state.layout.filter((layout) => layout.i !== item.layoutId && !childLayoutIds.has(layout.i));
   delete state.items[item.layoutId];
+  childLayoutIds.forEach((layoutId) => delete state.items[layoutId]);
   await onSave();
 };
 const updateNestedLayout = (layout: IGridLayoutItem[]) => {

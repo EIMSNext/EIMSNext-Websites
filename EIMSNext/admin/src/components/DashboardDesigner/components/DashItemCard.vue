@@ -19,10 +19,10 @@
     @update-image-setting="(...args) => emit('update-image-setting', ...args)"
     @update-text-setting="(...args) => emit('update-text-setting', ...args)"
   />
-  <div v-else class="layout-grid-item">
+  <div v-else class="layout-grid-item" :class="{ 'is-text-editing': textEditing }">
     <div class="container-group-drag-handle"></div>
     <div v-if="!isView" class="container-header">
-      <div class="header-action-container">
+      <div class="header-action-container no-drag">
         <div class="header-action">
           <div class="action-btn" :title="t('admin.dashItem.hideOnDesktop')" @click="onHide">
             <et-icon icon="el-hide" />
@@ -39,14 +39,14 @@
               <div class="action-btn" :title="t('common.edit')"><et-icon icon="el-editPen" /></div>
             </template>
           </el-popover>
-          <div v-else-if="itemDef.itemType === DashItemType.Text && textSetting" class="action-btn" :title="t('common.edit')" @click="toggleTextEditing">
+          <div v-else-if="itemDef.itemType === DashItemType.Text && textSetting" class="action-btn" :title="textEditing ? t('common.ok') : t('common.edit')" @click="toggleTextEditing">
             <et-icon :icon="textEditing ? 'el-check' : 'el-editPen'" />
           </div>
           <div v-else-if="itemDef.itemType !== DashItemType.FilterButton" class="action-btn" :title="t('common.edit')" @click="onEdit"><et-icon icon="el-editPen" /></div>
           <div class="action-btn" :title="t('admin.dashItem.copy')" @click="onCopy">
             <et-icon icon="el-documentCopy" />
           </div>
-          <div class="action-btn" :title="t('common.delete')" @click="onDelete"><et-icon icon="el-delete" /></div>
+          <div class="action-btn" :title="t('common.delete')" @click.stop="onDelete"><et-icon icon="el-delete" /></div>
           <span></span>
           <div class="action-btn custom-line-action"></div>
         </div>
@@ -55,7 +55,7 @@
         <span class="title-text item-text">{{ itemTitle }}</span>
       </div>
     </div>
-    <div class="container-content-wrapper" :class="{ interactive: isInteractiveContent }">
+    <div class="container-content-wrapper" :class="{ interactive: isInteractiveContent, 'text-editing': textEditing }">
       <template v-if="itemDef.itemType == DashItemType.Chart && chartSetting && chartSettingValidate(chartSetting)">
         <e-charts-viewer
           :setting="chartSetting"
@@ -98,7 +98,7 @@
         <ImageViewer :setting="imageSetting" />
       </template>
       <template v-else-if="itemDef.itemType == DashItemType.Text && textSetting">
-        <TextEditor v-if="!isView && textEditing" v-model="textDraft" @blur="persistTextDraft" />
+        <TextEditor v-if="!isView && textEditing" v-model="textDraft" @blur="finishTextEditing" @done="finishTextEditing" />
         <TextViewer v-else :setting="textSetting" />
       </template>
       <template v-else>
@@ -280,6 +280,10 @@ const toggleTextEditing = () => {
   }
   beginTextEditing();
 };
+const finishTextEditing = () => {
+  persistTextDraft();
+  textEditing.value = false;
+};
 onBeforeUnmount(() => {
   if (textEditing.value) persistTextDraft();
 });
@@ -303,6 +307,11 @@ onBeforeUnmount(() => {
       opacity: 1 !important;
       visibility: visible !important;
     }
+  }
+
+  &.is-text-editing .header-action-container {
+    opacity: 1;
+    visibility: visible;
   }
 
   // 拖拽层：允许穿透鼠标事件（核心修复，不再拦截hover）
@@ -423,6 +432,11 @@ onBeforeUnmount(() => {
     overflow: hidden;
     pointer-events: none;
     box-sizing: border-box;
+
+    &.text-editing {
+      overflow: visible;
+      z-index: 10;
+    }
 
     &.interactive {
       pointer-events: auto;

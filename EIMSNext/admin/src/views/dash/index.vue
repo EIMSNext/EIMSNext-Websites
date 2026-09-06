@@ -58,6 +58,7 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useChartFilterLinkage } from "./useChartFilterLinkage";
 import { escapeODataString } from "@/utils/odata";
+import { getDashboardItemMinSize } from "@/components/DashboardDesigner/type";
 const { t } = useI18n();
 const route = useRoute();
 
@@ -87,12 +88,9 @@ const { isFullscreen } = useFullscreen();
 
 const { chartFilters, rebuildChartFilters, handleFilterChange, handleQuickFilterChange, handleApplyFilters } = useChartFilterLinkage(state);
 
-const getMinWidth = (item: IGridLayoutItem) => {
-  return 6;
-};
-const getMinHeight = (item: IGridLayoutItem) => {
-  return 3;
-};
+const getItemType = (item: IGridLayoutItem) => item.type ?? state.items[item.i]?.itemType;
+const getMinWidth = (item: IGridLayoutItem) => getDashboardItemMinSize(getItemType(item)).w;
+const getMinHeight = (item: IGridLayoutItem) => getDashboardItemMinSize(getItemType(item)).h;
 const getMaxHeight = (item: IGridLayoutItem) => {
   return 60;
 };
