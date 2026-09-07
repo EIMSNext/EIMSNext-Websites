@@ -43,7 +43,8 @@
     <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="detailsDialogTitle" :show-footer="false"
       :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
-        <FormDataView :formId="formId" :dataId="selectedData!.id" :formDataPermissions="formDataPermissions" :formFieldPermissions="formFieldPermissions" :permissionGroupId="curPermissionGroup?.id"
+        <FormDataView :key="selectedData?.id" :formId="formId" :dataId="selectedData!.id" :formDataPermissions="formDataPermissions" :formFieldPermissions="formFieldPermissions" :permissionGroupId="curPermissionGroup?.id"
+          :start-in-edit="isDraftDetail" :hide-toolbar="isDraftDetail"
           @ok="handleViewOk"></FormDataView>
       </div>
     </et-dialog>
@@ -580,6 +581,7 @@ const pageSize = ref(20);
 const draftPageNum = ref(1);
 const draftPageSize = ref(20);
 const selectedData = ref<FormData>();
+const isDraftDetail = ref(false);
 const showDetailsDialog = ref(false);
 const detailsDialogTitle = computed(() => {
   if (!formDef.value || !selectedData.value) return formDef.value?.name || "";
@@ -906,10 +908,12 @@ const toExportColumnType = (type: FieldType) => {
 };
 const showDetails = (row: FormData) => {
   selectedData.value = row;
+  isDraftDetail.value = row.flowStatus === FlowStatus.Draft;
   showDetailsDialog.value = true;
 };
 const openDraft = (row: FormData) => {
   selectedData.value = row;
+  isDraftDetail.value = row.flowStatus === FlowStatus.Draft;
   showDetailsDialog.value = true;
 };
 const deleteDraft = async (row: FormData) => {

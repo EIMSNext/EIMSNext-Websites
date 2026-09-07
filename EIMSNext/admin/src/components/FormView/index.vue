@@ -280,7 +280,7 @@ defineExpose({
   .form-actions {
     display: flex;
     justify-content: flex-end;
-    margin-top: var(--et-space-10);
+    margin-top: var(--et-space-15);
     padding-right: var(--et-space-20);
   }
 

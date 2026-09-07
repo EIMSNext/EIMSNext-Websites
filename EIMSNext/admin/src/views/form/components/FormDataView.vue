@@ -26,9 +26,9 @@
     <template #extra><el-button @click="returnToList">{{ t("common.back") }}</el-button></template>
   </el-result>
   <template v-else>
-    <et-toolbar class="form-data-toolbar" type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
+    <et-toolbar v-if="!hideToolbar" class="form-data-toolbar" type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
     <FormView v-if="formDef && formData" :def="formDef.content!" :data="formData" :isView="isView" :actions="actions"
-      :formFieldPermissions="formFieldPermissions" class="editdata" @draft="saveDraft" @submit="submitData"></FormView>
+      :formFieldPermissions="formFieldPermissions" :class="['editdata', { 'no-toolbar': hideToolbar }]" @draft="saveDraft" @submit="submitData"></FormView>
   </template>
   <div ref="printTrigger" v-print="printConfig" class="print-trigger">
     <FormPrintDiv v-model="printConfig.showPrintDiv" :title="formDef?.name" :printData="formPrintData"></FormPrintDiv>
@@ -73,6 +73,8 @@ const props = withDefaults(
     formDataPermissions?: FormDataPermissions;
     formFieldPermissions?: FormFieldPermission[];
     permissionGroupId?: string;
+    startInEdit?: boolean;
+    hideToolbar?: boolean;
   }>(),
   {}
 );
@@ -217,10 +219,22 @@ const loadPrintDefs = async (formId: string) => {
   customPrintTemplates.value = await printDefService.query<PrintDef>(query);
 };
 
-const openCustomPrintPreview = (print: any) => {
+const openCustomPrintPreview = (print: any, title?: string) => {
   pdfPreviewUrl.value = print.downloadUrl;
-  pdfPreviewTitle.value = print.fileName;
+  pdfPreviewTitle.value = title || print.fileName;
   showPdfPreview.value = true;
+};
+
+const enterEdit = () => {
+  isEditing.value = true;
+  oriFormData.value = JSON.parse(JSON.stringify(formData.value));
+
+  actions.value = {
+    draft: { text: "common.wfProcess.saveDraft" },
+    submit: { text: "common.wfProcess.submit" },
+    reset: { text: "common.reset" },
+  };
+  isView.value = false;
 };
 
 const toolbarHandler = async (cmd: string, e: MouseEvent) => {
@@ -230,7 +244,8 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
     let printResult = await customPrintService.print(req);
 
     if (printResult && printResult.downloadUrl) {
-      openCustomPrintPreview(printResult);
+      const printDef = customPrintTemplates.value.find((item) => item.id === printId);
+      openCustomPrintPreview(printResult, printDef?.name);
     }
     else {
       ElMessage.error(printResult?.message || t("common.printFailed"))
@@ -245,15 +260,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       break;
     case "edit":
       if (!canEdit.value) break;
-      isEditing.value = true;
-      oriFormData.value = JSON.parse(JSON.stringify(formData.value));
-
-      actions.value = {
-        draft: { text: "common.wfProcess.saveDraft" },
-        submit: { text: "common.wfProcess.submit" },
-        reset: { text: "common.reset" },
-      };
-      isView.value = false;
+      enterEdit();
       break;
     case "cancel":
       isEditing.value = false;
@@ -395,6 +402,9 @@ onBeforeMount(async () => {
     const data = await formDataService.get<FormData>(props.dataId, props.permissionGroupId ? { permissionGroupId: props.permissionGroupId } : undefined);
     if (!data) throw new Error("Form data is unavailable");
     formData.value = data;
+    if (props.startInEdit && canEdit.value) {
+      enterEdit();
+    }
     const workflowLocked = !!(formDef.value?.usingWorkflow && formData.value.flowStatus != FlowStatus.Draft);
     editDisabled.value = workflowLocked;
     deleteDisabled.value = workflowLocked;

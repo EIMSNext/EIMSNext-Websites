@@ -313,9 +313,9 @@ const loadPrintDefs = async (formId: string) => {
   customPrintTemplates.value = await printDefService.query<PrintDef>(query);
 };
 
-const openCustomPrintPreview = (print: any) => {
+const openCustomPrintPreview = (print: any, title?: string) => {
   pdfPreviewUrl.value = print.downloadUrl;
-  pdfPreviewTitle.value = print.fileName;
+  pdfPreviewTitle.value = title || print.fileName;
   showPdfPreview.value = true;
 };
 
@@ -335,7 +335,8 @@ const toolbarHandler = async (cmd: string) => {
     const printResult = await customPrintService.print(req);
 
     if (printResult?.downloadUrl) {
-      openCustomPrintPreview(printResult);
+      const printDef = customPrintTemplates.value.find((item) => item.id === printId);
+      openCustomPrintPreview(printResult, printDef?.name);
     } else {
       ElMessage.error(printResult?.message || t("common.printFailed"));
     }

@@ -273,8 +273,8 @@
   </EtDrawer>
   <DataSourceDialog v-model="showDataSourceDialog" :appId="dashDef.appId" :dataSource="dataSource"
     @cancel="handleSourceCancel" @ok="handleSourceOk"></DataSourceDialog>
-  <EChartsDesigner v-if="dashItemDefRef" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
-  <DetailTableDesigner v-if="dashItemDefRef" v-model="showDetailTableEditor" :dash-item-def="dashItemDefRef" />
+  <EChartsDesigner v-if="dashItemDefRef && showChartEditor" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
+  <DetailTableDesigner v-if="dashItemDefRef && showDetailTableEditor" v-model="showDetailTableEditor" :dash-item-def="dashItemDefRef" />
   <FilterDesigner v-if="dashItemDefRef" v-model="showFilterEditor" :dash-item-def="dashItemDefRef"
     :chart-targets="chartTargets" :binding-candidates="bindingCandidates" />
   <QuickFilterSettings v-if="dashItemDefRef && quickFilterSettingRef" v-model="showQuickFilterEditor" :setting="quickFilterSettingRef"

@@ -87,7 +87,11 @@
 }
 
 .form-wrapper.editdata > .data-container {
-  height: calc(100vh - 201px);
+  height: calc(100vh - 204px);
+}
+
+.form-wrapper.editdata.no-toolbar > .data-container {
+  height: calc(100vh - 180px);
 }
 
 .toolbar-container.small-bar {
