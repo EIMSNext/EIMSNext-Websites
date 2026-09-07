@@ -213,8 +213,8 @@ export const constantRoutes: RouteRecordRaw[] = [
         meta: { hidden: true, requiresAuth: true },
       },
       {
-        path: "assistant",
-        component: () => import("@/views/app-admin/assistant.vue"),
+        path: "event-flow",
+        component: () => import("@/views/app-admin/event-flow.vue"),
         meta: { hidden: true, requiresAuth: true },
       },
       {
