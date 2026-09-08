@@ -491,6 +491,7 @@ const createFolder = () => {
   color: var(--et-text-primary);
   cursor: pointer;
   display: flex;
+  flex-shrink: 0;
   gap: var(--et-space-8);
   height: var(--et-size-44);
   padding: 0 var(--et-space-16);

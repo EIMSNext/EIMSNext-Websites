@@ -32,9 +32,12 @@ const compactDashboardItemTypes = new Set<DashItemType>([DashItemType.RealTime, 
 
 export const getDashboardItemDefaultSize = (type?: DashItemType): IDashboardGridSize => {
   if (type === DashItemType.RealTime) return { w: 2, h: 5 };
-  if (type === DashItemType.Text) return { w: 2, h: 8 };
+  // Text editing needs at least 300px for wangEditor popover positioning.
+  if (type === DashItemType.Text) return { w: 2, h: 18 };
   return { w: 12, h: 12 };
 };
 
-export const getDashboardItemMinSize = (type?: DashItemType): IDashboardGridSize =>
-  compactDashboardItemTypes.has(type as DashItemType) ? { w: 1, h: 1 } : { w: 6, h: 3 };
+export const getDashboardItemMinSize = (type?: DashItemType): IDashboardGridSize => {
+  if (type === DashItemType.Text) return { w: 1, h: 18 };
+  return compactDashboardItemTypes.has(type as DashItemType) ? { w: 1, h: 1 } : { w: 6, h: 3 };
+};

@@ -106,6 +106,9 @@ const menuGroups = computed<SysMenuGroup[]>(() => {
 <style lang="scss" scoped>
 .sidebar-container {
   position: fixed;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
   z-index: 999;
   width: $sidebar-width;
   background-color: $menu-background;

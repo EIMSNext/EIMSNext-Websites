@@ -51,7 +51,7 @@
           <div class="action-btn custom-line-action"></div>
         </div>
       </div>
-      <div class="header-title">
+      <div v-if="!hideTitle" class="header-title">
         <span class="title-text item-text">{{ itemTitle }}</span>
       </div>
     </div>
@@ -192,6 +192,7 @@ const quickFilterSetting = computed(() => props.itemDef.itemType === DashItemTyp
 const textEditing = ref(false);
 const textDraft = ref("");
 const lastSavedText = ref("");
+const hideTitle = computed(() => [DashItemType.RealTime, DashItemType.Text].includes(props.itemDef.itemType));
 
 const itemTitle = computed(() => {
   if (props.itemDef.name) {
