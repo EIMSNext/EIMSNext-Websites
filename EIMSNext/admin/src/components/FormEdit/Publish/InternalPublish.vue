@@ -19,11 +19,17 @@
       destroy-on-close
       @close="close"
     />
-    <AdvanceLayout :title="t('admin.publish.internal')" :desc="t('admin.internalPublish.desc')">
+    <AdvanceLayout
+      :show-header="showHeader"
+      :title="t('admin.publish.internal')"
+      :desc="t('admin.internalPublish.desc')"
+    >
       <div class="permission-group-container">
         <div class="panel-header">
           <div class="header-left">
-            <el-button type="primary" icon="plus" @click="addNew()">{{ t("admin.internalPublish.newGroup") }}</el-button>
+            <el-button type="primary" icon="plus" @click="addNew()">
+              {{ t("admin.internalPublish.newGroup") }}
+            </el-button>
           </div>
           <div class="header-right"></div>
         </div>
@@ -34,7 +40,9 @@
                 <template #action>
                   <div class="permission-group-header">
                     <el-button @click="edit(permissionGroup)">{{ t("common.edit") }}</el-button>
-                    <el-button class="delete-button" @click="remove(permissionGroup)">{{ t("common.delete") }}</el-button>
+                    <el-button class="delete-button" @click="remove(permissionGroup)">
+                      {{ t("common.delete") }}
+                    </el-button>
                     <el-switch
                       :model-value="!permissionGroup.disabled"
                       @change="toggleDisable(permissionGroup)"
@@ -96,6 +104,7 @@ defineOptions({
 const props = defineProps<{
   formDef: FormDef;
   limit?: { depts?: ISelectedTag[]; employeeGroups?: ISelectedTag[] };
+  showHeader?: boolean;
 }>();
 
 const showDialog = ref(false);
@@ -146,9 +155,11 @@ const execDelete = () => {
   });
 };
 const toggleDisable = (grp: FormDataPermissionGroup) => {
-  formDataPermissionGroupService.patch<FormDataPermissionGroup>(grp.id, { id: grp.id, disabled: !grp.disabled }).then(() => {
-    grp.disabled = !grp.disabled;
-  });
+  formDataPermissionGroupService
+    .patch<FormDataPermissionGroup>(grp.id, { id: grp.id, disabled: !grp.disabled })
+    .then(() => {
+      grp.disabled = !grp.disabled;
+    });
 };
 
 function close(reload: boolean) {
@@ -232,4 +243,3 @@ onBeforeMount(() => {
   }
 }
 </style>
-

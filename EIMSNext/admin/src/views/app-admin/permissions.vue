@@ -31,6 +31,7 @@
             :key="selectedForm.id"
             :form-def="selectedForm"
             :limit="publishMemberLimit"
+            :show-header="false"
           />
           <div v-else-if="selectedDashboard" class="dashboard-permission">
             <div class="setting-row">
@@ -209,6 +210,11 @@ onBeforeMount(loadItems);
   flex: 1;
   grid-template-columns: 340px 1fr;
   min-height: 0;
+
+  :deep(.content-body)
+  {
+    padding: var(--et-space-10);
+  }
 }
 
 .menu-panel {

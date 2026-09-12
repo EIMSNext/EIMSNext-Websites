@@ -3,14 +3,20 @@
     <div class="app-admin-sidebar">
       <div class="app-admin-title">
         <router-link :to="{ path: `/app/${appId}` }" class="back-link">
-          <et-icon icon="el-arrow-left" size="16px" />
+          <et-icon icon="el-arrow-left" size="18px" />
         </router-link>
         <span>{{ t("admin.appAdmin.title") }}</span>
       </div>
       <el-menu mode="vertical" :default-active="route.path">
         <div v-for="group in menuGroups" :key="group.titleKey" class="menu-group">
           <div class="group-title">{{ t(group.titleKey) }}</div>
-          <router-link v-for="item in group.items" :key="item.path" custom :to="{ path: resolvePath(item.path) }" v-slot="{ navigate }">
+          <router-link
+            v-for="item in group.items"
+            :key="item.path"
+            custom
+            :to="{ path: resolvePath(item.path) }"
+            v-slot="{ navigate }"
+          >
             <el-menu-item :index="resolvePath(item.path)" @click="() => navigate()">
               <et-icon :icon="item.icon" class="step-image" size="14px" />
               <span class="app-menu-text">{{ t(item.labelKey) }}</span>
@@ -69,7 +75,7 @@ watch(
       router.replace(`/app/${value}`);
     }
   },
-  { immediate: true },
+  { immediate: true }
 );
 </script>
 

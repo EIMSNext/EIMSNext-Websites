@@ -4,31 +4,31 @@
       <formCreate ref="fcInst" :modelValue="dataRef" :rule="rules" :option="options" :preview="isView" />
     </div>
     <div v-if="actions" class="form-actions">
-      <el-button v-if="actions.submit && (!actions.submit.visible || actions.submit.visible)" type="primary"
+      <el-button v-if="actions.submit && actions.submit.visible !== false" type="primary"
         :disabled="actions.submit.disabled" @click="handleSubmit">
         {{ t(actions.submit.text) }}
       </el-button>
-      <el-button v-if="actions.draft && (!actions.draft.visible || actions.draft.visible)"
+      <el-button v-if="actions.draft && actions.draft.visible !== false"
         :disabled="actions.draft.disabled" @click="handleDraft">
         {{ t(actions.draft.text) }}
       </el-button>
-      <el-button v-if="actions.reset && (!actions.reset.visible || actions.reset.visible)"
+      <el-button v-if="actions.reset && actions.reset.visible !== false"
         :disabled="actions.reset.disabled" @click="handleReset">
         {{ t(actions.reset.text) }}
       </el-button>
-      <el-button v-if="actions.approve && (!actions.approve.visible || actions.approve.visible)" type="primary"
+      <el-button v-if="actions.approve && actions.approve.visible !== false" type="primary"
         :disabled="actions.approve.disabled" @click="handleApprove">
         {{ t(actions.approve.text) }}
       </el-button>
-      <el-button v-if="actions.reject && (!actions.reject.visible || actions.reject.visible)"
+      <el-button v-if="actions.reject && actions.reject.visible !== false"
         :disabled="actions.reject.disabled" @click="handleReject">
         {{ t(actions.reject.text) }}
       </el-button>
-      <el-button v-if="actions.withdraw && (!actions.withdraw.visible || actions.withdraw.visible)"
+      <el-button v-if="actions.withdraw && actions.withdraw.visible !== false"
         :disabled="actions.withdraw.disabled" @click="handleWithdraw">
         {{ t(actions.withdraw.text) }}
       </el-button>
-      <el-button v-if="actions.urge && (!actions.urge.visible || actions.urge.visible)"
+      <el-button v-if="actions.urge && actions.urge.visible !== false"
         :disabled="actions.urge.disabled" @click="handleUrge">
         {{ t(actions.urge.text) }}
       </el-button>
