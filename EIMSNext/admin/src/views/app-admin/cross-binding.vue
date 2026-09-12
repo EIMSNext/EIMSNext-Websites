@@ -9,7 +9,8 @@
         <div class="section-title">{{ t("admin.appAdmin.selectedTitle") }}</div>
         <div v-if="selectedForms.length === 0" class="empty-text">{{ t("admin.appAdmin.emptySelected") }}</div>
         <div v-else class="selected-tags">
-          <el-tag v-for="form in selectedForms" :key="form.id" effect="plain">
+          <el-tag v-for="form in selectedForms" :key="form.id" effect="plain" class="selected-form-tag">
+            <et-icon :icon="getFormIcon(form as any)" :color="getAppIconColor(form)" size="14px" />
             {{ form.name }}
           </el-tag>
         </div>
@@ -40,7 +41,10 @@
             <div v-if="!selectedAppId" class="empty-text">{{ t("admin.appAdmin.selectSourceApp") }}</div>
             <el-checkbox-group v-else v-model="checkedFormIds" class="checkbox-list">
               <el-checkbox v-for="form in filteredForms" :key="form.id" :label="form.id">
-                <span class="form-title">{{ form.name }}</span>
+                <span class="form-option">
+                  <et-icon :icon="getFormIcon(form as any)" :color="getAppIconColor(form)" size="14px" />
+                  <span class="form-title">{{ form.name }}</span>
+                </span>
               </el-checkbox>
             </el-checkbox-group>
           </el-scrollbar>
@@ -57,6 +61,7 @@ import { useContextStore, useFormStore } from "@eimsnext/store";
 import { ElMessage, ElMessageBox } from "element-plus";
 import buildQuery from "odata-query";
 import { useI18n } from "vue-i18n";
+import { getAppIconColor, getFormIcon } from "@/utils/common";
 
 type BindingForm = FormDef & { bound?: boolean };
 
@@ -259,6 +264,12 @@ onBeforeMount(loadAll);
   gap: var(--et-space-8);
 }
 
+.selected-form-tag {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--et-space-4);
+}
+
 .empty-text {
   color: var(--et-text-tertiary);
   padding: var(--et-space-16);
@@ -331,5 +342,11 @@ onBeforeMount(loadAll);
   text-overflow: ellipsis;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+.form-option {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--et-space-6);
 }
 </style>
