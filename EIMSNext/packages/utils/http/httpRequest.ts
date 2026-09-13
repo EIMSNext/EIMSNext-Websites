@@ -6,6 +6,7 @@ import accessToken from "./token";
 import { bus } from "../eventBus";
 
 export class HttpRequest {
+  private static readonly inFlight = new Map<string, Promise<unknown>>();
   private axiosInstance: AxiosInstance;
   private currentPath: () => string = () => {
     if (typeof window === "undefined") return "/";
@@ -40,6 +41,7 @@ export class HttpRequest {
     // 全局拦截器
     this.axiosInstance.interceptors.request.use(
       (config: HttpRequestConfig) => {
+        this.applyIdempotency(config);
         if (config.headers["Content-Type"] == ContentType.FORM_URLENCODED) {
           config.data = qs.stringify(config.data);
         }
@@ -105,7 +107,12 @@ export class HttpRequest {
       if (token) config.headers.Authorization = `Bearer ${token}`;
     }
 
-    return new Promise<T>((resolve, reject) => {
+    const method = (config.method || "GET").toUpperCase();
+    const dedupeKey = this.getDedupeKey(config);
+    const existing = dedupeKey ? HttpRequest.inFlight.get(dedupeKey) : undefined;
+    if (existing) return existing as Promise<T>;
+
+    const promise = new Promise<T>((resolve, reject) => {
       this.axiosInstance
         .request(config)
         .then((res) => {
@@ -119,6 +126,43 @@ export class HttpRequest {
           reject(error);
         });
     });
+    if (dedupeKey) {
+      HttpRequest.inFlight.set(dedupeKey, promise);
+      promise.finally(() => HttpRequest.inFlight.delete(dedupeKey)).catch(() => undefined);
+    }
+    return promise;
+  }
+
+  private applyIdempotency(config: HttpRequestConfig) {
+    const method = (config.method || "GET").toUpperCase();
+    if (config.disableIdempotency || !["POST", "PUT", "PATCH", "DELETE"].includes(method)) return;
+    const key = config.idempotencyKey || this.createIdempotencyKey();
+    config.idempotencyKey = key;
+    if (config.headers?.set) config.headers.set("Idempotency-Key", key);
+    else {
+      config.headers = config.headers || ({} as any);
+      (config.headers as any)["Idempotency-Key"] = key;
+    }
+  }
+
+  private getDedupeKey(config: HttpRequestConfig): string | undefined {
+    const method = (config.method || "GET").toUpperCase();
+    if (config.disableIdempotency || !["POST", "PUT", "PATCH", "DELETE"].includes(method)) return;
+    return `${method}:${config.url || ""}:${this.stableSerialize(config.data)}`;
+  }
+
+  private stableSerialize(value: any): string {
+    if (value == null || typeof value !== "object") return String(value ?? "");
+    if ((typeof FormData !== "undefined" && value instanceof FormData) || (typeof Blob !== "undefined" && value instanceof Blob)) {
+      return Object.prototype.toString.call(value);
+    }
+    if (Array.isArray(value)) return `[${value.map((v) => this.stableSerialize(v)).join(",")}]`;
+    return `{${Object.keys(value).sort().map((k) => `${k}:${this.stableSerialize(value[k])}`).join(",")}}`;
+  }
+
+  private createIdempotencyKey(): string {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
   }
 
   get<T = any>(config: HttpRequestConfig) {
