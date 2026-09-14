@@ -661,7 +661,10 @@ const selectionChanged = (rows: any[]) => {
   leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
     checkedDatas.value.length == 0;
 };
+let deleting = false;
 const execDelete = async () => {
+  if (deleting) return;
+  deleting = true;
   if (!canRemove.value) return;
   try {
     await formDataService.delete("batch", { keys: checkedDatas.value.map((x) => x[SystemField.Id]) });
@@ -670,6 +673,8 @@ const execDelete = async () => {
       await handleQuery();
   } catch {
     ElMessage.error(t("common.deleteFailed"));
+  } finally {
+    deleting = false;
   }
 };
 
@@ -918,11 +923,15 @@ const openDraft = (row: FormData) => {
 };
 const deleteDraft = async (row: FormData) => {
   if (!canRemove.value) return;
+  if (deleting) return;
+  deleting = true;
   try {
     await formDataService.delete(row.id);
     await Promise.all([refreshDrafts(), Promise.resolve(handleQuery())]);
   } catch {
     ElMessage.error(t("common.deleteFailed"));
+  } finally {
+    deleting = false;
   }
 };
 const handleViewOk = () => {

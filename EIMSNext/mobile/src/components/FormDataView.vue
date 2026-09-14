@@ -21,12 +21,13 @@
 
     <template #footer>
       <div v-if="isAdd || editing" class="detail-footer-actions">
-        <van-button block :loading="saving" @click="() => handleSave()">{{ t("common.save") }}</van-button>
+        <van-button block :loading="saving" :disabled="saving" @click="() => handleSave()">{{ t("common.save") }}</van-button>
         <van-button
           v-if="isAdd && formDef?.usingWorkflow"
           block
           type="primary"
           :loading="saving"
+          :disabled="saving"
           @click="handleSubmit"
         >{{ t("common.submit") }}</van-button>
       </div>
@@ -41,7 +42,7 @@ import { showToast } from "vant";
 import { useI18n } from "vue-i18n";
 import { DataAction, FormDataPermissions, type FormDataPermissionGroup, type FormData, type FormDef, type FormFieldPermission } from "@eimsnext/models";
 import FormCreateMobile from "@eimsnext/form-render-vant";
-import { FlagEnum } from "@eimsnext/utils";
+import { FlagEnum, useSubmitGuard } from "@eimsnext/utils";
 import MobileFormRenderer from "@/components/form/MobileFormRenderer.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
 import { formDataPermissionGroupServiceMobile, formDataServiceMobile, formServiceMobile } from "@/services/mobileService";
@@ -55,6 +56,7 @@ const permissionGroupId = computed(() => String(route.query.permissionGroupId ||
 
 const loading = ref(false);
 const saving = ref(false);
+const { run: runSave } = useSubmitGuard();
 const editing = ref(true);
 const formDef = ref<FormDef>();
 const formData = ref<Record<string, unknown>>({});
@@ -84,7 +86,7 @@ const renderOption = computed(() => ({
 
 const goBack = () => router.back();
 
-const handleSave = async (action = DataAction.Save) => {
+const handleSave = async (action = DataAction.Save) => runSave(async () => {
   if ((isAdd.value && !canAdd.value) || (!isAdd.value && !canEdit.value)) return;
   saving.value = true;
   try {
@@ -100,7 +102,7 @@ const handleSave = async (action = DataAction.Save) => {
   } finally {
     saving.value = false;
   }
-};
+});
 
 const handleSubmit = () => handleSave(DataAction.Submit);
 

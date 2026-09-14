@@ -310,14 +310,19 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       break;
   }
 };
+let deleting = false;
 const execDelete = async () => {
   if (!canRemove.value) return;
+  if (deleting) return;
+  deleting = true;
   try {
     await formDataService.delete(props.dataId);
     emit("ok");
     bus.emit("data:deleted", { formId: props.formId });
   } catch {
     ElMessage.error(t("common.deleteFailed"));
+  } finally {
+    deleting = false;
   }
 };
 
