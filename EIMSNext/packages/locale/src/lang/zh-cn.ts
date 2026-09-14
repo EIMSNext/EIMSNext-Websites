@@ -1568,6 +1568,11 @@ export default {
       noDisplayFields: "请先配置显示字段",
     },
     shellMenu: {
+      basicInfo: "基本信息",
+      versionInfo: "版本信息",
+      enterpriseInfo: "企业信息",
+      enterpriseSettings: "企业设置",
+      productSettings: "产品设置",
       contacts: "通讯录",
       org: "内部组织",
       employeeGroup: "员工组",
