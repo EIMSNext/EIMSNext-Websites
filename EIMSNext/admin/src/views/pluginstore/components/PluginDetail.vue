@@ -35,7 +35,7 @@
                 type="primary"
                 size="large"
                 :disabled="profile.installed || installing"
-                :loading="installing"
+                :loading="installing" :disabled="installing"
                 @click="install"
               >
                 {{ profile.installed ? $t("admin.plugin.installed") : $t("admin.plugin.installPlugin") }}
@@ -570,3 +570,4 @@ function flattenPluginFields(fields: Array<{ key: string; name: string; subField
   }
 }
 </style>
+

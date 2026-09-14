@@ -16,7 +16,7 @@
           :placeholder="t('publicpublish.accessCodePlaceholder')"
           @keyup.enter="submitAccessCode"
         />
-        <el-button type="primary" :loading="accessCodeSubmitting" @click="submitAccessCode">
+        <el-button type="primary" :loading="accessCodeSubmitting" :disabled="accessCodeSubmitting" @click="submitAccessCode">
           {{ t("common.confirm") }}
         </el-button>
         <p v-if="accessCodeExpired" class="access-code-error">{{ t("publicpublish.accessCodeExpired") }}</p>
@@ -208,3 +208,4 @@ async function submitAccessCode() {
   background: var(--et-bg-page, #f5f7fa);
 }
 </style>
+

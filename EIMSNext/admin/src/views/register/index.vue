@@ -91,7 +91,7 @@
                   <el-link type="primary" underline="never" href="#">{{ t("register.privacyPolicy") }}</el-link>
                 </div>
 
-                <el-button :loading="loading" type="primary" size="large" class="login-btn"
+                <el-button :loading="loading" :disabled="loading" type="primary" size="large" class="login-btn"
                   @click.prevent="handleRegisterSubmit">
                   {{ t("register.submit") }}
                 </el-button>
@@ -571,3 +571,4 @@ html.dark {
   }
 }
 </style>
+

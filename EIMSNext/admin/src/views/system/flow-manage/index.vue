@@ -20,7 +20,7 @@
       </div>
       <template #footer>
         <el-button @click="closeApproverDialog">{{ $t("common.cancel") }}</el-button>
-        <el-button type="primary" :loading="actionLoading" @click="submitChangeApprover">{{ $t("common.ok") }}</el-button>
+        <el-button type="primary" :loading="actionLoading" :disabled="actionLoading" @click="submitChangeApprover">{{ $t("common.ok") }}</el-button>
       </template>
     </el-dialog>
 
@@ -372,3 +372,4 @@ onMounted(() => {
   }
 }
 </style>
+

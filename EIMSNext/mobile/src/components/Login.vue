@@ -31,7 +31,7 @@
           />
         </van-cell-group>
         <div class="login-btn">
-          <van-button round block type="primary" native-type="submit" :loading="loading">
+          <van-button round block type="primary" native-type="submit" :loading="loading" :disabled="loading">
             {{ t("mobile.login.submit") }}
           </van-button>
         </div>
@@ -160,3 +160,4 @@ const handleLogin = async () => {
   gap: 16px;
 }
 </style>
+

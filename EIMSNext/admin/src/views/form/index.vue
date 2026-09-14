@@ -18,7 +18,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showExportDialog = false">{{ $t("common.cancel") }}</el-button>
-        <el-button type="primary" :loading="exporting" @click="submitExport">{{ $t("common.ok") }}</el-button>
+        <el-button type="primary" :loading="exporting" :disabled="exporting" @click="submitExport">{{ $t("common.ok") }}</el-button>
       </template>
     </el-dialog>
     <et-dialog v-model="showAddDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
@@ -1234,4 +1234,5 @@ onUnmounted(() => {
   margin-right: var(--et-space-4);
 }
 </style>
+
 

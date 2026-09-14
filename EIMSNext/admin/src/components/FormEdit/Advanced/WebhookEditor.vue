@@ -9,7 +9,7 @@
         <div class="pane-label">{{ t("admin.webhook.serverUrl") }}</div>
         <div class="pane-row">
           <el-input v-model="hook.url" class="pane-row-stretch" autocomplete="new-password" />
-          <el-button type="primary" class="btn-test" :loading="testing" @click="testConnection">{{ t("admin.webhook.testConnection") }}</el-button>
+          <el-button type="primary" class="btn-test" :loading="testing" :disabled="testing" @click="testConnection">{{ t("admin.webhook.testConnection") }}</el-button>
         </div>
         <div class="pane-label">{{ t("common.secret") }}</div>
         <div class="pane-row">
@@ -298,3 +298,4 @@ const save = async () => {
   }
 }
 </style>
+

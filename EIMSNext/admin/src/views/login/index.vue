@@ -46,7 +46,7 @@
                   </el-link>
                 </div>
 
-                <el-button :loading="loading" type="primary" size="large" class="login-btn"
+                <el-button :loading="loading" :disabled="loading" type="primary" size="large" class="login-btn"
                   @click.prevent="handleLoginSubmit">
                   {{ t("login.login") }}
                 </el-button>
@@ -304,3 +304,4 @@ html.dark {
   }
 }
 </style>
+

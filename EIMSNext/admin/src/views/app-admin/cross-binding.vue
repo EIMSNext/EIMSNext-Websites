@@ -3,7 +3,7 @@
     <div class="page-card">
       <div class="page-title">
         <span>{{ t("admin.appAdmin.crossBinding") }}</span>
-        <el-button type="primary" :disabled="!selectedAppId" :loading="saving" @click="saveBindings">{{ t("common.save") }}</el-button>
+        <el-button type="primary" :disabled="!selectedAppId || saving" :loading="saving" @click="saveBindings">{{ t("common.save") }}</el-button>
       </div>
       <div class="selected-panel">
         <div class="section-title">{{ t("admin.appAdmin.selectedTitle") }}</div>
@@ -396,3 +396,5 @@ onBeforeMount(loadAll);
   gap: var(--et-space-6);
 }
 </style>
+
+

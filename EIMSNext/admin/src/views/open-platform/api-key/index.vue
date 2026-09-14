@@ -226,7 +226,7 @@
 
       <template #footer>
         <el-button @click="dialogVisible = false">{{ $t("common.cancel") }}</el-button>
-        <el-button type="primary" :loading="saving" @click="save">
+        <el-button type="primary" :loading="saving" :disabled="saving" @click="save">
           {{ $t("admin.apiKeyMgmt.form.save") }}
         </el-button>
       </template>
@@ -708,3 +708,4 @@ onMounted(load);
   box-shadow: var(--et-shadow-overlay);
 }
 </style>
+

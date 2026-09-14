@@ -206,7 +206,7 @@
           <el-button v-else-if="activeStep === 1" type="primary" :disabled="previewColumns.length === 0" @click="goMappingStep">{{ t("common.nextStep") }}</el-button>
           <el-button v-else-if="activeStep === 2" type="primary" :loading="submitting" :disabled="!canStartImport" @click="startImport">{{ t("admin.formDataImport.footer.startImport") }}</el-button>
           <el-button v-else-if="activeStep === 3 && !isImportRunning" type="primary" @click="finishDialog">{{ t("admin.formDataImport.footer.finish") }}</el-button>
-          <el-button v-else-if="activeStep === 3" type="primary" :loading="true" disabled>{{ t("admin.formDataImport.footer.importing") }}</el-button>
+          <el-button v-else-if="activeStep === 3" type="primary" :loading="true" :disabled="true" disabled>{{ t("admin.formDataImport.footer.importing") }}</el-button>
         </div>
       </div>
     </template>
@@ -1291,3 +1291,4 @@ function getColumnName(index: number) {
   }
 }
 </style>
+
