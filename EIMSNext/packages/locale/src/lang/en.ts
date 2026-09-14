@@ -1507,6 +1507,11 @@ export default {
       noDisplayFields: "Configure display fields first",
     },
     shellMenu: {
+      basicInfo: "Basic Information",
+      versionInfo: "Version Information",
+      enterpriseInfo: "Enterprise Information",
+      enterpriseSettings: "Enterprise Settings",
+      productSettings: "Product Settings",
       contacts: "Contacts",
       org: "Organization",
       employeeGroup: "Employee groups",

@@ -23,6 +23,18 @@ function parseUpload(file) {
   return { ...file, url: getFileFullUrl(url), file, value };
 }
 
+function normalizeStoredValue(file) {
+  if (typeof file === "string") return { name: getFileName(file), url: file };
+  const url = file?.url || file?.savePath;
+  return {
+    ...(file?.id ? { id: file.id } : {}),
+    name: file?.name || file?.fileName || getFileName(url || ""),
+    url,
+    ...(file?.thumbUrl || file?.thumbPath ? { thumbUrl: file.thumbUrl || file.thumbPath } : {}),
+    ...(file?.fileSize !== undefined ? { fileSize: file.fileSize } : {}),
+  };
+}
+
 function getFileName(file) {
   return ("" + file).split("/").pop();
 }
@@ -34,7 +46,7 @@ function toStoredFileValue(value) {
   }
 
   if (value && typeof value === "object" && value.url) {
-    return { ...value, url: toStoredFileValue(value.url) };
+    return { ...normalizeStoredValue(value), url: toStoredFileValue(value.url) };
   }
 
   return value;
@@ -110,10 +122,7 @@ export default defineComponent({
               const uploaded = res?.value?.[0] || res?.data?.[0];
               if (uploaded) {
                 const value = {
-                  ...uploaded,
-                  name: uploaded.name || uploaded.fileName,
-                  url: uploaded.savePath || uploaded.url,
-                  thumbUrl: uploaded.thumbPath || uploaded.thumbUrl,
+                  ...normalizeStoredValue(uploaded),
                 };
                 file.value = value;
                 file.url = getFileFullUrl(value.url);

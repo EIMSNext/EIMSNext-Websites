@@ -16,7 +16,20 @@ function parseFile(file, i) {
   };
 }
 function parseUpload(file) {
-  return { ...file, url: getFileFullUrl(file.url), file, value: file };
+  const value = normalizeStoredValue(file);
+  return { ...file, ...value, url: getFileFullUrl(value.url), file, value };
+}
+
+function normalizeStoredValue(file) {
+  if (typeof file === "string") return { name: getFileName(file), url: file };
+  const url = file?.url || file?.savePath;
+  return {
+    ...(file?.id ? { id: file.id } : {}),
+    name: file?.name || file?.fileName || getFileName(url || ""),
+    url,
+    ...(file?.thumbUrl || file?.thumbPath ? { thumbUrl: file.thumbUrl || file.thumbPath } : {}),
+    ...(file?.fileSize !== undefined ? { fileSize: file.fileSize } : {}),
+  };
 }
 
 function getFileName(file) {
@@ -76,7 +89,7 @@ export default defineComponent({
     },
     update(fileList) {
       let files = fileList
-        .map((v) => (v.is_string ? v.url : v.value || v.url))
+        .map((v) => normalizeStoredValue(v.value || v.url))
         .filter((url) => url !== undefined);
       this.$emit("update:modelValue", files);
     },
@@ -89,10 +102,7 @@ export default defineComponent({
         const uploaded = file.response?.value?.[0] || file.response?.data?.[0];
         if (uploaded) {
           const value = {
-            ...uploaded,
-            name: uploaded.name || uploaded.fileName,
-            url: uploaded.savePath || uploaded.url,
-            thumbUrl: uploaded.thumbPath || uploaded.thumbUrl,
+            ...normalizeStoredValue(uploaded),
           };
           file.value = value;
           file.url = getFileFullUrl(value.url);

@@ -7,7 +7,13 @@
         <el-menu mode="vertical" :default-active="route.path">
           <div v-for="group in menuGroups" :key="group.title" class="menu-group">
             <div class="group-title">{{ $t(group.title) }}</div>
-            <router-link v-for="item in group.items" :key="item.path" custom :to="{ path: resolveFullPath(item.path) }" v-slot="{ navigate }">
+            <router-link
+              v-for="item in group.items"
+              :key="item.path"
+              custom
+              :to="{ path: resolveFullPath(item.path) }"
+              v-slot="{ navigate }"
+            >
               <el-menu-item :index="resolveFullPath(item.path)" @click="() => navigate()">
                 <et-icon :icon="item.icon" class="step-image" size="14px" />
                 <span class="app-menu-text">{{ $t(item.label) }}</span>
@@ -50,45 +56,88 @@ const userStore = useUserStore();
 const curUser = toRef(userStore.currentUser);
 const route = useRoute();
 const wfbasePath = `/system/`;
-const resolveFullPath = (routePath: string) => routePath.startsWith("/") ? routePath : wfbasePath + routePath;
+const resolveFullPath = (routePath: string) =>
+  routePath.startsWith("/") ? routePath : wfbasePath + routePath;
 const isCorpAdmin = computed(() => curUser.value.userType == UserType.CorpAdmin);
 const isPlatAdmin = computed(() => curUser.value.userType == UserType.PlatAdmin);
-const isUnrestrictedAdmin = computed(() =>
-  curUser.value.userType == UserType.CorpOwmer || curUser.value.userType == UserType.CorpAdmin,
+const isUnrestrictedAdmin = computed(
+  () => curUser.value.userType == UserType.CorpOwmer || curUser.value.userType == UserType.CorpAdmin
 );
 
 const menuGroups = computed<SysMenuGroup[]>(() => {
   if (isPlatAdmin.value) {
-    return [{
-      title: "admin.platformAdmin.navigation",
-      items: [{ path: "/platform-admin", icon: "el-Setting", label: "admin.platformAdmin.title" }],
-    }];
+    return [
+      {
+        title: "admin.platformAdmin.navigation",
+        items: [
+          { path: "/platform-admin", icon: "el-Setting", label: "admin.platformAdmin.title" },
+        ],
+      },
+    ];
   }
 
   const groups: SysMenuGroup[] = [
     {
+      title: "admin.shellMenu.basicInfo",
+      items: [
+        { path: "version", icon: "icon-flowdefault", label: "admin.shellMenu.versionInfo" },
+        { path: "enterprise", icon: "icon-adminFilled", label: "admin.shellMenu.enterpriseInfo" },
+      ],
+    },
+    {
       title: "admin.shellMenu.contacts",
       items: [
         { path: "department", icon: "icon-organization", label: "admin.shellMenu.org" },
-        { path: "employeeGroup", icon: "icon-employee-group", label: "admin.shellMenu.employeeGroup" },
+        {
+          path: "employeeGroup",
+          icon: "icon-employee-group",
+          label: "admin.shellMenu.employeeGroup",
+        },
       ],
     },
     {
       title: "admin.shellMenu.permissionCenter",
-      items: [{ path: "tenant-admin-group", icon: "icon-admin", label: "admin.shellMenu.admin", visible: isUnrestrictedAdmin.value }],
+      items: [
+        {
+          path: "tenant-admin-group",
+          icon: "icon-admin",
+          label: "admin.shellMenu.admin",
+          visible: isUnrestrictedAdmin.value,
+        },
+      ],
     },
-    {
-      title: "admin.shellMenu.logAudit",
-      items: [{ path: "corp-log", icon: "icon-admin", label: "admin.shellMenu.corpLog", visible: isUnrestrictedAdmin.value }],
-    },
+
     {
       title: "admin.shellMenu.managementTools",
       items: [
+        {
+          path: "enterprise-settings",
+          icon: "icon-adminFilled",
+          label: "admin.shellMenu.enterpriseSettings",
+          visible: isUnrestrictedAdmin.value,
+        },
+        {
+          path: "product-settings",
+          icon: "icon-appdefault",
+          label: "admin.shellMenu.productSettings",
+          visible: isUnrestrictedAdmin.value,
+        },
         {
           path: "flow-manage",
           icon: "tree",
           label: "admin.shellMenu.flowManage",
           visible: isCorpAdmin.value,
+        },
+      ],
+    },
+    {
+      title: "admin.shellMenu.logAudit",
+      items: [
+        {
+          path: "corp-log",
+          icon: "icon-admin",
+          label: "admin.shellMenu.corpLog",
+          visible: isUnrestrictedAdmin.value,
         },
       ],
     },

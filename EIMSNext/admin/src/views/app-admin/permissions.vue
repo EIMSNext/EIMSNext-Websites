@@ -16,7 +16,7 @@
               :class="{ active: selectedItem?.id === item.id }"
               @click="selectItem(item)"
             >
-              <et-icon :icon="item.type === FormType.Dashboard ? 'dashboard' : 'form'" size="14px" />
+              <et-icon :icon="getMenuIcon(item)" :color="getAppIconColor(item)" size="14px" />
               <span>{{ item.title }}</span>
             </div>
           </el-scrollbar>
@@ -31,6 +31,7 @@
             :key="selectedForm.id"
             :form-def="selectedForm"
             :limit="publishMemberLimit"
+            :show-header="false"
           />
           <div v-else-if="selectedDashboard" class="dashboard-permission">
             <div class="setting-row">
@@ -74,6 +75,7 @@ import { appDefService, dashboardDefService, systemService } from "@eimsnext/ser
 import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
 import { ElMessage } from "element-plus";
 import { AppMenuItem, flattenAppMenus } from "./utils";
+import { getAppIconColor, getFormIcon } from "@/utils/common";
 import { useI18n } from "vue-i18n";
 
 const contextStore = useContextStore();
@@ -176,6 +178,10 @@ function tagsToMembers(tags: ISelectedTag[]): Member[] {
   }));
 }
 
+function getMenuIcon(item: AppMenuItem) {
+  return getFormIcon({ menuId: item.id, menuType: item.type, title: item.title, icon: item.icon, iconColor: item.iconColor });
+}
+
 onBeforeMount(loadItems);
 </script>
 
@@ -209,6 +215,11 @@ onBeforeMount(loadItems);
   flex: 1;
   grid-template-columns: 340px 1fr;
   min-height: 0;
+
+  :deep(.content-body)
+  {
+    padding: var(--et-space-10);
+  }
 }
 
 .menu-panel {

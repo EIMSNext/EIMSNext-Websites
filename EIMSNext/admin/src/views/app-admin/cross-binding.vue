@@ -7,9 +7,10 @@
       </div>
       <div class="selected-panel">
         <div class="section-title">{{ t("admin.appAdmin.selectedTitle") }}</div>
-        <div v-if="selectedForms.length === 0" class="empty-text">{{ t("admin.appAdmin.emptySelected") }}</div>
+        <div v-if="displayedSelectedForms.length === 0" class="empty-text">{{ t("admin.appAdmin.emptySelected") }}</div>
         <div v-else class="selected-tags">
-          <el-tag v-for="form in selectedForms" :key="form.id" effect="plain">
+          <el-tag v-for="form in displayedSelectedForms" :key="form.id" effect="plain" class="selected-form-tag">
+            <et-icon :icon="formIcon(form)" :color="formIconColor(form)" size="14px" />
             {{ form.name }}
           </el-tag>
         </div>
@@ -40,7 +41,10 @@
             <div v-if="!selectedAppId" class="empty-text">{{ t("admin.appAdmin.selectSourceApp") }}</div>
             <el-checkbox-group v-else v-model="checkedFormIds" class="checkbox-list">
               <el-checkbox v-for="form in filteredForms" :key="form.id" :label="form.id">
-                <span class="form-title">{{ form.name }}</span>
+                <span class="form-option">
+                  <et-icon :icon="formIcon(form)" :color="formIconColor(form)" size="14px" />
+                  <span class="form-title">{{ form.name }}</span>
+                </span>
               </el-checkbox>
             </el-checkbox-group>
           </el-scrollbar>
@@ -57,6 +61,7 @@ import { useContextStore, useFormStore } from "@eimsnext/store";
 import { ElMessage, ElMessageBox } from "element-plus";
 import buildQuery from "odata-query";
 import { useI18n } from "vue-i18n";
+import { getAppIconColor, getFormIcon } from "@/utils/common";
 
 type BindingForm = FormDef & { bound?: boolean };
 
@@ -87,6 +92,12 @@ const filteredForms = computed(() => {
 });
 
 const hasUnsavedChanges = computed(() => !isSameIdList(checkedFormIds.value, initialCheckedFormIds.value));
+const displayedSelectedForms = computed(() => {
+  const selectedIds = new Set(checkedFormIds.value);
+  const currentSourceIds = new Set(forms.value.map((form) => form.id));
+  const existing = selectedForms.value.filter((form) => !currentSourceIds.has(form.id));
+  return [...existing, ...forms.value.filter((form) => selectedIds.has(form.id))];
+});
 
 async function loadAll() {
   await Promise.all([loadApps(), loadSelectedForms()]);
@@ -151,6 +162,27 @@ async function loadSourceAppForms(appId: string) {
 
   checkedFormIds.value = forms.value.filter((item) => item.bound).map((item) => item.id);
   initialCheckedFormIds.value = [...checkedFormIds.value];
+}
+
+function sourceMenu(form: FormDef) {
+  const sourceApp = apps.value.find((app) => app.id === form.appId);
+  const findMenu = (menus: AppDef["appMenus"]): AppDef["appMenus"][number] | undefined => {
+    for (const menu of menus) {
+      if (menu.menuId === form.id) return menu;
+      const child = findMenu(menu.subMenus || []);
+      if (child) return child;
+    }
+    return undefined;
+  };
+  return sourceApp ? findMenu(sourceApp.appMenus || []) : undefined;
+}
+
+function formIcon(form: FormDef) {
+  return getFormIcon(sourceMenu(form) || { menuId: form.id, menuType: FormType.Form });
+}
+
+function formIconColor(form: FormDef) {
+  return getAppIconColor(sourceMenu(form));
 }
 
 async function saveBindings() {
@@ -259,6 +291,12 @@ onBeforeMount(loadAll);
   gap: var(--et-space-8);
 }
 
+.selected-form-tag {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--et-space-4);
+}
+
 .empty-text {
   color: var(--et-text-tertiary);
   padding: var(--et-space-16);
@@ -331,5 +369,30 @@ onBeforeMount(loadAll);
   text-overflow: ellipsis;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+.checkbox-list :deep(.el-checkbox) {
+  align-items: center;
+  display: flex;
+  margin-right: 0;
+  width: 100%;
+}
+
+.checkbox-list :deep(.el-checkbox__label) {
+  flex: 1;
+  min-width: 0;
+  order: 1;
+  padding-left: 0;
+}
+
+.checkbox-list :deep(.el-checkbox__input) {
+  margin-left: auto;
+  order: 2;
+}
+
+.form-option {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--et-space-6);
 }
 </style>
