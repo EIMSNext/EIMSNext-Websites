@@ -27,6 +27,22 @@ export interface EmpDept {
   deptName: string;
 }
 
+export interface EmployeeDepartment {
+  employeeId: string;
+  departmentId: string;
+  isManager?: boolean;
+  sortValue?: number;
+  heriarchyId?: string;
+  department?: { id?: string; name?: string };
+}
+
+export interface EmployeeGroupMember {
+  employeeId: string;
+  employeeGroupId: string;
+  employeeGroupName?: string;
+  sortValue?: number;
+}
+
 export interface Employee extends CorpModelBase {
   code: string;
   empName: string;
@@ -36,7 +52,8 @@ export interface Employee extends CorpModelBase {
   workEmail?: string;
   status: number;
   userBound: boolean;
-  depts?: EmpDept[];
+  departments?: EmployeeDepartment[];
+  groups?: EmployeeGroupMember[];
 }
 
 export enum EmployeeStatus {

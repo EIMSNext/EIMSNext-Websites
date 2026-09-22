@@ -201,7 +201,7 @@ const makeOrganizationSelect = ({ name, kind, placeholder }) =>
       const buildEmployeeScopeFilter = () => {
         if (props.limitType !== "custom" || !limitIds.value.size) return "";
         const filters = [...limitIds.value].map(
-          (id) => `Depts/any(d: contains(d/HeriarchyId, '|${escapeOData(id)}|'))`,
+          (id) => `Departments/any(d: contains(d/HeriarchyId, '|${escapeOData(id)}|'))`,
         );
         return filters.length === 1 ? filters[0] : `(${filters.join(" or ")})`;
       };

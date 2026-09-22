@@ -134,7 +134,7 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { TenantAccessSnapshot, Department, Employee, FieldType, PlatformType, ScopeMode, UserType } from "@eimsnext/models";
+import { TenantAccessSnapshot, Department, Employee, EmployeeDepartment, FieldType, PlatformType, ScopeMode, UserType } from "@eimsnext/models";
 import {
   SortDirection,
   employeeService,
@@ -456,7 +456,7 @@ const syncManageToolbar = () => {
   if (deleteBar) {
     deleteBar.config.visible = canManageAnyDepartment;
     deleteBar.config.disabled =
-      checkedDatas.value.length === 0 || checkedDatas.value.some((emp) => (emp.depts ?? []).every((d: { id: string }) => !canManageDepartment(d.id)));
+      checkedDatas.value.length === 0 || checkedDatas.value.some((emp: Employee) => (emp.departments ?? []).every((d: EmployeeDepartment) => !canManageDepartment(d.departmentId)));
   }
 };
 
@@ -464,7 +464,7 @@ const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
   const hasSelection = checkedDatas.value.length > 0;
   leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
-    !hasSelection || checkedDatas.value.some((emp: Employee) => (emp.depts ?? []).every((d) => !canManageDepartment(d.deptId)));
+    !hasSelection || checkedDatas.value.some((emp: Employee) => (emp.departments ?? []).every((d) => !canManageDepartment(d.departmentId)));
   const approveBar = leftBars.value.find((x) => x.config.command == "approve");
   const rejectBar = leftBars.value.find((x) => x.config.command == "reject");
   if (approveBar) approveBar.config.disabled = !hasSelection;
@@ -482,7 +482,7 @@ const edit = (row: Employee, column: any) => {
       selectedEmp.value = row;
       return;
     }
-    if ((row.depts ?? []).some((d) => canManageDepartment(d.deptId))) {
+    if ((row.departments ?? []).some((d) => canManageDepartment(d.departmentId))) {
       editMode.value = true;
       selectedEmp.value = row;
       showAddEditDialog.value = true;

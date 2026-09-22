@@ -16,9 +16,10 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
     }
 
     queryByDepartment<T>(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<T[]> {
+        // 级联过滤直接用关系表上的层级路径快照 HeriarchyId，无需经 d/Department 导航联表。
         const deptFilter = cascadedDept
-            ? `Depts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
-            : `Depts/any(d: d/DeptId eq '${departmentId}')`;
+            ? `Departments/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
+            : `Departments/any(d: d/DepartmentId eq '${departmentId}')`;
 
         const { body, urlParams } = this.buildDeptQuery(deptFilter, query);
         const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
@@ -27,8 +28,8 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
 
     countByDepartment(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<number> {
         const deptFilter = cascadedDept
-            ? `Depts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
-            : `Depts/any(d: d/DeptId eq '${departmentId}')`;
+            ? `Departments/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
+            : `Departments/any(d: d/DepartmentId eq '${departmentId}')`;
 
         const { body, urlParams } = this.buildDeptQuery(deptFilter, query);
         const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
