@@ -35,7 +35,7 @@
                 type="primary"
                 size="large"
                 :disabled="profile.installed || installing"
-                :loading="installing" :disabled="installing"
+                :loading="installing"
                 @click="install"
               >
                 {{ profile.installed ? $t("admin.plugin.installed") : $t("admin.plugin.installPlugin") }}

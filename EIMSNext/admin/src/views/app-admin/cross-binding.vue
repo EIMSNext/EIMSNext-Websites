@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { AppDef, CrossBinding, FormDef } from "@eimsnext/models";
+import { AppDef, CrossBinding, FormDef, FormType } from "@eimsnext/models";
 import { appDefService, crossBindingService, formDefService } from "@eimsnext/services";
 import { useContextStore, useFormStore } from "@eimsnext/store";
 import { ElMessage, ElMessageBox } from "element-plus";

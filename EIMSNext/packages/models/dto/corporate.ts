@@ -5,12 +5,14 @@ export interface CorporateRequest extends IdBase {
   description?: string;
 }
 
-export interface Corporate extends ModelBase {
+export type Corporate = Omit<ModelBase, "createTime" | "updateTime"> & {
+  createTime?: number | string;
+  updateTime?: number | string;
   code?: string;
   name: string;
   description: string;
   platform: PlatformType;
-}
+};
 
 export enum PlatformType {
   /// <summary>

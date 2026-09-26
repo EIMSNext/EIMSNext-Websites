@@ -398,6 +398,7 @@ const loadCount = () => {
 const loadData = () => {
   loading.value = true;
   let query = buildQuery(queryParams.value);
+  query = query ? `${query}&$expand=Departments($expand=Department),Groups` : "$expand=Departments($expand=Department),Groups";
 
   employeeService
     .query<Employee>(appendAdminScope(query))

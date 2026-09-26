@@ -43,7 +43,9 @@ export interface EmployeeGroupMember {
   sortValue?: number;
 }
 
-export interface Employee extends CorpModelBase {
+export type Employee = Omit<CorpModelBase, "createTime" | "updateTime"> & {
+  createTime?: number | string;
+  updateTime?: number | string;
   code: string;
   empName: string;
   userId?: string;
@@ -54,7 +56,7 @@ export interface Employee extends CorpModelBase {
   userBound: boolean;
   departments?: EmployeeDepartment[];
   groups?: EmployeeGroupMember[];
-}
+};
 
 export enum EmployeeStatus {
   Active = 0,
