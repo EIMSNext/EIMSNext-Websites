@@ -8,9 +8,9 @@
       </section>
     </template>
     <template v-else-if="kind === 'enterprise'">
-      <h2>基础信息</h2><div class="info-row"><b>企业名称</b><span>北京志臻互联网科技有限公司石家庄长安分公司</span><a>修改</a></div>
+      <h2>基础信息</h2>      <div class="info-row"><b>企业名称</b><span>—</span><a>修改</a></div>
       <div class="info-row"><b>账号模式</b><el-tag>公共模式</el-tag><span class="hint">如需绑定第三方平台，<a>点击咨询</a></span></div>
-      <div class="tenant"><span>租户 ID</span><code>5f029da37c98a00006dcf12e</code><el-button link>复制</el-button></div>
+      <div class="tenant"><span>租户 ID</span><code>{{ userStore.currentUser.corpId || '—' }}</code><el-button link>复制</el-button></div>
     </template>
     <template v-else-if="kind === 'enterprise-settings'">
       <h2>企业文化</h2><SettingRow label="自定义登录页"><el-switch v-model="login" /><el-button>设置</el-button><span>自定义登录页 Logo、展示图及登录方式等，对企业账号 URL 和发布给成员的内链生效。</span></SettingRow><SettingRow label="企业风格"><el-switch /><span>自定义企业风格。<a>了解更多</a></span></SettingRow><hr /><h2>企业协作</h2><SettingRow label="提醒屏蔽"><el-button>设置</el-button><span>可以设置成员是否接收应用内相关提醒。<a>了解更多</a></span></SettingRow><SettingRow label="系统语言"><el-select model-value="简体中文"><el-option label="简体中文" value="简体中文" /></el-select><span>设置系统的默认显示语言。<a>了解更多</a></span></SettingRow><SettingRow label="系统时区"><span>跟随成员设备实时区</span><a>修改</a><span>系统内所有的时间都基于系统时区显示并存储。</span></SettingRow>
@@ -21,8 +21,10 @@
 </template>
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { useUserStore } from "@eimsnext/store";
 import SettingRow from "./SettingRow.vue";
 const route = useRoute(); const login = ref(true);
+const userStore = useUserStore();
 const kind = computed(() => String(route.path.split("/").pop()));
 </script>
 <style scoped lang="scss">

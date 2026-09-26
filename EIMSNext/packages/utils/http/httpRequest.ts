@@ -19,6 +19,7 @@ export class HttpRequest {
     return window.location.pathname + window.location.search;
   };
   private isHandling401 = false;
+  private lastUnauthorizedToken?: string;
 
   constructor(config: HttpRequestConfig) {
     this.axiosInstance = axios.create(config);
@@ -75,7 +76,7 @@ export class HttpRequest {
         console.log("axios response error", error);
 
         if (error?.response?.status === 401 && !this.isAuthEndpoint(error.config?.url)) {
-          this.handleUnauthorized();
+          this.handleUnauthorized(this.getAuthorizationToken(error.config as HttpRequestConfig | undefined));
         }
 
         const requestConfig = error.config as HttpRequestConfig | undefined;
@@ -148,7 +149,19 @@ export class HttpRequest {
   private getDedupeKey(config: HttpRequestConfig): string | undefined {
     const method = (config.method || "GET").toUpperCase();
     if (config.disableIdempotency || !["POST", "PUT", "PATCH", "DELETE"].includes(method)) return;
+    // Multipart and binary payloads cannot be serialized by value here. Treating
+    // every FormData/Blob as the same request can merge different uploads.
+    if (this.isNonDeterministicPayload(config.data)) return;
     return `${method}:${config.url || ""}:${this.stableSerialize(config.data)}`;
+  }
+
+  private isNonDeterministicPayload(value: any): boolean {
+    if (value == null || typeof value !== "object") return false;
+    if (typeof FormData !== "undefined" && value instanceof FormData) return true;
+    if (typeof Blob !== "undefined" && value instanceof Blob) return true;
+    if (typeof ArrayBuffer !== "undefined" && value instanceof ArrayBuffer) return true;
+    if (typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView(value)) return true;
+    return false;
   }
 
   private stableSerialize(value: any): string {
@@ -209,9 +222,21 @@ export class HttpRequest {
     return /connect\/token|public\/challenge|public\/token|auth\/logout/i.test(url);
   }
 
-  private handleUnauthorized() {
-    if (this.isHandling401) return;
+  private getAuthorizationToken(config?: HttpRequestConfig): string {
+    const headers: any = config?.headers;
+    const value = headers?.get?.("Authorization")
+      ?? headers?.Authorization
+      ?? headers?.authorization;
+    return typeof value === "string"
+      ? value.replace(/^Bearer\s+/i, "")
+      : "";
+  }
+
+  private handleUnauthorized(failedToken = "") {
+    const token = failedToken || accessToken.get() || "";
+    if (this.isHandling401 || this.lastUnauthorizedToken === token) return;
     this.isHandling401 = true;
+    this.lastUnauthorizedToken = token;
     try {
       accessToken.clear();
       const path = this.currentPath();
@@ -223,7 +248,8 @@ export class HttpRequest {
     } catch (e) {
       console.error("401 handler error", e);
     } finally {
-      // 跨请求保活:不清,避免再次进入
+      // 同一失效令牌的并发 401 只处理一次；重新登录取得新令牌后允许再次处理。
+      this.isHandling401 = false;
     }
   }
   // get<T = any>(
