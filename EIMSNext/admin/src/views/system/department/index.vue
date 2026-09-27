@@ -7,14 +7,14 @@
         <div class="org-menu">{{ $t("admin.department.title") }}</div>
         <div class="menu-items">
           <el-radio-group v-model="empStatus" @change="handleStatusChanged">
-            <el-radio :label="0">{{ $t("admin.department.active") }}</el-radio>
-            <el-radio :label="1">{{ $t("admin.department.resigned") }}</el-radio>
-            <el-radio v-if="showPendingApproval" :label="2">{{ $t("admin.department.pending") }}</el-radio>
+            <el-radio :value="0">{{ $t("admin.department.active") }}</el-radio>
+            <el-radio :value="1">{{ $t("admin.department.resigned") }}</el-radio>
+            <el-radio v-if="showPendingApproval" :value="2">{{ $t("admin.department.pending") }}</el-radio>
           </el-radio-group>
         </div>
         <div class="org-menu">{{ $t("admin.department.deptTitle") }}</div>
         <div class="dept-tree-wrapper">
-          <dept-tree :editable="true" @node-click="handleDeptChanged" />
+          <dept-tree :editable="isUnrestrictedAdmin" admin-scope @node-click="handleDeptChanged" />
         </div>
       </div>
       <!-- 用户列表 -->
@@ -43,21 +43,12 @@
             <el-table-column :label="$t('admin.department.code')" width="150" prop="code" />
             <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
             <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
-            <el-table-column :label="$t('admin.department.dept')" prop="department.name" />
-            <el-table-column v-if="isPendingMode" :label="$t('common.edit')" fixed="right" width="160">
+            <el-table-column v-if="isPendingMode && isUnrestrictedAdmin" :label="$t('common.edit')" fixed="right" width="160">
               <template #default="scope">
                 <el-button link type="primary" @click.stop="reviewSingle(scope.row, true)">{{ $t("admin.department.approve") }}</el-button>
                 <el-button link type="danger" @click.stop="reviewSingle(scope.row, false)">{{ $t("admin.department.reject") }}</el-button>
               </template>
             </el-table-column>
-              <!-- <el-table-column label="操作" fixed="right" width="150">
-                <template #default="scope">
-                  <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
-                  </el-button>
-                  <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
-                  </el-button>
-                </template>
-</el-table-column> -->
             </el-table>
           </div>
           <div class="pagination-container">
@@ -94,6 +85,9 @@
       v-if="showAddEditDialog"
       :edit="editMode"
       :emp="selectedEmp"
+      admin-scope
+      :department-scope-mode="adminPermissions?.contactManageDepartmentScopeMode"
+      :department-ids="adminPermissions?.contactManageDepartmentIds || []"
       @cancel="showAddEditDialog = false"
       @ok="handleSaved"
     />
@@ -140,11 +134,13 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { DataPerms, Department, Employee, FieldType, PlatformType } from "@eimsnext/models";
+import { TenantAccessSnapshot, Department, Employee, FieldType, PlatformType, ScopeMode, UserType } from "@eimsnext/models";
 import {
   SortDirection,
   employeeService,
+  systemService,
 } from "@eimsnext/services";
+import { useUserStore } from "@eimsnext/store";
 import buildQuery from "odata-query";
 import {
   ToolbarItem,
@@ -190,18 +186,19 @@ const pageSize = ref(20);
 
 const contextStore = useContextStore();
 const isPendingMode = computed(() => empStatus.value === 2);
-const showPendingApproval = computed(() => contextStore.corpPlat === PlatformType.Public);
 
 const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
       text: t("common.addNew"),
-      type: "success",
+      type: "primary",
       command: "add",
       visible: true,
       icon: "el-plus",
       onCommand: () => {
+        if (!hasManageDepartmentScope.value || isPendingMode.value) return;
+
         editMode.value = false;
         showAddEditDialog.value = true;
       },
@@ -211,12 +208,14 @@ const leftBars = ref<ToolbarItem[]>([
     type: "button",
     config: {
       text: t("common.delete"),
-      type: "danger",
+      class: "delete-button",
       command: "delete",
       visible: true,
       icon: "el-delete",
       disabled: true,
       onCommand: async () => {
+        if (!hasManageDepartmentScope.value || isPendingMode.value) return;
+
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(
             t("common.message.deleteConfirm_Content", { 0: checkedDatas.value.length }),
@@ -338,13 +337,7 @@ const setSort = (sort: IFieldSortList) => {
 };
 
 const updateQueryParams = () => {
-  let statusFilter = { status: { eq: empStatus.value } };
-  let preFilter: any = statusFilter;
-  if (deptHeriarchyId.value) {
-    preFilter = {
-      and: [statusFilter, { "department/heriarchyId": { startswith: deptHeriarchyId.value } }],
-    };
-  }
+  let preFilter: any = { status: { eq: empStatus.value } };
 
   queryParams.value = toODataQuery(
     condList.value,
@@ -353,7 +346,6 @@ const updateQueryParams = () => {
     pageSize.value,
     preFilter
   );
-  queryParams.value.expand = "department";
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -364,8 +356,33 @@ const queryParams = ref<ODataQuery<Employee>>({
 const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
-const deptHeriarchyId = ref("");
 const empStatus = ref(0);
+const userStore = useUserStore();
+const adminPermissions = ref<TenantAccessSnapshot>();
+const selectedDepartmentId = ref("");
+const isUnrestrictedAdmin = computed(() =>
+  [
+    UserType.System,
+    UserType.Client,
+    UserType.CorpOwmer,
+    UserType.CorpAdmin,
+  ].includes(userStore.currentUser.userType),
+);
+const showPendingApproval = computed(() => contextStore.corpPlat === PlatformType.Public && isUnrestrictedAdmin.value);
+const hasManageDepartmentScope = computed(() => {
+  if (isUnrestrictedAdmin.value) return true;
+  const permissions = adminPermissions.value;
+  if (!permissions?.isNormalAdmin) return false;
+  return permissions.contactManageDepartmentScopeMode === ScopeMode.All || permissions.contactManageDepartmentIds.length > 0;
+});
+const canManageDepartment = (departmentId?: string) => {
+  if (isUnrestrictedAdmin.value) return true;
+  const permissions = adminPermissions.value;
+  if (!departmentId || !permissions?.isNormalAdmin) return false;
+  if (permissions.contactManageDepartmentScopeMode === ScopeMode.All) return true;
+  return permissions.contactManageDepartmentIds.includes(departmentId);
+};
+const appendAdminScope = (query: string) => query ? `${query}&adminScope=true` : "adminScope=true";
 
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
@@ -381,8 +398,8 @@ const handleStatusChanged = () => {
 };
 
 const handleDeptChanged = (dept?: Department) => {
-  deptHeriarchyId.value = dept?.heriarchyId ?? "";
-
+  selectedDepartmentId.value = dept?.id ?? "";
+  pageNum.value = 1;
   updateQueryParams();
   handleQuery();
 };
@@ -393,7 +410,11 @@ const rowClassName = (row: any) => {
 const loadCount = () => {
   let query = buildQuery({ filter: queryParams.value.filter });
 
-  employeeService.count(query).then((cnt: number) => {
+  const request = selectedDepartmentId.value
+    ? employeeService.countByDepartment(selectedDepartmentId.value, true, appendAdminScope(query))
+    : employeeService.count(appendAdminScope(query));
+
+  request.then((cnt: number) => {
     totalRef.value = cnt;
   });
 };
@@ -401,8 +422,11 @@ const loadData = () => {
   loading.value = true;
   let query = buildQuery(queryParams.value);
 
-  employeeService
-    .query<Employee>(query)
+  const request = selectedDepartmentId.value
+    ? employeeService.queryByDepartment<Employee>(selectedDepartmentId.value, true, appendAdminScope(query))
+    : employeeService.query<Employee>(appendAdminScope(query));
+
+  request
     .then((res: Employee[]) => {
       dataRef.value = res;
       if (isPendingMode.value) {
@@ -416,6 +440,7 @@ const handleQuery = async () => {
   loading.value = true;
   try {
     checkedDatas.value = [];
+    syncManageToolbar();
     loadCount();
     loadData();
   } finally {
@@ -423,10 +448,23 @@ const handleQuery = async () => {
   }
 };
 
+const syncManageToolbar = () => {
+  const canManageAnyDepartment = hasManageDepartmentScope.value && !isPendingMode.value;
+  const addBar = leftBars.value.find((x) => x.config.command == "add");
+  const deleteBar = leftBars.value.find((x) => x.config.command == "delete");
+  if (addBar) addBar.config.visible = canManageAnyDepartment;
+  if (deleteBar) {
+    deleteBar.config.visible = canManageAnyDepartment;
+    deleteBar.config.disabled =
+      checkedDatas.value.length === 0 || checkedDatas.value.some((emp) => (emp.depts ?? []).every((d: { id: string }) => !canManageDepartment(d.id)));
+  }
+};
+
 const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
   const hasSelection = checkedDatas.value.length > 0;
-  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled = !hasSelection;
+  leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
+    !hasSelection || checkedDatas.value.some((emp: Employee) => (emp.depts ?? []).every((d) => !canManageDepartment(d.deptId)));
   const approveBar = leftBars.value.find((x) => x.config.command == "approve");
   const rejectBar = leftBars.value.find((x) => x.config.command == "reject");
   if (approveBar) approveBar.config.disabled = !hasSelection;
@@ -444,13 +482,17 @@ const edit = (row: Employee, column: any) => {
       selectedEmp.value = row;
       return;
     }
-    editMode.value = true;
-    selectedEmp.value = row;
-    showAddEditDialog.value = true;
+    if ((row.depts ?? []).some((d) => canManageDepartment(d.deptId))) {
+      editMode.value = true;
+      selectedEmp.value = row;
+      showAddEditDialog.value = true;
+    }
   }
 };
 
 const reviewSingle = async (row: Employee, approved: boolean) => {
+  if (!isUnrestrictedAdmin.value) return;
+
   const confirm = await EtConfirm.showDialog(
     t("admin.department.messages." + (approved ? "approveSingle" : "rejectSingle"), { name: row.empName }),
     { title: t("admin.department.messages." + (approved ? "approveTitle" : "rejectTitle")) }
@@ -465,10 +507,12 @@ const reviewSingle = async (row: Employee, approved: boolean) => {
 };
 
 const reviewSelected = async (approved: boolean) => {
+  if (!isUnrestrictedAdmin.value) return;
+
   const employeeIds = checkedDatas.value.map((x) => x.id).filter((x): x is string => !!x);
 
   if (!employeeIds.length) {
-    ElMessage.warning(t("admin.department.messages.selectPending"));
+    ElMessage.warning(t("admin.department.selectPending"));
     return;
   }
 
@@ -516,14 +560,19 @@ const handleSaved = (data: Employee) => {
 };
 
 watch(isPendingMode, () => {
-  leftBars.value.find((x) => x.config.command == "add")!.config.visible = !isPendingMode.value;
-  leftBars.value.find((x) => x.config.command == "delete")!.config.visible = !isPendingMode.value;
-  leftBars.value.find((x) => x.config.command == "approve")!.config.visible = isPendingMode.value;
-  leftBars.value.find((x) => x.config.command == "reject")!.config.visible = isPendingMode.value;
+  syncManageToolbar();
+  leftBars.value.find((x) => x.config.command == "approve")!.config.visible = isPendingMode.value && isUnrestrictedAdmin.value;
+  leftBars.value.find((x) => x.config.command == "reject")!.config.visible = isPendingMode.value && isUnrestrictedAdmin.value;
   selectedEmp.value = undefined;
 });
 
-onMounted(() => {
+watch(hasManageDepartmentScope, () => {
+  syncManageToolbar();
+});
+
+onMounted(async () => {
+  adminPermissions.value = await systemService.getAdminPermissions();
+  syncManageToolbar();
   updateQueryParams();
   handleQuery();
 });

@@ -3,24 +3,24 @@
     <div class="webhook-alias-editor">
       <div class="alias-editor-body">
         <div class="alias-tip">
-          注：字段别名仅允许使用
-          <span class="tip-key">「小写字母」</span>
-          <span class="tip-key">「数字」</span>
-          和
-          <span class="tip-key">「下划线」</span>
-          组合，且必须以
-          <span class="tip-key">「小写字母」</span>
-          开头
+          {{ t("admin.webhook.aliasRule.prefix") }}
+          <span class="tip-key">「{{ t("admin.webhook.aliasRule.lowercase") }}」</span>
+          <span class="tip-key">「{{ t("admin.webhook.aliasRule.number") }}」</span>
+          {{ t("admin.webhook.aliasRule.and") }}
+          <span class="tip-key">「{{ t("admin.webhook.aliasRule.underscore") }}」</span>
+          {{ t("admin.webhook.aliasRule.suffix") }}
+          <span class="tip-key">「{{ t("admin.webhook.aliasRule.lowercase") }}」</span>
+          {{ t("admin.webhook.aliasRule.startWith") }}
         </div>
         <el-table :data="aliasFields" border class="alias-table">
-          <el-table-column prop="name" label="字段名称" min-width="200" />
-          <el-table-column prop="idFmt" label="字段ID" min-width="300" />
-          <el-table-column prop="type" label="字段类型" width="100" />
+          <el-table-column prop="name" :label="t('admin.webhook.fieldName')" min-width="200" />
+          <el-table-column prop="idFmt" :label="t('admin.webhook.fieldId')" min-width="300" />
+          <el-table-column prop="type" :label="t('admin.webhook.fieldType')" width="100" />
           <el-table-column width="200">
             <template #header>
               <div class="alias-header-cell">
-                <span>字段别名</span>
-                <el-tooltip content="推送时将使用这里配置的别名作为字段名" placement="top">
+                <span>{{ t("admin.webhook.fieldAlias") }}</span>
+                <el-tooltip :content="t('admin.webhook.fieldAliasTip')" placement="top">
                   <el-icon class="alias-help-icon"><QuestionFilled /></el-icon>
                 </el-tooltip>
               </div>
@@ -29,7 +29,7 @@
               <el-input
                 v-model="scope.row.alias"
                 class="alias-input"
-                placeholder="请输入别名"
+                :placeholder="t('admin.webhook.aliasPlaceholder')"
                 maxlength="64"
               />
             </template>
@@ -37,7 +37,7 @@
         </el-table>
       </div>
       <div class="alias-editor-footer">
-        <el-button type="primary" class="save-button" @click="saveAlias">保存</el-button>
+        <el-button type="primary" class="save-button" @click="saveAlias">{{ t("common.save") }}</el-button>
       </div>
     </div>
   </div>
@@ -51,6 +51,9 @@ import { webhookAliasService } from "@eimsnext/services";
 import type { FieldAliasItem, FieldDef, FormDef, WebhookAlias } from "@eimsnext/models";
 import { FieldType } from "@eimsnext/models";
 import buildQuery from "odata-query";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   formDef: FormDef;
@@ -195,10 +198,10 @@ const saveAlias = async () => {
       currentAliasId.value = result.id;
     }
 
-    ElMessage.success("保存成功");
+    ElMessage.success(t("admin.webhook.saveSuccess"));
     emit("saved");
   } catch (error) {
-    ElMessage.error("保存失败");
+    ElMessage.error(t("admin.webhook.saveFailed"));
   }
 };
 

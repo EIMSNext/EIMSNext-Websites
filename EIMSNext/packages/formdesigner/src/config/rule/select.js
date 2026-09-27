@@ -43,7 +43,7 @@ export default {
         fetch: "",
       },
       $required: false,
-      props: { clearable: true, filterable: true },
+      props: { clearable: true, filterable: true, optionColor: false },
       options: makeTreeOptions(
         t("props.option"),
         { label: "label", value: "value" },
@@ -59,7 +59,7 @@ export default {
   props(_, { t }) {
     return localeProps(t, name + ".props", [
       { type: "input", field: "placeholder" },
-      makeOptionsRule(t, "options"),
+      makeOptionsRule(t, "options", undefined, undefined, { multiple: false }),
       //   { type: "switch", field: "multiple" },
       // {
       //   type: "switch",
@@ -89,9 +89,6 @@ export default {
       //   type: "switch",
       //   field: "filterable",
       // },
-      {
-        type: "DefaultValueConfig",
-      },
       // {
       //   type: "CheckBoxInput",
       //   field: "filterable",

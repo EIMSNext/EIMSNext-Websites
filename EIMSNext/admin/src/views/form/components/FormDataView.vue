@@ -4,7 +4,7 @@
     <div>{{ t("common.message.deleteConfirm_Content2") }}</div>
   </EtConfirmDialog>
   <PdfPreview v-model="showPdfPreview" :title="pdfPreviewTitle" :pdf-url="pdfPreviewUrl" />
-  <et-dialog v-model="showShareDialog" class="share-dialog" :title="$t('admin.formData.share')" width="640px" :show-footer="false" append-to-body>
+  <et-dialog v-model="showShareDialog" class="share-dialog" :title="$t('common.share')" width="640px" :show-footer="false" append-to-body>
     <div class="share-dialog-body">
       <div class="share-section">
         <div class="share-section-title-row">
@@ -22,9 +22,14 @@
       </div> -->
     </div>
   </et-dialog>
-  <et-toolbar class="form-data-toolbar" type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
-  <FormView v-if="formDef && formData" :def="formDef.content!" :data="formData" :isView="isView" :actions="actions"
-    :fieldPerms="fieldPerms" class="editdata" @draft="saveDraft" @submit="submitData"></FormView>
+  <el-result v-if="loadError" icon="error" :title="t('admin.formData.dataNotAvailable')">
+    <template #extra><el-button @click="returnToList">{{ t("common.back") }}</el-button></template>
+  </el-result>
+  <template v-else>
+    <et-toolbar v-if="!hideToolbar" class="form-data-toolbar" type="small" :left-group="leftBars" @command="toolbarHandler"></et-toolbar>
+    <FormView v-if="formDef && formData" :def="formDef.content!" :data="formData" :isView="isView" :actions="actions"
+      :formFieldPermissions="formFieldPermissions" :class="['editdata', { 'no-toolbar': hideToolbar }]" @draft="saveDraft" @submit="submitData"></FormView>
+  </template>
   <div ref="printTrigger" v-print="printConfig" class="print-trigger">
     <FormPrintDiv v-model="printConfig.showPrintDiv" :title="formDef?.name" :printData="formPrintData"></FormPrintDiv>
   </div>
@@ -35,19 +40,19 @@ defineOptions({
 });
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   FormData,
   FormDataRequest,
   DataAction,
   FlowStatus,
-  IFieldPerm,
-  DataPerms,
+  FormFieldPermission,
+  FormDataPermissions,
   FormDef,
   PrintDef,
   WorkflowActionStatus,
 } from "@eimsnext/models";
-import { useFormStore, useUserStore } from "@eimsnext/store";
+import { useFormStore } from "@eimsnext/store";
 import { customPrintService, formDataService, PrintRequest, printDefService, workflowService } from "@eimsnext/services";
 import { bus } from "@eimsnext/utils";
 import { FormActionSettings } from "@/components/FormView/type";
@@ -65,8 +70,11 @@ const props = withDefaults(
   defineProps<{
     formId: string;
     dataId: string;
-    dataPerms?: DataPerms;
-    fieldPerms?: IFieldPerm[];
+    formDataPermissions?: FormDataPermissions;
+    formFieldPermissions?: FormFieldPermission[];
+    permissionGroupId?: string;
+    startInEdit?: boolean;
+    hideToolbar?: boolean;
   }>(),
   {}
 );
@@ -81,13 +89,13 @@ const formData = ref<FormData>();
 const showDeleteConfirmDialog = ref(false);
 const showShareDialog = ref(false);
 const externalShareEnabled = ref(false);
-const userStore = useUserStore();
-const { currentUser } = userStore;
 const route = useRoute();
+const router = useRouter();
+const loadError = ref(false);
 
-const canEdit = computed(() => hasDataPerm(currentUser.userType, DataPerms.Edit, props.dataPerms));
+const canEdit = computed(() => hasDataPerm(FormDataPermissions.Edit, props.formDataPermissions));
 const canRemove = computed(() =>
-  hasDataPerm(currentUser.userType, DataPerms.Remove, props.dataPerms)
+  hasDataPerm(FormDataPermissions.Remove, props.formDataPermissions)
 );
 
 const printConfig = ref(getPrintConfig(false));
@@ -99,6 +107,7 @@ const showPdfPreview = ref(false);
 const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
 const shareUrl = computed(() => `${window.location.origin}/#/app/${route.params.appId}/form/${props.formId}/data/${props.dataId}`);
+const returnToList = () => router.replace(`/app/${route.params.appId}/form/${props.formId}`);
 
 const inEdit = computed(() => isEditing.value);
 const editDisabled = ref(false);
@@ -110,7 +119,7 @@ const leftBars = computed<ToolbarItem[]>(() => {
     {
       type: "button",
       config: {
-        text: t("admin.formData.share"),
+        text: t("common.share"),
         command: "share",
         visible: !inEdit.value,
         icon: "el-share",
@@ -158,6 +167,7 @@ const leftBars = computed<ToolbarItem[]>(() => {
       type: "button",
       config: {
         text: "common.delete",
+        class: "delete-button",
         command: "delete",
         visible: canRemove.value && !inEdit.value,
         icon: "el-delete",
@@ -209,10 +219,22 @@ const loadPrintDefs = async (formId: string) => {
   customPrintTemplates.value = await printDefService.query<PrintDef>(query);
 };
 
-const openCustomPrintPreview = (print: any) => {
+const openCustomPrintPreview = (print: any, title?: string) => {
   pdfPreviewUrl.value = print.downloadUrl;
-  pdfPreviewTitle.value = print.fileName;
+  pdfPreviewTitle.value = title || print.fileName;
   showPdfPreview.value = true;
+};
+
+const enterEdit = () => {
+  isEditing.value = true;
+  oriFormData.value = JSON.parse(JSON.stringify(formData.value));
+
+  actions.value = {
+    draft: { text: "common.wfProcess.saveDraft" },
+    submit: { text: "common.wfProcess.submit" },
+    reset: { text: "common.reset" },
+  };
+  isView.value = false;
 };
 
 const toolbarHandler = async (cmd: string, e: MouseEvent) => {
@@ -222,10 +244,11 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
     let printResult = await customPrintService.print(req);
 
     if (printResult && printResult.downloadUrl) {
-      openCustomPrintPreview(printResult);
+      const printDef = customPrintTemplates.value.find((item) => item.id === printId);
+      openCustomPrintPreview(printResult, printDef?.name);
     }
     else {
-      ElMessage.error(printResult?.message || t("admin.formData.printFailed"))
+      ElMessage.error(printResult?.message || t("common.printFailed"))
     }
 
     return;
@@ -236,15 +259,8 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       showShareDialog.value = true;
       break;
     case "edit":
-      isEditing.value = true;
-      oriFormData.value = JSON.parse(JSON.stringify(formData.value));
-
-      actions.value = {
-        draft: { text: "common.wfProcess.saveDraft" },
-        submit: { text: "common.wfProcess.submit" },
-        reset: { text: "common.reset" },
-      };
-      isView.value = false;
+      if (!canEdit.value) break;
+      enterEdit();
       break;
     case "cancel":
       isEditing.value = false;
@@ -253,6 +269,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       actions.value = {};
       break;
     case "delete":
+      if (!canRemove.value) break;
       showDeleteConfirmDialog.value = true;
       break;
     case "withdraw":
@@ -266,7 +283,7 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
         await workflowService.withdraw({
           dataId: props.dataId,
         });
-        const data = await formDataService.get<FormData>(props.dataId);
+        const data = await formDataService.get<FormData>(props.dataId, props.permissionGroupId ? { permissionGroupId: props.permissionGroupId } : undefined);
         formData.value = data;
         actionStatus.value = { canWithdraw: false, canUrge: false };
         editDisabled.value = false;
@@ -293,11 +310,20 @@ const toolbarHandler = async (cmd: string, e: MouseEvent) => {
       break;
   }
 };
-const execDelete = () => {
-  formDataService.delete(props.dataId).then(() => {
+let deleting = false;
+const execDelete = async () => {
+  if (!canRemove.value) return;
+  if (deleting) return;
+  deleting = true;
+  try {
+    await formDataService.delete(props.dataId);
     emit("ok");
     bus.emit("data:deleted", { formId: props.formId });
-  });
+  } catch {
+    ElMessage.error(t("common.deleteFailed"));
+  } finally {
+    deleting = false;
+  }
 };
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
@@ -305,7 +331,8 @@ const cancel = () => {
   emit("update:modelValue", false);
   emit("cancel");
 };
-const saveDraft = (data: any) => {
+const saveDraft = async (data: any) => {
+  if (!canEdit.value) return;
   let fdata: FormDataRequest = {
     action: DataAction.Save,
     id: props.dataId,
@@ -315,17 +342,19 @@ const saveDraft = (data: any) => {
   };
 
   // 根据是否有dataId判断是新增还是编辑，编辑时使用put方法
-  const request = props.dataId
-    ? formDataService.put<FormData>(props.dataId, fdata)
-    : formDataService.post<FormData>(fdata);
-
-  request.then((res) => {
-    formData.value = res.data;
+  try {
+    const res = props.dataId
+      ? await formDataService.put<FormData>(props.dataId, fdata)
+      : await formDataService.post<FormData>(fdata);
+    formData.value = res;
     emit("ok");
     bus.emit("data:saved", { formId: props.formId });
-  });
+  } catch {
+    ElMessage.error(t("common.saveFailed"));
+  }
 };
-const submitData = (data: any) => {
+const submitData = async (data: any) => {
+  if (!canEdit.value) return;
   let fdata: FormDataRequest = {
     action: DataAction.Submit,
     id: props.dataId,
@@ -335,22 +364,23 @@ const submitData = (data: any) => {
   };
 
   // 根据是否有dataId判断是新增还是编辑，编辑时使用put方法
-  const request = props.dataId
-    ? formDataService.put<FormData>(props.dataId, fdata)
-    : formDataService.post<FormData>(fdata);
-
-  request.then((res) => {
-    formData.value = res.data;
+  try {
+    const res = props.dataId
+      ? await formDataService.put<FormData>(props.dataId, fdata)
+      : await formDataService.post<FormData>(fdata);
+    formData.value = res;
     emit("ok");
     bus.emit("data:saved", { formId: props.formId });
-  });
+  } catch {
+    ElMessage.error(t("common.saveFailed"));
+  }
 };
 
 const generatePrintData = () => {
   let printData: IPrintData = {
     formDef: formDef.value!,
     formData: formData.value!,
-    fieldPerms: props.fieldPerms,
+    formFieldPermissions: props.formFieldPermissions,
   };
   formPrintData.value = printData;
 };
@@ -369,21 +399,23 @@ watch(showPdfPreview, (visible) => {
 });
 
 onBeforeMount(async () => {
-  let form = await formStore.get(props.formId);
-  if (form) {
+  try {
+    const form = await formStore.get(props.formId);
+    if (!form) throw new Error("Form definition is unavailable");
     formDef.value = form;
     await loadPrintDefs(form.id);
-  }
-
-  let data = await formDataService.get<FormData>(props.dataId);
-  if (data) {
+    const data = await formDataService.get<FormData>(props.dataId, props.permissionGroupId ? { permissionGroupId: props.permissionGroupId } : undefined);
+    if (!data) throw new Error("Form data is unavailable");
     formData.value = data;
+    if (props.startInEdit && canEdit.value) {
+      enterEdit();
+    }
     const workflowLocked = !!(formDef.value?.usingWorkflow && formData.value.flowStatus != FlowStatus.Draft);
     editDisabled.value = workflowLocked;
     deleteDisabled.value = workflowLocked;
-
-    const status = await workflowService.getActionStatus(props.dataId);
-    actionStatus.value = status;
+    actionStatus.value = await workflowService.getActionStatus(props.dataId);
+  } catch {
+    loadError.value = true;
   }
 });
 </script>
@@ -402,7 +434,7 @@ onBeforeMount(async () => {
 
 .share-section-secondary {
   margin-top: 8px;
-  border-top: 1px solid #eef2f7;
+  border-top: 1px solid var(--et-border-color-light);
 }
 
 .share-section-title-row {
@@ -413,13 +445,13 @@ onBeforeMount(async () => {
 }
 
 .share-section-title {
-  color: #111827;
+  color: var(--et-text-primary);
   font-size: 15px;
   font-weight: 600;
 }
 
 .share-section-desc {
-  color: #6b7280;
+  color: var(--et-text-secondary);
   font-size: 12px;
 }
 
@@ -430,11 +462,11 @@ onBeforeMount(async () => {
 
 :deep(.share-dialog .el-dialog__header) {
   padding: 14px 20px;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid var(--et-border-color-light);
 }
 
 :deep(.share-dialog .el-dialog__title) {
-  color: #111827;
+  color: var(--et-text-primary);
   font-size: 16px;
   font-weight: 700;
 }
@@ -448,8 +480,8 @@ onBeforeMount(async () => {
 }
 
 :deep(.share-dialog .el-switch.is-disabled .el-switch__core) {
-  background: #d1d5db;
-  border-color: #d1d5db;
+  background: var(--et-fill-color-light);
+  border-color: var(--et-border-color);
 }
 
 :deep(.form-data-toolbar .toolbar-container) {

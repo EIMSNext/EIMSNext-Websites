@@ -33,6 +33,10 @@ export class AppDefService extends ODataServiceBase<AppDef, AppDefRequest> {
   saveMenus(data: SaveAppMenusRequest): Promise<AppDef> {
     return this.http().api.post<AppDef>(`/AppDef/SaveMenus`, data);
   }
+
+  publish(id: string): Promise<string> {
+    return this.http().api.post<string>(`/AppDef/${id}/publish`, {});
+  }
 }
 
 const appDefService = new AppDefService();

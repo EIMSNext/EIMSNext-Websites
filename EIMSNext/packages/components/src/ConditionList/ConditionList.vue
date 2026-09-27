@@ -49,6 +49,8 @@
             :maxLevel="maxLevel"
             :fieldBuildSetting="fieldBuildSettingRef"
             :valueBuildSetting="valueBuildSettingRef"
+            :allow-field-value="allowFieldValue"
+            :option-loader="optionLoader"
             @change="onInput"
             @remove="removeGroup(idx)"
           ></ConditionList>
@@ -61,6 +63,8 @@
             :condType="condType"
             :fieldBuildSetting="fieldBuildSettingRef"
             :valueBuildSetting="valueBuildSettingRef"
+            :allow-field-value="allowFieldValue"
+            :option-loader="optionLoader"
             @change="onInput"
             @remove="removeItem(idx)"
           ></ConditionItem>
@@ -80,6 +84,7 @@ import {
   INodeForm,
 } from "@/NodeFieldList/type";
 import { computed, ref, toRef, watch } from "vue";
+import type { DynamicSelectOption, DynamicSelectSource } from "@eimsnext/utils";
 
 const { t } = useLocale();
 
@@ -97,6 +102,8 @@ const props = withDefaults(
     maxLevel?: number;
     fieldBuildSetting?: IFieldBuildSetting;
     valueBuildSetting?: IFieldBuildSetting;
+    allowFieldValue?: boolean;
+    optionLoader?: (source: DynamicSelectSource, keyword?: string) => Promise<DynamicSelectOption[]>;
   }>(),
   {
     showTitle: true,

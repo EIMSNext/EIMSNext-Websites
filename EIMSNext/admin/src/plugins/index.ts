@@ -1,6 +1,5 @@
 import type { App } from "vue";
 
-import { setupDirective } from "@/directive";
 import { setupRouter } from "@/router";
 import { setupStore } from "@eimsnext/store";
 import { setupElIcons } from "./icons";
@@ -29,8 +28,6 @@ export default {
 
     //http初始化
     app.use(setupHttp);
-    // 自定义指令(directive)
-    setupDirective(app);
     // 路由(router)
     setupRouter(app);
     // Element-plus图标

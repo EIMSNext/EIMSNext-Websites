@@ -11,13 +11,14 @@ export class CurrentUser {
   empCode?: string;
   empName?: string;
   corpId?: string;
+  departmentIds?: string[];
   deptId?: string;
   userType: UserType = UserType.None;
   apps?: App[];
   /** 头像URL */
   avatar?: string;
-  /** 角色 */
-  roles: string[] = [];
+  /** 员工组 */
+  employeeGroups: string[] = [];
   /** 权限 */
   perms: string[] = [];
 }
@@ -69,9 +70,19 @@ export enum UserType {
   Employee = 64,
 
   /// <summary>
+  /// 无企业用户
+  /// </summary>
+  NoCorp = 128,
+
+  /// <summary>
+  /// 平台管理员
+  /// </summary>
+  PlatAdmin = 256,
+
+  /// <summary>
   /// 匿名用户
   /// </summary>
-  Anonymous = 32768,
+  Public = 32768,
 
   /// <summary>
   /// 用户已被禁用

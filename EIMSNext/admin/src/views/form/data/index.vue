@@ -1,7 +1,23 @@
 <template>
   <PdfPreview v-model="showPdfPreview" :title="pdfPreviewTitle" :pdf-url="pdfPreviewUrl" />
+  <et-dialog v-model="showShareDialog" class="share-dialog" :title="$t('common.share')" width="640px" :show-footer="false" append-to-body>
+    <div class="share-dialog-body">
+      <div class="share-section">
+        <div class="share-section-title-row">
+          <div class="share-section-title">{{ $t("admin.formData.enterpriseMembers") }}</div>
+          <div class="share-section-desc">{{ $t("admin.formData.enterpriseMembersDesc") }}</div>
+        </div>
+        <ShareLinkBar :url="shareUrl" />
+      </div>
+    </div>
+  </et-dialog>
   <div class="shared-form-data-page" v-loading="loading">
-    <div class="shared-form-shell">
+    <el-result v-if="loadError" icon="error" :title="$t('admin.formData.dataNotAvailable')">
+      <template #extra>
+        <el-button @click="returnToList">{{ $t("common.back") }}</el-button>
+      </template>
+    </el-result>
+    <div v-else class="shared-form-shell">
       <div class="shared-form-card">
         <div class="shared-form-header">
           <div>
@@ -48,47 +64,96 @@
           </section>
           <aside class="shared-form-side">
             <div class="shared-side-tabs">
-              <button class="shared-form-tab active" type="button">{{ $t("admin.formData.flowDynamic") }}</button>
-              <button class="shared-form-tab" type="button">{{ $t("admin.formData.dataLog") }}</button>
+              <button
+                class="shared-form-tab"
+                :class="{ active: sideTab === 'flow' }"
+                type="button"
+                @click="sideTab = 'flow'"
+              >
+                {{ $t("admin.formData.flowDynamic") }}
+              </button>
+              <button
+                class="shared-form-tab"
+                :class="{ active: sideTab === 'dataLog' }"
+                type="button"
+                @click="sideTab = 'dataLog'"
+              >
+                {{ $t("admin.formData.dataLog") }}
+              </button>
             </div>
             <div class="shared-side-head">
-              <div class="shared-side-title">{{ $t("admin.formData.flowDynamic") }}</div>
-              <div class="shared-side-extra">{{ approvalLogs.length }} {{ $t("admin.formData.records") }}</div>
+              <div class="shared-side-title">{{ sideTitle }}</div>
+              <div class="shared-side-extra">{{ sideRecordCount }} {{ $t("admin.formData.records") }}</div>
             </div>
             <div class="shared-side-body">
-              <template v-if="approvalLogs.length > 0">
-                <div v-for="log in approvalLogs" :key="log.id" class="workflow-card">
-                  <div class="workflow-card-header">
-                    <div class="workflow-node">{{ log.nodeName }}</div>
-                    <div class="workflow-time">{{ formatDate(log.approvalTime) }}</div>
+              <template v-if="sideTab === 'flow'">
+                <template v-if="taskLogs.length > 0">
+                  <div v-for="log in taskLogs" :key="log.id" class="workflow-card">
+                    <div class="workflow-card-header">
+                      <div class="workflow-node">{{ log.nodeName }}</div>
+                      <div class="workflow-time">{{ formatDate(log.approvalTime) }}</div>
+                    </div>
+                    <div class="workflow-operator-row">
+                      <div class="workflow-avatar">{{ getOperatorInitial(log.approver?.label) }}</div>
+                      <div class="workflow-operator-content">
+                        <div class="workflow-operator-name">{{ log.approver?.label || $t("admin.formData.system") }}</div>
+                        <div class="workflow-operator-meta">{{ $t("admin.formData.approvalProcess") }}</div>
+                      </div>
+                    </div>
+                    <div v-if="log.comment" class="workflow-comment">{{ log.comment }}</div>
                   </div>
-                  <div class="workflow-operator-row">
-                    <div class="workflow-avatar">{{ getOperatorInitial(log.approver?.label) }}</div>
-                    <div class="workflow-operator-content">
-                      <div class="workflow-operator-name">{{ log.approver?.label || $t("admin.formData.system") }}</div>
-                      <div class="workflow-operator-meta">{{ $t("admin.formData.approvalProcess") }}</div>
+                </template>
+                <template v-else>
+                  <div class="workflow-card workflow-card-compact">
+                    <div class="workflow-card-header">
+                      <div class="workflow-node">{{ $t("admin.formData.submitProcess") }}</div>
+                      <div class="workflow-time">{{ formatDate(formData?.createTime) }}</div>
+                    </div>
+                    <div class="workflow-operator-row">
+                      <div class="workflow-avatar">
+                        {{ getOperatorInitial(formData?.createBy?.label) }}
+                      </div>
+                      <div class="workflow-operator-content">
+                        <div class="workflow-operator-name">
+                          {{ formData?.createBy?.label || $t("common.unknown") }}
+                        </div>
+                        <div class="workflow-operator-meta">{{ $t("admin.formData.initiator") }}</div>
+                      </div>
                     </div>
                   </div>
-                  <div v-if="log.comment" class="workflow-comment">{{ log.comment }}</div>
+                </template>
+              </template>
+              <template v-else-if="changeLogs.length > 0">
+                <div v-for="log in changeLogs" :key="log.id" class="workflow-card change-log-card">
+                  <div class="workflow-card-header">
+                    <div class="workflow-node">{{ $t("admin.formData.actionUpdate") }}</div>
+                    <div class="workflow-time">{{ formatDate(log.operateTime) }}</div>
+                  </div>
+                  <div class="workflow-operator-row">
+                    <div class="workflow-avatar">{{ getOperatorInitial(log.operator?.label) }}</div>
+                    <div class="workflow-operator-content">
+                      <div class="workflow-operator-name">{{ log.operator?.label || $t("admin.formData.system") }}</div>
+                      <div class="workflow-operator-meta">{{ $t("admin.formData.dataLog") }}</div>
+                    </div>
+                  </div>
+                  <div class="change-list">
+                    <div v-for="item in log.content" :key="`${log.id}-${item.fieldId}`" class="change-row">
+                      <div class="change-field">
+                        {{ item.fieldLabel || item.fieldId }}
+                        <span class="change-type">{{ formatChangeType(item.changeType) }}</span>
+                      </div>
+                      <div class="change-values">
+                        <span>{{ formatChangeValue(item.oriVallue) }}</span>
+                        <span class="change-arrow">→</span>
+                        <span>{{ formatChangeValue(item.newVallue) }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </template>
               <template v-else>
                 <div class="workflow-card workflow-card-compact">
-                  <div class="workflow-card-header">
-                    <div class="workflow-node">{{ $t("admin.formData.submitProcess") }}</div>
-                    <div class="workflow-time">{{ formatDate(formData?.createTime) }}</div>
-                  </div>
-                  <div class="workflow-operator-row">
-                    <div class="workflow-avatar">
-                      {{ getOperatorInitial(formData?.createBy?.label) }}
-                    </div>
-                    <div class="workflow-operator-content">
-                      <div class="workflow-operator-name">
-                        {{ formData?.createBy?.label || $t("admin.formData.unknown") }}
-                      </div>
-                      <div class="workflow-operator-meta">{{ $t("admin.formData.initiator") }}</div>
-                    </div>
-                  </div>
+                  <div class="workflow-node">{{ $t("admin.formData.noDataLog") }}</div>
                 </div>
               </template>
             </div>
@@ -112,17 +177,17 @@ defineOptions({
 });
 
 import { computed, defineAsyncComponent, nextTick, onBeforeMount, ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import { FormDef, FormData, PrintDef, WfApprovalLog } from "@eimsnext/models";
+import { useRoute, useRouter } from "vue-router";
+import { DataChangeType, FormDataChangeLog, FormDef, FormData, PrintDef, WfTaskLog } from "@eimsnext/models";
 import {
   customPrintService,
   formDataService,
   PrintRequest,
   printDefService,
-  wfApprovalLogService,
+  wfTaskLogService,
 } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
-import { ToolbarItem } from "@eimsnext/components";
+import { ShareLinkBar, ToolbarItem } from "@eimsnext/components";
 import { useTagsViewStore } from "@/store";
 import { useI18n } from "vue-i18n";
 import FormView from "@/components/FormView/index.vue";
@@ -135,20 +200,35 @@ const PdfPreview = defineAsyncComponent(() => import("@/components/PrintDesigner
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 const formStore = useFormStore();
 const tagsViewStore = useTagsViewStore();
 const { isFullscreen, toggle } = useFullscreen();
 const formDef = ref<FormDef>();
 const formData = ref<FormData>();
-const approvalLogs = ref<WfApprovalLog[]>([]);
+const taskLogs = ref<WfTaskLog[]>([]);
+const changeLogs = ref<FormDataChangeLog[]>([]);
 const customPrintTemplates = ref<PrintDef[]>([]);
 const loading = ref(false);
+const loadError = ref(false);
 const printConfig = ref(getPrintConfig(false));
 const formPrintData = ref<IPrintData>();
 const printTrigger = ref<HTMLElement | null>(null);
 const showPdfPreview = ref(false);
+const showShareDialog = ref(false);
 const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
+const sideTab = ref<"flow" | "dataLog">("flow");
+const shareUrl = computed(() => `${window.location.origin}/#/app/${route.params.appId}/form/${route.params.formId}/data/${route.params.dataId}`);
+const returnToList = () => router.replace(`/app/${route.params.appId}/form/${route.params.formId}`);
+
+const sideTitle = computed(() => {
+  return sideTab.value === "flow" ? t("admin.formData.flowDynamic") : t("admin.formData.dataLog");
+});
+
+const sideRecordCount = computed(() => {
+  return sideTab.value === "flow" ? taskLogs.value.length : changeLogs.value.length;
+});
 
 const formatDate = (value?: number) => {
   if (!value) return "-";
@@ -157,6 +237,23 @@ const formatDate = (value?: number) => {
 
 const getOperatorInitial = (label?: string) => {
   return label?.slice(0, 1) || "-";
+};
+
+const formatChangeValue = (value: unknown) => {
+  if (value === null || value === undefined || value === "") return "-";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+
+const formatChangeType = (type: DataChangeType) => {
+  switch (type) {
+    case DataChangeType.Added:
+      return t("admin.formData.changeAdded");
+    case DataChangeType.Deleted:
+      return t("admin.formData.changeDeleted");
+    default:
+      return t("admin.formData.changeModified");
+  }
 };
 
 const toolbarItems = computed<ToolbarItem[]>(() => {
@@ -172,7 +269,7 @@ const toolbarItems = computed<ToolbarItem[]>(() => {
     {
       type: "button",
       config: {
-        text: t("admin.formData.share"),
+        text: t("common.share"),
         command: "share",
         visible: true,
         icon: "el-share",
@@ -216,9 +313,9 @@ const loadPrintDefs = async (formId: string) => {
   customPrintTemplates.value = await printDefService.query<PrintDef>(query);
 };
 
-const openCustomPrintPreview = (print: any) => {
+const openCustomPrintPreview = (print: any, title?: string) => {
   pdfPreviewUrl.value = print.downloadUrl;
-  pdfPreviewTitle.value = print.fileName;
+  pdfPreviewTitle.value = title || print.fileName;
   showPdfPreview.value = true;
 };
 
@@ -238,15 +335,17 @@ const toolbarHandler = async (cmd: string) => {
     const printResult = await customPrintService.print(req);
 
     if (printResult?.downloadUrl) {
-      openCustomPrintPreview(printResult);
+      const printDef = customPrintTemplates.value.find((item) => item.id === printId);
+      openCustomPrintPreview(printResult, printDef?.name);
     } else {
-      ElMessage.error(printResult?.message || t("admin.formData.printFailed"));
+      ElMessage.error(printResult?.message || t("common.printFailed"));
     }
     return;
   }
 
   switch (cmd) {
     case "share":
+      showShareDialog.value = true;
       break;
     case "systemprint":
       setTimeout(() => {
@@ -284,19 +383,22 @@ watch(showPdfPreview, (visible) => {
 onBeforeMount(async () => {
   const formId = route.params.formId.toString();
   const dataId = route.params.dataId.toString();
+  const permissionGroupId = (route.query.permissionGroupId as string) || undefined;
+  const queryParams = permissionGroupId ? { permissionGroupId } : undefined;
   loading.value = true;
 
   try {
-    const [form, data, logs] = await Promise.all([
+    const [form, data, logs, dataLogs] = await Promise.all([
       formStore.get(formId),
-      formDataService.get<FormData>(dataId),
-      wfApprovalLogService.query<WfApprovalLog>(
+      formDataService.get<FormData>(dataId, queryParams, { silentError: true }),
+      wfTaskLogService.query<WfTaskLog>(
         buildQuery({
           filter: { formId, dataId },
           orderBy: "approvalTime desc",
           top: 20,
         })
       ),
+      formDataService.getChangeLogs(dataId, 0, 20, permissionGroupId, { silentError: true }),
     ]);
 
     if (form) {
@@ -309,7 +411,10 @@ onBeforeMount(async () => {
       generatePrintData();
     }
 
-    approvalLogs.value = logs || [];
+    taskLogs.value = logs || [];
+    changeLogs.value = dataLogs || [];
+  } catch {
+    loadError.value = true;
   } finally {
     loading.value = false;
   }
@@ -321,7 +426,7 @@ onBeforeMount(async () => {
   min-width: 1080px;
   min-height: 100%;
   padding: 10px 0;
-  background: linear-gradient(180deg, #f7f8fa 0%, #f4f6f8 100%);
+  background: var(--et-bg-page);
 }
 
 .shared-form-shell {
@@ -331,10 +436,10 @@ onBeforeMount(async () => {
 
 .shared-form-card {
   overflow: hidden;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--et-border-color-light);
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+  background: var(--et-bg-container);
+  box-shadow: var(--et-shadow-lg);
 }
 
 .shared-form-body {
@@ -348,12 +453,12 @@ onBeforeMount(async () => {
   justify-content: space-between;
   align-items: flex-start;
   padding: 20px 24px 16px;
-  border-bottom: 1px solid #edf0f3;
+  border-bottom: 1px solid var(--et-border-color-light);
 }
 
 .shared-form-title {
   margin: 0;
-  color: #0f172a;
+  color: var(--et-text-primary);
   font-size: 18px;
   font-weight: 700;
 }
@@ -362,7 +467,7 @@ onBeforeMount(async () => {
   display: flex;
   gap: 12px;
   margin-top: 6px;
-  color: #94a3b8;
+  color: var(--et-text-tertiary);
   font-size: 12px;
 }
 
@@ -379,17 +484,18 @@ onBeforeMount(async () => {
   width: 24px;
   height: 24px;
   padding: 0;
+  border: 1px solid transparent;
   border-radius: 10px;
-  background: #fff;
-  color: #334155;
+  background: var(--et-bg-container);
+  color: var(--et-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .shared-form-header-action-btn:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-  color: #0f172a;
+  border-color: var(--et-border-color);
+  background: var(--et-bg-hover);
+  color: var(--et-text-primary);
 }
 
 .shared-form-header-action-btn:focus-visible {
@@ -399,12 +505,12 @@ onBeforeMount(async () => {
 
 .shared-form-main-panel {
   min-width: 0;
-  border-right: 1px solid #edf0f3;
+  border-right: 1px solid var(--et-border-color-light);
 }
 
 .shared-form-toolbar-wrap {
   padding: 14px 16px 0;
-  background: #fff;
+  background: var(--et-bg-container);
 }
 
 .shared-form-main {
@@ -420,7 +526,7 @@ onBeforeMount(async () => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #fbfcfd;
+  background: var(--et-bg-page);
 }
 
 .shared-side-tabs {
@@ -428,8 +534,8 @@ onBeforeMount(async () => {
   align-items: center;
   gap: 18px;
   padding: 0 18px;
-  border-bottom: 1px solid #edf0f3;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--et-border-color-light);
+  background: var(--et-bg-muted);
 }
 
 .shared-form-tab {
@@ -441,7 +547,7 @@ onBeforeMount(async () => {
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: #0f172a;
+  color: var(--et-text-primary);
   font-size: 14px;
   cursor: pointer;
 }
@@ -464,13 +570,13 @@ onBeforeMount(async () => {
 }
 
 .shared-side-title {
-  color: #0f172a;
+  color: var(--et-text-primary);
   font-size: 14px;
   font-weight: 700;
 }
 
 .shared-side-extra {
-  color: #94a3b8;
+  color: var(--et-text-tertiary);
   font-size: 12px;
 }
 
@@ -483,9 +589,9 @@ onBeforeMount(async () => {
 .workflow-card {
   margin-bottom: 12px;
   padding: 14px 14px 12px;
-  border: 1px solid #eef2f7;
+  border: 1px solid var(--et-border-color-light);
   border-radius: 10px;
-  background: #fff;
+  background: var(--et-bg-container);
 }
 
 .workflow-card-compact {
@@ -500,14 +606,14 @@ onBeforeMount(async () => {
 }
 
 .workflow-node {
-  color: #111827;
+  color: var(--et-text-primary);
   font-size: 14px;
   font-weight: 700;
 }
 
 .workflow-time {
   flex-shrink: 0;
-  color: #64748b;
+  color: var(--et-text-secondary);
   font-size: 12px;
 }
 
@@ -524,8 +630,8 @@ onBeforeMount(async () => {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #ff6b6b;
-  color: #fff;
+  background: var(--et-color-danger);
+  color: var(--et-text-on-danger);
   font-size: 13px;
   font-weight: 700;
 }
@@ -535,19 +641,59 @@ onBeforeMount(async () => {
 }
 
 .workflow-operator-name {
-  color: #111827;
+  color: var(--et-text-primary);
   font-size: 14px;
 }
 
 .workflow-operator-meta,
 .workflow-comment {
-  color: #64748b;
+  color: var(--et-text-secondary);
   font-size: 12px;
 }
 
 .workflow-comment {
   margin-top: 10px;
   line-height: 1.6;
+}
+
+.change-log-card {
+  padding-bottom: 10px;
+}
+
+.change-list {
+  margin-top: 12px;
+  border-top: 1px solid var(--et-border-color-light);
+}
+
+.change-row {
+  padding: 10px 0 0;
+}
+
+.change-field {
+  color: var(--et-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.change-type {
+  margin-left: 6px;
+  color: var(--et-text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.change-values {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--et-text-secondary);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.change-arrow {
+  color: var(--et-text-tertiary);
 }
 
 .print-trigger {
@@ -557,10 +703,10 @@ onBeforeMount(async () => {
 :deep(.shared-form-toolbar .toolbar-container) {
   min-height: 48px;
   padding: 8px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--et-border-color);
   border-radius: 8px;
-  background: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  background: var(--et-bg-container);
+  box-shadow: var(--et-shadow-sm);
 }
 
 :deep(.shared-form-toolbar .left-group) {
@@ -578,7 +724,7 @@ onBeforeMount(async () => {
 
 :deep(.shared-form-toolbar .toolbar-item.el-button:not(.is-disabled):hover),
 :deep(.shared-form-toolbar .toolbar-dropdown:not(.is-disabled):hover) {
-  background: #f8fafc;
+  background: var(--et-bg-hover);
 }
 
 :deep(.shared-form-toolbar .toolbar-share-btn) {
@@ -594,7 +740,7 @@ onBeforeMount(async () => {
   right: 0;
   width: 1px;
   height: 14px;
-  background: #dbe2ea;
+  background: var(--et-border-color);
   transform: translateY(-50%);
 }
 
@@ -609,7 +755,7 @@ onBeforeMount(async () => {
 
   .shared-form-main-panel {
     border-right: 0;
-    border-bottom: 1px solid #edf0f3;
+    border-bottom: 1px solid var(--et-border-color-light);
   }
 
   .shared-form-side {

@@ -3,7 +3,7 @@ import {
   ApproveRequest,
   ChangeApproverRequest,
   FlowManageQueryRequest,
-  FlowManageTodoQueryResult,
+  FlowManageTaskQueryResult,
   ReturnRequest,
   ReturnTargetNode,
   StartRequest,
@@ -12,6 +12,7 @@ import {
   UrgeRequest,
   WithdrawRequest,
   WorkflowActionStatus,
+  WorkflowNodeAction,
 } from "@eimsnext/models";
 import { ServiceBase } from "../interface";
 
@@ -63,6 +64,11 @@ export class WorkflowService extends ServiceBase {
     return this.http().api.get<WorkflowActionStatus>(`${this.getUrl(this.modelName(), "ActionStatus")}${query}`);
   }
 
+  getNodeActions(dataId: string, wfInstanceId: string) {
+    const query = `?dataId=${encodeURIComponent(dataId)}&wfInstanceId=${encodeURIComponent(wfInstanceId)}`;
+    return this.http().api.get<WorkflowNodeAction[]>(`${this.getUrl(this.modelName(), "NodeActions")}${query}`);
+  }
+
   getReturnNodes(dataId: string, wfInstanceId?: string) {
     const query = wfInstanceId
       ? `?dataId=${encodeURIComponent(dataId)}&wfInstanceId=${encodeURIComponent(wfInstanceId)}`
@@ -70,9 +76,8 @@ export class WorkflowService extends ServiceBase {
     return this.http().api.get<ReturnTargetNode[]>(`${this.getUrl(this.modelName(), "ReturnNodes")}${query}`);
   }
 
-  async queryManageTodos(params: FlowManageQueryRequest): Promise<FlowManageTodoQueryResult> {
-    const result = await this.http().api.get<{ data: FlowManageTodoQueryResult }>(this.getUrl(this.modelName(), "ManageTodos"), params);
-    return result.data;
+  async queryManageTasks(params: FlowManageQueryRequest): Promise<FlowManageTaskQueryResult> {
+    return this.http().api.get<FlowManageTaskQueryResult>(this.getUrl(this.modelName(), "ManageTasks"), params);
   }
 
   terminate(data: TerminateWorkflowRequest): Promise<any> {

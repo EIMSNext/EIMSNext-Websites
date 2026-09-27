@@ -2,10 +2,10 @@ import { is, parseFn } from "../utils";
 import { deepGet } from "./util";
 import {
   accessToken,
-  appSetting,
   getApiUrl,
   getODataUrl,
   getUploadUrl,
+  getFileFullUrl,
 } from "@eimsnext/utils";
 
 function getError(action, option, xhr) {
@@ -77,8 +77,8 @@ export default function fetch(option) {
     var result = getBody(xhr);
     if (option.source == "upload") {
       result.value.forEach((f) => {
-        f.url = `${appSetting.uploadUrl}/${f.savePath}`;
-        f.thumbUrl = `${appSetting.uploadUrl}/${f.thumbPath}`;
+        f.url = getFileFullUrl(f.savePath);
+        f.thumbUrl = getFileFullUrl(f.thumbPath);
       });
     }
     option.onSuccess(result);
@@ -108,7 +108,11 @@ export default function fetch(option) {
   const headers = option.headers || {};
   const token = accessToken.get();
   // console.log("token", token);
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (option.__eimsPublicToken) {
+    headers["Authorization"] = `Bearer ${option.__eimsPublicToken}`;
+  } else if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   Object.keys(headers).forEach((item) => {
     if (headers[item] != null) {

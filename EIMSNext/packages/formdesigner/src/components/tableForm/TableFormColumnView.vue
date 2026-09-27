@@ -45,6 +45,7 @@ export default defineComponent({
 }
 
 ._fd-tf-col {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 180px;

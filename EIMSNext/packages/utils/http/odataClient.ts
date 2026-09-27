@@ -12,7 +12,7 @@ export class ODataClient {
     this.httpRequest = request;
   }
 
-  get<T = any>(url: string, id: string, data?: any) {
+  get<T = any>(url: string, id: string, data?: any, options?: { silentError?: boolean }) {
     url = this.formatUrl<T>(url, id);
     if (data) {
       let qStr =
@@ -21,7 +21,7 @@ export class ODataClient {
       url = `${url}${qMark}${qStr}`;
     }
     let headers = this.getAxiosHeaders();
-    return this.httpRequest.get<T>({ url, headers, withToken: true });
+    return this.httpRequest.get<T>({ url, headers, withToken: true, silentError: options?.silentError });
   }
 
   count(url: string, data?: any) {
@@ -102,11 +102,14 @@ export class ODataClient {
   }
 
   private formatUrl<T>(url: string, id?: string) {
+    const queryIndex = url.indexOf("?");
+    const path = queryIndex >= 0 ? url.substring(0, queryIndex) : url;
+    const query = queryIndex >= 0 ? url.substring(queryIndex) : "";
     let idPath = id ? "/" + id : "";
-    url = url.startsWith("/") ? url : "/" + url;
-    return url.startsWith("http")
-      ? url
-      : getODataUrl(url, this.apiVersion) + idPath;
+    const normalizedPath = path.startsWith("/") || path.startsWith("http") ? path : "/" + path;
+    return normalizedPath.startsWith("http")
+      ? `${normalizedPath}${idPath}${query}`
+      : `${getODataUrl(normalizedPath, this.apiVersion)}${idPath}${query}`;
   }
 
   private getAxiosHeaders(contentType?: ContentType) {

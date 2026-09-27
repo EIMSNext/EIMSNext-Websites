@@ -133,7 +133,10 @@ export default function useInput(Handler) {
         // 使用computed确保响应式，同时应用toFormValue转换
         Object.defineProperty(initial, field, {
           get: () => {
-            return ctx.parser.toFormValue(ctx.rule.value, ctx);
+            const value = this.getFormData(ctx);
+            return value === undefined
+              ? ctx.parser.toFormValue(ctx.rule.value, ctx)
+              : value;
           },
           enumerable: true
         });

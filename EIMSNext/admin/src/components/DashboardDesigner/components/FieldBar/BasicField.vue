@@ -12,19 +12,19 @@
       :teleported="false"
     >
       <div class="total-input-popover">
-        <el-input v-model="title" placeholder="请输入" size="small" @keyup.enter="confirmTitle" />
+        <el-input v-model="title" :placeholder="t('common.pleaseInput')" size="small" @keyup.enter="confirmTitle" />
         <div class="popover-actions">
-          <el-button size="small" @click="showTitleInput = false">取消</el-button>
-          <el-button type="primary" size="small" @click="confirmTitle">确定</el-button>
+          <el-button size="small" @click="showTitleInput = false">{{ t("common.cancel") }}</el-button>
+          <el-button type="primary" size="small" @click="confirmTitle">{{ t("common.ok") }}</el-button>
         </div>
       </div>
     </el-popover>
     <el-dropdown :show-arrow="false" trigger="click" placement="bottom-start">
-      <div ref="triggerRef" :key="field.title" class="item dimension-item forbid">
+      <div ref="triggerRef" :key="field.title" class="item field-item forbid">
         <div class="item-text" :class="isDeleted ? 'style-red' : ''">
           <et-icon
             icon="el-arrowDown"
-            :color="isDeleted ? 'var(--et-color-danger)' : 'var(--et-text-on-primary)'"
+            :color="isDeleted ? 'var(--et-color-danger)' : 'var(--et-color-primary)'"
             class="field-icon"
           ></et-icon>
           {{ field.title || field.label }}
@@ -33,14 +33,14 @@
           <et-icon
             icon="el-close"
             size="10px"
-            :color="isDeleted ? 'var(--et-text-on-primary)' : 'var(--et-color-primary-hover)'"
+            :color="isDeleted ? 'var(--et-text-on-danger)' : 'var(--et-color-primary)'"
             @click.stop="onRemoveClick"
           />
         </div>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item @click="setTitle">设置显示名</el-dropdown-item>
+          <el-dropdown-item @click="setTitle">{{ t("admin.dashboardFieldBar.setDisplayName") }}</el-dropdown-item>
           <slot name="dropdown-item" :field="field" :isDeleted="isDeleted"></slot>
         </el-dropdown-menu>
       </template>
@@ -48,6 +48,10 @@
   </div>
 </template>
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+
 defineOptions({
   name: "BasicField",
 });
@@ -150,8 +154,18 @@ const onRemoveClick = () => {
   }
 }
 
-.dimension-item {
-  background-color: var(--et-color-primary-hover);
-  color: var(--et-text-on-primary);
+.field-item {
+  background-color: var(--et-bg-container);
+  border: 1px solid var(--et-border-color-light);
+  color: var(--et-text-primary);
+
+  &:hover {
+    background-color: var(--et-bg-hover);
+    border-color: var(--et-color-primary);
+  }
+
+  .item-text {
+    color: var(--et-text-primary);
+  }
 }
 </style>

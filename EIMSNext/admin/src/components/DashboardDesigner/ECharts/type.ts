@@ -14,6 +14,10 @@ export interface IChartSetting {
   sort?: ISortList;
   takeEnable?: boolean;
   take?: number;
+  indicator?: IIndicatorChartOptions;
+  progress?: IProgressChartOptions;
+  line?: ILineChartOptions;
+  bar?: IBarChartOptions;
 }
 
 export interface IDimensionField {
@@ -31,11 +35,61 @@ export interface IMetricsField {
   aggFun?: AggregateFun;
 }
 
+export interface INumberFormatOptions {
+  decimalPlaces?: number;
+}
+
+export interface IIndicatorChartOptions extends INumberFormatOptions {
+  showName?: boolean;
+}
+
+export type ProgressTargetType = "metric" | "value";
+export type ProgressStyle = "ring" | "semi" | "thin";
+export interface IProgressChartOptions extends INumberFormatOptions {
+  targetType?: ProgressTargetType;
+  targetMetric?: IMetricsField;
+  targetValue?: number;
+  showName?: boolean;
+  style?: ProgressStyle;
+  showActual?: boolean;
+  showTarget?: boolean;
+  showPercent?: boolean;
+}
+
+export type AxisLabelMode = "horizontal" | "tilt" | "vertical";
+export type LineXAxisLabelMode = AxisLabelMode;
+export type LineLabelOverlap = "adjust" | "hide" | "stagger";
+export interface ILineChartOptions {
+  smooth?: boolean;
+  showSymbol?: boolean;
+  xAxisLabelMode?: LineXAxisLabelMode;
+  showAllLabels?: boolean;
+  showDataZoom?: boolean;
+  yAxisTitle?: string;
+  yAxisMin?: number | null;
+  yAxisMax?: number | null;
+  showDataLabel?: boolean;
+  labelOverlap?: LineLabelOverlap;
+}
+
+export interface IBarChartOptions {
+  categoryAxisLabelMode?: AxisLabelMode;
+  showAllCategoryLabels?: boolean;
+  showDataZoom?: boolean;
+  valueAxisTitle?: string;
+  valueAxisMin?: number | null;
+  valueAxisMax?: number | null;
+  showDataLabel?: boolean;
+  labelOverlap?: LineLabelOverlap;
+}
+
 export enum ChartType {
   VBar = "vbar", //柱状图
   HBar = "hbar", //条形图
   Line = "line", //折线图
   Pie = "pie", //饼图
+  Indicator = "indicator", //指标图
+  Progress = "progress", //进度图
 }
 
 export interface ILimitation {
@@ -62,19 +116,49 @@ export interface IChartConfig {
   subType?: Array<any>;
   cssClass: string;
   limitation: ILimitation;
+  limitationDescription?: string;
 }
 
 export function chartSettingValidate(setting: IChartSetting): boolean {
-  if (!setting.datasource.id) return false;
+  if (!setting.datasource?.id) return false;
 
-  if (!setting.dimension1 || setting.dimension1.length == 0) return false;
+  const decimalPlacesValid = (value?: number) => value === undefined || (Number.isInteger(value) && value >= 0 && value <= 6);
+  const axisValueValid = (value?: number | null) => value === undefined || value === null || Number.isFinite(value);
+  const axisRangeValid = (min?: number | null, max?: number | null) => {
+    if (!axisValueValid(min) || !axisValueValid(max)) return false;
+    return min == null || max == null || min <= max;
+  };
+
+  if (setting.chartType === ChartType.Indicator) {
+    return !setting.dimension1?.length && !setting.dimension2?.length && setting.metrics?.length === 1 && !!setting.metrics[0]?.id && decimalPlacesValid(setting.indicator?.decimalPlaces);
+  }
+
+  if (setting.chartType === ChartType.Progress) {
+    if (setting.dimension1?.length || setting.dimension2?.length || setting.metrics?.length !== 1 || !setting.metrics[0]?.id || !decimalPlacesValid(setting.progress?.decimalPlaces)) return false;
+    const progress = setting.progress;
+    return progress?.targetType === "metric"
+      ? !!progress.targetMetric?.id
+      : progress?.targetType === "value" && Number(progress.targetValue) > 0;
+  }
+
+  if (!setting.dimension1 || setting.dimension1.length !== 1 || setting.dimension2?.length) return false;
 
   if (!setting.metrics || setting.metrics.length == 0) return false;
+
+  if (!setting.metrics.every((metric) => !!metric.id)) return false;
+  if (setting.chartType === ChartType.Line) {
+    const line = setting.line;
+    if (!axisRangeValid(line?.yAxisMin, line?.yAxisMax)) return false;
+  }
+  if (setting.chartType === ChartType.VBar || setting.chartType === ChartType.HBar) {
+    if (!axisRangeValid(setting.bar?.valueAxisMin, setting.bar?.valueAxisMax)) return false;
+  }
 
   return true;
 }
 
 export function getChartSort(setting: IChartSetting) {
+  if (setting.chartType === ChartType.Indicator || setting.chartType === ChartType.Progress) return [];
   let sorts: IAgSortItem[] = [];
   let dims = [...(setting.dimension1 || []), ...(setting.dimension2 || [])];
   let metrics = [...(setting.metrics || [])];
@@ -117,7 +201,7 @@ export function getChartConfigs() {
       cssClass: "vbar",
       limitation: {
         dimension: { type: LimitType.Strict, value: { value1: 1 } },
-        metric: { type: LimitType.Strict, value: { value1: 1 } },
+        metric: { type: LimitType.Range, value: { value1: 1 } },
       },
     },
     {
@@ -127,7 +211,7 @@ export function getChartConfigs() {
       cssClass: "hbar",
       limitation: {
         dimension: { type: LimitType.Strict, value: { value1: 1 } },
-        metric: { type: LimitType.Strict, value: { value1: 1 } },
+        metric: { type: LimitType.Range, value: { value1: 1 } },
       },
     },
     {
@@ -143,7 +227,7 @@ export function getChartConfigs() {
       cssClass: "line",
       limitation: {
         dimension: { type: LimitType.Strict, value: { value1: 1 } },
-        metric: { type: LimitType.Strict, value: { value1: 1 } },
+        metric: { type: LimitType.Range, value: { value1: 1 } },
       },
     },
     {
@@ -157,6 +241,25 @@ export function getChartConfigs() {
       cssClass: "pie",
       limitation: {
         dimension: { type: LimitType.Strict, value: { value1: 1 } },
+        metric: { type: LimitType.Strict, value: { value1: 1 } },
+      },
+    },
+    {
+      id: ChartType.Indicator,
+      i18n: "dash.chart.indicator",
+      cssClass: "indicator",
+      limitation: {
+        dimension: { type: LimitType.Strict, value: { value1: 0 } },
+        metric: { type: LimitType.Strict, value: { value1: 1 } },
+      },
+    },
+    {
+      id: ChartType.Progress,
+      i18n: "dash.chart.progress",
+      cssClass: "progress",
+      limitationDescription: "dash.limitation.progress",
+      limitation: {
+        dimension: { type: LimitType.Strict, value: { value1: 0 } },
         metric: { type: LimitType.Strict, value: { value1: 1 } },
       },
     },

@@ -15,3 +15,12 @@ export { default as mergeProps, normalMerge, functionalMerge, toArrayMerge } fro
 export { default as Mitt } from './mitt'
 export { default as toCase, upper, lower } from './tocase';
 export { logError, format, tip, err } from './console';
+export {
+  createFormDataQuery,
+  mergeFormDataRecord,
+  normalizeQueryField,
+  resolveFormDataValue,
+  resolveQueryFilter,
+  stringifyFormDataValue,
+} from './formDataQuery';
+export { getContrastTextColor, getFilledTextColor } from './color';

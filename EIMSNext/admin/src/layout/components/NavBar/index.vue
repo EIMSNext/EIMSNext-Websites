@@ -8,26 +8,32 @@
           </div>
         </template>
         <div class="platform-popover">
-          <router-link class="platform-item" to="/workspace">
-            <div class="platform-icon platform-icon--workspace">
+          <router-link class="platform-item" to="/workbench">
+            <div class="platform-icon platform-icon--workbench">
               <et-icon icon="homepage" size="24" />
             </div>
-            <div class="platform-title">工作台</div>
+            <div class="platform-title">{{ $t("admin.shell.workbench") }}</div>
           </router-link>
           <div class="platform-item platform-item--disabled">
             <div class="platform-icon platform-icon--knowledge">
               <et-icon icon="el-Reading" size="24" />
             </div>
             <div>
-              <div class="platform-title">知识库</div>
-              <div class="platform-desc">敬请期待</div>
+              <div class="platform-title">{{ $t("admin.shell.knowledgeBase") }}</div>
+              <div class="platform-desc">{{ $t("admin.shell.comingSoon") }}</div>
             </div>
           </div>
           <router-link class="platform-item" to="/open-platform/pluginstore">
             <div class="platform-icon platform-icon--open">
               <et-icon icon="el-Connection" size="24" />
             </div>
-            <div class="platform-title">开放平台</div>
+            <div class="platform-title">{{ $t("admin.shell.openPlatform") }}</div>
+          </router-link>
+          <router-link v-if="isPlatAdmin" class="platform-item" to="/platform-admin">
+            <div class="platform-icon platform-icon--admin">
+              <et-icon icon="el-Setting" size="24" />
+            </div>
+            <div class="platform-title">{{ $t("admin.platformAdmin.title") }}</div>
           </router-link>
         </div>
       </el-popover>
@@ -37,7 +43,13 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { UserType } from "@eimsnext/models";
+import { useUserStore } from "@eimsnext/store";
+
+const userStore = useUserStore();
+const isPlatAdmin = computed(() => userStore.currentUser.userType === UserType.PlatAdmin);
+</script>
 
 <style lang="scss" scoped>
 .navbar {
@@ -55,6 +67,7 @@
     line-height: var(--et-size-50);
     color: var(--et-text-primary);
     cursor: pointer;
+    padding-left: var(--et-space-2);
   }
 }
 
@@ -102,19 +115,24 @@
   border-radius: 8px;
 }
 
-.platform-icon--workspace {
-  background: color-mix(in srgb, #34d399 18%, white);
-  color: #059669;
+.platform-icon--workbench {
+  background: var(--et-bg-success-soft);
+  color: var(--et-color-success);
 }
 
 .platform-icon--knowledge {
-  background: color-mix(in srgb, #f59e0b 18%, white);
-  color: #d97706;
+  background: var(--et-bg-warning-soft);
+  color: var(--et-color-warning);
 }
 
 .platform-icon--open {
-  background: color-mix(in srgb, #4f46e5 18%, white);
-  color: #4338ca;
+  background: var(--et-bg-primary-soft);
+  color: var(--et-color-primary);
+}
+
+.platform-icon--admin {
+  background: var(--et-bg-danger-soft);
+  color: var(--et-color-danger);
 }
 
 .platform-title {

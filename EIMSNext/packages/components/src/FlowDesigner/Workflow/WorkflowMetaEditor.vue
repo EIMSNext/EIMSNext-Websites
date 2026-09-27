@@ -200,7 +200,7 @@ watch(
           color: var(--et-text-primary);
 
           .title {
-            // color: var(--fd-color-text);
+            color: var(--et-text-primary);
             font-size: var(--et-font-size-14);
             font-weight: 700;
           }

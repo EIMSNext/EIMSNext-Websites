@@ -27,7 +27,7 @@ import { buildSortFieldListItems, IFieldSortItem, IFieldSortList } from "./type"
 import { IFormFieldDef } from "../FieldSelect/type";
 import { SortDirection } from "@eimsnext/services";
 import { IListItem } from "@/list/type";
-import { IFieldPerm } from "@eimsnext/models";
+import { FormFieldPermission } from "@eimsnext/models";
 const { t } = useLocale();
 
 defineOptions({
@@ -38,7 +38,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: IFieldSortList;
     formId: string;
-    fieldPerms?: IFieldPerm[];
+    formFieldPermissions?: FormFieldPermission[];
   }>(),
   {}
 );
@@ -84,16 +84,18 @@ const emitChange = () => {
 };
 
 watch(
-  [() => props.formId],
-  async ([newFormId], [oldFormId]) => {
-    if (newFormId && newFormId != oldFormId) {
+  [() => props.formId, () => props.formFieldPermissions],
+  async ([newFormId]) => {
+    if (newFormId) {
       let form = await formStore.get(newFormId);
       if (form && form.content && form.content.items) {
-        allFields.value = buildSortFieldListItems(newFormId, form.content.items, form.usingWorkflow);
+        allFields.value = buildSortFieldListItems(newFormId, form.content.items, form.usingWorkflow)
+          .filter((item) => props.formFieldPermissions === undefined ||
+            props.formFieldPermissions.some((permission) => permission.id === item.id && permission.visible));
       }
     }
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 
 </script>

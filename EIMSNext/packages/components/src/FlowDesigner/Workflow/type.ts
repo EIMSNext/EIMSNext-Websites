@@ -36,12 +36,12 @@ export function convertTagToCandidate(tag: ISelectedTag): IApprovalCandidate {
 
 function getManagerLevelLabel(level: number): string {
   if (level === 1) {
-    return "直接部门主管";
+    return "workflow.directManager";
   }
   if (level === 2) {
-    return "上级部门主管";
+    return "workflow.higherLevelManager";
   }
-  return `${level}级部门主管`;
+  return `workflow.nthLevelManager|${level}`;
 }
 
 export function convertCandidateToTag(
@@ -121,8 +121,8 @@ export function convertItemTypeToCandidateType(tagType: DataItemType): Candidate
     case DataItemType.Department:
       candidateType = CandidateType.Department;
       break;
-    case DataItemType.Role:
-      candidateType = CandidateType.Role;
+    case DataItemType.EmployeeGroup:
+      candidateType = CandidateType.EmployeeGroup;
       break;
     case DataItemType.Employee:
       candidateType = CandidateType.Employee;
@@ -144,8 +144,8 @@ export function convertCandidateTypeToItemType(
     case CandidateType.Department:
       tagType = DataItemType.Department;
       break;
-    case CandidateType.Role:
-      tagType = DataItemType.Role;
+    case CandidateType.EmployeeGroup:
+      tagType = DataItemType.EmployeeGroup;
       break;
     case CandidateType.Employee:
       tagType = DataItemType.Employee;

@@ -22,4 +22,11 @@ export enum DashItemType {
   Chart = "chart",
   Comp = "comp",
   Filter = "filter",
+  DetailTable = "detailTable",
+  LayoutContainer = "layoutContainer",
+  RealTime = "realTime",
+  Image = "image",
+  Text = "text",
+  QuickFilter = "quickFilter",
+  FilterButton = "filterButton",
 }

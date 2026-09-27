@@ -23,6 +23,7 @@ const fieldIcons: Record<string, string> = {
   dataTable: "fc-icon-data-table",
   fcId: "fc-icon-input-id",
   signaturePad: "fc-icon-sign",
+  signature: "fc-icon-sign",
   fcValue: "fc-icon-value",
 
   // main - upload
@@ -45,6 +46,7 @@ const fieldIcons: Record<string, string> = {
   stepForm: "fc-icon-step-form",
   tableform: "fc-icon-table-form",
   dataselect: "fc-icon-select",
+  serialno: "fc-icon-input",
 
   // container - 容器组件
   fcSlot: "fc-icon-slot",

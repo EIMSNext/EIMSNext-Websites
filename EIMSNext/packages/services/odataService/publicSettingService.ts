@@ -5,6 +5,10 @@ export class PublicSettingService extends ODataServiceBase<PublicSetting, Public
     protected modelName(): string {
         return "PublicSetting";
     }
+
+    current(): Promise<PublicSetting> {
+        return this.http().api.get<PublicSetting>("/PublicSetting/current");
+    }
 }
 
 const publicSettingService = new PublicSettingService()

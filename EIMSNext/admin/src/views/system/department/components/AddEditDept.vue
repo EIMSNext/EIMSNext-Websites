@@ -9,14 +9,14 @@
     @ok="save"
   >
     <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
-      <el-form-item label="上级部门" prop="parentName">
+      <el-form-item :label="t('admin.department.editDept.parentDept')" prop="parentName">
         <el-input :model-value="formData.parentName" readonly />
       </el-form-item>
-      <el-form-item label="部门编码" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入部门编码" />
+      <el-form-item :label="t('admin.department.editDept.deptCode')" prop="code">
+        <el-input v-model="formData.code" :placeholder="t('admin.department.editDept.deptCodePlaceholder')" />
       </el-form-item>
-      <el-form-item label="部门名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入部门名称" />
+      <el-form-item :label="t('admin.department.editDept.deptName')" prop="name">
+        <el-input v-model="formData.name" :placeholder="t('admin.department.editDept.deptNamePlaceholder')" />
       </el-form-item>
     </el-form>
   </et-dialog>
@@ -26,6 +26,9 @@ import { Department, DepartmentRequest } from "@eimsnext/models";
 import { departmentService } from "@eimsnext/services";
 import { useDeptStore } from "@eimsnext/store";
 import { FormInstance } from "element-plus";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "AddEditDept",
@@ -43,7 +46,7 @@ const props = withDefaults(
 
 const deptStore = useDeptStore();
 const showDialog = ref(true);
-const title = props.edit ? "修改部门信息" : "添加子部门";
+const title = props.edit ? t("admin.department.editDept.editTitle") : t("admin.department.editDept.addTitle");
 const formData = ref<Department>({ id: "", code: "", name: "", isCompany: false });
 const formRef = ref<FormInstance>();
 if (props.edit) formData.value = props.pDept;
@@ -52,8 +55,8 @@ else {
   formData.value.parentName = props.pDept.name;
 }
 const rules = reactive({
-  code: [{ required: true, message: "部门编码不能为空", trigger: "blur" }],
-  name: [{ required: true, message: "部门名称不能为空", trigger: "blur" }],
+  code: [{ required: true, message: t("admin.department.editDept.codeRequired"), trigger: "blur" }],
+  name: [{ required: true, message: t("admin.department.editDept.nameRequired"), trigger: "blur" }],
 });
 
 const emit = defineEmits(["cancel", "ok"]);

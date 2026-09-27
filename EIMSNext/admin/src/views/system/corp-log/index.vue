@@ -22,7 +22,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showExportDialog = false">{{ $t("common.cancel") }}</el-button>
-        <el-button type="primary" :loading="exporting" @click="submitExport">{{ $t("common.confirm") }}</el-button>
+        <el-button type="primary" :loading="exporting" :disabled="exporting" @click="submitExport">{{ $t("common.confirm") }}</el-button>
       </template>
     </el-dialog>
 
@@ -148,14 +148,14 @@ import type { ODataQuery } from "@/utils/query";
 import {
   AuditLog,
   AuditLogExportRequest,
-  AuditLogin,
-  AuditLoginExportRequest,
+  IdentityLoginAudit,
+  IdentityLoginAuditExportRequest,
   ExportColumn,
   ExportColumnType,
   ExportFormat,
   ExportResponse,
 } from "@eimsnext/models";
-import { auditLogService, auditLoginService } from "@eimsnext/services";
+import { auditLogService, identityLoginAuditService } from "@eimsnext/services";
 import buildQuery from "odata-query";
 import { useI18n } from "vue-i18n";
 
@@ -174,7 +174,7 @@ const loading = ref(false);
 const totalRef = ref(0);
 const pageNum = ref(1);
 const pageSize = ref(20);
-const loginData = ref<AuditLogin[]>([]);
+const loginData = ref<IdentityLoginAudit[]>([]);
 const actionData = ref<AuditLog[]>([]);
 const actionOptions = ref<string[]>([]);
 const entityTypeOptions = ref<string[]>([]);
@@ -337,7 +337,7 @@ const loadCount = async () => {
 
   totalRef.value =
     activeTab.value === "login"
-      ? await auditLoginService.count(query)
+      ? await identityLoginAuditService.count(query)
       : await auditLogService.count(query);
 };
 
@@ -348,7 +348,7 @@ const loadData = async () => {
     const query = buildQuery(queryParams.value);
 
     if (activeTab.value === "login") {
-      loginData.value = await auditLoginService.query<AuditLogin>(query);
+      loginData.value = await identityLoginAuditService.query<IdentityLoginAudit>(query);
     } else {
       actionData.value = await auditLogService.query<AuditLog>(query);
     }
@@ -394,14 +394,14 @@ const submitExport = async () => {
 
     if (activeTab.value === "login") {
       const [startTime, endTime] = loginFilters.dateRange;
-      const request: AuditLoginExportRequest = {
+      const request: IdentityLoginAuditExportRequest = {
         format: exportFormat.value,
         columns,
         userName: loginFilters.userName || undefined,
         startTime: startTime ? Number(startTime) : undefined,
         endTime: endTime ? Number(endTime) : undefined,
       };
-      result = await auditLoginService.export(request);
+      result = await identityLoginAuditService.export(request);
     } else {
       const [startTime, endTime] = actionFilters.dateRange;
       const request: AuditLogExportRequest = {
@@ -568,3 +568,4 @@ onMounted(async () => {
   }
 }
 </style>
+

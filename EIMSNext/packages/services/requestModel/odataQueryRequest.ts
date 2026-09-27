@@ -1,3 +1,5 @@
+import { FormDataPermissions, FormFieldPermission } from "@eimsnext/models";
+
 export class ODataQueryRequest {
   $filter?: string;
   $expand?: string;
@@ -14,6 +16,9 @@ export interface IDynamicFindOptions {
   skip: number;
   take: number;
   scope?: IDataScope;
+  keyword?: string;
+  searchFields?: string[];
+  includeDeleted?: boolean;
 }
 
 export interface IDynamicField {
@@ -35,6 +40,7 @@ export interface IFormDataFilterOptionsRequest {
   fieldType?: string;
   keyword?: string;
   filter?: IDynamicFilter;
+  permissionGroupId?: string;
   limit?: number;
 }
 
@@ -59,5 +65,12 @@ export enum SortDirection {
   Desc = -1,
 }
 export interface IDataScope {
-  authGroupId?: string;
+  permissionGroupId?: string;
+  formId?: string;
+  inheritMemberPermissions?: boolean;
+}
+
+export interface IFormDataPermissionScopeResponse {
+  formDataPermissions: FormDataPermissions;
+  formFieldPermissions?: FormFieldPermission[] | null;
 }

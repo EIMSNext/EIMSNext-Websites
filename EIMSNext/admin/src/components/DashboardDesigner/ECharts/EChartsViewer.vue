@@ -24,9 +24,10 @@
         <div v-if="!designerMode" class="header-btn no-drag" @click.stop="onRefresh">
           <et-icon icon="el-refresh" size="16px" />
         </div>
-        <div ref="sortRef" class="header-btn no-drag" @click.stop="onSort">
+        <div v-if="setting.chartType !== ChartType.Indicator && setting.chartType !== ChartType.Progress" ref="sortRef" class="header-btn no-drag" @click.stop="onSort">
           <et-icon icon="el-sort" size="16px" />
         </div>
+        <slot name="header-actions"></slot>
       </div>
       <div class="header-title" :title="title">{{ title }}</div>
     </div>
@@ -38,7 +39,7 @@
       <el-empty class="et-dash-empty">
         <div class="empty-wrapper">
           <i class="x-icon iconfont-fx-pc icon-info-o"></i>
-          <div class="empty-text">组件配置异常</div>
+          <div class="empty-text">{{ t("admin.dashItem.invalidConfig") }}</div>
         </div>
       </el-empty>
     </template>
@@ -46,13 +47,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, onUnmounted, ref, watch } from "vue";
 import echarts from "@/plugins/echarts";
 import { chartSettingValidate, ChartType, getChartSort, IChartSetting } from "./type";
-import { AggCalcRequest, AggregateFun, aggregateService } from "@eimsnext/services";
+import { AggCalcRequest, AggPreviewRequest, AggregateFun, aggregateService } from "@eimsnext/services";
 import { convertToFieldArray } from "@eimsnext/utils";
+import { DashboardItemDef } from "@eimsnext/models";
 import { IConditionList, ISortItem, ISortList, toDynamicFilter } from "@eimsnext/components";
 import DashSort from "../components/DashSort.vue";
+import { useI18n } from "vue-i18n";
+import { usePublicHttp } from "@/views/public/shared";
+import { buildWaterfallSeries } from "./waterfall";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "EChartsViewer",
@@ -65,6 +72,9 @@ const props = withDefaults(
     showHeader?: boolean;
     designerMode?: boolean;
     externalFilter?: IConditionList;
+    isPublic?: boolean;
+    publicToken?: string;
+    itemDef?: DashboardItemDef;
   }>(),
   {
     showHeader: true,
@@ -73,196 +83,195 @@ const props = withDefaults(
 );
 
 const chartOpts = ref<echarts.EChartsCoreOption>();
+const publicHttp = usePublicHttp();
+let requestVersion = 0;
 
-const mergeFilter = (ownFilter?: IConditionList, externalFilter?: IConditionList) => {
-  const items: IConditionList[] = [];
+watch(
+  () => props.publicToken,
+  (token) => {
+    publicHttp.token.value = token || null;
+  },
+  { immediate: true },
+);
 
-  if (ownFilter?.items?.length || ownFilter?.field) {
-    items.push(ownFilter);
-  }
+const formatNumber = (value: number, decimalPlaces = 0) => {
+  if (!Number.isFinite(value)) return "-";
+  const places = Number.isInteger(decimalPlaces) && decimalPlaces >= 0 && decimalPlaces <= 6 ? decimalPlaces : 0;
+  return new Intl.NumberFormat(undefined, { minimumFractionDigits: places, maximumFractionDigits: places }).format(value);
+};
 
-  if (externalFilter?.items?.length || externalFilter?.field) {
-    items.push(externalFilter);
-  }
+const metricKey = (metric: { id: string; aggFun?: AggregateFun }) => `${metric.id}_${metric.aggFun || AggregateFun.Count}`;
+const firstNumericValue = (values: any[] | undefined) => {
+  const value = Number(values?.[0]);
+  return Number.isFinite(value) ? value : 0;
+};
 
-  if (items.length == 0) {
-    return undefined;
-  }
-
-  if (items.length == 1) {
-    return items[0];
-  }
-
-  return {
-    id: `merged_${Date.now()}`,
-    rel: "and",
-    items,
-  } as IConditionList;
+const themeColor = (name: string, fallback: string) => {
+  if (typeof document === "undefined") return fallback;
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 };
 
 const getChartOpts = async (setting: IChartSetting) => {
-  if (!chartSettingValidate(setting)) return null;
+  const currentRequest = ++requestVersion;
+  if (!chartSettingValidate(setting)) {
+    chartOpts.value = undefined;
+    return null;
+  }
 
   let chartType = setting.chartType || "";
   let chartSubType = setting.chartSubType || chartType;
+  const primaryColor = themeColor("--et-color-primary", "#2E73FF");
+  const mutedColor = themeColor("--et-bg-muted", isDark.value ? "#374151" : "#E6EAF2");
   let opt: any;
-  const mergedFilter = mergeFilter(setting.filter, props.externalFilter);
   let aggRequest: AggCalcRequest = {
-    dataSource: setting.datasource,
-    dimensions: [...(setting.dimension1 || []), ...(setting.dimension2 || [])],
-    metrics: [...(setting.metrics || [])],
-    filter: mergedFilter ? toDynamicFilter(mergedFilter) : undefined,
+    itemId: props.itemDef?.id || "",
+    filter: props.externalFilter ? toDynamicFilter(props.externalFilter) : undefined,
     sort: getChartSort(setting),
-    take: setting.takeEnable ? setting.take : -1,
   };
-  let aggResult = await aggregateService.calucate(aggRequest);
+  if (!aggRequest.itemId) {
+    chartOpts.value = undefined;
+    return null;
+  }
+  const previewRequest: AggPreviewRequest = { ...aggRequest, details: JSON.stringify(setting) };
+  const aggResult = props.designerMode
+    ? await aggregateService.preview(previewRequest)
+    : props.isPublic && props.publicToken
+    ? await publicHttp.api.post<any[]>("/aggregate/calucate", aggRequest)
+    : await aggregateService.calucate(aggRequest);
+  if (currentRequest !== requestVersion) return null;
   let ds = convertToFieldArray(aggResult);
   switch (chartType) {
-    case ChartType.VBar: // 垂直柱状图
+    case ChartType.Indicator: {
+      const metric = setting.metrics![0];
+      const value = firstNumericValue(ds[metricKey(metric)]);
+      const options = setting.indicator || {};
       opt = {
-        xAxis: { type: "category", data: ds[setting.dimension1![0].id] },
-        yAxis: { type: "value" },
-        series: [
-          {
-            type: "bar",
-            data: ds[
-              `${setting.metrics![0].id}_${setting.metrics![0].aggFun || AggregateFun.Count}`
-            ],
-          },
-        ],
+        title: options.showName === false ? undefined : { text: metric.title || metric.label || metric.id, left: "center", top: "18%" },
+        series: [{ type: "gauge", startAngle: 90, endAngle: -270, radius: "76%", pointer: { show: false }, progress: { show: false }, itemStyle: { color: primaryColor }, axisLine: { lineStyle: { width: 0 } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 32, offsetCenter: [0, "8%"], color: primaryColor, formatter: () => formatNumber(value, options.decimalPlaces || 0) }, data: [{ value }] }],
       };
-
-      if (chartSubType == "stack") {
-        let legend: any[] = [];
-        let series: any[] = [];
-        setting.metrics!.forEach((m) => {
-          legend.push(m.title);
-          series.push({
-            name: m.title,
-            type: "bar",
-            stack: "total",
-            data: ds[`${m.id}_${m.aggFun || AggregateFun.Count}`],
-          });
-        });
-        opt = {
-          xAxis: { type: "category", data: ds[setting.dimension1![0].id] },
-          yAxis: { type: "value" },
-          tooltip: { trigger: "axis", axisPointer: { type: "shadow" } }, // 轴提示优化
-          legend: { data: legend },
-          series: series,
-          // legend: { data: ['系列1', '系列2', '系列3'] }, // 堆叠系列图例
-          // series: [
-          //     { name: '系列1', type: 'bar', stack: 'total', data: [5, 20, 36, 10, 15] },
-          //     { name: '系列2', type: 'bar', stack: 'total', data: [3, 15, 22, 8, 10] },
-          //     { name: '系列3', type: 'bar', stack: 'total', data: [2, 8, 15, 5, 6] }
-          // ]
-        };
-      }
-
-      if (chartSubType == "waterfall") {
-        let colors = ["#66b1ff", "#73d13d", "#ff4d4f", "#73d13d", "#ff7a45"];
-        let legend: any[] = [];
-        let series: any[] = [];
-        setting.metrics!.forEach((m) => {
-          legend.push(m.title);
-          let serie = { name: m.title, type: "bar", data: [] as any[] };
-          ds[`${m.id}_${m.aggFun || AggregateFun.Count}`].forEach((v, i) => {
-            serie.data.push({ value: v, itemStyle: { color: colors[i] } });
-          });
-          series.push(serie);
-        });
-
-        opt = {
-          xAxis: { type: "category", data: ds[setting.dimension1![0].id] },
-          yAxis: { type: "value" },
-          tooltip: { trigger: "axis" },
-          legend: { data: legend },
-          series: series,
-          // series: [
-          //     {
-          //         name: '数值',
-          //         type: 'bar',
-          //         data: [
-          //             { value: 100, itemStyle: { color:  } }, // 初始值
-          //             { value: 50, itemStyle: { color:  } },  // 新增（正）
-          //             { value: -30, itemStyle: { color:  } }, // 减少（负）
-          //             { value: 20, itemStyle: { color:  } },  // 调整（正）
-          //             {
-          //                 value: 140,
-          //                 itemStyle: { color:  },
-          //                 label: { show: true, position: 'top' } // 汇总项显示数值
-          //             }
-          //         ]
-          //     }
-          // ]
-        };
-      }
-
-      chartOpts.value = opt;
+      chartOpts.value = applyChartTheme(opt);
       break;
-    case ChartType.HBar: // 水平柱状图（x/y轴类型互换）
+    }
+    case ChartType.Progress: {
+      const actualMetric = setting.metrics![0];
+      const actual = firstNumericValue(ds[metricKey(actualMetric)]);
+      const progress = setting.progress;
+      const target = progress?.targetType === "metric" && progress.targetMetric
+        ? firstNumericValue(ds[metricKey(progress.targetMetric)])
+        : Number(progress?.targetValue);
+      if (!Number.isFinite(target) || target <= 0) {
+        chartOpts.value = undefined;
+        break;
+      }
+      const percent = actual / target * 100;
+      const options = progress || {};
+      const style = options.style || "ring";
+      const labelParts = [
+        options.showActual ? formatNumber(actual, options.decimalPlaces || 0) : undefined,
+        options.showTarget ? formatNumber(target, options.decimalPlaces || 0) : undefined,
+        options.showPercent === false ? undefined : `${formatNumber(percent, options.decimalPlaces || 0)}%`,
+      ].filter(Boolean);
+      const isSemi = style === "semi";
       opt = {
-        xAxis: { type: "value" },
-        yAxis: { type: "category", data: ds[setting.dimension1![0].id] },
-        series: [
-          {
-            type: "bar",
-            data: ds[
-              `${setting.metrics![0].id}_${setting.metrics![0].aggFun || AggregateFun.Count}`
-            ],
-          },
-        ],
+        title: options.showName === false ? undefined : { text: actualMetric.title || actualMetric.label || actualMetric.id, left: "center", top: "2%" },
+        series: [{ type: "gauge", startAngle: isSemi ? 180 : 90, endAngle: isSemi ? 0 : -270, center: isSemi ? ["50%", "65%"] : ["50%", "50%"], radius: isSemi ? "90%" : "72%", pointer: { show: false }, progress: { show: true, width: style === "thin" ? 7 : 14, roundCap: true, itemStyle: { color: primaryColor } }, axisLine: { lineStyle: { width: style === "thin" ? 7 : 14, color: [[1, mutedColor]] } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { valueAnimation: true, fontSize: 24, offsetCenter: isSemi ? [0, "18%"] : [0, "8%"], color: primaryColor, formatter: () => labelParts.join(" / ") }, data: [{ value: Math.min(100, Math.max(0, percent)) }] }],
       };
-      if (chartSubType == "stack") {
-        let legend: any[] = [];
-        let series: any[] = [];
-        setting.metrics!.forEach((m) => {
-          legend.push(m.title);
-          series.push({
-            name: m.title,
-            type: "bar",
-            stack: "total",
-            data: ds[`${m.id}_${m.aggFun || AggregateFun.Count}`],
-          });
-        });
-
-        opt = {
-          xAxis: { type: "value" },
-          yAxis: { type: "category", data: ds[setting.dimension1![0].id] },
-          tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-          legend: { data: legend },
-          series: series,
-        };
-      }
-      chartOpts.value = opt;
+      chartOpts.value = applyChartTheme(opt);
       break;
+    }
+    case ChartType.VBar:
+    case ChartType.HBar: {
+      const bar = setting.bar || {};
+      const categories = ds[setting.dimension1![0].id] || [];
+      const isHorizontal = chartType === ChartType.HBar;
+      const labelLayout = bar.labelOverlap === "hide"
+        ? { hideOverlap: true }
+        : bar.labelOverlap === "stagger"
+          ? (params: any) => (isHorizontal ? { dy: params.dataIndex % 2 ? 14 : 0 } : { dx: params.dataIndex % 2 ? 14 : 0 })
+          : { moveOverlap: isHorizontal ? "shiftY" : "shiftX" };
+      let series = setting.metrics!.map((metric) => ({
+        name: metric.title || metric.label || metric.id,
+        type: "bar",
+        data: ds[metricKey(metric)] || [],
+        stack: chartSubType === "stack" ? "total" : undefined,
+        label: { show: bar.showDataLabel ?? false, position: chartType === ChartType.HBar ? "right" : "top" },
+        labelLayout,
+      }));
+      if (chartSubType === "waterfall") {
+        series = buildWaterfallSeries({
+          metrics: setting.metrics!,
+          data: ds,
+          isHorizontal,
+          positiveColor: themeColor("--et-color-success", primaryColor),
+          negativeColor: themeColor("--et-color-danger", primaryColor),
+          formatNumber,
+          labelShow: bar.showDataLabel ?? false,
+          labelLayout,
+        });
+      }
+      const categoryAxis = {
+        type: "category",
+        data: categories,
+        axisLabel: {
+          rotate: bar.categoryAxisLabelMode === "tilt" ? 35 : bar.categoryAxisLabelMode === "vertical" ? 90 : 0,
+          interval: bar.showAllCategoryLabels ? 0 : "auto",
+        },
+      };
+      const valueAxis = {
+        type: "value",
+        name: bar.valueAxisTitle || undefined,
+        min: bar.valueAxisMin ?? undefined,
+        max: bar.valueAxisMax ?? undefined,
+      };
+      opt = {
+        xAxis: isHorizontal ? valueAxis : categoryAxis,
+        yAxis: isHorizontal ? categoryAxis : valueAxis,
+        tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+        legend: setting.metrics!.length > 1 ? { data: series.map((item: any) => item.name) } : undefined,
+        dataZoom: bar.showDataZoom
+          ? isHorizontal ? [{ type: "inside", yAxisIndex: 0 }, { type: "slider", yAxisIndex: 0 }] : [{ type: "inside" }, { type: "slider" }]
+          : undefined,
+        series,
+      };
+      chartOpts.value = applyChartTheme(opt);
+      break;
+    }
     case ChartType.Line: // 折线图
+      const line = setting.line || {};
+      const lineXAxis = ds[setting.dimension1![0].id] || [];
+      const lineSeries = setting.metrics!.map((metric) => ({
+        name: metric.title || metric.label || metric.id,
+        type: "line",
+        data: ds[metricKey(metric)] || [],
+        smooth: line.smooth ?? chartSubType === "smooth",
+        showSymbol: line.showSymbol ?? true,
+        label: { show: line.showDataLabel ?? false },
+        labelLayout: line.labelOverlap === "hide"
+          ? { hideOverlap: true }
+          : line.labelOverlap === "stagger"
+            ? (params: any) => ({ dy: params.dataIndex % 2 ? 14 : 0 })
+            : { moveOverlap: "shiftY" },
+      }));
       opt = {
-        xAxis: { type: "category", data: ds[setting.dimension1![0].id] },
-        yAxis: { type: "value" },
-        series: [
-          {
-            type: "line",
-            data: ds[
-              `${setting.metrics![0].id}_${setting.metrics![0].aggFun || AggregateFun.Count}`
-            ],
-          },
-        ],
+        xAxis: { type: "category", data: lineXAxis, axisLabel: { rotate: line.xAxisLabelMode === "tilt" ? 35 : line.xAxisLabelMode === "vertical" ? 90 : 0, interval: line.showAllLabels ? 0 : "auto" } },
+        yAxis: { type: "value", name: line.yAxisTitle || undefined, min: line.yAxisMin ?? undefined, max: line.yAxisMax ?? undefined },
+        tooltip: { trigger: "axis" },
+        legend: lineSeries.length > 1 ? { data: lineSeries.map((series: any) => series.name) } : undefined,
+        dataZoom: line.showDataZoom ? [{ type: "inside" }, { type: "slider" }] : undefined,
+        series: lineSeries,
       };
       if (chartSubType == "stack") {
-        opt.series[0]["stack"] = "total";
+        opt.series.forEach((series: any) => { series.stack = "total"; });
       }
       if (chartSubType == "area") {
-        opt.series[0]["areaStyle"] = { color: "rgba(25,183,207,0.2)" };
+        opt.series.forEach((series: any) => { series.areaStyle = { color: primaryColor, opacity: 0.2 }; });
       }
-      if (chartSubType == "smooth") {
-        opt.series[0]["smooth"] = true;
-      }
+      if (chartSubType == "smooth") opt.series.forEach((series: any) => { series.smooth = true; });
       if (chartSubType == "step") {
-        opt.series[0]["step"] = "start";
+        opt.series.forEach((series: any) => { series.step = "start"; });
       }
 
-      chartOpts.value = opt;
+      chartOpts.value = applyChartTheme(opt);
       break;
     case ChartType.Pie: // 饼图（无需x/y轴，避免多余配置导致报错）
       let serie = { type: "pie", radius: "50%", data: [] as any[] };
@@ -294,7 +303,7 @@ const getChartOpts = async (setting: IChartSetting) => {
         opt.series[0]["center"] = ["50%", "50%"];
         opt.series[0]["roseType"] = "area";
       }
-      chartOpts.value = opt;
+      chartOpts.value = applyChartTheme(opt);
       break;
     default:
       chartOpts.value = undefined;
@@ -321,6 +330,54 @@ const setSort = (sort: ISortList) => {
   props.setting.sort = sort;
 };
 
+const isDark = ref(typeof document !== "undefined" && document.documentElement.classList.contains("dark"));
+
+const applyChartTheme = (opt: echarts.EChartsCoreOption | undefined): echarts.EChartsCoreOption | undefined => {
+  if (!opt) return opt;
+  const textColor = themeColor("--et-text-primary", isDark.value ? "#E5EAF3" : "#303133");
+  const axisColor = themeColor("--et-border-color", isDark.value ? "#6B7280" : "#DCDFE6");
+  const splitLineColor = themeColor("--et-border-color-light", isDark.value ? "#374151" : "#EBEEF5");
+  const tooltipBg = themeColor("--et-bg-container", isDark.value ? "#323232" : "#FFFFFF");
+  const tooltipText = textColor;
+
+  const themeDefaults = {
+    backgroundColor: "transparent",
+    textStyle: { color: textColor },
+    title: { textStyle: { color: textColor }, subtextStyle: { color: textColor } },
+    legend: { textStyle: { color: textColor } },
+    tooltip: {
+      backgroundColor: tooltipBg,
+      borderColor: tooltipBg,
+      textStyle: { color: tooltipText },
+    },
+    xAxis: {
+      axisLine: { lineStyle: { color: axisColor } },
+      axisLabel: { color: textColor },
+      splitLine: { lineStyle: { color: splitLineColor } },
+    },
+    yAxis: {
+      axisLine: { lineStyle: { color: axisColor } },
+      axisLabel: { color: textColor },
+      splitLine: { lineStyle: { color: splitLineColor } },
+    },
+  };
+
+  const mergeOptions = (defaults: any, overrides: any): any => {
+    if (overrides === undefined || overrides === null) return overrides;
+    if (!defaults || typeof defaults !== "object" || typeof overrides !== "object" || Array.isArray(overrides)) {
+      return overrides;
+    }
+
+    const merged = { ...defaults };
+    Object.entries(overrides).forEach(([key, value]) => {
+      merged[key] = mergeOptions(defaults[key], value);
+    });
+    return merged;
+  };
+
+  return mergeOptions(themeDefaults, opt) as echarts.EChartsCoreOption;
+};
+
 watch(
   () => props.setting,
   async (newVal) => {
@@ -343,6 +400,30 @@ watch(
   },
   { deep: true }
 );
+
+watch(isDark, async () => {
+  if (props.setting) await getChartOpts(props.setting);
+});
+
+onBeforeUnmount(() => {
+  requestVersion++;
+});
+
+let themeObserver: MutationObserver | undefined;
+onMounted(() => {
+  if (typeof document === "undefined") return;
+  themeObserver = new MutationObserver((records) => {
+    isDark.value = document.documentElement.classList.contains("dark");
+    if (records.some((record) => record.attributeName === "style") && props.setting) {
+      void getChartOpts(props.setting);
+    }
+  });
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style"] });
+});
+
+onUnmounted(() => {
+  themeObserver?.disconnect();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -371,15 +452,19 @@ watch(
   }
 
   .header-actions {
+    align-items: center;
     background: transparent;
     color: var(--et-text-secondary);
     cursor: pointer;
+    display: flex;
     float: right;
 
     .header-btn {
-      width: var(--et-size-30);
+      align-items: center;
+      display: inline-flex;
       height: var(--et-size-30);
-      display: inline-block;
+      justify-content: center;
+      width: var(--et-size-30);
     }
   }
 }

@@ -44,7 +44,7 @@
         </div>
         <div class="_fd-ai-chat-input">
             <div class="_fd-ai-chat-clear">
-                <el-button size="small" text round @click="clear"><i class="fc-icon icon-delete2"></i> 清空</el-button>
+                <el-button size="small" text round @click="clear"><i class="fc-icon icon-delete2"></i> {{ t('ai.clear') }}</el-button>
             </div>
             <el-input type="textarea" v-model="message" :placeholder="t('ai.placeholder')" resize="none"></el-input>
             <div class="fc-icon icon-suspend" v-if="chat && chat.status === 'loading'" @click="suspend"></div>
@@ -66,16 +66,16 @@ export default defineComponent({
             page: 0,
             limit: 3,
             pageData: [],
-            question: [
-                '生成一个就诊满意度问卷表单',
-                '创建一个建议收集表单，包含联系人、联系邮箱、分类和建议内容',
-                '追加一个用户信息表单',
-                '添加一个标签组件，显示文本为 "Tag"',
-                '删除商品简介字段',
-                '当单选框选择 "选项1" 时，显示输入框组件',
-                '设置输入框为必填，并限制长度必须大于13',
-                '商品价格字段使用数字输入框组件',
-                '给输入类组件补充占位提示文本（placeholder）'
+            questionKeys: [
+                'ai.example.medicalSurvey',
+                'ai.example.suggestionForm',
+                'ai.example.userInfoForm',
+                'ai.example.tagText',
+                'ai.example.deleteProductIntro',
+                'ai.example.radioShowInput',
+                'ai.example.requiredMinLength',
+                'ai.example.productPriceNumber',
+                'ai.example.placeholderTips'
             ],
             chat: null,
             history: []
@@ -94,7 +94,7 @@ export default defineComponent({
     },
     methods: {
         refresh() {
-            if (this.page * this.limit < this.question.length) {
+            if (this.page * this.limit < this.questionKeys.length) {
                 this.page++;
             } else {
                 this.page = 1;
@@ -102,7 +102,7 @@ export default defineComponent({
             const startIndex = (this.page - 1) * this.limit;
             const endIndex = startIndex + this.limit;
 
-            this.pageData = this.question.slice(startIndex, endIndex);
+            this.pageData = this.questionKeys.slice(startIndex, endIndex).map((key) => this.t(key));
         },
         send() {
             const message = (this.message || '').trim()

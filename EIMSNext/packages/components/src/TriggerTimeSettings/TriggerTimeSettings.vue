@@ -174,7 +174,7 @@ const emit = defineEmits<{
   "update:modelValue": [value: TriggerTimeSettingsValue];
 }>();
 
-const repeatTypeOptions = [
+const repeatTypeOptions = computed(() => [
   { value: TimerRepeatType.Once, label: t("comp.triggerTime.once") },
   { value: TimerRepeatType.Daily, label: t("comp.triggerTime.daily") },
   { value: TimerRepeatType.Weekly, label: t("comp.triggerTime.weekly") },
@@ -182,9 +182,9 @@ const repeatTypeOptions = [
   { value: TimerRepeatType.Monthly, label: t("comp.triggerTime.monthly") },
   { value: TimerRepeatType.Yearly, label: t("comp.triggerTime.yearly") },
   { value: TimerRepeatType.Custom, label: t("comp.triggerTime.custom") },
-];
+]);
 
-const weekdayOptions = [
+const weekdayOptions = computed(() => [
   { value: 0, label: t("comp.triggerTime.sun") },
   { value: 1, label: t("comp.triggerTime.mon") },
   { value: 2, label: t("comp.triggerTime.tue") },
@@ -192,15 +192,15 @@ const weekdayOptions = [
   { value: 4, label: t("comp.triggerTime.thu") },
   { value: 5, label: t("comp.triggerTime.fri") },
   { value: 6, label: t("comp.triggerTime.sat") },
-];
+]);
 
-const weekIndexOptions = [
+const weekIndexOptions = computed(() => [
   { value: 1, label: t("comp.triggerTime.first") },
   { value: 2, label: t("comp.triggerTime.second") },
   { value: 3, label: t("comp.triggerTime.third") },
   { value: 4, label: t("comp.triggerTime.fourth") },
   { value: 5, label: t("comp.triggerTime.last") },
-];
+]);
 
 const localValue = ref<TriggerTimeSettingsValue>(normalizeTriggerTimeSettings(
   props.modelValue?.mode ? props.modelValue : createDefaultTriggerTimeSettings(TriggerTimeMode.Custom),
@@ -219,7 +219,7 @@ const monthWeekday = ref(1);
 const currentFieldHasMinute = computed(() => hasMinutePrecision(localValue.value.field?.fieldFormat));
 const showCustomRepeatConfig = computed(() => localValue.value.repeatType === TimerRepeatType.Custom);
 
-const customStartTimeInput = computed<string | undefined>({
+const customStartTimeInput = computed<number | undefined>({
   get: () => toInputValue(localValue.value.custom?.startTime),
   set: (value) => {
     if (!localValue.value.custom) {
@@ -241,7 +241,7 @@ const fixedTimeInput = computed<string | undefined>({
   },
 });
 
-const endTimeInput = computed<string | undefined>({
+const endTimeInput = computed<number | undefined>({
   get: () => {
     const value = localValue.value.mode === TriggerTimeMode.Custom
       ? localValue.value.custom?.endTime
@@ -351,10 +351,10 @@ function emitChange() {
 }
 
 function toInputValue(value?: number) {
-  return value == null ? undefined : `${value}`;
+  return value;
 }
 
-function toTimestamp(value?: string) {
+function toTimestamp(value?: string | number) {
   if (!value) {
     return undefined;
   }

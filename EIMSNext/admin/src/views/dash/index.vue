@@ -1,8 +1,9 @@
 <template>
-  <div class="dash-edit-layout custom-scroll">
+  <el-result v-if="loadError" icon="error" :title="t('admin.dashboardDesigner.notAvailable')" />
+  <div v-else class="dash-edit-layout custom-scroll">
     <grid-layout
       ref="gridRef"
-      v-model:layout="state.layout"
+      v-model:layout="rootLayout"
       :col-num="colNum"
       :col-width="colWidth"
       :row-height="rowHeight"
@@ -18,14 +19,13 @@
       resize-ignore-from=".no-drag"
     >
       <grid-item
-        v-for="item in state.layout"
+        v-for="item in rootLayout"
         :x="item.x"
         :y="item.y"
         :w="item.w"
         :h="item.h"
         :i="item.i"
         :key="item.i"
-        @container-resized="containerResizedEvent"
         :minW="getMinWidth(item)"
         :minH="getMinHeight(item)"
         :maxW="60"
@@ -35,11 +35,14 @@
         <DashItemCard
           v-if="state.items[item.i]"
           :item-def="state.items[item.i]"
-          :height="item.h"
-          :width="item.w"
+          :layout="state.layout"
+          :items="state.items"
           :is-view="true"
           :external-filter="chartFilters[state.items[item.i].id]"
+          :external-filters="chartFilters"
           @filter-change="handleFilterChange"
+          @quick-filter-change="handleQuickFilterChange"
+          @apply-filters="handleApplyFilters"
         />
       </grid-item>
     </grid-layout>
@@ -48,14 +51,18 @@
 <script lang="ts" setup>
 import { reactive } from "vue";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
-import { IGridLayoutItem, IGridLayoutState } from "@/components/DashboardDesigner/type";
+import { IGridLayoutItem, IGridLayoutState } from "@eimsnext/models";
 import { DashboardDef, DashboardItemDef } from "@eimsnext/models";
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useChartFilterLinkage } from "./useChartFilterLinkage";
+import { escapeODataString } from "@/utils/odata";
+import { getDashboardItemMinSize } from "@/components/DashboardDesigner/type";
+const { t } = useI18n();
 const route = useRoute();
 
-const dashId = route.params.dashId.toString();
+const dashId = route.params.dashId?.toString() || "";
 
 const state = reactive<IGridLayoutState>({
   layout: [],
@@ -63,53 +70,96 @@ const state = reactive<IGridLayoutState>({
   draggable: false,
   resizable: false,
 });
+const rootLayout = computed<IGridLayoutItem[]>({
+  get: () => state.layout.filter((item) => !item.parentLayoutId),
+  set: (updated) => {
+    const nested = state.layout.filter((item) => item.parentLayoutId);
+    state.layout.splice(0, state.layout.length, ...updated, ...nested);
+  },
+});
 const colNum = ref(24);
 const colWidth = ref(150);
 const rowHeight = ref(10);
+const dashboard = ref<DashboardDef>();
+const loadError = ref(false);
+const refreshTimer = ref<number>();
+let loadTask: Promise<void> | undefined;
+const { isFullscreen } = useFullscreen();
 
-const { chartFilters, rebuildChartFilters, handleFilterChange } = useChartFilterLinkage(state);
+const { chartFilters, rebuildChartFilters, handleFilterChange, handleQuickFilterChange, handleApplyFilters } = useChartFilterLinkage(state);
 
-const containerResizedEvent = (
-  i: string | number,
-  newH: number,
-  newW: number,
-  newHPx: number,
-  newWPx: number
-) => {};
-
-const getMinWidth = (item: IGridLayoutItem) => {
-  return 6;
-};
-const getMinHeight = (item: IGridLayoutItem) => {
-  return 3;
-};
+const getItemType = (item: IGridLayoutItem) => item.type ?? state.items[item.i]?.itemType;
+const getMinWidth = (item: IGridLayoutItem) => getDashboardItemMinSize(getItemType(item)).w;
+const getMinHeight = (item: IGridLayoutItem) => getDashboardItemMinSize(getItemType(item)).h;
 const getMaxHeight = (item: IGridLayoutItem) => {
   return 60;
 };
 
-dashboardDefService.get<DashboardDef>(dashId).then((dash) => {
-  try {
-    const parsedLayout = JSON.parse(dash.layout) || [];
-    state.layout.splice(0, state.layout.length);
-    state.layout.push(...parsedLayout);
+const loadDashboard = async () => {
+  if (loadTask) return loadTask;
+  loadTask = (async () => {
+    loadError.value = false;
+    try {
+      const dash = await dashboardDefService.get<DashboardDef>(dashId, undefined, { silentError: true });
+      dashboard.value = dash;
+      try {
+        const parsedLayout = JSON.parse(dash.layout) || [];
+        state.layout.splice(0, state.layout.length);
+        state.layout.push(...parsedLayout);
 
-    state.items = {};
+        state.items = {};
 
-    dashboardItemDefService
-      .query<DashboardItemDef>(`$filter=appid eq '${dash.appId}'&DashboardId=${dash.id}`)
-      .then((itemDefs) => {
+        const itemDefs = await dashboardItemDefService.query<DashboardItemDef>(
+          `?$filter=appId eq '${escapeODataString(dash.appId)}' and dashboardId eq '${escapeODataString(dash.id)}'`
+        );
         if (itemDefs && itemDefs.length > 0) {
           itemDefs.forEach((x) => {
             state.items[x.layoutId] = x;
           });
           rebuildChartFilters();
         }
-      });
-  } catch (e) {
-    console.error("布局JSON解析失败：", e);
-    state.layout.splice(0, state.layout.length); // 解析失败则清空布局
+      } catch (e) {
+        console.error("布局JSON解析失败：", e);
+        state.layout.splice(0, state.layout.length);
+      }
+    } catch {
+      dashboard.value = undefined;
+      state.layout.splice(0, state.layout.length);
+      state.items = {};
+      loadError.value = true;
+    } finally {
+      loadTask = undefined;
+    }
+  })();
+  return loadTask;
+};
+
+function clearRefreshTimer() {
+  if (refreshTimer.value) {
+    window.clearInterval(refreshTimer.value);
+    refreshTimer.value = undefined;
   }
-});
+}
+
+function setupRefreshTimer() {
+  clearRefreshTimer();
+  if (!isFullscreen.value || !dashboard.value?.autoRefreshEnabled) {
+    return;
+  }
+
+  const minutes = dashboard.value.autoRefreshIntervalMinutes || 15;
+  refreshTimer.value = window.setInterval(() => {
+    if (loadTask) return;
+    loadDashboard();
+  }, minutes * 60 * 1000);
+}
+
+watch(
+  () => [isFullscreen.value, dashboard.value?.autoRefreshEnabled, dashboard.value?.autoRefreshIntervalMinutes] as const,
+  setupRefreshTimer
+);
+onMounted(loadDashboard);
+onBeforeUnmount(clearRefreshTimer);
 </script>
 <style lang="scss" scoped>
 .dash-edit-layout {

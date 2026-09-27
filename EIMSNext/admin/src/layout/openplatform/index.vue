@@ -3,11 +3,11 @@
     <div class="open-shell">
       <aside class="open-sidebar">
         <div class="menu-group" v-for="group in menuGroups" :key="group.title">
-          <div v-if="group.title" class="group-title">{{ group.title }}</div>
+          <div v-if="group.title" class="group-title">{{ $t(group.title) }}</div>
           <router-link v-for="item in group.items" :key="item.path" custom :to="item.path" v-slot="{ navigate }">
             <div class="open-menu-item" :class="{ active: route.path === item.path }" @click="navigate">
               <et-icon :icon="item.icon" size="14" />
-              <span>{{ item.label }}</span>
+              <span>{{ item.label.includes('.') ? $t(item.label) : item.label }}</span>
             </div>
           </router-link>
         </div>
@@ -30,22 +30,22 @@ const route = useRoute();
 
 const menuGroups = [
   {
-    title: "资源管理",
+    title: "admin.shellMenu.resourceMgmt",
     items: [
-      { path: "/open-platform/pluginstore", label: "插件中心", icon: "el-Shop" },
-      { path: "/open-platform/plugin-manage", label: "插件管理", icon: "icon-settings" },
+      { path: "/open-platform/pluginstore", label: "admin.shellMenu.pluginCenter", icon: "el-Shop" },
+      { path: "/open-platform/plugin-manage", label: "admin.shellMenu.pluginManage", icon: "icon-settings" },
     ],
   },
   {
-    title: "密钥管理",
+    title: "admin.shellMenu.keyMgmt",
     items: [
       { path: "/open-platform/api-key", label: "API Key", icon: "el-Key" },
-      { path: "/open-platform/api-log", label: "API调用日志", icon: "el-Document" },
+      { path: "/open-platform/api-log", label: "admin.shellMenu.apiLog", icon: "el-Document" },
     ],
   },
   {
-    title: "开发者工具",
-    items: [{ path: "/open-platform/docs", label: "开发文档", icon: "el-Reading" }],
+    title: "admin.shellMenu.devTools",
+    items: [{ path: "/open-platform/docs", label: "admin.shellMenu.devDocs", icon: "el-Reading" }],
   },
 ];
 </script>

@@ -4,7 +4,7 @@ import {
   deepCopy,
   extend,
 } from "@eimsnext/form-render-core";
-import { defineComponent, markRaw, nextTick, watch } from "vue";
+import { defineComponent, markRaw, nextTick, reactive, watch } from "vue";
 
 const NAME = "fcGroup";
 
@@ -16,6 +16,14 @@ export default defineComponent({
     expand: Number,
     options: Object,
     button: {
+      type: Boolean,
+      default: true,
+    },
+    addable: {
+      type: Boolean,
+      default: true,
+    },
+    deletable: {
       type: Boolean,
       default: true,
     },
@@ -40,6 +48,14 @@ export default defineComponent({
       type: Boolean,
       default: undefined,
     },
+    editable: {
+      type: Boolean,
+      default: true,
+    },
+    initialRowsAreNew: {
+      type: Boolean,
+      default: false,
+    },
     onBeforeRemove: {
       type: Function,
       default: () => {},
@@ -57,6 +73,8 @@ export default defineComponent({
       cacheRule: {},
       cacheValue: {},
       sort: [],
+      syncingModelValue: false,
+      pendingLocalModelValue: null,
       form: markRaw(this.formCreateInject.form.$form()),
     };
   },
@@ -94,12 +112,28 @@ export default defineComponent({
     modelValue: {
       handler(n) {
         n = n || [];
+        const serialized = JSON.stringify(n);
+        if (serialized === this.pendingLocalModelValue) {
+          this.pendingLocalModelValue = null;
+          const lengthDelta = n.length - this.sort.length;
+          if (lengthDelta > 0) {
+            for (let i = 0; i < lengthDelta; i += 1) {
+              this.addRule(this.sort.length + i, true, true);
+            }
+          } else if (lengthDelta < 0) {
+            for (let i = 0; i < -lengthDelta; i += 1) {
+              this.removeRule(this.sort[this.sort.length - i - 1]);
+            }
+          }
+          return;
+        }
+        this.syncingModelValue = true;
         let keys = this.sort,
           total = keys.length,
           len = total - n.length;
         if (len < 0) {
           for (let i = len; i < 0; i++) {
-            this.addRule(n.length + i, true);
+            this.addRule(n.length + i, true, false);
           }
           for (let i = 0; i < total; i++) {
             this.setValue(keys[i], n[i]);
@@ -114,6 +148,11 @@ export default defineComponent({
             this.setValue(keys[i], n[i]);
           });
         }
+        nextTick(() => {
+          nextTick(() => {
+            this.syncingModelValue = false;
+          });
+        });
       },
       deep: true,
     },
@@ -126,10 +165,12 @@ export default defineComponent({
       this.cacheValue[k] = JSON.stringify(val);
     },
     input(value) {
+      this.pendingLocalModelValue = JSON.stringify(value);
       this.$emit("update:modelValue", value);
       this.$emit("change", value);
     },
     formData(key, formData) {
+      if (this.syncingModelValue) return;
       const cacheRule = this.cacheRule;
       const keys = this.sort;
       if (keys.filter(k => cacheRule[k] && cacheRule[k].$f).length !== keys.length) {
@@ -153,11 +194,15 @@ export default defineComponent({
       ) {
         return;
       }
-      this.cacheRule[key].$f && this.cacheRule[key].$f.coverValue(value);
+      const api = this.cacheRule[key].$f;
+      if (api) {
+        api.setValue(value);
+      }
+      this.cacheRule[key].version += 1;
       this.cache(key, value);
     },
-    addRule(i, emit) {
-      const rule = this.formCreateInject.form.copyRules(this.rule || []);
+    addRule(i, emit, isNew = false) {
+      const rule = reactive(this.formCreateInject.form.copyRules(this.rule || []));
       const options = this.options
         ? { ...this.options }
         : {
@@ -173,7 +218,7 @@ export default defineComponent({
         );
       }
       this.parse && this.parse({ rule, options, index: this.sort.length });
-      this.cacheRule[++this.len] = { rule, options };
+      this.cacheRule[++this.len] = { rule, options, version: 0, isNew };
       if (emit) {
         nextTick(() =>
           this.$emit("add", rule, Object.keys(this.cacheRule).length - 1)
@@ -183,6 +228,11 @@ export default defineComponent({
     add$f(i, key, $f) {
       this.cacheRule[key].$f = $f;
       nextTick(() => {
+        const value = this.modelValue[i];
+        $f.setValue(
+          this.field ? { [this.field]: this._value(value) } : value || {},
+        );
+        $f.refresh();
         this.$emit("itemMounted", $f, Object.keys(this.cacheRule).indexOf(key));
       });
     },
@@ -195,7 +245,11 @@ export default defineComponent({
       }
     },
     add(i) {
-      if (this.disabled || false === this.onBeforeAdd(this.modelValue)) {
+      if (
+        this.disabled ||
+        !this.addable ||
+        false === this.onBeforeAdd(this.modelValue)
+      ) {
         return;
       }
       const value = [...this.modelValue];
@@ -207,6 +261,7 @@ export default defineComponent({
     del(index, key) {
       if (
         this.disabled ||
+        !this.deletable ||
         false === this.onBeforeRemove(this.modelValue, index)
       ) {
         return;
@@ -271,10 +326,10 @@ export default defineComponent({
         });
       }
       const btn = [];
-      if ((!this.max || total < this.max) && total === index + 1) {
+      if (this.addable && (!this.max || total < this.max) && total === index + 1) {
         btn.push(this.addIcon(key));
       }
-      if (total > this.min) {
+      if (this.deletable && total > this.min) {
         btn.push(this.delIcon(index, key));
       }
       if (this.sortBtn && index) {
@@ -290,7 +345,7 @@ export default defineComponent({
     },
     expandRule(n) {
       for (let i = 0; i < n; i++) {
-        this.addRule(i);
+        this.addRule(i, false, this.initialRowsAreNew);
       }
     },
   },
@@ -304,7 +359,7 @@ export default defineComponent({
     );
     const d = (this.expand || 0) - this.modelValue.length;
     for (let i = 0; i < this.modelValue.length; i++) {
-      this.addRule(i);
+      this.addRule(i, false, this.initialRowsAreNew);
     }
     if (d > 0) {
       this.expandRule(d);
@@ -324,29 +379,31 @@ export default defineComponent({
             add: this.add,
           })
         ) : (
-          <div
+          this.addable ? <div
             key={"a_def"}
             class="_fc-m-group-plus-minus _fc-m-group-add fc-clock"
             onClick={this.add}
-          />
+          /> : null
         )
       ) : (
         keys.map((key, index) => {
-          const { rule, options } = this.cacheRule[key];
+          const { rule, options, version, isNew } = this.cacheRule[key];
           const btn =
             button && !disabled ? this.makeIcon(keys.length, index, key) : [];
+          const rowDisabled = disabled || (this.editable === false && !isNew);
           return (
             <div class="_fc-m-group-container" key={key}>
               <Type
-                key={key}
+                key={`${key}-${version}`}
                 {...{
-                  disabled,
+                  disabled: rowDisabled,
                   "onUpdate:modelValue": (formData) =>
                     this.formData(key, formData),
                   "onEmit-event": (name, ...args) =>
                     this.emitEvent(name, args, index, key),
                   "onUpdate:api": ($f) => this.add$f(index, key, $f),
                   inFor: true,
+                  subForm: false,
                   modelValue: this.field
                     ? { [this.field]: this._value(this.modelValue[index]) }
                     : this.modelValue[index],

@@ -1,7 +1,7 @@
 <template>
   <et-dialog
     :model-value="modelValue"
-    class="member-select-dialog"
+    class="member-select-dialog no-head-divider no-foot-divider"
     :title="t('comp.memberSelectDialog.deptMemberList')"
     destroy-on-close
     width="750px"

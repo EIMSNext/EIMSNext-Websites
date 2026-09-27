@@ -94,6 +94,7 @@ const fieldItems = computed(() =>
     : buildFieldBlockFields(props.formDef, {
         showSubFields: props.showSubFields,
         showSystemFields: props.showSystemFields,
+        t,
       }),
 );
 

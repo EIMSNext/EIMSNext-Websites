@@ -283,7 +283,15 @@ export default function useContext(Handler) {
           )
         );
       }
-      this.bus.$once("load-end", () => {
+      const bindComputed = () => {
+        if (ctx.computedBound) {
+          return;
+        }
+        if (this.loading) {
+          this.bus.$once("load-end", bindComputed);
+          return;
+        }
+        ctx.computedBound = true;
         let computedRule = ctx.rule.computed;
         if (!computedRule) {
           return;
@@ -351,31 +359,40 @@ export default function useContext(Handler) {
           });
           const callback = (n) => {
             if (k === "value" || k === "defaultValue") {
-              this.onInput(ctx, n);
+              // Computed fields must update their source of truth immediately.
+              // A renderer with modelEmit (for example blur) otherwise updates only
+              // its local control cache, leaving the submitted rule value stale.
+              const formValue = ctx.parser.toFormValue(n, ctx);
+              if (this.isChange(ctx, formValue) || ctx.rule.value !== n) {
+                this.setValue(ctx, n, formValue, true);
+              }
             } else if (k[0] === "$") {
               this.api.setEffect(ctx.id, k, n);
             } else {
               deepSet(ctx.rule, k, n);
             }
           };
-          if (
-            k === "defaultValue" || k === "value"
-              ? [undefined, null, ""].indexOf(ctx.rule.value) > -1
-              : computedValue.value !== deepGet(ctx.rule, k)
-          ) {
+          const shouldApplyInitialValue =
+            k === "value"
+              ? true
+              : k === "defaultValue"
+                ? [undefined, null, ""].indexOf(ctx.rule.value) > -1
+                : computedValue.value !== deepGet(ctx.rule, k);
+          if (shouldApplyInitialValue) {
             callback(computedValue.value);
           }
           ctx.watch.push(
             watch(computedValue, (n) => {
-              // 简化版本：直接执行更新
               oldValue = n;
-              setTimeout(() => {
-                callback(n);
-              });
+              callback(n);
             })
           );
         });
-      });
+      };
+      this.bus.$once("load-end", bindComputed);
+      // Dynamic group rows are created after the initial load event; bind formulas
+      // on the next tick as well so their independent form instance is covered.
+      nextTick(bindComputed);
       this.watchEffect(ctx);
     },
     adapterValidate(validate, ctx) {

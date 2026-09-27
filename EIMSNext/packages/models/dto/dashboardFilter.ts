@@ -52,6 +52,25 @@ export interface DashboardFilterLinkage {
   sourceFilterIds?: string[];
 }
 
+export interface DashboardQuickFilterSetting {
+  version: 1;
+  kind: "quick-filter";
+  name: string;
+  showTitle: boolean;
+  options: DashboardQuickFilterOption[];
+}
+
+export interface DashboardQuickFilterOption {
+  id: string;
+  name: string;
+  conditions: DashboardFilterSetting[];
+}
+
+export interface DashboardFilterButtonSetting {
+  version: 1;
+  kind: "filter-button";
+}
+
 export type DashboardFilterMode = "options" | "text" | "range";
 export type DashboardRangeSourceType = "staticOptions" | "memberScope" | "distinctData" | "fixedRange";
 export type DashboardDefaultValueMode = "static" | "dynamic";

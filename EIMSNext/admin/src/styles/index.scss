@@ -1,5 +1,10 @@
 @use "./reset";
 
+.el-dialog .el-dialog__title {
+  font-size: var(--et-font-size-18) !important;
+  font-weight: 700 !important;
+}
+
 .app-container {
   padding: var(--et-space-15);
 }
@@ -82,7 +87,11 @@
 }
 
 .form-wrapper.editdata > .data-container {
-  height: calc(100vh - 201px);
+  height: calc(100vh - 204px);
+}
+
+.form-wrapper.editdata.no-toolbar > .data-container {
+  height: calc(100vh - 180px);
 }
 
 .toolbar-container.small-bar {

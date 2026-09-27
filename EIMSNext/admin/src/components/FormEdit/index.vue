@@ -5,10 +5,11 @@
     </template>
     <template #top-center>
       <el-tabs v-model="activeName" class="nav-tabs" :before-leave="tabChanging">
-        <el-tab-pane label="表单设计" name="formedit" />
-        <el-tab-pane v-if="usingFlow" label="流程设定" name="workflow" />
-        <el-tab-pane label="高级功能" name="advance" />
-        <el-tab-pane label="表单发布" name="publish" />
+        <el-tab-pane :label="t('admin.formEdit.design')" name="formedit" />
+        <el-tab-pane v-if="usingFlow" :label="t('admin.formEdit.workflow')" name="workflow" />
+        <el-tab-pane :label="t('admin.formEdit.extension')" name="extension" />
+        <el-tab-pane :label="t('admin.formEdit.publish')" name="publish" />
+        <el-tab-pane :label="t('admin.formEdit.dataManage')" name="datamanage" />
       </el-tabs>
     </template>
     <div v-if="loadedTabs.formedit" v-show="activeName == 'formedit'">
@@ -17,11 +18,14 @@
     <div v-if="usingFlow && loadedTabs.workflow" v-show="activeName == 'workflow'" class="main-content-container">
       <WorkflowDesigner ref="wfDesigner" :appId="formDef.appId" :formId="formDef.id" />
     </div>
-    <div v-if="loadedTabs.advance" v-show="activeName == 'advance'" class="main-content-container">
-      <Advanced :formDef="formDefRef!"></Advanced>
+    <div v-if="loadedTabs.extension" v-show="activeName == 'extension'" class="main-content-container">
+      <Advanced :formDef="formDefRef!" :initial-tab="initialAdvancedTab"></Advanced>
     </div>
     <div v-if="loadedTabs.publish" v-show="activeName == 'publish'" class="main-content-container">
-      <Publish :formDef="formDefRef!"></Publish>
+      <Publish ref="publishRef" :formDef="formDefRef!"></Publish>
+    </div>
+    <div v-if="loadedTabs.datamanage" v-show="activeName == 'datamanage'" class="main-content-container">
+      <DataManage :form-def="formDefRef!" />
     </div>
   </et-drawer>
 </template>
@@ -32,15 +36,16 @@ import { TabPaneName } from "element-plus";
 import "@eimsnext/form-builder/dist/index.css";
 import { FormBuilder } from "@eimsnext/form-builder";
 import { useSystemStore } from "@/store/system";
-import { FormContent, FormDef } from "@eimsnext/models";
+import { TenantAccessSnapshot, FieldType, FormContent, FormDef, ScopeMode } from "@eimsnext/models";
 import { useFormStore, useContextStore } from "@eimsnext/store";
 import { ConfirmResult, EtConfirm, MessageIcon } from "@eimsnext/components";
 import { useI18n } from "vue-i18n";
-import { formDefService } from "@eimsnext/services";
+import { formDefService, systemService } from "@eimsnext/services";
 
 const WorkflowDesigner = defineAsyncComponent(() => import("../WorkflowDesigner/index.vue"));
 const Advanced = defineAsyncComponent(() => import("./Advanced/index.vue"));
 const Publish = defineAsyncComponent(() => import("./Publish/index.vue"));
+const DataManage = defineAsyncComponent(() => import("./DataManage/index.vue"));
 const { t } = useI18n();
 
 defineOptions({
@@ -51,44 +56,152 @@ const props = defineProps<{
   modelValue: boolean;
   formDef: FormDef;
   usingFlow: boolean;
-  isLedger: boolean;
+  initialTab?: string;
+  initialAdvancedTab?: string;
 }>();
 
 const formStore = useFormStore();
 const contextStore = useContextStore();
 const formBuilder = ref<InstanceType<typeof FormBuilder>>();
 const wfDesigner = ref<{ isDirty: () => boolean; save: () => void }>();
+const publishRef = ref<{ beforeClose: () => Promise<boolean> }>();
 const systemStore = useSystemStore();
 const locale = computed(() => systemStore.locale);
 
 const formName = ref(props.formDef.name);
 const formDefRef = ref<FormDef>(props.formDef);
-const activeName = ref("formedit");
+const adminPermissions = ref<TenantAccessSnapshot>();
+const activeName = ref(props.initialTab || "formedit");
+const initialAdvancedTab = computed(() => props.initialAdvancedTab || "advanced-data");
 const loadedTabs = ref<Record<string, boolean>>({
   formedit: true,
   workflow: false,
-  advance: false,
+  extension: false,
   publish: false,
+  datamanage: false,
 });
 
 watch(activeName, (tabName) => {
   loadedTabs.value[tabName] = true;
 }, { immediate: true });
 
+type FormRuleNode = {
+  field?: string;
+  type?: string;
+  props?: Record<string, any>;
+  children?: FormRuleNode[];
+  columns?: FormRuleNode[];
+  subForm?: FormRuleNode[];
+  [key: string]: any;
+};
+
+const scopeFieldTypes = new Set<string>([
+  FieldType.Department1,
+  FieldType.Department2,
+  FieldType.Employee1,
+  FieldType.Employee2,
+]);
+
+const parseLayout = (layout: unknown): { root?: FormRuleNode | FormRuleNode[]; fromString: boolean } => {
+  if (!layout) return { fromString: false };
+  if (typeof layout === "string") {
+    try {
+      return { root: JSON.parse(layout), fromString: true };
+    } catch {
+      return { fromString: true };
+    }
+  }
+
+  return { root: layout as FormRuleNode | FormRuleNode[], fromString: false };
+};
+
+const visitRuleNodes = (root: unknown, visitor: (node: FormRuleNode) => void) => {
+  const visit = (node: unknown) => {
+    if (!node) return;
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
+    if (typeof node !== "object") return;
+
+    const rule = node as FormRuleNode;
+    visitor(rule);
+    visit(rule.children);
+    visit(rule.columns);
+    visit(rule.subForm);
+    visit(rule.rule);
+  };
+
+  visit(root);
+};
+
+const collectScopedFieldKeys = (content?: FormContent) => {
+  const fieldKeys = new Set<string>();
+  const { root } = parseLayout(content?.layout);
+  visitRuleNodes(root, (rule) => {
+    if (rule.field && scopeFieldTypes.has(String(rule.type))) fieldKeys.add(rule.field);
+  });
+  return fieldKeys;
+};
+
+const loadAdminPermissions = async () => {
+  if (!adminPermissions.value) adminPermissions.value = await systemService.getAdminPermissions();
+  return adminPermissions.value;
+};
+
+const getManagedDepartmentIds = async () => {
+  const permissions = await loadAdminPermissions();
+  if (!permissions.isNormalAdmin) return [];
+  if (permissions.contactManageDepartmentScopeMode !== ScopeMode.Partial) return [];
+  return permissions.contactManageDepartmentIds || [];
+};
+
+const applyDefaultAdminScopes = async (content: FormContent) => {
+  const managedDepartmentIds = await getManagedDepartmentIds();
+  if (managedDepartmentIds.length === 0) return content;
+
+  const previousFieldKeys = collectScopedFieldKeys(formDefRef.value.content);
+  const layout = parseLayout(content.layout);
+  let changed = false;
+
+  visitRuleNodes(layout.root, (rule) => {
+    if (!rule.field || previousFieldKeys.has(rule.field) || !scopeFieldTypes.has(String(rule.type))) return;
+
+    const props = rule.props || {};
+    const hasManualScope = props.limitType === "custom" || (Array.isArray(props.limitScope) && props.limitScope.length > 0);
+    if (hasManualScope) return;
+
+    rule.props = {
+      ...props,
+      limitType: "custom",
+      limitScope: [...managedDepartmentIds],
+    };
+    changed = true;
+  });
+
+  if (changed && layout.fromString && layout.root) {
+    content.layout = JSON.stringify(layout.root);
+  }
+
+  return content;
+};
+
 const onSave = async (content: FormContent) => {
+  const scopedContent = await applyDefaultAdminScopes(content);
   let req = {
     id: props.formDef.id,
     appId: props.formDef.appId,
     name: formName.value,
-    content: content,
+    content: scopedContent,
   };
 
   let resp = await formDefService.patch<FormDef>(req.id, req);
   formDefRef.value = resp;
+  formBuilder.value?.resetDirty(resp.content);
   formStore.update(resp);
   contextStore.setAppChanged(); //reload 菜单
 
-  ElMessage.success("保存成功");
+  ElMessage.success(t("admin.formEdit.saveSuccess"));
 };
 const tabChanging = async (activeName: TabPaneName, oldActiveName: TabPaneName) => {
   return await askSave(oldActiveName.toString());
@@ -97,13 +210,13 @@ const tabChanging = async (activeName: TabPaneName, oldActiveName: TabPaneName) 
 const askSave = async (tabName: string): Promise<boolean> => {
   if (tabName === "formedit" && formBuilder.value.isDirty()) {
     let confirm = await EtConfirm.showDialog(
-      "你修改了表单设计但没有保存，是否需要保存表单设计并继续？",
+      t("admin.formEdit.designDirtyContent"),
       {
-        title: "表单设计有修改，是否保存？",
+        title: t("admin.formEdit.designDirtyTitle"),
         icon: MessageIcon.Question,
         showCancel: true,
         showNoSave: true,
-        okText: "保存并继续",
+        okText: t("admin.formEdit.saveAndContinue"),
       },
       t
     );
@@ -113,13 +226,13 @@ const askSave = async (tabName: string): Promise<boolean> => {
     return confirm != ConfirmResult.Cancel;
   } else if (tabName === "workflow" && wfDesigner.value?.isDirty()) {
     let confirm = await EtConfirm.showDialog(
-      "你修改了流程设定但没有保存，是否需要保存流程设定并继续？",
+      t("admin.formEdit.workflowDirtyContent"),
       {
-        title: "流程设定有修改，是否保存？",
+        title: t("admin.formEdit.workflowDirtyTitle"),
         icon: MessageIcon.Question,
         showCancel: true,
         showNoSave: true,
-        okText: "保存并继续",
+        okText: t("admin.formEdit.saveAndContinue"),
       },
       t
     );
@@ -134,6 +247,10 @@ const askSave = async (tabName: string): Promise<boolean> => {
 const emit = defineEmits(["close"]);
 
 async function beforeClose() {
+  if (publishRef.value?.beforeClose) {
+    const ok = await publishRef.value.beforeClose();
+    if (!ok) return false;
+  }
   return await askSave(activeName.value);
 }
 
@@ -174,7 +291,11 @@ function close() {
 .top-nav-bar .nav-tabs .el-tabs__content {
   display: none;
 }
-
+.top-nav-bar .nav-tabs .el-tabs__item:last-child {
+  margin-left: 46px;
+  overflow: visible;
+  position: relative;
+}
 .top-nav-bar .nav-tabs .el-tabs__item:last-child:after {
   background: var(--et-border-color-light);
   content: "";

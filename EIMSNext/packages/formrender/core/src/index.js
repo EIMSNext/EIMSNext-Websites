@@ -36,8 +36,17 @@ import {
   format,
   tip,
   err,
+  createFormDataQuery,
+  mergeFormDataRecord,
+  normalizeQueryField,
+  resolveFormDataValue,
+  resolveQueryFilter,
+  stringifyFormDataValue,
+  getContrastTextColor,
+  getFilledTextColor,
 } from "./utils";
 import { fragment, FcSubForm } from "./components";
+import fetch from "./frame/fetch";
 
 export {
   FormCreateFactory,
@@ -50,6 +59,7 @@ export {
   invoke,
   fragment,
   FcSubForm,
+  fetch,
   debounce,
   toArray,
   toString,
@@ -83,4 +93,12 @@ export {
   format,
   tip,
   err,
+  createFormDataQuery,
+  mergeFormDataRecord,
+  normalizeQueryField,
+  resolveFormDataValue,
+  resolveQueryFilter,
+  stringifyFormDataValue,
+  getContrastTextColor,
+  getFilledTextColor,
 };

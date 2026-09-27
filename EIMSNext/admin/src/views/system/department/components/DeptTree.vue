@@ -9,13 +9,13 @@
   ></AddEditDept>
   <et-confirm-dialog
     v-model="showDeleteDialog"
-    :title="$t('role.confirmDelete')"
+    :title="$t('employeeGroup.confirmDelete')"
     :showNoSave="false"
     :okText="$t('common.confirm')"
     @cancel="showDeleteDialog = false"
     @ok="handleDeleteConfirm"
   >
-    {{ $t("role.confirmDeleteData") }}
+    {{ $t("employeeGroup.confirmDeleteData") }}
   </et-confirm-dialog>
   <el-card shadow="never" class="dept-card">
     <el-input
@@ -23,7 +23,7 @@
       class="search-input"
       prefix-icon="Search"
       clearable
-      :placeholder="$t('role.searchPlaceholder')"
+      :placeholder="$t('employeeGroup.searchPlaceholder')"
     />
     <el-tree
       ref="deptTreeRef"
@@ -38,7 +38,11 @@
       <template #default="{ node, data }">
         <div class="node-data" :title="data.label">
           <div class="node-wrapper">
-            <et-icon :icon="data.icon" icon-class="node-icon"></et-icon>
+            <et-icon
+              :icon="data.icon"
+              icon-class="node-icon"
+               :color="getNodeIconColor()"
+            ></et-icon>
             <span class="node-label">{{ data.label }}</span>
             <div v-if="editable" class="node-action">
               <et-icon icon="el-Plus" class="action-item" @click.stop="handleAddClick(data)" />
@@ -69,6 +73,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  adminScope: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const deptStore = useDeptStore();
@@ -86,8 +94,12 @@ watch(keyword, (val) => {
   deptTreeRef.value!.filter(val);
 });
 
+const loadDepartments = () => props.adminScope
+  ? departmentService.query<Department>("adminScope=true")
+  : deptStore.load();
+
 onBeforeMount(() => {
-  deptStore.load().then((data: Department[]) => {
+  loadDepartments().then((data: Department[]) => {
     deptList.value = buildDeptTree(data);
   });
 });
@@ -108,6 +120,9 @@ const handleNodeClick = (data: ITreeNode) => {
   emit("node-click", data.data);
 };
 
+/** 树节点图标颜色 —— 与 memberSelect 保持一致（部门统一绿色） */
+const getNodeIconColor = () => "var(--et-color-success)";
+
 const handleAddClick = (data: ITreeNode) => {
   editMode.value = false;
   selectedDept.value = data.data;
@@ -121,7 +136,7 @@ const handleEditClick = (data: ITreeNode) => {
 };
 const handleSaved = (data: Department) => {
   showAddEditDialog.value = false;
-  deptStore.load().then((depts: Department[]) => {
+  loadDepartments().then((depts: Department[]) => {
     deptList.value = buildDeptTree(depts);
   });
 };
@@ -133,7 +148,7 @@ const handleDeleteConfirm = async () => {
   await departmentService.delete(selectedDept.value?.id!);
 
   deptStore.remove(selectedDept.value?.id!);
-  departmentService.query<Department>().then((depts: Department[]) => {
+  loadDepartments().then((depts: Department[]) => {
     deptList.value = buildDeptTree(depts);
     deptStore.load().then();
   });

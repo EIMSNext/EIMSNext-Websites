@@ -6,8 +6,15 @@ import Select from './select';
 import Uploader from './uploader';
 import Radio from './radio';
 import DatePicker from './datePicker';
+import ColorPicker from './colorPicker';
 import TimePicker from './timePicker';
 import Group from './group';
+import SerialNo from './serialno';
+import Number from './number';
+import DataSelect from './dataSelect';
+import Query from './query';
+import { DepartmentSelect, EmployeeSelect } from './organizationSelect';
+import { Collapse, Tabs } from './layout';
 import IconWarning from './icon/IconWarning.vue';
 
 export default [
@@ -19,7 +26,16 @@ export default [
     Radio,
     Select,
     DatePicker,
+    ColorPicker,
     TimePicker,
     Group,
+    SerialNo,
     Uploader,
+    Number,
+    DepartmentSelect,
+    EmployeeSelect,
+    DataSelect,
+    Query,
+    Tabs,
+    Collapse,
 ]

@@ -18,10 +18,10 @@
       @cancel="showFilter = false"
     ></DashFilter>
   </el-popover>
-  <div class="item dimension-item">
+  <div class="item filter-item">
     <div @click="onFieldClick" class="item-text">
-      <et-icon icon="el-filter" color="var(--et-text-on-primary)" class="field-icon"></et-icon>
-      <span ref="filterBtnRef">设置过滤条件</span>
+      <et-icon icon="el-filter" color="var(--et-color-primary)" class="field-icon"></et-icon>
+      <span ref="filterBtnRef">{{ t("admin.dashboardFieldBar.setFilter") }}</span>
     </div>
   </div>
 </template>
@@ -30,6 +30,9 @@ import { IConditionList } from "@eimsnext/components";
 import DashFilter from "../DashFilter.vue";
 import { uniqueId } from "@eimsnext/utils";
 import { cloneDeep } from "lodash-es";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FilterField",
@@ -98,8 +101,22 @@ const setFilter = (filter: IConditionList) => {
   }
 }
 
-.dimension-item {
-  background-color: var(--et-color-primary-hover);
-  color: var(--et-text-on-primary);
+.filter-item {
+  background-color: var(--et-bg-container);
+  border: 1px solid var(--et-border-color-light);
+  color: var(--et-text-primary);
+
+  &:hover {
+    background-color: var(--et-bg-hover);
+    border-color: var(--et-color-primary);
+  }
+
+  .item-text {
+    color: var(--et-text-primary);
+  }
+
+  .field-icon {
+    color: var(--et-color-primary);
+  }
 }
 </style>

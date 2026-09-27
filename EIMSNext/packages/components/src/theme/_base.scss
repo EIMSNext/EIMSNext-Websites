@@ -2,19 +2,80 @@ $et-prefix: "et";
 
 :root {
   --et-color-primary: #4080ff;
-  --et-color-primary-hover: #5c97ff;
-  --et-color-primary-active: #2664d9;
+  --et-bg-base: #ffffff;
+  --et-color-primary-hover: #79a6ff;
+  --et-color-primary-active: #3366cc;
   --et-color-primary-outline: rgb(64 128 255 / 20%);
+  --et-color-primary-light-1: #538dff;
+  --et-color-primary-light-2: #6699ff;
+  --et-color-primary-light-3: var(--et-color-primary-hover);
+  --et-color-primary-light-4: #8cb3ff;
+  --et-color-primary-light-5: #a0c0ff;
+  --et-color-primary-light-6: #b3ccff;
+  --et-color-primary-light-7: #c6d9ff;
+  --et-color-primary-light-8: #d9e6ff;
+  --et-color-primary-light-9: #ecf2ff;
+  --et-color-primary-dark-2: var(--et-color-primary-active);
   --et-bg-primary-soft: rgb(64 128 255 / 10%);
+  --et-bg-primary-light: rgb(64 128 255 / 5%);
+  --et-bg-fill: var(--el-fill-color-light);
+  --et-bg-secondary-container: #f2f3f5;
+  --et-fill-light: var(--et-fill-color-light);
+  --et-fill-color-blank: transparent;
+  --et-text-placeholder: #a8abb2;
+  --et-shadow-light: 0 1px 4px rgb(0 0 0 / 5%);
   --et-text-on-primary: #ffffff;
+  --et-text-on-primary-hover: #ffffff;
+  --et-text-on-primary-active: #ffffff;
+  --et-text-on-success: #ffffff;
+  --et-text-on-success-hover: #ffffff;
+  --et-text-on-success-active: #ffffff;
+  --et-text-on-danger: #ffffff;
+  --et-text-on-danger-hover: #ffffff;
+  --et-text-on-danger-active: #ffffff;
+  --et-text-on-warning: #ffffff;
+  --et-text-on-warning-hover: #ffffff;
+  --et-text-on-warning-active: #ffffff;
+  --et-text-on-info: #ffffff;
+  --et-text-on-info-hover: #ffffff;
+  --et-text-on-info-active: #ffffff;
+  --et-text-on-overlay: #ffffff;
 
-  --et-color-secondary: #2f7deb;
-  --et-color-secondary-hover: #4d91ef;
-  --et-color-secondary-active: #2466c6;
+  --el-color-primary: var(--et-color-primary);
+  --el-color-primary-rgb: 64, 128, 255;
+  --el-color-primary-light-1: var(--et-color-primary-light-1);
+  --el-color-primary-light-2: var(--et-color-primary-light-2);
+  --el-color-primary-light-3: var(--et-color-primary-light-3);
+  --el-color-primary-light-4: var(--et-color-primary-light-4);
+  --el-color-primary-light-5: var(--et-color-primary-light-5);
+  --el-color-primary-light-6: var(--et-color-primary-light-6);
+  --el-color-primary-light-7: var(--et-color-primary-light-7);
+  --el-color-primary-light-8: var(--et-color-primary-light-8);
+  --el-color-primary-light-9: var(--et-color-primary-light-9);
+  --el-color-primary-dark-2: var(--et-color-primary-dark-2);
+  --el-button-outline-color: var(--el-color-primary-light-5);
+  --el-menu-active-color: var(--et-color-primary);
+  --el-menu-hover-text-color: var(--et-color-primary);
+  --el-menu-hover-bg-color: var(--el-color-primary-light-9);
+  --van-primary-color: var(--et-color-primary);
+  --van-button-primary-background: var(--et-color-primary);
+  --van-button-primary-border-color: var(--et-color-primary);
+  --van-button-primary-color: var(--et-text-on-primary);
+  --van-tabs-default-color: var(--et-color-primary);
+  --van-tabs-bottom-bar-color: var(--et-color-primary);
+  --van-tab-active-text-color: var(--et-color-primary);
+  --van-active-color: var(--et-bg-primary-soft);
+
+  --et-color-secondary: #3b76eb;
+  --et-color-secondary-hover: #578fff;
+  --et-color-secondary-active: #3469d1;
   --et-color-success: #23c343;
   --et-color-warning: #f0a800;
-  --et-color-danger: #eb5050;
-  --et-color-info: #2f7deb;
+  --et-color-danger: #c93636;
+  --et-color-info: #2468bd;
+  --et-color-success-light-3: #65d77a;
+  --et-color-danger-light-5: #f5a8a8;
+  --et-color-danger-light-9: #fdeeee;
 
   --et-bg-info-soft: #eaf2fd;
   --et-bg-success-soft: rgb(35 195 67 / 12%);
@@ -39,14 +100,17 @@ $et-prefix: "et";
   --et-space-17: 17px;
   --et-space-18: 18px;
   --et-space-20: 20px;
+  --et-space-22: 22px;
   --et-space-24: 24px;
   --et-space-25: 25px;
+  --et-space-26: 26px;
   --et-space-28: 28px;
   --et-space-30: 30px;
   --et-space-32: 32px;
-  --et-space-45: 45px;
   --et-space-40: 40px;
   --et-space-42: 42px;
+  --et-space-45: 45px;
+  --et-space-48: 48px;
   --et-space-50: 50px;
   --et-space-80: 80px;
 
@@ -73,6 +137,9 @@ $et-prefix: "et";
   --et-font-size-32: 32px;
   --et-font-size-36: 36px;
 
+  --et-font-size-11: 11px;
+  --et-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
   --et-line-height-16: 16px;
   --et-line-height-18: 18px;
   --et-line-height-20: 20px;
@@ -88,16 +155,25 @@ $et-prefix: "et";
   --et-line-height-48: 48px;
 
   --et-size-18: 18px;
+  --et-size-4: 4px;
+  --et-size-6: 6px;
+  --et-size-10: 10px;
+  --et-size-12: 12px;
+  --et-size-14: 14px;
   --et-size-20: 20px;
   --et-size-22: 22px;
   --et-size-24: 24px;
   --et-size-25: 25px;
+  --et-size-28: 28px;
   --et-size-30: 30px;
   --et-size-32: 32px;
+  --et-size-34: 34px;
   --et-size-35: 35px;
   --et-size-36: 36px;
+  --et-size-38: 38px;
   --et-size-40: 40px;
   --et-size-42: 42px;
+  --et-size-44: 44px;
   --et-size-45: 45px;
   --et-size-46: 46px;
   --et-size-48: 48px;
@@ -119,19 +195,20 @@ $et-prefix: "et";
   --et-size-110: 110px;
   --et-size-120: 120px;
   --et-size-130: 130px;
+  --et-size-140: 140px;
   --et-size-144: 144px;
   --et-size-150: 150px;
   --et-size-160: 160px;
   --et-size-165: 165px;
   --et-size-168: 168px;
+  --et-size-170: 170px;
   --et-size-172: 172px;
   --et-size-180: 180px;
   --et-size-200: 200px;
   --et-size-210: 210px;
-  --et-size-360: 360px;
-  --et-size-480: 480px;
-  --et-size-500: 500px;
   --et-size-214: 214px;
+  --et-size-220: 220px;
+  --et-size-240: 240px;
   --et-size-250: 250px;
   --et-size-260: 260px;
   --et-size-264: 264px;
@@ -139,18 +216,24 @@ $et-prefix: "et";
   --et-size-280: 280px;
   --et-size-300: 300px;
   --et-size-320: 320px;
-  --et-size-660: 660px;
-  --et-size-906: 906px;
+  --et-size-360: 360px;
   --et-size-400: 400px;
-  --et-size-500: 500px;
+  --et-size-420: 420px;
+  --et-size-450: 450px;
   --et-size-460: 460px;
   --et-size-470: 470px;
+  --et-size-480: 480px;
+  --et-size-500: 500px;
   --et-size-540: 540px;
   --et-size-600: 600px;
+  --et-size-660: 660px;
   --et-size-700: 700px;
   --et-size-750: 750px;
+  --et-size-760: 760px;
+  --et-size-78: 78px;
   --et-size-800: 800px;
   --et-size-850: 850px;
+  --et-size-906: 906px;
   --et-size-980: 980px;
   --et-size-1000: 1000px;
   --et-size-1200: 1200px;
@@ -179,4 +262,102 @@ $et-prefix: "et";
   --et-overlay-color: rgb(0 0 0 / 45%);
   --et-overlay-color-strong: rgb(0 0 0 / 60%);
   --et-blur-overlay: blur(8px);
+}
+
+.el-button--primary {
+  --el-button-text-color: var(--et-text-on-primary);
+  --el-button-bg-color: var(--et-color-primary);
+  --el-button-border-color: var(--et-color-primary);
+  --el-button-outline-color: var(--el-color-primary-light-5);
+  --el-button-hover-text-color: var(--et-text-on-primary-hover);
+  --el-button-hover-bg-color: var(--et-color-primary-hover);
+  --el-button-hover-border-color: var(--et-color-primary-hover);
+  --el-button-hover-link-text-color: var(--et-color-primary-hover);
+  --el-button-active-color: var(--et-color-primary-active);
+  --el-button-active-text-color: var(--et-text-on-primary-active);
+  --el-button-active-bg-color: var(--et-color-primary-active);
+  --el-button-active-border-color: var(--et-color-primary-active);
+  --el-button-disabled-text-color: var(--et-text-on-primary);
+  --el-button-disabled-bg-color: var(--el-color-primary-light-5);
+  --el-button-disabled-border-color: var(--el-color-primary-light-5);
+}
+
+.el-button--primary.is-plain,
+.el-button--primary.is-text,
+.el-button--primary.is-link {
+  --el-button-text-color: var(--et-color-primary);
+  --el-button-bg-color: var(--el-color-primary-light-9);
+  --el-button-border-color: var(--el-color-primary-light-5);
+  --el-button-hover-text-color: var(--et-color-primary-hover);
+  --el-button-hover-bg-color: var(--el-color-primary-light-9);
+  --el-button-hover-border-color: var(--et-color-primary-hover);
+  --el-button-hover-link-text-color: var(--et-color-primary-hover);
+  --el-button-active-color: var(--et-color-primary-active);
+  --el-button-active-text-color: var(--et-color-primary-active);
+  --el-button-active-bg-color: var(--el-color-primary-light-9);
+  --el-button-active-border-color: var(--et-color-primary-active);
+}
+
+.el-button--primary.is-plain:not(.is-disabled):hover {
+  --el-button-hover-text-color: var(--et-text-on-primary);
+  --el-button-hover-bg-color: var(--et-color-primary);
+  --el-button-hover-border-color: var(--et-color-primary);
+}
+
+.el-button--primary.is-link,
+.el-button--primary.is-text {
+  --el-button-bg-color: transparent;
+  --el-button-border-color: transparent;
+  --el-button-hover-bg-color: transparent;
+  --el-button-hover-border-color: transparent;
+  --el-button-active-bg-color: transparent;
+  --el-button-active-border-color: transparent;
+}
+
+// These foregrounds are derived at runtime from their actual semantic
+// backgrounds, rather than assuming that every status color is dark.
+.el-button--success {
+  --el-button-text-color: var(--et-text-on-success);
+  --el-button-hover-text-color: var(--et-text-on-success-hover);
+  --el-button-active-text-color: var(--et-text-on-success-active);
+}
+
+.el-button--danger {
+  --el-button-text-color: var(--et-text-on-danger);
+  --el-button-hover-text-color: var(--et-text-on-danger-hover);
+  --el-button-active-text-color: var(--et-text-on-danger-active);
+}
+
+// Destructive actions keep their neutral resting state in toolbars and lists,
+// but always use the error color on hover so the action remains recognizable.
+.el-button.delete-button:not(.el-button--danger):not(.is-disabled):hover,
+.el-button.delete-button:not(.el-button--danger):not(.is-disabled):focus-visible {
+  --el-button-hover-text-color: var(--et-color-danger);
+  --el-button-hover-link-text-color: var(--et-color-danger);
+  --el-button-hover-bg-color: var(--et-bg-danger-soft);
+  --el-button-hover-border-color: var(--et-color-danger);
+  color: var(--et-color-danger);
+  background-color: var(--et-bg-danger-soft) !important;
+  border-color: var(--et-color-danger);
+}
+
+.el-button--warning {
+  --el-button-text-color: var(--et-text-on-warning);
+  --el-button-hover-text-color: var(--et-text-on-warning-hover);
+  --el-button-active-text-color: var(--et-text-on-warning-active);
+}
+
+.el-button--info {
+  --el-button-text-color: var(--et-text-on-info);
+  --el-button-hover-text-color: var(--et-text-on-info-hover);
+  --el-button-active-text-color: var(--et-text-on-info-active);
+}
+
+.el-tabs__active-bar {
+  background-color: var(--et-color-primary);
+}
+
+.el-tabs__item.is-active,
+.el-tabs__item:hover {
+  color: var(--et-color-primary);
 }

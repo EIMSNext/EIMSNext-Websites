@@ -11,7 +11,7 @@ export function formTemplate(json, options) {
 </template>
 
 <script>
-import formCreate from "@eimsnext/form-render/element-plus";
+import formCreate from "@eimsnext/form-render-elplus";
 
 export default {
   components: {
@@ -50,7 +50,7 @@ export function formTemplateV3(json, options) {
 
 <script setup>
 import {ref} from "vue";
-import formCreate from "@eimsnext/form-render/element-plus";
+import formCreate from "@eimsnext/form-render-elplus";
 
 const option = ref(formCreate.parseJson('${options.replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}'));
 const rule = ref(formCreate.parseJson('${json.replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}'));
@@ -76,7 +76,7 @@ export function mobileTemplate(json, options) {
 </template>
 
 <script>
-import formCreate from "@eimsnext/form-render/vant";
+import formCreate from "@eimsnext/form-render-vant";
 
 export default {
   components: {
@@ -116,7 +116,7 @@ export function mobileTemplateV3(json, options) {
 
 <script setup>
 import {ref} from "vue";
-import formCreateMobile from "@eimsnext/form-render/vant";
+import formCreateMobile from "@eimsnext/form-render-vant";
 
 const option = ref(formCreateMobile.parseJson('${options.replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}'));
 const rule = ref(formCreateMobile.parseJson('${json.replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}'));

@@ -5,6 +5,7 @@ import {
   FormDef,
   FormData,
   SystemField,
+  isSystemField,
   getDataTitle,
   getCreateBy,
   getCreateTime,
@@ -14,6 +15,7 @@ import {
 import { IConditionList, toDynamicFilter } from "../ConditionList/type";
 import { flowStatusArray } from "../common";
 import dayjs from "dayjs";
+import { getFileFullUrl } from "@eimsnext/utils";
 
 export interface IDataSelectField {
   field: string;
@@ -28,11 +30,19 @@ export interface IDataSelectMapping {
   targetField: IDataSelectField;
 }
 
+export interface IDataSelectValue {
+  appId: string;
+  formId: string;
+  dataId: string;
+  data: Record<string, any>;
+}
+
 export interface IDataSelectQueryOptions {
   formId: string;
   page: number;
   pageSize: number;
   filter?: IConditionList;
+  fields?: IDataSelectField[];
 }
 
 export const normalizeDataSelectField = (field: any): IDataSelectField | null => {
@@ -88,18 +98,25 @@ export const buildDataSelectFields = (form?: FormDef, includeSystemFields: boole
   if (!includeSystemFields || !form) {
     return result;
   }
+  const systemFieldLabel = (key: "flowStatus" | "dataTitle" | "createBy" | "createTime" | "updateTime") => ({
+    flowStatus: "流程状态",
+    dataTitle: "数据标题",
+    createBy: "提交人",
+    createTime: "提交时间",
+    updateTime: "更新时间",
+  }[key]);
 
   if (form.usingWorkflow) {
-    const flowField = getFlowStatus("流程状态");
+    const flowField = getFlowStatus(systemFieldLabel("flowStatus"));
     result.unshift({ field: flowField.field, label: flowField.title, type: flowField.type });
   }
 
-  const dataTitleField = getDataTitle("数据标题");
+  const dataTitleField = getDataTitle(systemFieldLabel("dataTitle"));
   result.unshift({ field: dataTitleField.field, label: dataTitleField.title, type: dataTitleField.type });
 
-  const createByField = getCreateBy("提交人");
-  const createTimeField = getCreateTime("提交时间");
-  const updateTimeField = getUpdateTime("更新时间");
+  const createByField = getCreateBy(systemFieldLabel("createBy"));
+  const createTimeField = getCreateTime(systemFieldLabel("createTime"));
+  const updateTimeField = getUpdateTime(systemFieldLabel("updateTime"));
 
   result.push(
     { field: createByField.field, label: createByField.title, type: createByField.type },
@@ -110,7 +127,7 @@ export const buildDataSelectFields = (form?: FormDef, includeSystemFields: boole
   return result;
 };
 
-export const createDataSelectQuery = ({ formId, page, pageSize, filter }: IDataSelectQueryOptions) => {
+export const createDataSelectQuery = ({ formId, page, pageSize, filter, fields }: IDataSelectQueryOptions) => {
   const items: any[] = [
     {
       field: "formId",
@@ -126,9 +143,27 @@ export const createDataSelectQuery = ({ formId, page, pageSize, filter }: IDataS
   }
 
   return {
+    ...(fields?.length
+      ? {
+          select: [
+            { field: "id", visible: true },
+            { field: "appId", visible: true },
+            { field: "formId", visible: true },
+            ...fields
+              .filter((field, index, values) => values.findIndex((item) => item.field === field.field) === index)
+              .map((field) => ({
+                field: isSystemField(field.field) ? field.field : `data.${field.field}`,
+                visible: true,
+              })),
+          ],
+        }
+      : {}),
     skip: (page - 1) * pageSize,
     take: pageSize,
-    scope: {},
+    scope: {
+      formId,
+      inheritMemberPermissions: true,
+    },
     sort: [
       {
         field: "createTime",
@@ -209,16 +244,14 @@ export const stringifyDataSelectValue = (value: any): string => {
   return String(value);
 };
 
-const normalizeAssetUrl = (value: string) => String(value || "").replace(/\\/g, "/");
-
 const renderImageValue = (value: any) => {
   if (!value) return "";
 
   if (Array.isArray(value)) {
     const urls = value
       .map((item) => {
-        if (typeof item === "string") return normalizeAssetUrl(item);
-        if (item && typeof item === "object" && item.url) return normalizeAssetUrl(item.url);
+        if (typeof item === "string") return getFileFullUrl(item);
+        if (item && typeof item === "object" && item.url) return getFileFullUrl(item.url);
         return "";
       })
       .filter(Boolean);
@@ -229,11 +262,11 @@ const renderImageValue = (value: any) => {
   }
 
   if (typeof value === "object" && value.url) {
-    return `<img src="${normalizeAssetUrl(value.url)}" class="table-image-thumb" />`;
+    return `<img src="${getFileFullUrl(value.url)}" class="table-image-thumb" />`;
   }
 
   if (typeof value === "string") {
-    return `<img src="${normalizeAssetUrl(value)}" class="table-image-thumb" />`;
+    return `<img src="${getFileFullUrl(value)}" class="table-image-thumb" />`;
   }
 
   return "";
@@ -271,14 +304,26 @@ export const formatDataSelectValue = (
   field?: IDataSelectField,
   options?: { t?: (key: string) => string },
 ) => {
-  if (field?.field === SystemField.FlowStatus || field?.type === (getFlowStatus("流程状态").type as FieldType)) {
-    const status = flowStatusArray().find((item) => item.id === value);
+  if (field?.field === SystemField.FlowStatus) {
+    const status = flowStatusArray(options?.t).find((item) => item.id === value);
     return status ? (options?.t ? options.t(status.i18n) : status.label) : stringifyDataSelectValue(value);
   }
 
   if (field?.type === FieldType.TimeStamp && value) {
     const format = field.format || "YYYY-MM-DD HH:mm:ss";
     return dayjs(Number(value)).isValid() ? dayjs(Number(value)).format(format) : stringifyDataSelectValue(value);
+  }
+
+  if (field?.options?.length) {
+    const values = Array.isArray(value) ? value : [value];
+    return values
+      .map((item) => {
+        const raw = item && typeof item === "object" ? item.value : item;
+        const option = field.options?.find((candidate) => candidate.value === raw);
+        return option?.label ?? stringifyDataSelectValue(item);
+      })
+      .filter(Boolean)
+      .join(", ");
   }
 
   if (field?.type === FieldType.ImageUpload) {
@@ -316,6 +361,41 @@ export const buildDataSelectDisplayValue = (
     label: field.label,
     value: formatDataSelectValue(resolveDataSelectValue(record, field.field), field),
   }));
+};
+
+export const buildDataSelectValue = (
+  record: Record<string, any>,
+  displayFields: IDataSelectField[],
+  mappings: IDataSelectMapping[] = [],
+): IDataSelectValue => {
+  const sourceFields = [...displayFields, ...mappings.map((mapping) => mapping.sourceField)]
+    .filter((field): field is IDataSelectField => !!field?.field)
+    .filter((field, index, fields) => fields.findIndex((item) => item.field === field.field) === index);
+
+  const data = sourceFields.reduce<Record<string, any>>((result, field) => {
+    result[field.field] = resolveDataSelectValue(record, field.field);
+    return result;
+  }, {});
+
+  return {
+    appId: String(record?.appId || ""),
+    formId: String(record?.formId || ""),
+    dataId: String(record?.id || record?._id || ""),
+    data,
+  };
+};
+
+export const normalizeDataSelectValue = (value: any): IDataSelectValue | null => {
+  const candidate = Array.isArray(value) && value.length === 1 ? value[0] : value;
+  if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) return null;
+  if (!candidate.data || typeof candidate.data !== "object" || Array.isArray(candidate.data)) return null;
+
+  return {
+    appId: String(candidate.appId || ""),
+    formId: String(candidate.formId || ""),
+    dataId: String(candidate.dataId || ""),
+    data: candidate.data,
+  };
 };
 
 export const findDataSelectField = (fields: IDataSelectField[], fieldName: string) => {

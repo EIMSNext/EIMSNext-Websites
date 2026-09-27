@@ -4,30 +4,22 @@ import { Tickets } from "@element-plus/icons-vue";
 import { DataSelectTablePanel } from "@eimsnext/components";
 import { formDataService } from "@eimsnext/services";
 import {
-  buildDataSelectDisplayValue,
+  buildDataSelectValue,
   createDataSelectQuery,
+  formatDataSelectValue,
   mergeDataSelectRecord,
   normalizeDataSelectField,
+  normalizeDataSelectValue,
   resolveDataSelectValue,
 } from "@eimsnext/components";
 import "./style.css";
 
-const normalizeDisplayTags = (val) => {
-  if (!Array.isArray(val)) {
-    return [];
-  }
-
+const normalizeLegacyDisplayTags = (val) => {
+  if (!Array.isArray(val)) return [];
   return val
-    .map((item) => {
-      if (!item) return null;
-      if (item.label != null && item.value != null) {
-        return {
-          label: String(item.label),
-          value: String(item.value ?? ""),
-        };
-      }
-      return null;
-    })
+    .map((item) => item && item.label != null && item.value != null
+      ? { label: String(item.label), value: String(item.value ?? "") }
+      : null)
     .filter(Boolean);
 };
 
@@ -36,12 +28,12 @@ export default defineComponent({
   inheritAttrs: false,
   props: {
     modelValue: {
-      type: Array,
-      default: () => [],
+      type: [Object, Array],
+      default: null,
     },
     placeholder: {
       type: String,
-      default: "选择数据",
+      default: "",
     },
     disabled: {
       type: Boolean,
@@ -58,7 +50,7 @@ export default defineComponent({
     selectionProcess: {
       type: Object,
       default: () => ({
-        buttonText: "选择数据",
+        buttonText: "",
         tableFields: [],
       }),
     },
@@ -82,7 +74,7 @@ export default defineComponent({
   emits: ["update:modelValue", "change"],
   setup(props, { emit }) {
     const showDialog = ref(false);
-    const selectedValue = ref(normalizeDisplayTags(props.modelValue));
+    const selectedValue = ref(normalizeDataSelectValue(props.modelValue));
     const formData = ref([]);
     const loading = ref(false);
     const selectedRecord = ref(null);
@@ -91,6 +83,7 @@ export default defineComponent({
     const pageSize = ref(20);
     const total = ref(0);
     const filterConfig = ref({ id: "", rel: "and", items: [] });
+    const t = (key) => props.formCreateInject?.t?.(key) || "";
 
     const isPreviewMode = computed(() => {
       if (props.preview !== undefined) {
@@ -120,17 +113,22 @@ export default defineComponent({
         .filter((mapping) => mapping.sourceField && mapping.targetField);
     });
 
+    const queryFields = computed(() => {
+      return [...tableFields.value, ...displayFields.value, ...fillMappings.value.map((mapping) => mapping.sourceField)]
+        .filter((field, index, fields) => fields.findIndex((item) => item.field === field.field) === index);
+    });
+
     watch(
       () => props.modelValue,
       (newVal) => {
-        selectedValue.value = normalizeDisplayTags(newVal);
+        selectedValue.value = normalizeDataSelectValue(newVal);
       },
       { immediate: true, deep: true }
     );
 
     const fetchFormData = async (page = 1, size = pageSize.value) => {
       if (!props.dataSource) {
-        error.value = "请先选择数据源";
+        error.value = t("com.dataselect.sourceRequired") || "请先选择数据源";
         formData.value = [];
         total.value = 0;
         return;
@@ -146,12 +144,36 @@ export default defineComponent({
           page,
           pageSize: size,
           filter: filterConfig.value,
+          fields: queryFields.value,
         });
-        const data = await formDataService.query(query);
+        const body = props.formCreateInject?.api?.fetch
+          ? await props.formCreateInject.api.fetch({
+              action: "/FormData/$query",
+              method: "post",
+              data: query,
+              dataType: "json",
+            })
+          : await formDataService.query(query);
+        const countBody = props.formCreateInject?.api?.fetch
+          ? await props.formCreateInject.api.fetch({
+              action: "/FormData/$count",
+              method: "post",
+              data: query.filter,
+              dataType: "json",
+            }).catch(() => null)
+          : await formDataService.count(query.filter).catch(() => null);
+        const data = Array.isArray(body?.value) ? body.value : Array.isArray(body) ? body : [];
         formData.value = data.map((item) => mergeDataSelectRecord(item));
-        total.value = data.length;
+        const count = Number(countBody?.value ?? countBody?.count ?? countBody?.["@odata.count"] ?? countBody);
+        total.value = Number.isFinite(count)
+          ? count
+          : (page - 1) * size + data.length + (data.length === size ? 1 : 0);
+        const selectedId = selectedValue.value?.dataId;
+        selectedRecord.value = selectedId
+          ? formData.value.find((item) => String(item.id || item._id || "") === selectedId) || null
+          : null;
       } catch (err) {
-        error.value = "获取表单数据失败，请重试";
+        error.value = t("com.dataselect.fetchFailed") || "获取表单数据失败，请重试";
         console.error("获取表单数据失败:", err);
       } finally {
         loading.value = false;
@@ -198,9 +220,10 @@ export default defineComponent({
         return;
       }
 
-      const selectedData = buildDataSelectDisplayValue(
+      const selectedData = buildDataSelectValue(
         selectedRecord.value,
-        displayFields.value
+        displayFields.value,
+        fillMappings.value,
       );
       await applyMappings(selectedRecord.value);
       selectedValue.value = selectedData;
@@ -234,26 +257,31 @@ export default defineComponent({
     };
 
     const displayRows = computed(() => {
-      const valueMap = new Map(
-        (selectedValue.value || []).map((tag) => [
-          tag.label,
-          String(tag.value ?? ""),
-        ])
-      );
-      return displayFields.value.map((field) => {
-        const value = valueMap.get(field.label) || "";
-        return {
-          label: field.label || "未知字段",
-          value,
-          empty: value === "",
-        };
-      });
+      if (selectedValue.value) {
+        return displayFields.value.map((field) => {
+          const value = formatDataSelectValue(
+            resolveDataSelectValue(selectedValue.value.data, field.field),
+            field,
+          );
+          return {
+            label: field.label || t("com.dataselect.unknownField") || "未知字段",
+            value,
+            empty: value == null || value === "",
+          };
+        });
+      }
+
+      return normalizeLegacyDisplayTags(props.modelValue).map((tag) => ({
+        label: tag.label,
+        value: tag.value,
+        empty: tag.value === "",
+      }));
     });
 
     return () => {
       const editable = !(props.disabled || isPreviewMode.value);
       const emptyText =
-        props.selectionProcess?.buttonText || props.placeholder || "选择数据";
+        props.selectionProcess?.buttonText || props.placeholder || t("com.dataselect.selectData") || "选择数据";
 
       return (
         <div class="_fc-form-selected-data-wrap">
@@ -316,7 +344,7 @@ export default defineComponent({
             {{
               header: () => (
                 <div class="form-selected-data-dialog-header">
-                  <div class="form-selected-data-dialog-title">选择数据</div>
+                  <div class="form-selected-data-dialog-title">{t("com.dataselect.selectData") || "选择数据"}</div>
                 </div>
               ),
               default: () => (
@@ -341,21 +369,21 @@ export default defineComponent({
                     onPageSizeChange={handlePageSizeChange}
                     onFilter={handleFilter}
                   >
-                    {{ title: () => "选择数据" }}
+                    {{ title: () => t("com.dataselect.selectData") || "选择数据" }}
                   </DataSelectTablePanel>
                 </div>
               ),
               footer: () => (
                 <div class="form-selected-data-dialog-footer">
                   <ElButton onClick={() => (showDialog.value = false)}>
-                    取消
+                    {t("common.cancel") || "取消"}
                   </ElButton>
                   <ElButton
                     type="primary"
                     disabled={!selectedRecord.value}
                     onClick={handleConfirm}
                   >
-                    确定
+                    {t("common.ok") || "确定"}
                   </ElButton>
                 </div>
               ),

@@ -2,7 +2,7 @@ import { AccessToken } from "./token";
 import accessToken from "./token";
 import { HttpRequest } from "./httpRequest";
 import { HttpClient } from "./httpClient";
-import { AuthClient } from "./authClient";
+import { IdentityClient } from "./identityClient";
 import { ApiClient } from "./apiClient";
 import { ODataClient } from "./odataClient";
 import { UploadClient } from "./uploadClient";
@@ -15,6 +15,7 @@ import {
 } from "./interface";
 import type { HttpRequestConfig } from "./interface";
 import { setupHttp } from "./setupHttp";
+export { useSubmitGuard } from "../useSubmitGuard";
 
 export {
   http,
@@ -22,7 +23,7 @@ export {
   AccessToken,
   HttpRequest,
   HttpClient,
-  AuthClient,
+  IdentityClient,
   ApiClient,
   ODataClient,
   UploadClient,

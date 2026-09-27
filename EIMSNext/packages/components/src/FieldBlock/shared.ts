@@ -98,25 +98,25 @@ export function findFieldBlockField(fields: FieldBlockField[], field: string) {
 export function getFieldBlockTypeLabel(type: FieldType) {
   switch (type) {
     case FieldType.Input:
-      return "文本";
+      return "comp.fieldBlock.typeLabels.input";
     case FieldType.TextArea:
-      return "文本";
+      return "comp.fieldBlock.typeLabels.textarea";
     case FieldType.Number:
-      return "数字";
+      return "comp.fieldBlock.typeLabels.number";
     case FieldType.TimeStamp:
-      return "时间戳";
+      return "comp.fieldBlock.typeLabels.timestamp";
     case FieldType.Employee1:
     case FieldType.Employee2:
-      return "成员";
+      return "comp.fieldBlock.typeLabels.employee1";
     case FieldType.Department1:
     case FieldType.Department2:
-      return "部门";
+      return "comp.fieldBlock.typeLabels.department1";
     case FieldType.Select1:
     case FieldType.Select2:
     case FieldType.Radio:
     case FieldType.CheckBox:
-      return "选项";
+      return "comp.fieldBlock.typeLabels.select1";
     default:
-      return "字段";
+      return "common.fields";
   }
 }

@@ -6,10 +6,13 @@ export default defineComponent({
     name: NAME,
     inheritAttrs: false,
     props: {
+        formCreateInject: Object,
         disabled: Boolean,
         clearable: Boolean,
         placeholder: String,
         modelValue: [String, Number],
+        format: String,
+        valueFormat: String,
     },
     emits: ['update:modelValue', 'fc.el', 'change'],
     setup(props, _) {
@@ -20,8 +23,15 @@ export default defineComponent({
             if (modelValue.value == null || modelValue.value === '') {
                 return [];
             }
-            return modelValue.value.split(':');
+            return String(modelValue.value).split(':');
         });
+
+        const hasSeconds = computed(() =>
+            (props.format || props.valueFormat || String(modelValue.value || '')).includes('ss'),
+        );
+        const columnsType = computed(() =>
+            hasSeconds.value ? ['hour', 'minute', 'second'] : ['hour', 'minute'],
+        );
 
         const onInput = (val) => {
             _.emit('update:modelValue', val);
@@ -31,6 +41,7 @@ export default defineComponent({
         return {
             show,
             formValue,
+            columnsType,
             open() {
                 if (props.disabled) {
                     return;
@@ -59,9 +70,10 @@ export default defineComponent({
                 model-value={this.modelValue} border={false} isLink v-slots={{
                     'right-icon': clearIcon
                 }}/>
-            <van-popup show={this.show} onUpdate:show={(v) => this.show = v} round position="bottom">
+            <van-popup show={this.show} onUpdate:show={(v) => this.show = v} round position="bottom"
+                teleport={this.formCreateInject?.popupContainer ?? undefined}>
                 <van-time-picker
-                    columnsType={['hour', 'minute']}
+                    columnsType={this.columnsType}
                     {...this.$attrs}
                     modelValue={this.formValue}
                     onConfirm={this.confirm}

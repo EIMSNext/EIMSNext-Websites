@@ -4,38 +4,38 @@
       <div class="left"></div>
       <div class="right">
         <el-dropdown trigger="click" style="margin-right: 12px">
-          <el-button>流程版本（V{{ currentWfDef.version }}）</el-button>
+          <el-button>{{ t("admin.workflowDesigner.version") }}（V{{ currentWfDef.version }}）</el-button>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item v-if="versions.length > 0" v-for="item in versions"
                 :key="item.id || `draft-${item.version}`" @click="selectVersion(item)">
                 <div class="wf-version-item">
-                  <span>流程版本(V{{ item.version }})</span>
+                  <span>{{ t("admin.workflowDesigner.version") }}(V{{ item.version }})</span>
                   <el-tag v-if="item.isCurrent" size="small" type="success">{{ $t("common.flowStatus.approving") }}</el-tag>
                   <el-tag v-else-if="!item.released" size="small" type="warning">{{ $t("common.flowStatus.indesign") }}</el-tag>
-                  <el-tag v-else size="small" type="info">历史</el-tag>
+                  <el-tag v-else size="small" type="info">{{ t("admin.workflowDesigner.history") }}</el-tag>
                 </div>
               </el-dropdown-item>
               <el-dropdown-item v-else>
                 <div class="wf-version-item">
-                  <span>流程版本(V1)</span>
+                  <span>{{ t("admin.workflowDesigner.version") }}(V1)</span>
                   <el-tag size="small" type="warning">{{ $t("common.flowStatus.indesign") }}</el-tag>
                 </div>
               </el-dropdown-item>
               <el-dropdown-item divided @click="createVersion" :disabled="versions.length === 0">
-                添加新版本
+                {{ t("admin.workflowDesigner.addVersion") }}
               </el-dropdown-item>
               <el-dropdown-item @click="showVersionDialog = true" :disabled="versions.length === 0">
-                管理已有版本
+                {{ t("admin.workflowDesigner.manageVersions") }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
         <!-- <el-button>预览</el-button> -->
-        <el-button @click="save">保存</el-button>
+        <el-button @click="save">{{ t("common.save") }}</el-button>
         <el-button type="success" :disabled="currentWfDef.released && currentWfDef.isCurrent"
           @click="activateCurrentVersion">
-          启用
+          {{ t("admin.workflowDesigner.activate") }}
         </el-button>
       </div>
     </div>
@@ -49,30 +49,30 @@
       </div>
     </div>
 
-    <et-dialog :modelValue="showVersionDialog" class="version-manage-dialog" title="管理已有版本" width="760px"
+    <et-dialog :modelValue="showVersionDialog" class="version-manage-dialog" :title="t('admin.workflowDesigner.manageTitle')" width="760px"
       :showNoSave="false" :showCancel="false" :ok-text="$t('common.close')" @cancel="showVersionDialog = false"
       @ok="showVersionDialog = false">
       <div class="version-dialog-body">
         <div v-for="item in versions" :key="item.id" class="version-row">
           <div class="version-row-main">
             <div class="version-row-title">
-              <span class="version-name">流程版本(V{{ item.version }})</span>
+              <span class="version-name">{{ t("admin.workflowDesigner.version") }}(V{{ item.version }})</span>
               <el-tag v-if="!item.released" size="small" effect="plain" type="warning">
                  {{ $t("common.flowStatus.indesign") }}
                 </el-tag>
                 <el-tag v-else-if="item.isCurrent" size="small" effect="plain" type="success">
                  {{ $t("common.flowStatus.approving") }}
                 </el-tag>
-              <el-tag v-else size="small" effect="plain" type="info">历史</el-tag>
+              <el-tag v-else size="small" effect="plain" type="info">{{ t("admin.workflowDesigner.history") }}</el-tag>
             </div>
           </div>
           <div class="version-row-actions">
             <el-button v-if="!item.isCurrent" link type="primary" @click="activateVersion(item)">
-              启用流程
+              {{ t("admin.workflowDesigner.activateFlow") }}
             </el-button>
-            <el-button link type="primary" @click="selectVersion(item, true)">编辑</el-button>
+            <el-button link type="primary" @click="selectVersion(item, true)">{{ t("common.edit") }}</el-button>
             <el-button v-if="!item.released && !item.isCurrent" link type="danger" @click="deleteVersion(item)">
-              删除
+              {{ t("common.delete") }}
             </el-button>
           </div>
         </div>
@@ -213,7 +213,7 @@ const save = async () => {
   flowContext.structureReadonly = !!res.released;
   oldFlowDataStr.value = JSON.stringify(flowData.value);
   await loadVersions();
-  ElMessage.success("保存成功");
+  ElMessage.success(t("common.saveSuccess"));
   return res;
 };
 
@@ -221,13 +221,13 @@ const confirmUnsavedChange = async () => {
   if (!isDirty()) return true;
 
   const confirm = await EtConfirm.showDialog(
-    "你修改了流程设定但没有保存，是否需要先保存当前版本？",
+    t("admin.workflowDesigner.dirtyContent"),
     {
-      title: "流程设定有修改，是否保存？",
+      title: t("admin.workflowDesigner.dirtyTitle"),
       icon: MessageIcon.Question,
       showCancel: true,
       showNoSave: true,
-      okText: "保存并继续",
+      okText: t("admin.workflowDesigner.saveAndContinue"),
     },
     t
   );
@@ -263,7 +263,7 @@ const createVersion = async () => {
     applyDefinition(target);
   }
   showVersionDialog.value = false;
-  ElMessage.success("已创建新版本");
+  ElMessage.success(t("admin.workflowDesigner.versionCreated"));
 };
 
 const activateVersion = async (definition: WfDefinition) => {
@@ -283,7 +283,7 @@ const activateVersion = async (definition: WfDefinition) => {
   if (target) {
     applyDefinition(target);
   }
-  ElMessage.success("启用成功");
+  ElMessage.success(t("admin.workflowDesigner.activated"));
 };
 
 const activateCurrentVersion = async () => {
@@ -302,7 +302,7 @@ const deleteVersion = async (definition: WfDefinition) => {
   } else {
     applyDefinition(createDraftDefinition());
   }
-  ElMessage.success("删除成功");
+  ElMessage.success(t("admin.workflowDesigner.deleted"));
 };
 
 const isDirty = () => {

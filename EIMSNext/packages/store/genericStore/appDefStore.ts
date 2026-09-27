@@ -1,4 +1,4 @@
-import type { AppDef } from "../../models/dto/appDef";
+import type { AppDef } from "@eimsnext/models";
 import { store } from "../setup";
 import createStore from "./creator";
 

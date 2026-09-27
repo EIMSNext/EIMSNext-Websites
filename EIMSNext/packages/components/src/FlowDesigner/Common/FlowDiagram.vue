@@ -2,7 +2,7 @@
   <div class="flow-diagram bg-grid">
     <div style="transform: scale(1)">
       <StartNode :p-node-datas="flowData.nodes" :node-data="flowData.startNode" />
-      <template v-for="node in flowData.nodes">
+      <template v-for="node in flowData.nodes" :key="node.id">
         <ApproveNode
           v-if="node.nodeType == FlowNodeType.Approve"
           :p-node-datas="flowData.nodes"

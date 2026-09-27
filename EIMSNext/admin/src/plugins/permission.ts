@@ -3,7 +3,8 @@ import { accessToken } from "@eimsnext/utils";
 import router from "@/router";
 import { usePermissionStore } from "@/store";
 import { useUserStore, useAppStore } from "@eimsnext/store";
-import { AppMenu } from "@eimsnext/models";
+import { AppMenu, UserType, WorkbenchRecentVisit, WorkbenchRecentVisitRequest } from "@eimsnext/models";
+import { workbenchRecentVisitService } from "@eimsnext/services";
 
 export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
@@ -20,14 +21,20 @@ export function setupPermission() {
           console.warn("userStore.initialize failed, continuing with cached data");
         }
 
-        const needsCorpOnboarding = !userStore.currentUser.corpId;
+        const isPlatAdmin = userStore.currentUser.userType === UserType.PlatAdmin;
+        const needsCorpOnboarding = !userStore.currentUser.corpId && !isPlatAdmin;
         if (needsCorpOnboarding && to.path !== "/corp-onboarding") {
           next({ path: "/corp-onboarding", replace: true });
           return;
         }
 
         if (!needsCorpOnboarding && to.path === "/corp-onboarding") {
-          next({ path: "/workspace", replace: true });
+          next({ path: isPlatAdmin ? "/platform-admin" : "/workbench", replace: true });
+          return;
+        }
+
+        if (isPlatAdmin && (to.path === "/" || to.path === "/workbench")) {
+          next({ path: "/platform-admin", replace: true });
           return;
         }
 
@@ -57,7 +64,12 @@ export function setupPermission() {
                   (to.params.formId || to.params.dashId)
                 ) {
                   const appStore = useAppStore();
-                  const app = await appStore.get(to.params.appId as string);
+                  let app;
+                  try {
+                    app = await appStore.get(to.params.appId as string, true, true, { silentError: true });
+                  } catch {
+                    // A target page renders its own denied or missing-resource state.
+                  }
                   const menuId = to.params.formId || to.params.dashId;
                   if (menuId) {
                     const form = findMenu(app?.appMenus || [], menuId as string);
@@ -92,7 +104,9 @@ export function setupPermission() {
   });
 
   // 后置守卫，保证每次路由跳转结束时关闭进度条
-  router.afterEach(() => {});
+  router.afterEach((to) => {
+    recordWorkbenchRecent(to);
+  });
 }
 
 function findMenu(menus: AppMenu[], menuId: string): AppMenu | undefined {
@@ -112,6 +126,49 @@ function findMenu(menus: AppMenu[], menuId: string): AppMenu | undefined {
   return undefined;
 }
 
+function firstRouteParam(value: unknown) {
+  if (Array.isArray(value)) return value[0] as string | undefined;
+  return value as string | undefined;
+}
+
+function recordWorkbenchRecent(to: RouteLocationNormalized) {
+  const appId = firstRouteParam(to.params.appId);
+  const formId = firstRouteParam(to.params.formId);
+  const dashId = firstRouteParam(to.params.dashId);
+
+  if (!appId || (!formId && !dashId)) {
+    return;
+  }
+
+  const targetType: WorkbenchRecentVisitRequest["targetType"] = dashId ? "dashboard" : "form";
+  const targetId = dashId || formId!;
+
+  (async () => {
+    const query = `$filter=targetType eq '${escapeODataString(targetType)}' and targetId eq '${escapeODataString(targetId)}'&$top=1`;
+    const records = await workbenchRecentVisitService.query<WorkbenchRecentVisit>(query);
+    if (records[0]) {
+      await workbenchRecentVisitService.patch<WorkbenchRecentVisit>(records[0].id, {
+        id: records[0].id,
+        targetType,
+        targetId,
+      });
+      return;
+    }
+
+    await workbenchRecentVisitService.post<WorkbenchRecentVisit>({
+      id: "",
+      targetType,
+      targetId,
+    });
+  })().catch(() => {
+    // 最近使用是弱依赖，记录失败不影响正常跳转。
+  });
+}
+
+function escapeODataString(value: string) {
+  return value.replace(/'/g, "''");
+}
+
 // 重定向到登录页
 function redirectToLogin(to: RouteLocationNormalized, next: NavigationGuardNext) {
   const params = new URLSearchParams(to.query as Record<string, string>);
@@ -122,14 +179,14 @@ function redirectToLogin(to: RouteLocationNormalized, next: NavigationGuardNext)
 
 /** 判断是否有权限 */
 export function hasAuth(value: string | string[], type: "button" | "role" = "button") {
-  const { roles, perms } = useUserStore().currentUser;
+  const { employeeGroups, perms } = useUserStore().currentUser;
 
   // 超级管理员 拥有所有权限
-  if (type === "button" && roles.includes("ROOT")) {
+  if (type === "button" && employeeGroups.includes("ROOT")) {
     return true;
   }
 
-  const auths = type === "button" ? perms : roles;
+  const auths = type === "button" ? perms : employeeGroups;
   return typeof value === "string"
     ? auths.includes(value)
     : value.some((perm) => auths.includes(perm));

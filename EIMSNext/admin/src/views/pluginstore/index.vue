@@ -1,7 +1,12 @@
 <template>
   <div class="pluginstore-page">
     <div class="toolbar-card">
-      <el-input v-model="keyword" class="search-input" :placeholder="$t('admin.plugin.searchPlugin')" @keyup.enter="loadProfiles">
+      <el-input
+        v-model="keyword"
+        class="search-input"
+        :placeholder="$t('admin.plugin.searchPlugin')"
+        @keyup.enter="loadProfiles"
+      >
         <template #prefix>
           <et-icon icon="el-Search" size="15" />
         </template>
@@ -12,41 +17,82 @@
       <aside class="filter-panel">
         <div class="filter-scroll">
           <div class="filter-group">
-            <button class="filter-all" :class="{ active: !activeCategory && !activeScenario }"
-              @click="resetFilters">{{ $t("admin.plugin.allPlugins") }}</button>
+            <button
+              class="filter-all"
+              :class="{ active: !activeCategory && !activeScenario }"
+              @click="resetFilters"
+            >
+              {{ $t("admin.plugin.allPlugins") }}
+            </button>
           </div>
 
-          <div class="filter-group">
-            <div class="filter-title-row">
+          <div class="filter-group" :class="{ collapsed: categoryCollapsed }">
+            <button
+              class="filter-title-row"
+              type="button"
+              :aria-expanded="!categoryCollapsed"
+              @click="categoryCollapsed = !categoryCollapsed"
+            >
               <span class="filter-title">
                 <et-icon icon="el-Box" size="13" />
                 {{ $t("admin.plugin.toolType") }}
               </span>
-              <et-icon icon="el-ArrowUp" size="12" />
-            </div>
-            <div class="filter-items">
-              <button class="filter-item" :class="{ active: !activeCategory }" @click="setCategory('')">{{ $t("admin.plugin.latestPlugins") }}</button>
-              <button v-for="category in categories" :key="category" class="filter-item"
-                :class="{ active: activeCategory === category }" @click="setCategory(category)">
-                {{ category }}
-              </button>
+              <et-icon class="toggle-icon" icon="el-ArrowUp" size="12" />
+            </button>
+            <div class="filter-collapse">
+              <div class="filter-items">
+                <button
+                  class="filter-item"
+                  :class="{ active: !activeCategory }"
+                  @click="setCategory('')"
+                >
+                  {{ $t("admin.plugin.latestPlugins") }}
+                </button>
+                <button
+                  v-for="category in categories"
+                  :key="category"
+                  class="filter-item"
+                  :class="{ active: activeCategory === category }"
+                  @click="setCategory(category)"
+                >
+                  {{ category }}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="filter-group">
-            <div class="filter-title-row">
+          <div class="filter-group" :class="{ collapsed: scenarioCollapsed }">
+            <button
+              class="filter-title-row"
+              type="button"
+              :aria-expanded="!scenarioCollapsed"
+              @click="scenarioCollapsed = !scenarioCollapsed"
+            >
               <span class="filter-title">
                 <et-icon icon="el-Grid" size="13" />
                 {{ $t("admin.plugin.bizScenario") }}
               </span>
-              <et-icon icon="el-ArrowUp" size="12" />
-            </div>
-            <div class="filter-items">
-              <button class="filter-item" :class="{ active: !activeScenario }" @click="setScenario('')">{{ $t("admin.plugin.allScenarios") }}</button>
-              <button v-for="scenario in scenarios" :key="scenario" class="filter-item"
-                :class="{ active: activeScenario === scenario }" @click="setScenario(scenario)">
-                {{ scenario }}
-              </button>
+              <et-icon class="toggle-icon" icon="el-ArrowUp" size="12" />
+            </button>
+            <div class="filter-collapse">
+              <div class="filter-items">
+                <button
+                  class="filter-item"
+                  :class="{ active: !activeScenario }"
+                  @click="setScenario('')"
+                >
+                  {{ $t("admin.plugin.allScenarios") }}
+                </button>
+                <button
+                  v-for="scenario in scenarios"
+                  :key="scenario"
+                  class="filter-item"
+                  :class="{ active: activeScenario === scenario }"
+                  @click="setScenario(scenario)"
+                >
+                  {{ scenario }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -58,8 +104,15 @@
             <div class="section-title">{{ $t("admin.plugin.featuredPlugins") }}</div>
           </div>
           <div class="plugin-grid featured-grid">
-            <div v-for="item in featuredItems" :key="item.id" class="plugin-card" @click="openDetail(item)">
-              <span v-if="item.installed" class="card-corner-badge">{{ $t("admin.plugin.installed") }}</span>
+            <div
+              v-for="item in featuredItems"
+              :key="item.id"
+              class="plugin-card"
+              @click="openDetail(item)"
+            >
+              <span v-if="item.installed" class="card-corner-badge">
+                {{ $t("admin.plugin.installed") }}
+              </span>
               <div class="plugin-card-top">
                 <div class="plugin-info">
                   <img v-if="item.icon" class="plugin-icon" :src="item.icon" :alt="item.name" />
@@ -81,8 +134,15 @@
             <div class="section-title">{{ $t("admin.plugin.allPlugins") }}</div>
           </div>
           <div class="plugin-grid all-grid">
-            <div v-for="item in profileItems" :key="item.id" class="plugin-card" @click="openDetail(item)">
-              <span v-if="item.installed" class="card-corner-badge">{{ $t("admin.plugin.installed") }}</span>
+            <div
+              v-for="item in profileItems"
+              :key="item.id"
+              class="plugin-card"
+              @click="openDetail(item)"
+            >
+              <span v-if="item.installed" class="card-corner-badge">
+                {{ $t("admin.plugin.installed") }}
+              </span>
               <div class="plugin-card-top">
                 <div class="plugin-info">
                   <img v-if="item.icon" class="plugin-icon" :src="item.icon" :alt="item.name" />
@@ -101,7 +161,11 @@
       </main>
     </div>
 
-    <PluginDetail v-model="detailVisible" :profile-id="selectedProfileId" @installed="onDetailInstalled" />
+    <PluginDetail
+      v-model="detailVisible"
+      :profile-id="selectedProfileId"
+      @installed="onDetailInstalled"
+    />
   </div>
 </template>
 
@@ -115,14 +179,28 @@ defineOptions({ name: "PluginStorePage" });
 const keyword = ref("");
 const activeCategory = ref("");
 const activeScenario = ref("");
+const categoryCollapsed = ref(false);
+const scenarioCollapsed = ref(false);
 const profileItems = ref<PluginProfile[]>([]);
 const detailVisible = ref(false);
 const selectedProfileId = ref("");
 
-const categories = computed(() => Array.from(new Set(profileItems.value.map((item: PluginProfile) => item.category).filter(Boolean))) as string[]);
-const scenarios = computed(() => Array.from(new Set(profileItems.value.map((item: PluginProfile) => item.scenario).filter(Boolean))) as string[]);
+const categories = computed(
+  () =>
+    Array.from(
+      new Set(profileItems.value.map((item: PluginProfile) => item.category).filter(Boolean))
+    ) as string[]
+);
+const scenarios = computed(
+  () =>
+    Array.from(
+      new Set(profileItems.value.map((item: PluginProfile) => item.scenario).filter(Boolean))
+    ) as string[]
+);
 const featuredItems = computed(() => {
-  const preferred = profileItems.value.filter((item: PluginProfile) => item.isRecommended || item.isOfficial || item.isHot);
+  const preferred = profileItems.value.filter(
+    (item: PluginProfile) => item.isRecommended || item.isOfficial || item.isHot
+  );
   return (preferred.length ? preferred : profileItems.value).slice(0, 8);
 });
 
@@ -167,8 +245,7 @@ function openDetail(item: PluginProfile) {
 }
 
 function onDetailInstalled() {
-  const found = profileItems.value.find((p) => p.id === selectedProfileId.value);
-  if (found) found.installed = true;
+  loadProfiles();
 }
 
 onMounted(loadProfiles);
@@ -215,9 +292,7 @@ onMounted(loadProfiles);
   padding-right: 2px;
 }
 
-.filter-group+.filter-group {
-  margin-top: 10px;
-  padding-top: 10px;
+.filter-group + .filter-group {
   border-top: 1px solid color-mix(in srgb, var(--et-border-color-light) 72%, transparent);
 }
 
@@ -234,60 +309,105 @@ onMounted(loadProfiles);
 .filter-all {
   padding: 9px 12px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   border: 1px solid transparent;
 }
 
 .filter-all.active {
-  background: var(--et-bg-hover);
-  color: var(--et-text-primary);
-  border-color: var(--et-bg-hover);
+  background: var(--et-bg-primary-soft);
+  border-color: color-mix(in srgb, var(--et-color-primary) 18%, transparent);
+  color: var(--et-color-primary);
 }
 
 .filter-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
+  width: 100%;
+  padding: 4px 8px;
   margin-bottom: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--et-text-primary);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  line-height: 40px;
+  transition: background-color 0.2s ease;
+}
+
+.filter-title-row:hover {
+  background: var(--et-bg-hover);
+}
+
+.filter-title-row:focus-visible {
+  background: var(--et-bg-hover);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--et-color-primary) 30%, transparent);
 }
 
 .filter-title {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.toggle-icon {
+  color: var(--et-text-tertiary);
+  transition: transform 0.22s ease;
+}
+
+.filter-group.collapsed .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.filter-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.22s ease;
+}
+
+.filter-group.collapsed .filter-collapse {
+  grid-template-rows: 0fr;
 }
 
 .filter-items {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .filter-item {
-  padding: 8px 12px;
+  padding: 8px 12px 8px 28px;
   border-radius: 8px;
   font-size: 13px;
   color: var(--et-text-secondary);
   border: 1px solid transparent;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
-.filter-item:hover,
-.filter-item.active {
+.filter-item:hover {
   background: var(--et-bg-hover);
   color: var(--et-text-primary);
 }
-
+.filter-item.active {
+  background: var(--et-bg-primary-soft);
+  border-color: color-mix(in srgb, var(--et-color-primary) 18%, transparent);
+  color: var(--et-color-primary);
+}
 .content-panel {
   border-radius: 10px;
   padding: 14px 16px 20px;
 }
 
-.plugin-section+.plugin-section {
+.plugin-section + .plugin-section {
   margin-top: 28px;
 }
 
@@ -335,7 +455,10 @@ onMounted(loadProfiles);
   padding: 14px 14px 12px;
   color: inherit;
   text-decoration: none;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .plugin-card:hover {

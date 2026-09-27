@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 import { Department, FormDef, ApproveRequest, ApproveAction} from "@jlsoft/models";
 import {
-  authService,
+  identityService,
   departmentService,
   formDataService,
   workflowService
@@ -30,7 +30,7 @@ let form2: FormDef;
 
 let depts: any;
 
-authService
+identityService
   .login({
     username: "12345678901",
     password: "123456",

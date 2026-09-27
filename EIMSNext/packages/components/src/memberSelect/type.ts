@@ -4,7 +4,7 @@ import { IListItem } from "@/list/type";
 export enum MemberTabs {
   None = 0,
   Department = 1,
-  Role = 2,
+  EmployeeGroup = 2,
   Employee = 4,
   Dynamic = 8,
   CurDept = 16,
@@ -13,6 +13,7 @@ export enum MemberTabs {
 
 export interface IMemberLimit {
   depts?: ISelectedTag[];
+  employeeGroups?: ISelectedTag[];
 }
 
 export interface IMemberSelectOptions {
@@ -24,6 +25,7 @@ export interface IMemberSelectOptions {
   dynamicMembers?: ISelectedTag[];
   dynamicManagerLevels?: number[];
   showContract?: false;
+  adminScope?: boolean;
 }
 
 export interface IDynamicMemberGroup extends IListItem {

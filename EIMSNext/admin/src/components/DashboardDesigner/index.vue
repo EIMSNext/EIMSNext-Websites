@@ -3,60 +3,67 @@
     <template #title>
       <el-input v-model="dashDefRef.name" class="title-editor" />
     </template>
-    <template #top-right>
-      <el-button @click="onSave">保存</el-button>
-      <el-button @click="onPreview">预览</el-button>
+    <template #top-center>
+      <el-tabs v-model="activeTab" class="nav-tabs">
+        <el-tab-pane :label="t('admin.dashboard.design')" name="design" />
+        <el-tab-pane :label="t('admin.dashboard.extension')" name="extension" />
+        <el-tab-pane :label="t('admin.dashboard.publish')" name="publish" />
+      </el-tabs>
     </template>
-    <el-container class="design-container">
+    <template #top-right>
+      <el-button @click="onSave">{{ t("common.save") }}</el-button>
+      <el-button @click="onPreview">{{ t("common.preview") }}</el-button>
+    </template>
+    <el-container v-show="activeTab === 'design'" class="design-container">
       <el-aside width="180px" class="left-aside">
         <div class="dash-designer-menu">
           <div class="menu-wrapper">
             <div>
-              <div class="menu-label">图表</div>
+              <div class="menu-label">{{ t("admin.dashboardDesigner.chart") }}</div>
               <div class="menu-group">
                 <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Chart" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
                   :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Chart }">
                   <div class="menu-guide">
-                    <div class="guide-title">统计表</div>
+                    <div class="guide-title">{{ t("admin.dashboardDesigner.statsChart") }}</div>
                     <img src="@/assets/images/dsheditor/guide-chart.svg" />
-                    <div class="guide-des">提供多种图表样式，对数据进行汇总统计</div>
+                    <div class="guide-des">{{ t("admin.dashboardDesigner.statsChartDesc") }}</div>
                   </div>
                   <template #reference>
                     <div class="menu-line">
                       <div class="line-content" draggable="true"
                         @dragstart="dashItemDragStart($event, DashItemType.Chart)"
                         @drag="(dashItemDrag($event, DashItemType.Chart), (hoverMenu = false))"
-                        @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
+                        @dragend="handlePaletteDrop($event, DashItemType.Chart)" unselectable="on"
                         @mouseover="setHoverMenu(true, DashItemType.Chart)" @mouseleave="hoverMenu = false">
                         <et-icon icon="el-PieChart" class="line-icon" />
-                        <div class="line-text">统计表</div>
+                        <div class="line-text">{{ t("admin.dashboardDesigner.statsChart") }}</div>
                       </div>
                     </div>
                   </template>
                 </el-popover>
 
-                <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Chart" placement="right-start"
+                <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.DetailTable" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
-                  :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Chart }">
+                  :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.DetailTable }">
                   <div class="menu-guide">
-                    <div class="guide-title">统计表</div>
+                    <div class="guide-title">{{ t("admin.dashboardDesigner.detailTable") }}</div>
                     <img src="@/assets/images/dsheditor/guide-chart.svg" />
-                    <div class="guide-des">提供多种图表样式，对数据进行汇总统计</div>
+                    <div class="guide-des">{{ t("admin.dashboardDesigner.detailTableDesc") }}</div>
                   </div>
                   <template #reference>
                     <div class="menu-line">
                       <div class="line-content" draggable="true"
-                        @dragstart="dashItemDragStart($event, DashItemType.Chart)"
-                        @drag="dashItemDrag($event, DashItemType.Chart), (hoverMenu = false)"
-                        @dragend="dashItemDrop($event, openSourceDialog)" unselectable="on"
-                        @mouseover="setHoverMenu(true, DashItemType.Chart)" @mouseleave="hoverMenu = false">
-                        <et-icon icon="el-PieChart" class="line-icon" />
-                        <div class="line-text">明细表</div>
+                        @dragstart="dashItemDragStart($event, DashItemType.DetailTable)"
+                        @drag="dashItemDrag($event, DashItemType.DetailTable), (hoverMenu = false)"
+                        @dragend="handlePaletteDrop($event, DashItemType.DetailTable)" unselectable="on"
+                        @mouseover="setHoverMenu(true, DashItemType.DetailTable)" @mouseleave="hoverMenu = false">
+                        <et-icon icon="el-Grid" class="line-icon" />
+                        <div class="line-text">{{ t("admin.dashboardDesigner.detailTable") }}</div>
                       </div>
                     </div>
                   </template>
-                </el-popover> -->
+                </el-popover>
                 <!-- <div class="menu-line">
                   <div class="line-content" draggable="true" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-table"></i></div>
@@ -102,8 +109,36 @@
               </div>
             </div>
             <div>
-              <!-- <div class="menu-label">组件</div> -->
+              <div class="menu-label">组件</div>
               <div class="menu-group">
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Image)"
+                    @drag="dashItemDrag($event, DashItemType.Image)" @dragend="handlePaletteDrop($event, DashItemType.Image)" unselectable="on">
+                    <et-icon icon="el-Picture" class="line-icon" />
+                    <div class="line-text">{{ t("admin.dashboardDesigner.imageComponent") }}</div>
+                  </div>
+                </div>
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Text)"
+                    @drag="dashItemDrag($event, DashItemType.Text)" @dragend="handlePaletteDrop($event, DashItemType.Text)" unselectable="on">
+                    <et-icon icon="el-Document" class="line-icon" />
+                    <div class="line-text">{{ t("admin.dashboardDesigner.textComponent") }}</div>
+                  </div>
+                </div>
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.LayoutContainer)"
+                    @drag="dashItemDrag($event, DashItemType.LayoutContainer)" @dragend="handlePaletteDrop($event, DashItemType.LayoutContainer)" unselectable="on">
+                    <et-icon icon="el-Grid" class="line-icon" />
+                    <div class="line-text">布局容器</div>
+                  </div>
+                </div>
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.RealTime)"
+                    @drag="dashItemDrag($event, DashItemType.RealTime)" @dragend="handlePaletteDrop($event, DashItemType.RealTime)" unselectable="on">
+                    <et-icon icon="el-Clock" class="line-icon" />
+                    <div class="line-text">{{ t("admin.dashboardDesigner.realTime") }}</div>
+                  </div>
+                </div>
                 <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Comp" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
                   :class="{ 'line-hover': hoverMenu && hoverMenuType === DashItemType.Comp }">
@@ -160,7 +195,7 @@
               </div>
             </div>
             <div>
-              <div class="menu-label">工具</div>
+              <div class="menu-label">{{ t("admin.dashboardDesigner.tools") }}</div>
               <div class="menu-group">
                 <!-- <el-popover :visible="hoverMenu && hoverMenuType === DashItemType.Filter" placement="right-start"
                   trigger="hover" fit-content no-fade width="auto"
@@ -185,23 +220,25 @@
                 </el-popover> -->
                 <div class="menu-line">
                   <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.Filter)"
-                    @drag="dashItemDrag($event, DashItemType.Filter)" @dragend="dashItemDrop($event, null)" unselectable="on">
+                    @drag="dashItemDrag($event, DashItemType.Filter)" @dragend="handlePaletteDrop($event, DashItemType.Filter)" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-filter"></i></div>
-                    <div class="line-text">筛选组件</div>
+                    <div class="line-text">{{ t("admin.dashboardDesigner.filterWidget") }}</div>
                   </div>
                 </div>
-                <!--    <div class="menu-line">
-                  <div class="line-content" draggable="true" unselectable="on">
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.QuickFilter)"
+                    @drag="dashItemDrag($event, DashItemType.QuickFilter)" @dragend="handlePaletteDrop($event, DashItemType.QuickFilter)" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-combine-filter"></i></div>
-                    <div class="line-text">快捷筛选</div>
+                    <div class="line-text">{{ t("admin.dashboardDesigner.quickFilter") }}</div>
                   </div>
                 </div>
-                <div class="menu-line disable">
-                  <div class="line-content" draggable="false" unselectable="on">
+                <div class="menu-line">
+                  <div class="line-content" draggable="true" @dragstart="dashItemDragStart($event, DashItemType.FilterButton)"
+                    @drag="dashItemDrag($event, DashItemType.FilterButton)" @dragend="handlePaletteDrop($event, DashItemType.FilterButton)" unselectable="on">
                     <div class="line-thumb"><i class="x-icon iconfont-fx-pc icon-filter-add"></i></div>
-                    <div class="line-text">筛选按钮</div>
+                    <div class="line-text">{{ t("admin.dashboardDesigner.filterButton") }}</div>
                   </div>
-                </div> -->
+                </div>
               </div>
             </div>
             <!-- <div class="sidebar-toggle"><i class="x-icon iconfont-fx-pc icon-sidebar"></i></div> -->
@@ -210,35 +247,43 @@
       </el-aside>
       <el-main class="designer-main">
         <div class="dash-edit-layout custom-scroll" @dragover="gridDragOver">
-          <grid-layout ref="gridRef" v-model:layout="state.layout" :col-num="colNum" :col-width="colWidth"
+          <grid-layout ref="gridRef" v-model:layout="rootLayout" :col-num="colNum" :col-width="colWidth"
             :row-height="rowHeight" :is-draggable="state.draggable" :is-resizable="state.resizable" :is-mirrored="false"
             :is-bounded="true" :vertical-compact="true" :margin="[10, 10]" :use-css-transforms="true"
-            :responsive="true">
-            <grid-item v-for="item in state.layout" :ref="(e) => setItemRef(item, e)" :x="item.x" :y="item.y"
+            :responsive="true" resize-ignore-from=".no-drag">
+            <grid-item v-for="item in rootLayout" :ref="(e) => setItemRef(item, e)" :x="item.x" :y="item.y"
               :w="item.w" :h="item.h" :i="item.i" :key="item.i" @resize="resizeEvent" @resized="resizedEvent"
               @moved="movedEvent" @container-resized="containerResizedEvent" :minW="getMinWidth(item)"
               :minH="getMinHeight(item)" :maxW="60" :maxH="getMaxHeight(item)" drag-ignore-from=".no-drag"
+              resize-ignore-from=".no-drag"
               :class="{ edited: item.inEdit, gridNoTran: item.drag }" :style="{ 'z-index': getZIndex(item) }">
-              <DashItemCard v-if="state.items[item.i]" :item-def="state.items[item.i]" :height="item.h" :width="item.w"
-                :is-view="false" @hide="handleItemHide(state.items[item.i])" @edit="handleItemEdit(state.items[item.i])"
-                @copy="handleItemCopy(state.items[item.i])" @delete="handleItemDelete(state.items[item.i])" />
+              <DashItemCard v-if="state.items[item.i]" :item-def="state.items[item.i]" :layout="state.layout" :items="state.items" :height="item.h" :width="item.w"
+                :is-view="false" @hide="handleItemHide($event)" @edit="handleItemEdit($event)"
+                @copy="handleItemCopy($event)" @delete="handleItemDelete($event)"
+                @update-layout="updateNestedLayout" @update-setting="updateContainerSetting"
+                @update-realtime-setting="updateRealTimeSetting" @update-image-setting="updateImageSetting"
+                @update-text-setting="updateTextSetting" />
             </grid-item>
           </grid-layout>
         </div>
       </el-main>
     </el-container>
+    <ExtensionSettings v-if="activeTab === 'extension'" :dash-def="dashDefRef" @updated="handleDashUpdated" />
+    <PublishSettings v-if="activeTab === 'publish'" :dash-def="dashDefRef" @updated="handleDashUpdated" />
   </EtDrawer>
   <DataSourceDialog v-model="showDataSourceDialog" :appId="dashDef.appId" :dataSource="dataSource"
     @cancel="handleSourceCancel" @ok="handleSourceOk"></DataSourceDialog>
-  <EChartsDesigner v-if="dashItemDefRef" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
+  <EChartsDesigner v-if="dashItemDefRef && showChartEditor" v-model="showChartEditor" :dash-item-def="dashItemDefRef" />
+  <DetailTableDesigner v-if="dashItemDefRef && showDetailTableEditor" v-model="showDetailTableEditor" :dash-item-def="dashItemDefRef" />
   <FilterDesigner v-if="dashItemDefRef" v-model="showFilterEditor" :dash-item-def="dashItemDefRef"
     :chart-targets="chartTargets" :binding-candidates="bindingCandidates" />
+  <QuickFilterSettings v-if="dashItemDefRef && quickFilterSettingRef" v-model="showQuickFilterEditor" :setting="quickFilterSettingRef"
+    :chart-targets="chartTargets" :binding-candidates="bindingCandidates" @updated="updateQuickFilterSetting" />
 </template>
 <script setup lang="ts">
-import { EtDrawer } from "@eimsnext/components/src/drawer";
-import { buildFieldListItems, IFormFieldDef } from "@eimsnext/components";
+import { buildFieldListItems, EtDrawer, IFormFieldDef } from "@eimsnext/components";
 import DashItemCard from "./components/DashItemCard.vue";
-import { IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
+import { getDashboardItemMinSize, IDataSource, IDraggableItem, IGridLayoutItem, IGridLayoutState } from "./type";
 import { uniqueId } from "@eimsnext/utils";
 import { useContextStore } from "@eimsnext/store";
 import { GridLayout, GridItem } from "vue-grid-layout-v3";
@@ -253,9 +298,22 @@ import {
 import { dashboardDefService, dashboardItemDefService } from "@eimsnext/services";
 import EChartsDesigner from "./ECharts/EChartsDesigner.vue";
 import FilterDesigner from "./FilterDesigner/FilterDesigner.vue";
+import DetailTableDesigner from "./DetailTable/DetailTableDesigner.vue";
+import ExtensionSettings from "./ExtensionSettings.vue";
+import PublishSettings from "./PublishSettings.vue";
 import { useI18n } from "vue-i18n";
 import { useFormStore } from "@eimsnext/store";
 import { IDashboardBindingCandidate, IDashboardChartTarget } from "./FilterDesigner/type";
+import { createDefaultDetailTableSetting } from "./DetailTable/type";
+import { useDashboardDragDrop } from "./useDashboardDragDrop";
+import { escapeODataString } from "@/utils/odata";
+import { createDefaultLayoutContainerSetting, ILayoutContainerSetting, parseLayoutContainerSetting } from "./LayoutContainer/type";
+import { createDefaultRealTimeSetting, IRealTimeSetting } from "./RealTime/type";
+import { createDefaultDashboardImageSetting, IDashboardImageSetting } from "./Image/type";
+import { createDefaultDashboardTextSetting, IDashboardTextSetting } from "./Text/type";
+import QuickFilterSettings from "./QuickFilter/QuickFilterSettings.vue";
+import { createDefaultFilterButtonSetting, createDefaultQuickFilterSetting, parseQuickFilterSetting } from "./QuickFilter/type";
+import { DashboardQuickFilterSetting } from "@eimsnext/models";
 const { t } = useI18n();
 
 defineOptions({
@@ -272,6 +330,7 @@ const formStore = useFormStore();
 const dashDefRef = ref<DashboardDef>(props.dashDef);
 const dashItemDefRef = ref<DashboardItemDef>();
 const gridRef = ref<any>();
+const activeTab = ref<"design" | "extension" | "publish">("design");
 
 const hoverMenu = ref(false);
 const hoverMenuType = ref<DashItemType | "">("");
@@ -280,7 +339,12 @@ const showDataSourceDialog = ref(false);
 const dataSource = ref<IDataSource>();
 
 const showChartEditor = ref(false);
+const showDetailTableEditor = ref(false);
 const showFilterEditor = ref(false);
+const showQuickFilterEditor = ref(false);
+const quickFilterSettingRef = computed(() => dashItemDefRef.value?.itemType === DashItemType.QuickFilter
+  ? parseQuickFilterSetting(dashItemDefRef.value.details)
+  : undefined);
 
 const state = reactive<IGridLayoutState>({
   layout: [],
@@ -288,18 +352,36 @@ const state = reactive<IGridLayoutState>({
   draggable: true,
   resizable: true,
 });
+const rootLayout = computed<IGridLayoutItem[]>({
+  get: () => state.layout.filter((item) => !item.parentLayoutId),
+  set: (updated) => {
+    const nested = state.layout.filter((item) => item.parentLayoutId);
+    state.layout.splice(0, state.layout.length, ...updated, ...nested);
+  },
+});
+const pendingDrop = ref<(IGridLayoutItem & { parentLayoutId?: string; tabId?: string }) | undefined>();
 
-const elItemsRef = ref<any>({});
-const colNum = ref(24);
+const {
+  colNum,
+  mouseXY,
+  dragPos,
+  draggingItemType,
+  elItemsRef,
+  setItemRef,
+  dashItemDragStart,
+  gridDragOver,
+  dashItemDrag,
+  dashItemDrop,
+  getMaxHeight,
+  getZIndex,
+  setupMouseTracking,
+} = useDashboardDragDrop(state, gridRef);
+
 const colWidth = ref(150);
 const rowHeight = ref(10);
-const newWidth = 12;
-const newHeight = 12;
-const mouseXY = { x: -1, y: -1 };
-const dragPos: IGridLayoutItem = { x: -1, y: -1, w: 1, h: 1, i: "" };
-const draggingItemType = ref<DashItemType>();
+
 const chartTargets = computed<IDashboardChartTarget[]>(() => Object.values(state.items)
-  .filter((item) => item.itemType == DashItemType.Chart)
+  .filter((item) => [DashItemType.Chart, DashItemType.DetailTable].includes(item.itemType))
   .map((item) => {
     const details = JSON.parse(item.details || "{}");
     return {
@@ -334,26 +416,13 @@ const containerResizedEvent = (
   newWPx: number
 ) => { };
 
-const getMinWidth = (item: IGridLayoutItem) => {
-  return 6;
-};
-const getMinHeight = (item: IGridLayoutItem) => {
-  return 3;
-};
-const getMaxHeight = (item: IGridLayoutItem) => {
-  return 60;
-};
-const getZIndex = (item: IGridLayoutItem) => {
-  return 99999;
-};
-
-const openSourceDialog = (b: boolean, type: DashItemType) => {
-  draggingItemType.value = type;
-  showDataSourceDialog.value = true;
-};
+const getItemType = (item: IGridLayoutItem) => item.type ?? state.items[item.i]?.itemType;
+const getMinWidth = (item: IGridLayoutItem) => getDashboardItemMinSize(getItemType(item)).w;
+const getMinHeight = (item: IGridLayoutItem) => getDashboardItemMinSize(getItemType(item)).h;
 
 const handleSourceCancel = async () => {
   showDataSourceDialog.value = false;
+  pendingDrop.value = undefined;
   state.layout = state.layout.filter((obj) => obj.i !== "drop");
   await nextTick();
 };
@@ -361,22 +430,28 @@ const handleSourceOk = async (source: IDataSource) => {
   dataSource.value = source;
   showDataSourceDialog.value = false;
 
-  let details = { datasource: dataSource.value };
+  const target = pendingDrop.value;
+  if (!target?.type) return;
+  let details = target.type == DashItemType.DetailTable
+    ? createDefaultDetailTableSetting(dataSource.value)
+    : { datasource: dataSource.value };
   let layoutId = uniqueId();
 
   state.layout.push({
-    x: dragPos.x,
-    y: dragPos.y,
-    w: dragPos.w,
-    h: dragPos.h,
+    x: target.x,
+    y: target.y,
+    w: target.w,
+    h: target.h,
     i: layoutId,
-    type: dragPos.type,
+    type: target.type,
+    parentLayoutId: target.parentLayoutId,
+    tabId: target.tabId,
   });
 
-  await createNewDashItem(dragPos.type!, JSON.stringify(details), layoutId);
+  await createNewDashItem(target.type, JSON.stringify(details), layoutId);
 
   await nextTick();
-  gridRef.value.emitter.emit("dragEvent", [
+  if (!target.parentLayoutId) gridRef.value.emitter.emit("dragEvent", [
     "dragend",
     dragPos.i,
     dragPos.x,
@@ -385,7 +460,14 @@ const handleSourceOk = async (source: IDataSource) => {
     dragPos.w,
   ]);
 
-  showChartEditor.value = true;
+  showChartEditor.value = false;
+  showDetailTableEditor.value = false;
+  if (target.type == DashItemType.DetailTable) {
+    showDetailTableEditor.value = true;
+  } else {
+    showChartEditor.value = true;
+  }
+  pendingDrop.value = undefined;
 };
 
 const loadBindingCandidates = async () => {
@@ -396,7 +478,7 @@ const loadBindingCandidates = async () => {
     if (!form) {
       continue;
     }
-    const fields = buildFieldListItems(sourceId, form.content?.items || [], !!form.usingWorkflow)
+    const fields = buildFieldListItems(sourceId, form.content?.items || [], !!form.usingWorkflow, undefined, { t } as any)
       .map((item) => item.data)
       .filter(Boolean) as IFormFieldDef[];
     items.push({
@@ -413,142 +495,26 @@ const setHoverMenu = (b: boolean, type: DashItemType) => {
   hoverMenuType.value = type;
 };
 
-const setItemRef = (item: IGridLayoutItem, e: any) => {
-  elItemsRef.value[item.i] = e;
-};
-const dashItemDragStart = (e: DragEvent, type: DashItemType) => {
-  if (!e.dataTransfer) return;
-  e.dataTransfer.dropEffect = "copy";
-  e.dataTransfer.setData("text", JSON.stringify({ type }));
-  // e.dataTransfer.setDragImage(new Image(), 0, 0);
-};
-const gridDragOver = (e: DragEvent) => {
-  e.preventDefault();
-  if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
-};
-
-const dashItemDrag = async (e: DragEvent, type: DashItemType) => {
-  let parentRect = gridRef.value!.$el.getBoundingClientRect();
-  let mouseInGrid = false;
-
-  if (
-    mouseXY.x > parentRect.left &&
-    mouseXY.x < parentRect.right &&
-    mouseXY.y > parentRect.top &&
-    mouseXY.y < parentRect.bottom
-  ) {
-    mouseInGrid = true;
-  }
-  if (mouseInGrid === true && state.layout.findIndex((item) => item.i === "drop") === -1) {
-    state.layout.push({
-      x: (state.layout.length * 2) % colNum.value,
-      y: state.layout.length + colNum.value,
-      w: newWidth,
-      h: newHeight,
-      i: "drop",
-      type: type,
-      inEdit: false,
-      drag: true,
-    });
-    await nextTick();
-  }
-
-  if (!elItemsRef.value.drop) {
+const handlePaletteDrop = async (e: DragEvent, type: DashItemType) => {
+  const result = await dashItemDrop(e, null);
+  if (!result) return;
+  const target = { ...result, type } as IGridLayoutItem & { parentLayoutId?: string; tabId?: string };
+  if (type === DashItemType.Chart || type === DashItemType.DetailTable) {
+    pendingDrop.value = target;
+    draggingItemType.value = type;
+    showDataSourceDialog.value = true;
     return;
   }
-
-  const index = state.layout.findIndex((item) => item.i === "drop");
-  if (index !== -1) {
-    if (elItemsRef.value.drop?.el?.style) {
-      elItemsRef.value.drop.el.style.display = "none";
-    }
-    const elRef = elItemsRef.value.drop;
-    const new_pos = elRef.calcXY(mouseXY.y - parentRect.top, mouseXY.x - parentRect.left);
-    if (mouseInGrid === true) {
-      gridRef.value.emitter.emit("dragEvent", [
-        "dragstart",
-        "drop",
-        new_pos.x,
-        new_pos.y,
-        state.layout[index].h,
-        state.layout[index].w,
-      ]);
-      dragPos.i = "drop";
-      dragPos.x = state.layout[index].x;
-      dragPos.y = state.layout[index].y;
-      dragPos.h = newWidth;
-      dragPos.w = newHeight;
-      dragPos.type = state.layout[index].type;
-    }
-    if (mouseInGrid === false) {
-      gridRef.value.emitter.emit("dragEvent", [
-        "dragend",
-        "drop",
-        new_pos.x,
-        new_pos.y,
-        state.layout[index].h,
-        state.layout[index].w,
-      ]);
-      state.layout = state.layout.filter((obj) => obj.i !== "drop");
-      await nextTick();
-    }
-  }
-};
-const dashItemDrop = async (e: DragEvent, callback: any) => {
-  const parentRect = gridRef.value!.$el.getBoundingClientRect();
-  let mouseInGrid = false;
-  if (
-    e.clientX > parentRect.left - 10 &&
-    e.clientX < parentRect.right + 10 &&
-    e.clientY > parentRect.top - 10 &&
-    e.clientY < parentRect.bottom + 10
-  ) {
-    mouseInGrid = true;
-  }
-  if (
-    mouseXY.x > parentRect.left &&
-    mouseXY.x < parentRect.right &&
-    mouseXY.y > parentRect.top &&
-    mouseXY.y < parentRect.bottom
-  ) {
-    mouseInGrid = true;
-  }
-  if (mouseInGrid === true) {
-    gridRef.value.emitter.emit("dragEvent", [
-      "dragend",
-      "drop",
-      dragPos.x,
-      dragPos.y,
-      dragPos.h,
-      dragPos.w,
-    ]);
-    state.layout = state.layout.filter((obj) => obj.i !== "drop");
-
-    if (callback) {
-      callback(true, dragPos.type);
-    } else {
-      let layoutId = uniqueId();
-      state.layout.push({
-        x: dragPos.x,
-        y: dragPos.y,
-        w: dragPos.w,
-        h: dragPos.h,
-        i: layoutId,
-        type: dragPos.type,
-      });
-      await createNewDashItem(dragPos.type!, "", layoutId);
-
-      await nextTick();
-      gridRef.value.emitter.emit("dragEvent", [
-        "dragend",
-        dragPos.i,
-        dragPos.x,
-        dragPos.y,
-        dragPos.h,
-        dragPos.w,
-      ]);
-    }
-  }
+  const layoutId = uniqueId();
+  state.layout.push({ ...target, i: layoutId });
+  let details = "{}";
+  if (type === DashItemType.LayoutContainer) details = JSON.stringify(createDefaultLayoutContainerSetting());
+  if (type === DashItemType.RealTime) details = JSON.stringify(createDefaultRealTimeSetting());
+  if (type === DashItemType.Image) details = JSON.stringify(createDefaultDashboardImageSetting());
+  if (type === DashItemType.Text) details = JSON.stringify(createDefaultDashboardTextSetting());
+  if (type === DashItemType.QuickFilter) details = JSON.stringify(createDefaultQuickFilterSetting(t("admin.dashboardDesigner.quickFilter")));
+  if (type === DashItemType.FilterButton) details = JSON.stringify(createDefaultFilterButtonSetting());
+  await createNewDashItem(type, details, layoutId);
 };
 
 const createNewDashItem = async (itemType: DashItemType, details: string, layoutId: string) => {
@@ -564,8 +530,29 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
     case DashItemType.Chart:
       name = t("admin.untitledChart");
       break;
+    case DashItemType.DetailTable:
+      name = t("admin.untitledDetailTable");
+      break;
     case DashItemType.Filter:
-      name = "筛选组件";
+      name = t("admin.dashboardDesigner.filterWidgetName");
+      break;
+    case DashItemType.LayoutContainer:
+      name = "未命名布局容器";
+      break;
+    case DashItemType.RealTime:
+      name = t("admin.dashboardDesigner.realTime");
+      break;
+    case DashItemType.Image:
+      name = t("admin.dashboardDesigner.imageComponent");
+      break;
+    case DashItemType.Text:
+      name = t("admin.dashboardDesigner.textComponent");
+      break;
+    case DashItemType.QuickFilter:
+      name = t("admin.dashboardDesigner.quickFilter");
+      break;
+    case DashItemType.FilterButton:
+      name = t("admin.dashboardDesigner.filterButton");
       break;
     default:
       name = t("admin.untitledChart");
@@ -589,10 +576,10 @@ const createNewDashItem = async (itemType: DashItemType, details: string, layout
 const onSave = async () => {
   var layout = JSON.stringify(state.layout);
 
-  let req = {
-    id: props.dashDef.id,
-    appId: props.dashDef.appId,
-    name: props.dashDef.name,
+  let req: DashboardDefRequest = {
+    id: dashDefRef.value.id,
+    appId: dashDefRef.value.appId,
+    name: dashDefRef.value.name,
     layout: layout,
   };
 
@@ -601,7 +588,15 @@ const onSave = async () => {
   contextStore.setAppChanged(); //reload 菜单
 };
 
-const onPreview = () => { };
+const handleDashUpdated = (dash: DashboardDef) => {
+  dashDefRef.value = { ...dash };
+  contextStore.setAppChanged();
+};
+
+const onPreview = async () => {
+  await onSave();
+  close();
+};
 
 const emit = defineEmits(["update:modelValue", "close"]);
 const close = () => {
@@ -609,27 +604,97 @@ const close = () => {
   emit("close");
 };
 
-document.addEventListener(
-  "dragover",
-  (e) => {
-    mouseXY.x = e.clientX;
-    mouseXY.y = e.clientY;
-  },
-  false
-);
+const cleanupMouseTracking = setupMouseTracking();
+onUnmounted(() => cleanupMouseTracking());
 
 const handleItemHide = (item: DashboardItemDef) => { };
 const handleItemEdit = (item: DashboardItemDef) => {
+  if (item.itemType === DashItemType.LayoutContainer) return;
   dashItemDefRef.value = item;
+  showChartEditor.value = false;
+  showDetailTableEditor.value = false;
+  showFilterEditor.value = false;
+  showQuickFilterEditor.value = false;
   if (item.itemType == DashItemType.Filter) {
     loadBindingCandidates();
     showFilterEditor.value = true;
+  } else if (item.itemType === DashItemType.QuickFilter) {
+    loadBindingCandidates();
+    showQuickFilterEditor.value = true;
+  } else if (item.itemType === DashItemType.FilterButton) {
+    return;
+  } else if (item.itemType == DashItemType.DetailTable) {
+    showDetailTableEditor.value = true;
   } else {
     showChartEditor.value = true;
   }
 };
 const handleItemCopy = (item: DashboardItemDef) => { };
-const handleItemDelete = (item: DashboardItemDef) => { };
+const handleItemDelete = async (item: DashboardItemDef) => {
+  const childLayoutIds = new Set<string>();
+  const collectChildren = (parentId: string) => {
+    state.layout.forEach((layout) => {
+      if (layout.parentLayoutId !== parentId || childLayoutIds.has(layout.i)) return;
+      childLayoutIds.add(layout.i);
+      collectChildren(layout.i);
+    });
+  };
+  collectChildren(item.layoutId);
+  const hasChildren = childLayoutIds.size > 0;
+  if (item.itemType === DashItemType.LayoutContainer && hasChildren) return;
+  await dashboardItemDefService.delete(item.id);
+  state.layout = state.layout.filter((layout) => layout.i !== item.layoutId && !childLayoutIds.has(layout.i));
+  delete state.items[item.layoutId];
+  childLayoutIds.forEach((layoutId) => delete state.items[layoutId]);
+  await onSave();
+};
+const updateNestedLayout = (layout: IGridLayoutItem[]) => {
+  state.layout.splice(0, state.layout.length, ...layout);
+};
+const updateContainerSetting = async (item: DashboardItemDef, setting: ILayoutContainerSetting, name: string) => {
+  const previous = parseLayoutContainerSetting(item.details);
+  if (previous.mode !== setting.mode) {
+    state.layout.forEach((layout) => {
+      if (layout.parentLayoutId !== item.layoutId) return;
+      layout.tabId = setting.mode === "tabs" ? setting.tabs[0]?.id : undefined;
+    });
+    await onSave();
+  }
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, { id: item.id, name, details: JSON.stringify(setting) });
+  state.items[item.layoutId] = updated;
+};
+const updateRealTimeSetting = async (item: DashboardItemDef, setting: IRealTimeSetting) => {
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    details: JSON.stringify(setting),
+  });
+  state.items[item.layoutId] = updated;
+};
+const updateImageSetting = async (item: DashboardItemDef, setting: IDashboardImageSetting) => {
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    details: JSON.stringify(setting),
+  });
+  state.items[item.layoutId] = updated;
+};
+const updateTextSetting = async (item: DashboardItemDef, setting: IDashboardTextSetting) => {
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    details: JSON.stringify(setting),
+  });
+  state.items[item.layoutId] = updated;
+};
+const updateQuickFilterSetting = async (setting: DashboardQuickFilterSetting) => {
+  const item = dashItemDefRef.value;
+  if (!item) return;
+  const updated = await dashboardItemDefService.patch<DashboardItemDef>(item.id, {
+    id: item.id,
+    name: setting.name,
+    details: JSON.stringify(setting),
+  });
+  dashItemDefRef.value = updated;
+  state.items[updated.layoutId] = updated;
+};
 
 watch(
   () => props.dashDef,
@@ -644,7 +709,7 @@ watch(
         state.items = {};
 
         let itemDefs = await dashboardItemDefService.query<DashboardItemDef>(
-          `$filter=appid eq '${newVal.appId}'&DashboardId=${newVal.id}`
+          `?$filter=appId eq '${escapeODataString(newVal.appId)}' and dashboardId eq '${escapeODataString(newVal.id)}'`
         );
         if (itemDefs && itemDefs.length > 0) {
           itemDefs.forEach((x) => {
@@ -652,7 +717,7 @@ watch(
           });
         }
       } catch (e) {
-        console.error("布局JSON解析失败：", e);
+        console.error(t("admin.dashboardDesigner.layoutParseFailed"), e);
         state.layout.splice(0, state.layout.length); // 解析失败则清空布局
       }
     } else if (newVal) {
@@ -667,6 +732,27 @@ watch(
 .design-container {
   height: 100%;
   display: flex;
+}
+
+.title-editor {
+  width: var(--et-size-260);
+}
+
+:global(.top-nav-bar) .nav-tabs {
+  height: var(--et-size-60);
+}
+
+:global(.top-nav-bar) .nav-tabs :deep(.el-tabs__header) {
+  margin: 0;
+}
+
+:global(.top-nav-bar) .nav-tabs :deep(.el-tabs__nav) {
+  align-items: center;
+  height: var(--et-size-60);
+}
+
+:global(.top-nav-bar) .nav-tabs :deep(.el-tabs__content) {
+  display: none;
 }
 
 .left-aside {

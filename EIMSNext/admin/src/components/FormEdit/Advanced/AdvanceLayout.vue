@@ -1,10 +1,10 @@
 <template>
   <div class="adv-layout">
-    <div class="content-header">
+    <div v-if="showHeader !== false" class="content-header">
       <div class="header">
         <div class="header-left">
           <span class="header-title">{{ title }}</span>
-          <span title="设置数据标题，编辑方式等" class="header-describe">{{ desc }}</span>
+          <span :title="desc" class="header-describe">{{ desc }}</span>
           <slot name="headeractions" />
         </div>
       </div>
@@ -21,6 +21,7 @@ defineOptions({
 const props = defineProps<{
   title: string;
   desc?: string;
+  showHeader?: boolean;
 }>();
 </script>
 <style lang="scss" scoped>
@@ -31,6 +32,7 @@ const props = defineProps<{
 
     .header {
       border-bottom: 1px solid var(--et-border-color-light);
+      color: var(--et-text-primary);
       display: flex;
       font-size: var(--et-font-size-16);
       height: var(--et-size-45);

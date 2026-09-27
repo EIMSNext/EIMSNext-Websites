@@ -19,7 +19,7 @@ const required = {
       if (!validate.message) {
         validate.message =
           api.t("required", { title }) ||
-          title + (api.getLocale() === "en" ? " is required" : "不能为空");
+          title + "不能为空";
       } else {
         const match = validate.message.match(/^\{\{\s*\$t\.(.+)\s*\}\}$/);
         if (match) {

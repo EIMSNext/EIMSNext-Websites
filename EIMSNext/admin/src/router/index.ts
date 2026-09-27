@@ -3,8 +3,9 @@ import type { App } from "vue";
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
 
 const AppLayout = () => import("@/layout/applayout/index.vue");
+const AppAdminLayout = () => import("@/layout/appadminlayout/index.vue");
 export const SysLayout = () => import("@/layout/syslayout/index.vue");
-const TodoLayout = () => import("@/layout/todolayout/index.vue");
+const TaskLayout = () => import("@/layout/tasklayout/index.vue");
 const OpenPlatformLayout = () => import("@/layout/openplatform/index.vue");
 
 interface SystemRouteDef {
@@ -15,24 +16,29 @@ interface SystemRouteDef {
 }
 
 const systemRoutes: SystemRouteDef[] = [
-  { path: "department",  component: () => import("@/views/system/department/index.vue"),  allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
-  { path: "role",        component: () => import("@/views/system/role/index.vue"),        title: "role",        allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
-  { path: "admin",       component: () => import("@/views/system/admin/index.vue"),       title: "admin",       allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "version", component: () => import("@/views/system/settings/index.vue"), title: "version", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "enterprise", component: () => import("@/views/system/settings/index.vue"), title: "enterprise", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "enterprise-settings", component: () => import("@/views/system/settings/index.vue"), title: "enterprise-settings", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "product-settings", component: () => import("@/views/system/settings/index.vue"), title: "product-settings", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "department",  component: () => import("@/views/system/department/index.vue"),  allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.AppAdmin] },
+  { path: "employeeGroup",        component: () => import("@/views/system/employeeGroup/index.vue"),        title: "employeeGroup",        allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.AppAdmin] },
+  { path: "tenant-admin-group", component: () => import("@/views/system/tenantAdminGroup/index.vue"), title: "tenantAdminGroup", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "corp-log",    component: () => import("@/views/system/corp-log/index.vue"),    title: "corp-log",    allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "flow-manage", component: () => import("@/views/system/flow-manage/index.vue"), title: "flow-manage", allowedUserTypes: [UserType.CorpAdmin] },
-  { path: "plugin",      component: () => import("@/views/system/plugin/index.vue"),      title: "plugin",      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "plugin",      component: () => import("@/views/system/plugin/index.vue"),      title: "plugin",      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.PlatAdmin] },
 ];
 
 interface OpenPlatformRouteDef {
   path: string;
   component: () => Promise<any>;
   title?: string;
+  allowedUserTypes?: UserType[];
 }
 
 const openPlatformRoutes: OpenPlatformRouteDef[] = [
   { path: "pluginstore",   component: () => import("@/views/pluginstore/index.vue"),                title: "pluginstore" },
   { path: "plugin-manage", component: () => import("@/views/open-platform/plugin-manage/index.vue"), title: "plugin-manage" },
-  { path: "api-key",       component: () => import("@/views/open-platform/api-key/index.vue"),       title: "api-key" },
+  { path: "api-key",       component: () => import("@/views/open-platform/api-key/index.vue"),       title: "api-key", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "api-log",       component: () => import("@/views/open-platform/api-log/index.vue"),       title: "api-log" },
   { path: "docs",          component: () => import("@/views/open-platform/docs/index.vue"),          title: "open-platform-docs" },
 ];
@@ -58,15 +64,15 @@ function createOpenPlatformRoutes(defs: OpenPlatformRouteDef[]): RouteRecordRaw[
     children: [{
       path: "",
       component: d.component,
-      meta: { title: d.title, keepAlive: true, requiresAuth: true },
+      meta: { title: d.title, keepAlive: true, requiresAuth: true, allowedUserTypes: d.allowedUserTypes },
     }],
   }));
 }
 
-function createTodoRoute(path: string, name: string, component: () => Promise<any>, title: string): RouteRecordRaw {
+function createTaskRoute(path: string, name: string, component: () => Promise<any>, title: string): RouteRecordRaw {
   return {
     path,
-    component: TodoLayout,
+    component: TaskLayout,
     children: [{
       path: "",
       name: `${name}-global`,
@@ -95,6 +101,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   {
+    name: "forget-password",
+    path: "/forget-password",
+    component: () => import("@/views/login/forget-password.vue"),
+    meta: { hidden: true },
+  },
+  {
     name: "register",
     path: "/register",
     component: () => import("@/views/register/index.vue"),
@@ -113,9 +125,19 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true, requiresAuth: true },
   },
   {
-    name: "workspace",
-    path: "/workspace",
-    component: () => import("@/views/workspace/index.vue"),
+    name: "workbench-customize",
+    path: "/workbench/customize",
+    component: () => import("@/views/workbench/customize.vue"),
+    meta: {
+      hidden: true,
+      requiresAuth: true,
+      allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin],
+    },
+  },
+  {
+    name: "workbench",
+    path: "/workbench",
+    component: () => import("@/views/workbench/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
   {
@@ -124,10 +146,27 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import("@/views/corp-onboarding/index.vue"),
     meta: { hidden: true, requiresAuth: true },
   },
-  createTodoRoute("/mytasks", "mytasks", () => import("@/views/wftodo/global/mytasks.vue"), "我的待办"),
-  createTodoRoute("/mystarted", "mystarted", () => import("@/views/wftodo/global/mystarted.vue"), "我发起的"),
-  createTodoRoute("/myapproved", "myapproved", () => import("@/views/wftodo/global/myapproved.vue"), "我审批的"),
-  createTodoRoute("/cctome", "cctome", () => import("@/views/wftodo/global/cctome.vue"), "抄送我的"),
+  {
+    path: "/platform-admin",
+    component: SysLayout,
+    children: [
+      {
+        path: "",
+        name: "platform-admin",
+        component: () => import("@/views/platform-admin/index.vue"),
+        meta: {
+          title: "admin.platformAdmin.title",
+          hidden: true,
+          requiresAuth: true,
+          allowedUserTypes: [UserType.PlatAdmin],
+        },
+      },
+    ],
+  },
+  createTaskRoute("/mytasks", "mytasks", () => import("@/views/wftask/global/mytasks.vue"), "common.wfProcess.mytasks"),
+  createTaskRoute("/mystarted", "mystarted", () => import("@/views/wftask/global/mystarted.vue"), "common.wfProcess.mystarted"),
+  createTaskRoute("/myapproved", "myapproved", () => import("@/views/wftask/global/myapproved.vue"), "common.wfProcess.myapproved"),
+  createTaskRoute("/cctome", "cctome", () => import("@/views/wftask/global/cctome.vue"), "common.wfProcess.cctome"),
   ...createSysRoutes(systemRoutes),
   ...createOpenPlatformRoutes(openPlatformRoutes),
   {
@@ -144,6 +183,48 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "404",
         component: () => import("@/views/error/404.vue"),
         meta: { hidden: true },
+      },
+    ],
+  },
+  {
+    path: "/app/:appId",
+    component: () => import("@/views/app/index.vue"),
+    meta: { hidden: true, requiresAuth: true },
+  },
+  {
+    path: "/app/:appId/admin",
+    component: AppAdminLayout,
+    redirect: (to) => ({ path: `/app/${to.params.appId}/admin/permissions` }),
+    children: [
+      {
+        path: "permissions",
+        component: () => import("@/views/app-admin/permissions.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "cross-binding",
+        component: () => import("@/views/app-admin/cross-binding.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "settings",
+        component: () => import("@/views/app-admin/settings.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "aggregate",
+        component: () => import("@/views/app-admin/aggregate.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "event-flow",
+        component: () => import("@/views/app-admin/event-flow.vue"),
+        meta: { hidden: true, requiresAuth: true },
+      },
+      {
+        path: "webhook",
+        component: () => import("@/views/app-admin/webhook.vue"),
+        meta: { hidden: true, requiresAuth: true },
       },
     ],
   },
@@ -191,7 +272,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/form/:formId",
-        component: () => import("@/views/form/index.vue"),
+        component: () => import("@/views/form/FormListPage.vue"),
         // name: "form",
         meta: {
           title: "form",
@@ -219,10 +300,10 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/mytasks",
-        component: () => import("@/views/wftodo/app/tasks.vue"),
+        component: () => import("@/views/wftask/app/tasks.vue"),
         name: "mytasks",
         meta: {
-          title: "我的待办",
+          title: "common.wfProcess.mytasks",
           affix: false,
           keepAlive: true,
           requiresAuth: true,
@@ -236,10 +317,10 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/mystarted",
-        component: () => import("@/views/wftodo/app/started.vue"),
+        component: () => import("@/views/wftask/app/started.vue"),
         name: "mystarted",
         meta: {
-          title: "我发起的",
+          title: "common.wfProcess.mystarted",
           affix: false,
           keepAlive: true,
           requiresAuth: true,
@@ -254,10 +335,10 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/myapproved",
-        component: () => import("@/views/wftodo/app/approved.vue"),
+        component: () => import("@/views/wftask/app/approved.vue"),
         name: "myapproved",
         meta: {
-          title: "我审批的",
+          title: "common.wfProcess.myapproved",
           affix: false,
           keepAlive: true,
           requiresAuth: true,
@@ -272,10 +353,10 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/app/:appId/cctome",
-        component: () => import("@/views/wftodo/app/cctome.vue"),
+        component: () => import("@/views/wftask/app/cctome.vue"),
         name: "cctome",
         meta: {
-          title: "抄送我的",
+          title: "common.wfProcess.cctome",
           affix: false,
           keepAlive: true,
           requiresAuth: true,
@@ -284,20 +365,40 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  // {
-  //   path: "/app/:appId",
-  //   component: () => import("@/views/app/index.vue"),
-  //   meta: { hidden: true, requiresAuth: true },
-  // },
+  {
+    path: "/public/dash/:dashboardId",
+    component: () => import("@/views/public/DashLink.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/public/form/:formId/submit",
+    component: () => import("@/views/public/FormLink.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/public/form/:formId/query",
+    component: () => import("@/views/public/QueryLink.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/public/form/:formId/data/:dataId",
+    component: () => import("@/views/public/DataLink.vue"),
+    meta: { hidden: true },
+  },
   {
     path: "/",
-    redirect: "/workspace",
+    redirect: "/workbench",
   },
   {
     path: "/profile",
     name: "Profile",
     component: () => import("@/views/profile/index.vue"),
-    meta: { title: "个人中心", icon: "user", hidden: true, requiresAuth: true },
+    meta: { title: "navbar.profile", icon: "user", hidden: true, requiresAuth: true },
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/404",
+    meta: { hidden: true },
   },
 ];
 

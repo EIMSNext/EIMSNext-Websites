@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { IListItem, IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
-import { IFieldPerm } from "@eimsnext/models";
+import { FieldType, FormFieldPermission } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { useI18n } from "vue-i18n";
@@ -22,7 +22,7 @@ defineOptions({
 const props = defineProps<{
   modelValue: IFormFieldDef[];
   formId: string;
-  fieldPerms?: IFieldPerm[];
+  formFieldPermissions?: FormFieldPermission[];
 }>();
 
 const formStore = useFormStore();
@@ -55,8 +55,13 @@ onBeforeMount(() => {
         form.content.items,
         form.usingWorkflow,
         undefined,
-        { fieldPerms: props.fieldPerms }
-      );
+        { formFieldPermissions: props.formFieldPermissions, t } as any
+      ).filter((item) => {
+        const field = item.data as IFormFieldDef;
+        const canView = props.formFieldPermissions === undefined ||
+          props.formFieldPermissions.some((permission) => permission.id === field.field && permission.visible);
+        return field?.type !== FieldType.DataSelect && canView;
+      });
   });
 });
 </script>

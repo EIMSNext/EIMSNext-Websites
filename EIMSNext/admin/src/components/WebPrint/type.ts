@@ -1,4 +1,4 @@
-import { FormDef, IFieldPerm, FormData } from "@eimsnext/models";
+import { FormDef, FormFieldPermission, FormData } from "@eimsnext/models";
 
 export const getPrintConfig = (isTablePrint: boolean) => {
   let printObj = {
@@ -29,5 +29,5 @@ export const getPrintConfig = (isTablePrint: boolean) => {
 export interface IPrintData {
   formDef: FormDef;
   formData: FormData;
-  fieldPerms?: IFieldPerm[];
+  formFieldPermissions?: FormFieldPermission[];
 }

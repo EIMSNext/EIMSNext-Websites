@@ -1,6 +1,8 @@
 import { IFieldLimit } from "../NodeFieldList/type";
 import { DataItemType } from "../common";
 import { IListItem } from "../list/type";
+import fieldIcons from "../fieldIcons";
+import type { DynamicSelectSource } from "@eimsnext/utils";
 import {
   FieldDef,
   FieldType,
@@ -8,7 +10,7 @@ import {
   getFlowStatus,
   getCreateBy,
   getCreateTime,
-  IFieldPerm,
+  FormFieldPermission,
   ValueOption,
 } from "@eimsnext/models";
 
@@ -19,10 +21,12 @@ export interface IFormFieldDef {
   type: FieldType;
   format?: string;
   options?: ValueOption[];
+  source?: DynamicSelectSource;
   isSubField?: boolean;
   nodeId?: string;
   singleResultNode?: boolean;
   sourceType?: "form" | "http" | "schedule";
+  missing?: boolean;
 }
 export function splitSubField(subField: string) {
   return subField.split(">");
@@ -42,6 +46,7 @@ export function toFormFieldDef(
       type: field.type,
       format: field.props?.format,
       options: field.props?.options,
+      source: getDynamicSelectSource(field),
       isSubField: true,
       nodeId: nodeId,
       singleResultNode: singleResultNode,
@@ -55,6 +60,7 @@ export function toFormFieldDef(
       type: field.type,
       format: field.props?.format,
       options: field.props?.options,
+      source: getDynamicSelectSource(field),
       isSubField: false,
       nodeId: nodeId,
       singleResultNode: singleResultNode,
@@ -64,16 +70,38 @@ export function toFormFieldDef(
   }
 }
 export function getFieldIcon(type: FieldType) {
-  return "el-UserFilled";
+  return fieldIcons[type] || "fc-icon-input";
+}
+
+function getDynamicSelectSource(
+  field: FieldDef,
+): DynamicSelectSource | undefined {
+  if (field.type !== FieldType.Select1 && field.type !== FieldType.Select2) {
+    return undefined;
+  }
+  return (field as FieldDef & { effect?: { source?: DynamicSelectSource } })
+    .effect?.source;
 }
 export function buildFieldListItems(
   formId: string,
   fields: FieldDef[],
   usingWf: boolean,
   nodeId?: string,
-  fieldLimit?: IFieldLimit,
+  fieldLimit?: IFieldLimit & { t?: (key: string) => string },
 ): IListItem[] {
   const items: IListItem[] = [];
+  const t = fieldLimit?.t;
+  const getSystemFieldLabel = (
+    key: "dataTitle" | "flowStatus" | "createBy" | "createTime",
+  ) =>
+    t
+      ? t(`comp.fieldBlock.systemFields.${key}`)
+      : {
+          dataTitle: "数据标题",
+          flowStatus: "流程状态",
+          createBy: "提交人",
+          createTime: "提交时间",
+        }[key];
 
   if (
     !fieldLimit ||
@@ -82,7 +110,7 @@ export function buildFieldListItems(
   ) {
     let dataTitle: IFormFieldDef = toFormFieldDef(
       formId,
-      getDataTitle("数据标题"),
+      getDataTitle(getSystemFieldLabel("dataTitle")),
       undefined,
       nodeId,
     );
@@ -96,7 +124,7 @@ export function buildFieldListItems(
     if (usingWf) {
       let status: IFormFieldDef = toFormFieldDef(
         formId,
-        getFlowStatus("流程状态"),
+        getFlowStatus(getSystemFieldLabel("flowStatus")),
         undefined,
         nodeId,
       );
@@ -109,6 +137,10 @@ export function buildFieldListItems(
     }
   }
   fields.forEach((x: FieldDef) => {
+    if (fieldLimit?.excludeFieldTypes?.includes(x.type)) {
+      return;
+    }
+
     if (x.type == FieldType.TableForm) {
       if (
         (!fieldLimit ||
@@ -118,6 +150,10 @@ export function buildFieldListItems(
         x.columns.length > 0
       ) {
         x.columns.forEach((sub: FieldDef) => {
+          if (fieldLimit?.excludeFieldTypes?.includes(sub.type)) {
+            return;
+          }
+
           var fieldDef: IFormFieldDef = toFormFieldDef(formId, sub, x, nodeId);
           let item: IListItem = {
             id: fieldDef.field,
@@ -161,7 +197,7 @@ export function buildFieldListItems(
     if (formId != "employee") {
       let submitor: IFormFieldDef = toFormFieldDef(
         formId,
-        getCreateBy("提交人"),
+        getCreateBy(getSystemFieldLabel("createBy")),
         undefined,
         nodeId,
       );
@@ -174,7 +210,7 @@ export function buildFieldListItems(
 
       let createTime: IFormFieldDef = toFormFieldDef(
         formId,
-        getCreateTime("提交时间"),
+        getCreateTime(getSystemFieldLabel("createTime")),
         undefined,
         nodeId,
       );
