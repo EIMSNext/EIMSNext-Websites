@@ -60,7 +60,7 @@ export function buildColumns(
       title: dataTitleField.title,
       type: dataTitleField.type,
       width: 180,
-      mergeField: "_id",
+      mergeField: "id",
       oriField: SystemField.DataTitle,
     });
   }
@@ -72,7 +72,7 @@ export function buildColumns(
       title: statusField.title,
       type: statusField.type,
       width: 80,
-      mergeField: "_id",
+      mergeField: "id",
       oriField: SystemField.FlowStatus,
     });
   }
@@ -93,7 +93,7 @@ export function buildColumns(
         title: x.title,
         type: x.type,
         format: x.props?.format,
-        mergeField: "_id",
+        mergeField: "id",
         oriField: `data.${x.field}`,
       };
       if (x.columns && x.columns.length > 0) {
@@ -119,7 +119,7 @@ export function buildColumns(
       field: createByField.field,
       title: createByField.title,
       type: createByField.type,
-      mergeField: "_id",
+      mergeField: "id",
       oriField: SystemField.CreateBy,
     });
   }
@@ -131,7 +131,7 @@ export function buildColumns(
       title: createTimeField.title,
       type: createTimeField.type,
       format: createTimeField.props?.format,
-      mergeField: "_id",
+      mergeField: "id",
       oriField: SystemField.CreateTime,
     });
   }

@@ -125,7 +125,7 @@ export const buildDataSelectValue = (record, displayFields, mappings = []) => {
   return {
     appId: String(record?.appId || ""),
     formId: String(record?.formId || ""),
-    dataId: String(record?.id || record?._id || ""),
+    dataId: String(record?.id || ""),
     data,
   };
 };

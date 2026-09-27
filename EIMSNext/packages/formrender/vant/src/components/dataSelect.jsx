@@ -13,7 +13,7 @@ import { formDataService } from "@eimsnext/services";
 const normalizeFields = (fields) =>
   (fields || []).map(normalizeDataSelectField).filter(Boolean);
 
-const recordId = (record) => String(record?.id || record?._id || "");
+const recordId = (record) => String(record?.id || "");
 
 export default defineComponent({
   name: "fcDataSelect",

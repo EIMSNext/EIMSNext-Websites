@@ -113,7 +113,7 @@ export default defineComponent({
       return (
         <div class="fc-mobile-query-list">
           {rows.value.map((row, index) => (
-            <van-cell-group key={row.id || row._id || index} inset class="fc-mobile-query-record">
+            <van-cell-group key={row.id || index} inset class="fc-mobile-query-record">
               {fields.value.map((field) => (
                 <van-cell key={field.field} title={field.label} value={String(cellValue(row, field))} />
               ))}
