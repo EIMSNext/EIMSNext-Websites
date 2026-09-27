@@ -1,27 +1,27 @@
 import { CorpModelBase } from "./modelBase";
 
 export enum ExportType {
-  IdentityLoginAudit = 0,
-  AuditLog = 1,
-  FormData = 2,
+  IdentityLoginAudit = "0",
+  AuditLog = "1",
+  FormData = "2",
 }
 
 export enum ExportFormat {
-  Csv = 0,
-  Excel = 1,
+  Csv = "0",
+  Excel = "1",
 }
 
 export enum ExportLogStatus {
-  Pending = 0,
-  Processing = 1,
-  Succeeded = 2,
-  Failed = 3,
+  Pending = "0",
+  Processing = "1",
+  Succeeded = "2",
+  Failed = "3",
 }
 
 export enum ExportColumnType {
-  String = 0,
-  Number = 1,
-  Date = 2,
+  String = "0",
+  Number = "1",
+  Date = "2",
 }
 
 export interface ExportColumn {

@@ -41,7 +41,7 @@
                   </div>
                   <div
                     class="favorite-icon"
-                    :class="{ active: workbenchStore.isFavorite('app', app.id) }"
+                    :class="{ active: workbenchStore.isFavorite(WorkbenchTargetType.App, app.id) }"
                     @click.stop="toggleFavorite(app)"
                   >
                     <et-icon icon="el-star" size="large"></et-icon>
@@ -77,7 +77,7 @@ defineOptions({
   name: "MyAppsCard",
 });
 import AddEditApp from "@/views/app/components/AddEditApp.vue";
-import { AppDef } from "@eimsnext/models";
+import { AppDef, WorkbenchTargetType } from "@eimsnext/models";
 import { useAppStore, useContextStore } from "@eimsnext/store";
 import { useI18n } from "vue-i18n";
 import { ConfirmResult, EtConfirm } from "@eimsnext/components";
@@ -146,7 +146,7 @@ const gotoApp = async (app: AppDef) => {
 const toggleFavorite = async (app: AppDef) => {
   await workbenchStore.loadFavorites();
   await workbenchStore.toggleFavorite({
-    targetType: "app",
+    targetType: WorkbenchTargetType.App,
     targetId: app.id,
   });
 };

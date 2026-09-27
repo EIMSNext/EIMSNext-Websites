@@ -3,7 +3,7 @@ import { accessToken } from "@eimsnext/utils";
 import router from "@/router";
 import { usePermissionStore } from "@/store";
 import { useUserStore, useAppStore } from "@eimsnext/store";
-import { AppMenu, UserType, WorkbenchRecentVisit, WorkbenchRecentVisitRequest } from "@eimsnext/models";
+import { AppMenu, UserType, WorkbenchRecentVisit, WorkbenchRecentVisitRequest, WorkbenchTargetType } from "@eimsnext/models";
 import { workbenchRecentVisitService } from "@eimsnext/services";
 
 export function setupPermission() {
@@ -140,11 +140,13 @@ function recordWorkbenchRecent(to: RouteLocationNormalized) {
     return;
   }
 
-  const targetType: WorkbenchRecentVisitRequest["targetType"] = dashId ? "dashboard" : "form";
+  const targetType: WorkbenchRecentVisitRequest["targetType"] = dashId
+    ? WorkbenchTargetType.Dashboard
+    : WorkbenchTargetType.Form;
   const targetId = dashId || formId!;
 
   (async () => {
-    const query = `$filter=targetType eq '${escapeODataString(targetType)}' and targetId eq '${escapeODataString(targetId)}'&$top=1`;
+    const query = `$filter=targetType eq ${targetType} and targetId eq '${escapeODataString(targetId)}'&$top=1`;
     const records = await workbenchRecentVisitService.query<WorkbenchRecentVisit>(query);
     if (records[0]) {
       await workbenchRecentVisitService.patch<WorkbenchRecentVisit>(records[0].id, {

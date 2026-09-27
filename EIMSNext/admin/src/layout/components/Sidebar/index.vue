@@ -163,6 +163,7 @@ import {
   FormDef,
   FormDefRequest,
   FormType,
+  WorkbenchTargetType,
 } from "@eimsnext/models";
 import { useAppStore, useContextStore, useFormStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
@@ -241,7 +242,7 @@ const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
 const systemStore = useSystemStore();
 const workbenchStore = useWorkbenchStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
-const isAppFavorite = computed(() => !!app.value && workbenchStore.isFavorite("app", app.value.id));
+const isAppFavorite = computed(() => !!app.value && workbenchStore.isFavorite(WorkbenchTargetType.App, app.value.id));
 const workflowActiveIndex = computed(() => {
   switch (route.path) {
     case "/mytasks": return "mytask";
@@ -272,7 +273,7 @@ function toggleSideBar() {
 async function toggleAppFavorite() {
   if (!app.value) return;
   await workbenchStore.loadFavorites();
-  await workbenchStore.toggleFavorite({ targetType: "app", targetId: app.value.id });
+  await workbenchStore.toggleFavorite({ targetType: WorkbenchTargetType.App, targetId: app.value.id });
 }
 
 watch(

@@ -425,8 +425,8 @@ const memberScopeFilter = () => {
   const filters = departments.map((department) => {
     const id = String(department.id).replaceAll("'", "''");
     return department.cascadedDept
-      ? `Depts/any(d: contains(d/HeriarchyId, '|${id}|'))`
-      : `Depts/any(d: d/DeptId eq '${id}')`;
+      ? `Departments/any(d: contains(d/HeriarchyId, '|${id}|'))`
+      : `Departments/any(d: d/DepartmentId eq '${id}')`;
   });
   return filters.length === 1 ? filters[0] : `(${filters.join(" or ")})`;
 };

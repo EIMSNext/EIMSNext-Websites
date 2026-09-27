@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import type { WorkbenchRecentVisit, WorkbenchTargetType } from "@eimsnext/models";
+import { WorkbenchTargetType, type WorkbenchRecentVisit } from "@eimsnext/models";
 import { useContextStore } from "@eimsnext/store";
 import { workbenchRecentVisitService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<{ designMode?: boolean; removable?: boole
 defineEmits<{ (e: "remove"): void }>();
 
 const defaultIcon = (targetType: WorkbenchTargetType) => {
-  if (targetType === "dashboard") return "el-DataAnalysis";
+  if (targetType === WorkbenchTargetType.Dashboard) return "el-DataAnalysis";
   return "el-document";
 };
 
@@ -50,7 +50,7 @@ const openItem = async (item: WorkbenchRecentVisit) => {
     await contextStore.setAppId(item.appId);
   }
 
-  if (item.targetType === "dashboard") {
+  if (item.targetType === WorkbenchTargetType.Dashboard) {
     router.push(`/app/${item.appId}/dash/${item.targetId}`);
     return;
   }
