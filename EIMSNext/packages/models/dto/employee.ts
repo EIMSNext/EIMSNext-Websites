@@ -59,7 +59,7 @@ export type Employee = Omit<CorpModelBase, "createTime" | "updateTime"> & {
 };
 
 export enum EmployeeStatus {
-  Active = 0,
-  Inactive = 1,
-  PendingReview = 2,
+  Active = "0",
+  Inactive = "1",
+  PendingReview = "2",
 }

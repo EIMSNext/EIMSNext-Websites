@@ -1,15 +1,15 @@
 import { CorpModelBase, IdBase } from "./modelBase";
 
 export enum TimerOffsetDirection {
-  Before = 0,
-  At = 1,
-  After = 2,
+  Before = "0",
+  At = "1",
+  After = "2",
 }
 
 export enum TimerOffsetUnit {
-  Minute = 0,
-  Hour = 1,
-  Day = 2,
+  Minute = "0",
+  Hour = "1",
+  Day = "2",
 }
 
 export interface FormNotifyRequest extends IdBase {

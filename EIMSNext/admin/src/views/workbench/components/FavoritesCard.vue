@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import type { WorkbenchFavorite, WorkbenchTargetType } from "@eimsnext/models";
+import { WorkbenchTargetType, type WorkbenchFavorite } from "@eimsnext/models";
 import { useContextStore } from "@eimsnext/store";
 import {
   useWorkbenchStore,
@@ -81,8 +81,8 @@ const workbenchStore = useWorkbenchStore();
 const favorites = ref<WorkbenchFavorite[]>([]);
 
 const defaultIcon = (targetType: WorkbenchTargetType) => {
-  if (targetType === "app") return "icon-appdefault";
-  if (targetType === "dashboard") return "el-DataAnalysis";
+  if (targetType === WorkbenchTargetType.App) return "icon-appdefault";
+  if (targetType === WorkbenchTargetType.Dashboard) return "el-DataAnalysis";
   return "el-document";
 };
 
@@ -91,13 +91,13 @@ const openItem = async (item: WorkbenchFavorite) => {
     await contextStore.setAppId(item.appId);
   }
 
-  if (item.targetType === "app") {
+  if (item.targetType === WorkbenchTargetType.App) {
     const app = await appStore.get(item.targetId);
     router.push(app ? resolveAppEntryPath(app) : `/app/${item.targetId}/mytasks`);
     return;
   }
 
-  if (item.targetType === "dashboard") {
+  if (item.targetType === WorkbenchTargetType.Dashboard) {
     if (!item.appId) {
       ElMessage.error(t("admin.workbench.invalidFavorite"));
       return;

@@ -8,7 +8,11 @@ export type WorkbenchWidgetType =
   | "favorites"
   | "chartBoard";
 
-export type WorkbenchTargetType = "app" | "form" | "dashboard";
+export enum WorkbenchTargetType {
+  App = "0",
+  Form = "1",
+  Dashboard = "2",
+}
 
 export interface WorkbenchLayoutItem {
   i: string;
@@ -84,7 +88,7 @@ export interface WorkbenchFavoriteRequest extends IdBase {
 }
 
 export interface WorkbenchRecentVisitRequest extends IdBase {
-  targetType?: Extract<WorkbenchTargetType, "form" | "dashboard">;
+  targetType?: WorkbenchTargetType;
   targetId?: string;
 }
 
@@ -96,7 +100,7 @@ export interface WorkbenchTargetRequest {
 export interface WorkbenchCatalogMenu {
   id: string;
   title: string;
-  targetType: WorkbenchTargetType | "group";
+  targetType: WorkbenchTargetType | null;
   icon: string;
   iconColor: string;
   children: WorkbenchCatalogMenu[];

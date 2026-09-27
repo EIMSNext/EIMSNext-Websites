@@ -1,14 +1,14 @@
 import { IdBase } from "./modelBase";
 
 export enum ECoinTargetType {
-  SMS = 0,
-  EMail = 1,
-  Plugin = 2,
+  SMS = "0",
+  EMail = "1",
+  Plugin = "2",
 }
 
 export enum ECoinChargeType {
-  ECoin = 0,
-  Subscription = 1,
+  ECoin = "0",
+  Subscription = "1",
 }
 
 export interface ECoinPrice extends IdBase {
