@@ -16,7 +16,22 @@ export default {
   event: ["change", "add", "delete", "handleClick"],
   drag: true,
   denyDrag: {
-    item: ["tableform", "divider", "fcRow", "col", "fcFlex", "fcFlex2", "fcCell", "tabs", "elTabPane", "collapse", "elCollapseItem", "fcTable", "elCard", "fcInlineForm"],
+    item: [
+      "tableform",
+      "divider",
+      "fcRow",
+      "col",
+      "fcFlex",
+      "fcFlex2",
+      "fcCell",
+      "tabs",
+      "elTabPane",
+      "collapse",
+      "elCollapseItem",
+      "fcTable",
+      "elCard",
+      "fcInlineForm",
+    ],
     menu: ["layout"],
   },
   subRender() {
@@ -24,14 +39,33 @@ export default {
   },
   loadRule(rule) {
     if (!rule.props) rule.props = {};
+    delete rule.props.button;
+    delete rule.props.page;
+    if (rule.props.tableInsert === undefined) rule.props.tableInsert = rule.props.addable !== false;
+    if (rule.props.tableEdit === undefined) rule.props.tableEdit = rule.props.editExisting !== false;
+    if (rule.props.tableDelete === undefined) rule.props.tableDelete = rule.props.deletable !== false;
+    delete rule.props.addable;
+    delete rule.props.editExisting;
+    delete rule.props.deletable;
+    rule.props.max = 200;
+    rule.props.stripe = true;
+    rule.props.border = true;
+    rule.props.showIndex = true;
     const columns = rule.props.columns || [];
     const unwrapColumnRule = (item) => {
       let current = item;
-      while (current && current.type === "DragTool" && Array.isArray(current.children) && current.children[0]) {
+      while (
+        current &&
+        current.type === "DragTool" &&
+        Array.isArray(current.children) &&
+        current.children[0]
+      ) {
         current = current.children[0];
       }
       if (current && current.type === "DragBox") {
-        const child = Array.isArray(current.children) ? current.children[0] : null;
+        const child = Array.isArray(current.children)
+          ? current.children[0]
+          : null;
         return child ? unwrapColumnRule(child) : null;
       }
       if (!current) {
@@ -64,6 +98,15 @@ export default {
   },
   parseRule(rule) {
     const children = rule.children || [];
+    delete rule.props.button;
+    delete rule.props.page;
+    delete rule.props.addable;
+    delete rule.props.editExisting;
+    delete rule.props.deletable;
+    rule.props.max = 200;
+    rule.props.stripe = true;
+    rule.props.border = true;
+    rule.props.showIndex = true;
     rule.props.columns = children.map((column) => {
       return {
         header: column.props.header,
@@ -88,129 +131,20 @@ export default {
       title: t("com.tableform.name"),
       info: "",
       props: {
-        button: {
-          open: true,
-          column: [
-            {
-              key: "delete",
-              name: "删除",
-              type: "danger",
-              size: "small",
-              prop: ["link"],
-            },
-          ],
-        },
+        max: 200,
+        stripe: true,
+        border: true,
+        showIndex: true,
+        editable: true,
+        tableInsert: true,
+        tableEdit: true,
+        tableDelete: true,
       },
       children: [],
     };
   },
   props(_, { t }) {
-    const propsT = function (list) {
-      return localeProps(t, name + ".props", list);
-    };
     return localeProps(t, name + ".props", [
-      {
-        type: "ConfigItem",
-        props: {
-          label: t("com.dataTable.props.button"),
-        },
-        col: {
-          show: true,
-        },
-        children: [
-          {
-            type: "HideConfig",
-            title: t("com.dataTable.props.button"),
-            wrap: { show: false },
-            col: { show: false },
-            field: "button>open",
-          },
-          {
-            type: "template",
-            slot: "append",
-            children: propsT([
-              {
-                type: "TableButtonConfig",
-                col: { show: false },
-                field: "button>column",
-              },
-              {
-                type: "input",
-                col: { show: false },
-                field: "button>label",
-                value: "操作",
-              },
-              {
-                type: "select",
-                col: { show: false },
-                field: "button>fixed",
-                options: [
-                  { label: t("com.dataTable.fixed.default"), value: false },
-                  { label: t("com.dataTable.fixed.left"), value: "left" },
-                  { label: t("com.dataTable.fixed.right"), value: "right" },
-                ],
-                value: "right",
-              },
-              {
-                type: "SizeInput",
-                col: { show: false },
-                field: "button>width",
-                value: "100px",
-              },
-            ]),
-          },
-        ],
-      },
-      {
-        type: "ConfigItem",
-        props: {
-          label: t("com.dataTable.props.page"),
-        },
-        col: {
-          show: true,
-        },
-        children: [
-          {
-            type: "HideConfig",
-            wrap: {
-              show: false,
-            },
-            col: {
-              show: false,
-            },
-            title: t("com.dataTable.props.page"),
-            field: "page>open",
-          },
-          {
-            type: "template",
-            slot: "append",
-            children: propsT([
-              {
-                type: "inputNumber",
-                col: {
-                  show: false,
-                },
-                field: "page>props>pageSize",
-                value: 20,
-              },
-              {
-                type: "switch",
-                col: {
-                  show: false,
-                },
-                field: "page>props>small",
-              },
-              {
-                type: "switch",
-                col: {
-                  show: false,
-                },
-                field: "page>props>background",
-              },
-            ]),
-          },
-        ],
-      },
       // {
       //   type: "select",
       //   field: "size",
@@ -224,57 +158,54 @@ export default {
       //   type: "input",
       //   field: "emptyText",
       // },
-      { type: "GroupLabel", props: { title: t("props.othersetting") } },
+      { type: "GroupLabel", props: { title: t("form.operationPermission") } },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "stripe",
+      //   hidden: true,
+      //   value: true,
+      //   wrap: { show: false },
+      // },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "border",
+      //   hidden: true,
+      //   value: true,
+      //   wrap: { show: false },
+      // },
+      // {
+      //   type: "CheckBoxInput",
+      //   field: "showIndex",
+      //   hidden: true,
+      //   value: true,
+      //   wrap: { show: false },
+      // },
       {
         type: "CheckBoxInput",
-        field: "stripe",
-        wrap: { show: false },
-      },
-      {
-        type: "CheckBoxInput",
-        field: "border",
-        wrap: { show: false },
-      },
-      {
-        type: "CheckBoxInput",
-        field: "showIndex",
-        wrap: { show: false },
-      },
-      {
-        type: "CheckBoxInput",
-        field: "addable",
-        value: false,
-        wrap: { show: false },
-      },
-      {
-        type: "CheckBoxInput",
-        field: "deletable",
+        field: "editable",
+        props: { title: t("comp.formFieldPermissions.edit") },
         value: true,
         wrap: { show: false },
       },
       {
         type: "CheckBoxInput",
-        field: "newColumn",
+        field: "tableInsert",
+        props: { title: t("comp.formFieldPermissions.addRecord") },
+        style: "padding-left: 24px",
         wrap: { show: false },
       },
       {
         type: "CheckBoxInput",
-        field: "filterEmptyColumn",
-        value: true,
+        field: "tableEdit",
+        props: { title: t("comp.formFieldPermissions.editRecord") },
+        style: "padding-left: 24px",
         wrap: { show: false },
       },
-      // {
-      //   type: "SizeInput",
-      //   field: "height",
-      // },
-      // {
-      //   type: "inputNumber",
-      //   field: "max",
-      //   props: { min: 0 },
-      // },
       {
         type: "CheckBoxInput",
-        field: "disabled",
+        field: "tableDelete",
+        props: { title: t("comp.formFieldPermissions.deleteRecord") },
+        style: "padding-left: 24px",
         wrap: { show: false },
       },
     ]);

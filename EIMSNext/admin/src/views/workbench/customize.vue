@@ -18,7 +18,7 @@
           {{ t("admin.workbench.pageStyle") }}
         </el-button> -->
         <el-button @click="preview">{{ t("common.preview") }}</el-button>
-        <el-button type="primary" :loading="saving" @click="save">{{ t("common.save") }}</el-button>
+        <el-button type="primary" :loading="saving" :disabled="saving" @click="save">{{ t("common.save") }}</el-button>
       </template>
       <div class="workbench-designer">
 
@@ -573,3 +573,4 @@ watch(layout, syncLayout, { deep: true });
   overflow: visible;
 }
 </style>
+

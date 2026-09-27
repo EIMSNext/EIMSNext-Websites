@@ -1,6 +1,6 @@
 <template>
   <div class="adv-layout">
-    <div class="content-header">
+    <div v-if="showHeader !== false" class="content-header">
       <div class="header">
         <div class="header-left">
           <span class="header-title">{{ title }}</span>
@@ -21,6 +21,7 @@ defineOptions({
 const props = defineProps<{
   title: string;
   desc?: string;
+  showHeader?: boolean;
 }>();
 </script>
 <style lang="scss" scoped>

@@ -202,8 +202,12 @@ export default defineComponent({
             const slot = `${item.pid}:${item.idx}`;
             const rule = e.item._underlying_vm_;
             const flag = designer.addRule && designer.addRule.children === designer.moveRule;
+            const sourceIndex = flag ? designer.moveRule.indexOf(rule) : -1;
+            if (flag && sourceIndex < 0) {
+                return;
+            }
             if (flag) {
-                designer.moveRule.splice(designer.moveRule.indexOf(rule), 1);
+                designer.moveRule.splice(sourceIndex, 1);
             }
             let idx = 0;
             const refKey = 'drag' + item.pid + item.idx;
@@ -238,7 +242,13 @@ export default defineComponent({
             const designer = this.designer.setupState;
             const children = this.formCreateInject.children;
             const rule = e.item._underlying_vm_;
+            if (!rule) {
+                return;
+            }
             const oldIdx = children.indexOf(rule);
+            if (oldIdx < 0) {
+                return;
+            }
             e.newIndex = oldIdx + (e.newIndex - e.oldIndex);
             e.oldIndex = oldIdx;
             designer.dragEnd(this.formCreateInject.children, e, `${item.pid}:${item.idx}`);

@@ -1,5 +1,5 @@
 <template>
-  <FormView :def="formDef" :data="formData" :isView="isView" :isNewData="!data?.id" :actions="actions" :formFieldPermissions="formFieldPermissions"
+  <FormView v-if="formDef" :def="formDef" :data="formData" :isView="isView" :isNewData="!data?.id" :actions="actions" :formFieldPermissions="formFieldPermissions"
     @draft="saveDraft" @submit="submitData">
   </FormView>
 </template>
@@ -9,7 +9,7 @@ defineOptions({
 });
 
 import { ref, watch } from "vue";
-import { FormDef, FormData, FormContent, FormDataRequest, DataAction, FormFieldPermission } from "@eimsnext/models";
+import { FormData, FormContent, FormDataRequest, DataAction, FormFieldPermission } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { formDataService } from "@eimsnext/services";
 import { bus } from "@eimsnext/utils";
@@ -34,7 +34,7 @@ const actions = ref<FormActionSettings>({ draft: { text: "common.wfProcess.saveD
 
 const appId = ref("");
 const formStore = useFormStore();
-const formDef = ref<FormContent>(new FormContent());
+const formDef = ref<FormContent>();
 const formData = ref(props.data);
 
 // 添加watch监听props.data的变化，确保formData始终与props.data保持同步
@@ -47,11 +47,22 @@ watch(
 );
 
 if (props.formId) {
-  let form = formStore.items.find((x: FormDef) => x.id == props.formId);
-  if (form) {
-    appId.value = form.appId;
-    formDef.value = form.content!;
-  }
+  void (async () => {
+    try {
+      const form = await formStore.get(props.formId);
+      if (form) {
+        appId.value = form.appId;
+        const content = form.content ?? new FormContent();
+        formDef.value = {
+          ...content,
+          layout: content.layout || "[]",
+          options: content.options || "{}",
+        };
+      }
+    } catch {
+      ElMessage.error(t("common.loadFailed"));
+    }
+  })();
 }
 
 const emit = defineEmits(["update:modelValue", "cancel", "save", "submit"]);

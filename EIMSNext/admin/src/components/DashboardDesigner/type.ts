@@ -22,3 +22,22 @@ export interface IDataSourceField {
   label?: string;
   isComputed?: boolean;
 }
+
+export interface IDashboardGridSize {
+  w: number;
+  h: number;
+}
+
+const compactDashboardItemTypes = new Set<DashItemType>([DashItemType.RealTime, DashItemType.Text]);
+
+export const getDashboardItemDefaultSize = (type?: DashItemType): IDashboardGridSize => {
+  if (type === DashItemType.RealTime) return { w: 2, h: 5 };
+  // Text editing needs at least 300px for wangEditor popover positioning.
+  if (type === DashItemType.Text) return { w: 2, h: 18 };
+  return { w: 12, h: 12 };
+};
+
+export const getDashboardItemMinSize = (type?: DashItemType): IDashboardGridSize => {
+  if (type === DashItemType.Text) return { w: 1, h: 18 };
+  return compactDashboardItemTypes.has(type as DashItemType) ? { w: 1, h: 1 } : { w: 6, h: 3 };
+};

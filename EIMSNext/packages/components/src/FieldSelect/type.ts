@@ -1,6 +1,7 @@
 import { IFieldLimit } from "../NodeFieldList/type";
 import { DataItemType } from "../common";
 import { IListItem } from "../list/type";
+import fieldIcons from "../fieldIcons";
 import type { DynamicSelectSource } from "@eimsnext/utils";
 import {
   FieldDef,
@@ -69,31 +70,38 @@ export function toFormFieldDef(
   }
 }
 export function getFieldIcon(type: FieldType) {
-  return "el-UserFilled";
+  return fieldIcons[type] || "fc-icon-input";
 }
 
-function getDynamicSelectSource(field: FieldDef): DynamicSelectSource | undefined {
+function getDynamicSelectSource(
+  field: FieldDef,
+): DynamicSelectSource | undefined {
   if (field.type !== FieldType.Select1 && field.type !== FieldType.Select2) {
     return undefined;
   }
-  return (field as FieldDef & { effect?: { source?: DynamicSelectSource } }).effect?.source;
+  return (field as FieldDef & { effect?: { source?: DynamicSelectSource } })
+    .effect?.source;
 }
 export function buildFieldListItems(
   formId: string,
   fields: FieldDef[],
   usingWf: boolean,
   nodeId?: string,
-  fieldLimit?: (IFieldLimit & { t?: (key: string) => string }),
+  fieldLimit?: IFieldLimit & { t?: (key: string) => string },
 ): IListItem[] {
   const items: IListItem[] = [];
   const t = fieldLimit?.t;
-  const getSystemFieldLabel = (key: "dataTitle" | "flowStatus" | "createBy" | "createTime") =>
-    t ? t(`comp.fieldBlock.systemFields.${key}`) : ({
-      dataTitle: "数据标题",
-      flowStatus: "流程状态",
-      createBy: "提交人",
-      createTime: "提交时间",
-    }[key]);
+  const getSystemFieldLabel = (
+    key: "dataTitle" | "flowStatus" | "createBy" | "createTime",
+  ) =>
+    t
+      ? t(`comp.fieldBlock.systemFields.${key}`)
+      : {
+          dataTitle: "数据标题",
+          flowStatus: "流程状态",
+          createBy: "提交人",
+          createTime: "提交时间",
+        }[key];
 
   if (
     !fieldLimit ||

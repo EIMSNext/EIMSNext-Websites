@@ -57,13 +57,17 @@
       :destroy-on-close="true"
       width="800px"
       :close-on-click-modal="false"
+      append-to-body
     >
       <div class="form-container">
         <FormDataView
           v-if="selectedData"
+          :key="selectedData.id"
           :formId="formDef.id"
           :dataId="selectedData.id"
           :formDataPermissions="FormDataPermissions.All"
+          :start-in-edit="isDraftDetail"
+          :hide-toolbar="isDraftDetail"
           @ok="handleViewOk"
         />
       </div>
@@ -335,6 +339,7 @@ const sortBtnRef = ref();
 const fieldBtnRef = ref();
 
 const selectedData = ref<FormData>();
+const isDraftDetail = ref(false);
 const checkedDatas = ref<FormData[]>([]);
 const trashCheckedDatas = ref<FormData[]>([]);
 
@@ -744,6 +749,7 @@ const purgeOne = async (row: FormData) => {
 
 const openDraft = (row: FormData) => {
   selectedData.value = row;
+  isDraftDetail.value = row.flowStatus === FlowStatus.Draft;
   showDetailsDialog.value = true;
 };
 
@@ -772,6 +778,7 @@ const setField = (fields: IFormFieldDef[]) => {
 
 const showDetails = (row: FormData) => {
   selectedData.value = row;
+  isDraftDetail.value = row.flowStatus === FlowStatus.Draft;
   showDetailsDialog.value = true;
 };
 

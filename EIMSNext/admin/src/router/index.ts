@@ -16,6 +16,10 @@ interface SystemRouteDef {
 }
 
 const systemRoutes: SystemRouteDef[] = [
+  { path: "version", component: () => import("@/views/system/settings/index.vue"), title: "version", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "enterprise", component: () => import("@/views/system/settings/index.vue"), title: "enterprise", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "enterprise-settings", component: () => import("@/views/system/settings/index.vue"), title: "enterprise-settings", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
+  { path: "product-settings", component: () => import("@/views/system/settings/index.vue"), title: "product-settings", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
   { path: "department",  component: () => import("@/views/system/department/index.vue"),  allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.AppAdmin] },
   { path: "employeeGroup",        component: () => import("@/views/system/employeeGroup/index.vue"),        title: "employeeGroup",        allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin, UserType.AppAdmin] },
   { path: "tenant-admin-group", component: () => import("@/views/system/tenantAdminGroup/index.vue"), title: "tenantAdminGroup", allowedUserTypes: [UserType.CorpOwmer, UserType.CorpAdmin] },
@@ -213,8 +217,8 @@ export const constantRoutes: RouteRecordRaw[] = [
         meta: { hidden: true, requiresAuth: true },
       },
       {
-        path: "assistant",
-        component: () => import("@/views/app-admin/assistant.vue"),
+        path: "event-flow",
+        component: () => import("@/views/app-admin/event-flow.vue"),
         meta: { hidden: true, requiresAuth: true },
       },
       {

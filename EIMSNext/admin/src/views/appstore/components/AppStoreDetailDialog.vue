@@ -24,7 +24,7 @@
           <div class="hero-side-title">{{ $t("admin.appStore.installTemplate") }}</div>
           <div class="hero-side-text">{{ $t("admin.appStore.installDesc") }}</div>
           <div class="action-row">
-            <el-button type="success" size="large" :loading="installing" @click="install">{{ $t("admin.appStore.installTemplate") }}</el-button>
+            <el-button type="success" size="large" :loading="installing" :disabled="installing" @click="install">{{ $t("admin.appStore.installTemplate") }}</el-button>
           </div>
         </div>
       </section>
@@ -381,3 +381,4 @@ const { t } = useI18n();
   }
 }
 </style>
+

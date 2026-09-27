@@ -58,7 +58,7 @@
         <div class="settings-row">
           <div class="settings-label">{{ t("admin.appAdmin.homeEntries") }}</div>
           <div class="settings-value">
-            <el-button @click="openHomeDialog">{{ t("admin.appAdmin.set") }}</el-button>
+            <el-button @click="openHomeDialog">{{ t("common.set") }}</el-button>
             <span class="value-tip">{{ homeEntryText }}</span>
           </div>
         </div>

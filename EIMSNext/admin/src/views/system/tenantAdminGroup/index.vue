@@ -162,7 +162,7 @@
           />
         </section>
         <div class="footer-actions">
-          <el-button type="primary" :loading="saving" @click="saveSystemAdmins">
+          <el-button type="primary" :loading="saving" :disabled="saving" @click="saveSystemAdmins">
             {{ t("admin.tenantAdminGroup.save") }}
           </el-button>
         </div>
@@ -280,7 +280,7 @@
           <el-button type="danger" plain @click="deleteGroup(selectedGroup)">
             {{ t("admin.tenantAdminGroup.delete") }}
           </el-button>
-          <el-button type="primary" :loading="saving" @click="savePermissions">
+          <el-button type="primary" :loading="saving" :disabled="saving" @click="savePermissions">
             {{ t("admin.tenantAdminGroup.save") }}
           </el-button>
         </div>
@@ -1189,4 +1189,5 @@ onMounted(() => {
   padding: var(--et-space-28) var(--et-space-22);
 }
 </style>
+
 

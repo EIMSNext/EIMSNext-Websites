@@ -15,6 +15,7 @@ import {
 } from "./interface";
 import type { HttpRequestConfig } from "./interface";
 import { setupHttp } from "./setupHttp";
+export { useSubmitGuard } from "../useSubmitGuard";
 
 export {
   http,

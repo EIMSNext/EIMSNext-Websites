@@ -7,15 +7,11 @@
                    @emit-event="$emit"></component>
         <div class="_fc-tf-pro-handle">
             <div>
-                <el-button link type="primary" class="fc-clock" v-if="!disabled && (!max || max > total) && addable !== false"
+                <el-button link type="primary" class="fc-clock" v-if="!disabled && (!max || max > total) && tableInsert !== false"
                            @click="addRaw(true)"><i class="fc-icon icon-add-circle" style="font-weight: 700;"></i>
                     {{ formCreateInject.t('add') || '添加' }}
                 </el-button>
             </div>
-            <el-pagination v-bind="page.props || {}" layout="prev, pager, next" :currentPage="nowPage"
-                           @update:currentPage="changePage"
-                           :total="total" :pageSize="limit"
-                           v-if="page && page.open === true && chunk.length > 1"></el-pagination>
         </div>
     </div>
 </template>
@@ -30,6 +26,10 @@ export default {
     props: {
         formCreateInject: Object,
         height: [String, Number],
+        max: {
+            type: Number,
+            default: 200,
+        },
         modelValue: {
             type: Array,
             default: () => [],
@@ -47,15 +47,19 @@ export default {
             default: true,
         },
         newColumn: Boolean,
-        deletable: {
-            type: Boolean,
-            default: true,
-        },
-        addable: {
-            type: Boolean,
-            default: true,
-        },
         editable: {
+            type: Boolean,
+            default: true,
+        },
+        tableInsert: {
+            type: Boolean,
+            default: true,
+        },
+        tableEdit: {
+            type: Boolean,
+            default: true,
+        },
+        tableDelete: {
             type: Boolean,
             default: true,
         },
@@ -71,7 +75,6 @@ export default {
             }))
         },
         showIndex: Boolean,
-        max: Number,
         disabled: Boolean,
     },
     watch: {
@@ -149,7 +152,7 @@ export default {
             });
         },
         isRowEditable(rowData) {
-            return this.editable !== false ||
+            return (this.editable !== false && (this.tableEdit !== false || this.newRows.has(rowData))) ||
                 this.initialRowsAreNew === true ||
                 (!!rowData && typeof rowData === 'object' && this.newRows.has(rowData));
         },
@@ -238,7 +241,7 @@ export default {
             this.rule[0].children = this.trs;
         },
         delRaw(idx) {
-            if (this.disabled || this.deletable === false) {
+            if (this.disabled || this.tableDelete === false) {
                 return;
             }
             this.trs.splice(idx, 1);
@@ -248,7 +251,7 @@ export default {
             this.oldValue = '';
         },
         addRaw(flag, rowData) {
-            if (flag && (this.disabled || this.addable === false)) {
+            if (flag && (this.disabled || this.tableInsert === false)) {
                 return;
             }
             if (!flag) {
@@ -274,7 +277,7 @@ export default {
             const _scope = {...scope};
             _scope.row = this.modelValue[scope.$index] || {};
             const prop = btn.prop || [];
-            const permissionDisabled = this.disabled || (btn.key === 'delete' && this.deletable === false);
+            const permissionDisabled = this.disabled || (btn.key === 'delete' && this.tableDelete === false);
             const props = {
                 type: btn.type,
                 size: btn.size,
@@ -438,7 +441,7 @@ export default {
                     this.rule[1].children.splice(idx, 1);
                 }
             })
-            if (!this.formCreateInject.preview && this.button.show !== false) {
+            if (!this.formCreateInject.preview && this.button?.show !== false && Array.isArray(this.button?.column)) {
                 this.rule[1].children.push({
                     type: 'el-table-column',
                     _tableHandle: true,

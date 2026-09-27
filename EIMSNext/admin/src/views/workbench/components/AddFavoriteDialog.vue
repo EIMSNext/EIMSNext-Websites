@@ -53,11 +53,11 @@
 <script setup lang="ts">
 import {
   FormType,
+  WorkbenchTargetType,
   type AppDef,
   type AppMenu,
   type WorkbenchCatalogMenu,
   type WorkbenchTargetRequest,
-  type WorkbenchTargetType,
 } from "@eimsnext/models";
 import { useWorkbenchStore } from "@/store";
 import { getAppIcon, getAppIconColor, getFormIcon } from "@/utils/common";
@@ -96,9 +96,9 @@ const getMenuIcon = (menu: WorkbenchCatalogMenu) =>
   getFormIcon({
     menuId: menu.id,
     menuType:
-      menu.targetType === "dashboard"
+      menu.targetType === WorkbenchTargetType.Dashboard
         ? FormType.Dashboard
-        : menu.targetType === "group"
+        : menu.targetType === null
           ? FormType.Group
           : FormType.Form,
     icon: menu.icon,
@@ -108,18 +108,18 @@ const getMenuIcon = (menu: WorkbenchCatalogMenu) =>
 const getMenuIconColor = (menu: WorkbenchCatalogMenu) =>
   getAppIconColor({
     iconColor: menu.iconColor,
-    menuType: menu.targetType === "dashboard" ? FormType.Dashboard : FormType.Form,
+    menuType: menu.targetType === WorkbenchTargetType.Dashboard ? FormType.Dashboard : FormType.Form,
   });
 
 const mapMenus = (menus: WorkbenchCatalogMenu[], appId: string): FavoriteTreeNode[] =>
   menus.map((menu) => ({
     id: `${menu.targetType}:${appId}:${menu.id}`,
     label: menu.title,
-    kind: menu.targetType === "group" ? "group" : "target",
+    kind: menu.targetType === null ? "group" : "target",
     icon: getMenuIcon(menu),
     iconColor: getMenuIconColor(menu),
-    targetType: menu.targetType === "group" ? undefined : menu.targetType,
-    targetId: menu.targetType === "group" ? undefined : menu.id,
+    targetType: menu.targetType === null ? undefined : menu.targetType,
+    targetId: menu.targetType === null ? undefined : menu.id,
     children: mapMenus(menu.children || [], appId),
   }));
 
@@ -130,7 +130,7 @@ const treeData = computed<FavoriteTreeNode[]>(() =>
     kind: "app" as const,
     icon: getAppIcon(app as unknown as AppDef),
     iconColor: getAppIconColor(app),
-    targetType: "app",
+    targetType: WorkbenchTargetType.App,
     targetId: app.id,
     children: mapMenus(app.menus || [], app.id),
   }))

@@ -14,8 +14,8 @@
           <div class="section-title">{{ $t("admin.corpOnboarding.pendingInvite") }}</div>
           <div class="section-tip">{{ $t("admin.corpOnboarding.pendingInviteTip") }}</div>
           <div class="invite-actions">
-            <el-button type="primary" :loading="processingInvite" @click="handleInviteDecision(true)">{{ $t("admin.corpOnboarding.acceptInvite") }}</el-button>
-            <el-button :loading="processingInvite" @click="handleInviteDecision(false)">{{ $t("admin.corpOnboarding.rejectInvite") }}</el-button>
+            <el-button type="primary" :loading="processingInvite" :disabled="processingInvite" @click="handleInviteDecision(true)">{{ $t("admin.corpOnboarding.acceptInvite") }}</el-button>
+            <el-button :loading="processingInvite" :disabled="processingInvite" @click="handleInviteDecision(false)">{{ $t("admin.corpOnboarding.rejectInvite") }}</el-button>
           </div>
         </section>
 
@@ -36,7 +36,7 @@
                 :placeholder="$t('corpOnboarding.corpIntroPlaceholder')"
               />
             </el-form-item>
-            <el-button type="primary" :loading="creating" @click="createCorporate">{{ $t("admin.corpOnboarding.createAndEnter") }}</el-button>
+            <el-button type="primary" :loading="creating" :disabled="creating" @click="createCorporate">{{ $t("admin.corpOnboarding.createAndEnter") }}</el-button>
           </el-form>
         </section>
 
@@ -50,7 +50,7 @@
               clearable
               @keyup.enter="searchCorporates"
             />
-            <el-button :loading="searching" @click="searchCorporates">{{ $t("common.search") }}</el-button>
+            <el-button :loading="searching" :disabled="searching" @click="searchCorporates">{{ $t("common.search") }}</el-button>
           </div>
 
           <el-empty v-if="searched && !searchResults.length" :description="$t('corpOnboarding.noMatchCorp')" />
@@ -337,3 +337,4 @@ async function logout() {
   }
 }
 </style>
+

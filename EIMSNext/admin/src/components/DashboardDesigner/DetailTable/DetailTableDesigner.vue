@@ -37,7 +37,11 @@
                 <template #item="{ element }">
                   <div class="field-wrapper" :title="element.label">
                     <div class="field-name">
-                      <et-icon size="16px" icon="el-copyDocument" class="mr-[8px]"></et-icon>
+                      <et-icon
+                        size="16px"
+                        :icon="fieldIcons[element.type] || 'fc-icon-input'"
+                        class="mr-[8px]"
+                      ></et-icon>
                       <span class="name">{{ element.label }}</span>
                     </div>
                   </div>
@@ -210,7 +214,15 @@
 
 <script setup lang="ts">
 import Draggable from "vuedraggable";
-import { buildFieldListItems, buildSortFieldListItems, EtDrawer, IConditionList, IFieldSortList, IFormFieldDef } from "@eimsnext/components";
+import {
+  buildFieldListItems,
+  buildSortFieldListItems,
+  EtDrawer,
+  fieldIcons,
+  IConditionList,
+  IFieldSortList,
+  IFormFieldDef,
+} from "@eimsnext/components";
 import { DashboardItemDef } from "@eimsnext/models";
 import { dashboardItemDefService } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";

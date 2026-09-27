@@ -34,25 +34,25 @@ export interface DataChangeContent {
 }
 
 export enum FlowStatus {
-  None = 0,
-  Draft = 1,
-  Approving = 2,
-  Approved = 3,
-  Rejected = 4,
-  Suspended = 5,
-  Discarded = 6,
+  None = "0",
+  Draft = "1",
+  Approving = "2",
+  Approved = "3",
+  Rejected = "4",
+  Suspended = "5",
+  Discarded = "6",
 }
 
 export enum DataAction {
-  None = 0,
-  Save = 1,
-  Submit = 2,
-  Approve = 3,
-  Return = 4,
+  None = "0",
+  Save = "1",
+  Submit = "2",
+  Approve = "3",
+  Return = "4",
 }
 
 export enum DataChangeType {
-  Added = 0,
-  Modified = 1,
-  Deleted = 2,
+  Added = "0",
+  Modified = "1",
+  Deleted = "2",
 }

@@ -162,7 +162,7 @@ const getFieldValues = () => {
 const getValue = (el: FieldDef, vObj: any): string => {
     const dType = getObjectType(vObj);
     let dValue = "";
-    if (!vObj) return dValue
+    if (vObj === null || vObj === undefined || vObj === "") return dValue
 
     switch (dType) {
         case "Array":
@@ -198,10 +198,10 @@ const getValue = (el: FieldDef, vObj: any): string => {
                 case FieldType.Select1:
                 case FieldType.Department1:
                 case FieldType.Employee1:
-                    dValue = vObj.label || "";
+                    dValue = vObj.label ?? "";
                     break;
                 default:
-                    dValue = vObj.value || "";
+                    dValue = vObj.value ?? "";
                     break;
             }
             break;
@@ -231,7 +231,7 @@ const getValue = (el: FieldDef, vObj: any): string => {
                 //     }
                 //     break;
                 default:
-                    dValue = vObj || "";
+                    dValue = String(vObj);
                     break;
             }
             break;
@@ -268,19 +268,19 @@ const generateHtml = () => {
 
         if (wxAvatar) {
             pHtml += `<div class="info-item">
-        <span class="info-label">${wxAvatar.label}</span>
+        <span class="info-label">${escapeHtml(wxAvatar.label)}</span>
         <span class="info-text">
           <div class="x-avatar ${wxAvatar.value ? "has-image" : "no-image"}" style="width: 20px; height: 20px; line-height: 20px; font-size: 12px">
-            ${wxAvatar.value}
+            ${escapeHtml(wxAvatar.value)}
           </div>
         </span>
       </div>`;
         }
         if (wxNickName) {
-            pHtml += `<div class="info-item"><span class="info-label">${wxNickName.label}</span><span class="info-text">${wxNickName.value}</span></div>`;
+            pHtml += `<div class="info-item"><span class="info-label">${escapeHtml(wxNickName.label)}</span><span class="info-text">${escapeHtml(wxNickName.value)}</span></div>`;
         }
         if (wxOpenId) {
-            pHtml += `<div class="info-item"><span class="info-label">${wxOpenId.label}</span><span class="info-text">${wxOpenId.value}</span></div>`;
+            pHtml += `<div class="info-item"><span class="info-label">${escapeHtml(wxOpenId.label)}</span><span class="info-text">${escapeHtml(wxOpenId.value)}</span></div>`;
         }
         pHtml += `</div>`;
     }
@@ -295,16 +295,16 @@ const generateHtml = () => {
 
         pHtml += `<div class="print-info has-wx-info with-item-3">`;
         if (createdBy) {
-            pHtml += `<div class="info-item"><span class="info-label">${createdBy.label}</span><span class="info-text">${createdBy.value}</span></div>`;
+            pHtml += `<div class="info-item"><span class="info-label">${escapeHtml(createdBy.label)}</span><span class="info-text">${escapeHtml(createdBy.value)}</span></div>`;
         }
         if (createdTime) {
             pHtml += `<div class="info-item">
-        <span class="info-label">${createdTime.label}</span><span class="info-text">${createdTime.value}</span>
+        <span class="info-label">${escapeHtml(createdTime.label)}</span><span class="info-text">${escapeHtml(createdTime.value)}</span>
       </div>`;
         }
         if (updatedTime) {
             pHtml += `<div class="info-item">
-        <span class="info-label">${updatedTime.label}</span><span class="info-text">${updatedTime.value}</span>
+        <span class="info-label">${escapeHtml(updatedTime.label)}</span><span class="info-text">${escapeHtml(updatedTime.value)}</span>
       </div>`;
         }
         pHtml += `</div>`;
@@ -325,14 +325,16 @@ const generateHtml = () => {
                 tableRendering = false;
                 tableStr += "</tbody></table>";
             }
-            const colCount = el.items![0].fieldValues.length
+            const firstRow = el.items?.[0];
+            if (!firstRow) return;
+            const colCount = firstRow.fieldValues.length
             const subColLimit = colCount > 7 && colCount < 11 ? 5 : 7;
             const subTableCount = Math.ceil(colCount / subColLimit);
 
             for (let t = 1; t <= subTableCount; t++) {
                 const startColCount = (t - 1) * subColLimit;
                 const endColCount = Math.min(colCount, t * subColLimit);
-                const currentChildren = el.items![0].fieldValues?.slice(startColCount, endColCount) || [];
+                const currentChildren = firstRow.fieldValues.slice(startColCount, endColCount);
 
                 tableStr += `<table><tbody><tr><td class="print-center" colspan="${currentChildren.length}">${escapeHtml(el.label)}</td></tr>`;
 
@@ -345,10 +347,11 @@ const generateHtml = () => {
 
                 // 表体
                 let subTr = "";
-                (el.items || []).forEach((row: Record<string, any>) => {
+                (el.items || []).forEach((row: ITableItem) => {
                     subTr += "<tr>";
                     currentChildren.forEach((sub) => {
-                        subTr += `<td>${renderValueHtml(sub.value, sub.type)}</td>`;
+                        const cell = row.fieldValues.find(x => x.field === sub.field);
+                        subTr += `<td>${renderValueHtml(cell?.value, cell?.type || sub.type)}</td>`;
                     });
                     subTr += "</tr>";
                 });

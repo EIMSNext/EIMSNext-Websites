@@ -98,8 +98,8 @@ export const formatFormValue = (
     }
   }
 
-  if (flowStatusLabel && type === FieldType.None && typeof normalized === "number") {
-    return flowStatusLabel(normalized as FlowStatus);
+  if (flowStatusLabel && type === FieldType.None && (typeof normalized === "number" || typeof normalized === "string")) {
+    return flowStatusLabel(String(normalized) as FlowStatus);
   }
 
   if (Array.isArray(normalized)) {

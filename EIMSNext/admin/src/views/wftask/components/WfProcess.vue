@@ -381,6 +381,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--et-space-12);
+  margin: 0 var(--et-space-20);
 }
 
 .full-width {

@@ -1,20 +1,42 @@
 <template>
   <template v-if="ready">
-    <MetaItemHeader :label="t('workflow.approver')" :required="true" :tips="t('workflow.maxApproverTips')" />
+    <MetaItemHeader
+      :label="t('workflow.approver')"
+      :required="true"
+      :tips="t('workflow.maxApproverTips')"
+    />
     <el-select v-model="approverType" class="sub-item approve-mode-select">
-      <el-option :label="t('workflow.normalApproval')" :value="ApproverType.Normal" />
-      <el-option :label="t('workflow.byLevelApproval')" :value="ApproverType.ByLevel" />
+      <el-option
+        :label="t('workflow.normalApproval')"
+        :value="ApproverType.Normal"
+      />
+      <el-option
+        :label="t('workflow.byLevelApproval')"
+        :value="ApproverType.ByLevel"
+      />
     </el-select>
     <template v-if="isNormalApprover">
       <MetaItemHeader :label="t('workflow.approvalMode')" />
-      <el-select v-model="activeData.metadata.approveMeta!.approveMode" class="sub-item approve-mode-select">
+      <el-select
+        v-model="activeData.metadata.approveMeta!.approveMode"
+        class="sub-item approve-mode-select"
+      >
         <el-option :label="t('workflow.orSign')" :value="1" />
         <el-option :label="t('workflow.counterSign')" :value="2" />
       </el-select>
-      <selected-tags v-model="selectedCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
-        @editTag="editApprover" />
-      <member-select-dialog v-model="showApproverDialog" :tags="selectedCandidateTags" :member-options="memberOptions"
-        destroy-on-close @ok="finishApproverSelect" />
+      <selected-tags
+        v-model="selectedCandidateTags"
+        :editable="true"
+        :empty-text="t('comp.emptyMember')"
+        @editTag="editApprover"
+      />
+      <member-select-dialog
+        v-model="showApproverDialog"
+        :tags="selectedCandidateTags"
+        :member-options="memberOptions"
+        destroy-on-close
+        @ok="finishApproverSelect"
+      />
     </template>
     <el-button v-else class="by-level-rule-button" @click="openByLevelDialog">
       <span>{{ t("workflow.byLevelRuleConfigured") }}</span>
@@ -22,65 +44,105 @@
     </el-button>
 
     <div class="copyto-section">
-      <el-checkbox v-model="enableCopyto" class="copyto-check">
+      <el-checkbox v-model="enableCopyto">
         {{ t("workflow.enableCopyto") }}
       </el-checkbox>
-      <div
+      <selected-tags
         v-if="enableCopyto"
-        class="copyto-member-panel"
-        @click="showCopytoMemberDialog = true"
-      >
-        <selected-tags
-          v-model="copytoCandidateTags"
-          :editable="true"
-          :empty-text="t('workflow.selectCopytoMember')"
-          @editTag="showCopytoMemberDialog = true"
-        />
-      </div>
+        v-model="copytoCandidateTags"
+        :editable="true"
+        :empty-text="t('workflow.selectCopytoMember')"
+        @editTag="showCopytoMemberDialog = true"
+      />
     </div>
-
     <el-tabs v-model="activeConfigTab" class="node-config-tabs">
       <!-- <el-tab-pane :label="t('workflow.formFieldPermissions')" name="formFieldPermissions" /> -->
       <el-tab-pane :label="t('workflow.nodeActions')" name="nodeActions">
         <div class="node-actions-panel">
           <div>
-            <div v-for="action in nodeActions" :key="action.actionType" class="node-action-item">
+            <div
+              v-for="action in nodeActions"
+              :key="action.actionType"
+              class="node-action-item"
+            >
               <div class="node-action-main">
-                <span class="node-action-label">{{ getDefaultActionLabel(action.actionType) }}</span>
+                <span class="node-action-label">{{
+                  getDefaultActionLabel(action.actionType)
+                }}</span>
                 <div class="node-action-tools">
-                  <el-button v-if="supportsCandidates(action.actionType)" link type="primary"
-                    @click="openActionDialog(action.actionType)">
-                    {{ t('common.edit') }}
+                  <el-button
+                    v-if="action.enabled"
+                    link
+                    type="primary"
+                    class="node-action-set"
+                    @click="openActionDialog(action)"
+                  >
+                    {{ t("common.set") }}
                   </el-button>
-                  <el-switch v-model="action.enabled" size="small" />
+                  <el-switch
+                    v-model="action.enabled"
+                    size="small"
+                    :disabled="action.actionType == NodeActionType.Submit"
+                    @change="handleActionEnabledChange(action, $event)"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane :label="t('workflow.transitionRules')" name="transitionRules">
+      <el-tab-pane
+        :label="t('workflow.transitionRules')"
+        name="transitionRules"
+      >
         <div class="transition-rules-panel">
           <div class="transition-rule-section">
             <MetaItemHeader :label="t('workflow.submitCondition')" />
-            <el-select v-model="submitCondition.enabled" class="full-width-select">
-              <el-option :label="t('workflow.submitConditionMet')" :value="false" />
-              <el-option :label="t('workflow.submitConditionFormula')" :value="true" />
+            <el-select
+              v-model="submitCondition.enabled"
+              class="full-width-select"
+            >
+              <el-option
+                :label="t('workflow.submitConditionMet')"
+                :value="false"
+              />
+              <el-option
+                :label="t('workflow.submitConditionFormula')"
+                :value="true"
+              />
             </el-select>
-            <el-button class="rule-action-button" @click="showSubmitConditionDialog = true">
-              {{ t('workflow.addSubmitCondition') }}
+            <el-button
+              class="rule-action-button"
+              @click="showSubmitConditionDialog = true"
+            >
+              {{ t("workflow.addSubmitCondition") }}
             </el-button>
           </div>
 
           <div class="transition-rule-section">
             <MetaItemHeader :label="t('workflow.noApproverHandling')" />
-            <el-select v-model="noApproverSetting.actionType" class="full-width-select">
-              <el-option :label="t('workflow.noApproverStopAndReport')" :value="WfNoApproverActionType.StopAndReport" />
-              <el-option :label="t('workflow.noApproverTransferToMember')" :value="WfNoApproverActionType.TransferToMember" />
-              <el-option :label="t('workflow.noApproverAutoSubmit')" :value="WfNoApproverActionType.AutoSubmit" />
+            <el-select
+              v-model="noApproverSetting.actionType"
+              class="full-width-select"
+            >
+              <el-option
+                :label="t('workflow.noApproverStopAndReport')"
+                :value="WfNoApproverActionType.StopAndReport"
+              />
+              <el-option
+                :label="t('workflow.noApproverTransferToMember')"
+                :value="WfNoApproverActionType.TransferToMember"
+              />
+              <el-option
+                :label="t('workflow.noApproverAutoSubmit')"
+                :value="WfNoApproverActionType.AutoSubmit"
+              />
             </el-select>
             <el-button
-              v-if="noApproverSetting.actionType === WfNoApproverActionType.TransferToMember"
+              v-if="
+                noApproverSetting.actionType ===
+                WfNoApproverActionType.TransferToMember
+              "
               class="rule-action-button member-button"
               @click="showNoApproverMemberDialog = true"
             >
@@ -90,7 +152,7 @@
 
           <div class="transition-rule-section">
             <MetaItemHeader :label="t('workflow.expireHandling')" />
-            <el-button class="rule-action-button" @click="openExpireDialog">
+            <el-button class="rule-action-button" style="margin-top: 0;" @click="openExpireDialog">
               {{ expireButtonText }}
             </el-button>
           </div>
@@ -106,23 +168,25 @@
       :description="t('workflow.submitConditionDialogDesc')"
     />
 
-    <et-dialog v-model="showActionDialog" :title="dialogTitle" width="500px" destroy-on-close @ok="confirmActionDialog"
-      @cancel="cancelActionDialog">
-      <div class="action-dialog-body">
-        <MetaItemHeader :label="t('workflow.buttonText')" :required="true" />
-        <el-input v-model="dialogAction.text" />
-
-        <MetaItemHeader class="candidate-header" :label="dialogCandidateLabel" :required="true" />
-        <selected-tags v-model="dialogCandidateTags" :editable="true" :empty-text="t('comp.emptyMember')"
-          @editTag="showActionMemberDialog = true" />
-      </div>
+    <et-dialog
+      v-model="showActionDialog"
+      class="no-foot-divider"
+      :title="dialogTitle"
+      width="300px"
+      destroy-on-close
+      @ok="confirmActionDialog"
+      @cancel="cancelActionDialog"
+    >
+      <NodeActionConfig
+        :action="dialogAction"
+        :member-options="memberOptions"
+        :return-node-options="returnNodeOptions"
+      />
     </et-dialog>
-
-    <member-select-dialog v-model="showActionMemberDialog" :tags="dialogCandidateTags" :member-options="memberOptions"
-      destroy-on-close @ok="finishActionMemberSelect" />
 
     <et-dialog
       v-model="showSubmitConditionDialog"
+      class="no-foot-divider"
       :title="t('workflow.submitConditionDialogTitle')"
       width="560px"
       destroy-on-close
@@ -135,7 +199,10 @@
           v-model="submitCondition.promptText"
           :placeholder="t('workflow.submitConditionPromptPlaceholder')"
         />
-        <el-button class="formula-edit-button" @click="showSubmitFormulaDialog = true">
+        <el-button
+          class="formula-edit-button"
+          @click="showSubmitFormulaDialog = true"
+        >
           {{ submitFormulaButtonText }}
         </el-button>
       </div>
@@ -175,6 +242,7 @@
 
     <et-dialog
       v-model="showExpireDialog"
+      class="no-foot-divider"
       :title="t('workflow.expireDialogTitle')"
       width="640px"
       destroy-on-close
@@ -184,20 +252,43 @@
       <div class="expire-dialog">
         <div class="expire-form-section">
           <MetaItemHeader :label="t('workflow.actionType')" />
-          <el-select v-model="expireDialogDraft.actionType" class="full-width-select">
+          <el-select
+            v-model="expireDialogDraft.actionType"
+            class="full-width-select"
+          >
             <el-option :label="t('common.notSet')" :value="undefined" />
-            <el-option :label="t('workflow.autoNotify')" :value="WfExpireActionType.AutoNotify" />
-            <el-option :label="t('workflow.autoApprove')" :value="WfExpireActionType.AutoApprove" />
-            <el-option :label="t('workflow.autoTransfer')" :value="WfExpireActionType.AutoTransfer" />
-            <el-option :label="t('workflow.autoReject')" :value="WfExpireActionType.AutoReject" />
-            <el-option :label="t('workflow.autoReturn')" :value="WfExpireActionType.AutoReturn" />
+            <el-option
+              :label="t('workflow.autoNotify')"
+              :value="WfExpireActionType.AutoNotify"
+            />
+            <el-option
+              :label="t('workflow.autoApprove')"
+              :value="WfExpireActionType.AutoApprove"
+            />
+            <el-option
+              :label="t('workflow.autoTransfer')"
+              :value="WfExpireActionType.AutoTransfer"
+            />
+            <el-option
+              :label="t('workflow.autoReject')"
+              :value="WfExpireActionType.AutoReject"
+            />
+            <el-option
+              :label="t('workflow.autoReturn')"
+              :value="WfExpireActionType.AutoReturn"
+            />
           </el-select>
         </div>
 
-        <div v-if="expireDialogDraft.actionType !== undefined" class="expire-form-section">
+        <div
+          v-if="expireDialogDraft.actionType !== undefined"
+          class="expire-form-section"
+        >
           <MetaItemHeader :label="t('workflow.expireTime')" />
           <div class="expire-time-row">
-            <span class="expire-time-prefix">{{ t("workflow.expireTimePrefix") }}</span>
+            <span class="expire-time-prefix">{{
+              t("workflow.expireTimePrefix")
+            }}</span>
             <el-input-number
               v-model="expireDialogDraft.timeValue"
               :min="1"
@@ -205,12 +296,26 @@
               :controls="false"
               class="expire-time-value"
             />
-            <el-select v-model="expireDialogDraft.timeUnit" class="expire-time-unit">
-              <el-option :label="t('workflow.timeUnitMinute')" :value="TimeUnit.Minute" />
-              <el-option :label="t('workflow.timeUnitHour')" :value="TimeUnit.Hour" />
-              <el-option :label="t('workflow.timeUnitDay')" :value="TimeUnit.Day" />
+            <el-select
+              v-model="expireDialogDraft.timeUnit"
+              class="expire-time-unit"
+            >
+              <el-option
+                :label="t('workflow.timeUnitMinute')"
+                :value="TimeUnit.Minute"
+              />
+              <el-option
+                :label="t('workflow.timeUnitHour')"
+                :value="TimeUnit.Hour"
+              />
+              <el-option
+                :label="t('workflow.timeUnitDay')"
+                :value="TimeUnit.Day"
+              />
             </el-select>
-            <span class="expire-time-suffix">{{ t("workflow.expireTimeSuffix") }}</span>
+            <span class="expire-time-suffix">{{
+              t("workflow.expireTimeSuffix")
+            }}</span>
           </div>
         </div>
 
@@ -226,7 +331,9 @@
               </el-checkbox>
               <el-checkbox
                 :model-value="hasExpireNotifyChannel(NotifyChannel.System)"
-                @change="toggleExpireNotifyChannel(NotifyChannel.System, $event)"
+                @change="
+                  toggleExpireNotifyChannel(NotifyChannel.System, $event)
+                "
               >
                 {{ t("workflow.systemReminder") }}
               </el-checkbox>
@@ -235,7 +342,10 @@
 
           <div class="expire-form-section">
             <MetaItemHeader :label="t('workflow.notifyCandidates')" />
-            <div class="expire-member-panel" @click="showExpireNotifyMemberDialog = true">
+            <div
+              class="expire-member-panel"
+              @click="showExpireNotifyMemberDialog = true"
+            >
               <selected-tags
                 v-model="expireNotifyCandidateTags"
                 :editable="true"
@@ -249,7 +359,10 @@
         <template v-if="isExpireTransfer">
           <div class="expire-form-section">
             <MetaItemHeader :label="t('workflow.transferTarget')" />
-            <div class="expire-member-panel" @click="showExpireTransferMemberDialog = true">
+            <div
+              class="expire-member-panel"
+              @click="showExpireTransferMemberDialog = true"
+            >
               <selected-tags
                 v-model="expireTransferCandidateTags"
                 :editable="true"
@@ -263,9 +376,18 @@
         <template v-if="isExpireReturn">
           <div class="expire-form-section">
             <MetaItemHeader :label="t('workflow.returnTarget')" />
-            <el-select v-model="expireReturnTargetMode" class="full-width-select">
-              <el-option :label="t('workflow.returnPrevious')" :value="ReturnTargetMode.Previous" />
-              <el-option :label="t('workflow.returnStart')" :value="ReturnTargetMode.Start" />
+            <el-select
+              v-model="expireReturnTargetMode"
+              class="full-width-select"
+            >
+              <el-option
+                :label="t('workflow.returnPrevious')"
+                :value="ReturnTargetMode.Previous"
+              />
+              <el-option
+                :label="t('workflow.returnStart')"
+                :value="ReturnTargetMode.Start"
+              />
             </el-select>
           </div>
         </template>
@@ -284,12 +406,18 @@
         <p class="by-level-desc">{{ t("workflow.byLevelApprovalRuleDesc") }}</p>
         <MetaItemHeader :label="t('workflow.approvalTerminal')" />
         <div class="by-level-row">
-          <el-radio v-model="byLevelDraft.terminal" :value="ByLevelApprovalTerminal.StarterDepartment">
+          <el-radio
+            v-model="byLevelDraft.terminal"
+            :value="ByLevelApprovalTerminal.StarterDepartment"
+          >
             {{ t("workflow.initiator") }}
           </el-radio>
           <el-select
             v-model="byLevelDraft.endLevel"
-            :disabled="byLevelDraft.terminal !== ByLevelApprovalTerminal.StarterDepartment"
+            :disabled="
+              byLevelDraft.terminal !==
+              ByLevelApprovalTerminal.StarterDepartment
+            "
             class="by-level-select"
           >
             <el-option
@@ -301,12 +429,17 @@
           </el-select>
         </div>
         <div class="by-level-row">
-          <el-radio v-model="byLevelDraft.terminal"  :value="ByLevelApprovalTerminal.Organization">
+          <el-radio
+            v-model="byLevelDraft.terminal"
+            :value="ByLevelApprovalTerminal.Organization"
+          >
             {{ t("workflow.organizationInAddressBook") }}
           </el-radio>
           <el-select
             v-model="byLevelDraft.endLevel"
-            :disabled="byLevelDraft.terminal !== ByLevelApprovalTerminal.Organization"
+            :disabled="
+              byLevelDraft.terminal !== ByLevelApprovalTerminal.Organization
+            "
             class="by-level-select"
           >
             <el-option
@@ -351,9 +484,15 @@ import MetaItemHeader from "../Common/MetaItemHeader.vue";
 import { ISelectedTag } from "@/selectedTags/type";
 import { MemberTabs } from "@/component";
 import { DataItemType } from "@/common";
-import { FieldType, FormDef, NotifyChannel, WfNoApproverActionType } from "@eimsnext/models";
+import {
+  FieldType,
+  FormDef,
+  NotifyChannel,
+  WfNoApproverActionType,
+} from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import FormulaEditorDialog from "../EventFlow/FormulaEditorDialog.vue";
+import NodeActionConfig from "./NodeActionConfig.vue";
 import { INodeForm } from "@/NodeFieldList/type";
 import { IFormulaValue } from "@/FormFieldList/type";
 import { Edit } from "@element-plus/icons-vue";
@@ -373,7 +512,6 @@ const showApproverDialog = ref(false);
 const selectedCandidateTags = ref<ISelectedTag[]>([]);
 const activeConfigTab = ref("nodeActions");
 const showActionDialog = ref(false);
-const showActionMemberDialog = ref(false);
 const showSubmitConditionDialog = ref(false);
 const showSubmitFormulaDialog = ref(false);
 const showNoApproverMemberDialog = ref(false);
@@ -383,8 +521,12 @@ const showExpireDialog = ref(false);
 const showExpireNotifyMemberDialog = ref(false);
 const showExpireTransferMemberDialog = ref(false);
 const dialogActionType = ref<NodeActionType>();
-const dialogAction = ref<INodeActionConfig>({ actionType: NodeActionType.AddSign, enabled: false, text: "", candidates: [] });
-const dialogCandidateTags = ref<ISelectedTag[]>([]);
+const dialogAction = ref<INodeActionConfig>({
+  actionType: NodeActionType.AddSign,
+  enabled: false,
+  text: "",
+  candidates: [],
+});
 const submitFormulaValue = ref<IFormulaValue>();
 const noApproverCandidateTags = ref<ISelectedTag[]>([]);
 const copytoCandidateTags = ref<ISelectedTag[]>([]);
@@ -443,7 +585,10 @@ const noApproverMemberOptions = computed(() => ({
 
 const ensureApproveMeta = () => {
   if (!activeData.value.metadata.approveMeta) {
-    activeData.value.metadata.approveMeta = createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!;
+    activeData.value.metadata.approveMeta = createFlowNode(
+      FlowNodeType.Approve,
+      t
+    ).metadata.approveMeta!;
   }
   if (activeData.value.metadata.approveMeta.approverType === undefined) {
     activeData.value.metadata.approveMeta.approverType = ApproverType.Normal;
@@ -500,7 +645,9 @@ const ensureNotifySetting = (expireSetting: IExpireSetting): INotifySetting => {
   return expireSetting.notifySetting;
 };
 
-const ensureTransferSetting = (expireSetting: IExpireSetting): ITransferSetting => {
+const ensureTransferSetting = (
+  expireSetting: IExpireSetting
+): ITransferSetting => {
   if (!expireSetting.transferSetting) {
     expireSetting.transferSetting = {
       candidates: [],
@@ -564,15 +711,18 @@ const approverType = computed<ApproverType>({
   },
 });
 
-const isNormalApprover = computed(() => approverType.value === ApproverType.Normal);
+const isNormalApprover = computed(
+  () => approverType.value === ApproverType.Normal
+);
 
 const starterLevelOptions = computed(() => [
   { value: 1, label: t("workflow.directDepartmentManager") },
   ...[2, 3, 4, 5, 6].map((level) => ({
     value: level,
-    label: level === 2
-      ? t("workflow.upperDepartmentManager")
-      : t("workflow.nthDepartmentManager", { level }),
+    label:
+      level === 2
+        ? t("workflow.upperDepartmentManager")
+        : t("workflow.nthDepartmentManager", { level }),
   })),
 ]);
 
@@ -599,13 +749,17 @@ const createStarterTag = (): ISelectedTag => {
   };
 };
 
-const createFieldTag = (
-  field: { field: string; title: string; type: FieldType },
-): ISelectedTag | null => {
-  if (field.type !== FieldType.Employee1
-    && field.type !== FieldType.Employee2
-    && field.type !== FieldType.Department1
-    && field.type !== FieldType.Department2) {
+const createFieldTag = (field: {
+  field: string;
+  title: string;
+  type: FieldType;
+}): ISelectedTag | null => {
+  if (
+    field.type !== FieldType.Employee1 &&
+    field.type !== FieldType.Employee2 &&
+    field.type !== FieldType.Department1 &&
+    field.type !== FieldType.Department2
+  ) {
     return null;
   }
 
@@ -653,10 +807,34 @@ const loadFormulaNodes = (form?: FormDef) => {
 const nodeActions = computed(() => {
   const approveMeta = ensureApproveMeta();
   if (!approveMeta.nodeActions) {
-    approveMeta.nodeActions = createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!.nodeActions || [];
+    approveMeta.nodeActions =
+      createFlowNode(FlowNodeType.Approve, t).metadata.approveMeta!
+        .nodeActions || [];
   }
 
   return approveMeta.nodeActions!;
+});
+
+const returnNodeOptions = computed(() => {
+  const options: Array<{ nodeId: string; nodeName: string }> = [];
+  const byId = new Map<string, IFlowNodeData>();
+  const collect = (node?: IFlowNodeData) => {
+    if (!node || byId.has(node.id)) return;
+    byId.set(node.id, node);
+    node.childNodes?.forEach(collect);
+    collect(node.conditionData);
+  };
+  collect(flowContext.flowData.startNode);
+  flowContext.flowData.nodes.forEach(collect);
+
+  let node = byId.get(activeData.value.id);
+  while (node?.prevId) {
+    node = byId.get(node.prevId);
+    if (node?.nodeType === FlowNodeType.Approve) {
+      options.push({ nodeId: node.id, nodeName: node.name });
+    }
+  }
+  return options;
 });
 
 const dialogTitle = computed(() => {
@@ -665,12 +843,6 @@ const dialogTitle = computed(() => {
   }
 
   return getDefaultActionLabel(dialogActionType.value);
-});
-
-const dialogCandidateLabel = computed(() => {
-  return dialogActionType.value === NodeActionType.Transfer
-    ? t("workflow.transferCandidates")
-    : t("workflow.addSignCandidates");
 });
 
 const submitFormulaButtonText = computed(() => {
@@ -687,22 +859,34 @@ const noApproverMemberButtonText = computed(() => {
 
 const expireButtonText = computed(() => {
   const setting = expireSetting.value;
-  return setting?.actionType !== undefined && setting.timeValue && setting.timeValue > 0
+  return setting?.actionType !== undefined &&
+    setting.timeValue &&
+    setting.timeValue > 0
     ? t("workflow.editExpireHandling")
     : t("workflow.setExpireHandling");
 });
 
-const isExpireNotify = computed(() => expireDialogDraft.value.actionType === WfExpireActionType.AutoNotify);
-const isExpireTransfer = computed(() => expireDialogDraft.value.actionType === WfExpireActionType.AutoTransfer);
-const isExpireReturn = computed(() => expireDialogDraft.value.actionType === WfExpireActionType.AutoReturn);
+const isExpireNotify = computed(
+  () => expireDialogDraft.value.actionType === WfExpireActionType.AutoNotify
+);
+const isExpireTransfer = computed(
+  () => expireDialogDraft.value.actionType === WfExpireActionType.AutoTransfer
+);
+const isExpireReturn = computed(
+  () => expireDialogDraft.value.actionType === WfExpireActionType.AutoReturn
+);
 
 const expireReturnTargetMode = computed<ReturnTargetMode>({
   get() {
-    return ensureReturnSetting(expireDialogDraft.value).targetMode ?? ReturnTargetMode.Previous;
+    return (
+      ensureReturnSetting(expireDialogDraft.value).targetMode ??
+      ReturnTargetMode.Previous
+    );
   },
   set(value) {
     const returnSetting = ensureReturnSetting(expireDialogDraft.value);
-    returnSetting.targetMode = value === ReturnTargetMode.Specified ? ReturnTargetMode.Previous : value;
+    returnSetting.targetMode =
+      value === ReturnTargetMode.Specified ? ReturnTargetMode.Previous : value;
     delete returnSetting.targetNodeId;
   },
 });
@@ -717,7 +901,8 @@ const finishApproverSelect = (tags: ISelectedTag[]) => {
     return;
   }
 
-  activeData.value.metadata.approveMeta!.approvalCandidates = convertTagsToCandidates(tags);
+  activeData.value.metadata.approveMeta!.approvalCandidates =
+    convertTagsToCandidates(tags);
   selectedCandidateTags.value = tags;
   showApproverDialog.value = false;
 };
@@ -734,7 +919,8 @@ const openByLevelDialog = () => {
 
 const confirmByLevelDialog = () => {
   ensureApproveMeta().byLevelApprovalSetting = {
-    terminal: byLevelDraft.value.terminal ?? ByLevelApprovalTerminal.StarterDepartment,
+    terminal:
+      byLevelDraft.value.terminal ?? ByLevelApprovalTerminal.StarterDepartment,
     startLevel: 1,
     endLevel: byLevelDraft.value.endLevel ?? 1,
   };
@@ -761,48 +947,62 @@ const getDefaultActionLabel = (actionType: NodeActionType) => {
 };
 
 const supportsCandidates = (actionType: NodeActionType) => {
-  return actionType === NodeActionType.AddSign || actionType === NodeActionType.Transfer;
+  return (
+    actionType === NodeActionType.AddSign ||
+    actionType === NodeActionType.Transfer
+  );
 };
 
-const openActionDialog = (actionType: NodeActionType) => {
-  const action = nodeActions.value.find((item) => item.actionType === actionType);
-  if (!action) {
-    return;
-  }
-
-  dialogActionType.value = actionType;
+const openActionDialog = (action: INodeActionConfig) => {
+  dialogActionType.value = action.actionType;
   dialogAction.value = {
     actionType: action.actionType,
     enabled: action.enabled,
     text: action.text || getDefaultActionLabel(action.actionType),
     candidates: action.candidates ? [...action.candidates] : [],
+    returnSetting: action.returnSetting
+      ? { ...action.returnSetting }
+      : { targetMode: ReturnTargetMode.Previous },
   };
-  dialogCandidateTags.value = (dialogAction.value.candidates || []).flatMap(convertCandidateToTags);
   showActionDialog.value = true;
 };
 
-const finishActionMemberSelect = (tags: ISelectedTag[]) => {
-  dialogCandidateTags.value = tags;
-  dialogAction.value.candidates = convertTagsToCandidates(tags);
-  showActionMemberDialog.value = false;
+const handleActionEnabledChange = (
+  action: INodeActionConfig,
+  enabled: boolean | string | number
+) => {
+  if (
+    action.actionType === NodeActionType.Return &&
+    !!enabled &&
+    !action.returnSetting
+  ) {
+    action.returnSetting = { targetMode: ReturnTargetMode.Previous };
+  }
 };
 
 const confirmSubmitConditionDialog = () => {
-  if (submitCondition.value.enabled && !submitFormulaValue.value?.expression?.trim()) {
+  if (
+    submitCondition.value.enabled &&
+    !submitFormulaValue.value?.expression?.trim()
+  ) {
     ElMessage.warning(t("workflow.submitConditionRequired"));
     return;
   }
 
   submitCondition.value.formulaValue = submitFormulaValue.value;
   if (!submitCondition.value.promptText?.trim()) {
-    submitCondition.value.promptText = t("workflow.submitConditionDefaultPrompt");
+    submitCondition.value.promptText = t(
+      "workflow.submitConditionDefaultPrompt"
+    );
   }
   showSubmitConditionDialog.value = false;
 };
 
 const finishNoApproverMemberSelect = (tags: ISelectedTag[]) => {
   noApproverCandidateTags.value = tags.slice(0, 1);
-  noApproverSetting.value.candidates = convertTagsToCandidates(noApproverCandidateTags.value);
+  noApproverSetting.value.candidates = convertTagsToCandidates(
+    noApproverCandidateTags.value
+  );
   showNoApproverMemberDialog.value = false;
 };
 
@@ -814,25 +1014,32 @@ const finishCopytoMemberSelect = (tags: ISelectedTag[]) => {
 
 const finishExpireNotifyMemberSelect = (tags: ISelectedTag[]) => {
   expireNotifyCandidateTags.value = tags;
-  ensureNotifySetting(expireDialogDraft.value).candidates = convertTagsToCandidates(tags);
+  ensureNotifySetting(expireDialogDraft.value).candidates =
+    convertTagsToCandidates(tags);
   showExpireNotifyMemberDialog.value = false;
 };
 
 const finishExpireTransferMemberSelect = (tags: ISelectedTag[]) => {
   expireTransferCandidateTags.value = tags.slice(0, 1);
-  ensureTransferSetting(expireDialogDraft.value).candidates = convertTagsToCandidates(expireTransferCandidateTags.value);
+  ensureTransferSetting(expireDialogDraft.value).candidates =
+    convertTagsToCandidates(expireTransferCandidateTags.value);
   showExpireTransferMemberDialog.value = false;
 };
 
 const cancelActionDialog = () => {
   showActionDialog.value = false;
-  showActionMemberDialog.value = false;
 };
 
 const hasExpireNotifyChannel = (channel: NotifyChannel) =>
-  FlagEnum.has(ensureNotifySetting(expireDialogDraft.value).channels ?? NotifyChannel.None, channel);
+  FlagEnum.has(
+    ensureNotifySetting(expireDialogDraft.value).channels ?? NotifyChannel.None,
+    channel
+  );
 
-const toggleExpireNotifyChannel = (channel: NotifyChannel, checked: boolean | string | number) => {
+const toggleExpireNotifyChannel = (
+  channel: NotifyChannel,
+  checked: boolean | string | number
+) => {
   const isChecked = !!checked;
   const notifySetting = ensureNotifySetting(expireDialogDraft.value);
   const current = notifySetting.channels ?? NotifyChannel.None;
@@ -849,19 +1056,30 @@ const openExpireDialog = () => {
     timeUnit: source?.timeUnit ?? TimeUnit.Day,
     notifySetting: {
       channels: source?.notifySetting?.channels ?? NotifyChannel.None,
-      candidates: source?.notifySetting?.candidates ? [...source.notifySetting.candidates] : [],
+      candidates: source?.notifySetting?.candidates
+        ? [...source.notifySetting.candidates]
+        : [],
     },
     transferSetting: {
-      candidates: source?.transferSetting?.candidates ? [...source.transferSetting.candidates] : [],
+      candidates: source?.transferSetting?.candidates
+        ? [...source.transferSetting.candidates]
+        : [],
     },
     returnSetting: {
-      targetMode: source?.returnSetting?.targetMode === ReturnTargetMode.Specified
-        ? ReturnTargetMode.Previous
-        : (source?.returnSetting?.targetMode ?? ReturnTargetMode.Previous),
+      targetMode:
+        source?.returnSetting?.targetMode === ReturnTargetMode.Specified
+          ? ReturnTargetMode.Previous
+          : (source?.returnSetting?.targetMode ?? ReturnTargetMode.Previous),
     },
   };
-  expireNotifyCandidateTags.value = (expireDialogDraft.value.notifySetting?.candidates || []).flatMap(convertCandidateToTags);
-  expireTransferCandidateTags.value = (expireDialogDraft.value.transferSetting?.candidates || []).flatMap(convertCandidateToTags).slice(0, 1);
+  expireNotifyCandidateTags.value = (
+    expireDialogDraft.value.notifySetting?.candidates || []
+  ).flatMap(convertCandidateToTags);
+  expireTransferCandidateTags.value = (
+    expireDialogDraft.value.transferSetting?.candidates || []
+  )
+    .flatMap(convertCandidateToTags)
+    .slice(0, 1);
   showExpireDialog.value = true;
 };
 
@@ -878,7 +1096,10 @@ const confirmExpireDialog = () => {
     return;
   }
 
-  if (!expireDialogDraft.value.timeValue || expireDialogDraft.value.timeValue <= 0) {
+  if (
+    !expireDialogDraft.value.timeValue ||
+    expireDialogDraft.value.timeValue <= 0
+  ) {
     ElMessage.warning(t("workflow.expireTimeRequired"));
     return;
   }
@@ -916,16 +1137,24 @@ const confirmExpireDialog = () => {
     timeValue: expireDialogDraft.value.timeValue,
     timeUnit: expireDialogDraft.value.timeUnit,
     notifySetting: {
-    channels: expireDialogDraft.value.notifySetting?.channels ?? NotifyChannel.None,
-    candidates: expireDialogDraft.value.notifySetting?.candidates ? [...expireDialogDraft.value.notifySetting.candidates] : [],
+      channels:
+        expireDialogDraft.value.notifySetting?.channels ?? NotifyChannel.None,
+      candidates: expireDialogDraft.value.notifySetting?.candidates
+        ? [...expireDialogDraft.value.notifySetting.candidates]
+        : [],
     },
     transferSetting: {
-    candidates: expireDialogDraft.value.transferSetting?.candidates ? [...expireDialogDraft.value.transferSetting.candidates] : [],
+      candidates: expireDialogDraft.value.transferSetting?.candidates
+        ? [...expireDialogDraft.value.transferSetting.candidates]
+        : [],
     },
     returnSetting: {
-    targetMode: expireDialogDraft.value.returnSetting?.targetMode === ReturnTargetMode.Specified
-      ? ReturnTargetMode.Previous
-      : (expireDialogDraft.value.returnSetting?.targetMode ?? ReturnTargetMode.Previous),
+      targetMode:
+        expireDialogDraft.value.returnSetting?.targetMode ===
+        ReturnTargetMode.Specified
+          ? ReturnTargetMode.Previous
+          : (expireDialogDraft.value.returnSetting?.targetMode ??
+            ReturnTargetMode.Previous),
     },
   };
   cancelExpireDialog();
@@ -940,17 +1169,39 @@ const confirmActionDialog = () => {
     dialogAction.value.text = getDefaultActionLabel(dialogActionType.value);
   }
 
-  if (supportsCandidates(dialogActionType.value) && (!dialogAction.value.candidates || dialogAction.value.candidates.length === 0)) {
+  if (
+    supportsCandidates(dialogActionType.value) &&
+    (!dialogAction.value.candidates ||
+      dialogAction.value.candidates.length === 0)
+  ) {
     ElMessage.warning(t("workflow.actionCandidateRequired"));
     return;
   }
 
-  const index = nodeActions.value.findIndex((item) => item.actionType === dialogActionType.value);
+  if (dialogActionType.value === NodeActionType.Return) {
+    const setting = dialogAction.value.returnSetting;
+    if (
+      setting?.targetMode === ReturnTargetMode.Specified &&
+      !setting.targetNodeId
+    ) {
+      ElMessage.warning(t("workflow.selectReturnTargetNode"));
+      return;
+    }
+  }
+
+  const index = nodeActions.value.findIndex(
+    (item) => item.actionType === dialogActionType.value
+  );
   if (index >= 0) {
     nodeActions.value[index] = {
       ...nodeActions.value[index],
       text: dialogAction.value.text,
-      candidates: dialogAction.value.candidates ? [...dialogAction.value.candidates] : [],
+      candidates: dialogAction.value.candidates
+        ? [...dialogAction.value.candidates]
+        : [],
+      returnSetting: dialogAction.value.returnSetting
+        ? { ...dialogAction.value.returnSetting }
+        : undefined,
     };
   }
 
@@ -961,12 +1212,19 @@ const init = () => {
   nextTick(() => {
     activeData.value = flowContext.activeData;
     const approveMeta = ensureApproveMeta();
-    selectedCandidateTags.value = approveMeta.approverType === ApproverType.ByLevel
-      ? []
-      : (approveMeta.approvalCandidates || []).flatMap(convertCandidateToTags);
+    selectedCandidateTags.value =
+      approveMeta.approverType === ApproverType.ByLevel
+        ? []
+        : (approveMeta.approvalCandidates || []).flatMap(
+            convertCandidateToTags
+          );
     submitFormulaValue.value = approveMeta.submitCondition?.formulaValue;
-    noApproverCandidateTags.value = (approveMeta.noApproverSetting?.candidates || []).flatMap(convertCandidateToTags);
-    copytoCandidateTags.value = (approveMeta.copytoCandidates || []).flatMap(convertCandidateToTags);
+    noApproverCandidateTags.value = (
+      approveMeta.noApproverSetting?.candidates || []
+    ).flatMap(convertCandidateToTags);
+    copytoCandidateTags.value = (approveMeta.copytoCandidates || []).flatMap(
+      convertCandidateToTags
+    );
     ready.value = true;
   });
   loadDynamicMembers();
@@ -984,14 +1242,14 @@ watch(
     if (!submitCondition.value.formulaValue?.expression?.trim()) {
       showSubmitConditionDialog.value = true;
     }
-  },
+  }
 );
 
 watch(
   () => submitFormulaValue.value,
   (value) => {
     submitCondition.value.formulaValue = value;
-  },
+  }
 );
 
 watch(
@@ -1001,7 +1259,7 @@ watch(
       noApproverSetting.value.candidates = [];
       noApproverCandidateTags.value = [];
     }
-  },
+  }
 );
 
 watch(
@@ -1011,7 +1269,7 @@ watch(
       ensureApproveMeta().approvalCandidates = [];
       selectedCandidateTags.value = [];
     }
-  },
+  }
 );
 
 init();
@@ -1024,18 +1282,9 @@ init();
 }
 
 .copyto-section {
-  margin-top: var(--et-space-12);
-  border: 1px solid var(--et-border-color);
-  border-radius: var(--et-radius-6);
-  padding: var(--et-space-12);
-  background: var(--et-bg-container);
+  margin-top: var(--et-space-8);
 }
 
-.copyto-check {
-  margin-bottom: var(--et-space-12);
-}
-
-.copyto-member-panel,
 .expire-member-panel {
   border: 1px dashed var(--et-border-color);
   border-radius: var(--et-radius-6);
@@ -1045,7 +1294,6 @@ init();
   transition: border-color var(--et-duration-fast) var(--et-ease-linear);
 }
 
-.copyto-member-panel:hover,
 .expire-member-panel:hover {
   border-color: var(--et-color-primary);
 }
@@ -1085,7 +1333,7 @@ init();
 }
 
 .node-config-tabs {
-  margin-top: var(--et-space-12);
+  margin-top: var(--et-space-8);
 }
 
 .full-width-select {
@@ -1105,7 +1353,6 @@ init();
   border-bottom: 1px solid var(--et-border-color);
 }
 
-
 .node-action-main {
   align-items: center;
   display: flex;
@@ -1123,14 +1370,17 @@ init();
   gap: var(--et-space-8);
 }
 
-.action-dialog-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--et-space-12);
+.node-action-set {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--et-duration-fast) var(--et-ease-linear),
+    visibility var(--et-duration-fast) var(--et-ease-linear);
 }
 
-.candidate-header {
-  margin-top: var(--et-space-8);
+.node-action-item:hover .node-action-set {
+  opacity: 1;
+  visibility: visible;
 }
 
 .transition-rules-panel {
@@ -1141,10 +1391,7 @@ init();
 }
 
 .transition-rule-section {
-  border: 1px solid var(--et-border-color);
-  border-radius: var(--et-radius-6);
-  padding: var(--et-space-12);
-  background: var(--et-bg-container);
+  margin-top: 6px;
 }
 
 .rule-action-button {
@@ -1160,6 +1407,7 @@ init();
   display: flex;
   flex-direction: column;
   gap: var(--et-space-12);
+  padding: var(--et-space-20);
 }
 
 .formula-edit-button {
@@ -1170,7 +1418,8 @@ init();
   display: flex;
   flex-direction: column;
   gap: var(--et-space-16);
-  min-height: var(--et-size-320);
+  min-height: var(--et-size-300);
+  padding: var(--et-space-20);
 }
 
 .expire-form-section {

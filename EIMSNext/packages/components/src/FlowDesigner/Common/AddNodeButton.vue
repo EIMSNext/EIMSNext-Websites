@@ -1,18 +1,13 @@
 <template>
   <el-popover ref="popoverRef" :show-arrow="false" placement="right" width="240" trigger="click">
-    <el-button :disabled="!canPaste" icon="el-plus" class="popover-action-button" @click.stop="pasteNode">
+    <el-button :disabled="!canPaste" icon="el-plus" class="popover-action-button paste-button" @click.stop="pasteNode">
       {{ t("workflow.pasteNode") }}
     </el-button>
 
     <div v-for="g in visibleGroups" :key="g.category" class="node-group">
       <div class="node-group__title">{{ t(g.labelKey) }}</div>
       <div class="node-group__grid">
-        <button
-          v-for="n in g.nodes"
-          :key="n.type"
-          type="button"
-          class="node-card"
-          @click.stop="addNode(n.type)">
+        <button v-for="n in g.nodes" :key="n.type" type="button" class="node-card" @click.stop="addNode(n.type)">
           <i :class="n.icon" class="node-card__icon" />
           <span class="node-card__label">{{ t(n.labelKey) }}</span>
         </button>
@@ -174,19 +169,26 @@ function addNewNode(
   width: 100%;
 }
 
-.node-group + .node-group {
+.paste-button {
+  margin-bottom: var(--et-space-10);
+}
+
+.node-group+.node-group {
   margin-top: var(--et-space-10, 10px);
 }
+
 .node-group__title {
   font-size: 12px;
   color: var(--el-text-color-secondary);
   margin: 0 0 6px 2px;
 }
+
 .node-group__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
+
 .node-card {
   display: flex;
   align-items: center;
@@ -202,14 +204,17 @@ function addNewNode(
   text-align: left;
   transition: border-color 0.15s, color 0.15s, background-color 0.15s;
 }
+
 .node-card:hover {
   border-color: var(--el-color-primary);
   color: var(--el-color-primary);
   background: var(--el-color-primary-light-9);
 }
+
 .node-card__icon {
   font-size: 14px;
 }
+
 .node-card__label {
   white-space: nowrap;
   overflow: hidden;

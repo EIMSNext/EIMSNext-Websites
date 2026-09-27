@@ -18,7 +18,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showExportDialog = false">{{ $t("common.cancel") }}</el-button>
-        <el-button type="primary" :loading="exporting" @click="submitExport">{{ $t("common.ok") }}</el-button>
+        <el-button type="primary" :loading="exporting" :disabled="exporting" @click="submitExport">{{ $t("common.ok") }}</el-button>
       </template>
     </el-dialog>
     <et-dialog v-model="showAddDialog" class="formdatadialog" :title="formDef?.name" :show-footer="false"
@@ -43,7 +43,8 @@
     <et-dialog v-model="showDetailsDialog" class="formdatadialog" :title="detailsDialogTitle" :show-footer="false"
       :destroy-on-close="true" width="800px" :close-on-click-modal="false">
       <div class="form-container">
-        <FormDataView :formId="formId" :dataId="selectedData!.id" :formDataPermissions="formDataPermissions" :formFieldPermissions="formFieldPermissions" :permissionGroupId="curPermissionGroup?.id"
+        <FormDataView :key="selectedData?.id" :formId="formId" :dataId="selectedData!.id" :formDataPermissions="formDataPermissions" :formFieldPermissions="formFieldPermissions" :permissionGroupId="curPermissionGroup?.id"
+          :start-in-edit="isDraftDetail" :hide-toolbar="isDraftDetail"
           @ok="handleViewOk"></FormDataView>
       </div>
     </et-dialog>
@@ -580,6 +581,7 @@ const pageSize = ref(20);
 const draftPageNum = ref(1);
 const draftPageSize = ref(20);
 const selectedData = ref<FormData>();
+const isDraftDetail = ref(false);
 const showDetailsDialog = ref(false);
 const detailsDialogTitle = computed(() => {
   if (!formDef.value || !selectedData.value) return formDef.value?.name || "";
@@ -659,7 +661,10 @@ const selectionChanged = (rows: any[]) => {
   leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
     checkedDatas.value.length == 0;
 };
+let deleting = false;
 const execDelete = async () => {
+  if (deleting) return;
+  deleting = true;
   if (!canRemove.value) return;
   try {
     await formDataService.delete("batch", { keys: checkedDatas.value.map((x) => x[SystemField.Id]) });
@@ -668,6 +673,8 @@ const execDelete = async () => {
       await handleQuery();
   } catch {
     ElMessage.error(t("common.deleteFailed"));
+  } finally {
+    deleting = false;
   }
 };
 
@@ -906,19 +913,25 @@ const toExportColumnType = (type: FieldType) => {
 };
 const showDetails = (row: FormData) => {
   selectedData.value = row;
+  isDraftDetail.value = row.flowStatus === FlowStatus.Draft;
   showDetailsDialog.value = true;
 };
 const openDraft = (row: FormData) => {
   selectedData.value = row;
+  isDraftDetail.value = row.flowStatus === FlowStatus.Draft;
   showDetailsDialog.value = true;
 };
 const deleteDraft = async (row: FormData) => {
   if (!canRemove.value) return;
+  if (deleting) return;
+  deleting = true;
   try {
     await formDataService.delete(row.id);
     await Promise.all([refreshDrafts(), Promise.resolve(handleQuery())]);
   } catch {
     ElMessage.error(t("common.deleteFailed"));
+  } finally {
+    deleting = false;
   }
 };
 const handleViewOk = () => {
@@ -1221,4 +1234,5 @@ onUnmounted(() => {
   margin-right: var(--et-space-4);
 }
 </style>
+
 

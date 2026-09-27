@@ -65,3 +65,6 @@ dist/
 
 EIMSNext/admin/src/types/components.d.ts
 .vite
+EIMSNext/.reasonix
+EIMSNext/reasonix.toml
+EIMSNext/admin/dist-review

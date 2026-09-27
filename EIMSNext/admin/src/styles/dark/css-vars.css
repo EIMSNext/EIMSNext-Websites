@@ -30,17 +30,17 @@ html.dark {
   .el-autocomplete__popper.el-popper,
   .el-popover.el-popper,
   .el-tooltip__popper.el-popper,
-  .el-menu--popup-container {
+  .el-menu--popup-container {    
+    color: var(--et-text-primary);
     background-color: var(--et-bg-container);
     border-color: var(--et-border-color-light);
-    color: var(--et-text-primary);
   }
 
   .el-popper.is-light,
-  .el-popover {
+  .el-popover {    
+    color: var(--et-text-primary);
     background-color: var(--et-bg-container);
     border-color: var(--et-border-color-light);
-    color: var(--et-text-primary);
   }
 
   .el-popper.is-light .el-popper__arrow::before,
@@ -76,15 +76,15 @@ html.dark {
   .el-select-dropdown__item.is-selected,
   .el-dropdown-menu__item.is-active,
   .el-cascader-node.is-selectable.in-checked-path,
-  .el-cascader-node.is-active {
-    background-color: var(--et-bg-hover) !important;
+  .el-cascader-node.is-active {    
     color: var(--et-text-primary);
+    background-color: var(--et-bg-hover) !important;
   }
 
-  // 抽屉 / 对话框容器在暗黑下沿用默认浅文字会失效，显式兜底
+  /* 抽屉/对话框容器在暗黑下沿用默认浅文字会失效，显式兜底 */
   .el-drawer,
-  .el-dialog {
-    background-color: var(--et-bg-container);
+  .el-dialog {    
     color: var(--et-text-primary);
+    background-color: var(--et-bg-container);
   }
 }

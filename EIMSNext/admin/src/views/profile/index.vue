@@ -210,7 +210,7 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeDialog">{{ $t("common.cancel") }}</el-button>
-          <el-button type="primary" :loading="submitting" @click="submitDialog">{{ dialogStep === 'verify' ? $t("admin.profile.nextStep") :
+          <el-button type="primary" :loading="submitting" :disabled="submitting" @click="submitDialog">{{ dialogStep === 'verify' ? $t("admin.profile.nextStep") :
             $t("common.save") }}</el-button>
         </div>
       </template>
@@ -950,3 +950,4 @@ onUnmounted(() => {
   min-width: 88px;
 }
 </style>
+

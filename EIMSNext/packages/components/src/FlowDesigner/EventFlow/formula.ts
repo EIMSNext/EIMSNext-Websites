@@ -1,4 +1,5 @@
 import { IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
+import fieldIcons from "@/fieldIcons";
 import { INodeForm } from "@/NodeFieldList/type";
 import { FieldDef, FieldType } from "@eimsnext/models";
 import {
@@ -15,7 +16,28 @@ export interface IEventFlowFormulaTreeItem {
   info?: string;
   example?: string;
   field?: IFormFieldDef;
+  icon?: string;
+  dataType?: "text" | "number" | "dateTime" | "array";
   children?: IEventFlowFormulaTreeItem[];
+}
+
+export function getFormulaFieldDataType(
+  type: FieldType,
+  isSubField = false,
+): IEventFlowFormulaTreeItem["dataType"] {
+  if (
+    isSubField ||
+    type === FieldType.TableForm ||
+    type === FieldType.CheckBox ||
+    type === FieldType.Select2 ||
+    type === FieldType.Employee2 ||
+    type === FieldType.Department2
+  ) {
+    return "array";
+  }
+  if (type === FieldType.Number) return "number";
+  if (type === FieldType.TimeStamp) return "dateTime";
+  return "text";
 }
 
 export interface IFormulaInferenceError {
@@ -38,10 +60,18 @@ export function getFormulaFieldDisplayLabel(
 }
 
 function buildFieldDef(node: INodeForm, field: FieldDef, parent?: FieldDef) {
-  return toFormFieldDef(node.form!.id, field, parent, node.nodeId, node.singleResult);
+  return toFormFieldDef(
+    node.form!.id,
+    field,
+    parent,
+    node.nodeId,
+    node.singleResult,
+  );
 }
 
-export function buildEventFlowFieldTree(nodes: INodeForm[]): IEventFlowFormulaTreeItem[] {
+export function buildEventFlowFieldTree(
+  nodes: INodeForm[],
+): IEventFlowFormulaTreeItem[] {
   return nodes.map((node) => {
     const children: IEventFlowFormulaTreeItem[] = [];
     if (node.outputFields?.length) {
@@ -51,6 +81,8 @@ export function buildEventFlowFieldTree(nodes: INodeForm[]): IEventFlowFormulaTr
           label: field.label,
           field,
           formula: true,
+          icon: fieldIcons[field.type] || "fc-icon-input",
+          dataType: getFormulaFieldDataType(field.type, field.isSubField),
         });
       });
 
@@ -70,6 +102,8 @@ export function buildEventFlowFieldTree(nodes: INodeForm[]): IEventFlowFormulaTr
             label: `${field.title}.${sub.title}`,
             field: buildFieldDef(node, sub, field),
             formula: true,
+            icon: fieldIcons[sub.type] || "fc-icon-input",
+            dataType: getFormulaFieldDataType(sub.type, true),
           });
         });
       } else {
@@ -78,6 +112,8 @@ export function buildEventFlowFieldTree(nodes: INodeForm[]): IEventFlowFormulaTr
           label: field.title,
           field: buildFieldDef(node, field),
           formula: true,
+          icon: fieldIcons[field.type] || "fc-icon-input",
+          dataType: getFormulaFieldDataType(field.type),
         });
       }
     });
@@ -104,7 +140,10 @@ export function inferFormulaDrivingField(
   const ownMultiField = refs.find((x) => x.field.singleResultNode === false);
   if (ownMultiField) return ownMultiField.field;
 
-  const siblingDrivenField = inferFromSiblingFields(currentField, siblingFields);
+  const siblingDrivenField = inferFromSiblingFields(
+    currentField,
+    siblingFields,
+  );
   if (siblingDrivenField) return siblingDrivenField;
 
   return refs[0].field;
@@ -120,7 +159,10 @@ function inferFromSiblingFields(
 
   const sibling = siblingFields.find((item) => {
     if (item.field.field == currentField.field) return false;
-    if (item.value.type != "formula" || !item.value.formulaValue?.drivingField) {
+    if (
+      item.value.type != "formula" ||
+      !item.value.formulaValue?.drivingField
+    ) {
       return false;
     }
 

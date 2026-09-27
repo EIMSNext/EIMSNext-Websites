@@ -3,8 +3,15 @@
     <el-input :model-value="url" readonly class="share-link-input" />
     <div class="share-link-actions">
       <el-button text @click="copyLink">{{ t("common.copy") }}</el-button>
-      <el-button text @click="openLink">{{ t("comp.shareLinkBar.open") }}</el-button>
-      <el-popover placement="bottom-end" trigger="click" :width="220" @show="renderQrCode">
+      <el-button text @click="openLink">{{
+        t("comp.shareLinkBar.open")
+      }}</el-button>
+      <el-popover
+        placement="bottom-end"
+        trigger="click"
+        :width="220"
+        @show="renderQrCode"
+      >
         <template #reference>
           <el-button text class="share-link-qrcode-btn">
             <el-icon><Grid /></el-icon>
@@ -94,6 +101,7 @@ const renderQrCode = async () => {
   box-shadow: var(--et-shadow-sm);
   display: flex;
   overflow: hidden;
+  min-width: 560px;
 }
 
 .share-link-input {

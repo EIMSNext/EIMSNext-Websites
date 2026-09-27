@@ -1,15 +1,15 @@
 export enum FormDataImportMode {
-  AddOnly = 0,
-  UpdateOnly = 1,
-  Upsert = 2,
+  AddOnly = "0",
+  UpdateOnly = "1",
+  Upsert = "2",
 }
 
 export enum FormDataImportStatus {
-  Pending = 0,
-  Processing = 1,
-  Succeeded = 2,
-  CompletedWithErrors = 3,
-  Failed = 4,
+  Pending = "0",
+  Processing = "1",
+  Succeeded = "2",
+  CompletedWithErrors = "3",
+  Failed = "4",
 }
 
 export interface FormDataImportPreviewResponse {

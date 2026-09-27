@@ -23,6 +23,7 @@ const fieldIcons: Record<string, string> = {
   dataTable: "fc-icon-data-table",
   fcId: "fc-icon-input-id",
   signaturePad: "fc-icon-sign",
+  signature: "fc-icon-sign",
   fcValue: "fc-icon-value",
 
   // main - upload

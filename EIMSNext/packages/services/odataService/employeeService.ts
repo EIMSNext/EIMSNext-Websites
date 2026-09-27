@@ -1,5 +1,6 @@
 ﻿import { ODataServiceBase } from "../interface";
 import { Employee, EmployeeRequest } from "@eimsnext/models";
+import { BatchDeleteRequest, ODataQueryRequest } from "../requestModel";
 
 export interface ReviewJoinCorporateRequest {
   employeeIds: string[];
@@ -15,22 +16,47 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
         return "Employee";
     }
 
-    queryByDepartment<T>(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<T[]> {
-        const deptFilter = cascadedDept
-            ? `Depts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
-            : `Depts/any(d: d/DeptId eq '${departmentId}')`;
+    get<T>(id: string, query?: ODataQueryRequest | string, options?: { silentError?: boolean }): Promise<T> {
+        return this.http().odata.get<T>(this.modelName(), id, query, options);
+    }
 
-        const { body, urlParams } = this.buildDeptQuery(deptFilter, query);
+    query<T>(query?: ODataQueryRequest | string): Promise<T[]> {
+        return this.http().odata.query<T>(this.modelName(), query);
+    }
+
+    post<T>(data: EmployeeRequest): Promise<T> {
+        return this.http().odata.post<T>(this.modelName(), data);
+    }
+
+    put<T>(id: string, data: EmployeeRequest): Promise<T> {
+        return this.http().odata.put<T>(this.modelName(), id, data);
+    }
+
+    patch<T>(id: string, data: EmployeeRequest): Promise<T> {
+        return this.http().odata.patch<T>(this.modelName(), id, data);
+    }
+
+    delete<T>(id: string, data?: BatchDeleteRequest): Promise<T> {
+        return this.http().odata.delete<T>(this.modelName(), id, data);
+    }
+
+    queryByDepartment<T>(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<T[]> {
+        // 级联过滤直接用关系表上的层级路径快照 HeriarchyId，无需经 d/Department 导航联表。
+        const deptFilter = cascadedDept
+            ? `Departments/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
+            : `Departments/any(d: d/DepartmentId eq '${departmentId}')`;
+
+        const { body, urlParams } = this.buildDeptQuery(deptFilter, query, true);
         const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
         return this.http().odata.query<T>(url, body);
     }
 
     countByDepartment(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<number> {
         const deptFilter = cascadedDept
-            ? `Depts/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
-            : `Depts/any(d: d/DeptId eq '${departmentId}')`;
+            ? `Departments/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
+            : `Departments/any(d: d/DepartmentId eq '${departmentId}')`;
 
-        const { body, urlParams } = this.buildDeptQuery(deptFilter, query);
+        const { body, urlParams } = this.buildDeptQuery(deptFilter, query, true);
         const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
         return this.http().odata.count(url, body);
     }
@@ -43,7 +69,7 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
         return this.http().api.post<{ success: boolean }>("/employee/acceptinvite", data);
     }
 
-    private buildDeptQuery(deptFilter: string, query?: string): { body: string; urlParams: string } {
+    private buildDeptQuery(deptFilter: string, query?: string, includeRelations = false): { body: string; urlParams: string } {
         const urlParams = new URLSearchParams();
         const bodyParams = new URLSearchParams();
 
@@ -63,6 +89,7 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
             ? `(${existingFilter}) and (${deptFilter})`
             : deptFilter;
         bodyParams.set("$filter", combinedFilter);
+        if (includeRelations) bodyParams.set("$expand", "Departments($expand=Department),Groups");
 
         return {
             body: bodyParams.toString(),

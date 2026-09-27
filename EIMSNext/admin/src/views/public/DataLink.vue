@@ -7,24 +7,10 @@
       <span>{{ t("common.loading") }}</span>
     </div>
 
-    <div v-else-if="accessCodeGate" class="access-code-gate">
-      <el-card class="access-code-card">
-        <h3>{{ t("publicpublish.accessCodeGateTitle") }}</h3>
-        <el-input
-          v-model="accessCodeInput"
-          type="password"
-          :placeholder="t('publicpublish.accessCodePlaceholder')"
-          @keyup.enter="submitAccessCode"
-        />
-        <el-button type="primary" :loading="accessCodeSubmitting" @click="submitAccessCode">
-          {{ t("common.confirm") }}
-        </el-button>
-        <p v-if="accessCodeExpired" class="access-code-error">{{ t("publicpublish.accessCodeExpired") }}</p>
-        <p v-else-if="accessCodeError" class="access-code-error">{{ t("publicpublish.accessCodeInvalid") }}</p>
-      </el-card>
-    </div>
-
-    <PublicNotFound v-else-if="!formId || !dataId" :description="t('publicpublish.dataNotAvailable')" />
+    <PublicNotFound
+      v-else-if="!formId || !dataId"
+      :description="t('publicpublish.dataNotAvailable')"
+    />
 
     <PublicDataView
       v-else
@@ -40,7 +26,12 @@
 <script setup lang="ts">
 import { Loading } from "@element-plus/icons-vue";
 import { PublicScope } from "@eimsnext/models";
-import { AccessCodeExpiredError, PublicNotFound, bootstrapWithToken, renderPrintFullscreenToolbar, toAccessCodeError, usePublicHttp } from "./shared";
+import {
+  PublicNotFound,
+  bootstrapWithToken,
+  renderPrintFullscreenToolbar,
+  usePublicHttp,
+} from "./shared";
 import PublicDataView from "./PublicDataView.vue";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -53,12 +44,6 @@ const formId = computed(() => route.params.formId?.toString() || "");
 const dataId = computed(() => route.params.dataId?.toString() || "");
 
 const loading = ref(false);
-const accessCodeGate = ref(false);
-const accessCodeInput = ref("");
-const accessCodeSubmitting = ref(false);
-const accessCodeError = ref(false);
-const accessCodeExpired = ref(false);
-
 const publicHttp = usePublicHttp();
 
 const renderToolbar = () => renderPrintFullscreenToolbar();
@@ -69,39 +54,19 @@ watch(
     if (!fid || !did) return;
     await bootstrap();
   },
-  { immediate: true },
+  { immediate: true }
 );
 
-async function bootstrap(accessCode?: string) {
+async function bootstrap() {
   loading.value = true;
-  accessCodeError.value = false;
-  accessCodeExpired.value = false;
+
   try {
     if (!publicHttp.token.value) {
-      await bootstrapWithToken(publicHttp, formId.value, PublicScope.DataLink, accessCode);
+      await bootstrapWithToken(publicHttp, formId.value, PublicScope.DataLink);
     }
-    accessCodeGate.value = false;
   } catch (err: any) {
-    if (toAccessCodeError(err)) {
-      accessCodeGate.value = true;
-      accessCodeExpired.value = err instanceof AccessCodeExpiredError;
-      accessCodeError.value = !!accessCode && !accessCodeExpired.value;
-    }
   } finally {
     loading.value = false;
-  }
-}
-
-async function submitAccessCode() {
-  if (!accessCodeInput.value) return;
-  accessCodeSubmitting.value = true;
-  try {
-    await bootstrap(accessCodeInput.value);
-    if (!accessCodeGate.value) {
-      accessCodeInput.value = "";
-    }
-  } finally {
-    accessCodeSubmitting.value = false;
   }
 }
 </script>

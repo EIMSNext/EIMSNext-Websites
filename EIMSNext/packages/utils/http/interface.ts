@@ -31,6 +31,10 @@ export class HttpInterceptors<T = AxiosResponse> {
 
 export interface HttpRequestConfig<T = AxiosResponse>
   extends InternalAxiosRequestConfig {
+  /** Idempotency key reused when retrying the same write operation. */
+  idempotencyKey?: string;
+  /** Disable automatic idempotency handling for endpoints such as auth/upload. */
+  disableIdempotency?: boolean;
   withToken?: boolean;
   /** Suppress the global error notification when the caller renders the error state itself. */
   silentError?: boolean;

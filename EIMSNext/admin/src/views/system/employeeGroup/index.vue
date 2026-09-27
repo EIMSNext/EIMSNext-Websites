@@ -281,7 +281,7 @@ const updateQueryParams = () => {
   let preFilter: any = statusFilter;
   if (employeeGroupId.value) {
     preFilter = {
-      and: [statusFilter, `employeeGroups/any(r: r/employeeGroupId eq '${employeeGroupId.value}')`],
+      and: [statusFilter, `Groups/any(r: r/EmployeeGroupId eq '${employeeGroupId.value}')`],
     };
   }
 
@@ -365,7 +365,7 @@ const syncManageToolbar = () => {
     deleteBar.config.disabled =
       !canManageEmployeeGroupMembers.value ||
       checkedDatas.value.length == 0 ||
-      checkedDatas.value.some((emp: Employee) => (emp.depts ?? []).every((d) => !canManageEmployeeDepartment(d.deptId)));
+      checkedDatas.value.some((emp: Employee) => (emp.departments ?? []).every((d) => !canManageEmployeeDepartment(d.departmentId)));
   }
 };
 const handleEmployeeGroupQuery = (employeeGroup?: EmployeeGroup) => {
@@ -398,6 +398,7 @@ const loadCount = () => {
 const loadData = () => {
   loading.value = true;
   let query = buildQuery(queryParams.value);
+  query = query ? `${query}&$expand=Departments($expand=Department),Groups` : "$expand=Departments($expand=Department),Groups";
 
   employeeService
     .query<Employee>(appendAdminScope(query))
@@ -408,7 +409,7 @@ const loadData = () => {
 };
 
 const formatDepartments = (employee: Employee) => {
-  return employee.depts?.map((x) => x.deptName).filter(Boolean).join(", ") ?? "";
+  return employee.departments?.map((x) => x.department?.name || x.departmentId).filter(Boolean).join(", ") ?? "";
 };
 
 const handleSelectionChange = (selection: any[]) => {

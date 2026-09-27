@@ -5,7 +5,7 @@
         <h1>{{ t("admin.platformAdmin.title") }}</h1>
         <p>{{ t("admin.platformAdmin.subtitle") }}</p>
       </div>
-      <el-button :icon="Refresh" :loading="activeLoading" circle @click="refreshActiveTab" />
+      <el-button :icon="Refresh" :loading="activeLoading" :disabled="activeLoading" circle @click="refreshActiveTab" />
     </div>
 
     <el-tabs v-model="activeTab" class="management-tabs">
@@ -51,7 +51,7 @@
           <div v-if="packageFile" class="package-file-row">
             <span>{{ packageFile.name }}</span>
             <div class="package-file-actions">
-              <el-button :loading="packagePreviewing" @click="previewAppPackage">{{ t("admin.platformAdmin.previewPackage") }}</el-button>
+              <el-button :loading="packagePreviewing" :disabled="packagePreviewing" @click="previewAppPackage">{{ t("admin.platformAdmin.previewPackage") }}</el-button>
               <el-button type="danger" :loading="packageImporting" :disabled="!packagePreview" @click="importAppPackage">
                 {{ t("admin.platformAdmin.confirmImport") }}
               </el-button>
@@ -124,7 +124,7 @@
             </span>
           </div>
           <div class="form-actions">
-            <el-button type="primary" :icon="Upload" :loading="pluginPublishing" @click="publishPlugin">
+            <el-button type="primary" :icon="Upload" :loading="pluginPublishing" :disabled="pluginPublishing" @click="publishPlugin">
               {{ t("admin.platformAdmin.publishPlugin") }}
             </el-button>
           </div>
@@ -139,7 +139,7 @@
           <el-input v-model="priceKeyword" clearable :prefix-icon="Search" :placeholder="t('admin.platformAdmin.searchPrice')" />
           <div class="toolbar-spacer" />
           <el-button :icon="Plus" @click="addPrice">{{ t("admin.platformAdmin.addPrice") }}</el-button>
-          <el-button type="primary" :icon="Check" :disabled="dirtyPrices.length === 0" :loading="priceSaving" @click="savePrices">
+          <el-button type="primary" :icon="Check" :disabled="dirtyPrices.length === 0 || priceSaving" :loading="priceSaving" @click="savePrices">
             {{ t("admin.platformAdmin.batchSave") }} ({{ dirtyPrices.length }})
           </el-button>
         </div>
@@ -660,3 +660,5 @@ onMounted(() => Promise.all([loadRuntimePlugins(), loadPrices()]));
   }
 }
 </style>
+
+

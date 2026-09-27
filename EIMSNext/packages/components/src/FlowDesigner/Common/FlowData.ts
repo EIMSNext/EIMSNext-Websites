@@ -216,7 +216,7 @@ export function createFlowNode(
             },
             nodeActions: [
               { actionType: NodeActionType.Submit, enabled: true, text: t("common.wfProcess.submit") },
-              { actionType: NodeActionType.Return, enabled: false, text: t("workflow.nodeActionReturn") },
+              { actionType: NodeActionType.Return, enabled: false, text: t("workflow.nodeActionReturn"), returnSetting: { targetMode: ReturnTargetMode.Previous } },
               { actionType: NodeActionType.Reject, enabled: false, text: t("common.wfProcess.reject") },
               { actionType: NodeActionType.Draft, enabled: false, text: t("common.wfProcess.saveDraft") },
               { actionType: NodeActionType.AddSign, enabled: false, text: t("workflow.nodeActionAddSign"), candidates: [] },
@@ -741,6 +741,7 @@ export interface INodeActionConfig {
   enabled?: boolean;
   text?: string;
   candidates?: IApprovalCandidate[];
+  returnSetting?: IReturnSetting;
 }
 
 export interface ISubmitConditionSetting {

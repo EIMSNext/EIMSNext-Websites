@@ -16,7 +16,7 @@
           :placeholder="t('publicpublish.accessCodePlaceholder')"
           @keyup.enter="submitAccessCode"
         />
-        <el-button type="primary" :loading="accessCodeSubmitting" @click="submitAccessCode">
+        <el-button type="primary" :loading="accessCodeSubmitting" :disabled="accessCodeSubmitting" @click="submitAccessCode">
           {{ t("common.confirm") }}
         </el-button>
         <p v-if="accessCodeExpired" class="access-code-error">{{ t("publicpublish.accessCodeExpired") }}</p>
@@ -68,6 +68,7 @@ import {
   DataAction,
   FieldDef,
   FieldType,
+  FlowStatus,
   FormContent,
   FormData,
   FormDataRequest,
@@ -106,7 +107,7 @@ const formDef = ref<FormDef>();
 const publicSetting = ref<PublicSetting>();
 const renderContent = ref<FormContent>(new FormContent());
 const unsupportedFields = ref<FieldDef[]>([]);
-const prefillData = ref<FormData>({ id: "", appId: "", formId: "", data: {} as any, flowStatus: 0 });
+const prefillData = ref<FormData>({ id: "", appId: "", formId: "", data: {} as any, flowStatus: FlowStatus.None });
 const publicSystemValues = ref<Record<string, any>>({});
 const formViewRef = ref<InstanceType<typeof FormView>>();
 const submitting = ref(false);
@@ -225,7 +226,7 @@ function buildInitialPrefill(form: FormDef): FormData {
     appId: form.appId,
     formId: form.id,
     data: { ...publicSystemValues.value },
-    flowStatus: 0,
+    flowStatus: FlowStatus.None,
   };
 }
 
@@ -445,3 +446,4 @@ function isDepartmentField(type?: string) {
   }
 }
 </style>
+

@@ -11,8 +11,8 @@ export default defineComponent({
   inheritAttrs: false,
   props: {
     modelValue: {
-      type: [Array, Object],
-      default: [],
+      type: [Array, Object, String],
+      default: () => [],
     },
     placeholder: {
       type: String,
@@ -55,7 +55,10 @@ export default defineComponent({
   emits: ["update:modelValue", "change"],
   setup(props, { emit }) {
     const showDialog = ref(false);
-    const selectedValue = ref(props.modelValue ?? []);
+    const normalizeValue = (value) => value === "" || value === null || value === undefined
+      ? (props.multiple ? [] : undefined)
+      : value;
+    const selectedValue = ref(normalizeValue(props.modelValue));
 
     // 结合props和上下文的preview属性，确定是否处于查看模式
     // 优先使用props.preview，因为FormDataView组件会将isView=true传递给FormView组件，
@@ -72,7 +75,7 @@ export default defineComponent({
     watch(
       () => props.modelValue,
       (newVal) => {
-        selectedValue.value = newVal;
+        selectedValue.value = normalizeValue(newVal);
       },
     );
 
@@ -92,7 +95,7 @@ export default defineComponent({
       } else {
         // 单选模式：处理单个部门对象
         processedDepartments =
-          departments.length > 0 ? removeUnnecessaryFields(departments[0]) : "";
+          departments.length > 0 ? removeUnnecessaryFields(departments[0]) : undefined;
       }
 
       selectedValue.value = processedDepartments;

@@ -18,7 +18,7 @@
       @cancel="showFilter = false"
     ></DashFilter>
   </el-popover>
-  <div class="item dimension-item">
+  <div class="item filter-item">
     <div @click="onFieldClick" class="item-text">
       <et-icon icon="el-filter" color="var(--et-color-primary)" class="field-icon"></et-icon>
       <span ref="filterBtnRef">{{ t("admin.dashboardFieldBar.setFilter") }}</span>
@@ -101,8 +101,22 @@ const setFilter = (filter: IConditionList) => {
   }
 }
 
-.dimension-item {
-  background-color: var(--et-color-primary-hover);
-  color: var(--et-color-primary);
+.filter-item {
+  background-color: var(--et-bg-container);
+  border: 1px solid var(--et-border-color-light);
+  color: var(--et-text-primary);
+
+  &:hover {
+    background-color: var(--et-bg-hover);
+    border-color: var(--et-color-primary);
+  }
+
+  .item-text {
+    color: var(--et-text-primary);
+  }
+
+  .field-icon {
+    color: var(--et-color-primary);
+  }
 }
 </style>

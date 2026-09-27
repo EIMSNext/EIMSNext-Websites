@@ -16,7 +16,7 @@
           :placeholder="t('publicpublish.accessCodePlaceholder')"
           @keyup.enter="submitAccessCode"
         />
-        <el-button type="primary" :loading="accessCodeSubmitting" @click="submitAccessCode">
+        <el-button type="primary" :loading="accessCodeSubmitting" :disabled="accessCodeSubmitting" @click="submitAccessCode">
           {{ t("common.confirm") }}
         </el-button>
         <p v-if="accessCodeExpired" class="access-code-error">{{ t("publicpublish.accessCodeExpired") }}</p>
@@ -50,8 +50,8 @@
           :w="item.w"
           :h="item.h"
           :i="item.i"
-          :minW="6"
-          :minH="3"
+          :minW="getDashboardItemMinSize(item.type ?? state.items[item.i]?.itemType).w"
+          :minH="getDashboardItemMinSize(item.type ?? state.items[item.i]?.itemType).h"
           :maxW="60"
           :maxH="60"
         >
@@ -88,6 +88,7 @@ import {
   PublicScope,
 } from "@eimsnext/models";
 import DashItemCard from "@/components/DashboardDesigner/components/DashItemCard.vue";
+import { getDashboardItemMinSize } from "@/components/DashboardDesigner/type";
 import { useChartFilterLinkage } from "@/views/dash/useChartFilterLinkage";
 import {
   AccessCodeExpiredError,
@@ -207,3 +208,4 @@ async function submitAccessCode() {
   background: var(--et-bg-page, #f5f7fa);
 }
 </style>
+

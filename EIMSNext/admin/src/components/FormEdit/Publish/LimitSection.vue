@@ -91,8 +91,7 @@ function markDirty() {
 <style scoped lang="scss">
 .limit-section {
   border-top: 1px solid var(--et-border-color-light);
-  margin-top: var(--et-space-16);
-  padding-top: var(--et-space-16);
+  margin: var(--et-space-16) 0;
 }
 
 .section-title {
@@ -107,7 +106,6 @@ function markDirty() {
   display: flex;
   flex-wrap: wrap;
   gap: var(--et-space-12);
-  margin-bottom: var(--et-space-12);
 
   .el-input {
     flex: 1;

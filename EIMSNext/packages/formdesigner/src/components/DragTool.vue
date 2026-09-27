@@ -2,8 +2,11 @@
   <div class="_fd-drag-tool field-layout-designer" @click.stop="active" :class="{
     active: fcx.active === id,
     'is-inside': inside,
+    'is-subform': subForm,
+    'is-table-column-child': tableFormColumnChild,
     'is-inline': inline,
-  }">
+  }" @pointerdown.capture="captureSubFormInteraction" @mousedown.capture="captureSubFormInteraction"
+    @click.capture="captureSubFormInteraction">
     <div class="_fd-drag-mask form-widget-mask" v-if="mask"></div>
     <div class="_fd-drag-hidden" v-if="hidden">
       <i class="fc-icon icon-eye-close"></i> {{ t("props.hide") }}
@@ -70,6 +73,8 @@ export default defineComponent({
     dragBtn: Boolean,
     children: String,
     inside: Boolean,
+    subForm: Boolean,
+    tableFormColumnChild: Boolean,
     inline: Boolean,
     hidden: Boolean,
     mask: Boolean,
@@ -127,6 +132,20 @@ export default defineComponent({
       this.fcx.active = this.id;
       this.$emit("active");
     },
+    captureSubFormInteraction(event) {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest("._fd-drag-btn")) return;
+
+      const parentSubForm = this.$el.parentElement?.closest(
+        "._fd-drag-tool.is-subform"
+      );
+      if (!parentSubForm || parentSubForm === this.$el) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      this.active();
+    },
   },
   mounted() {
     this.$emit("fc.el", this);
@@ -177,9 +196,32 @@ export default defineComponent({
   opacity: 0.7;
 }
 
-._fd-drag-tool:has(._fd-drag-tool:not(.active):hover,
-  ._fd-drag-tool.active:hover)>div>._fd-drag-btn {
+._fd-drag-tool:has(._fd-drag-tool:hover) > ._fd-drag-r {
   display: none !important;
+}
+
+._fd-drag-tool:has(._fd-tf-col:hover) > ._fd-drag-r {
+  display: none !important;
+}
+
+/* A table-form column is a layout shell. The field DragTool remains the
+   owner of the actions, but its toolbar is presented in the column title. */
+._fd-drag-tool.is-table-column-child {
+  position: static;
+  overflow: visible;
+}
+
+._fd-drag-tool.is-table-column-child > ._fd-drag-r {
+  top: 4px;
+  right: 2px;
+}
+
+._fd-tf-col:hover ._fd-drag-tool.is-table-column-child > ._fd-drag-r {
+  display: block;
+}
+
+._fd-tf-col:hover ._fd-drag-tool.is-table-column-child > ._fd-drag-r > ._fd-drag-btn {
+  display: flex;
 }
 
 ._fd-drag-tool:has(._fd-drag-tool) {

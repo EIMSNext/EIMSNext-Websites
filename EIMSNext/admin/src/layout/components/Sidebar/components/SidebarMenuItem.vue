@@ -101,7 +101,7 @@ defineOptions({
 });
 
 import { getAppIconColor, getFormIcon } from "@/utils/common";
-import { AppMenu, FormType } from "@eimsnext/models";
+import { AppMenu, FormType, WorkbenchTargetType } from "@eimsnext/models";
 import { ConfirmResult, EtConfirm } from "@eimsnext/components";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
@@ -142,7 +142,7 @@ const getMenuType = (menuType: FormType | number | undefined): FormType => {
 const currentMenuType = computed(() => getMenuType(props.item.menuType));
 const isFavorite = computed(() =>
   workbenchStore.isFavorite(
-    currentMenuType.value === FormType.Dashboard ? "dashboard" : "form",
+    currentMenuType.value === FormType.Dashboard ? WorkbenchTargetType.Dashboard : WorkbenchTargetType.Form,
     props.item.menuId
   )
 );
@@ -156,7 +156,7 @@ const routeTo = computed(() => ({
 const toggleFavorite = async () => {
   await workbenchStore.loadFavorites();
   await workbenchStore.toggleFavorite({
-    targetType: currentMenuType.value === FormType.Dashboard ? "dashboard" : "form",
+    targetType: currentMenuType.value === FormType.Dashboard ? WorkbenchTargetType.Dashboard : WorkbenchTargetType.Form,
     targetId: props.item.menuId,
   });
 };
