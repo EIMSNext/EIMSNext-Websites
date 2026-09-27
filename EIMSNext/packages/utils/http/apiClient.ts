@@ -11,10 +11,10 @@ export class ApiClient {
     this.httpRequest = request;
   }
 
-  get<T = any>(url: string, data?: any, withToken?: true) {
+  get<T = any>(url: string, data?: any, withToken?: true, options?: { silentError?: boolean }) {
     url = this.formatUrl(url);
     let headers = new AxiosHeaders();
-    return this.httpRequest.get<T>({ url, data, headers, withToken });
+    return this.httpRequest.get<T>({ url, params: data, headers, withToken, silentError: options?.silentError });
   }
 
   count(url: string, data?: any) {
@@ -53,6 +53,18 @@ export class ApiClient {
     let headers = new AxiosHeaders();
     headers.setContentType(contentType);
     return this.httpRequest.post<T>({ url, data, headers, withToken });
+  }
+
+  postForm<T = any>(url: string, data: FormData, withToken?: true) {
+    url = this.formatUrl(url);
+    let headers = new AxiosHeaders();
+    return this.httpRequest.post<T>({ url, data, headers, withToken });
+  }
+
+  download(url: string, data?: any, withToken?: true): Promise<Blob> {
+    url = this.formatUrl(url);
+    const headers = new AxiosHeaders();
+    return this.httpRequest.get<Blob>({ url, params: data, headers, withToken, responseType: "blob" });
   }
 
   put<T = any>(url: string, data: any, withToken?: true) {

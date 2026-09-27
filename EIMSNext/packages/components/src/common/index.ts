@@ -1,4 +1,5 @@
-import { IListItem } from "@/component";
+export * from "./fieldUtils";
+import { IListItem } from "../list/type";
 export interface IDataItem {
   id: string;
   value?: string;
@@ -9,9 +10,9 @@ export enum DataItemType {
   Unknown = 0,
   Department,
   Employee,
-  Role,
+  EmployeeGroup,
   Dynamic,
-  AuthGroup,
+  FormDataPermissionGroup,
   FlowNode,
   Print,
   App,
@@ -29,8 +30,8 @@ import {
   Department,
   Employee,
   FlowStatus,
-  Role,
-  RoleGroup,
+  EmployeeGroup,
+  EmployeeGroupCategory,
 } from "@eimsnext/models";
 
 export interface ITreeNode extends IDataItemView {
@@ -103,11 +104,11 @@ export function deptToTreeNode(dept: Department): ITreeNode {
   };
 }
 
-export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
+export function buildEmployeeGroupTree(groups: EmployeeGroupCategory[], employeeGroups: EmployeeGroup[]): ITreeNode[] {
   const attachChildren = (pNode: ITreeNode) => {
-    const children = roles.filter((x) => x.roleGroupId == pNode.id);
+    const children = employeeGroups.filter((x) => x.employeeGroupCategoryId == pNode.id);
     children.forEach((x) => {
-      const node: ITreeNode = roleToTreeNode(x);
+      const node: ITreeNode = employeeGroupToTreeNode(x);
       attachChildren(node);
       if (!pNode.children) pNode.children = [];
       pNode.children.push(node);
@@ -131,14 +132,14 @@ export function buildRoleTree(groups: RoleGroup[], roles: Role[]): ITreeNode[] {
 
   return treeNoes;
 }
-export function roleToTreeNode(role: Role): ITreeNode {
+export function employeeGroupToTreeNode(employeeGroup: EmployeeGroup): ITreeNode {
   return {
-    id: role.id,
-    label: role.name,
-    type: DataItemType.Role,
+    id: employeeGroup.id,
+    label: employeeGroup.name,
+    type: DataItemType.EmployeeGroup,
     children: [],
-    data: role,
-    icon: "el-role",
+    data: employeeGroup,
+    icon: "el-employeeGroup",
   };
 }
 
@@ -153,33 +154,33 @@ export function employeeToListItem(emp: Employee): IListItem {
   };
 }
 
-export function flowStatusArray() {
+export function flowStatusArray(t?: (key: string) => string) {
   return [
-    { id: FlowStatus.Draft, i18n: "workflow.flowStatus.draft", label: "草稿" },
+    { id: FlowStatus.Draft, i18n: "workflow.flowStatus.draft", label: t ? t("workflow.flowStatus.draft") : "草稿" },
     {
       id: FlowStatus.Approving,
       i18n: "workflow.flowStatus.approving",
-      label: "审批中",
+      label: t ? t("workflow.flowStatus.approving") : "审批中",
     },
     {
       id: FlowStatus.Approved,
       i18n: "workflow.flowStatus.approved",
-      label: "已审批",
+      label: t ? t("workflow.flowStatus.approved") : "已审批",
     },
     {
       id: FlowStatus.Rejected,
       i18n: "workflow.flowStatus.rejected",
-      label: "已驳回",
+      label: t ? t("workflow.flowStatus.rejected") : "已驳回",
     },
     {
       id: FlowStatus.Discarded,
       i18n: "workflow.flowStatus.discarded",
-      label: "已废弃",
+      label: t ? t("workflow.flowStatus.discarded") : "已废弃",
     },
     {
       id: FlowStatus.Suspended,
       i18n: "workflow.flowStatus.suspended",
-      label: "已挂起",
+      label: t ? t("workflow.flowStatus.suspended") : "已挂起",
     },
   ];
 }

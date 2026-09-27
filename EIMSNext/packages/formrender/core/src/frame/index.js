@@ -506,9 +506,15 @@ export default function FormCreateFactory(config) {
         const language = this.options.value.language || {};
         const locale = this.getLocale();
         value = deepGet(language[locale] || {}, id);
-                if (value == null) {
-                    value = deepGet(baseLanguage[locale] || {}, id);
-                }
+        if (value == null) {
+          value = deepGet(language["zh-cn"] || {}, id);
+        }
+        if (value == null) {
+          value = deepGet(baseLanguage[locale] || {}, id);
+        }
+        if (value == null) {
+          value = deepGet(baseLanguage["zh-cn"] || {}, id);
+        }
       }
       return value;
     },

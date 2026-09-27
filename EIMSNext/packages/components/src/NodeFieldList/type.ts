@@ -3,15 +3,16 @@ import {
   getFieldIcon,
   splitSubField,
   toFormFieldDef,
-} from "@/FieldSelect/type";
-import { DataItemType, ITreeNode } from "@/common";
-import { FieldDef, FieldType, FormDef, IFieldPerm } from "@eimsnext/models";
+} from "../FieldSelect/type";
+import { DataItemType, ITreeNode } from "../common";
+import { FieldDef, FieldType, FormDef, FormFieldPermission } from "@eimsnext/models";
 
 export interface INodeForm {
   nodeId: string;
   nodeName: string;
   singleResult: boolean;
   form?: FormDef;
+  outputFields?: IFormFieldDef[];
 }
 export enum FieldBuildRule {
   All = 0,
@@ -38,7 +39,8 @@ export interface IFormFieldMap {
 export interface IFieldLimit {
   limitField?: string;
   limitType?: FieldLimitType;
-  fieldPerms?: IFieldPerm[];
+  formFieldPermissions?: FormFieldPermission[];
+  excludeFieldTypes?: FieldType[];
 }
 export enum FieldLimitType {
   None,
@@ -118,6 +120,9 @@ export function buildNodeFieldTree(
 ): ITreeNode[] {
   const fieldDataType = getConditionFieldType(fieldDef?.type);
   const fieldMapping = setting.fieldMapping || {};
+  const canViewField = (field: string) =>
+    setting.fieldLimit?.formFieldPermissions === undefined ||
+    setting.fieldLimit.formFieldPermissions.some((permission) => permission.id === field && permission.visible);
   const hasFieldMapping =
     setting.fieldMapping != null && setting.fieldMapping != undefined;
 
@@ -126,11 +131,38 @@ export function buildNodeFieldTree(
     singleResult: boolean,
     ignoreTable: boolean,
   ) => {
-    const children = forms.find((x) => x.nodeId == pNode.id)?.form?.content
-      ?.items;
+    const nodeForm = forms.find((x) => x.nodeId == pNode.id);
+    const outputFields = nodeForm?.outputFields ?? [];
+    if (outputFields.length > 0) {
+      outputFields.forEach((sourceFieldDef) => {
+        if (!canViewField(sourceFieldDef.field)) return;
+        const isMultiResultSubField =
+          fieldDef?.isSubField && !singleResult && sourceFieldDef.isSubField;
+        if (
+          !isMultiResultSubField &&
+          (!setting.matchType || isFieldTypeMatched(fieldDataType, sourceFieldDef.type))
+        ) {
+          const node: ITreeNode = {
+            id: `${pNode.id}-${sourceFieldDef.field}`,
+            value: sourceFieldDef.field,
+            label: sourceFieldDef.label,
+            type: DataItemType.Field,
+            children: [],
+            data: sourceFieldDef,
+            icon: getFieldIcon(sourceFieldDef.type),
+          };
+          if (!pNode.children) pNode.children = [];
+          pNode.children.push(node);
+        }
+      });
+      return;
+    }
+
+    const children = nodeForm?.form?.content?.items;
     if (children && children.length > 0) {
       //master fields
       children.forEach((x: FieldDef) => {
+        if (!canViewField(x.field)) return;
         let shouldHidden = true;
         //1. 左边为子表字段
         if (fieldDef?.isSubField) {
@@ -290,6 +322,11 @@ export function buildNodeFieldTree(
           if (x.type == FieldType.TableForm) {
             if (x.columns) {
               x.columns.forEach((sub: FieldDef) => {
+                if (!canViewField(`${x.field}>${sub.field}`)) return;
+                // A multi-result subfield cannot be matched to a target subfield.
+                // The supported multi-result-to-subtable path only maps master fields.
+                if (fieldDef?.isSubField && !singleResult) return;
+
                 //sub fields
                 if (
                   !setting.matchType ||

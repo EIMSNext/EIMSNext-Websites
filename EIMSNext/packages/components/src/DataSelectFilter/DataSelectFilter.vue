@@ -8,8 +8,8 @@
       :value-build-setting="fieldBuildSetting"
     />
     <div class="filter-actions">
-      <el-button type="primary" @click="onConfirm">筛选</el-button>
-      <el-button @click="onReset">重置</el-button>
+      <el-button type="primary" @click="onConfirm">{{ t("common.filter") }}</el-button>
+      <el-button @click="onReset">{{ t("common.reset") }}</el-button>
     </div>
   </div>
 </template>
@@ -17,9 +17,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { ClickOutside as vClickOutside } from "element-plus";
+import { useI18n } from "vue-i18n";
 import { FieldBuildRule, type IFieldBuildSetting } from "../NodeFieldList/type";
 import { type IConditionList } from "../ConditionList/type";
 import type { IFormFieldDef } from "../FieldSelect/type";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "DataSelectFilter",

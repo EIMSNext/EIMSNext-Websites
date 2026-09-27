@@ -1,5 +1,6 @@
 import { defineComponent, ref, toRef, watch } from "vue";
 import { toArray } from "@eimsnext/form-render-core";
+import { appSetting, getFileFullUrl } from "@eimsnext/utils";
 
 const NAME = "fcUploader";
 
@@ -10,17 +11,45 @@ function parseFile(file, i) {
 
   return {
     url: file,
+    value: file,
     is_string: true,
     name: getFileName(file),
     uid: i,
   };
 }
 function parseUpload(file) {
-  return { ...file, file, value: file };
+  const value = file.value ?? file;
+  const url = typeof value === "string" ? value : value?.url || file.url;
+  return { ...file, url: getFileFullUrl(url), file, value };
+}
+
+function normalizeStoredValue(file) {
+  if (typeof file === "string") return { name: getFileName(file), url: file };
+  const url = file?.url || file?.savePath;
+  return {
+    ...(file?.id ? { id: file.id } : {}),
+    name: file?.name || file?.fileName || getFileName(url || ""),
+    url,
+    ...(file?.thumbUrl || file?.thumbPath ? { thumbUrl: file.thumbUrl || file.thumbPath } : {}),
+    ...(file?.fileSize !== undefined ? { fileSize: file.fileSize } : {}),
+  };
 }
 
 function getFileName(file) {
   return ("" + file).split("/").pop();
+}
+
+function toStoredFileValue(value) {
+  if (typeof value === "string") {
+    const baseUrl = appSetting.uploadUrl.replace(/\/+$/, "");
+    return baseUrl && value.startsWith(`${baseUrl}/`) ? value.slice(baseUrl.length + 1) : value;
+  }
+
+  if (value && typeof value === "object" && value.url) {
+    return { ...normalizeStoredValue(value), url: toStoredFileValue(value.url) };
+  }
+
+  return value;
 }
 
 export default defineComponent({
@@ -57,7 +86,7 @@ export default defineComponent({
 
     const uploadValue = () => {
       let files = fileList.value
-        .map((v) => (v.is_string ? v.url : v.value || v.url))
+        .map((v) => toStoredFileValue(v.value ?? v.url))
         .filter((url) => url !== undefined);
       _.emit(
         "update:modelValue",
@@ -90,13 +119,21 @@ export default defineComponent({
             })
             .then((res) => {
               file.status = "success";
+              const uploaded = res?.value?.[0] || res?.data?.[0];
+              if (uploaded) {
+                const value = {
+                  ...normalizeStoredValue(uploaded),
+                };
+                file.value = value;
+                file.url = getFileFullUrl(value.url);
+              }
               props.onSuccess && props.onSuccess(res, file);
               uploadValue();
             })
             .catch((e) => {
               file.status = "failed";
               file.message =
-                this.formCreateInject.t("uploadFail") || "上传失败";
+                props.formCreateInject?.t("uploadFail") || "上传失败";
               props.onError && props.onError(e, file);
             });
         }

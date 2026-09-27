@@ -1,36 +1,69 @@
 <template>
   <div class="adv-container">
-    <el-tabs v-model="activeName" tabPosition="left" class="adv-tabs" @tab-click="handleClick">
-      <el-tab-pane label="内部发布" name="internal" class="adv-panel">
-        <InternalPublish :form-def="formDef" />
+    <el-tabs v-model="activeName" tab-position="left" class="adv-tabs" :before-leave="beforeTabLeave">
+      <el-tab-pane :label="t('admin.publish.internal')" name="member" class="adv-panel">
+        <InternalPublish v-if="activeName === 'member'" :form-def="formDef" />
       </el-tab-pane>
-      <el-tab-pane label="公开发布" name="public" class="adv-panel">To do</el-tab-pane>
+      <el-tab-pane :label="t('admin.publish.public')" name="public" class="adv-panel">
+        <PublicPublish v-if="activeName === 'public'" ref="publicPanelRef" :form-def="formDef" />
+      </el-tab-pane>
+      <el-tab-pane :label="t('admin.publish.view')" name="view" class="adv-panel">
+        <ViewPublish v-if="activeName === 'view'" :form-def="formDef" />
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
+
 <script setup lang="ts">
-import InternalPublish from "./InternalPublish.vue";
+import { TabPaneName } from "element-plus";
+import { useI18n } from "vue-i18n";
 import { FormDef } from "@eimsnext/models";
-import { TabsPaneContext } from "element-plus";
+import InternalPublish from "./InternalPublish.vue";
+import PublicPublish from "./PublicPublish.vue";
+import ViewPublish from "./ViewPublish.vue";
 
-defineOptions({
-  name: "Publish",
+const { t } = useI18n();
+defineOptions({ name: "Publish" });
+
+defineProps<{ formDef: FormDef }>();
+
+const activeName = ref("member");
+const publicPanelRef = ref<{ beforeClose: () => Promise<boolean> }>();
+
+const ensurePublicPanelSaved = async () => {
+  if (activeName.value !== "public") return true;
+  return (await publicPanelRef.value?.beforeClose?.()) ?? true;
+};
+
+const beforeTabLeave = async (_newTab: TabPaneName, oldTab: TabPaneName) => {
+  if (oldTab !== "public") return true;
+  return (await publicPanelRef.value?.beforeClose?.()) ?? true;
+};
+
+const beforeClose = async () => {
+  return await ensurePublicPanelSaved();
+};
+
+defineExpose({
+  beforeClose,
 });
-
-const props = defineProps<{
-  formDef: FormDef;
-}>();
-
-const activeName = ref("internal");
-
-const handleClick = (_tab: TabsPaneContext, _event: Event) => {};
 </script>
-<style lang="scss" scoped>
+
+<style scoped lang="scss">
 :deep(.adv-tabs.el-tabs--left .el-tabs__nav.is-left) {
   width: var(--et-size-165) !important;
 }
 
 :deep(.adv-tabs.el-tabs--left .el-tabs__item.is-left) {
   justify-content: flex-start;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: var(--et-bg-hover);
+  }
+
+  &.is-active {
+    background: var(--et-bg-primary-soft);
+  }
 }
 </style>

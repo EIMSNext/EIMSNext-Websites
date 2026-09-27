@@ -11,6 +11,8 @@ export const useSettingsStore = defineStore("setting", () => {
   const notificationUnreadCount = ref(0);
   // 基本设置
   const settingsVisible = ref(false);
+  // 应用市场
+  const appStoreVisible = ref(false);
   // 标签
   const tagsView = useStorage<boolean>("tagsView", defaultSettings.tagsView);
   // 固定头部
@@ -63,6 +65,7 @@ export const useSettingsStore = defineStore("setting", () => {
     messageCenterVisible,
     notificationUnreadCount,
     settingsVisible,
+    appStoreVisible,
     tagsView,
     fixedHeader,
     themeColor,

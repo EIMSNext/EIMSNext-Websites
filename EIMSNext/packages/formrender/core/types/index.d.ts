@@ -47,6 +47,24 @@ declare type FormCreateFactory<
 
 export default FormCreateFactory;
 
+export interface FetchOption {
+  action?: string;
+  method?: string;
+  query?: Record<string, any>;
+  data?: Record<string, any>;
+  file?: File;
+  filename?: string;
+  source?: "upload" | "odata" | string;
+  dataType?: string;
+  headers?: Record<string, any>;
+  withCredentials?: boolean;
+  onProgress?: (evt: ProgressEvent & { percent?: number }) => void;
+  onSuccess?: (result: any) => void;
+  onError?: (error: any, body?: any) => void;
+}
+
+export declare function fetch(option: FetchOption): void;
+
 export interface Install<
   MakerAttrs,
   OptionAttrs,

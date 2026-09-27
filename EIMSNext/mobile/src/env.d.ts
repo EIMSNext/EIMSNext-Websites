@@ -8,7 +8,8 @@ declare global {
   interface Window {
     appSetting?: {
       clientId?: string;
-      authUrl?: string;
+      publicClientId?: string;
+      identityUrl?: string;
       apiUrl?: string;
       uploadUrl?: string;
       tokenKey?: string;

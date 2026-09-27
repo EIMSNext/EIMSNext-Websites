@@ -5,17 +5,17 @@
         <NavBar />
       </el-header>
       <el-container class="layout-main-shell">
-        <el-aside width="45px" class="main-left-menu">
-          <el-tooltip :content="t('route.workspace')" placement="right" :hide-after="0">
-            <router-link custom :to="{ path: '/workspace' }" v-slot="{ navigate }">
+        <el-aside width="50px" class="main-left-menu">
+          <el-tooltip :content="t('admin.workbench.title')" placement="right" :hide-after="0">
+            <router-link custom :to="{ path: '/workbench' }" v-slot="{ navigate }">
               <div class="main-left-menu-item" @click="navigate">
-                <!-- <AppIcon :app="workspaceApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
+                <!-- <AppIcon :app="workbenchApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
                 <et-icon icon="homepage" size="18px" />
               </div>
             </router-link>
           </el-tooltip>
           <template
-            v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin"
+            v-if="curUser.userType == UserType.CorpOwmer || curUser.userType == UserType.CorpAdmin || curUser.userType == UserType.AppAdmin"
           >
             <el-tooltip :content="t('route.system')" placement="right" :hide-after="0">
               <router-link custom :to="{ path: '/system/department' }" v-slot="{ navigate }">
@@ -30,7 +30,7 @@
           <template v-for="app in appsRef">
             <template v-if="app.id != 'system'">
               <el-tooltip :content="app.name" placement="right" :hide-after="0">
-                <router-link custom :to="{ path: `/app/${app.id}/mytasks` }" v-slot="{ navigate }">
+                <router-link custom :to="{ path: `/app/${app.id}` }" v-slot="{ navigate }">
                   <div class="main-left-menu-item" @click="navigate">
                     <AppIcon :app="app" iconSize="12px" style="width: 22px; height: 22px" />
                   </div>
@@ -55,23 +55,23 @@ import { useAppStore, useUserStore } from "@eimsnext/store";
 import NavBar from "./components/NavBar/index.vue";
 import defaultSettings from "@/settings";
 import { useI18n } from "vue-i18n";
-import { App, UserType } from "@eimsnext/models";
+import { AppDef, UserType } from "@eimsnext/models";
 const { t } = useI18n();
 
 defineOptions({
   name: "Layout",
 });
 
-const workspaceApp: App = {
-  id: "workspace",
-  name: "工作台",
+const workbenchApp: AppDef = {
+  id: "workbench",
+  name: t("admin.workbench.title"),
   icon: "homepage",
   sortIndex: -2,
   appMenus: [],
 };
-const systemApp: App = {
+const systemApp: AppDef = {
   id: "system",
-  name: "系统设置",
+  name: t("route.system"),
   icon: "icon-settings",
   sortIndex: -1,
   appMenus: [],
@@ -111,6 +111,7 @@ const classObj = computed(() => ({
 
 .layout-main {
   padding: var(--et-space-0);
+  overflow: hidden;
 }
 
 .main-left-menu {

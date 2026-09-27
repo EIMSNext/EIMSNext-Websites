@@ -238,12 +238,11 @@
                           v-if="hiddenItem.indexOf(element.name) === -1"
                           @click="clickMenu(element)"
                         >
-                          <template v-if="item.name !== 'template'">
+                            <template v-if="item.name !== 'template'">
                             <div class="_fc-l-icon">
-                              <i
-                                class="fc-icon"
-                                :class="element.icon || 'icon-input'"
-                              ></i>
+                              <et-icon
+                                :icon="fieldIcons[element.name] || 'el-EditPen'"
+                              />
                             </div>
                             <span class="_fc-l-name">{{
                               t("com." + element.name + ".name") ||
@@ -338,6 +337,16 @@
                   </template>
                 </el-tree>
               </el-main>
+              <el-footer
+                v-show="activeMenuTab === 'menu'"
+                height="46px"
+                class="_fc-field-recycle-entry"
+              >
+                <el-button text @click="fieldRecycleVisible = true">
+                  <et-icon icon="el-RefreshLeft" />
+                  <span>{{ t("designer.fieldRecycle.title") }}</span>
+                </el-button>
+              </el-footer>
             </el-container>
           </el-aside>
           <el-container class="_fc-m">
@@ -585,9 +594,9 @@
                 <div
                   v-if="isgod && activeRule"
                   class="_fc-r-name-config"
-                  style="margin-bottom: 8px"
+                  style="margin-bottom: 6px"
                 >
-                  <div style="margin-bottom: 10px">
+                  <div style="margin-bottom: 6px">
                     <span class="_fc-field-title"> 字段标识 </span>
                   </div>
                   <FieldInput
@@ -764,77 +773,51 @@
               </el-main>
             </el-container>
           </el-aside>
-          <el-dialog
+          <el-drawer
             v-model="preview.state"
-            width="80%"
-            class="_fd-preview-dialog formdatadialog"
+            direction="btt"
+            size="95%"
+            :with-header="false"
+            :destroy-on-close="true"
+            class="_fd-preview-drawer formdatadialog"
             append-to-body
           >
-            <el-tabs class="_fd-preview-tabs" v-model="previewStatus">
-              <el-tab-pane
-                :label="t('form.formMode')"
-                name="form"
-              ></el-tab-pane>
-              <el-tab-pane
-                :label="t('form.previewMode')"
-                name="preview"
-              ></el-tab-pane>
-              <!-- <el-tab-pane :label="t('form.componentMode')" name="component"></el-tab-pane>
-                            <el-tab-pane :label="t('form.sfcMode')" name="sfc"
-                                v-if="previewDevice !== 'mobile'"></el-tab-pane> -->
-            </el-tabs>
-            <div
-              class="_fd-preview-device"
-              v-if="previewStatus !== 'sfc' && !onlyPC"
-            >
-              <div
-                :class="{ active: previewDevice === 'pc' }"
-                @click="previewDevice = 'pc'"
-              >
-                <i class="fc-icon icon-pc2"></i>{{ t("props.pc") }}
-              </div>
-              <div
-                :class="{ active: previewDevice === 'mobile' }"
-                @click="previewDevice = 'mobile'"
-              >
-                <i class="fc-icon icon-mobile2"></i>{{ t("props.mobile") }}
-              </div>
-            </div>
-            <div
-              class="_fd-preview-copy"
-              v-if="['component', 'sfc'].indexOf(previewStatus) > -1"
-              @click="copyCode"
-            >
-              <i class="fc-icon icon-copy"></i>
-            </div>
-            <template
-              v-if="previewStatus === 'form' || previewStatus === 'preview'"
-            >
-              <template v-if="previewDevice === 'mobile'">
-                <div class="_fd-preview-mobile">
-                  <div>
-                    <ViewFormMobile
-                      driver="elm"
-                      :rule="preview.rule"
-                      :option="preview.option"
-                      @submit="previewSubmit"
-                      @reset="previewReset"
-                      v-model:api="preview.api"
-                      v-if="preview.state"
-                    >
-                      <template v-for="(_, name) in $slots" #[name]="scope">
-                        <slot :name="name" v-bind="scope ?? {}" />
-                      </template>
-                    </ViewFormMobile>
-                  </div>
-                </div>
-              </template>
-              <template v-else>
-                <div
-                  class="data-container"
-                  style="margin: 10px; height: calc(100vh - 150px)"
+            <div class="_fd-preview-toolbar">
+              <div class="_fd-preview-device" v-if="!onlyPC">
+                <button
+                  type="button"
+                  :class="{ active: previewDevice === 'pc' }"
+                  :title="t('props.pc')"
+                  :aria-label="t('props.pc')"
+                  @click="previewDevice = 'pc'"
                 >
-                  <ViewForm
+                  <i class="fc-icon icon-pc"></i>
+                </button>
+                <button
+                  type="button"
+                  :class="{ active: previewDevice === 'mobile' }"
+                  :title="t('props.mobile')"
+                  :aria-label="t('props.mobile')"
+                  @click="previewDevice = 'mobile'"
+                >
+                  <i class="fc-icon icon-mobile"></i>
+                </button>
+              </div>
+              <button
+                class="_fd-preview-close"
+                type="button"
+                :title="t('props.close')"
+                :aria-label="t('props.close')"
+                @click="preview.state = false"
+              >
+                <et-icon icon="el-Close" />
+              </button>
+            </div>
+            <template v-if="previewDevice === 'mobile'">
+              <div class="_fd-preview-mobile">
+                <div :id="previewPopupTarget">
+                  <ViewFormMobile
+                    driver="elm"
                     :rule="preview.rule"
                     :option="preview.option"
                     @submit="previewSubmit"
@@ -845,29 +828,66 @@
                     <template v-for="(_, name) in $slots" #[name]="scope">
                       <slot :name="name" v-bind="scope ?? {}" />
                     </template>
-                  </ViewForm>
+                  </ViewFormMobile>
                 </div>
-              </template>
+              </div>
             </template>
-            <pre
-              class="_fd-preview-code"
-              ref="previewCode"
-              v-else-if="previewStatus === 'component'"
-            ><code
-            v-html="previewDevice === 'mobile' ? preview.mobileHtml : preview.html"></code></pre>
-            <pre
-              class="_fd-preview-code"
-              ref="previewCode"
-              v-else
-            ><code v-html="preview.sfc"></code></pre>
-          </el-dialog>
+            <template v-else>
+              <div class="data-container">
+                <ViewForm
+                  :rule="preview.rule"
+                  :option="preview.option"
+                  @submit="previewSubmit"
+                  @reset="previewReset"
+                  v-model:api="preview.api"
+                  v-if="preview.state"
+                >
+                  <template v-for="(_, name) in $slots" #[name]="scope">
+                    <slot :name="name" v-bind="scope ?? {}" />
+                  </template>
+                </ViewForm>
+              </div>
+            </template>
+          </el-drawer>
         </el-container>
       </el-main>
+      <FieldRecycleBin
+        v-model="fieldRecycleVisible"
+        :logs="fieldChangeLogs"
+        :loading="fieldRecycleLoading"
+        :t="t"
+        @restore="restoreFieldChangeLogs"
+        @purge="purgeFieldChangeLogs"
+        @clear="clearFieldChangeLogs"
+      />
     </el-config-provider>
   </el-container>
 </template>
 
-<style></style>
+<style>
+._fc-field-recycle-entry {
+  display: flex;
+  align-items: center;
+  padding: 0 12px !important;
+  border-top: 1px solid var(--fc-line-color-3);
+  background: var(--fc-bg-color-1);
+}
+
+._fc-field-recycle-entry .el-button {
+  width: 100%;
+  height: 34px;
+  justify-content: center;
+  color: var(--fc-text-color-1);
+}
+
+._fc-field-recycle-entry .el-button:hover {
+  color: var(--fc-style-color-1);
+}
+
+._fc-field-recycle-entry .et-icon {
+  margin-right: 6px;
+}
+</style>
 
 <script>
 import {
@@ -888,6 +908,14 @@ import style from "../config/base/style";
 import advanced from "../config/base/advanced";
 import validate from "../config/base/validate";
 import ruleList, { defaultDrag } from "../config";
+import {
+  ConfirmResult,
+  EtConfirm,
+  EtIcon,
+  fieldIcons,
+  MessageIcon,
+} from "@eimsnext/components";
+import { formDefService } from "@eimsnext/services";
 import fcDraggable from "vuedraggable/src/vuedraggable";
 import createMenu from "../config/menu";
 import {
@@ -927,7 +955,7 @@ import {
   toRefs,
   watch,
 } from "vue";
-import errorMessage from "../utils/message";
+import errorMessage, { message } from "../utils/message";
 import hljs from "../utils/highlight/highlight.min";
 import xml from "../utils/highlight/xml.min";
 import javascript from "../utils/highlight/javascript.min";
@@ -954,6 +982,7 @@ import SlotsConfig from "./SlotsConfig.vue";
 import QuickLayout from "./QuickLayout.vue";
 import AiChat from "./ai/AiChat.vue";
 import FieldInput from "./FieldInput.vue";
+import FieldRecycleBin from "./FieldRecycleBin.vue";
 
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("xml", xml);
@@ -975,6 +1004,7 @@ export default defineComponent({
     FormList,
     FieldList,
     FieldInput,
+    FieldRecycleBin,
     TypeSelect,
     ConfigTitle,
     VariableConfig,
@@ -982,6 +1012,7 @@ export default defineComponent({
     SubList,
     PageInput,
     fcDraggable,
+    EtIcon,
     DragForm: designerForm.$form(),
     ViewForm: viewForm.$form(),
     // #if ONLY_PC
@@ -1053,7 +1084,6 @@ export default defineComponent({
     provide("designer", vm);
 
     const configRef = toRef(props, "config", {});
-    const theme = toRef(props, "theme");
     const fieldRef = toRef(props, "field", []);
     const formListRef = toRef(props, "list", []);
     const baseRule = toRef(configRef.value, "baseRule", null);
@@ -1125,19 +1155,12 @@ export default defineComponent({
         })
         .join(" ");
     });
-    watch(theme, (n, o) => {
-      if (o) {
-        document.body.classList.remove("fd-theme-" + o);
-      }
-      if (n) {
-        document.body.classList.add("fd-theme-" + n);
-      }
-    });
     let _t = globalT;
     if (locale.value) {
       _t = useLocale(locale).t;
     }
     const t = (...args) => _t(...args);
+    const publicSystemFields = ["wxopenid", "wxnickname", "wxavator", "ext"];
 
     const tidyRuleConfig = (orgRule, configRule, ...args) => {
       if (configRule) {
@@ -1159,6 +1182,10 @@ export default defineComponent({
 
     const data = reactive({
       formId: "",
+      fieldChangeLogs: [],
+      savedFieldChangeLogs: [],
+      fieldRecycleVisible: false,
+      fieldRecycleLoading: false,
       cacheProps: {},
       operation: {
         idx: -1,
@@ -1176,13 +1203,14 @@ export default defineComponent({
       activePage: null,
       activeRule: null,
       children: ref([]),
+      publicSystemRules: [],
       treeInfo: [],
       menuList: menu.value || createMenu({ t }),
       dragRuleList: {},
       eventShow: false,
       unloadStatus: false,
-      previewStatus: "form",
       previewDevice: "pc",
+      previewPopupTarget: `fc-preview-${uniqueId8()}`,
       t,
       preview: {
         state: false,
@@ -1407,18 +1435,8 @@ export default defineComponent({
       function (n) {
         if (!n) {
           nextTick(() => {
-            data.previewStatus = "form";
             data.preview.rule = data.preview.option = null;
           });
-        }
-      }
-    );
-
-    watch(
-      () => data.previewStatus,
-      (n) => {
-        if (data.preview.rule) {
-          data.preview.option.preview = n === "preview";
         }
       }
     );
@@ -1490,6 +1508,374 @@ export default defineComponent({
     const methods = {
       setFormId(formId) {
         data.formId = formId;
+      },
+      setFieldChangeLogs(logs) {
+        const normalized = deepCopy(Array.isArray(logs) ? logs : []).sort(
+          (a, b) => (b.deletedTime || 0) - (a.deletedTime || 0)
+        );
+        data.fieldChangeLogs = normalized;
+        data.savedFieldChangeLogs = deepCopy(normalized);
+      },
+      getFieldChangeLogs() {
+        return deepCopy(data.fieldChangeLogs);
+      },
+      resetFieldChangeLogs() {
+        data.fieldChangeLogs = deepCopy(data.savedFieldChangeLogs);
+      },
+      parseFieldChangeLog(log) {
+        const separator = (log.fieldId || "").indexOf(">");
+        if (separator < 0) {
+          return {
+            ...log,
+            isSubField: false,
+            fieldId: log.fieldId,
+            fieldLabel: log.fieldLabel,
+          };
+        }
+        const labelSeparator = (log.fieldLabel || "").indexOf(".");
+        return {
+          ...log,
+          isSubField: true,
+          parentFieldId: log.fieldId.slice(0, separator),
+          fieldId: log.fieldId.slice(separator + 1),
+          parentFieldLabel:
+            labelSeparator > -1
+              ? log.fieldLabel.slice(0, labelSeparator)
+              : log.fieldId.slice(0, separator),
+          fieldLabel:
+            labelSeparator > -1
+              ? log.fieldLabel.slice(labelSeparator + 1)
+              : log.fieldLabel,
+        };
+      },
+      findTableFormRule(fieldId) {
+        let found = null;
+        const visit = (rules) => {
+          (rules || []).forEach((rule) => {
+            if (found || !rule || is.String(rule)) return;
+            if (methods.isTableFormRule(rule) && rule.field === fieldId) {
+              found = rule;
+              return;
+            }
+            visit(rule.children);
+          });
+        };
+        visit(data.children);
+        return found;
+      },
+      getCurrentFieldPaths() {
+        const paths = new Set();
+        const visit = (rules, parentFieldId) => {
+          (rules || []).forEach((rule) => {
+            if (!rule || is.String(rule)) return;
+            if (rule.field) {
+              paths.add(
+                parentFieldId ? `${parentFieldId}>${rule.field}` : rule.field
+              );
+            }
+            if (rule.type === "tableform") {
+              (rule.props?.columns || []).forEach((column) => {
+                visit(column.rule, rule.field);
+              });
+              return;
+            }
+            visit(rule.children, parentFieldId);
+          });
+        };
+        visit(methods.getRule());
+        return paths;
+      },
+      validateFieldRestore(logs) {
+        const paths = methods.getCurrentFieldPaths();
+        for (const log of logs) {
+          const parsed = methods.parseFieldChangeLog(log);
+          const fullFieldId = parsed.isSubField
+            ? `${parsed.parentFieldId}>${parsed.fieldId}`
+            : parsed.fieldId;
+          if (!parsed.fieldId || !parsed.fieldLabel) {
+            throw new Error(t("designer.fieldRecycle.invalidRecord"));
+          }
+          if (!data.dragRuleList[parsed.fieldType]) {
+            throw new Error(
+              t("designer.fieldRecycle.unsupportedType", {
+                type: parsed.fieldType,
+              })
+            );
+          }
+          if (paths.has(fullFieldId)) {
+            throw new Error(
+              t("designer.fieldRecycle.fieldExists", { field: fullFieldId })
+            );
+          }
+          if (parsed.isSubField) {
+            const parent = methods.findTableFormRule(parsed.parentFieldId);
+            if (!parent && paths.has(parsed.parentFieldId)) {
+              throw new Error(
+                t("designer.fieldRecycle.parentConflict", {
+                  field: parsed.parentFieldId,
+                })
+              );
+            }
+          }
+        }
+      },
+      createRestoredField(log, parentRule) {
+        const parsed = methods.parseFieldChangeLog(log);
+        const menu = data.dragRuleList[parsed.fieldType];
+        const children = parentRule
+          ? methods.getTableFormRootChildren(parentRule)
+          : data.children;
+        const restored = methods.dragMenu({
+          menu,
+          children,
+          index: children.length,
+          update: {
+            field: parsed.fieldId,
+            title: parsed.fieldLabel,
+          },
+        });
+        if (!restored) {
+          throw new Error(
+            t("designer.fieldRecycle.restoreFailed", {
+              field: log.fieldLabel,
+            })
+          );
+        }
+        return restored;
+      },
+      async restoreFieldChangeLogs(logs) {
+        if (!Array.isArray(logs) || !logs.length) return;
+        const parsedLogs = logs.map((log) => methods.parseFieldChangeLog(log));
+        const needsParentRestore = parsedLogs.some(
+          (log) => log.isSubField && !methods.findTableFormRule(log.parentFieldId)
+        );
+        const content = needsParentRestore
+          ? t("designer.fieldRecycle.restoreCascadeContent")
+          : parsedLogs.every((log) => log.isSubField)
+            ? t("designer.fieldRecycle.restoreSubContent")
+            : t("designer.fieldRecycle.restoreContent");
+        const confirm = await EtConfirm.showDialog(
+          content,
+          {
+            title: t("designer.fieldRecycle.restoreConfirmTitle"),
+            icon: MessageIcon.Warning,
+            showCancel: true,
+          },
+          t
+        );
+        if (confirm !== ConfirmResult.Yes) return;
+
+        const ruleSnapshot = methods.getRule();
+        const logSnapshot = deepCopy(data.fieldChangeLogs);
+        try {
+          methods.validateFieldRestore(logs);
+          const rootLogs = logs.filter(
+            (log) => !methods.parseFieldChangeLog(log).isSubField
+          );
+          const subLogs = logs.filter(
+            (log) => methods.parseFieldChangeLog(log).isSubField
+          );
+
+          rootLogs.forEach((log) => methods.createRestoredField(log));
+          await nextTick();
+
+          const restoredParentIds = new Set(
+            rootLogs
+              .filter((log) => log.fieldType === "tableform")
+              .map((log) => log.fieldId)
+          );
+          for (const log of subLogs) {
+            const parsed = methods.parseFieldChangeLog(log);
+            let parent = methods.findTableFormRule(parsed.parentFieldId);
+            if (!parent) {
+              methods.createRestoredField({
+                fieldId: parsed.parentFieldId,
+                fieldType: "tableform",
+                fieldLabel: parsed.parentFieldLabel,
+              });
+              restoredParentIds.add(parsed.parentFieldId);
+              await nextTick();
+              parent = methods.findTableFormRule(parsed.parentFieldId);
+            }
+            if (!parent) {
+              throw new Error(
+                t("designer.fieldRecycle.restoreFailed", {
+                  field: log.fieldLabel,
+                })
+              );
+            }
+            methods.createRestoredField(log, parent);
+            await nextTick();
+          }
+
+          const restoredIds = new Set(logs.map((log) => log.fieldId));
+          restoredParentIds.forEach((id) => restoredIds.add(id));
+          data.fieldChangeLogs = data.fieldChangeLogs.filter(
+            (log) => !restoredIds.has(log.fieldId)
+          );
+          methods.updateTree();
+          message(t("designer.fieldRecycle.restoreSuccess"), "success");
+        } catch (error) {
+          methods.setRule(ruleSnapshot);
+          data.fieldChangeLogs = logSnapshot;
+          errorMessage(error?.message || t("designer.fieldRecycle.restoreFailed"));
+        }
+      },
+      async purgeFieldChangeLogs(logs) {
+        if (!Array.isArray(logs) || !logs.length) return;
+        const confirm = await EtConfirm.showDialog(
+          t("designer.fieldRecycle.purgeContent"),
+          {
+            title: t("designer.fieldRecycle.purgeConfirmTitle"),
+            icon: MessageIcon.Warning,
+            showCancel: true,
+          },
+          t
+        );
+        if (confirm !== ConfirmResult.Yes) return;
+        await methods.executeFieldChangeLogPurge({
+          fieldIds: logs.map((log) => log.fieldId),
+        });
+      },
+      async clearFieldChangeLogs() {
+        if (!data.fieldChangeLogs.length) return;
+        const confirm = await EtConfirm.showDialog(
+          t("designer.fieldRecycle.clearContent"),
+          {
+            title: t("designer.fieldRecycle.clearConfirmTitle"),
+            icon: MessageIcon.Warning,
+            showCancel: true,
+          },
+          t
+        );
+        if (confirm !== ConfirmResult.Yes) return;
+        await methods.executeFieldChangeLogPurge({ clearAll: true });
+      },
+      async executeFieldChangeLogPurge(request) {
+        if (!data.formId) {
+          errorMessage(t("designer.fieldRecycle.missingForm"));
+          return;
+        }
+        data.fieldRecycleLoading = true;
+        try {
+          await formDefService.purgeFieldChangeLogs(data.formId, request);
+          const ids = new Set(request.fieldIds || []);
+          const filter = request.clearAll
+            ? () => false
+            : (log) => !ids.has(log.fieldId);
+          data.fieldChangeLogs = data.fieldChangeLogs.filter(filter);
+          data.savedFieldChangeLogs = data.savedFieldChangeLogs.filter(filter);
+          message(t("designer.fieldRecycle.purgeSuccess"), "success");
+        } catch (error) {
+          errorMessage(
+            error?.message || t("designer.fieldRecycle.purgeFailed")
+          );
+        } finally {
+          data.fieldRecycleLoading = false;
+        }
+      },
+      isPublicSystemRule(rule) {
+        return (
+          !!rule &&
+          rule.source === "public" &&
+          publicSystemFields.indexOf(`${rule.field || rule.systemKind || ""}`.toLowerCase()) > -1
+        );
+      },
+      collectPublicSystemRules(rules, result = []) {
+        if (!Array.isArray(rules)) {
+          return result;
+        }
+        rules.forEach((rule) => {
+          if (!rule || is.String(rule)) {
+            return;
+          }
+          if (methods.isPublicSystemRule(rule)) {
+            result.push(deepCopy(rule));
+            return;
+          }
+          methods.collectPublicSystemRules(rule.children, result);
+          if (rule.props?.columns) {
+            rule.props.columns.forEach((column) => {
+              methods.collectPublicSystemRules(column.rule, result);
+            });
+          }
+        });
+        return result;
+      },
+      removePublicSystemRules(rules) {
+        if (!Array.isArray(rules)) {
+          return [];
+        }
+        return rules.reduce((result, rule) => {
+          if (!rule || is.String(rule)) {
+            result.push(rule);
+            return result;
+          }
+          if (methods.isPublicSystemRule(rule)) {
+            return result;
+          }
+
+          const next = { ...rule };
+          if (Array.isArray(next.children)) {
+            next.children = methods.removePublicSystemRules(next.children);
+          }
+          if (next.props?.columns) {
+            next.props = {
+              ...next.props,
+              columns: next.props.columns.map((column) => ({
+                ...column,
+                rule: Array.isArray(column.rule)
+                  ? methods.removePublicSystemRules(column.rule)
+                  : column.rule,
+              })),
+            };
+          }
+          result.push(next);
+          return result;
+        }, []);
+      },
+      rememberPublicSystemRules(rules, replace = false) {
+        const collected = methods.collectPublicSystemRules(rules);
+        if (replace) {
+          data.publicSystemRules = [];
+        }
+        methods.mergePublicSystemRules(data.publicSystemRules, collected);
+      },
+      mergePublicSystemRules(target, rules) {
+        const fields = new Set();
+        methods.collectFields(target, fields);
+        rules.forEach((rule) => {
+          const field = `${rule?.field || rule?.systemKind || ""}`.toLowerCase();
+          if (!field || fields.has(field)) {
+            return;
+          }
+          target.push(deepCopy(rule));
+          fields.add(field);
+        });
+      },
+      collectFields(rules, fields = new Set()) {
+        if (!Array.isArray(rules)) {
+          return fields;
+        }
+        rules.forEach((rule) => {
+          if (!rule || is.String(rule)) {
+            return;
+          }
+          const field = `${rule.field || rule.systemKind || ""}`.toLowerCase();
+          field && fields.add(field);
+          methods.collectFields(rule.children, fields);
+          if (rule.props?.columns) {
+            rule.props.columns.forEach((column) => {
+              methods.collectFields(column.rule, fields);
+            });
+          }
+        });
+        return fields;
+      },
+      mergePublicSystemRulesForOutput(rules) {
+        const next = Array.isArray(rules) ? deepCopy(rules) : [];
+        methods.mergePublicSystemRules(next, data.publicSystemRules);
+        return next;
       },
       setDevice(device) {
         data.device = device;
@@ -1882,6 +2268,15 @@ export default defineComponent({
         const options = methods.getOptionsJson();
         const useV2 = methods.getConfig("useTemplate", false);
         data.preview.option = designerForm.parseJson(options);
+        data.preview.option.preview = false;
+        // Preview actions are owned by the host page after the form redesign.
+        // Keep the configured buttons in exported options, but never render them
+        // inside the designer's PC/mobile preview.
+        data.preview.option.submitBtn = false;
+        data.preview.option.resetBtn = false;
+        // Preview overlays must use the document body. A target rendered inside
+        // this component tree is not guaranteed to exist before Vant mounts.
+        delete data.preview.option.popupContainer;
         if (!data.activePage.default) {
           data.preview.option.formData = deepCopy(methods.getPreviewFormData());
         }
@@ -1910,7 +2305,9 @@ export default defineComponent({
         copyTextToClipboard(this.$refs.previewCode.innerText);
       },
       getPageRule() {
-        return methods.parseRule(deepCopy(data.children));
+        return methods.mergePublicSystemRulesForOutput(
+          methods.parseRule(deepCopy(data.children))
+        );
       },
       getPageJson() {
         return designerForm.toJson(methods.getPageRule());
@@ -1930,7 +2327,7 @@ export default defineComponent({
         } else {
           rule = methods.getPageRule();
         }
-        return rule;
+        return methods.mergePublicSystemRulesForOutput(rule);
       },
       getJson() {
         return designerForm.toJson(methods.getRule());
@@ -2016,9 +2413,14 @@ export default defineComponent({
         if (!rules) {
           rules = [];
         }
+        const parsedRules = is.String(rules)
+          ? designerForm.parseJson(rules)
+          : deepCopy(rules);
+        methods.rememberPublicSystemRules(parsedRules, !partFlag);
+        const visualRules = methods.removePublicSystemRules(parsedRules);
         !partFlag && methods.initPage();
         const loadRule = methods.loadRule(
-          is.String(rules) ? designerForm.parseJson(rules) : deepCopy(rules)
+          visualRules
         );
         const children = [];
         loadRule.forEach((item) => {
@@ -2257,6 +2659,12 @@ export default defineComponent({
           rule._loadData = rule.effect.loadData;
           delete rule.effect.loadData;
         }
+        if (rule.type === "radio" || rule.type === "checkbox") {
+          if (rule.effect) {
+            delete rule.effect.fetch;
+            delete rule.effect.source;
+          }
+        }
         // 去掉空的fetch字段
         if (rule.effect?.fetch === "" || rule.effect?.fetch === undefined) {
           delete rule.effect.fetch;
@@ -2326,6 +2734,12 @@ export default defineComponent({
           } else {
             methods.tidyRule(rule);
           }
+          if (rule.type === "radio" || rule.type === "checkbox") {
+            if (rule.effect) {
+              delete rule.effect.fetch;
+              delete rule.effect.source;
+            }
+          }
           loadRule.push(rule);
         });
         return loadRule;
@@ -2387,6 +2801,12 @@ export default defineComponent({
           if (rule._loadData) {
             rule.$loadData = rule._loadData;
             delete rule._loadData;
+          }
+          if (rule.type === "radio" || rule.type === "checkbox") {
+            if (rule.effect) {
+              delete rule.effect.fetch;
+              delete rule.effect.source;
+            }
           }
           rule.props &&
             Object.keys(rule.props).forEach((k) => {
@@ -2475,6 +2895,9 @@ export default defineComponent({
       },
       isTableFormRule(rule) {
         return methods.isRuleName(rule, ["tableform"]);
+      },
+      isSubFormRule(rule) {
+        return !!rule?._menu?.subForm;
       },
       isTableFormBlockedMenu(menu) {
         if (!menu) {
@@ -2724,6 +3147,12 @@ export default defineComponent({
         methods.handleChange("", field, value, _, fapi);
       },
       formOptChange(field, value) {
+        if (field === "_componentSpan") {
+          methods.applyComponentSpan(value);
+          // This is a one-shot bulk operation, not a persisted form option.
+          data.form.value = { ...data.form.value, [field]: "" };
+          return;
+        }
         data.form.value[field] = value;
         if (field.indexOf(">") === -1) {
           field = "form>" + field;
@@ -2740,6 +3169,28 @@ export default defineComponent({
           }
         });
         source[lastField] = value;
+      },
+      applyComponentSpan(span) {
+        const value = Number(span);
+        if (!value) return;
+
+        data.dragForm.api.all().forEach((rule) => {
+          if (
+            !rule?._menu ||
+            methods.isSubFormRule(rule) ||
+            methods.isInsideTableFormColumn(rule)
+          ) {
+            return;
+          }
+
+          rule.col = { ...(rule.col || {}), span: value };
+        });
+        data.dragForm.api.refresh();
+        if (data.activeRule) {
+          methods.updateRuleFormData();
+        }
+        methods.addOperationRecord();
+        methods.updateTree();
       },
       propRemoveField(field, _, fapi) {
         if (
@@ -2779,7 +3230,39 @@ export default defineComponent({
         }
       },
       propChange(field, value, _, fapi) {
+        const rule = data.activeRule;
+        if (
+          methods.isTableFormRule(rule) &&
+          ["editable", "tableInsert", "tableEdit", "tableDelete"].includes(field) &&
+          rule.props?.[field] === value
+        ) {
+          return;
+        }
         methods.handleChange("props", field, value, _, fapi);
+        methods.syncTableFormPermissions(field, value);
+      },
+      syncTableFormPermissions(field, value) {
+        const rule = data.activeRule;
+        if (!methods.isTableFormRule(rule)) return;
+
+        if (field === "editable") {
+          const enabled = value === true;
+          rule.props.tableInsert = enabled;
+          rule.props.tableEdit = enabled;
+          rule.props.tableDelete = enabled;
+        } else if (["tableInsert", "tableEdit", "tableDelete"].includes(field)) {
+          const childEnabled = value === true;
+          rule.props[field] = childEnabled;
+          const permissions = ["tableInsert", "tableEdit", "tableDelete"];
+          const enabled = permissions.some((permission) =>
+            permission === field
+              ? childEnabled
+              : rule.props[permission] === true
+          );
+          rule.props.editable = enabled;
+        } else {
+          return;
+        }
       },
       computedChange(field, value, _, fapi) {
         methods.handleChange("_computed", field, value, _, fapi);
@@ -2983,6 +3466,12 @@ export default defineComponent({
           ...(hiddenItemConfig?.[rule._menu.name] || []),
           ...(rule._menu.hiddenBaseField || []),
         ]);
+        if (
+          methods.isInsideTableFormColumn(rule) ||
+          methods.isSubFormRule(rule)
+        ) {
+          hiddenField.push("formCreateCol>span");
+        }
         const disabledField = uniqueArray([
           ...(disabledItemConfig?.default || []),
           ...(disabledItemConfig?.[rule._menu.name] || []),
@@ -3002,9 +3491,6 @@ export default defineComponent({
           nextTick(() => {
             data.propsForm.api.disabled(true, disabledField);
           });
-        }
-        if (methods.isInsideTableFormColumn(rule)) {
-          data.baseForm.api.hidden(true, "formCreateCol>span");
         }
         if (!methods.getConfig("showControl", true)) {
           data.baseForm.api.hidden(true, "_control");
@@ -3342,10 +3828,10 @@ export default defineComponent({
       },
       dragMenu({ rule, menu, children, index, slot, update }) {
         if (data.inputForm.state) {
-          return;
+          return null;
         }
         if (menu && menu.only && methods.checkOnly(menu)) {
-          return;
+          return null;
         }
         const loadPage = (loadRule) => {
           const tmp = [];
@@ -3416,7 +3902,7 @@ export default defineComponent({
           methods.getTableFormContextByChildren(children) &&
           methods.isTableFormBlockedRule(firstRule)
         ) {
-          return;
+          return null;
         }
         if (update) {
           methods.mergeRule(firstRule, update);
@@ -3450,7 +3936,7 @@ export default defineComponent({
               methods.triggerActive(firstRule);
             });
           }
-          return;
+          return firstRule;
         }
         if (tableFormContext) {
           const columnWrappers = methods.createTableFormColumns(rules);
@@ -3472,7 +3958,7 @@ export default defineComponent({
               methods.triggerActive(firstRule);
             });
           }
-          return;
+          return firstRule;
         }
         children.splice(index, 0, ...rules);
         if (dragRule && dragRule.formOptions) {
@@ -3492,6 +3978,7 @@ export default defineComponent({
             methods.triggerActive(firstRule);
           });
         }
+        return firstRule;
       },
       mergeRule(rule, update) {
         Object.keys(update).forEach((k) => {
@@ -3664,10 +4151,16 @@ export default defineComponent({
         if (menu.__fc__) {
           if (data.addRule) {
             methods.handleSortBefore();
-            const rule = data.addRule.children.splice(
-              data.addRule.children.indexOf(menu),
-              1
-            )[0];
+            const sourceIndex = data.addRule.children.indexOf(menu);
+            if (sourceIndex < 0) {
+              data.added = false;
+              return;
+            }
+            const rule = data.addRule.children.splice(sourceIndex, 1)[0];
+            if (!rule) {
+              data.added = false;
+              return;
+            }
             if (
               methods.getTableFormContextByChildren(children) &&
               methods.isTableFormBlockedRule(rule)
@@ -3713,15 +4206,20 @@ export default defineComponent({
         // console.log('top dragEnd')
         if (
           !data.added &&
-          !(data.moveRule === children && newIndex === oldIndex)
+          !(data.moveRule === children && newIndex === oldIndex) &&
+          Array.isArray(data.moveRule) &&
+          oldIndex >= 0 &&
+          oldIndex < data.moveRule.length
         ) {
           methods.handleSortBefore();
-          const rule = data.moveRule.splice(oldIndex, 1);
-          if (slot) {
-            rule[0].slot = slot;
+          const rule = data.moveRule.splice(oldIndex, 1)[0];
+          if (rule) {
+            if (slot) {
+              rule.slot = slot;
+            }
+            children.splice(newIndex, 0, rule);
+            methods.handleSortAfter({ rule });
           }
-          children.splice(newIndex, 0, rule[0]);
-          methods.handleSortAfter({ rule: rule[0] });
         }
         data.moveRule = null;
         data.addRule = null;
@@ -3790,7 +4288,9 @@ export default defineComponent({
         }
         methods.tidyRule(rule);
         rule.display = true;
-        rule.hidden = false;
+        if (rule.hidden === undefined) {
+          rule.hidden = false;
+        }
         rule._fc_drag_tag = config.name;
         if (config.container) {
           rule._fc_page_tag = config.name;
@@ -3921,6 +4421,21 @@ export default defineComponent({
         if (config.tool === false) {
           return rule;
         }
+        // Layout-only helpers such as tableFormColumn must not get their own
+        // DragTool. The actual field inside the column owns the toolbar.
+        if (config.drag === false) {
+          if (config.name === "tableFormColumn") {
+            rule.children.forEach((child) => {
+              if (child?.type === "DragTool") {
+                child.props = {
+                  ...(child.props || {}),
+                  tableFormColumnChild: true,
+                };
+              }
+            });
+          }
+          return rule;
+        }
         if (!config.inside && methods.isInsideTableFormColumn(rule)) {
           return rule;
         }
@@ -3936,6 +4451,8 @@ export default defineComponent({
           hidden: rule._hidden === true || rule._display === false,
           handleBtn: config.handleBtn,
           only,
+          subForm: !!config.subForm,
+          tableFormColumnChild: !!rule.tableFormColumnChild,
         };
         if (config.inside) {
           rule.children = methods.makeChildren([
@@ -4365,6 +4882,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       ...methods,
+      fieldIcons,
       fieldRef,
       formListRef,
       dragHeight,
@@ -4399,15 +4917,17 @@ export default defineComponent({
     };
   },
   mounted() {
-    if (this.theme) {
-      document.body.classList.add("fd-theme-" + this.theme);
-    }
+    // Legacy fd-theme-* classes hard-code colors and must not override the
+    // application's runtime theme variables. Clear any class left by an older
+    // designer instance before rendering.
+    document.body.classList.remove("fd-theme-purple", "fd-theme-orange", "fd-theme-pink", "fd-theme-green");
     if (this.config?.hotKey !== false) {
       document.addEventListener("keydown", this.bindHotkey);
       document.addEventListener("paste", this.bindPaste);
     }
   },
   unmounted() {
+    document.body.classList.remove("fd-theme-purple", "fd-theme-orange", "fd-theme-pink", "fd-theme-green");
     document.removeEventListener("keydown", this.bindHotkey);
     document.removeEventListener("paste", this.bindPaste);
   },

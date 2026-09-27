@@ -2,4 +2,6 @@ export * from "./odataQueryRequest";
 export * from "./batchDeleteRequest";
 export * from "./loginRequest";
 export * from "./aggCalcRequest";
-export * from "./printRequest"
+export * from "./printRequest";
+export * from "./sendRegCodeRequest";
+export * from "./registerRequest";

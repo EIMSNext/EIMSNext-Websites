@@ -1,6 +1,6 @@
 <template>
   <div class="icon-picker" style="width: 315px">
-    <div class="color-bar" aria-label="颜色">
+    <div class="color-bar" :aria-label="$t('comp.appIconSelect.color')">
       <span v-for="c in colorOptions" :key="c.value" class="color-chip" :aria-pressed="selectedColor === c.value"
         :style="{ backgroundColor: c.value }" @click="selectColor(c.value)" />
     </div>
@@ -104,8 +104,8 @@ onMounted(() => {
   }
 
   .color-chip[aria-pressed="true"] {
-    outline: 1px solid rgb(64 128 255 / 55%);
-    box-shadow: 0 0 0 2px rgb(64 128 255 / 16%);
+    outline: 1px solid color-mix(in srgb, var(--et-color-primary) 55%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--et-color-primary) 16%, transparent);
   }
 }
 

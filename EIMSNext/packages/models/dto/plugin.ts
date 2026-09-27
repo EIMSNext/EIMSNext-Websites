@@ -5,8 +5,10 @@ export interface PluginFieldDesc {
   required: boolean;
   allowCustomValue: boolean;
   allowFieldMapping: boolean;
+  multiple: boolean;
   description?: string;
   compatibleFieldTypes: string[];
+  subFields?: PluginFieldDesc[];
 }
 
 export interface FunctionDesc {
@@ -14,6 +16,16 @@ export interface FunctionDesc {
   name: string;
   description?: string;
   inputFields: PluginFieldDesc[];
+  resultFields: PluginResultFieldDesc[];
+}
+
+export interface PluginResultFieldDesc {
+  key: string;
+  name: string;
+  fieldType: string;
+  multiple: boolean;
+  description?: string;
+  subFields?: PluginResultFieldDesc[];
 }
 
 export interface PluginRuntimeInfo {

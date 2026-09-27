@@ -2,7 +2,7 @@
   <div class="icon-picker" style="width: 315px">
     <!-- <el-tabs v-model="activeTab" @tab-click="handleTabClick">
             <el-tab-pane label="系统图标" name="svg"> -->
-    <div class="color-bar" aria-label="颜色">
+    <div class="color-bar" :aria-label="$t('comp.appIconSelect.color')">
       <span
         v-for="c in colorOptions"
         :key="c.value"
@@ -30,7 +30,7 @@
               justify-content: center;
             "
           >
-            <et-icon :icon="icon" color="#ffffff" size="28px" />
+            <et-icon :icon="icon" color="var(--el-color-white, #fff)" size="28px" />
           </span>
         </div>
       </div>

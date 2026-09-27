@@ -1,44 +1,44 @@
 <template>
   <div class="flow-designer">
-    <el-dialog v-model="showPageSetupDialog" title="打印模板设置" width="560px">
+    <el-dialog v-model="showPageSetupDialog" :title="t('admin.printDesigner.settings')" width="560px">
       <el-form label-width="88px">
-        <el-form-item label="纸张大小">
+        <el-form-item :label="t('admin.printDesigner.paperSize')">
           <el-select v-model="pageSettingsDraft.paperSize" class="w-full">
             <el-option v-for="option in paperSizeOptions" :key="option.value" :label="option.label" :value="option.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="纸张方向">
+        <el-form-item :label="t('admin.printDesigner.paperOrientation')">
           <el-radio-group v-model="pageSettingsDraft.orientation">
-            <el-radio-button label="portrait">竖向</el-radio-button>
-            <el-radio-button label="landscape">横向</el-radio-button>
+            <el-radio-button label="portrait">{{ t("admin.printDesigner.portrait") }}</el-radio-button>
+            <el-radio-button label="landscape">{{ t("admin.printDesigner.landscape") }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="页边距">
+        <el-form-item :label="t('admin.printDesigner.pageMargin')">
           <div class="page-margin-grid">
             <div class="page-margin-item">
-              <span class="page-margin-label">上</span>
+              <span class="page-margin-label">{{ t("admin.printDesigner.marginTop") }}</span>
               <el-input-number v-model="pageSettingsDraft.margins.top" :min="0" :step="1" :precision="0" controls-position="right" />
             </div>
             <div class="page-margin-item">
-              <span class="page-margin-label">右</span>
+              <span class="page-margin-label">{{ t("admin.printDesigner.marginRight") }}</span>
               <el-input-number v-model="pageSettingsDraft.margins.right" :min="0" :step="1" :precision="0" controls-position="right" />
             </div>
             <div class="page-margin-item">
-              <span class="page-margin-label">下</span>
+              <span class="page-margin-label">{{ t("admin.printDesigner.marginBottom") }}</span>
               <el-input-number v-model="pageSettingsDraft.margins.bottom" :min="0" :step="1" :precision="0" controls-position="right" />
             </div>
             <div class="page-margin-item">
-              <span class="page-margin-label">左</span>
+              <span class="page-margin-label">{{ t("admin.printDesigner.marginLeft") }}</span>
               <el-input-number v-model="pageSettingsDraft.margins.left" :min="0" :step="1" :precision="0" controls-position="right" />
             </div>
           </div>
-          <span class="page-margin-unit">单位：mm</span>
+          <span class="page-margin-unit">{{ t("admin.printDesigner.marginUnit") }}</span>
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="showPageSetupDialog = false">取消</el-button>
-          <el-button type="primary" @click="applyPageSettings">确定</el-button>
+          <el-button @click="showPageSetupDialog = false">{{ t("common.cancel") }}</el-button>
+          <el-button type="primary" @click="applyPageSettings">{{ t("common.ok") }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -52,14 +52,14 @@
         <span class="page-setup-summary">{{ pageSetupSummary }}</span>
       </div>
       <div class="right">
-        <el-button @click="openPageSetupDialog">打印模板设置</el-button>
-        <el-button :loading="previewing" :disabled="!designerReady" @click="preview">预览</el-button>
-        <el-button :loading="saving" :disabled="!designerReady" @click="save">保存</el-button>
+        <el-button @click="openPageSetupDialog">{{ t("admin.printDesigner.settings") }}</el-button>
+        <el-button :loading="previewing" :disabled="!designerReady" @click="preview">{{ t("admin.printDesigner.preview") }}</el-button>
+        <el-button :loading="saving" :disabled="!designerReady" @click="save">{{ t("common.save") }}</el-button>
       </div>
     </div>
     <div class="print-design-container" v-loading="loading">
       <el-tabs v-model="activeTab" class="field-container">
-        <el-tab-pane label="表单字段" name="form" class="field-panel">
+        <el-tab-pane :label="t('admin.printDesigner.formFields')" name="form" class="field-panel">
           <el-tree
             ref="formFieldsTreeRef"
             class="mt-2"
@@ -80,7 +80,11 @@
                 <template #item="{ element }">
                   <div class="node-data" :title="data.label">
                     <div class="node-wrapper">
-                      <et-icon size="16px" icon="el-copyDocument" class="node-icon"></et-icon>
+                      <et-icon
+                        size="16px"
+                        :icon="fieldIcons[data.data?.type] || 'fc-icon-input'"
+                        class="node-icon"
+                      ></et-icon>
                       <span class="node-label">{{ data.label }}</span>
                     </div>
                   </div>
@@ -89,13 +93,56 @@
             </template>
           </el-tree>
         </el-tab-pane>
-        <el-tab-pane label="系统字段" name="system" class="field-panel">
-          <div>system</div>
+        <el-tab-pane :label="t('admin.printDesigner.systemFields')" name="system" class="field-panel">
+          <el-tree
+            ref="systemFieldsTreeRef"
+            class="mt-2"
+            :data="systemFieldNodes"
+            item-key="id"
+            :props="{ children: 'children', label: 'label', disabled: '' }"
+            :expand-on-click-node="false"
+            default-expand-all
+          >
+            <template #default="{ data }">
+              <Draggable
+                v-if="data.value !== 'approvallogs'"
+                :list="[data]"
+                :sort="false"
+                ghost-class="ghost"
+                @start="onStart"
+                :group="{ name: 'fields', pull: 'clone', put: false }"
+                item-key="id"
+              >
+                <template #item="{ element }">
+                  <div class="node-data" :title="data.label">
+                    <div class="node-wrapper">
+                      <et-icon
+                        size="16px"
+                        :icon="fieldIcons[data.data?.type] || 'fc-icon-input'"
+                        class="node-icon"
+                      ></et-icon>
+                      <span class="node-label">{{ data.label }}</span>
+                    </div>
+                  </div>
+                </template>
+              </Draggable>
+              <div v-else class="node-data" :title="data.label">
+                <div class="node-wrapper">
+                  <et-icon
+                    size="16px"
+                    :icon="fieldIcons[data.data?.type] || 'fc-icon-input'"
+                    class="node-icon"
+                  ></et-icon>
+                  <span class="node-label">{{ data.label }}</span>
+                </div>
+              </div>
+            </template>
+          </el-tree>
         </el-tab-pane>
       </el-tabs>
       <div class="designer-stage">
         <el-alert v-if="loadError" type="error" :closable="false" show-icon>
-          <template #title>打印设计器加载失败</template>
+          <template #title>{{ t("admin.printDesigner.designerLoadFailed") }}</template>
           {{ loadError }}
         </el-alert>
         <div ref="container" class="univer-container"></div>
@@ -106,13 +153,16 @@
 
 <script setup lang="ts">
 import { useFormStore } from "@eimsnext/store";
-import { FieldDef, FieldType, FormDef, PrintTemplate, PrintTemplateRequest } from "@eimsnext/models";
-import { DataItemType, ITreeNode } from "@eimsnext/components";
+import { FieldDef, FieldType, FormDef, PrintDef, PrintDefRequest } from "@eimsnext/models";
+import { DataItemType, fieldIcons, ITreeNode } from "@eimsnext/components";
 import { EimsPrintAreaPlugin, type PrintOrientation } from "@eimsnext/print-plugins";
 import Draggable from "vuedraggable";
-import { customPrintService, PrintPreviewRequest, printTemplateService } from "@eimsnext/services";
+import { customPrintService, PrintPreviewRequest, printDefService } from "@eimsnext/services";
 import { IPrintMetadata } from "./type";
 import PdfPreview from "./PdfPreview.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "PdfPrintDesigner",
@@ -335,14 +385,15 @@ const applyPageSetupToWorkbookData = (workbookData: Record<string, unknown>, set
 
 const props = defineProps<{
   formDef: FormDef;
-  printDef: PrintTemplate;
+  printDef: PrintDef;
 }>();
 
-const currentPrintDef = ref<PrintTemplate>(props.printDef);
+const currentPrintDef = ref<PrintDef>(props.printDef);
 
 const activeTab = ref("form");
 const formStore = useFormStore();
 const formFieldNodes = ref<ITreeNode[]>([]);
+const systemFieldNodes = ref<ITreeNode[]>([]);
 const draggingNode = ref<ITreeNode>();
 const container = ref<HTMLElement | null>(null);
 const showPageSetupDialog = ref(false);
@@ -358,7 +409,16 @@ const pageSettingsDraft = reactive<PrintPageSettings>(createDefaultPageSettings(
 const designerReady = computed(() => !loading.value && !loadError.value && !!workbookApi);
 const pageSetupSummary = computed(() => {
   const margins = pageSettings.value.margins;
-  return `纸张：${pageSettings.value.paperSize} ${pageSettings.value.orientation === "landscape" ? "横向" : "竖向"} | 页边距 ${margins.top}/${margins.right}/${margins.bottom}/${margins.left} mm`;
+  return t("admin.printDesigner.pageSummary", {
+    paper: pageSettings.value.paperSize,
+    orientation: pageSettings.value.orientation === "landscape"
+      ? t("admin.printDesigner.landscape")
+      : t("admin.printDesigner.portrait"),
+    top: margins.top,
+    right: margins.right,
+    bottom: margins.bottom,
+    left: margins.left,
+  });
 });
 
 let univerObj: InstanceType<UniverModule["Univer"]> | undefined;
@@ -451,8 +511,8 @@ const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: 
   runtimeApi.registerComponent(PAGE_SETUP_MENU_ICON_ID, createPageSetupMenuIcon(modules.react));
   runtimeApi.createMenu({
     id: PAGE_SETUP_MENU_ID,
-    title: "页面设置",
-    tooltip: "页面设置",
+    title: t("admin.printDesigner.pageSetupMenu"),
+    tooltip: t("admin.printDesigner.pageSetupMenu"),
     icon: PAGE_SETUP_MENU_ICON_ID,
     order: 1000,
     action: openPageSetupDialog,
@@ -481,7 +541,7 @@ const parseTemplateContent = () => {
 
   const parsed = JSON.parse(currentPrintDef.value.content);
   if (!isRecord(parsed)) {
-    throw new Error("打印模板数据格式无效");
+    throw new Error(t("admin.printDesigner.invalidTemplate"));
   }
 
   const workbookData = { ...parsed };
@@ -502,7 +562,7 @@ const serializeTemplateContent = () => applyPageSetupToWorkbookData({
 
 const ensureWorkbookApi = () => {
   if (!workbookApi) {
-    throw new Error("打印设计器尚未完成初始化");
+    throw new Error(t("admin.printDesigner.designerNotReady"));
   }
 
   return workbookApi;
@@ -510,12 +570,14 @@ const ensureWorkbookApi = () => {
 
 const populateFields = () => {
   formFieldNodes.value = [];
+  systemFieldNodes.value = buildSystemFieldNodes();
 
   if (props.formDef.content && props.formDef.content.items) {
     props.formDef.content.items.forEach((x: FieldDef) => {
+      const fieldId = x.field.toLowerCase();
       const node: ITreeNode = {
-        id: x.field,
-        value: x.field,
+        id: fieldId,
+        value: fieldId,
         label: x.title,
         fullLabel: x.title,
         type: DataItemType.Field,
@@ -525,9 +587,10 @@ const populateFields = () => {
       if (x.columns && x.columns.length > 0) {
         node.children = [];
         x.columns.forEach((y) => {
+          const subFieldId = y.field.toLowerCase();
           const subNode: ITreeNode = {
-            id: `${node.id}-${y.field}`,
-            value: `${node.id}>${y.field}`,
+            id: `${node.id}-${subFieldId}`,
+            value: `${node.id}>${subFieldId}`,
             label: y.title,
             fullLabel: `${node.label}.${y.title}`,
             type: DataItemType.Field,
@@ -543,11 +606,92 @@ const populateFields = () => {
   }
 };
 
+function buildSystemFieldNodes(): ITreeNode[] {
+  const fields: Array<{
+    id: string;
+    labelKey: string;
+    type: FieldType;
+    dataType?: "qrcode";
+  }> = [
+    { id: "createby", labelKey: "submitter", type: FieldType.Employee1 },
+    { id: "createtime", labelKey: "submittedAt", type: FieldType.TimeStamp },
+    { id: "updatetime", labelKey: "updatedAt", type: FieldType.TimeStamp },
+    { id: "ext", labelKey: "extensionField", type: FieldType.Input },
+    { id: "flowstatus", labelKey: "flowStatus", type: FieldType.Input },
+    { id: "internalqrcode", labelKey: "internalQrCode", type: FieldType.Input, dataType: "qrcode" },
+    { id: "externalqrcode", labelKey: "externalQrCode", type: FieldType.Input, dataType: "qrcode" },
+    { id: "printedby", labelKey: "printOperator", type: FieldType.Employee1 },
+    { id: "printedtime", labelKey: "printTime", type: FieldType.TimeStamp },
+  ];
+
+  const nodes: ITreeNode[] = fields.map((field) => ({
+    id: field.id,
+    value: field.id,
+    label: t(`admin.printDesigner.${field.labelKey}`),
+    fullLabel: t(`admin.printDesigner.${field.labelKey}`),
+    type: DataItemType.Field,
+    data: { type: field.type, printDataType: field.dataType || "field" },
+  }));
+
+  if (!props.formDef.usingWorkflow) {
+    return nodes;
+  }
+
+  nodes.splice(5, 0,
+    {
+      id: "currentnode",
+      value: "currentnode",
+      label: t("admin.printDesigner.currentNode"),
+      fullLabel: t("admin.printDesigner.currentNode"),
+      type: DataItemType.Field,
+      data: { type: FieldType.Input, printDataType: "field" },
+    },
+    {
+      id: "currentowner",
+      value: "currentowner",
+      label: t("admin.printDesigner.currentOwner"),
+      fullLabel: t("admin.printDesigner.currentOwner"),
+      type: DataItemType.Field,
+      data: { type: FieldType.Employee1, printDataType: "field" },
+    },
+  );
+
+  const approvalFields = [
+    { id: "sequence", labelKey: "approvalSequence", type: FieldType.Number },
+    { id: "approvaltime", labelKey: "approvalTime", type: FieldType.TimeStamp },
+    { id: "nodename", labelKey: "approvalNodeName", type: FieldType.Input },
+    { id: "approver", labelKey: "approvalApprover", type: FieldType.Employee1 },
+    { id: "comment", labelKey: "approvalContent", type: FieldType.TextArea },
+    { id: "result", labelKey: "approvalResult", type: FieldType.Input },
+  ];
+  const approvalLabel = t("admin.printDesigner.approvalInfo");
+  nodes.push({
+    id: "approvallogs",
+    value: "approvallogs",
+    label: approvalLabel,
+    fullLabel: approvalLabel,
+    type: DataItemType.Field,
+    data: { type: FieldType.TableForm, printDataType: "field" },
+    children: approvalFields.map((field) => ({
+      id: `approvallogs-${field.id}`,
+      value: `approvallogs>${field.id}`,
+      label: t(`admin.printDesigner.${field.labelKey}`),
+      fullLabel: `${approvalLabel}.${t(`admin.printDesigner.${field.labelKey}`)}`,
+      type: DataItemType.Field,
+      data: { type: field.type, printDataType: "field" },
+    })),
+  });
+
+  return nodes;
+}
+
 const loadUniverModules = async () => {
   if (loadedModules) {
     return loadedModules;
   }
 
+  console.log("[PdfPrintDesigner] loadUniverModules: starting first batch (9 facade imports)");
+  const t1 = Date.now();
   await Promise.all([
     import("@univerjs/core/facade"),
     import("@univerjs/ui/facade"),
@@ -557,7 +701,10 @@ const loadUniverModules = async () => {
     import("@univerjs/sheets-formula/facade"),
     import("@univerjs/sheets-numfmt/facade"),
   ]);
+  console.log(`[PdfPrintDesigner] loadUniverModules: first batch done in ${Date.now() - t1}ms`);
 
+  console.log("[PdfPrintDesigner] loadUniverModules: starting second batch (24 imports)");
+  const t2 = Date.now();
   const [
     core,
     react,
@@ -621,6 +768,7 @@ const loadUniverModules = async () => {
     import("@univerjs/core/facade"),
     import("@univerjs/sheets/facade"),
   ]);
+  console.log(`[PdfPrintDesigner] loadUniverModules: second batch done in ${Date.now() - t2}ms`);
 
   loadedModules = {
     core,
@@ -660,10 +808,12 @@ const loadUniverModules = async () => {
 
 const initSheet = async (data: Record<string, unknown>) => {
   if (!container.value) {
-    throw new Error("未找到打印设计器容器");
+    throw new Error(t("admin.printDesigner.containerMissing"));
   }
 
+  console.log("[PdfPrintDesigner] initSheet: loading Univer modules...");
   const modules = await loadUniverModules();
+  console.log("[PdfPrintDesigner] initSheet: creating Univer instance...");
   const { LocaleType, merge, Univer } = modules.core;
 
   const univer = new Univer({
@@ -685,6 +835,7 @@ const initSheet = async (data: Record<string, unknown>) => {
     },
   });
 
+  console.log("[PdfPrintDesigner] initSheet: registering Univer plugins...");
   univer.registerPlugin(modules.render.UniverRenderEnginePlugin);
   univer.registerPlugin(modules.engineFormula.UniverFormulaEnginePlugin);
   univer.registerPlugin(modules.ui.UniverUIPlugin, {
@@ -723,11 +874,11 @@ const initSheet = async (data: Record<string, unknown>) => {
       : DEFAULT_SHEET_ID;
 
   if (!renderManagerService) {
-    throw new Error("Univer 渲染服务未初始化，无法加载打印区域插件");
+    throw new Error(t("admin.printDesigner.renderServiceMissing"));
   }
 
   if (!runtimeUnitId) {
-    throw new Error("Univer 工作簿缺少 unitId，无法加载打印区域插件");
+    throw new Error(t("admin.printDesigner.unitIdMissing"));
   }
 
   univerObj = univer;
@@ -741,12 +892,14 @@ const initSheet = async (data: Record<string, unknown>) => {
     getPageSettings: () => pageSettings.value,
   }, renderManagerService);
   printAreaPlugin.onRendered();
+  console.log("[PdfPrintDesigner] initSheet: scheduling requestAnimationFrame...");
   requestAnimationFrame(() => {
+    console.log("[PdfPrintDesigner] requestAnimationFrame: fired, refreshing print area");
     printAreaPlugin?.refresh();
   });
 
   if (!runtimeApi.Event?.DragOver || !runtimeApi.Event?.Drop) {
-    throw new Error("Univer 0.21 运行时事件接口发生变化，请检查 facade Event 定义");
+    throw new Error(t("admin.printDesigner.eventApiChanged"));
   }
 
   runtimeApi.addEvent(runtimeApi.Event.DragOver, (params: any) => {
@@ -770,12 +923,12 @@ const initSheet = async (data: Record<string, unknown>) => {
     if (cell) {
       cell.setValue(`\${${draggingNode.value.fullLabel}}`);
       const printMetadata: IPrintMetadata = {
-        dataType: "field",
+        dataType: draggingNode.value.data?.printDataType || "field",
         id: draggingNode.value.value!,
       };
 
       if (typeof (cell as any).setCustomMetaData !== "function") {
-        throw new Error("Univer 0.21 运行时未提供 setCustomMetaData，打印字段元数据写入失败");
+        throw new Error(t("admin.printDesigner.metadataApiMissing"));
       }
 
       (cell as any).setCustomMetaData(printMetadata);
@@ -785,9 +938,11 @@ const initSheet = async (data: Record<string, unknown>) => {
   });
 
   printAreaPlugin?.refresh();
+  console.log("[PdfPrintDesigner] initSheet: complete");
 };
 
 const initializeDesigner = async () => {
+  console.log("[PdfPrintDesigner] initializeDesigner: start, disposed=", disposed);
   loading.value = true;
   loadError.value = "";
 
@@ -795,16 +950,22 @@ const initializeDesigner = async () => {
     const data = parseTemplateContent();
     await nextTick();
     if (disposed) {
+      console.log("[PdfPrintDesigner] initializeDesigner: already disposed, early return");
       return;
     }
 
     disposeDesigner();
+    console.log("[PdfPrintDesigner] initializeDesigner: calling initSheet...");
+    const t = Date.now();
     await initSheet(data as Record<string, unknown>);
+    console.log(`[PdfPrintDesigner] initializeDesigner: initSheet completed in ${Date.now() - t}ms`);
   } catch (error) {
+    console.error("[PdfPrintDesigner] initializeDesigner: caught error", error);
     disposeDesigner();
-    loadError.value = error instanceof Error ? error.message : "打印设计器初始化失败";
+    loadError.value = error instanceof Error ? error.message : t("admin.printDesigner.initFailed");
     console.error("[PdfPrintDesigner] init failed", error);
   } finally {
+    console.log("[PdfPrintDesigner] initializeDesigner: end, loading=false");
     loading.value = false;
   }
 };
@@ -820,14 +981,14 @@ const preview = async () => {
     const printResult = await customPrintService.preview(req);
     if (printResult?.downloadUrl) {
       previewPdfUrl.value = printResult.downloadUrl;
-      previewPdfTitle.value = currentPrintDef.value.name || "打印预览";
+      previewPdfTitle.value = currentPrintDef.value.name || t("admin.printDesigner.previewTitle");
       showPrintPreview.value = true;
       return;
     }
 
-    ElMessage.error(printResult?.message || "打印失败");
+    ElMessage.error(printResult?.message || t("admin.printDesigner.previewFailed"));
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : "打印失败");
+    ElMessage.error(error instanceof Error ? error.message : t("admin.printDesigner.previewFailed"));
   } finally {
     previewing.value = false;
   }
@@ -836,7 +997,7 @@ const preview = async () => {
 const save = async () => {
   try {
     saving.value = true;
-    const req: PrintTemplateRequest = {
+    const req: PrintDefRequest = {
       id: currentPrintDef.value.id,
       name: currentPrintDef.value.name,
       appId: currentPrintDef.value.appId,
@@ -846,10 +1007,10 @@ const save = async () => {
     };
 
     currentPrintDef.value = req.id
-      ? await printTemplateService.put<PrintTemplate>(req.id, req)
-      : await printTemplateService.post<PrintTemplate>(req);
+      ? await printDefService.put<PrintDef>(req.id, req)
+      : await printDefService.post<PrintDef>(req);
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : "保存失败");
+    ElMessage.error(error instanceof Error ? error.message : t("common.saveFailed"));
   } finally {
     saving.value = false;
   }
@@ -868,7 +1029,8 @@ const onStart = (e: any) => {
 
 watch(
   () => props.printDef,
-  async (value) => {
+  async (value, oldValue) => {
+    console.log("[PdfPrintDesigner] watch printDef: changed", oldValue?.id, "->", value?.id);
     currentPrintDef.value = value;
 
     if (container.value) {
@@ -878,11 +1040,13 @@ watch(
 );
 
 onMounted(async () => {
+  console.log("[PdfPrintDesigner] onMounted: component mounted");
   populateFields();
   await initializeDesigner();
 });
 
 onBeforeUnmount(() => {
+  console.log("[PdfPrintDesigner] onBeforeUnmount: component about to unmount, disposed=", disposed);
   disposed = true;
   disposeDesigner();
 });

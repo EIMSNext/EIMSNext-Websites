@@ -1,6 +1,7 @@
 <template>
   <el-drawer
     :model-value="modelValue"
+    class="et-drawer"
     :append-to-body="appendToBody"
     direction="btt"
     :with-header="false"
@@ -112,7 +113,6 @@ async function close() {
     z-index: var(--et-z-base);
   }
 }
-
 .main-content {
   bottom: 0;
   left: 0;

@@ -4,40 +4,46 @@
     :modelValue="showFormEditor"
     :formDef="newForm!"
     :usingFlow="usingWorkflow"
-    :isLedger="isLedger"
     @close="showFormEditor = false"
   />
+  <DashboardDesigner
+    v-if="showDashboardEditor && newDashboard"
+    :model-value="showDashboardEditor"
+    :dash-def="newDashboard"
+    @update:model-value="handleDashboardEditorVisible"
+  />
   <Layout>
-    <div class="empty-app">
+    <div v-if="showEmptyPage" class="empty-app">
       <div class="empty-content">
         <div class="empty-tips">
-          <div class="empty-title">创建以下对象，开始构建应用</div>
-          <!-- <el-link target="_blank">了解表单和仪表盘</el-link> -->
+          <div class="empty-title">{{ $t("admin.appPage.createPlaceholder") }}</div>
+          <!-- <el-link target="_blank">{{ $t("admin.myApp") }}</el-link> -->
         </div>
-        <div class="creator-container">
-          <div class="creator-item" @click="createForm(false, false)">
+        <div v-if="canManageCurrentApp" class="creator-container">
+          <div class="creator-item" @click="createForm(false)">
             <div class="tip-icon generic">
-              <div class="create-icon generic"></div>
-              <div class="tip-title">新建普通表单</div>
+              <et-icon class="create-icon" icon="icon-formdefault" size="72px" />
+              <div class="tip-title">{{ $t("admin.appPage.newForm") }}</div>
             </div>
-            <div class="tip-desc">适用于数据上报、问卷调研等业务。</div>
+            <div class="tip-desc">{{ $t("admin.appPage.newFormDesc") }}</div>
           </div>
 
-          <div class="creator-item" @click="createForm(true, false)">
+          <div class="creator-item" @click="createForm(true)">
             <div class="tip-icon flow">
-              <div class="create-icon flow"></div>
-              <div class="tip-title">新建流程表单</div>
+              <et-icon class="create-icon" icon="icon-flowdefault" size="72px" />
+              <div class="tip-title">{{ $t("admin.appPage.newFlowForm") }}</div>
             </div>
-            <div class="tip-desc">适用于有特定流程，需要不同成员分步骤填写数据的业务。</div>
+            <div class="tip-desc">{{ $t("admin.appPage.newFlowFormDesc") }}</div>
           </div>
-          <div class="creator-item" @click="createForm(false, true)">
-            <div class="tip-icon generic">
-              <div class="create-icon generic"></div>
-              <div class="tip-title">新建数据台账</div>
+          <div class="creator-item" @click="createDashboard">
+            <div class="tip-icon dashboard">
+              <et-icon class="create-icon" icon="icon-dshdefault" size="72px" />
+              <div class="tip-title">{{ $t("admin.newDashboard") }}</div>
             </div>
-            <div class="tip-desc">用于财务台账，库存台账等持续使用业务</div>
+            <div class="tip-desc">{{ $t("admin.appPage.newDashboardDesc") }}</div>
           </div>
         </div>
+        <el-empty v-else :description="$t('common.noPermission')" />
       </div>
     </div>
   </Layout>
@@ -45,11 +51,21 @@
 <script lang="ts" setup>
 import Layout from "@/layout/index.vue";
 import { useRoute, useRouter } from "vue-router";
-import { useAppStore, useFormStore, useContextStore } from "@eimsnext/store";
+import { useAppStore, useFormStore, useContextStore, useUserStore } from "@eimsnext/store";
 import FormEdit from "@/components/FormEdit/index.vue";
-import { App, FormDef, FormDefRequest, FormType } from "@eimsnext/models";
-import { formDefService } from "@eimsnext/services";
+import DashboardDesigner from "@/components/DashboardDesigner/index.vue";
+import {
+  AppDef,
+  DashboardDef,
+  DashboardDefRequest,
+  FormDef,
+  FormDefRequest,
+  UserType,
+} from "@eimsnext/models";
+import { dashboardDefService, formDefService, systemService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
+import { useAdminPermissions } from "@/composables/useAdminPermissions";
+import { resolveAppEntryPath } from "@/utils/appEntry";
 const { t } = useI18n();
 
 const newForm = ref<FormDef>();
@@ -57,26 +73,68 @@ const router = useRouter();
 const appStore = useAppStore();
 const formStore = useFormStore();
 const contextStore = useContextStore();
+const userStore = useUserStore();
 const route = useRoute();
-let appId = route.params.appId.toString();
+const appId = computed(() => String(route.params.appId || ""));
 const showFormEditor = ref(false);
 const usingWorkflow = ref(false);
-const isLedger = ref(false);
+const newDashboard = ref<DashboardDef>();
+const showDashboardEditor = ref(false);
+const { loadAdminPermissions, canManageAppId } = useAdminPermissions();
+const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
 
-const app = ref<App>();
+const app = ref<AppDef>();
+let appLoadSequence = 0;
+const showEmptyPage = ref(false);
 
-onBeforeMount(async () => {
-  await contextStore.setAppId(appId);
-  appStore.get(contextStore.appId).then((res) => (app.value = res));
-  if (formStore.items.length > 0) {
-    const path = `/app/${appId}/form/${formStore.items[0].id}`;
-    router.push(path);
+const loadAppEntry = async () => {
+  const sequence = ++appLoadSequence;
+  const targetAppId = appId.value;
+  if (!targetAppId) return;
+
+  showEmptyPage.value = false;
+  await contextStore.setAppId(targetAppId);
+  await loadAdminPermissions();
+  const resolvedApp = await appStore.get(targetAppId, false);
+  if (sequence !== appLoadSequence || targetAppId !== appId.value) return;
+
+  app.value = resolvedApp;
+  if (resolvedApp) {
+    const visibleMenuIds = await getVisibleMenuIds(targetAppId);
+    if (sequence !== appLoadSequence || targetAppId !== appId.value) return;
+
+    const path = resolveAppEntryPath(resolvedApp, visibleMenuIds);
+    if (path !== route.fullPath) {
+      await router.replace(path);
+      return;
+    }
+
+    // 决议后仍停留本页：该应用确实没有可用入口，显示空应用占位
+    showEmptyPage.value = true;
   }
-});
+};
 
-const createForm = (usingFlow: boolean, ledger: boolean) => {
+watch(appId, () => void loadAppEntry(), { immediate: true });
+
+async function getVisibleMenuIds(appId: string) {
+  const unrestrictedUserTypes = [
+    UserType.System,
+    UserType.Client,
+    UserType.CorpOwmer,
+    UserType.CorpAdmin,
+  ];
+  if (unrestrictedUserTypes.includes(userStore.currentUser.userType)) {
+    return undefined;
+  }
+
+  const perms = await systemService.getAppMenuPerms(appId);
+  return perms.map((item: { id: string }) => item.id);
+}
+
+const createForm = (usingFlow: boolean) => {
+  if (!canManageCurrentApp.value) return;
+
   usingWorkflow.value = usingFlow;
-  isLedger.value = ledger;
 
   //直接创建，防止工作流/数据流等设置报错
   let req: FormDefRequest = {
@@ -85,11 +143,9 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
     name: t("admin.untitledForm"),
     content: {
       layout: "[]",
-      options:
-        '{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":false,"innerText":"提交"}}',
+      options: `{"info":{"align":"left"},"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"top","size":"default","labelWidth":"auto"},"resetBtn":{"show":false,"innerText":"${t("common.reset")}"},"submitBtn":{"show":false,"innerText":"${t("common.submit")}"}}`,
     },
     usingWorkflow: usingFlow,
-    isLedger: ledger,
   };
 
   formDefService.post<FormDef>(req).then((resp) => {
@@ -99,6 +155,30 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
 
     showFormEditor.value = true;
   });
+};
+
+const createDashboard = () => {
+  if (!canManageCurrentApp.value) return;
+
+  const req: DashboardDefRequest = {
+    id: "",
+    appId: contextStore.appId,
+    name: t("admin.untitledDashboard"),
+    layout: "[]",
+  };
+
+  dashboardDefService.post<DashboardDef>(req).then((resp) => {
+    newDashboard.value = resp;
+    contextStore.setAppChanged();
+    showDashboardEditor.value = true;
+  });
+};
+
+const handleDashboardEditorVisible = (visible: boolean) => {
+  showDashboardEditor.value = visible;
+  if (!visible && newDashboard.value) {
+    void router.replace(`/app/${contextStore.appId}/dash/${newDashboard.value.id}`);
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -130,6 +210,7 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
         font-size: var(--et-font-size-16);
         font-weight: 700;
         line-height: var(--et-line-height-22);
+        color: var(--et-text-primary);
       }
     }
 
@@ -155,19 +236,36 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
           width: var(--et-size-250);
 
           .create-icon {
-            background-repeat: no-repeat;
-            background-size: cover;
+            display: flex;
             height: var(--et-size-110);
             margin: var(--et-space-42) auto var(--et-space-14);
             width: var(--et-size-90);
+            align-items: center;
+            justify-content: center;
           }
 
           &.flow {
             background: var(--et-bg-warning-soft);
+
+            .create-icon {
+              color: var(--et-color-warning);
+            }
           }
 
           &.generic {
             background: var(--et-bg-info-soft);
+
+            .create-icon {
+              color: var(--et-color-primary);
+            }
+          }
+
+          &.dashboard {
+            background: var(--et-bg-success-soft);
+
+            .create-icon {
+              color: var(--et-color-success);
+            }
           }
 
           .tip-title {
@@ -175,6 +273,7 @@ const createForm = (usingFlow: boolean, ledger: boolean) => {
             font-size: var(--et-font-size-16);
             font-weight: 700;
             line-height: var(--et-line-height-22);
+            color: var(--et-text-primary);
           }
         }
 

@@ -10,7 +10,7 @@
           @change="onSortChanged"
         >
           <el-radio-button
-            :label="t('comp.orderby_Unset')"
+            :label="t('common.notset')"
             :value="SortDirection.Unset"
           />
           <el-radio-button

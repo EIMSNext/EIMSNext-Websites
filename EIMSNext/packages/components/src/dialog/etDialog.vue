@@ -15,8 +15,8 @@
         </div>
         <div class="footer-right">
           <slot name="footer-right">
-            <el-button @click="cancel">{{ cancelText }}</el-button>
-            <el-button type="primary" @click="save">{{ okText }}</el-button>
+            <el-button @click="cancel">{{ cancelLabel }}</el-button>
+            <el-button type="primary" @click="save">{{ okLabel }}</el-button>
           </slot>
         </div>
       </div>
@@ -25,7 +25,8 @@
 </template>
 <script lang="ts" setup>
 import "./style/index.scss";
-import { ref, useAttrs } from "vue";
+import { computed, ref, useAttrs } from "vue";
+import { useI18n } from "vue-i18n";
 
 const attrs = useAttrs();
 // const ori = ref(null);
@@ -34,6 +35,8 @@ const attrs = useAttrs();
 defineOptions({
   name: "EtDialog",
 });
+const { t } = useI18n();
+
 const props = withDefaults(
   defineProps<{
     modelValue: boolean;
@@ -42,13 +45,16 @@ const props = withDefaults(
     showFooter?: boolean;
   }>(),
   {
-    cancelText: "取消",
-    okText: "确定",
+    cancelText: "",
+    okText: "",
     showFooter: true,
   },
 );
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);
+
+const cancelLabel = computed(() => props.cancelText || t("common.cancel"));
+const okLabel = computed(() => props.okText || t("common.ok"));
 const cancel = () => {
   emit("update:modelValue", false);
   emit("cancel");

@@ -53,6 +53,7 @@ if (systemStore.language) {
 
 function handleLanguageChange(lang: string) {
   systemStore.changeLanguage(lang);
+  locale.value = lang;
   curLang.value = langOptions.find((x) => x.value === lang) || {
     label: "简体中文",
     value: Language.ZH_CN,

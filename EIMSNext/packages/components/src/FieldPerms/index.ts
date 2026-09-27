@@ -1,4 +1,4 @@
-import etFieldPerms from "./etFieldPerms.vue";
+import etFormFieldPermissions from "./etFieldPerms.vue";
 import { withInstall } from "../utils/install";
-const EtFieldPerms = withInstall(etFieldPerms);
-export { EtFieldPerms };
+const EtFormFieldPermissions = withInstall(etFormFieldPermissions);
+export { EtFormFieldPermissions };

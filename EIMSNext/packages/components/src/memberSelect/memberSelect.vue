@@ -6,7 +6,7 @@
       class="search-input"
       prefix-icon="Search"
       clearable
-      placeholder="请输入"
+      :placeholder="$t('common.pleaseInput')"
     />
     <div class="search-result">
       <div class="result-container">
@@ -17,7 +17,7 @@
         >
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.Department)"
-            label="组织架构"
+            :label="$t('comp.memberSelect.tabs.department')"
             :name="MemberTabs.Department"
           >
             <div class="dept-select">
@@ -79,32 +79,32 @@
               </el-tree>
               <div v-if="options.showCascade" class="options-footer">
                 <el-checkbox :model-value="orgCascade" @change="cascadeChanged"
-                  >动态包含下级部门</el-checkbox
+                  >{{ $t("comp.memberSelect.cascadeSubDepts") }}</el-checkbox
                 >
               </div>
             </div>
           </el-tab-pane>
           <el-tab-pane
-            v-if="FlagEnum.has(options.showTabs!, MemberTabs.Role)"
-            label="角色"
-            :name="MemberTabs.Role"
+            v-if="FlagEnum.has(options.showTabs!, MemberTabs.EmployeeGroup)"
+            :label="$t('comp.memberSelect.tabs.employeeGroup')"
+            :name="MemberTabs.EmployeeGroup"
           >
             <div class="dept-select">
               <el-tree
-                ref="roleTree"
+                ref="employeeGroupTree"
                 class="dept-tree"
-                :data="roleData"
+                :data="employeeGroupData"
                 :props="defaultProps"
                 :expand-on-click-node="false"
                 node-key="id"
                 :check-strictly="true"
-                :filter-node-method="roleFilter"
+                :filter-node-method="employeeGroupFilter"
               >
                 <template #default="{ node, data }">
                   <div
                     class="node-data"
                     :title="data.label"
-                    @click="handleNodeClick(node, data, roleFilter, true)"
+                    @click="handleNodeClick(node, data, employeeGroupFilter, true)"
                   >
                     <div class="node-wrapper">
                       <et-icon
@@ -117,10 +117,10 @@
                         <el-checkbox
                           v-model="data.checked"
                           @click.stop=""
-                          :disabled="!roleFilter(keyword, data)"
+                          :disabled="!employeeGroupFilter(keyword, data)"
                           @change="
                             (val: any) =>
-                              handleCheckedChanged(node, data, roleFilter, true)
+                              handleCheckedChanged(node, data, employeeGroupFilter, true)
                           "
                         />
                       </div>
@@ -132,7 +132,7 @@
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.Employee)"
-            label="员工"
+            :label="$t('comp.memberSelect.tabs.employee')"
             :name="MemberTabs.Employee"
           >
             <div class="emp-select">
@@ -143,7 +143,7 @@
                     :class="{ active: selectedEmpDeptId == 'all' }"
                     @click.stop="selectEmpDept('all')"
                   >
-                    全部员工
+                    {{ $t("comp.memberSelect.allEmployees") }}
                   </div>
                 </div>
                 <el-tree
@@ -193,26 +193,63 @@
               options.dynamicMembers &&
               FlagEnum.has(options.showTabs!, MemberTabs.Dynamic)
             "
-            label="动态负责人"
+            :label="$t('comp.memberSelect.tabs.dynamic')"
             :name="MemberTabs.Dynamic"
           >
-            <div class="dept-select">
-              <et-list
-                v-model="selectedDyMembers"
-                :data="options.dynamicMembers"
-                :selectable="true"
-                :multiple="options.multiple"
-                :showCount="false"
-                class="borderless-list"
-                @item-check="dymChecked"
-                @all-check="dymCheckAll"
-              >
-              </et-list>
+            <div class="dynamic-member-panel">
+              <div class="dynamic-member-groups">
+                <div
+                  v-for="group in dynamicGroups"
+                  :key="group.id"
+                  class="dynamic-member-group"
+                  :class="{ active: group.id === selectedDynamicGroupId }"
+                  @click="selectDynamicGroup(group.id)"
+                >
+                  <span class="dynamic-member-item-label">{{ group.label }}</span>
+                </div>
+              </div>
+              <div class="dynamic-member-content">
+                <div class="dynamic-member-items" :class="{ 'manager-mode': isManagerGroup }">
+                  <div
+                    v-for="item in currentDynamicItems"
+                    :key="item.id"
+                  class="dynamic-member-item"
+                    :class="{ active: item.id === selectedDynamicMemberId && isManagerGroup }"
+                    @click="selectDynamicItem(item)"
+                  >
+                    <span class="dynamic-member-item-label">{{ getDynamicItemLabelByGroup(item) }}</span>
+                    <el-checkbox
+                      v-if="!isManagerGroup"
+                      :model-value="isDynamicItemChecked(item)"
+                      @click.stop=""
+                      @change="(checked: boolean) => dymChecked(item, checked)"
+                    />
+                  </div>
+                </div>
+                <div v-if="isManagerGroup" class="dynamic-member-managers">
+                    <template v-if="selectedDynamicItem">
+                      <div class="dynamic-manager-title">
+                        {{ $t("comp.memberSelect.managerLevels", { label: selectedDynamicItem.label }) }}
+                      </div>
+                    <div
+                      v-for="level in dynamicManagerLevels"
+                      :key="level"
+                      class="dynamic-manager-option"
+                    >
+                      <span>{{ getManagerLevelLabel(level) }}</span>
+                      <el-checkbox
+                        :model-value="selectedDynamicManagerLevels.includes(level)"
+                        @change="(checked: boolean) => toggleManagerLevel(level, checked)"
+                      />
+                    </div>
+                  </template>
+                </div>
+              </div>
             </div>
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.CurDept)"
-            label="当前用户所处部门"
+            :label="$t('comp.memberSelect.tabs.curDept')"
             :name="MemberTabs.CurDept"
           >
             <div class="dept-select">
@@ -265,7 +302,7 @@
           </el-tab-pane>
           <el-tab-pane
             v-if="FlagEnum.has(options.showTabs!, MemberTabs.CurUser)"
-            label="当前用户"
+            :label="$t('comp.memberSelect.tabs.curUser')"
             :name="MemberTabs.CurUser"
           >
             <div class="dept-select">
@@ -289,26 +326,33 @@
 </template>
 <script lang="ts" setup>
 import "./style/index.scss";
-import { ref, reactive, watch, onBeforeMount, toRef } from "vue";
+import { computed, ref, watch, onBeforeMount, toRef } from "vue";
 import { TreeInstance } from "element-plus";
+import { useI18n } from "vue-i18n";
 import {
   DataItemType,
   deptToTreeNode,
   employeeToListItem,
   ITreeNode,
   buildDeptTree,
-  buildRoleTree,
+  buildEmployeeGroupTree,
 } from "../common";
 import { ISelectedTag } from "../selectedTags/type";
-import { Department, Employee, RoleGroup, Role } from "@eimsnext/models";
+import { Department, Employee, EmployeeGroupCategory, EmployeeGroup } from "@eimsnext/models";
 import { useDeptStore, useUserStore } from "@eimsnext/store";
 import {
+  departmentService,
   employeeService,
-  roleGroupService,
-  roleService,
+  employeeGroupCategoryService,
+  employeeGroupService,
 } from "@eimsnext/services";
 import { IListItem } from "../list/type";
-import { IMemberLimit, IMemberSelectOptions, MemberTabs } from "./type";
+import {
+  IDynamicMemberGroup,
+  IMemberLimit,
+  IMemberSelectOptions,
+  MemberTabs,
+} from "./type";
 import { deepMerge, FlagEnum } from "@eimsnext/utils";
 
 defineOptions({
@@ -333,6 +377,7 @@ const options = deepMerge<IMemberSelectOptions>(
   props.options || {},
 );
 
+const { t } = useI18n();
 const orgCascade = ref(options.cascadedDept ?? false);
 const userStore = useUserStore();
 const defaultProps = { children: "children", label: "label" };
@@ -348,19 +393,288 @@ const empData = ref<IListItem[]>([]); //员工列表
 const selectedEmpDeptId = ref("");
 const selectedEmps = ref<string[]>([]);
 const deptChanging = ref(false);
-const roleTree = ref<TreeInstance>();
-const roleData = ref<ITreeNode[]>(); // 角色列表
+const employeeGroupTree = ref<TreeInstance>();
+const employeeGroupData = ref<ITreeNode[]>(); // 员工组列表
 const curDeptTree = ref<TreeInstance>();
 const curDeptData = ref<ITreeNode[]>();
 const singleDeptId = ref<string>("");
 const curEmpData = ref<IListItem[]>([]);
-const selectedDyMembers = ref<string[]>();
+const selectedDynamicGroupId = ref<string>("");
+const selectedDynamicMemberId = ref<string>("");
+const dynamicGroupOrder = ["starter", "employeeField", "departmentField", "manager"];
+
+const isManagerGroup = computed(() => selectedDynamicGroupId.value === "manager");
+const adminScopeParam = () => options.adminScope ? "adminScope=true" : "";
+const filterEmployeeGroupsByScope = (employeeGroups: EmployeeGroup[]) => {
+  const allowedEmployeeGroupIds = new Set(
+    (options.limit?.employeeGroups ?? [])
+      .map((employeeGroup) => employeeGroup?.id)
+      .filter((id): id is string => !!id),
+  );
+  if (allowedEmployeeGroupIds.size === 0) return employeeGroups;
+  return employeeGroups.filter((employeeGroup) => allowedEmployeeGroupIds.has(employeeGroup.id));
+};
+const loadDepartments = () => options.adminScope
+  ? departmentService.query<Department>(adminScopeParam())
+  : deptStore.load();
+
+const memberScopeFilter = () => {
+  const departments = options.limit?.depts?.filter((x) => !!x?.id) ?? [];
+  if (departments.length === 0) return "";
+
+  const filters = departments.map((department) => {
+    const id = String(department.id).replaceAll("'", "''");
+    return department.cascadedDept
+      ? `Depts/any(d: contains(d/HeriarchyId, '|${id}|'))`
+      : `Depts/any(d: d/DeptId eq '${id}')`;
+  });
+  return filters.length === 1 ? filters[0] : `(${filters.join(" or ")})`;
+};
+
+const employeeQuery = (query = "") => {
+  const scopeFilter = memberScopeFilter();
+  if (!scopeFilter) return query;
+
+  const params = new URLSearchParams(query);
+  const existingFilter = params.get("$filter");
+  params.set("$filter", existingFilter ? `(${existingFilter}) and (${scopeFilter})` : scopeFilter);
+  return params.toString();
+};
+
+const dynamicGroups = computed<IDynamicMemberGroup[]>(() => {
+  const groups: IDynamicMemberGroup[] = [];
+  const groupMap = new Map<string, IDynamicMemberGroup>();
+  const members = options.dynamicMembers || [];
+
+  const registerGroup = (id: string, label: string) => {
+    if (!groupMap.has(id)) {
+      const group: IDynamicMemberGroup = {
+        id,
+        label,
+        type: DataItemType.Group,
+        items: [],
+      };
+      groupMap.set(id, group);
+      groups.push(group);
+    }
+    return groupMap.get(id)!;
+  };
+
+  members.forEach((item) => {
+    const category = getDynamicCategory(item);
+    if (category === "employeeField") {
+      registerGroup("employeeField", t("workflow.formEmployeeField")).items.push(item);
+    } else if (category === "departmentField") {
+      registerGroup("departmentField", t("workflow.formDepartmentField")).items.push(item);
+    } else {
+      registerGroup("starter", t("workflow.starter")).items.push(item);
+    }
+  });
+
+  if (members.length > 0) {
+    registerGroup("manager", t("workflow.departmentManager")).items = managerSourceItems.value;
+  }
+
+  groups.sort(
+    (a, b) => dynamicGroupOrder.indexOf(a.id) - dynamicGroupOrder.indexOf(b.id),
+  );
+
+  return groups;
+});
+
+const managerSourceItems = computed<ISelectedTag[]>(() => {
+  return (options.dynamicMembers || []).filter((item) =>
+    getDynamicItemLabel(item).includes(keyword.value || ""),
+  );
+});
+
+const currentDynamicItems = computed<ISelectedTag[]>(() => {
+  const activeGroup = dynamicGroups.value.find(
+    (item) => item.id === selectedDynamicGroupId.value,
+  );
+  return (activeGroup?.items || []).filter((item) =>
+    getDynamicItemLabel(item).includes(keyword.value || ""),
+  );
+});
+
+const selectedDynamicItem = computed<ISelectedTag | undefined>(() => {
+  return currentDynamicItems.value.find(
+    (item) => item.id === selectedDynamicMemberId.value,
+  );
+});
+
+const dynamicManagerLevels = computed<number[]>(() => {
+  return options.dynamicManagerLevels && options.dynamicManagerLevels.length > 0
+    ? options.dynamicManagerLevels
+    : [1, 2, 3, 4, 5];
+});
+
+const selectedDynamicManagerLevels = computed<number[]>(() => {
+  const item = selectedDynamicItem.value;
+  if (!item) {
+    return [];
+  }
+
+  return dynamicManagerLevels.value.filter((level) =>
+    !!findDynamicManagerTag(item, level),
+  );
+});
+
+const normalizeManagerLevels = (levels?: number[]) => {
+  if (!levels || levels.length === 0) {
+    return [];
+  }
+
+  return [...new Set(levels.filter((x) => x > 0))].sort((a, b) => a - b);
+};
+
+const buildDynamicTagId = (item: ISelectedTag, managerLevels?: number[]) => {
+  const sourceId = item.sourceId || item.id;
+  const normalized = normalizeManagerLevels(managerLevels);
+  return normalized.length > 0
+    ? `${item.type}:${sourceId}|m:${normalized.join(",")}`
+    : `${item.type}:${sourceId}`;
+};
+
+const buildDynamicTagLabel = (item: ISelectedTag, managerLevels?: number[]) => {
+  const normalized = normalizeManagerLevels(managerLevels);
+  if (normalized.length === 0) {
+    return getDynamicItemLabel(item);
+  }
+
+  return `${getDynamicItemLabel(item)} | ${getManagerLevelLabel(normalized[0])}`;
+};
+
+const getDynamicItemLabelByGroup = (item: ISelectedTag) => {
+  if (isManagerGroup.value) {
+    return getDynamicItemLabel(item);
+  }
+
+  const category = getDynamicCategory(item);
+  if (category === "starter") {
+    return t("workflow.starter");
+  }
+
+  if (category === "employeeField") {
+    return item.data?.fieldType?.toString().endsWith("2") ? t("comp.memberSelect.multiMember") : t("comp.memberSelect.singleMember");
+  }
+
+  if (category === "departmentField") {
+    return item.data?.fieldType?.toString().endsWith("2") ? t("comp.memberSelect.multiDept") : t("comp.memberSelect.singleDept");
+  }
+
+  return getDynamicItemLabel(item);
+};
+
+const getDynamicCategory = (item: ISelectedTag) => {
+  return item.data?.dynamicCategory || "starter";
+};
+
+const getDynamicItemLabel = (item: ISelectedTag) => {
+  return item.data?.baseLabel || item.label;
+};
+
+const findDynamicTag = (item: ISelectedTag) => {
+  const sourceId = item.sourceId || item.id;
+  return tagsRef.value.find(
+    (tag) =>
+      tag.type === item.type
+      && (tag.sourceId || tag.id) === sourceId
+      && (!tag.managerLevels || tag.managerLevels.length === 0),
+  );
+};
+
+const findDynamicManagerTag = (item: ISelectedTag, level: number) => {
+  const sourceId = item.sourceId || item.id;
+  return tagsRef.value.find(
+    (tag) =>
+      tag.type === item.type
+      && (tag.sourceId || tag.id) === sourceId
+      && tag.managerLevels?.length === 1
+      && tag.managerLevels[0] === level,
+  );
+};
+
+const isDynamicItemChecked = (item: ISelectedTag) => {
+  return !!findDynamicTag(item);
+};
+
+const syncDynamicSelection = () => {
+  if (!selectedDynamicGroupId.value || !dynamicGroups.value.find((item) => item.id === selectedDynamicGroupId.value)) {
+    selectedDynamicGroupId.value = dynamicGroups.value[0]?.id || "";
+  }
+
+  if (!selectedDynamicMemberId.value || !currentDynamicItems.value.find((item) => item.id === selectedDynamicMemberId.value)) {
+    selectedDynamicMemberId.value = currentDynamicItems.value[0]?.id || "";
+  }
+};
+
+const selectDynamicGroup = (groupId: string) => {
+  selectedDynamicGroupId.value = groupId;
+  selectedDynamicMemberId.value = currentDynamicItems.value[0]?.id || "";
+};
+
+const selectDynamicItem = (item: ISelectedTag) => {
+  selectedDynamicMemberId.value = item.id;
+};
+
+const upsertDynamicTag = (item: ISelectedTag, checked: boolean, managerLevels?: number[]) => {
+  const sourceId = item.sourceId || item.id;
+  const normalizedLevels = normalizeManagerLevels(managerLevels);
+  const label = buildDynamicTagLabel(item, normalizedLevels);
+  const nextTag: ISelectedTag = {
+    ...item,
+    id: buildDynamicTagId(item, normalizedLevels),
+    sourceId,
+    label,
+    managerLevels: normalizedLevels,
+    data: {
+      ...item.data,
+      baseLabel: getDynamicItemLabel(item),
+    },
+  };
+
+  const remainTags = tagsRef.value.filter((tag) => tag.id !== nextTag.id);
+
+  if (!checked) {
+    tagsRef.value = remainTags;
+  } else if (options.multiple) {
+    tagsRef.value = [...remainTags, nextTag];
+  } else {
+    const nonDynamicTags = remainTags.filter(
+      (tag) => tag.type !== DataItemType.Dynamic && tag.type !== DataItemType.Field,
+    );
+    tagsRef.value = [...nonDynamicTags, nextTag];
+  }
+
+  emit("update:modelValue", tagsRef.value);
+};
+
+const toggleManagerLevel = (level: number, checked: boolean) => {
+  const item = selectedDynamicItem.value;
+  if (!item) {
+    return;
+  }
+
+  upsertDynamicTag(item, checked, [level]);
+};
+
+const getManagerLevelLabel = (level: number) => {
+  if (level === 1) {
+    return t("workflow.directManager");
+  }
+  if (level === 2) {
+    return t("workflow.higherLevelManager");
+  }
+  return t("workflow.nthLevelManager", { 0: level });
+};
 
 watch([keyword], ([newKeyword], [oldKeyword]) => {
   if (newKeyword != oldKeyword) {
     deptTree.value!.filter(newKeyword);
-    roleTree.value!.filter(newKeyword);
+    employeeGroupTree.value!.filter(newKeyword);
     empDeptTree.value!.filter(newKeyword);
+    syncDynamicSelection();
   }
 });
 
@@ -469,14 +783,15 @@ onBeforeMount(() => {
       orgCascade.value = firstDept.cascadedDept;
   }
 
-  deptStore.load().then((data: Department[]) => {
+  loadDepartments().then((data: Department[]) => {
     let detps = buildDeptTree(data);
     const filteredDeptData = filterDeptTreeByScope(detps);
     deptData.value = JSON.parse(JSON.stringify(filteredDeptData));
     empDeptData.value = JSON.parse(JSON.stringify(filteredDeptData));
 
-    if (userStore.currentUser.deptId) {
-      deptStore.get(userStore.currentUser.deptId).then((x) => {
+    const currentDepartmentId = userStore.currentUser.departmentIds?.[0] ?? userStore.currentUser.deptId;
+    if (currentDepartmentId) {
+      deptStore.get(currentDepartmentId).then((x) => {
         if (x) {
           const curDeptNode = [deptToTreeNode(x)];
           // 不应用范围过滤，直接显示当前用户部门
@@ -490,9 +805,7 @@ onBeforeMount(() => {
         code: userStore.currentUser.empCode!,
         empName: userStore.currentUser.empName!,
         status: 0,
-        departmentId: userStore.currentUser.deptId!,
-        approved: true,
-        isManager: false,
+        userBound: true
       };
       curEmpData.value = [employeeToListItem(emp)];
     }
@@ -501,18 +814,18 @@ onBeforeMount(() => {
     setSelectedNodes();
   });
 
-  let roleGroups: RoleGroup[] = [];
-  let roles: Role[] = [];
+  let employeeGroupCategorys: EmployeeGroupCategory[] = [];
+  let employeeGroups: EmployeeGroup[] = [];
   Promise.all([
-    roleGroupService.query<RoleGroup>().then((data) => {
-      roleGroups = data;
+    employeeGroupCategoryService.query<EmployeeGroupCategory>().then((data) => {
+      employeeGroupCategorys = data;
     }),
-    roleService.query<Role>().then((data) => {
-      roles = data;
+    employeeGroupService.query<EmployeeGroup>(adminScopeParam()).then((data) => {
+      employeeGroups = filterEmployeeGroupsByScope(data);
     }),
   ]).then(() => {
-    roleData.value = buildRoleTree(roleGroups, roles);
-    // 角色树数据加载完成后，手动触发一次选中状态的设置
+    employeeGroupData.value = buildEmployeeGroupTree(employeeGroupCategorys, employeeGroups);
+    // 员工组树数据加载完成后，手动触发一次选中状态的设置
     setSelectedNodes();
   });
 
@@ -520,12 +833,16 @@ onBeforeMount(() => {
     if (props.modelValue[0].type == DataItemType.Department)
       singleDeptId.value = props.modelValue[0].id;
   }
+
+  syncDynamicSelection();
 });
 
 // 手动设置选中节点
 const setSelectedNodes = () => {
+  syncDynamicSelection();
+
   // 确保树数据已加载
-  if (!deptData.value || !roleData.value) return;
+  if (!deptData.value || !employeeGroupData.value) return;
 
   // 获取员工类型的选中项ID列表
   const employeeSelectedIds = tagsRef.value
@@ -549,8 +866,8 @@ const setSelectedNodes = () => {
     setNodeChecked(DataItemType.Department, curDeptData.value);
   }
 
-  // 设置角色树的选中状态
-  setNodeChecked(DataItemType.Role, roleData.value);
+  // 设置员工组树的选中状态
+  setNodeChecked(DataItemType.EmployeeGroup, employeeGroupData.value);
 };
 
 // 遍历树节点，设置选中状态
@@ -575,7 +892,7 @@ const setNodeChecked = (type: DataItemType, nodes: ITreeNode[]) => {
 // 监听选中标签变化，同步更新所有树组件的选中状态
 watch([() => tagsRef.value, activeTab], () => {
   // 确保树数据已加载
-  if (!deptData.value || !roleData.value) return;
+  if (!deptData.value || !employeeGroupData.value) return;
 
   // 直接调用setSelectedNodes函数，确保所有树组件的选中状态都正确设置
   setSelectedNodes();
@@ -602,6 +919,7 @@ const singleDeptChecked = (data: ITreeNode, val: string) => {
         value: data.value,
         label: data.data?.name || data.label,
         type: DataItemType.Department,
+        cascadedDept: orgCascade.value,
         data: data.data,
       },
     ];
@@ -613,10 +931,15 @@ const selectEmpDept = (deptId: string) => {
   deptChanging.value = true;
   selectedEmpDeptId.value = deptId;
 
-  let $filter = deptId == "all" ? "" : `$filter=departmentId eq '${deptId}'`;
   empData.value = [];
   selectedEmps.value = [];
-  employeeService.query<Employee>($filter).then((res) => {
+
+  const query = employeeQuery(adminScopeParam());
+  const request = deptId && deptId !== "all"
+    ? employeeService.queryByDepartment<Employee>(deptId, false, query)
+    : employeeService.query<Employee>(query);
+
+  request.then((res) => {
     res.forEach((x) => {
       empData.value.push(employeeToListItem(x));
 
@@ -737,78 +1060,16 @@ const curEmpCheckAll = (checked: boolean) => {
 };
 
 const dymChecked = (data: IListItem, checked: boolean) => {
-  if (options.multiple) {
-    if (checked) {
-      let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == DataItemType.Dynamic,
-      );
-      if (index == undefined || index == -1) {
-        tagsRef.value.push({
-          id: data.id,
-          value: data.value,
-          label: data.label,
-          type: DataItemType.Dynamic,
-          data: data.data,
-        });
-      }
-    } else {
-      tagsRef.value = tagsRef.value.filter(
-        (x) => x.type !== DataItemType.Dynamic || x.id !== data.id,
-      );
-    }
-
-    emit("update:modelValue", tagsRef.value);
-  } else {
-    if (checked) {
-      // 直接创建新数组
-      const nonDynamics = tagsRef.value.filter(
-        (x) => x.type != DataItemType.Dynamic,
-      );
-      tagsRef.value = [
-        ...nonDynamics,
-        {
-          id: data.id,
-          value: data.value,
-          label: data.label,
-          type: DataItemType.Dynamic,
-          data: data.data,
-        },
-      ];
-    } else {
-      tagsRef.value = tagsRef.value.filter(
-        (x) => x.type !== DataItemType.Dynamic || x.id !== data.id,
-      );
-    }
-    emit("update:modelValue", tagsRef.value);
-  }
+  const item = data as ISelectedTag;
+  upsertDynamicTag(item, checked, selectedDynamicManagerLevels.value);
 };
 const dymCheckAll = (checked: boolean) => {
-  if (checked) {
-    //全新增
-    options.dynamicMembers!.forEach((data) => {
-      let index = tagsRef.value.findIndex(
-        (x) => x.id == data.id && x.type == DataItemType.Dynamic,
-      );
-      if (index == undefined || index == -1) {
-        tagsRef.value.push({
-          id: data.id,
-          label: data.label,
-          type: DataItemType.Dynamic,
-          data: data.data,
-          icon: data.icon,
-        });
-      }
-    });
-  } else {
-    tagsRef.value = tagsRef.value.filter(
-      (x) => x.type !== DataItemType.Dynamic,
-    );
-  }
-
-  emit("update:modelValue", tagsRef.value);
+  currentDynamicItems.value.forEach((item) => {
+    upsertDynamicTag(item, checked, checked ? selectedDynamicManagerLevels.value : []);
+  });
 };
 
-const roleFilter = (value: string, data: any) => {
+const employeeGroupFilter = (value: string, data: any) => {
   if (!value) {
     return true;
   }
@@ -825,14 +1086,15 @@ const removeTag = (tag: ISelectedTag) => {
       deptTree.value.setChecked(tag.id, false, orgCascade.value);
     else if (curDeptTree.value)
       curDeptTree.value.setChecked(tag.id, false, false);
-  } else if (tag.type == DataItemType.Role) {
-    if (roleTree.value) roleTree.value.setChecked(tag.id, false, false);
+  } else if (tag.type == DataItemType.EmployeeGroup) {
+    if (employeeGroupTree.value) employeeGroupTree.value.setChecked(tag.id, false, false);
   } else if (tag.type == DataItemType.Employee) {
     selectedEmps.value = selectedEmps.value?.filter((x) => x != tag.id);
-  } else if (tag.type == DataItemType.Dynamic) {
-    selectedDyMembers.value = selectedDyMembers.value?.filter(
-      (x) => x != tag.id,
-    );
+  } else if (
+    tag.type == DataItemType.Dynamic ||
+    tag.type == DataItemType.Field
+  ) {
+    syncDynamicSelection();
   }
 };
 
@@ -841,35 +1103,35 @@ const handleNodeClick = (
   node: any,
   data: ITreeNode,
   filterFn: (value: string, data: any) => boolean,
-  isRole: boolean,
+  isEmployeeGroup: boolean,
 ) => {
-  updateTags(data, !data.checked, filterFn, isRole);
+  updateTags(data, !data.checked, filterFn, isEmployeeGroup);
 };
 
 const handleCheckedChanged = (
   node: any,
   data: ITreeNode,
   filterFn: (value: string, data: any) => boolean,
-  isRole: boolean,
+  isEmployeeGroup: boolean,
 ) => {
-  updateTags(data, !!data.checked, filterFn, isRole);
+  updateTags(data, !!data.checked, filterFn, isEmployeeGroup);
 };
 
 const updateTags = (
   data: ITreeNode,
   checked: boolean,
   filterFn: (value: string, data: any) => boolean,
-  isRole: boolean,
+  isEmployeeGroup: boolean,
 ) => {
   // 检查是否禁用
   if (data.disabled || data.readonly || !filterFn(keyword.value, data)) {
     return;
   }
 
-  if (isRole) {
-    // 角色选择
-    if (roleTree.value) {
-      updateRoleTags(data, checked);
+  if (isEmployeeGroup) {
+    // 员工组选择
+    if (employeeGroupTree.value) {
+      updateEmployeeGroupTags(data, checked);
     }
   } else {
     // 部门选择
@@ -881,7 +1143,7 @@ const updateTags = (
   }
 };
 
-const updateRoleTags = (data: ITreeNode, checked: boolean) => {
+const updateEmployeeGroupTags = (data: ITreeNode, checked: boolean) => {
   data.checked = checked;
   if (checked) {
     if (data.type == DataItemType.Group) {
@@ -891,7 +1153,7 @@ const updateRoleTags = (data: ITreeNode, checked: boolean) => {
             tagsRef.value.push({
               id: child.id,
               label: child.label,
-              type: DataItemType.Role,
+              type: DataItemType.EmployeeGroup,
               data: child.data,
             });
             child.checked = true;
@@ -902,32 +1164,32 @@ const updateRoleTags = (data: ITreeNode, checked: boolean) => {
       tagsRef.value.push({
         id: data.id,
         label: data.label,
-        type: DataItemType.Role,
+        type: DataItemType.EmployeeGroup,
         data: data.data,
       });
     }
   } else {
     if (data.type == DataItemType.Group) {
-      let roleIds: string[] = [];
+      let employeeGroupIds: string[] = [];
       if (data.children && data.children.length > 0) {
         data.children.forEach((child) => {
-          roleIds.push(child.id);
+          employeeGroupIds.push(child.id);
           child.checked = false;
         });
 
-        if (roleIds.length > 0)
+        if (employeeGroupIds.length > 0)
           tagsRef.value = tagsRef.value.filter(
             (x) =>
-              x.type !== DataItemType.Role ||
-              roleIds.findIndex((id) => x.id == id) == -1,
+              x.type !== DataItemType.EmployeeGroup ||
+              employeeGroupIds.findIndex((id) => x.id == id) == -1,
           );
       }
     } else {
       tagsRef.value = tagsRef.value.filter(
-        (x) => x.type !== DataItemType.Role || x.id !== data.id,
+        (x) => x.type !== DataItemType.EmployeeGroup || x.id !== data.id,
       );
-      if (data.data?.roleGroupId) {
-        var group = roleData.value?.find((x) => x.id == data.data.roleGroupId);
+      if (data.data?.employeeGroupCategoryId) {
+        var group = employeeGroupData.value?.find((x) => x.id == data.data.employeeGroupCategoryId);
         if (group) group.checked = false;
       }
     }
@@ -954,6 +1216,7 @@ const updateDeptTags = (
           value: data.value,
           label: data.data?.name || data.label,
           type: DataItemType.Department,
+          cascadedDept: orgCascade.value,
           data: data.data,
         });
       }
@@ -974,6 +1237,7 @@ const updateDeptTags = (
           value: data.value,
           label: data.data?.name || data.label,
           type: DataItemType.Department,
+          cascadedDept: orgCascade.value,
           data: data.data,
         },
       ];
@@ -1013,12 +1277,18 @@ const updateCascadeStatus = (data: ITreeNode) => {
 };
 const cascadeChanged = (val: boolean) => {
   orgCascade.value = val;
+  tagsRef.value = tagsRef.value.map((tag) =>
+    tag.type === DataItemType.Department
+      ? { ...tag, cascadedDept: val }
+      : tag,
+  );
   if (deptData.value) {
     if (val) updateCascadeStatus(deptData.value[0]);
     else {
       setNodeChecked(DataItemType.Department, deptData.value);
     }
   }
+  emit("update:modelValue", tagsRef.value);
 };
 const getNodeIconColor = (node: ITreeNode) => {
   switch (node.type) {
@@ -1043,4 +1313,5 @@ const getNodeIconColor = (node: ITreeNode) => {
 .custom-list-item {
   cursor: pointer;
 }
+
 </style>

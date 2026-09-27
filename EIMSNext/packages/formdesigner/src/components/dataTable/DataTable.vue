@@ -1,5 +1,6 @@
 <script>
 import {parseFn} from '@eimsnext/form-render-core';
+import {getFileFullUrl} from '@eimsnext/utils';
 import {defineComponent, h, resolveComponent, resolveDirective, withDirectives} from 'vue';
 
 export default defineComponent({
@@ -345,7 +346,7 @@ export default defineComponent({
                 return col.render(scope, h, resolveComponent, this.formCreateInject.api);
             } else if (col.format === 'tag') {
                 return h(resolveComponent('el-tag'), {disableTransitions: true}, () => [this.deepGet(scope.row, col.prop, '')]);
-            } else if (col.format === 'image' || col.label === '图片') {
+            } else if (col.format === 'image' || col.label === (this.formCreateInject.t('props.image') || '图片')) {
                 // 直接解析图片数据，生成img标签
                 return h('div', {
                     class: '_fc-data-table-img-list'
@@ -384,10 +385,10 @@ export default defineComponent({
                             // 如果是对象，提取url或src属性作为图片地址
                             imgUrl = item.url || item.src || '';
                             // 将反斜杠转换为正斜杠
-                            imgUrl = imgUrl.replace(/\\/g, '/');
+                            imgUrl = getFileFullUrl(imgUrl);
                         } else if (typeof item === 'string') {
                             // 如果是字符串，直接作为图片地址
-                            imgUrl = item.replace(/\\/g, '/');
+                            imgUrl = getFileFullUrl(item);
                         }
                         
                         // 只有URL不为空时才生成img标签
@@ -410,7 +411,7 @@ export default defineComponent({
                     
                     // 如果没有生成图片，显示占位符
                     if (imgs.length === 0) {
-                        return h('span', { style: { color: '#909399', fontSize: '12px' } }, '暂无图片');
+                        return h('span', { style: { color: '#909399', fontSize: '12px' } }, this.formCreateInject.t('com.dataTable.noImage') || '暂无图片');
                     }
                     
                     return imgs;
@@ -460,6 +461,7 @@ export default defineComponent({
         })
     }
 });
+
 </script>
 
 <style>

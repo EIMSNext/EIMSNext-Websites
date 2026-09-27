@@ -1,154 +1,76 @@
 <template>
   <div class="field-value">
     <div class="value-type">
-      <el-select
-        size="default"
-        default-first-option
-        v-model="fieldValueType"
-        @change="onValueTypeChange"
-      >
-        <el-option
-          v-for="opt in fieldValueTypes"
-          :label="opt.label"
-          :value="opt.id"
-          :key="opt.id"
-        ></el-option>
+      <el-select size="default" default-first-option v-model="fieldValueType" @change="onValueTypeChange">
+        <el-option v-for="opt in fieldValueTypes" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
       </el-select>
     </div>
     <div class="value-value">
       <template v-if="fieldValueType == FieldValueType.Custom">
-        <template
-          v-if="
-            fieldType == FieldType.Input ||
-            fieldType == FieldType.Select1 ||
-            fieldType == FieldType.Select2
-          "
-        >
+        <template v-if="
+          fieldType == FieldType.Input ||
+          fieldType == FieldType.Select1 ||
+          fieldType == FieldType.Select2
+        ">
           <el-input v-model="value" size="default" @change="onInput"></el-input>
         </template>
         <template v-if="fieldType == FieldType.Number">
-          <el-input-number
-            v-model="value"
-            size="default"
-            align="right"
-            class="auto-width-input-number"
-            @change="onInput"
-          ></el-input-number>
+          <el-input-number v-model="value" size="default" align="right" class="auto-width-input-number"
+            @change="onInput"></el-input-number>
         </template>
         <template v-if="fieldType == FieldType.TimeStamp">
-          <el-date-picker
-            size="default"
-            v-model="value"
-            value-format="x"
-            :format="fieldDef?.format"
-            :type="dateType"
-            @change="onInput"
-          ></el-date-picker>
+          <el-date-picker size="default" v-model="value" value-format="x" :format="fieldDef?.format" :type="dateType"
+            @change="onInput"></el-date-picker>
         </template>
 
         <template v-else-if="fieldType == FieldType.Radio">
-          <el-select
-            size="default"
-            filterable
-            allow-create
-            default-first-option
-            v-model="value"
-            @change="onInput"
-          >
-            <el-option
-              v-for="opt in toListItem(fieldDef?.options)"
-              :label="opt.label"
-              :value="opt.id"
-              :key="opt.id"
-            ></el-option>
+          <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="fieldType == FieldType.CheckBox">
-          <el-select
-            size="default"
-            multiple
-            filterable
-            allow-create
-            default-first-option
-            v-model="value"
-            @change="onInput"
-          >
-            <el-option
-              v-for="opt in toListItem(fieldDef?.options)"
-              :label="opt.label"
-              :value="opt.id"
-              :key="opt.id"
-            ></el-option>
+          <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
+            @change="onInput">
+            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
+              :key="opt.id"></el-option>
           </el-select>
         </template>
         <template v-else-if="fieldType == FieldType.Department1">
-          <selected-tags
-            :modelValue="value"
-            :editable="true"
-            :empty-text="t('comp.emptyDept')"
-            @editTag="selectDept(false)"
-          />
+          <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyDept')"
+            @editTag="selectDept(false)" />
         </template>
         <template v-else-if="fieldType == FieldType.Department2">
-          <selected-tags
-            :modelValue="value"
-            :multiple="true"
-            :editable="true"
-            :empty-text="t('comp.emptyDept')"
-            @editTag="selectDept(true)"
-          />
+          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyDept')"
+            @editTag="selectDept(true)" />
         </template>
         <template v-else-if="fieldType == FieldType.Employee1">
-          <selected-tags
-            :modelValue="value"
-            :editable="true"
-            :empty-text="t('comp.emptyEmp')"
-            @editTag="selectEmp(false)"
-          />
+          <selected-tags :modelValue="value" :editable="true" :empty-text="t('comp.emptyEmp')"
+            @editTag="selectEmp(false)" />
         </template>
         <template v-else-if="fieldType == FieldType.Employee2">
-          <selected-tags
-            :modelValue="value"
-            :multiple="true"
-            :editable="true"
-            :empty-text="t('comp.emptyEmp')"
-            @editTag="selectEmp(true)"
-          />
+          <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyEmp')"
+            @editTag="selectEmp(true)" />
         </template>
       </template>
       <template v-if="fieldValueType == FieldValueType.Field">
-        <NodeFieldList
-          ref="nodefieldlist"
-          v-model="fieldFieldValue"
-          :nodes="nodes"
-          :field-def="fieldDef"
-          :fieldBuildSetting="fieldSetting"
-          @change="onValueChange"
-        ></NodeFieldList>
+        <NodeFieldList ref="nodefieldlist" v-model="fieldFieldValue" :nodes="nodes" :field-def="fieldDef"
+          :fieldBuildSetting="fieldSetting" @change="onValueChange"></NodeFieldList>
       </template>
       <template v-if="fieldValueType == FieldValueType.Formula">
         <div class="formula-value-panel">
-          <el-button @click="showFormulaEditor = true">
-            {{ formulaButtonText }}
-          </el-button>
-          <FormulaEditorDialog
-            v-model="formulaValue"
-            v-model:visible="showFormulaEditor"
-            :nodes="nodes"
-            @update:modelValue="onFormulaChange"
-          />
+          <el-badge class="w_full" type="warning" is-dot :hidden="!formulaValue">
+            <el-button class="w_full" plain @click="showFormulaEditor = true">{{t("eventFlow.setFormula")}}</el-button>
+          </el-badge>
+          <FormulaEditorDialog v-model="formulaValue" v-model:visible="showFormulaEditor" :nodes="nodes"
+            @update:modelValue="onFormulaChange" />
         </div>
       </template>
     </div>
-    <memberSelectDialog
-      v-model="showMemberDialog"
-      :tags="value ?? []"
-      :memberOptions="{
-        showTabs: memberShowTabs,
-        multiple: memberMultiple,
-      }"
-      @ok="memberSelected"
-    >
+    <memberSelectDialog v-model="showMemberDialog" :tags="value ?? []" :memberOptions="{
+      showTabs: memberShowTabs,
+      multiple: memberMultiple,
+    }" @ok="memberSelected">
     </memberSelectDialog>
   </div>
 </template>
@@ -168,8 +90,8 @@ import { toListItem } from "@/ConditionList/type";
 import { MemberTabs } from "@/memberSelect/type";
 import { ISelectedTag } from "@/selectedTags/type";
 import { DataItemType } from "@/common";
-import FormulaEditorDialog from "@/FlowDesigner/Dataflow/FormulaEditorDialog.vue";
-import { normalizeFormulaValue } from "@/FlowDesigner/Dataflow/formula";
+import FormulaEditorDialog from "@/FlowDesigner/EventFlow/FormulaEditorDialog.vue";
+import { normalizeFormulaValue } from "@/FlowDesigner/EventFlow/formula";
 
 const { t } = useLocale();
 
@@ -280,7 +202,7 @@ watch(
   { deep: true },
 );
 
-const fieldValueTypes: IListItem[] = [
+const fieldValueTypes = computed<IListItem[]>(() => [
   {
     id: FieldValueType.Custom,
     label: t("comp.value_Custom"),
@@ -293,7 +215,7 @@ const fieldValueTypes: IListItem[] = [
   },
   {
     id: FieldValueType.Formula,
-    label: t("dataflow.formula"),
+    label: t("eventFlow.formula"),
     type: DataItemType.Unknown,
   },
   {
@@ -301,13 +223,7 @@ const fieldValueTypes: IListItem[] = [
     label: t("comp.value_Empty"),
     type: DataItemType.Unknown,
   },
-];
-
-const formulaButtonText = computed(() => {
-  const exp = formulaValue.value?.expression?.trim();
-  if (!exp) return t("dataflow.setFormula");
-  return exp.length > 24 ? `${exp.slice(0, 24)}...` : exp;
-});
+]);
 
 const emit = defineEmits(["update:modelValue", "change"]);
 const onValueTypeChange = () => {

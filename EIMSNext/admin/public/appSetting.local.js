@@ -1,6 +1,6 @@
 window.appSetting = {
-  authUrl: "http://localhost:9999/jlauth",
+  identityUrl: "https://localhost:7777",
   apiUrl: "https://localhost:8899",
-  uploadUrl: "http://localhost:9999/jlupload",
+  uploadUrl: "https://localhost:8855",
   httpTimeout: 100000,
 };

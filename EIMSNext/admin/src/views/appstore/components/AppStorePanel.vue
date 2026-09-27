@@ -1,0 +1,827 @@
+<template>
+  <div class="appstore-page">
+    <section class="market-hero">
+      <div class="hero-copy">
+        <h1 class="hero-title">{{ $t("admin.appStore.title") }}</h1>
+        <p class="hero-subtitle">{{ $t("admin.appStore.subtitle") }}</p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value">{{ totalProfiles }}</span>
+            <span class="hero-stat-label">{{ $t("admin.appStore.totalTemplates") }}</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">{{ featuredPool.length }}</span>
+            <span class="hero-stat-label">{{ $t("admin.appStore.featuredTemplates") }}</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">{{ industries.length }}</span>
+            <span class="hero-stat-label">{{ $t("admin.appStore.industries") }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-search-card">
+        <div class="hero-search-title">{{ $t("admin.appStore.findTemplates") }}</div>
+        <div class="hero-search-subtitle">{{ $t("admin.appStore.filterDesc") }}</div>
+        <el-input
+          v-model="keyword"
+          class="search-input"
+          :placeholder="$t('admin.appStore.searchPlaceholder')"
+          @keyup.enter="loadProfiles"
+        >
+          <template #append>
+            <el-tooltip :content="$t('admin.appStore.search')" placement="top">
+              <button
+                class="search-btn"
+                type="button"
+                :aria-label="$t('admin.appStore.search')"
+                @click="loadProfiles"
+              >
+                <et-icon icon="el-search" size="16px" />
+              </button>
+            </el-tooltip>
+          </template>
+        </el-input>
+      </div>
+    </section>
+
+    <div v-loading="loading" class="market-layout">
+      <aside class="market-sidebar">
+        <div class="sidebar-section" :class="{ collapsed: categoryCollapsed }">
+          <button
+            class="sidebar-section-head"
+            type="button"
+            :aria-expanded="!categoryCollapsed"
+            @click="categoryCollapsed = !categoryCollapsed"
+          >
+            <span class="sidebar-section-title">
+              <et-icon icon="el-Box" size="13px" />
+              {{ $t("admin.appStore.category") }}
+            </span>
+            <et-icon class="toggle-icon" icon="el-ArrowUp" size="12px" />
+          </button>
+          <div class="sidebar-collapse">
+            <div class="sidebar-items">
+              <button
+                class="sidebar-item"
+                :class="{ active: !activeCategory }"
+                @click="setCategory('')"
+              >
+                {{ $t("admin.appStore.allCategories") }}
+              </button>
+              <button
+                v-for="category in categories"
+                :key="category"
+                class="sidebar-item"
+                :class="{ active: activeCategory === category }"
+                @click="setCategory(category)"
+              >
+                {{ category }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-section" :class="{ collapsed: industryCollapsed }">
+          <button
+            class="sidebar-section-head"
+            type="button"
+            :aria-expanded="!industryCollapsed"
+            @click="industryCollapsed = !industryCollapsed"
+          >
+            <span class="sidebar-section-title">
+              <et-icon icon="el-Grid" size="13px" />
+              {{ $t("admin.appStore.industry") }}
+            </span>
+            <et-icon class="toggle-icon" icon="el-ArrowUp" size="12px" />
+          </button>
+          <div class="sidebar-collapse">
+            <div class="sidebar-items">
+              <button
+                class="sidebar-item"
+                :class="{ active: !activeIndustry }"
+                @click="setIndustry('')"
+              >
+                {{ $t("admin.appStore.allIndustries") }}
+              </button>
+              <button
+                v-for="industry in industries"
+                :key="industry"
+                class="sidebar-item"
+                :class="{ active: activeIndustry === industry }"
+                @click="setIndustry(industry)"
+              >
+                {{ industry }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="market-content">
+        <el-result v-if="loadError" icon="error" :title="$t('admin.appStore.loadFailed')">
+          <template #extra>
+            <el-button type="primary" @click="loadProfiles">
+              {{ $t("admin.appStore.retry") }}
+            </el-button>
+          </template>
+        </el-result>
+        <template v-else>
+          <section class="market-section">
+            <div class="section-head">
+              <div>
+                <div class="section-title">{{ $t("admin.appStore.featured") }}</div>
+                <div class="section-subtitle">{{ $t("admin.appStore.featuredDesc") }}</div>
+              </div>
+              <el-button link type="primary" @click="rotateFeatured">
+                {{ $t("admin.appStore.rotate") }}
+              </el-button>
+            </div>
+
+            <div class="featured-grid">
+              <div
+                v-for="item in featuredItems"
+                :key="item.id"
+                class="market-card featured-card"
+                @click="openDetail(item.id)"
+              >
+                <div class="market-cover">
+                  <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
+                  <div class="card-badges">
+                    <span v-if="item.isOfficial" class="badge badge-official">
+                      {{ $t("admin.official") }}
+                    </span>
+                    <span v-else-if="item.isHot" class="badge badge-hot">
+                      {{ $t("admin.hot") }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="market-card-body">
+                  <div class="market-card-title">{{ item.name }}</div>
+                  <div class="market-card-desc">{{ item.summary }}</div>
+                  <div class="market-tags">
+                    <span
+                      v-for="tag in (item.tags || []).slice(0, 4)"
+                      :key="tag"
+                      class="market-tag"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
+                  <div class="market-meta">
+                    <span>{{ item.category || $t("admin.appStore.generalCategory") }}</span>
+                    <span>{{ item.installCount || 0 }} {{ $t("admin.appStore.installs") }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="market-section">
+            <div class="section-head">
+              <div>
+                <div class="section-title">{{ $t("admin.appStore.allTemplates") }}</div>
+                <div class="section-subtitle">{{ $t("admin.appStore.allTemplatesDesc") }}</div>
+              </div>
+            </div>
+
+            <div class="market-grid">
+              <div
+                v-for="item in profileItems"
+                :key="item.id"
+                class="market-card grid-card"
+                @click="openDetail(item.id)"
+              >
+                <div class="market-cover compact">
+                  <img v-if="coverImage(item)" :src="coverImage(item)!" :alt="item.name" />
+                  <div class="card-badges">
+                    <span v-if="item.isOfficial" class="badge badge-official">
+                      {{ $t("admin.official") }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="market-card-body">
+                  <div class="market-list-head">
+                    <div class="market-card-title">{{ item.name }}</div>
+                    <div class="market-card-extra">{{ item.author || $t("admin.developer") }}</div>
+                  </div>
+                  <div class="market-card-desc two-line">{{ item.summary }}</div>
+                  <div class="market-tags small">
+                    <span
+                      v-for="tag in (item.tags || []).slice(0, 5)"
+                      :key="tag"
+                      class="market-tag"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
+                  <div class="market-meta">
+                    <span>{{ item.industry || $t("admin.appStore.generalIndustry") }}</span>
+                    <span>{{ item.installCount || 0 }} {{ $t("admin.appStore.installs") }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </template>
+      </main>
+    </div>
+
+    <AppStoreDetailDialog
+      v-model="detailVisible"
+      :app-id="selectedId"
+      @install-success="handleInstallSuccess"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import type { AppProfile } from "@eimsnext/models";
+import { appProfileService } from "@eimsnext/services";
+import { useRouter } from "vue-router";
+import AppStoreDetailDialog from "./AppStoreDetailDialog.vue";
+
+defineOptions({ name: "AppStorePanel" });
+
+const props = withDefaults(defineProps<{}>(), {});
+
+const emit = defineEmits<{
+  (e: "close"): void;
+}>();
+
+const router = useRouter();
+const keyword = ref("");
+const activeCategory = ref("");
+const activeIndustry = ref("");
+const categoryCollapsed = ref(false);
+const industryCollapsed = ref(false);
+const profileItems = ref<AppProfile[]>([]);
+const totalProfiles = ref(0);
+const loading = ref(false);
+const loadError = ref(false);
+const knownCategories = ref<string[]>([]);
+const knownIndustries = ref<string[]>([]);
+let profileRequestId = 0;
+const featuredStart = ref(0);
+const selectedId = ref("");
+const detailVisible = ref(false);
+
+const categories = computed(() => knownCategories.value);
+const industries = computed(() => knownIndustries.value);
+const featuredPool = computed(() => {
+  const preferred = profileItems.value.filter(
+    (item: AppProfile) => item.isRecommended || item.isOfficial || item.isHot
+  );
+  return preferred.length > 0 ? preferred : profileItems.value;
+});
+const featuredItems = computed(() => {
+  const pool = featuredPool.value;
+  if (pool.length <= 4) return pool;
+  return Array.from({ length: 4 }, (_, index) => pool[(featuredStart.value + index) % pool.length]);
+});
+
+function coverImage(item: AppProfile) {
+  return item.coverImage || item.bannerImage;
+}
+
+async function loadProfiles() {
+  const requestId = ++profileRequestId;
+  loading.value = true;
+  loadError.value = false;
+  try {
+    const result = await appProfileService.query({
+      keyword: keyword.value,
+      category: activeCategory.value,
+      industry: activeIndustry.value,
+      take: 60,
+    });
+    if (requestId !== profileRequestId) return;
+    profileItems.value = result.items || [];
+    totalProfiles.value = result.total || 0;
+    knownCategories.value = Array.from(
+      new Set([
+        ...knownCategories.value,
+        ...profileItems.value.map((item) => item.category).filter(Boolean),
+      ])
+    ) as string[];
+    knownIndustries.value = Array.from(
+      new Set([
+        ...knownIndustries.value,
+        ...profileItems.value.map((item) => item.industry).filter(Boolean),
+      ])
+    ) as string[];
+    featuredStart.value = 0;
+  } catch {
+    if (requestId === profileRequestId) {
+      profileItems.value = [];
+      totalProfiles.value = 0;
+      loadError.value = true;
+    }
+  } finally {
+    if (requestId === profileRequestId) loading.value = false;
+  }
+}
+
+function rotateFeatured() {
+  if (featuredPool.value.length <= 4) return;
+  featuredStart.value = (featuredStart.value + 4) % featuredPool.value.length;
+}
+
+function setCategory(category: string) {
+  activeCategory.value = category;
+  loadProfiles();
+}
+
+function setIndustry(industry: string) {
+  activeIndustry.value = industry;
+  loadProfiles();
+}
+
+function openDetail(id: string) {
+  selectedId.value = id;
+  detailVisible.value = true;
+}
+
+function handleInstallSuccess() {
+  detailVisible.value = false;
+  selectedId.value = "";
+  emit("close");
+  router.push("/workbench");
+}
+
+onMounted(loadProfiles);
+</script>
+
+<style scoped lang="scss">
+.appstore-page {
+  width: 1100px;
+  padding: var(--et-space-20);
+  min-height: 100%;
+  background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
+  color: var(--et-text-primary);
+}
+
+.market-hero,
+.market-sidebar,
+.market-content,
+.market-card {
+  border: 1px solid color-mix(in srgb, var(--et-border-color-light) 78%, transparent);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
+}
+
+.market-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 420px);
+  gap: 20px;
+  padding: 20px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--et-bg-container) 92%, transparent);
+}
+
+.hero-title {
+  margin: 16px 0 10px;
+  font-size: 36px;
+  line-height: 1.12;
+  color: var(--et-text-primary);
+}
+
+.hero-subtitle {
+  max-width: 620px;
+  color: var(--et-text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.hero-stat {
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--et-bg-container) 86%, transparent);
+}
+
+.hero-stat-value {
+  display: block;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.hero-stat-label {
+  display: block;
+  margin-top: 6px;
+  color: var(--et-text-secondary);
+  font-size: 13px;
+}
+
+.hero-search-card {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--et-bg-container) 92%, transparent);
+}
+
+.hero-search-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.hero-search-subtitle {
+  margin-top: 8px;
+  margin-bottom: 18px;
+  color: var(--et-text-secondary);
+  line-height: 1.6;
+}
+
+:deep(.search-input .el-input-group__append) {
+  min-width: 44px;
+  padding: 0 14px;
+  border-color: var(--et-border-color);
+  background: color-mix(in srgb, var(--et-color-primary) 10%, var(--et-bg-container));
+}
+
+.search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--et-color-primary);
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.search-btn:hover,
+.search-btn:focus-visible {
+  background: color-mix(in srgb, var(--et-color-primary) 18%, transparent);
+  color: var(--et-color-primary);
+}
+
+.search-btn:active {
+  background: color-mix(in srgb, var(--et-color-primary) 26%, transparent);
+}
+
+.market-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+  align-items: start;
+}
+
+.market-sidebar {
+  position: sticky;
+  top: 20px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--et-bg-container) 96%, transparent);
+}
+
+.sidebar-section + .sidebar-section {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--et-border-color-light) 72%, transparent);
+}
+
+.sidebar-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 8px;
+  margin-bottom: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--et-text-primary);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  line-height: 40px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-section-head:hover {
+  background: var(--et-bg-hover);
+}
+
+.sidebar-section-head:focus-visible {
+  background: var(--et-bg-hover);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--et-color-primary) 30%, transparent);
+}
+
+.sidebar-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--et-text-primary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.toggle-icon {
+  color: var(--et-text-tertiary);
+  transition: transform 0.22s ease;
+}
+
+.sidebar-section.collapsed .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.sidebar-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.22s ease;
+}
+
+.sidebar-section.collapsed .sidebar-collapse {
+  grid-template-rows: 0fr;
+}
+
+.sidebar-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sidebar-item {
+  margin: 0 8px;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--et-text-secondary);
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.sidebar-item:hover {
+  background: var(--et-bg-hover);
+  color: var(--et-text-primary);
+}
+
+.sidebar-item.active {
+  background: var(--et-bg-primary-soft);
+  border-color: color-mix(in srgb, var(--et-color-primary) 18%, transparent);
+  color: var(--et-color-primary);
+}
+
+.market-content {
+  padding: 14px 16px 20px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
+}
+
+.market-section + .market-section {
+  margin-top: 24px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.section-subtitle {
+  margin-top: 6px;
+  color: var(--et-text-secondary);
+  font-size: 13px;
+}
+
+.featured-grid,
+.market-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.featured-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.market-grid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.market-card {
+  overflow: hidden;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+  cursor: pointer;
+}
+
+.market-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--et-color-primary) 22%, var(--et-border-color-light));
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--et-color-primary) 10%, transparent);
+}
+
+.market-cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.market-cover.compact {
+  aspect-ratio: 16 / 8.7;
+}
+
+.market-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-badges {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.badge-official {
+  background: var(--et-color-primary);
+}
+
+.badge-hot {
+  background: var(--et-color-warning);
+}
+
+.market-card-body {
+  padding: 14px;
+}
+
+.market-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.grid-card .market-card-title {
+  font-size: 14px;
+}
+
+.market-card-desc {
+  margin-top: 8px;
+  color: var(--et-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.market-card-desc.two-line {
+  min-height: 42px;
+}
+
+.market-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.market-tags.small {
+  margin-top: 10px;
+}
+
+.market-tag {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--et-fill-color-light) 86%, transparent);
+  color: var(--et-text-secondary);
+  font-size: 12px;
+}
+
+.market-meta,
+.market-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.market-meta {
+  margin-top: 12px;
+  color: var(--et-text-tertiary);
+  font-size: 12px;
+}
+
+.market-card-extra {
+  color: var(--et-text-tertiary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+:global(html.dark) .appstore-page {
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
+}
+
+:global(html.dark) .market-hero,
+:global(html.dark) .market-sidebar,
+:global(html.dark) .market-content,
+:global(html.dark) .market-card {
+  box-shadow: var(--et-shadow-overlay);
+}
+
+:global(html.dark) .market-hero {
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
+}
+
+:global(html.dark) .hero-search-card,
+:global(html.dark) .hero-stat,
+:global(html.dark) .market-sidebar,
+:global(html.dark) .market-content,
+:global(html.dark) .market-card {
+  background: color-mix(in srgb, var(--et-bg-container) 82%, transparent);
+}
+
+@media (max-width: 1200px) {
+  .market-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .market-sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .sidebar-section + .sidebar-section {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+@media (max-width: 960px) {
+  .appstore-page {
+    padding: 16px;
+  }
+
+  .market-hero,
+  .market-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-title {
+    font-size: 26px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .market-content {
+    padding: 12px 14px 16px;
+  }
+}
+</style>

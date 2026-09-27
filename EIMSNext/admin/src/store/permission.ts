@@ -8,8 +8,9 @@ import {
   useUserStoreHook,
 } from "@eimsnext/store";
 import router from "@/router";
-import { AppMenu, FormType } from "@eimsnext/models";
+import { AppMenu, FormType, UserType } from "@eimsnext/models";
 import { systemService } from "@eimsnext/services";
+import { bus } from "@eimsnext/utils";
 
 const getMenuType = (menuType: FormType | number | undefined): FormType => {
   if (menuType === undefined) return FormType.Form;
@@ -38,6 +39,15 @@ export const usePermissionStore = defineStore("permission", () => {
   const userStore = useUserStoreHook();
   const { appId, appChanged } = storeToRefs(contextStore);
 
+  const isUnrestrictedAdmin = () => {
+    return [
+      UserType.System,
+      UserType.Client,
+      UserType.CorpOwmer,
+      UserType.CorpAdmin,
+    ].includes(userStore.currentUser.userType);
+  };
+
   watch([appChanged], async ([newVal]) => {
     await generateAppMenus();
   });
@@ -45,10 +55,15 @@ export const usePermissionStore = defineStore("permission", () => {
   const generateAppMenus = async () => {
     appMenus.value = [];
     if (appId.value) {
-      let app = await appStore.get(appId.value);
+      let app;
+      try {
+        app = await appStore.get(appId.value, true, true, { silentError: true });
+      } catch {
+        return;
+      }
       if (app) {
         let appMenuPerms: IAppMenuPerm[] = [];
-        if (!userStore.isAppAdmin())
+        if (!isUnrestrictedAdmin())
           appMenuPerms = await systemService.getAppMenuPerms(appId.value);
 
         appMenus.value = filterAppMenus(app.appMenus, appMenuPerms);
@@ -72,14 +87,14 @@ export const usePermissionStore = defineStore("permission", () => {
       .filter((menu) => {
         const menuType = getMenuType(menu.menuType);
         if (menuType === FormType.Group) {
-          return userStore.isAppAdmin() || (menu.subMenus?.length || 0) > 0;
+          return isUnrestrictedAdmin() || (menu.subMenus?.length || 0) > 0;
         }
 
         return hasMenuPerm(menu.menuId, perms);
       });
   };
   const hasMenuPerm = (menuId: string, menuPerms?: IAppMenuPerm[]) => {
-    if (userStore.isAppAdmin()) return true;
+    if (isUnrestrictedAdmin()) return true;
     if (!menuPerms || menuPerms.length == 0) return false;
     return menuPerms.findIndex((m) => m.id == menuId) > -1;
   };
@@ -123,6 +138,10 @@ export const usePermissionStore = defineStore("permission", () => {
     appMenus.value = [];
     isRoutesLoaded.value = false;
   };
+
+  bus.on("identity:logout", () => {
+    resetRouter();
+  });
 
   return {
     routes,

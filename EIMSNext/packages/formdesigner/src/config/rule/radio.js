@@ -1,7 +1,7 @@
 import { uniqueId8 } from "@eimsnext/form-render-core";
 import {
+  localeOptions,
   localeProps,
-  makeOptionsRule,
   makeTreeOptions,
 } from "../../utils/index";
 
@@ -23,14 +23,18 @@ export default {
   sfc(rule) {
     rule.type = "elRadioGroup";
     rule.children = (rule.options || []).map((opt) => {
+      const option =
+        opt && typeof opt === "object"
+          ? { value: opt.value ?? opt.label, label: opt.label ?? opt.value }
+          : { value: opt, label: opt };
       return {
-        type: rule.props.type === "button" ? "elRadioButton" : "elRadio",
+        type: rule.props?.type === "button" ? "elRadioButton" : "elRadio",
         props: {
-          label: opt,
-          value: opt,
+          label: option.value,
+          value: option.value,
         },
         _sfc: {
-          content: opt.label,
+          content: option.label,
         },
       };
     });
@@ -42,11 +46,8 @@ export default {
       field: `f_${uniqueId8()}`,
       title: t("com.radio.name"),
       info: "",
-      effect: {
-        fetch: "",
-      },
       $required: false,
-      props: {},
+      props: { type: "default", distribution: "horizontal", optionColor: false },
       options: makeTreeOptions(
         t("props.option"),
         { label: "label", value: "value" },
@@ -56,7 +57,33 @@ export default {
   },
   props(_, { t }) {
     return localeProps(t, name + ".props", [
-      makeOptionsRule(t, "options"),
+      {
+        type: "StaticOptionsConfig",
+        field: "formCreateOptions",
+        title: t("props.options"),
+        _fc_important_prop: true,
+        props: {
+          multiple: false,
+        },
+      },
+      {
+        type: "select",
+        field: "type",
+        value: "default",
+        options: localeOptions(t, [
+          { label: "default", value: "default" },
+          { label: "button", value: "button" },
+        ]),
+      },
+      {
+        type: "select",
+        field: "distribution",
+        value: "horizontal",
+        options: localeOptions(t, [
+          { label: "horizontal", value: "horizontal" },
+          { label: "vertical", value: "vertical" },
+        ]),
+      },
       // {type: 'switch', field: 'disabled'}
       // {
       //     type: "CheckBoxInput",
@@ -79,9 +106,6 @@ export default {
       //     field: "readonly",
       //     wrap: { show: false },
       //   },
-      {
-        type: "DefaultValueConfig",
-      },
       { type: "GroupLabel", props: { title: t("props.othersetting") } },
       {
         type: "CheckBoxInput",

@@ -30,7 +30,9 @@ export enum ConditionOperator {
   LessThan = "lt",
   LessThanEquals = "lte",
   In = "in",
+  AllIn = "allin",
   NotIn = "nin",
+  Between = "between",
   Empty = "empty",
   NotEmpty = "notempty",
 }
@@ -40,16 +42,16 @@ export enum ConditionValueType {
 }
 export const dataOperators: Record<string, string[]> = {
   input: ["eq", "ne", "in", "nin", "empty", "notempty"],
-  number: ["eq", "ne", "gt", "gte", "lt", "lte", "empty", "notempty"],
-  timestamp: ["eq", "ne", "gt", "gte", "lt", "lte", "empty", "notempty"],
+  number: ["eq", "ne", "gt", "gte", "lt", "lte", "between", "empty", "notempty"],
+  timestamp: ["eq", "ne", "gt", "gte", "lt", "lte", "between", "empty", "notempty"],
   radio: ["eq", "ne", "in", "nin", "empty", "notempty"],
-  checkbox: ["in", "nin", "empty", "notempty"],
+  checkbox: ["in", "allin", "nin", "empty", "notempty"],
   select: ["eq", "ne", "in", "nin", "empty", "notempty"],
-  select2: ["in", "nin", "empty", "notempty"],
+  select2: ["in", "allin", "nin", "empty", "notempty"],
   department1: ["eq", "ne", "in", "nin", "empty", "notempty"],
-  department2: ["in", "nin", "empty", "notempty"],
+  department2: ["in", "allin", "nin", "empty", "notempty"],
   employee1: ["eq", "ne", "in", "nin", "empty", "notempty"],
-  employee2: ["in", "nin", "empty", "notempty"],
+  employee2: ["in", "allin", "nin", "empty", "notempty"],
   other: ["empty", "notempty"],
 };
 
@@ -153,6 +155,8 @@ export function toDynamicFilter(filter: IConditionList) {
         dfilter.type == FieldType.Department2)
     ) {
       dfilter.value = filter.value.value.map((x: ISelectedTag) => x.id);
+    } else if (filter.op == ConditionOperator.Between) {
+      dfilter.value = Array.isArray(filter.value?.value) ? filter.value?.value : [];
     } else {
       dfilter.value = filter.value?.value;
     }

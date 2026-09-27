@@ -1,6 +1,6 @@
 <template>
   <div class="cond-value">
-    <div v-if="nodes && nodes.length > 0" class="value-type">
+    <div v-if="allowFieldValue || (nodes && nodes.length > 0)" class="value-type">
       <el-select size="default" default-first-option v-model="condValueType" @change="onValueTypeChange">
         <el-option v-for="opt in condValueTypes" :label="opt.label" :value="opt.id" :key="opt.id"></el-option>
       </el-select>
@@ -16,6 +16,7 @@
           v-model="condFieldValue"
           :formId="fieldDef?.formId || ''"
           :fields="fieldBuildSetting.fields"
+          :use-fields="fieldBuildSetting.fields !== undefined"
           :fieldLimit="fieldBuildSetting.fieldLimit"
           @change="onValueChange"
         />
@@ -33,8 +34,19 @@
             <el-input size="default" v-model="value" @blur="onInput"></el-input>
           </template>
         </template>
+        <template v-else-if="isBetweenOperator && dataType == ConditionFieldType.Number">
+          <div class="range-value">
+            <el-input-number size="default" v-model="rangeValue[0]" align="right" @change="onRangeInput"></el-input-number>
+            <span class="range-separator">-</span>
+            <el-input-number size="default" v-model="rangeValue[1]" align="right" @change="onRangeInput"></el-input-number>
+          </div>
+        </template>
         <template v-else-if="dataType == ConditionFieldType.Number">
           <el-input-number size="default" v-model="value" align="right" @change="onInput"></el-input-number>
+        </template>
+        <template v-else-if="isBetweenOperator && dataType == ConditionFieldType.TimeStamp">
+          <el-date-picker size="default" v-model="rangeValue" type="datetimerange" value-format="x"
+            :format="fieldDef?.format" @change="onRangeInput"></el-date-picker>
         </template>
         <template v-else-if="dataType == ConditionFieldType.TimeStamp">
           <el-date-picker size="default" v-model="value" value-format="x" :format="fieldDef?.format"
@@ -54,16 +66,16 @@
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select1">
-          <el-select size="default" filterable allow-create default-first-option v-model="value" @change="onInput">
-            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
-              :key="opt.id"></el-option>
+          <el-select size="default" filterable :allow-create="!hasDynamicSource" default-first-option v-model="value" :remote="hasDynamicSource" :remote-method="searchOptions" :loading="optionsLoading" @visible-change="loadOptions" @change="onInput">
+            <el-option v-for="opt in selectOptions" :label="opt.label" :value="opt.value"
+              :key="String(opt.value)"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Select2">
-          <el-select size="default" multiple filterable allow-create default-first-option v-model="value"
+          <el-select size="default" multiple filterable :allow-create="!hasDynamicSource" default-first-option v-model="value" :remote="hasDynamicSource" :remote-method="searchOptions" :loading="optionsLoading" @visible-change="loadOptions"
             @change="onInput">
-            <el-option v-for="opt in toListItem(fieldDef?.options)" :label="opt.label" :value="opt.id"
-              :key="opt.id"></el-option>
+            <el-option v-for="opt in selectOptions" :label="opt.label" :value="opt.value"
+              :key="String(opt.value)"></el-option>
           </el-select>
         </template>
         <template v-else-if="dataType == ConditionFieldType.Department1">
@@ -107,6 +119,7 @@ import {
 } from "@/NodeFieldList/type";
 import { IListItem } from "@/list/type";
 import { computed, ref, watch } from "vue";
+import { isDynamicSelectSource, loadDynamicSelectOptions, type DynamicSelectOption, type DynamicSelectSource } from "@eimsnext/utils";
 import memberSelectDialog from "@/memberSelect/memberSelectDialog.vue";
 import { useLocale } from "element-plus";
 import { MemberTabs } from "@/memberSelect/type";
@@ -122,11 +135,26 @@ const props = defineProps<{
   fieldBuildSetting: IFieldBuildSetting;
   nodes?: INodeForm[];
   fieldDef?: IFormFieldDef;
+  operator?: string;
+  allowFieldValue?: boolean;
+  optionLoader?: (source: DynamicSelectSource, keyword?: string) => Promise<DynamicSelectOption[]>;
 }>();
 
 const dataType = computed(() => {
   return getConditionFieldType(props.fieldDef?.type ?? FieldType.None);
 });
+
+const isBetweenOperator = computed(() => props.operator == "between");
+const hasDynamicSource = computed(() =>
+  (props.fieldDef?.type === FieldType.Select1 || props.fieldDef?.type === FieldType.Select2) &&
+  isDynamicSelectSource(props.fieldDef?.source),
+);
+const remoteOptions = ref<DynamicSelectOption[]>([]);
+const optionsLoading = ref(false);
+let optionsRequestId = 0;
+const selectOptions = computed(() => hasDynamicSource.value
+  ? mergeSelectedOptions(remoteOptions.value, value.value)
+  : toListItem(props.fieldDef?.options).map((item) => ({ label: item.label, value: item.id })));
 
 const isMemberValueType = computed(
   () =>
@@ -154,6 +182,7 @@ const memberShowTabs = ref(MemberTabs.None);
 
 const condValueType = ref(props.modelValue.type);
 const value = ref<any>(props.modelValue.value);
+const rangeValue = ref<any[]>(Array.isArray(props.modelValue.value) ? [...props.modelValue.value] : [null, null]);
 const condFieldValue = ref<IFormFieldDef>(
   props.modelValue.fieldValue ?? {
     nodeId: "",
@@ -181,6 +210,8 @@ const syncFromModelValue = () => {
   ) {
     value.value = normalizeSelectedTags(value.value);
   }
+
+  rangeValue.value = Array.isArray(props.modelValue.value) ? [...props.modelValue.value] : [null, null];
 };
 
 watch(
@@ -194,7 +225,7 @@ watch(
   },
 );
 
-const condValueTypes: IListItem[] = [
+const condValueTypes = computed<IListItem[]>(() => [
   {
     id: ConditionValueType.Custom,
     label: t("comp.value_Custom"),
@@ -205,7 +236,7 @@ const condValueTypes: IListItem[] = [
     label: t("comp.value_Field"),
     type: DataItemType.Unknown,
   },
-];
+]);
 
 const emit = defineEmits(["update:modelValue", "change"]);
 
@@ -223,6 +254,53 @@ const onValueTypeChange = () => {
 const onInput = () => {
   props.modelValue.value = value.value;
 
+  emitChange();
+};
+const loadOptions = async (visible = true) => {
+  if (!visible || !hasDynamicSource.value || !props.fieldDef?.source || remoteOptions.value.length || optionsLoading.value) return;
+  await searchOptions("");
+};
+const searchOptions = async (keyword: string) => {
+  if (!hasDynamicSource.value || !props.fieldDef?.source) return;
+  const requestId = ++optionsRequestId;
+  optionsLoading.value = true;
+  try {
+    const options = await (props.optionLoader || loadDynamicSelectOptions)(props.fieldDef.source, keyword);
+    if (requestId === optionsRequestId) {
+      remoteOptions.value = options;
+    }
+  } catch {
+    if (requestId === optionsRequestId) {
+      remoteOptions.value = [];
+    }
+  } finally {
+    if (requestId === optionsRequestId) {
+      optionsLoading.value = false;
+    }
+  }
+};
+const mergeSelectedOptions = (options: DynamicSelectOption[], selected: unknown): DynamicSelectOption[] => {
+  const selectedValues = Array.isArray(selected) ? selected : selected === undefined || selected === null ? [] : [selected];
+  const result = [...options];
+  selectedValues.forEach((item) => {
+    const selectedValue = item && typeof item === "object" ? (item as { value?: unknown }).value : item;
+    if (selectedValue === undefined || selectedValue === null || result.some((option) => String(option.value) === String(selectedValue))) return;
+    result.push({ label: String(selectedValue), value: selectedValue as string | number | boolean });
+  });
+  return result;
+};
+
+watch(
+  () => props.fieldDef?.source,
+  () => {
+    optionsRequestId += 1;
+    remoteOptions.value = [];
+    loadOptions(true);
+  },
+  { deep: true, immediate: true },
+);
+const onRangeInput = () => {
+  props.modelValue.value = [...rangeValue.value];
   emitChange();
 };
 const onValueChange = () => {
@@ -267,6 +345,16 @@ const memberSelected = (members: ISelectedTag[]) => {
 
   .value-value {
     flex: 1;
+  }
+
+  .range-value {
+    display: flex;
+    align-items: center;
+    gap: var(--et-space-8);
+  }
+
+  .range-separator {
+    color: var(--et-text-secondary);
   }
 
   :deep(.selected-tags) {

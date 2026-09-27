@@ -12,6 +12,7 @@
           ref="tagRef"
           :class="'tags-item ' + (tagsViewStore.isActive(tag) ? 'active' : '')"
           :data-affix="isAffix(tag)"
+          :title="getTagTitle(tag)"
           role="link"
           tabindex="0"
           draggable="false"
@@ -22,7 +23,7 @@
           @keydown.enter.prevent="() => navigate()"
           @keydown.space.prevent="() => navigate()"
         >
-          {{ translateRouteTitle(t, tag.title) }}
+          <span class="tag-text">{{ getTagTitle(tag) }}</span>
           <et-icon
             v-if="!isAffix(tag) || isClosable(tag)"
             icon="el-Close"
@@ -48,23 +49,23 @@
         @click="closeSelectedTag(selectedTag)"
       >
         <et-icon icon="close" />
-        关闭
+        {{ t("admin.tagsView.close") }}
       </li>
       <li @click="closeOtherTags">
         <et-icon icon="close_other" />
-        关闭其它
+        {{ t("admin.tagsView.closeOther") }}
       </li>
       <li v-if="!isFirstView()" @click="closeLeftTags">
         <et-icon icon="close_left" />
-        关闭左侧
+        {{ t("admin.tagsView.closeLeft") }}
       </li>
       <li v-if="!isLastView()" @click="closeRightTags">
         <et-icon icon="close_right" />
-        关闭右侧
+        {{ t("admin.tagsView.closeRight") }}
       </li>
       <li @click="closeAllTags(selectedTag)">
         <et-icon icon="close_all" />
-        关闭所有
+        {{ t("admin.tagsView.closeAll") }}
       </li>
     </ul>
   </div>
@@ -76,7 +77,7 @@ import { resolve } from "path-browserify";
 import { translateRouteTitle } from "@/utils/common";
 import { usePermissionStore, useTagsViewStore, useSettingsStore, useSystemStore } from "@/store";
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const { proxy } = getCurrentInstance()!;
 const router = useRouter();
@@ -200,10 +201,13 @@ function isAffix(tag: TagView) {
 function isClosable(tag: TagView) {
   return tag?.closable;
 }
+function getTagTitle(tag: TagView) {
+  return translateRouteTitle(t, tag.title, te);
+}
 function isFirstView() {
   try {
     return (
-      selectedTag.value.path === "/workspace" ||
+      selectedTag.value.path === "/workbench" ||
       selectedTag.value.fullPath === tagsViewStore.visitedViews[1].fullPath
     );
   } catch (err) {
@@ -372,8 +376,15 @@ onMounted(() => {
     position: relative;
     overflow: hidden;
     max-width: var(--et-size-180);
-    text-overflow: ellipsis;
     white-space: nowrap;
+
+    .tag-text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     &::before {
       content: "";
@@ -423,6 +434,7 @@ onMounted(() => {
       width: var(--et-size-18);
       height: var(--et-size-18);
       display: inline-flex;
+      flex-shrink: 0;
       align-items: center;
       justify-content: center;
       font-size: var(--et-font-size-12);

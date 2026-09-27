@@ -1,7 +1,7 @@
 <template>
   <div v-click-outside="onClickOutside">
     <!-- <div> -->
-    <ConditionList v-model="condList" :form-id="formId" :max-level="1" @change="onChange" @remove="onClear">
+    <ConditionList v-model="condList" :form-id="formId" :max-level="1" :field-build-setting="filterFieldBuildSetting" @change="onChange" @remove="onClear">
     </ConditionList>
     <div class="actions">
       <el-button type="primary" @click="onSearch">{{ t("common.filter") }}</el-button>
@@ -11,7 +11,7 @@
 </template>
 <script setup lang="ts">
 import { IConditionList } from "@eimsnext/components";
-import { IFieldPerm } from "@eimsnext/models";
+import { FieldType, FormFieldPermission } from "@eimsnext/models";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -24,12 +24,21 @@ const props = withDefaults(
   defineProps<{
     modelValue: IConditionList;
     formId: string;
-    fieldPerms?: IFieldPerm[];
+    formFieldPermissions?: FormFieldPermission[];
   }>(),
   {}
 );
 
 const condList = toRef<IConditionList>(props.modelValue);
+const filterFieldBuildSetting = computed(() => ({
+  version: 0,
+  rule: 0,
+  matchType: false,
+  fieldLimit: {
+    excludeFieldTypes: [FieldType.DataSelect],
+    formFieldPermissions: props.formFieldPermissions,
+  },
+}));
 const onChange = (filter: IConditionList) => {
   condList.value = filter;
 };

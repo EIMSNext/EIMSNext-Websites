@@ -3,55 +3,33 @@
     <el-badge type="warning" is-dot :hidden="!configured">
       <el-button class="_fd-plain-button" plain @click="openDrawer">
         <slot>
-          {{ btn || '设置' }}
+          {{ btn || t('common.set') }}
         </slot>
       </el-button>
     </el-badge>
 
-    <el-drawer
-      v-model="visible"
-      direction="btt"
-      size="95%"
-      :destroy-on-close="true"
-      append-to-body
-      class="_fd-selection-process-drawer"
-    >
+    <el-drawer v-model="visible" direction="btt" size="95%" :destroy-on-close="true" append-to-body
+      class="elt-drawer _fd-selection-process-drawer">
       <template #header>
-        <div class="drawer-title">{{ title || '数据选择过程' }}</div>
+        <div class="drawer-title">{{ title || t('com.dataselect.selectionProcess') }}</div>
       </template>
 
       <div class="drawer-body">
         <div class="drawer-left">
-          <DataSelectTablePanel
-            :form-id="selectedForm"
-            :fields="tableFields"
-            :rows="rows"
-            :loading="loading"
-            :total="total"
-            :page="page"
-            :page-size="pageSize"
-            :filter="filterConfig"
-            :model-value="selectedRow"
-            @update:model-value="selectedRow = $event"
-            @pageChange="handlePageChange"
-            @pageSizeChange="handlePageSizeChange"
-            @filter="handleFilter"
-          />
+          <DataSelectTablePanel :form-id="selectedForm" :fields="tableFields" :rows="rows" :loading="loading"
+            :total="total" :page="page" :page-size="pageSize" :filter="filterConfig" :model-value="selectedRow"
+            @update:model-value="selectedRow = $event" @pageChange="handlePageChange"
+            @pageSizeChange="handlePageSizeChange" @filter="handleFilter" />
         </div>
         <div class="drawer-right">
           <div class="config-block">
-            <div class="config-label">按钮文字</div>
-            <el-input v-model="config.buttonText" placeholder="选择数据" />
+            <div class="config-label">{{ t('com.dataselect.buttonText') }}</div>
+            <el-input v-model="config.buttonText" :placeholder="t('com.dataselect.selectData')" />
           </div>
           <div class="config-block">
-            <div class="config-label">选择数据时的显示字段</div>
-            <DataSelectFieldPicker
-              v-model="config.tableFields"
-              :fields="sourceFields"
-              :show-trigger="true"
-              :default-expanded="false"
-              :trigger-text="fieldTriggerText"
-            />
+            <div class="config-label">{{ t('com.dataselect.selectionDisplayFields') }}</div>
+            <DataSelectFieldPicker v-model="config.tableFields" :fields="sourceFields" :show-trigger="true"
+              :default-expanded="false" :trigger-text="fieldTriggerText" />
           </div>
         </div>
       </div>
@@ -96,7 +74,7 @@ export default defineComponent({
       filterConfig: { id: '', rel: 'and', items: [] },
       selectedRow: null,
       sourceFields: [],
-      config: normalizeSelectionProcess(this.modelValue),
+      config: normalizeSelectionProcess(this.modelValue, this.designer?.setupState?.t),
     };
   },
   computed: {
@@ -104,13 +82,16 @@ export default defineComponent({
       return this.designer.setupState.t;
     },
     configured() {
-      return this.config.tableFields.length > 0 || !!this.config.buttonText;
+      return this.config.tableFields.length > 0;
     },
     activeRule() {
       return this.designer.setupState.activeRule;
     },
     selectedForm() {
       return this.activeRule?.props?.dataSource || '';
+    },
+    targetAppId() {
+      return this.designer.setupState.appId || '';
     },
     tableFields() {
       return this.config.tableFields.length > 0
@@ -119,13 +100,13 @@ export default defineComponent({
     },
     fieldTriggerText() {
       const count = this.config.tableFields.length;
-      return count > 0 ? `显示 ${count} 个字段` : '请选择显示字段';
+      return count > 0 ? this.t('com.dataselect.displayFieldCount', { count }) : this.t('com.dataselect.selectDisplayFields');
     },
   },
   watch: {
     modelValue: {
       handler(value) {
-        this.config = normalizeSelectionProcess(value);
+        this.config = normalizeSelectionProcess(value, this.t);
       },
       deep: true,
     },
@@ -133,8 +114,8 @@ export default defineComponent({
   methods: {
     async openDrawer() {
       this.visible = true;
-      this.config = normalizeSelectionProcess(this.modelValue);
-      this.sourceFields = await loadSourceFormFields(this.selectedForm);
+      this.config = normalizeSelectionProcess(this.modelValue, this.t);
+      this.sourceFields = await loadSourceFormFields(this.selectedForm, this.targetAppId);
       if (this.config.tableFields.length === 0) {
         this.config.tableFields = buildDefaultDisplayFields(this.config, this.sourceFields);
       }
@@ -155,10 +136,16 @@ export default defineComponent({
           page: this.page,
           pageSize: this.pageSize,
           filter: this.filterConfig,
+          fields: this.tableFields,
         });
         const result = await formDataService.query(query);
+        const count = await formDataService.count(query.filter).catch(() => null);
         this.rows = result.map((item) => mergeDataSelectRecord(item));
-        this.total = result.length;
+        const parsedCount = Number(count);
+        this.total = Number.isFinite(parsedCount)
+          ? parsedCount
+          : (this.page - 1) * this.pageSize + result.length
+            + (result.length === this.pageSize ? 1 : 0);
       } finally {
         this.loading = false;
       }
@@ -178,7 +165,7 @@ export default defineComponent({
       this.loadRows();
     },
     onOk() {
-      const nextValue = normalizeSelectionProcess(this.config);
+      const nextValue = normalizeSelectionProcess(this.config, this.t);
       this.$emit('update:modelValue', nextValue);
       this.$emit('change', nextValue);
       this.visible = false;
@@ -230,7 +217,7 @@ export default defineComponent({
     overflow: auto;
   }
 
-  .config-block + .config-block {
+  .config-block+.config-block {
     margin-top: 22px;
   }
 

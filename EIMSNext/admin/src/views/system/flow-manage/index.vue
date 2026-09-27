@@ -1,6 +1,6 @@
 <template>
   <div class="flow-manage-container">
-    <el-dialog v-model="showApproverDialog" title="变更当前节点审批人" width="520px" destroy-on-close>
+    <el-dialog v-model="showApproverDialog" :title="$t('admin.flowManage.changeApprover')" width="520px" destroy-on-close>
       <member-select-dialog
         v-model="showMemberDialog"
         :tags="selectedApproverTags"
@@ -13,14 +13,14 @@
           v-model="selectedApproverTags"
           :editable="true"
           :multiple="false"
-          empty-text="请选择审批人"
+          :empty-text="$t('admin.flowManage.selectApprover')"
           @editTag="showMemberDialog = true"
         />
-        <el-input v-model="changeComment" type="textarea" :rows="4" placeholder="请输入变更说明，可选" />
+        <el-input v-model="changeComment" type="textarea" :rows="4" :placeholder="$t('admin.flowManage.changeComment')" />
       </div>
       <template #footer>
-        <el-button @click="closeApproverDialog">取消</el-button>
-        <el-button type="primary" :loading="actionLoading" @click="submitChangeApprover">确定</el-button>
+        <el-button @click="closeApproverDialog">{{ $t("common.cancel") }}</el-button>
+        <el-button type="primary" :loading="actionLoading" :disabled="actionLoading" @click="submitChangeApprover">{{ $t("common.ok") }}</el-button>
       </template>
     </el-dialog>
 
@@ -29,18 +29,18 @@
         <div class="toolbar-actions">
           <el-button :disabled="checkedRows.length === 0 || actionLoading" @click="handleTerminate">
             <et-icon icon="circle-close" />
-            废弃实例
+            {{ $t("admin.flowManage.terminate") }}
           </el-button>
           <el-button :disabled="checkedRows.length === 0 || actionLoading" @click="openApproverDialog">
             <et-icon icon="edit-pen" />
-            变更当前节点审批人
+            {{ $t("admin.flowManage.changeApprover") }}
           </el-button>
         </div>
         <div class="toolbar-search">
           <el-input
             v-model="keyword"
             clearable
-            placeholder="请输入数据ID进行查询"
+            :placeholder="$t('admin.flowManage.searchPlaceholder')"
             @clear="handleSearch"
             @keyup.enter="handleSearch"
           >
@@ -57,26 +57,27 @@
         <el-table
           v-loading="loading"
           :data="tableData"
+          :row-key="getRowKey"
           height="100%"
           class="flow-manage-table"
           show-overflow-tooltip
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="52" reserve-selection :selectable="() => true" />
-          <el-table-column label="状态" min-width="100">
+          <el-table-column :label="$t('admin.status')" min-width="100">
             <template #default>
-              <span class="status-running">进行中</span>
+              <span class="status-running">{{ $t("admin.flowManage.inProgress") }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="数据ID" min-width="180" prop="dataId" />
-          <el-table-column label="表单名称" min-width="180" prop="formName" />
-          <el-table-column label="申请人" min-width="120">
+          <el-table-column :label="$t('admin.flowManage.dataId')" min-width="180" prop="dataId" />
+          <el-table-column :label="$t('admin.flowManage.formName')" min-width="180" prop="formName" />
+          <el-table-column :label="$t('admin.flowManage.applicant')" min-width="120">
             <template #default="scope">{{ scope.row.starter?.label || "-" }}</template>
           </el-table-column>
-          <el-table-column label="当前审批人" min-width="140" prop="currentApproverName" />
-          <el-table-column label="部门" min-width="180" prop="departmentName" />
-          <el-table-column label="当前节点" min-width="160" prop="approveNodeName" />
-          <el-table-column label="当前节点到达时间" min-width="180">
+          <el-table-column :label="$t('admin.flowManage.currentApprover')" min-width="140" prop="currentApproverName" />
+          <el-table-column :label="$t('admin.flowManage.department')" min-width="180" prop="departmentName" />
+          <el-table-column :label="$t('admin.flowManage.currentNode')" min-width="160" prop="approveNodeName" />
+          <el-table-column :label="$t('admin.flowManage.nodeArrivalTime')" min-width="180">
             <template #default="scope">{{ formatDateTime(scope.row.approveNodeStartTime) }}</template>
           </el-table-column>
         </el-table>
@@ -91,9 +92,12 @@
 
 <script setup lang="ts">
 import { dateFormat } from "@/utils/common";
-import { FlowManageTodoItem } from "@eimsnext/models";
+import { FlowManageTaskItem } from "@eimsnext/models";
 import { workflowService } from "@eimsnext/services";
 import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FlowManage",
@@ -106,8 +110,8 @@ const keyword = ref("");
 const pageNum = ref(1);
 const pageSize = ref(20);
 const totalRef = ref(0);
-const tableData = ref<FlowManageTodoItem[]>([]);
-const checkedRows = ref<FlowManageTodoItem[]>([]);
+const tableData = ref<FlowManageTaskItem[]>([]);
+const checkedRows = ref<FlowManageTaskItem[]>([]);
 const showApproverDialog = ref(false);
 const showMemberDialog = ref(false);
 const selectedApproverTags = ref<ISelectedTag[]>([]);
@@ -120,21 +124,28 @@ const memberOptions = computed(() => ({
 
 const formatDateTime = (value?: number) => dateFormat(value, "YYYY-MM-DD HH:mm:ss") || "-";
 
+const getRowKey = (row: FlowManageTaskItem) => row.taskId;
+
 const handleQuery = async () => {
   loading.value = true;
   try {
-    const result = await workflowService.queryManageTodos({
+    const result = await workflowService.queryManageTasks({
       keyword: keyword.value.trim(),
       pageNum: pageNum.value,
       pageSize: pageSize.value,
     });
-    tableData.value = result.items || [];
-    totalRef.value = result.total || 0;
+    tableData.value = result?.items ?? [];
+    totalRef.value = result?.total ?? 0;
     checkedRows.value = checkedRows.value.filter((checked) =>
       tableData.value.some(
         (item) => item.wfInstanceId === checked.wfInstanceId && item.approveNodeId === checked.approveNodeId
       )
     );
+  } catch {
+    tableData.value = [];
+    totalRef.value = 0;
+    checkedRows.value = [];
+    ElMessage.error(t("common.loadFailed"));
   } finally {
     loading.value = false;
   }
@@ -151,8 +162,32 @@ const pageChanged = (curPage: number, pSize: number) => {
   handleQuery();
 };
 
-const handleSelectionChange = (rows: FlowManageTodoItem[]) => {
+const handleSelectionChange = (rows: FlowManageTaskItem[]) => {
   checkedRows.value = rows;
+};
+
+const showBatchActionResult = async (
+  results: PromiseSettledResult<unknown>[],
+  actionName: string,
+) => {
+  const failedDataIds = results
+    .map((result, index) => (result.status === "rejected" ? checkedRows.value[index]?.dataId || "-" : null))
+    .filter((dataId): dataId is string => dataId !== null);
+
+  if (failedDataIds.length === 0) {
+    ElMessage.success(t("admin.flowManage.batchSuccess", { action: actionName }));
+    return;
+  }
+
+  await ElMessageBox.alert(
+    t("admin.flowManage.batchPartial", {
+      success: results.length - failedDataIds.length,
+      failed: failedDataIds.length,
+      details: failedDataIds.join(", "),
+    }),
+    t("admin.flowManage.batchResultTitle", { action: actionName }),
+    { type: "warning" },
+  );
 };
 
 const handleTerminate = async () => {
@@ -160,15 +195,15 @@ const handleTerminate = async () => {
     return;
   }
 
-  await ElMessageBox.confirm(`确认废弃选中的 ${checkedRows.value.length} 条流程实例吗？`, "废弃实例", {
+  await ElMessageBox.confirm(t("admin.flowManage.confirmTerminate", { count: checkedRows.value.length }), t("admin.flowManage.terminate"), {
     type: "warning",
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
+    confirmButtonText: t("common.ok"),
+    cancelButtonText: t("common.cancel"),
   });
 
   actionLoading.value = true;
   try {
-    await Promise.all(
+    const results = await Promise.allSettled(
       checkedRows.value.map((row) =>
         workflowService.terminate({
           wfInstanceId: row.wfInstanceId,
@@ -176,7 +211,7 @@ const handleTerminate = async () => {
         })
       )
     );
-    ElMessage.success("流程已废弃");
+    await showBatchActionResult(results, t("admin.flowManage.terminate"));
     checkedRows.value = [];
     await handleQuery();
   } finally {
@@ -214,13 +249,13 @@ const submitChangeApprover = async () => {
 
   const targetEmployeeId = selectedApproverTags.value[0]?.id;
   if (!targetEmployeeId) {
-    ElMessage.warning("请选择新的审批人");
+    ElMessage.warning(t("admin.flowManage.selectNewApprover"));
     return;
   }
 
   actionLoading.value = true;
   try {
-    await Promise.all(
+    const results = await Promise.allSettled(
       checkedRows.value.map((row) =>
         workflowService.changeApprover({
           wfInstanceId: row.wfInstanceId,
@@ -231,7 +266,7 @@ const submitChangeApprover = async () => {
         })
       )
     );
-    ElMessage.success("审批人已更新");
+    await showBatchActionResult(results, t("admin.flowManage.changeApprover"));
     closeApproverDialog();
     checkedRows.value = [];
     await handleQuery();
@@ -337,3 +372,4 @@ onMounted(() => {
   }
 }
 </style>
+

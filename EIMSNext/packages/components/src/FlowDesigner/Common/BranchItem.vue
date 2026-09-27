@@ -1,6 +1,6 @@
 <template>
-  <div class="branch-item">
-    <SvgLine />
+  <div class="branch-item" :class="{ 'log-executed': isExecuted, 'log-failed': isFailed }">
+    <SvgLine :executed="isExecuted" :failed="isFailed" />
     <div class="branch-item-panel">
       <div class="branch-item-condition branch-item-condition-spacer" />
       <ConditionNode
@@ -10,7 +10,7 @@
         :node-data="nodeData.conditionData!"
         :data-index="dataIndex"
       />
-      <template v-for="item in nodeData.childNodes">
+      <template v-for="item in nodeData.childNodes" :key="item.id">
         <ApproveNode
           v-if="item.nodeType == FlowNodeType.Approve"
           :p-node-datas="nodeData.childNodes!"
@@ -82,7 +82,8 @@ import DeleteNode from "./DeleteNode.vue";
 import PrintNode from "./PrintNode.vue";
 import PluginNode from "./PluginNode.vue";
 import BranchNode from "./BranchNode.vue";
-import { FlowNodeType, IFlowNodeData } from "./FlowData";
+import { computed, inject } from "vue";
+import { FlowNodeType, IFlowContext, IFlowNodeData } from "./FlowData";
 import SvgLine from "./SvgLine.vue";
 
 defineOptions({
@@ -94,6 +95,33 @@ const props = defineProps<{
   nodeData: IFlowNodeData;
   dataIndex: number;
 }>();
+const flowContext = inject<IFlowContext>("flowContext")!;
+const isExecuted = computed(() => {
+  if (!flowContext.logState) return false;
+  if (flowContext.logState.isBranchExecuted?.(props.nodeData)) return true;
+  return props.nodeData.childNodes?.some(hasExecutedNode) ?? false;
+});
+const isFailed = computed(() => {
+  if (!flowContext.logState) return false;
+  if (flowContext.logState.isBranchFailed?.(props.nodeData)) return true;
+  return props.nodeData.childNodes?.some(hasFailedNode) ?? false;
+});
+
+const hasExecutedNode = (node: IFlowNodeData): boolean => {
+  if (flowContext.logState?.executedNodeIds.has(node.id) || flowContext.logState?.failedNodeIds.has(node.id)) {
+    return true;
+  }
+
+  return node.childNodes?.some(hasExecutedNode) ?? false;
+};
+
+const hasFailedNode = (node: IFlowNodeData): boolean => {
+  if (flowContext.logState?.failedNodeIds.has(node.id)) {
+    return true;
+  }
+
+  return node.childNodes?.some(hasFailedNode) ?? false;
+};
 </script>
 
 <style scoped>

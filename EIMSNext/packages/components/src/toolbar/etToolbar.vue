@@ -12,6 +12,9 @@
         @command="handleCommand"
       />
     </div>
+    <div v-if="$slots.default" class="middle-group">
+      <slot />
+    </div>
     <div
       v-if="rightGroupRef && rightGroupRef.length > 0"
       class="right-group"
@@ -69,8 +72,10 @@ const handleCommand = (cmd: string, e: MouseEvent, callback: any) => {
 }
 
 .left-group,
+.middle-group,
 .right-group {
   display: flex;
+  align-items: center;
   justify-content: center;
 }
 </style>

@@ -5,7 +5,7 @@
         <el-button class="back-btn" @click="close">
           <et-icon icon="el-ArrowLeft" size="32px" />
         </el-button>
-        <span class="nav-text">个人设置</span>
+        <span class="nav-text">{{ $t("admin.profile.title") }}</span>
       </div>
     </div>
     <div class="main-container">
@@ -13,32 +13,39 @@
         <div class="info-container team-name-container">
           <div class="team-current">
             <div :title="contextStore.corpName">
-              <span class="team-prefix">{{ t("admin.currentCorporate") }}：</span>
+              <span class="team-prefix">{{ $t("admin.currentCorporate") }}：</span>
               <span class="team-text">{{ contextStore.corpName }}</span>
             </div>
-            <div class="team-label">我创建的</div>
+            <div class="team-label">{{ $t("admin.profile.myCreated") }}</div>
           </div>
         </div>
         <div class="biz-panel info-container team-container">
-          <div class="prefixed-label"><span class="title">基本信息</span></div>
+          <div class="prefixed-label"><span class="title">{{ $t("admin.profile.basicInfo") }}</span></div>
           <div class="panel-wrapper rows-layout">
             <div class="panel-row">
-              <div class="row-label fixed-label-width">通讯录头像</div>
+              <div class="row-label fixed-label-width">{{ $t("admin.profile.avatar") }}</div>
               <div class="row-content">
                 <user-avatar size="24px" :avatar="userStore.currentUser.avatar"
                   :label="userStore.currentUser.empName" />
-                <el-link type="primary" underline="never" class="link-btn">修改</el-link>
+                <el-upload
+                  class="avatar-upload"
+                  accept="image/gif,image/jpeg,image/png,image/webp"
+                  :show-file-list="false"
+                  :http-request="uploadAvatar"
+                >
+                  <el-link type="primary" underline="never" class="link-btn">{{ $t("admin.profile.edit") }}</el-link>
+                </el-upload>
               </div>
             </div>
             <div class="panel-row">
-              <div class="row-label fixed-label-width">通讯录姓名</div>
+              <div class="row-label fixed-label-width">{{ $t("admin.profile.name") }}</div>
               <div class="row-content">
                 <span class="content-row">{{ userStore.currentUser.empName }}</span>
-                <el-link type="primary" underline="never" class="link-btn">修改</el-link>
+                <el-link type="primary" underline="never" class="link-btn">{{ $t("admin.profile.edit") }}</el-link>
               </div>
             </div>
             <div class="panel-row">
-              <div class="row-label fixed-label-width">用户ID</div>
+              <div class="row-label fixed-label-width">{{ $t("admin.profile.userId") }}</div>
               <div class="row-content">
                 <span class="content-row">{{ userStore.currentUser.userId }}</span>
               </div>
@@ -47,69 +54,60 @@
         </div>
         <el-divider class="section-divider" />
         <div class="biz-panel info-container user-container">
-          <div class="prefixed-label"><span class="title">账号安全</span></div>
+          <div class="prefixed-label"><span class="title">{{ $t("admin.profile.accountSecurity") }}</span></div>
           <div class="panel-wrapper rows-layout">
             <div class="panel-row">
-              <div class="row-label fixed-label-width">密码</div>
+              <div class="row-label fixed-label-width">{{ $t("admin.profile.password") }}</div>
               <div class="row-content">
                 <el-link type="primary" underline="never" class="link-btn"
-                  @click="openDialog('change-password')">修改</el-link>
+                  @click="openDialog('change-password')">{{ $t("admin.profile.change") }}</el-link>
               </div>
             </div>
             <div class="panel-row">
-              <div class="row-label fixed-label-width">手机</div>
+              <div class="row-label fixed-label-width">{{ $t("admin.profile.phone") }}</div>
               <div class="row-content">
                 <span class="content-row">{{ displayPhone }}</span>
                 <el-link type="primary" underline="never" class="link-btn"
                   @click="openDialog(hasPhone ? 'change-phone' : 'bind-phone')">
-                  {{ hasPhone ? '修改' : '绑定' }}
+                  {{ hasPhone ? $t("admin.profile.change") : $t("admin.profile.bind") }}
                 </el-link>
                 <el-link v-if="canUnbindPhone" type="primary" underline="never" class="link-btn"
                   @click="openDialog('unbind-phone')">
-                  解绑
+                  {{ $t("admin.profile.unbind") }}
                 </el-link>
               </div>
             </div>
             <div class="panel-row">
-              <div class="row-label fixed-label-width">邮箱</div>
+              <div class="row-label fixed-label-width">{{ $t("admin.profile.email") }}</div>
               <div class="row-content">
                 <span class="content-row">{{ displayEmail }}</span>
                 <el-link type="primary" underline="never" class="link-btn"
                   @click="openDialog(hasEmail ? 'change-email' : 'bind-email')">
-                  {{ hasEmail ? '修改' : '绑定' }}
+                  {{ hasEmail ? $t("admin.profile.change") : $t("admin.profile.bind") }}
                 </el-link>
                 <el-link v-if="canUnbindEmail" type="primary" underline="never" class="link-btn"
                   @click="openDialog('unbind-email')">
-                  解绑
+                  {{ $t("admin.profile.unbind") }}
                 </el-link>
               </div>
             </div>
             <div class="panel-row">
-              <div class="row-label fixed-label-width">禁止同时登录</div>
+              <div class="row-label fixed-label-width">{{ $t("admin.profile.noConcurrentLogin") }}</div>
               <div class="row-content">
                 <el-switch />
               </div>
             </div>
-            <div class="panel-row bind-info-row">
-              <div class="row-label fixed-label-width">账号绑定</div>
-              <div class="row-content">
-                <div class="social-icon">
-                  <et-icon icon="wechat" size="24px" color="green" />
-                  <span class="item-text">微信</span>
-                  <el-link type="primary" underline="never" class="link-btn">解绑</el-link>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
         <el-divider class="section-divider" />
         <div class="biz-panel info-container">
           <div class="panel-wrapper rows-layout">
             <div class="panel-row">
-              <div class="row-label fixed-label-width">账号注销</div>
+              <div class="row-label fixed-label-width">{{ $t("admin.profile.accountDeletion") }}</div>
               <div class="row-content">
                 <el-link type="primary" underline="never" class="link-btn danger-link">
-                  注销
+                  {{ $t("admin.profile.deletion") }}
                 </el-link>
               </div>
             </div>
@@ -131,14 +129,14 @@
                 :type="verifyMethod === 'password' ? 'password' : 'input'" show-password />
               <el-input v-else v-model="verifyForm.code">
                 <template #append>
-                  <el-button link type="primary" @click="sendVerifyCode">发送验证码</el-button>
+                  <el-button link type="primary" @click="sendVerifyCode">{{ $t("admin.profile.sendCode") }}</el-button>
                 </template>
               </el-input>
             </el-form-item>
           </el-form>
           <div class="verify-switches">
             <el-link v-for="option in verifyOptions" :key="option.value" type="primary" underline="never"
-              @click="verifyMethod = option.value">
+              @click="switchVerifyMethod(option.value)">
               {{ option.label }}
             </el-link>
           </div>
@@ -147,39 +145,54 @@
         <template v-else>
           <el-form ref="actionFormRef" :model="actionForm" label-position="top">
             <template v-if="dialogMode === 'change-password'">
-              <el-form-item label="新密码">
-                <el-input v-model="actionForm.newPassword" type="password" show-password />
+              <el-form-item :label="$t('admin.profile.newPassword')">
+                <el-popover placement="bottom-start" :width="320" trigger="click" :visible="showPasswordTips">
+                  <template #reference>
+                    <el-input v-model="actionForm.newPassword" type="password" show-password
+                      @focus="showPasswordTips = true" @blur="showPasswordTips = false" />
+                  </template>
+                  <div class="password-tip-list">
+                    <div class="password-tip-item" :class="{ passed: passwordState.hasLength }">
+                      <span class="password-tip-icon">{{ passwordState.hasLength ? "✓" : "○" }}</span>
+                      <span>{{ $t("admin.profile.passwordRules.length") }}</span>
+                    </div>
+                    <div class="password-tip-item" :class="{ passed: passwordState.hasCategoryCount }">
+                      <span class="password-tip-icon">{{ passwordState.hasCategoryCount ? "✓" : "○" }}</span>
+                      <span>{{ $t("admin.profile.passwordRules.categories") }}</span>
+                    </div>
+                  </div>
+                </el-popover>
               </el-form-item>
-              <el-form-item label="确认新密码">
+              <el-form-item :label="$t('admin.profile.confirmPassword')">
                 <el-input v-model="actionForm.confirmPassword" type="password" show-password />
               </el-form-item>
             </template>
             <template v-else-if="dialogMode === 'change-phone' || dialogMode === 'bind-phone'">
-              <el-form-item label="手机号">
+              <el-form-item :label="$t('admin.profile.phoneNumber')">
                 <el-input v-model="actionForm.phone" maxlength="11" />
               </el-form-item>
-              <el-form-item label="验证码">
+              <el-form-item :label="$t('admin.profile.code')">
                 <el-input v-model="actionForm.code">
                   <template #append>
-                    <el-button link type="primary" @click="sendActionCode('phone')">发送验证码</el-button>
+                    <el-button link type="primary" @click="sendActionCode('phone')">{{ $t("admin.profile.sendCode") }}</el-button>
                   </template>
                 </el-input>
               </el-form-item>
             </template>
             <template v-else-if="dialogMode === 'change-email' || dialogMode === 'bind-email'">
-              <el-form-item label="邮箱">
+              <el-form-item :label="$t('admin.profile.email')">
                 <el-input v-model="actionForm.email" />
               </el-form-item>
-              <el-form-item label="验证码">
+              <el-form-item :label="$t('admin.profile.code')">
                 <el-input v-model="actionForm.code">
                   <template #append>
-                    <el-button link type="primary" @click="sendActionCode('email')">发送验证码</el-button>
+                    <el-button link type="primary" @click="sendActionCode('email')">{{ $t("admin.profile.sendCode") }}</el-button>
                   </template>
                 </el-input>
               </el-form-item>
             </template>
             <template v-else>
-              <div class="unbind-tip">身份验证已通过，点击保存后将解绑当前{{ dialogMode === 'unbind-phone' ? '手机' : '邮箱' }}。</div>
+              <div class="unbind-tip">{{ $t("admin.profile.unbindTips", { type: dialogMode === 'unbind-phone' ? $t("admin.profile.phone") : $t("admin.profile.email") }) }}</div>
             </template>
           </el-form>
         </template>
@@ -187,9 +200,9 @@
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="closeDialog">取消</el-button>
-          <el-button type="primary" :loading="submitting" @click="submitDialog">{{ dialogStep === 'verify' ? '下一步' :
-            '保存' }}</el-button>
+          <el-button @click="closeDialog">{{ $t("common.cancel") }}</el-button>
+          <el-button type="primary" :loading="submitting" :disabled="submitting" @click="submitDialog">{{ dialogStep === 'verify' ? $t("admin.profile.nextStep") :
+            $t("common.save") }}</el-button>
         </div>
       </template>
     </et-dialog>
@@ -200,10 +213,12 @@
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore, useContextStore } from "@eimsnext/store";
-import { authProfileService, systemService } from "@eimsnext/services";
+import { identityProfileService, systemService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
+import { http } from "@eimsnext/utils";
+import { getPasswordStrengthMessage, getPasswordStrengthState, isStrongPassword } from "@/utils/password";
 
 type DialogMode = "change-password" | "change-phone" | "bind-phone" | "change-email" | "bind-email" | "unbind-phone" | "unbind-email";
 type DialogStep = "verify" | "action";
@@ -224,6 +239,7 @@ const verifyFormRef = ref<FormInstance>();
 const actionFormRef = ref<FormInstance>();
 const verifyCountdown = ref(0);
 const actionCountdown = ref(0);
+const showPasswordTips = ref(false);
 let verifyTimer: ReturnType<typeof setInterval> | undefined;
 let actionTimer: ReturnType<typeof setInterval> | undefined;
 
@@ -239,51 +255,61 @@ const actionForm = reactive({
   email: "",
   code: "",
 });
+const passwordState = computed(() => getPasswordStrengthState(actionForm.newPassword));
 
 const hasPhone = computed(() => !!userStore.currentUser.phone);
 const hasEmail = computed(() => !!userStore.currentUser.email);
 const canUnbindPhone = computed(() => hasPhone.value && hasEmail.value);
 const canUnbindEmail = computed(() => hasPhone.value && hasEmail.value);
-const displayPhone = computed(() => maskPhone(userStore.currentUser.phone) || "未绑定");
-const displayEmail = computed(() => maskEmail(userStore.currentUser.email) || "未绑定");
+const displayPhone = computed(() => maskPhone(userStore.currentUser.phone) || t("admin.misc.unbound"));
+const displayEmail = computed(() => maskEmail(userStore.currentUser.email) || t("admin.misc.unbound"));
 
 const verifyOptions = computed(() => {
-  const options: Array<{ value: VerifyMethod; label: string }> = [{ value: "password", label: "密码验证" }];
+  const options: Array<{ value: VerifyMethod; label: string }> = [{ value: "password", label: t("admin.profile.passwordVerify") }];
   if (hasPhone.value) {
-    options.push({ value: "phone", label: "手机验证" });
+    options.push({ value: "phone", label: t("admin.profile.phoneVerify") });
   }
   if (hasEmail.value) {
-    options.push({ value: "email", label: "邮箱验证" });
+    options.push({ value: "email", label: t("admin.profile.emailVerify") });
   }
   return options.length == 1 ? options : options.filter(x => x.value != verifyMethod.value);
 });
 
-const dialogTitleMap: Record<DialogMode, string> = {
-  "change-password": "修改密码",
-  "change-phone": "修改手机",
-  "bind-phone": "绑定手机",
-  "change-email": "修改邮箱",
-  "bind-email": "绑定邮箱",
-  "unbind-phone": "解绑手机",
-  "unbind-email": "解绑邮箱",
-};
-
-const dialogTitle = computed(() => dialogTitleMap[dialogMode.value]);
+const dialogTitle = computed(() => {
+  switch (dialogMode.value) {
+    case "change-password":
+      return t("admin.profile.change") + t("admin.profile.password");
+    case "change-phone":
+      return t("admin.profile.change") + t("admin.profile.phone");
+    case "bind-phone":
+      return t("admin.profile.bind") + t("admin.profile.phone");
+    case "change-email":
+      return t("admin.profile.change") + t("admin.profile.email");
+    case "bind-email":
+      return t("admin.profile.bind") + t("admin.profile.email");
+    case "unbind-phone":
+      return t("admin.profile.unbind") + t("admin.profile.phone");
+    case "unbind-email":
+      return t("admin.profile.unbind") + t("admin.profile.email");
+    default:
+      return "";
+  }
+});
 const actionTip = computed(() => {
   switch (dialogMode.value) {
     case "change-password":
-      return "请输入新的登录密码，并妥善保管。";
+      return t("admin.profile.passwordTips");
     case "change-phone":
     case "bind-phone":
-      return "请输入新的手机号，并通过验证码完成确认。";
+      return t("admin.profile.phoneTips");
     case "change-email":
     case "bind-email":
-      return "请输入新的邮箱，并通过验证码完成确认。";
+      return t("admin.profile.emailTips");
     default:
-      return "解绑后可使用其他已绑定方式继续验证身份。";
+      return t("admin.profile.unbindTips", { type: dialogMode.value.includes("phone") ? t("admin.profile.phone") : t("admin.profile.email") });
   }
 });
-const verifyPrimaryLabel = computed(() => (verifyMethod.value === "email" ? "电子邮箱" : "手机号"));
+const verifyPrimaryLabel = computed(() => (verifyMethod.value === "email" ? t("admin.profile.email") : t("admin.profile.phone")));
 const verifyPrimaryValue = computed(() => {
   if (verifyMethod.value === "email") {
     return displayEmail.value;
@@ -291,35 +317,45 @@ const verifyPrimaryValue = computed(() => {
   if (verifyMethod.value === "phone") {
     return displayPhone.value;
   }
-  return displayPhone.value !== "未绑定" ? displayPhone.value : displayEmail.value;
+  return hasPhone.value ? displayPhone.value : displayEmail.value;
 });
-const verifyInputLabel = computed(() => (verifyMethod.value === "password" ? "密码" : "验证码"));
-const verifySendText = computed(() => (verifyCountdown.value > 0 ? `${verifyCountdown.value}s后重发` : "发送验证码"));
-const actionSendText = computed(() => (actionCountdown.value > 0 ? `${actionCountdown.value}s后重发` : "发送验证码"));
+const verifyInputLabel = computed(() => (verifyMethod.value === "password" ? t("admin.profile.password") : t("admin.profile.code")));
 const verifyCodeTarget = computed(() => (verifyMethod.value === "phone" ? userStore.currentUser.phone : userStore.currentUser.email));
 const verifyCodeDisabled = computed(() => verifyMethod.value === "password" || verifyCountdown.value > 0 || !verifyCodeTarget.value);
-const actionCodeDisabled = computed(() => actionCountdown.value > 0 || !getActionTargetValue());
 
 const verifyRules: FormRules = {
-  password: [{ required: true, message: "请输入当前密码", trigger: "blur" }],
-  code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
+  password: [{ required: true, message: t("admin.profile.rules.passwordRequired"), trigger: "blur" }],
+  code: [{ required: true, message: t("admin.profile.rules.codeRequired"), trigger: "blur" }],
 };
 
 const actionRules: FormRules = {
   newPassword: [
-    { required: true, message: "请输入新密码", trigger: "blur" },
-    { min: 6, message: "新密码至少6位", trigger: "blur" },
-  ],
-  confirmPassword: [
-    { required: true, message: "请再次输入新密码", trigger: "blur" },
+    { required: true, message: t("admin.profile.rules.newPasswordRequired"), trigger: "blur" },
     {
       validator: (_rule, value, callback) => {
         if (!value) {
-          callback(new Error("请再次输入新密码"));
+          callback(new Error(t("admin.profile.rules.newPasswordRequired")));
+          return;
+        }
+        if (!isStrongPassword(value)) {
+          callback(new Error(getPasswordStrengthMessage(t("admin.profile.newPassword"), t)));
+          return;
+        }
+        callback();
+      },
+      trigger: "blur",
+    },
+  ],
+  confirmPassword: [
+    { required: true, message: t("admin.profile.rules.codeRequired"), trigger: "blur" },
+    {
+      validator: (_rule, value, callback) => {
+        if (!value) {
+          callback(new Error(t("admin.profile.rules.codeRequired")));
           return;
         }
         if (value !== actionForm.newPassword) {
-          callback(new Error("两次输入的新密码不一致"));
+          callback(new Error(t("admin.profile.rules.passwordMismatch")));
           return;
         }
         callback();
@@ -328,25 +364,25 @@ const actionRules: FormRules = {
     },
   ],
   phone: [
-    { required: true, message: "请输入手机号", trigger: "blur" },
-    { pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号", trigger: "blur" },
+    { required: true, message: t("admin.profile.rules.phoneRequired"), trigger: "blur" },
+    { pattern: /^1[3-9]\d{9}$/, message: t("admin.profile.rules.phoneInvalid"), trigger: "blur" },
   ],
   email: [
-    { required: true, message: "请输入邮箱", trigger: "blur" },
+    { required: true, message: t("admin.profile.rules.emailRequired"), trigger: "blur" },
     {
       pattern: /^\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}$/,
-      message: "请输入正确的邮箱地址",
+      message: t("admin.profile.rules.emailInvalid"),
       trigger: "blur",
     },
   ],
-  code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
+  code: [{ required: true, message: t("admin.profile.rules.codeRequired"), trigger: "blur" }],
 };
 
 const close = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push("/workspace");
+    router.push("/workbench");
   }
 };
 
@@ -357,7 +393,7 @@ const openDialog = (mode: DialogMode) => {
   verifyToken.value = "";
   resetForms();
 
-  if (verifyMethod.value === "password" && verifyPrimaryValue.value === "未绑定") {
+  if (verifyMethod.value === "password" && !hasPhone.value) {
     verifyMethod.value = hasPhone.value ? "phone" : "email";
   }
 
@@ -383,6 +419,7 @@ const resetForms = () => {
   actionForm.phone = userStore.currentUser.phone || "";
   actionForm.email = userStore.currentUser.email || "";
   actionForm.code = "";
+  showPasswordTips.value = false;
 };
 
 const submitDialog = async () => {
@@ -390,7 +427,7 @@ const submitDialog = async () => {
   try {
     if (dialogStep.value === "verify") {
       await validateVerifyForm();
-      const result = (await authProfileService.verifyIdentity({
+      const result = (await identityProfileService.verifyIdentity({
         type: verifyMethod.value,
         password: verifyMethod.value === "password" ? verifyForm.password : undefined,
         code: verifyMethod.value !== "password" ? verifyForm.code : undefined,
@@ -405,7 +442,7 @@ const submitDialog = async () => {
 
     await validateActionForm();
     await submitAction();
-    ElMessage.success("保存成功");
+    ElMessage.success(t("common.saveSuccess"));
     await refreshCurrentUser();
     closeDialog();
   } catch (error) {
@@ -418,7 +455,7 @@ const submitDialog = async () => {
 const submitAction = async () => {
   switch (dialogMode.value) {
     case "change-password":
-      await authProfileService.changePassword({
+      await identityProfileService.changePassword({
         verifyToken: verifyToken.value,
         newPassword: actionForm.newPassword,
         confirmPassword: actionForm.confirmPassword,
@@ -426,7 +463,7 @@ const submitAction = async () => {
       break;
     case "change-phone":
     case "bind-phone":
-      await authProfileService.changePhone({
+      await identityProfileService.changePhone({
         verifyToken: verifyToken.value,
         phone: actionForm.phone,
         code: actionForm.code,
@@ -434,17 +471,17 @@ const submitAction = async () => {
       break;
     case "change-email":
     case "bind-email":
-      await authProfileService.changeEmail({
+      await identityProfileService.changeEmail({
         verifyToken: verifyToken.value,
         email: actionForm.email,
         code: actionForm.code,
       });
       break;
     case "unbind-phone":
-      await authProfileService.unbindPhone({ verifyToken: verifyToken.value });
+      await identityProfileService.unbindPhone({ verifyToken: verifyToken.value });
       break;
     case "unbind-email":
-      await authProfileService.unbindEmail({ verifyToken: verifyToken.value });
+      await identityProfileService.unbindEmail({ verifyToken: verifyToken.value });
       break;
   }
 };
@@ -456,48 +493,68 @@ const sendVerifyCode = async () => {
 
   const target = verifyCodeTarget.value;
   if (!target) {
-    ElMessage.warning("当前验证方式未绑定账号信息");
+    ElMessage.warning(t("admin.profile.messages.verifyUnbound"));
     return;
   }
 
-  await authProfileService.sendPinCode({
+  await identityProfileService.sendPinCode({
     type: verifyMethod.value,
     usage: "verify",
     target,
   });
   startCountdown("verify");
-  ElMessage.success("验证码已发送");
+  ElMessage.success(t("admin.profile.messages.codeSent"));
 };
 
 const sendActionCode = async (type: "phone" | "email") => {
   const target = type === "phone" ? actionForm.phone : actionForm.email;
   if (!target) {
-    ElMessage.warning(type === "phone" ? "请先输入手机号" : "请先输入邮箱");
+    ElMessage.warning(type === "phone" ? t("admin.profile.messages.phoneRequired") : t("admin.profile.messages.emailRequired"));
     return;
   }
 
   if (type === "phone" && !/^1[3-9]\d{9}$/.test(target)) {
-    ElMessage.warning("请输入正确的手机号");
+    ElMessage.warning(t("admin.profile.messages.phoneInvalid"));
     return;
   }
 
   if (type === "email" && !/^\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}$/.test(target)) {
-    ElMessage.warning("请输入正确的邮箱地址");
+    ElMessage.warning(t("admin.profile.messages.emailInvalid"));
     return;
   }
 
-  await authProfileService.sendPinCode({
+  await identityProfileService.sendPinCode({
     type,
     usage: "bind",
     target,
   });
   startCountdown("action");
-  ElMessage.success("验证码已发送");
+  ElMessage.success(t("admin.profile.messages.codeSent"));
 };
 
 const refreshCurrentUser = async () => {
   const currentUser = await systemService.getCurrentUser();
   Object.assign(userStore.currentUser, currentUser);
+};
+
+const uploadAvatar = async (option: any) => {
+  const formData = new FormData();
+  formData.append("file", option.file);
+
+  try {
+    const result = await http.upload.upload("/upload/avatar", formData, undefined, true);
+    const avatar = result?.avatar ?? result?.value?.avatar ?? result?.data?.avatar;
+    if (!avatar) {
+      throw new Error("头像上传失败");
+    }
+
+    await systemService.updateAvatar(avatar);
+    await refreshCurrentUser();
+    option.onSuccess?.(result);
+    ElMessage.success(t("common.saveSuccess"));
+  } catch (error) {
+    option.onError?.(error);
+  }
 };
 
 const maskPhone = (value?: string) => {
@@ -709,6 +766,7 @@ onUnmounted(() => {
             flex-shrink: 0;
             font-weight: 600;
             line-height: var(--et-line-height-24);
+            color: var(--et-text-primary);
           }
         }
 
@@ -840,6 +898,28 @@ onUnmounted(() => {
   margin-bottom: var(--et-space-16);
 }
 
+.password-tip-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--et-space-10);
+}
+
+.password-tip-item {
+  align-items: flex-start;
+  color: var(--et-text-secondary);
+  display: flex;
+  font-size: var(--et-font-size-13);
+  line-height: var(--et-line-height-20);
+}
+
+.password-tip-item.passed {
+  color: var(--et-text-primary);
+}
+
+.password-tip-icon {
+  margin-right: var(--et-space-8);
+}
+
 :deep(.security-modal .el-dialog__header) {
   padding: var(--et-space-20) var(--et-space-24) var(--et-space-12);
   border-bottom: 1px solid var(--et-border-color-light);
@@ -861,3 +941,4 @@ onUnmounted(() => {
   min-width: 88px;
 }
 </style>
+

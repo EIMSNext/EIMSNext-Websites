@@ -1,10 +1,13 @@
-import { App, FormDef, FormType } from "@eimsnext/models";
+import { AppDef, FormDef, FormType } from "@eimsnext/models";
 
 export interface IFormItem {
   id: string;
   label?: string;
   icon?: string;
   iconColor?: string;
+  appId?: string;
+  appName?: string;
+  external?: boolean;
 }
 
 export interface IFormSelectOptions {
@@ -12,7 +15,7 @@ export interface IFormSelectOptions {
 }
 
 export function buildFormListItems(
-  app: App,
+  app: AppDef,
   options?: IFormSelectOptions,
 ): IFormItem[] {
   const items: IFormItem[] = [];
@@ -31,4 +34,18 @@ export function buildFormListItems(
   });
 
   return items;
+}
+
+export function buildFormDefListItems(forms: FormDef[], options?: IFormSelectOptions): IFormItem[] {
+  const exclude = options?.exclude || [];
+  return forms
+    .filter((item) => exclude.indexOf(item.id) === -1)
+    .map((item) => ({
+      id: item.id,
+      label: item.name,
+      appId: item.appId,
+      external: item.external,
+      icon: item.usingWorkflow ? "icon-flowdefault" : "icon-formdefault",
+      iconColor: "var(--et-color-primary)",
+    }));
 }

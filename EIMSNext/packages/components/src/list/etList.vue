@@ -48,11 +48,14 @@
 <script lang="ts" setup>
 import "./style/index.scss";
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { IListItem } from "./type";
 
 defineOptions({
   name: "EtList",
 });
+const { t } = useI18n();
+
 const props = withDefaults(
   defineProps<{
     modelValue: string[];
@@ -93,7 +96,7 @@ const headerText = computed(() => {
   let selCnt = 0;
   if (props.modelValue) selCnt = props.modelValue.length;
 
-  return `已选 ${selCnt}/${props.data.length}`;
+  return t("comp.etList.selected", { selCnt, total: props.data.length });
 });
 
 const allSelected = computed({

@@ -1,7 +1,7 @@
 <template>
   <div class="et-field-select-list">
     <div class="field-list-header">
-      <span class="field-header">全选</span>
+      <span class="field-header">{{ t("common.selectAll") }}</span>
       <div class="field-check-col">
         <el-checkbox :model-value="allChecked" :indeterminate="indeterminate" @change="toggleAll" />
       </div>
@@ -26,6 +26,9 @@
 import { ref, computed, onMounted } from "vue";
 import { FieldDef, FieldType } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FieldSelectList",

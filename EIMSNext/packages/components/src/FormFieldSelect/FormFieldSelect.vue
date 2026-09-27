@@ -3,7 +3,7 @@
     v-model="selectedFieldId"
     filterable
     clearable
-    placeholder="请选择字段"
+    :placeholder="t('comp.formFieldSelect.pleaseSelectField')"
     :loading="loading"
     @change="handleChange"
   >
@@ -21,8 +21,11 @@
 <script setup lang="ts">
 import { useFormStore } from "@eimsnext/store";
 import { IFormFieldDef, toFormFieldDef } from "@/FieldSelect/type";
-import { ref, watch, computed, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { FieldType } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FormFieldSelect",
@@ -38,6 +41,8 @@ const props = withDefaults(
   defineProps<{
     modelValue: IFormFieldDef;
     formId: string; // 当前选择的表单ID
+    sourceScope?: "currentApp" | "crossApp";
+    targetAppId?: string;
   }>(),
   {
     modelValue: () => ({
@@ -82,7 +87,9 @@ const loadFields = async () => {
   
   try {
     loading.value = true;
-    // 加载指定表单
+    if (props.sourceScope === "crossApp" && props.targetAppId) {
+      await formStore.loadFormsIncludeCross(props.targetAppId);
+    }
     const form = await formStore.get(props.formId);
     
     if (!form) {
@@ -99,7 +106,7 @@ const loadFields = async () => {
       if (field.type === FieldType.TableForm && field.columns) {
         // 如果是子表单，遍历子表单的列
         field.columns.forEach(subField => {
-          const fieldDef = toFormFieldDef(form.id, subField, field, form.id, !form.isLedger);
+          const fieldDef = toFormFieldDef(form.id, subField, field, form.id);
           fieldOptions.push({
             id: buildFieldId(form.id, fieldDef.field),
             label: fieldDef.label,
@@ -108,7 +115,7 @@ const loadFields = async () => {
         });
       } else {
         // 普通字段
-        const fieldDef = toFormFieldDef(form.id, field, undefined, form.id, !form.isLedger);
+        const fieldDef = toFormFieldDef(form.id, field, undefined, form.id);
         fieldOptions.push({
           id: buildFieldId(form.id, fieldDef.field),
           label: fieldDef.label,

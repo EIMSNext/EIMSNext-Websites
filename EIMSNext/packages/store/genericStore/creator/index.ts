@@ -1,14 +1,14 @@
 import { IIdentity } from "@eimsnext/models";
-import { http } from "@eimsnext/utils";
+import { bus, http } from "@eimsnext/utils";
 import { useStorage } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export default function createStore<T extends IIdentity>(
-  id: string,
-  url: string,
-  initData: T[] = []
-) {
+type StoreGetOptions = {
+  silentError?: boolean;
+};
+
+export default function createStore<T extends IIdentity>(id: string, url: string, initData: T[] = []) {
   return defineStore(id, () => {
     const loading = ref(false);
     const items = useStorage<T[]>(id, initData, sessionStorage);
@@ -40,7 +40,8 @@ export default function createStore<T extends IIdentity>(
     const get = (
       id: string,
       fromCache: boolean = true,
-      saveToCache: boolean = true
+      saveToCache: boolean = true,
+      options?: StoreGetOptions,
     ): Promise<T | undefined> => {
       return new Promise<T | undefined>((resolve, reject) => {
         if (id) {
@@ -50,7 +51,7 @@ export default function createStore<T extends IIdentity>(
           } else {
             loading.value = true;
             http.odata
-              .get<T>(url, id)
+              .get<T>(url, id, undefined, options)
               .then((res) => {
                 if (saveToCache) {
                   update(res);
@@ -98,6 +99,8 @@ export default function createStore<T extends IIdentity>(
     const clear = () => {
       items.value = initData;
     };
+
+    bus.on("identity:logout", clear);
 
     return { loading, items, load, get, update, remove, clear };
   });

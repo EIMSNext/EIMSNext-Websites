@@ -11,7 +11,7 @@
         :icon="isEnter ? 'el-FolderOpened' : 'el-Folder'"
       />
       <div class="et-upload-dragger-text">
-        将文件拖到此处或<em>点击上传</em>
+        {{ t("comp.dragger.dragHere") }}<em>{{ t("comp.dragger.clickToUpload") }}</em>
       </div>
     </div>
   </div>
@@ -20,7 +20,9 @@
 <script setup lang="ts">
 import "./style/drag.scss";
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import EtIcon from "../icon/etIcon.vue";
+const { t } = useI18n();
 const emits = defineEmits(["getFilesList", "fileUpload"]);
 const fileArea = ref();
 const isEnter = ref(false);

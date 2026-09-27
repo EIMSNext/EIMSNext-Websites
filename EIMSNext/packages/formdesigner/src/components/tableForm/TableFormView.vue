@@ -108,7 +108,7 @@ export default defineComponent({
 }
 
 ._fd-tf-wrap._fd-drop-hover {
-  outline: 1px dashed var(--fc-style-color-1);
+  outline: 1px dashed var(--et-color-primary);
   background: var(--fc-style-bg-color-1);
 }
 

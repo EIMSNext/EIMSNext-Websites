@@ -16,11 +16,11 @@
         <div class="login-container">
           <div class="account-login">
             <div class="login-title">{{ t("login.loginTitle") }}</div>
-            <!-- <div class="login-register"><span>没有账号？</span>
+            <div class="login-register"><span>{{ t("login.noAccount") }}</span>
               <el-link type="primary" underline="never" href="/register" target="_self">
-                免费注册
+                {{ t("login.registerNow") }}
               </el-link>
-            </div> -->
+            </div>
             <el-form ref="loginFormRef" :model="loginData" :rules="loginRules">
               <div class="login-content">
                 <div class="login-form">
@@ -33,24 +33,25 @@
                       name="password" size="large" show-password @keyup="checkCapslock"
                       @keyup.enter="handleLoginSubmit" />
                   </div>
+                  <div v-if="isCapslock" class="capslock-tip">{{ t("login.capsLock") }}</div>
                 </div>
                 <div class="login-options">
                   <el-checkbox>
                     {{ t("login.rememberMe") }}
                   </el-checkbox>
 
-                  <el-link type="primary" underline="never" class="forget-password" href="/forget-password"
+                  <el-link type="primary" underline="never" class="forget-password" href="/#/forget-password"
                     target="_self">
                     {{ t("login.forgetPassword") }}
                   </el-link>
                 </div>
 
-                <el-button :loading="loading" type="primary" size="large" class="login-btn"
+                <el-button :loading="loading" :disabled="loading" type="primary" size="large" class="login-btn"
                   @click.prevent="handleLoginSubmit">
                   {{ t("login.login") }}
                 </el-button>
                 <!-- <div class="footer">
-                <div class="switch-btn">验证码登录</div>
+                <div class="switch-btn">{{ t("admin.loginExtra.codeLogin") }}</div>
               </div> -->
               </div>
             </el-form>
@@ -64,6 +65,7 @@
 <script setup lang="ts">
 import { LocationQuery, useRoute } from "vue-router";
 import router from "@/router";
+import { ElMessage } from "element-plus";
 import type { FormInstance } from "element-plus";
 import { Themes } from "@/enums/Themes";
 
@@ -118,22 +120,24 @@ const loginRules = computed(() => {
 
 // 登录
 async function handleLoginSubmit() {
-  loginFormRef.value?.validate((valid: boolean) => {
-    if (valid) {
-      loading.value = true;
-      userStore
-        .login(loginData.value)
-        .then(async () => {
-          await userStore.initialize(true);
+  if (loading.value) return;
 
-          const { path, queryParams } = parseRedirect();
-          router.push({ path: path, query: queryParams });
-        })
-        .finally(() => {
-          loading.value = false;
-        });
-    }
-  });
+  const valid = await loginFormRef.value?.validate().catch(() => false);
+  if (!valid) return;
+
+  loading.value = true;
+  try {
+    await userStore.login(loginData.value);
+    await userStore.initialize(true);
+
+    const { path, queryParams } = parseRedirect();
+    // Keep the button disabled until the guarded route has finished resolving.
+    await router.replace({ path, query: queryParams });
+  } catch {
+    // The HTTP interceptor displays the server's business error.
+  } finally {
+    loading.value = false;
+  }
 }
 
 /**
@@ -146,7 +150,7 @@ function parseRedirect(): {
   queryParams: Record<string, string>;
 } {
   const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/";
+  const redirect = (query.redirect as string) ?? "/workbench";
 
   const url = new URL(redirect, window.location.origin);
   const path = url.pathname;
@@ -260,6 +264,13 @@ function checkCapslock(event: KeyboardEvent) {
         margin-top: 0;
       }
 
+      .capslock-tip {
+        color: var(--el-color-warning);
+        font-size: var(--et-font-size-12);
+        line-height: var(--et-line-height-18);
+        margin-top: var(--et-space-6);
+      }
+
       .login-options {
         align-items: center;
         display: flex;
@@ -276,6 +287,8 @@ function checkCapslock(event: KeyboardEvent) {
         margin-top: var(--et-space-28);
         width: 100%;
       }
+
+
     }
   }
 }
@@ -291,3 +304,4 @@ html.dark {
   }
 }
 </style>
+

@@ -1,25 +1,25 @@
 import {
+  DataAction,
   ApproveAction,
-  type App,
+  type AppDef,
   type FormData,
   type FormDef,
-  type NodeActionConfig,
-  type NodeActionType,
-  type WfDefinition,
-  type WfTodo,
+  type WfTask,
 } from "@eimsnext/models";
 import {
-  appService,
-  authService,
+  appDefService,
+  formDataPermissionGroupService,
+  identityService,
   formDataService,
   formDefService,
+  formListViewService,
   systemService,
-  wfTodoService,
-  wfDefinitionService,
+  wfTaskService,
   workflowService,
 } from "@eimsnext/services";
 import type { LoginRequest } from "@eimsnext/services";
 import { ODataQueryRequest } from "@eimsnext/services";
+import type { FormListView } from "@eimsnext/models";
 
 const buildODataQuery = (filter?: string, skip = 0, top = 20, orderby?: string) => {
   const query = new ODataQueryRequest();
@@ -32,9 +32,9 @@ const buildODataQuery = (filter?: string, skip = 0, top = 20, orderby?: string) 
   return query;
 };
 
-export const mobileAuthService = {
+export const mobileIdentityService = {
   login(request: LoginRequest) {
-    return authService.login(request);
+    return identityService.login(request);
   },
   getCurrentUser() {
     return systemService.getCurrentUser();
@@ -42,57 +42,85 @@ export const mobileAuthService = {
 };
 
 export const appServiceMobile = {
-  getMyApps(): Promise<App[]> {
-    return appService.query<App>();
+  getMyApps(): Promise<AppDef[]> {
+    return appDefService.query<AppDef>();
   },
-  get(appId: string): Promise<App> {
-    return appService.get<App>(appId);
+  get(appId: string): Promise<AppDef> {
+    return appDefService.get<AppDef>(appId);
   },
 };
 
 export const formServiceMobile = {
   query(appId: string, skip = 0, top = 20): Promise<FormDef[]> {
-    return formDefService.query<FormDef>(buildODataQuery(`appId eq '${appId}'`, skip, top, "sortIndex asc"));
+    return formDefService.query<FormDef>(buildODataQuery(`appId eq '${appId}'`, skip, top, "createTime asc"));
   },
   get(formId: string): Promise<FormDef> {
     return formDefService.get<FormDef>(formId);
   },
 };
 
-export const formDataServiceMobile = {
-  query(formId: string, skip = 0, top = 20): Promise<FormData[]> {
-    return formDataService.dynamicQuery<FormData>({
-      skip,
-      take: top,
-      filter: `formId eq '${formId}'`,
-      sort: "createTime desc",
-    });
-  },
-  count(formId: string): Promise<number> {
-    return formDataService.dynamicCount(`formId eq '${formId}'`);
-  },
-  get(dataId: string): Promise<FormData> {
-    return formDataService.get<FormData>(dataId);
-  },
-  post(formId: string, data: Record<string, unknown>): Promise<FormData> {
-    return formDataService.post<FormData>({ formId, data } as never);
-  },
-  put(dataId: string, data: Record<string, unknown>): Promise<FormData> {
-    return formDataService.put<FormData>(dataId, data as never);
+export const formListViewServiceMobile = {
+  query(formId: string): Promise<FormListView[]> {
+    return formListViewService.query<FormListView>(`$filter=formid eq '${formId}'&$orderby=sortIndex asc,createTime asc`);
   },
 };
 
-export const todoServiceMobile = {
-  getCount(): Promise<number> {
-    return wfTodoService.count();
+export const formDataServiceMobile = {
+  query(formId: string, skip = 0, top = 20, filter?: any, sort?: any, permissionGroupId?: string): Promise<FormData[]> {
+    return formDataService.dynamicQuery<FormData>({
+      skip,
+      take: top,
+      filter: filter || `formId eq '${formId}'`,
+      sort: sort || "createTime desc",
+      scope: permissionGroupId ? { permissionGroupId } : undefined,
+    });
   },
-  query(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.query<WfTodo>(
+  count(formId: string, filter?: any, permissionGroupId?: string): Promise<number> {
+    return formDataService.dynamicCount({
+      filter: filter || `formId eq '${formId}'`,
+      scope: permissionGroupId ? { permissionGroupId } : undefined,
+    });
+  },
+  get(dataId: string, permissionGroupId?: string): Promise<FormData> {
+    return formDataService.get<FormData>(dataId, permissionGroupId ? { permissionGroupId } : undefined);
+  },
+  post(form: FormDef, data: Record<string, unknown>, action: DataAction): Promise<FormData> {
+    return formDataService.post<FormData>({
+      id: "",
+      appId: form.appId,
+      formId: form.id,
+      data,
+      action,
+    } as never);
+  },
+  put(entity: FormData, data: Record<string, unknown>): Promise<FormData> {
+    return formDataService.put<FormData>(entity.id, {
+      id: entity.id,
+      appId: entity.appId,
+      formId: entity.formId,
+      data,
+      action: DataAction.Save,
+    } as never);
+  },
+};
+
+export const formDataPermissionGroupServiceMobile = {
+  getAssigned(formId: string) {
+    return formDataPermissionGroupService.getAssigned(formId);
+  },
+};
+
+export const taskServiceMobile = {
+  getCount(): Promise<number> {
+    return wfTaskService.count();
+  },
+  query(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.query<WfTask>(
       buildODataQuery(appId ? `appId eq '${appId}'` : undefined, skip, top, "approveNodeStartTime desc")
     );
   },
-  get(taskId: string): Promise<WfTodo> {
-    return wfTodoService.get<WfTodo>(taskId);
+  get(taskId: string): Promise<WfTask> {
+    return wfTaskService.get<WfTask>(taskId);
   },
   approve(dataId: string, action: ApproveAction, comment = "") {
     return workflowService.approve({ dataId, action, comment });
@@ -124,53 +152,14 @@ export const todoServiceMobile = {
   getReturnNodes(dataId: string, wfInstanceId?: string) {
     return workflowService.getReturnNodes(dataId, wfInstanceId);
   },
-  async getNodeActions(formId: string, approveNodeId: string): Promise<NodeActionConfig[]> {
-    const defs = await wfDefinitionService.query<WfDefinition>(buildODataQuery(`ExternalId eq '${formId}' and flowType eq '0' and isCurrent eq true`, 0, 1));
-    const def = defs[0];
-    if (!def?.content) {
-      return [];
-    }
-
-    const content = JSON.parse(def.content);
-    const nodes = [content.startNode, ...(content.nodes || [])];
-    const findNode = (items: any[]): any => {
-      for (const item of items) {
-        if (!item) continue;
-        if (item.id === approveNodeId) return item;
-        if (item.conditionData?.id === approveNodeId) return item.conditionData;
-        const childMatch = findNode(item.childNodes || []);
-        if (childMatch) return childMatch;
-      }
-      return undefined;
-    };
-
-    const node = findNode(nodes);
-    return node?.metadata?.approveMeta?.nodeActions || [];
+  getNodeActions(dataId: string, wfInstanceId: string) {
+    return workflowService.getNodeActions(dataId, wfInstanceId);
   },
 };
 
-export const getNodeActionLabel = (actionType: NodeActionType) => {
-  switch (actionType) {
-    case "submit":
-      return "提交";
-    case "return":
-      return "回退";
-    case "reject":
-      return "驳回";
-    case "draft":
-      return "暂存";
-    case "addSign":
-      return "加签";
-    case "transfer":
-      return "转交";
-    default:
-      return "操作";
-  }
-};
-
 export const workflowServiceMobile = {
-  getMyStarted(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.dynamicQuery<WfTodo>({
+  getMyStarted(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.dynamicQuery<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,
@@ -178,8 +167,8 @@ export const workflowServiceMobile = {
       scope: "started",
     });
   },
-  getApproved(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.dynamicQuery<WfTodo>({
+  getApproved(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.dynamicQuery<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,
@@ -187,8 +176,8 @@ export const workflowServiceMobile = {
       scope: "approved",
     });
   },
-  getCced(appId?: string, skip = 0, top = 10): Promise<WfTodo[]> {
-    return wfTodoService.dynamicQuery<WfTodo>({
+  getCced(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
+    return wfTaskService.dynamicQuery<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,

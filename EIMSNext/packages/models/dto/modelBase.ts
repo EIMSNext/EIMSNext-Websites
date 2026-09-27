@@ -1,4 +1,4 @@
-import { FieldDef, FieldProp, FieldType } from "./formDef";
+import { FieldDef, FieldType } from "./formDef";
 
 export interface IIdentity {
   id: string;

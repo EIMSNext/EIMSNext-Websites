@@ -108,7 +108,7 @@ export function makeTitleRule(t) {
   ];
 }
 
-export function makeOptionsRule(t, to, label, value) {
+export function makeOptionsRule(t, to, label, value, staticOptionsProps) {
   const options = [
     { label: t("fetch.optionsType.struct"), value: 2 },
     { label: t("fetch.optionsType.fetch"), value: 3 },
@@ -144,12 +144,12 @@ export function makeOptionsRule(t, to, label, value) {
       value: 2,
       rule: [
         {
-          type: "TableOptions",
+          type: staticOptionsProps ? "StaticOptionsConfig" : "TableOptions",
           field: "formCreate" + upper(to).replace(".", ">"),
           title: t("props.options"),
           _fc_important_prop: true,
           wrap: { show: false },
-          props: {
+          props: staticOptionsProps || {
             column: [
               { label: t("props.label"), key: label || "label" },
               { label: t("props.value"), key: value || "value" },
@@ -398,11 +398,13 @@ export function deepGet(object, path, defaultValue) {
 export const buildTranslator = (locale) => (path, option) =>
   translate(path, option, unref(locale));
 
-export const translate = (path, option, locale) =>
-  deepGet(locale, path, "").replace(
+export const translate = (path, option, locale) => {
+  const value = deepGet(locale, path, undefined) ?? deepGet(ZhCn, path, "");
+  return String(value).replace(
     /\{(\w+)\}/g,
     (_, key) => `${option?.[key] ?? `{${key}}`}`
   );
+};
 
 export const buildLocaleContext = (locale) => {
   const lang = computed(() => unref(locale).name);

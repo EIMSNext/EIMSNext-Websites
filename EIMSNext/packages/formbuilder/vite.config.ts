@@ -15,7 +15,9 @@ export default defineConfig({
     rollupOptions: {
       external: [
         "vue",
-        "CodeMirror",
+        "codemirror",
+        "codemirror/lib/codemirror",
+        "jsonlint-mod",
         "v-jsoneditor",
         "element-plus",
         "@element-plus/icons-vue",

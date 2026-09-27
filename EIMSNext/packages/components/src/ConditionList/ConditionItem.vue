@@ -54,6 +54,9 @@
         :field-def="field"
         :nodes="nodes"
         :fieldBuildSetting="valueBuildSetting"
+        :operator="op"
+        :allow-field-value="allowFieldValue"
+        :option-loader="optionLoader"
         @change="onInput"
       ></ConditionValue>
     </div>
@@ -76,6 +79,7 @@ import {
 } from "@/NodeFieldList/type";
 import { IFormFieldDef } from "@/FieldSelect/type";
 import { computed, ref, watch } from "vue";
+import type { DynamicSelectOption, DynamicSelectSource } from "@eimsnext/utils";
 
 const { t } = useLocale();
 
@@ -89,7 +93,9 @@ const props = defineProps<{
   condType: ConditionType;
   fieldBuildSetting: IFieldBuildSetting;
   valueBuildSetting: IFieldBuildSetting;
-  nodes?: INodeForm[];
+  allowFieldValue?: boolean;
+    nodes?: INodeForm[];
+    optionLoader?: (source: DynamicSelectSource, keyword?: string) => Promise<DynamicSelectOption[]>;
 }>();
 
 const field = ref<IFormFieldDef>(
@@ -143,7 +149,9 @@ const buildOpLabels = () => {
     "eq",
     "ne",
     "in",
+    "allin",
     "nin",
+    "between",
     "empty",
     "notempty",
     "gt",

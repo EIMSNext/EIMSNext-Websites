@@ -18,7 +18,7 @@
       </span>
     </template>
     <div class="field-block-picker">
-      <el-input v-model="keyword" placeholder="搜索" clearable>
+      <el-input v-model="keyword" :placeholder="$t('common.search')" clearable>
         <template #prefix>
           <el-icon><Search /></el-icon>
         </template>
@@ -31,11 +31,21 @@
           type="button"
           @click="selectField(item)"
         >
-          <span class="item-label">{{ item.label }}</span>
-          <span class="item-type">{{ getFieldBlockTypeLabel(item.type) }}</span>
+          <span class="item-leading">
+            <EtIcon
+              :icon="fieldIcons[item.type] || 'fc-icon-input'"
+              color="var(--et-text-secondary)"
+              class="item-icon"
+            />
+            <span class="item-label">{{ item.label }}</span>
+          </span>
+          <span
+            :class="['item-type', `item-type--${getFieldDataType(item)}`]"
+            >{{ t(`eventFlow.fieldDataTypes.${getFieldDataType(item)}`) }}</span
+          >
         </button>
         <div v-if="filteredFields.length === 0" class="picker-empty">
-          暂无可选字段
+          {{ $t("comp.fieldBlockPicker.noFields") }}
         </div>
       </div>
     </div>
@@ -45,12 +55,16 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { Search, Plus } from "@element-plus/icons-vue";
-import { FormDef } from "@eimsnext/models";
+import { FieldType, FormDef } from "@eimsnext/models";
+import { useI18n } from "vue-i18n";
 import {
   buildFieldBlockFields,
   FieldBlockField,
-  getFieldBlockTypeLabel,
 } from "../FieldBlock/shared";
+import { EtIcon } from "../icon";
+import fieldIcons from "../fieldIcons";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "FieldBlockPicker",
@@ -84,7 +98,7 @@ const visible = ref(false);
 const keyword = ref("");
 
 const tooltipContent = computed(() =>
-  props.limitReached ? `最多添加${props.maxBlocks}个字段` : "添加字段"
+  props.limitReached ? t("comp.fieldBlockPicker.maxBlocks", { maxBlocks: props.maxBlocks }) : t("comp.fieldBlockPicker.addField")
 );
 
 const fieldItems = computed(() =>
@@ -93,6 +107,7 @@ const fieldItems = computed(() =>
     : buildFieldBlockFields(props.formDef, {
         showSubFields: props.showSubFields,
         showSystemFields: props.showSystemFields,
+        t,
       })
 );
 
@@ -110,6 +125,24 @@ const filteredFields = computed(() => {
 
 function selectField(field: FieldBlockField) {
   emit("select", field);
+}
+
+function getFieldDataType(field: FieldBlockField) {
+  if (
+    field.isSubField ||
+    [
+      FieldType.TableForm,
+      FieldType.CheckBox,
+      FieldType.Select2,
+      FieldType.Employee2,
+      FieldType.Department2,
+    ].includes(field.type)
+  ) {
+    return "array";
+  }
+  if (field.type === FieldType.Number) return "number";
+  if (field.type === FieldType.TimeStamp) return "dateTime";
+  return "text";
 }
 
 watch(
@@ -188,26 +221,59 @@ watch(visible, (nextVisible) => {
   background: var(--et-bg-container);
   color: var(--et-text-primary);
   cursor: pointer;
+  gap: var(--et-space-5);
 }
 
 .picker-item:hover {
   background: var(--et-bg-page);
 }
 
-.item-label {
+.item-leading {
+  display: flex;
+  align-items: center;
   flex: 1;
   min-width: 0;
+  gap: var(--et-space-5);
+}
+
+.item-icon {
+  flex: 0 0 auto;
+}
+
+.item-label {
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item-type {
   flex-shrink: 0;
-  padding: 0 var(--et-space-8);
-  border-radius: var(--et-size-12);
-  background: var(--et-bg-primary-soft);
-  color: var(--et-color-primary);
   font-size: var(--et-font-size-12);
-  line-height: var(--et-line-height-24);
+  line-height: 18px;
+  padding: 0 var(--et-space-5);
+  border: 1px solid currentcolor;
+  border-radius: var(--et-radius-10);
+}
+
+.item-type--text {
+  color: #f08a37;
+  background: color-mix(in srgb, #f08a37 10%, transparent);
+}
+
+.item-type--number {
+  color: var(--et-color-primary);
+  background: color-mix(in srgb, var(--et-color-primary) 10%, transparent);
+}
+
+.item-type--dateTime {
+  color: var(--et-color-success);
+  background: color-mix(in srgb, var(--et-color-success) 10%, transparent);
+}
+
+.item-type--array {
+  color: #ec4899;
+  background: color-mix(in srgb, #ec4899 10%, transparent);
 }
 
 .picker-empty {

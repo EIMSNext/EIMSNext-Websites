@@ -1,5 +1,7 @@
-import { DashboardItemDef, DashItemType, FieldType } from "@eimsnext/models";
+import { DashboardItemDef, DashItemType, FieldType, IGridLayoutItem, IGridLayoutState } from "@eimsnext/models";
 import { DatasourceType } from "@eimsnext/services";
+
+export type { IGridLayoutItem, IGridLayoutState };
 
 export interface IDataSource {
   id: string;
@@ -20,46 +22,22 @@ export interface IDataSourceField {
   label?: string;
   isComputed?: boolean;
 }
-export interface IGridLayoutItem {
-  /** 唯一标识 (必需) */
-  i: string;
-  /** 起始列 (必需) */
-  x: number;
-  /** 起始行 (必需) */
-  y: number;
-  /** 宽度（列数）(必需) */
+
+export interface IDashboardGridSize {
   w: number;
-  /** 高度（行数）(必需) */
   h: number;
-
-  // 可选属性
-  /** 最小宽度（覆盖全局） */
-  minW?: number;
-  /** 最大宽度（覆盖全局） */
-  maxW?: number;
-  /** 最小高度（覆盖全局） */
-  minH?: number;
-  /** 最大高度（覆盖全局） */
-  maxH?: number;
-  /** 是否可拖拽（覆盖全局） */
-  isDraggable?: boolean;
-  /** 是否可缩放（覆盖全局） */
-  isResizable?: boolean;
-  /** 拖拽时忽略的选择器，如 ".no-drag" */
-  dragIgnoreFrom?: string;
-  /** 缩放时忽略的选择器 */
-  resizeIgnoreFrom?: string;
-
-  /** 自定义业务字段（支持任意扩展） */
-  inEdit?: boolean;
-  drag?: boolean;
-  type?: DashItemType; // 关联拖拽项类型
-  [key: string]: any;
 }
 
-export interface IGridLayoutState {
-  layout: IGridLayoutItem[];
-  items: Record<string, DashboardItemDef>;
-  draggable: boolean;
-  resizable: boolean;
-}
+const compactDashboardItemTypes = new Set<DashItemType>([DashItemType.RealTime, DashItemType.Text]);
+
+export const getDashboardItemDefaultSize = (type?: DashItemType): IDashboardGridSize => {
+  if (type === DashItemType.RealTime) return { w: 2, h: 5 };
+  // Text editing needs at least 300px for wangEditor popover positioning.
+  if (type === DashItemType.Text) return { w: 2, h: 18 };
+  return { w: 12, h: 12 };
+};
+
+export const getDashboardItemMinSize = (type?: DashItemType): IDashboardGridSize => {
+  if (type === DashItemType.Text) return { w: 1, h: 18 };
+  return compactDashboardItemTypes.has(type as DashItemType) ? { w: 1, h: 1 } : { w: 6, h: 3 };
+};

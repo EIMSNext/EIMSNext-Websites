@@ -92,6 +92,8 @@ import department2 from "./rule/departmentSelect2";
 import employee1 from "./rule/employeeSelect";
 import employee2 from "./rule/employeeSelect2";
 import dataSelect from "./rule/dataSelect";
+import query from "./rule/query";
+import serialno from "./rule/serialno";
 
 const ruleList = [
   input,
@@ -124,9 +126,11 @@ const ruleList = [
   employee1,
   employee2,
   dataSelect,
+  query,
   editor,
   dataTable,
   id,
+  serialno,
   signaturePad,
   group,
   subForm,

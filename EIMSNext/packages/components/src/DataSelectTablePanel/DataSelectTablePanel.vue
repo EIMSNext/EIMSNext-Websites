@@ -25,14 +25,14 @@
         <slot name="title"></slot>
       </div>
       <div class="panel-toolbar-actions">
-        <el-input v-model="keyword" clearable placeholder="搜索数据" class="panel-search">
+        <el-input v-model="keyword" clearable :placeholder="t('comp.dataSelectTablePanel.searchData')" class="panel-search">
           <template #prefix>
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
         <el-button ref="filterBtnRef" text class="panel-filter" @click="showFilter = !showFilter">
           <el-icon><Filter /></el-icon>
-          <span>筛选</span>
+          <span>{{ t("common.filter") }}</span>
         </el-button>
       </div>
     </div>
@@ -43,7 +43,7 @@
         :data="filteredRows"
         class="panel-table"
         height="100%"
-        empty-text="暂无数据"
+        :empty-text="t('common.noData')"
         @row-click="selectRow"
       >
         <el-table-column width="68" align="center">
@@ -85,11 +85,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { Search, Filter } from "@element-plus/icons-vue";
+import { useI18n } from "vue-i18n";
 import type { IDataSelectField } from "../DataSelect";
 import { formatDataSelectValue, resolveDataSelectValue } from "../DataSelect";
 import { DataSelectFilter } from "../DataSelectFilter";
 import type { IConditionList } from "../ConditionList/type";
 import type { IFormFieldDef } from "../FieldSelect/type";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "DataSelectTablePanel",

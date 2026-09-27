@@ -5,6 +5,7 @@
       width: size,
       height: size,
       ...(avatar ? {} : { backgroundColor: bgColor }),
+      ...(avatar ? {} : { color: getContrastTextColor(bgColor) }),
     }"
   >
     <img
@@ -20,6 +21,8 @@
 </template>
 
 <script setup lang="ts">
+import { getContrastTextColor } from "@eimsnext/utils";
+
 defineOptions({
   name: "UserAvatar",
 });
@@ -27,7 +30,7 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     avatar?: string;
-    label: string;
+    label?: string;
     bgColor?: string;
     size?: string;
   }>(),
@@ -44,7 +47,7 @@ const handleImgError = (e: Event) => {
 };
 
 const formatFirstChar = () => {
-  const pureText = props.label.trim();
+  const pureText = props.label?.trim() ?? "";
   return pureText.charAt(0).toUpperCase();
 };
 </script>
@@ -68,7 +71,7 @@ const formatFirstChar = () => {
 }
 
 .avatar-text {
-  color: var(--et-text-on-primary);
+  color: inherit;
   font-weight: 500;
   user-select: none;
 }

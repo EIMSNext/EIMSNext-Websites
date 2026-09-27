@@ -1,7 +1,19 @@
 import { appSetting } from "../appSetting";
 
 export class AccessToken {
+  private runtimeToken?: string;
+  private runtimeExpiresAt?: number;
+  private runtimeActive = false;
+
   get(): string | null | undefined {
+    if (this.runtimeActive) {
+      if (this.runtimeToken && (!this.runtimeExpiresAt || new Date().getTime() < this.runtimeExpiresAt)) {
+        return this.runtimeToken;
+      }
+
+      return undefined;
+    }
+
     if (appSetting.tokenKey) return localStorage.getItem(appSetting.tokenKey);
   }
 
@@ -21,10 +33,23 @@ export class AccessToken {
   }
 
   clear(): void {
+    this.clearRuntime();
     if (appSetting.tokenKey) {
       localStorage.removeItem(appSetting.tokenKey);
       localStorage.removeItem(`${appSetting.tokenKey}_exp`);
     }
+  }
+
+  setRuntime(token: string, expiresIn?: number): void {
+    this.runtimeActive = true;
+    this.runtimeToken = token;
+    this.runtimeExpiresAt = expiresIn ? new Date().getTime() + (expiresIn - 300) * 1000 : undefined;
+  }
+
+  clearRuntime(): void {
+    this.runtimeActive = false;
+    this.runtimeToken = undefined;
+    this.runtimeExpiresAt = undefined;
   }
 
   isLoggedIn(): boolean {

@@ -3,7 +3,7 @@
     <div v-if="showTrigger" class="picker-trigger" @click="expanded = !expanded">
       <div class="picker-trigger-text">
         <slot name="trigger">
-          <span>{{ triggerText }}</span>
+          <span>{{ triggerTextDisplay }}</span>
         </slot>
       </div>
       <el-icon class="picker-trigger-icon">
@@ -13,7 +13,7 @@
     </div>
     <div v-show="expanded" class="picker-panel">
       <div class="picker-search">
-        <el-input v-model="keyword" clearable :placeholder="searchPlaceholder">
+        <el-input v-model="keyword" clearable :placeholder="searchPlaceholderText">
           <template #prefix>
             <el-icon><Search /></el-icon>
           </template>
@@ -21,7 +21,7 @@
       </div>
       <div v-if="multiple && showSelectAll" class="picker-select-all" @click="toggleAll">
         <el-checkbox :model-value="allChecked" :indeterminate="indeterminate" @click.stop="toggleAll" />
-        <span>全选</span>
+        <span>{{ t("common.selectAll") }}</span>
       </div>
       <div class="picker-list">
         <div
@@ -49,7 +49,7 @@
             <span class="picker-item-label">{{ field.label }}</span>
           </div>
         </div>
-        <div v-if="filteredFields.length === 0" class="picker-empty">暂无字段</div>
+        <div v-if="filteredFields.length === 0" class="picker-empty">{{ t("comp.dataSelectFieldPicker.noFields") }}</div>
       </div>
     </div>
   </div>
@@ -58,7 +58,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { ArrowDown, ArrowUp, Search } from "@element-plus/icons-vue";
+import { useI18n } from "vue-i18n";
 import type { IDataSelectField } from "../DataSelect";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "DataSelectFieldPicker",
@@ -80,10 +83,10 @@ const props = withDefaults(
     modelValue: () => [],
     fields: () => [],
     multiple: true,
-    searchPlaceholder: "搜索字段",
+    searchPlaceholder: "",
     showSelectAll: true,
     showTrigger: false,
-    triggerText: "选择字段",
+    triggerText: "",
     defaultExpanded: true,
     showIndicator: true,
   },
@@ -93,6 +96,9 @@ const emit = defineEmits(["update:modelValue", "change"]);
 
 const keyword = ref("");
 const expanded = ref(props.defaultExpanded);
+
+const searchPlaceholderText = computed(() => props.searchPlaceholder || t("comp.dataSelectFieldPicker.searchFields"));
+const triggerTextDisplay = computed(() => props.triggerText || t("common.selectField"));
 
 watch(
   () => props.defaultExpanded,

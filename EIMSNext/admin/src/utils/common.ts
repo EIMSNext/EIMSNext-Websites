@@ -1,52 +1,50 @@
 import {
-  App,
+  AppDef,
   AppMenu,
-  AuthGroup,
-  AuthGroupType,
-  DataPerms,
+  FormDataPermissionGroup,
+  FormDataPermissionMode,
+  FormDataPermissions,
   FormDef,
   FormType,
-  UserType,
 } from "@eimsnext/models";
 import { useFormStore } from "@eimsnext/store";
 import { appSetting, FlagEnum } from "@eimsnext/utils";
 import dayjs from "dayjs";
 
-export function getAuthGroupDataPerms(authGrp?: AuthGroup) {
-  if (authGrp) {
-    switch (authGrp.type) {
-      case AuthGroupType.ManageSelfData:
-      case AuthGroupType.ManageAllData:
-        return DataPerms.All;
-      case AuthGroupType.ViewAllData:
-        return DataPerms.View;
+export function getFormDataPermissionGroupFormDataPermissions(permissionGroup?: FormDataPermissionGroup) {
+  if (permissionGroup) {
+    switch (permissionGroup.type) {
+      case FormDataPermissionMode.ManageSelfData:
+      case FormDataPermissionMode.ManageAllData:
+        return FormDataPermissions.All;
+      case FormDataPermissionMode.ViewAllData:
+        return FormDataPermissions.View;
       default:
-        return authGrp.dataPerms;
+        return permissionGroup.formDataPermissions;
     }
   }
 
   return undefined;
 }
-export function hasDataPerm(userType: UserType, needPerm: DataPerms, dataPerms?: DataPerms) {
-  return (
-    userType == UserType.CorpOwmer ||
-    userType == UserType.CorpAdmin ||
-    (dataPerms && FlagEnum.has(dataPerms, needPerm)) == true
-  );
+export function hasDataPerm(needPerm: FormDataPermissions, formDataPermissions?: FormDataPermissions) {
+  return (formDataPermissions && FlagEnum.has(formDataPermissions, needPerm)) == true;
 }
 
-export function getAppIcon(app?: App) {
+export function getAppIcon(app?: AppDef) {
   let icon = "icon-appdefault";
   if (app && app.icon && app.icon != "default") icon = app.icon;
 
   return icon;
 }
 export function getAppIconColor(menu?: any) {
-  let color = "#1296db";
+  let color = "var(--et-color-primary)";
   if (menu && menu.iconColor) color = menu.iconColor;
-  if (menu && menu.menuType && menu.menuType == 2) color = "orange";
 
   return color;
+}
+
+export function getAppIconTextColor(menu?: any) {
+  return "var(--el-color-white, #fff)";
 }
 
 export function getFormIcon(form?: AppMenu) {
@@ -76,8 +74,7 @@ export function getFormIcon(form?: AppMenu) {
           let formdef = formStore.items.find((x) => x.id == form.menuId);
 
           if (formdef) {
-            if (formdef.isLedger) icon = "icon-ledgerdefault";
-            else if (formdef.usingWorkflow) icon = "icon-flowdefault";
+            if (formdef.usingWorkflow) icon = "icon-flowdefault";
           }
         }
         break;
@@ -107,14 +104,17 @@ export function getAttachmentRootPath() {
 }
 
 export function dateFormat(val: any, fmt?: string) {
-  const format = fmt || "YYYY-MM-DD";
+  const format = (fmt || "YYYY-MM-DD")
+    .replace(/yyyy/g, "YYYY")
+    .replace(/(?<!d)dd(?!d)/g, "DD");
   return val ? dayjs(val).format(format) : "";
 }
 
-export function translateRouteTitle(t: any, title: string) {
-  return title;
-  // 判断是否存在国际化配置，如果没有原生返回
-  // const key = "route." + title;
-  // const translatedTitle = t(key);
-  // return translatedTitle === key ? title : translatedTitle;
+export function translateRouteTitle(t: any, title: string, te?: (key: string) => boolean) {
+  if (!title || typeof te !== "function") return title;
+  if (te(title)) return t(title);
+
+  const routeKey = `route.${title}`;
+  return te(routeKey) ? t(routeKey) : title;
 }
+

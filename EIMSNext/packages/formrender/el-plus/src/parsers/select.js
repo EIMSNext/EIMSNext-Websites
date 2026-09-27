@@ -1,11 +1,17 @@
 import {toArray} from '@eimsnext/form-render-core';
 
+const getOptions = (ctx) =>
+    ctx.payload?.fetch?.options ??
+    ctx.payload?.source?.options ??
+    ctx.prop.options ??
+    [];
+
 // 创建select解析器
 const selectParser = {
     name: 'select',
     toFormValue(value, ctx) {
         // 获取下拉框选项
-        const options = ctx.prop.options || ctx.payload?.options || [];
+        const options = getOptions(ctx);
         
         // 处理多选模式
         if (ctx.prop.props.multiple) {

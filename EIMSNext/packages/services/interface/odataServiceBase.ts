@@ -5,8 +5,8 @@ import { ServiceBase } from "./serviceBase";
 export abstract class ReadonlyODataServiceBase<T = IdBase> extends ServiceBase {
   protected abstract modelName(): string;
 
-  get<T>(id: string, query?: ODataQueryRequest | string): Promise<T> {
-    return this.http().odata.get<T>(this.modelName(), id, query);
+  get<T>(id: string, query?: ODataQueryRequest | string, options?: { silentError?: boolean }): Promise<T> {
+    return this.http().odata.get<T>(this.modelName(), id, query, options);
   }
 
   count(query?: ODataQueryRequest | string): Promise<number> {
@@ -40,8 +40,8 @@ export abstract class ODataServiceBase<
 > extends ServiceBase {
   protected abstract modelName(): string;
 
-  get<T>(id: string, query?: ODataQueryRequest | string): Promise<T> {
-    return this.http().odata.get<T>(this.modelName(), id, query);
+  get<T>(id: string, query?: ODataQueryRequest | string, options?: { silentError?: boolean }): Promise<T> {
+    return this.http().odata.get<T>(this.modelName(), id, query, options);
   }
 
   count(query?: ODataQueryRequest | string): Promise<number> {

@@ -2,9 +2,16 @@
   <div class="share-link-bar">
     <el-input :model-value="url" readonly class="share-link-input" />
     <div class="share-link-actions">
-      <el-button text @click="copyLink">复制</el-button>
-      <el-button text @click="openLink">打开</el-button>
-      <el-popover placement="bottom-end" trigger="click" :width="220" @show="renderQrCode">
+      <el-button text @click="copyLink">{{ t("common.copy") }}</el-button>
+      <el-button text @click="openLink">{{
+        t("comp.shareLinkBar.open")
+      }}</el-button>
+      <el-popover
+        placement="bottom-end"
+        trigger="click"
+        :width="220"
+        @show="renderQrCode"
+      >
         <template #reference>
           <el-button text class="share-link-qrcode-btn">
             <el-icon><Grid /></el-icon>
@@ -23,6 +30,9 @@ import { Grid } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import QRCodeStyling from "qr-code-styling";
 import { nextTick, ref } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "ShareLinkBar",
@@ -48,9 +58,9 @@ const copyLink = async () => {
       document.body.removeChild(input);
     }
 
-    ElMessage.success("链接已复制");
+    ElMessage.success(t("comp.shareLinkBar.linkCopied"));
   } catch {
-    ElMessage.error("复制失败");
+    ElMessage.error(t("comp.shareLinkBar.copyFailed"));
   }
 };
 
@@ -88,16 +98,17 @@ const renderQrCode = async () => {
   background: var(--el-bg-color);
   border: 1px solid var(--et-border-color);
   border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--et-shadow-sm);
   display: flex;
   overflow: hidden;
+  min-width: 560px;
 }
 
 .share-link-input {
   flex: 1;
 
   :deep(.el-input__wrapper) {
-    background: #fff;
+    background: var(--et-bg-container);
     border-radius: 0;
     box-shadow: none;
     min-height: 36px;
@@ -106,7 +117,7 @@ const renderQrCode = async () => {
   }
 
   :deep(.el-input__inner) {
-    color: #1f2937;
+    color: var(--et-text-primary);
     font-size: 13px;
   }
 }
@@ -114,12 +125,12 @@ const renderQrCode = async () => {
 .share-link-actions {
   align-items: center;
   background: var(--el-bg-color);
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid var(--et-border-color);
   display: flex;
 
   .el-button {
     border-radius: 0;
-    color: #4b5563;
+    color: var(--et-text-secondary);
     font-size: 13px;
     height: 36px;
     margin: 0;
@@ -127,11 +138,11 @@ const renderQrCode = async () => {
   }
 
   .el-button + .el-button {
-    border-left: 1px solid #eef2f7;
+    border-left: 1px solid var(--et-border-color-light);
   }
 
   .el-button:hover {
-    background: #f8fafc;
+    background: var(--et-bg-hover);
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@eimsnext/utils",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "",
   "type": "module",
   "main": "./dist/index.js",
@@ -12,6 +12,10 @@
   ],
   "author": "",
   "license": "",
+  "dependencies": {
+    "axios": "^1.15.2",
+    "mitt": "^3.0.1"
+  },
   "scripts": {
     "build": "vite build"
   }

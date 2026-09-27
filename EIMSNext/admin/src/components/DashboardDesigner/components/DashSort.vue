@@ -1,6 +1,6 @@
 <template>
   <div v-click-outside="onClickOutside" class="no-drag">
-    <div class="sort-title">设置排序规则</div>
+    <div class="sort-title">{{ t("comp.addSortRule") }}</div>
     <SortList
       v-model="sortList"
       :sortFields="sortFields"
@@ -22,7 +22,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 defineOptions({
-  name: "DataSort",
+  name: "DashSort",
 });
 
 const props = withDefaults(

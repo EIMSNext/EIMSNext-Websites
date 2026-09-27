@@ -21,6 +21,9 @@
 
 <script setup lang="ts">
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps({
   modelValue: {
@@ -44,7 +47,7 @@ const toolbarConfig = ref({
 }); // 工具条配置
 // 编辑器配置
 const editorConfig = ref({
-  placeholder: "请输入内容...",
+  placeholder: t("admin.editor.placeholder"),
   MENU_CONF: {
     uploadImage: {
       // 自定义图片上传

@@ -3,8 +3,10 @@
 export interface WebhookRequest extends IdBase {
   appId?: string;
   formId?: string;
+  name?: string;
   url?: string;
   secret?: string;
+  remark?: string;
   triggers?: WebHookTrigger;
   disabled: boolean;
 }
@@ -12,8 +14,10 @@ export interface WebhookRequest extends IdBase {
 export interface Webhook extends CorpModelBase {
   appId: string;
   formId: string;
+  name?: string;
   url: string;
   secret: string;
+  remark?: string;
   triggers?: WebHookTrigger;
   disabled: boolean;
 }
@@ -24,5 +28,5 @@ export enum WebHookTrigger {
   Data_Updated = 1 << 1,
   Data_Removed = 1 << 2,
   WfStatus_Updated = 1 << 3,
-  WfTodo_Updated = 1 << 4,
+  WfTask_Updated = 1 << 4,
 }

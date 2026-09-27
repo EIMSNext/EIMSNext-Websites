@@ -4,16 +4,17 @@
     <div class="main-row">
       <!-- 部门树 -->
       <div class="dept-tree-col">
-        <div class="org-menu">员工</div>
+        <div class="org-menu">{{ $t("admin.department.title") }}</div>
         <div class="menu-items">
           <el-radio-group v-model="empStatus" @change="handleStatusChanged">
-            <el-radio :label="0">在职员工</el-radio>
-            <el-radio :label="1">离职员工</el-radio>
+            <el-radio :value="0">{{ $t("admin.department.active") }}</el-radio>
+            <el-radio :value="1">{{ $t("admin.department.resigned") }}</el-radio>
+            <el-radio v-if="showPendingApproval" :value="2">{{ $t("admin.department.pending") }}</el-radio>
           </el-radio-group>
         </div>
-        <div class="org-menu">部门</div>
+        <div class="org-menu">{{ $t("admin.department.deptTitle") }}</div>
         <div class="dept-tree-wrapper">
-          <dept-tree :editable="true" @node-click="handleDeptChanged" />
+          <dept-tree :editable="isUnrestrictedAdmin" admin-scope @node-click="handleDeptChanged" />
         </div>
       </div>
       <!-- 用户列表 -->
@@ -38,19 +39,16 @@
               @row-click="edit"
             >
               <el-table-column type="selection" width="40" />
-              <el-table-column label="姓名" width="150" prop="empName" />
-              <el-table-column label="编码" width="150" prop="code" />
-              <el-table-column label="工作电话" width="150" prop="workPhone" />
-              <el-table-column label="工作邮箱" width="150" prop="workEmail" />
-              <el-table-column label="部门" prop="department.name" />
-              <!-- <el-table-column label="操作" fixed="right" width="150">
-                <template #default="scope">
-                  <el-button v-hasPerm="{ needPerm: DataPerms.Edit }" type="primary" icon="edit" link size="small"> 编辑
-                  </el-button>
-                  <el-button v-hasPerm="{ needPerm: DataPerms.Remove }" type="danger" icon="delete" link size="small"> 删除
-                  </el-button>
-                </template>
-</el-table-column> -->
+            <el-table-column :label="$t('admin.department.name')" width="150" prop="empName" />
+            <el-table-column :label="$t('admin.department.code')" width="150" prop="code" />
+            <el-table-column :label="$t('admin.workPhone')" width="150" prop="workPhone" />
+            <el-table-column :label="$t('admin.workEmail')" width="150" prop="workEmail" />
+            <el-table-column v-if="isPendingMode && isUnrestrictedAdmin" :label="$t('common.edit')" fixed="right" width="160">
+              <template #default="scope">
+                <el-button link type="primary" @click.stop="reviewSingle(scope.row, true)">{{ $t("admin.department.approve") }}</el-button>
+                <el-button link type="danger" @click.stop="reviewSingle(scope.row, false)">{{ $t("admin.department.reject") }}</el-button>
+              </template>
+            </el-table-column>
             </el-table>
           </div>
           <div class="pagination-container">
@@ -58,11 +56,38 @@
           </div>
         </el-card>
       </div>
+      <div v-if="isPendingMode" class="pending-detail-col">
+        <el-card shadow="never" class="pending-detail-card">
+          <template v-if="selectedEmp">
+            <div class="detail-title">{{ $t("admin.department.joinApplication") }}</div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t("admin.empName") }}</span>
+              <span>{{ selectedEmp.empName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t("admin.empCode") }}</span>
+              <span>{{ selectedEmp.code || "-" }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t("admin.department.phone") }}</span>
+              <span>{{ selectedEmp.workPhone || "-" }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t("admin.department.email") }}</span>
+              <span>{{ selectedEmp.workEmail || "-" }}</span>
+            </div>
+          </template>
+          <el-empty v-else :description="$t('admin.department.selectPending')" />
+        </el-card>
+      </div>
     </div>
     <AddEditEmp
       v-if="showAddEditDialog"
       :edit="editMode"
       :emp="selectedEmp"
+      admin-scope
+      :department-scope-mode="adminPermissions?.contactManageDepartmentScopeMode"
+      :department-ids="adminPermissions?.contactManageDepartmentIds || []"
       @cancel="showAddEditDialog = false"
       @ok="handleSaved"
     />
@@ -109,8 +134,13 @@
 
 <script setup lang="ts">
 import { ODataQuery } from "@/utils/query";
-import { DataPerms, Department, Employee, FieldType } from "@eimsnext/models";
-import { SortDirection, employeeService } from "@eimsnext/services";
+import { TenantAccessSnapshot, Department, Employee, FieldType, PlatformType, ScopeMode, UserType } from "@eimsnext/models";
+import {
+  SortDirection,
+  employeeService,
+  systemService,
+} from "@eimsnext/services";
+import { useUserStore } from "@eimsnext/store";
 import buildQuery from "odata-query";
 import {
   ToolbarItem,
@@ -120,7 +150,11 @@ import {
   EtConfirm,
   ConfirmResult,
 } from "@eimsnext/components";
-import { TableInstance, TableTooltipData } from "element-plus";
+import { useContextStore } from "@eimsnext/store";
+import { ElMessage, TableInstance, TableTooltipData } from "element-plus";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineOptions({
   name: "DeptManager",
@@ -138,7 +172,7 @@ const showSort = ref(false);
 const sortList = ref<IFieldSortList>({
   items: [
     {
-      field: { formId: "employee", field: "empName", label: "姓名", type: FieldType.Input },
+      field: { formId: "employee", field: "empName", label: t("admin.department.name"), type: FieldType.Input },
       sort: SortDirection.Asc,
     },
   ],
@@ -150,16 +184,21 @@ const checkedDatas = ref<any[]>([]);
 const pageNum = ref(1);
 const pageSize = ref(20);
 
+const contextStore = useContextStore();
+const isPendingMode = computed(() => empStatus.value === 2);
+
 const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "新增",
-      type: "success",
+      text: t("common.addNew"),
+      type: "primary",
       command: "add",
       visible: true,
       icon: "el-plus",
       onCommand: () => {
+        if (!hasManageDepartmentScope.value || isPendingMode.value) return;
+
         editMode.value = false;
         showAddEditDialog.value = true;
       },
@@ -168,17 +207,19 @@ const leftBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "删除",
-      type: "danger",
+      text: t("common.delete"),
+      class: "delete-button",
       command: "delete",
       visible: true,
       icon: "el-delete",
       disabled: true,
       onCommand: async () => {
+        if (!hasManageDepartmentScope.value || isPendingMode.value) return;
+
         if (checkedDatas.value.length > 0) {
           var confirm = await EtConfirm.showDialog(
-            `你当前选中了${checkedDatas.value.length}条数据，数据删除后将不可恢复`,
-            { title: "你确定要删除所选数据吗？" }
+            t("common.message.deleteConfirm_Content", { 0: checkedDatas.value.length }),
+            { title: t("common.message.deleteConfirm_Title") }
           );
           if (confirm == ConfirmResult.Yes) {
             await employeeService
@@ -191,6 +232,34 @@ const leftBars = ref<ToolbarItem[]>([
       },
     },
   },
+  {
+    type: "button",
+    config: {
+      text: t("admin.department.toolbar.batchApprove"),
+      type: "primary",
+      command: "approve",
+      visible: false,
+      icon: "el-select",
+      disabled: true,
+      onCommand: async () => {
+        await reviewSelected(true);
+      },
+    },
+  },
+  {
+    type: "button",
+    config: {
+      text: t("admin.department.toolbar.batchReject"),
+      type: "danger",
+      command: "reject",
+      visible: false,
+      icon: "el-close",
+      disabled: true,
+      onCommand: async () => {
+        await reviewSelected(false);
+      },
+    },
+  },
   // { type: "button", config: { text: "导入", command: "upload", icon: "el-upload" } },
   // { type: "button", config: { text: "导出", command: "download", icon: "el-download" } }
 ]);
@@ -199,7 +268,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "筛选",
+      text: t("common.filter"),
       class: "data-filter",
       command: "filter",
       visible: true,
@@ -213,7 +282,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "排序",
+      text: t("common.sort"),
       class: "data-filter",
       command: "sort",
       visible: true,
@@ -227,7 +296,7 @@ const rightBars = ref<ToolbarItem[]>([
   {
     type: "button",
     config: {
-      text: "刷新",
+      text: t("common.refresh"),
       class: "data-filter",
       command: "refresh",
       visible: true,
@@ -268,13 +337,7 @@ const setSort = (sort: IFieldSortList) => {
 };
 
 const updateQueryParams = () => {
-  let statusFilter = { status: { eq: empStatus.value } };
-  let preFilter: any = statusFilter;
-  if (deptHeriarchyId.value) {
-    preFilter = {
-      and: [statusFilter, { "department/heriarchyId": { startswith: deptHeriarchyId.value } }],
-    };
-  }
+  let preFilter: any = { status: { eq: empStatus.value } };
 
   queryParams.value = toODataQuery(
     condList.value,
@@ -283,7 +346,6 @@ const updateQueryParams = () => {
     pageSize.value,
     preFilter
   );
-  queryParams.value.expand = "department";
 };
 
 const queryParams = ref<ODataQuery<Employee>>({
@@ -294,8 +356,33 @@ const queryParams = ref<ODataQuery<Employee>>({
 const dataRef = ref<Employee[]>();
 const totalRef = ref(0);
 const loading = ref(false);
-const deptHeriarchyId = ref("");
 const empStatus = ref(0);
+const userStore = useUserStore();
+const adminPermissions = ref<TenantAccessSnapshot>();
+const selectedDepartmentId = ref("");
+const isUnrestrictedAdmin = computed(() =>
+  [
+    UserType.System,
+    UserType.Client,
+    UserType.CorpOwmer,
+    UserType.CorpAdmin,
+  ].includes(userStore.currentUser.userType),
+);
+const showPendingApproval = computed(() => contextStore.corpPlat === PlatformType.Public && isUnrestrictedAdmin.value);
+const hasManageDepartmentScope = computed(() => {
+  if (isUnrestrictedAdmin.value) return true;
+  const permissions = adminPermissions.value;
+  if (!permissions?.isNormalAdmin) return false;
+  return permissions.contactManageDepartmentScopeMode === ScopeMode.All || permissions.contactManageDepartmentIds.length > 0;
+});
+const canManageDepartment = (departmentId?: string) => {
+  if (isUnrestrictedAdmin.value) return true;
+  const permissions = adminPermissions.value;
+  if (!departmentId || !permissions?.isNormalAdmin) return false;
+  if (permissions.contactManageDepartmentScopeMode === ScopeMode.All) return true;
+  return permissions.contactManageDepartmentIds.includes(departmentId);
+};
+const appendAdminScope = (query: string) => query ? `${query}&adminScope=true` : "adminScope=true";
 
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
@@ -311,16 +398,10 @@ const handleStatusChanged = () => {
 };
 
 const handleDeptChanged = (dept?: Department) => {
-  deptHeriarchyId.value = dept?.heriarchyId ?? "";
-
+  selectedDepartmentId.value = dept?.id ?? "";
+  pageNum.value = 1;
   updateQueryParams();
   handleQuery();
-};
-const handleQuery = () => {
-  loading.value = true;
-
-  loadCount();
-  loadData();
 };
 const rowClassName = (row: any) => {
   return "pointer";
@@ -329,7 +410,11 @@ const rowClassName = (row: any) => {
 const loadCount = () => {
   let query = buildQuery({ filter: queryParams.value.filter });
 
-  employeeService.count(query).then((cnt: number) => {
+  const request = selectedDepartmentId.value
+    ? employeeService.countByDepartment(selectedDepartmentId.value, true, appendAdminScope(query))
+    : employeeService.count(appendAdminScope(query));
+
+  request.then((cnt: number) => {
     totalRef.value = cnt;
   });
 };
@@ -337,18 +422,53 @@ const loadData = () => {
   loading.value = true;
   let query = buildQuery(queryParams.value);
 
-  employeeService
-    .query<Employee>(query)
+  const request = selectedDepartmentId.value
+    ? employeeService.queryByDepartment<Employee>(selectedDepartmentId.value, true, appendAdminScope(query))
+    : employeeService.query<Employee>(appendAdminScope(query));
+
+  request
     .then((res: Employee[]) => {
       dataRef.value = res;
+      if (isPendingMode.value) {
+        selectedEmp.value = res[0];
+      }
     })
     .finally(() => (loading.value = false));
 };
 
+const handleQuery = async () => {
+  loading.value = true;
+  try {
+    checkedDatas.value = [];
+    syncManageToolbar();
+    loadCount();
+    loadData();
+  } finally {
+    loading.value = false;
+  }
+};
+
+const syncManageToolbar = () => {
+  const canManageAnyDepartment = hasManageDepartmentScope.value && !isPendingMode.value;
+  const addBar = leftBars.value.find((x) => x.config.command == "add");
+  const deleteBar = leftBars.value.find((x) => x.config.command == "delete");
+  if (addBar) addBar.config.visible = canManageAnyDepartment;
+  if (deleteBar) {
+    deleteBar.config.visible = canManageAnyDepartment;
+    deleteBar.config.disabled =
+      checkedDatas.value.length === 0 || checkedDatas.value.some((emp) => (emp.depts ?? []).every((d: { id: string }) => !canManageDepartment(d.id)));
+  }
+};
+
 const selectionChanged = (rows: any[]) => {
   checkedDatas.value = rows;
+  const hasSelection = checkedDatas.value.length > 0;
   leftBars.value.find((x) => x.config.command == "delete")!.config.disabled =
-    checkedDatas.value.length == 0;
+    !hasSelection || checkedDatas.value.some((emp: Employee) => (emp.depts ?? []).every((d) => !canManageDepartment(d.deptId)));
+  const approveBar = leftBars.value.find((x) => x.config.command == "approve");
+  const rejectBar = leftBars.value.find((x) => x.config.command == "reject");
+  if (approveBar) approveBar.config.disabled = !hasSelection;
+  if (rejectBar) rejectBar.config.disabled = !hasSelection;
 };
 const tableToolFormatter = (data: TableTooltipData<FormData>) => {
   return `${data.cellValue}`;
@@ -358,10 +478,59 @@ const edit = (row: Employee, column: any) => {
   if (column.type == "selection") {
     tableRef.value?.toggleRowSelection(row);
   } else {
-    editMode.value = true;
-    selectedEmp.value = row;
-    showAddEditDialog.value = true;
+    if (isPendingMode.value) {
+      selectedEmp.value = row;
+      return;
+    }
+    if ((row.depts ?? []).some((d) => canManageDepartment(d.deptId))) {
+      editMode.value = true;
+      selectedEmp.value = row;
+      showAddEditDialog.value = true;
+    }
   }
+};
+
+const reviewSingle = async (row: Employee, approved: boolean) => {
+  if (!isUnrestrictedAdmin.value) return;
+
+  const confirm = await EtConfirm.showDialog(
+    t("admin.department.messages." + (approved ? "approveSingle" : "rejectSingle"), { name: row.empName }),
+    { title: t("admin.department.messages." + (approved ? "approveTitle" : "rejectTitle")) }
+  );
+  if (confirm != ConfirmResult.Yes) {
+    return;
+  }
+
+  await employeeService.reviewJoinCorporate({ employeeIds: [row.id], approved });
+  ElMessage.success(t("admin.department.messages." + (approved ? "approveSuccess" : "rejectSuccess")));
+  await handleQuery();
+};
+
+const reviewSelected = async (approved: boolean) => {
+  if (!isUnrestrictedAdmin.value) return;
+
+  const employeeIds = checkedDatas.value.map((x) => x.id).filter((x): x is string => !!x);
+
+  if (!employeeIds.length) {
+    ElMessage.warning(t("admin.department.selectPending"));
+    return;
+  }
+
+  const confirm = await EtConfirm.showDialog(
+    t("admin.department.messages." + (approved ? "batchApproveConfirm" : "batchRejectConfirm"), { count: employeeIds.length }),
+    { title: t("admin.department.messages." + (approved ? "batchApproveTitle" : "batchRejectTitle")) }
+  );
+  if (confirm != ConfirmResult.Yes) {
+    return;
+  }
+
+  await employeeService.reviewJoinCorporate({
+    employeeIds,
+    approved,
+  });
+
+  ElMessage.success(t("admin.department.messages." + (approved ? "batchApproveSuccess" : "batchRejectSuccess")));
+  await handleQuery();
 };
 
 // 重置密码
@@ -390,7 +559,20 @@ const handleSaved = (data: Employee) => {
   handleQuery();
 };
 
-onMounted(() => {
+watch(isPendingMode, () => {
+  syncManageToolbar();
+  leftBars.value.find((x) => x.config.command == "approve")!.config.visible = isPendingMode.value && isUnrestrictedAdmin.value;
+  leftBars.value.find((x) => x.config.command == "reject")!.config.visible = isPendingMode.value && isUnrestrictedAdmin.value;
+  selectedEmp.value = undefined;
+});
+
+watch(hasManageDepartmentScope, () => {
+  syncManageToolbar();
+});
+
+onMounted(async () => {
+  adminPermissions.value = await systemService.getAdminPermissions();
+  syncManageToolbar();
   updateQueryParams();
   handleQuery();
 });
@@ -459,6 +641,17 @@ onMounted(() => {
   flex: 1; // 允许在有空间时扩展
 }
 
+.pending-detail-col {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pending-detail-card {
+  height: 100%;
+}
+
 // 员工列表卡片样式
 .emp-list-card {
   height: 100%;
@@ -505,6 +698,24 @@ onMounted(() => {
 .menu-items {
   margin: 0 var(--et-space-20);
   font-size: var(--et-font-size-14);
+}
+
+.detail-title {
+  margin-bottom: var(--et-space-16);
+  font-size: var(--et-font-size-16);
+  font-weight: 600;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--et-space-12);
+  margin-bottom: var(--et-space-12);
+}
+
+.detail-label {
+  color: var(--et-text-tertiary);
+  flex-shrink: 0;
 }
 
 :deep(.data-filter) {

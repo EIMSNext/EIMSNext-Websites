@@ -1,4 +1,5 @@
 import { toArray, getSlot } from "@eimsnext/form-render-core";
+import { getFileFullUrl } from "@eimsnext/utils";
 import "./style.css";
 import { defineComponent } from "vue";
 import IconUpload from "./IconUpload.vue";
@@ -15,7 +16,20 @@ function parseFile(file, i) {
   };
 }
 function parseUpload(file) {
-  return { ...file, file, value: file };
+  const value = normalizeStoredValue(file);
+  return { ...file, ...value, url: getFileFullUrl(value.url), file, value };
+}
+
+function normalizeStoredValue(file) {
+  if (typeof file === "string") return { name: getFileName(file), url: file };
+  const url = file?.url || file?.savePath;
+  return {
+    ...(file?.id ? { id: file.id } : {}),
+    name: file?.name || file?.fileName || getFileName(url || ""),
+    url,
+    ...(file?.thumbUrl || file?.thumbPath ? { thumbUrl: file.thumbUrl || file.thumbPath } : {}),
+    ...(file?.fileSize !== undefined ? { fileSize: file.fileSize } : {}),
+  };
 }
 
 function getFileName(file) {
@@ -75,7 +89,7 @@ export default defineComponent({
     },
     update(fileList) {
       let files = fileList
-        .map((v) => (v.is_string ? v.url : v.value || v.url))
+        .map((v) => normalizeStoredValue(v.value || v.url))
         .filter((url) => url !== undefined);
       this.$emit("update:modelValue", files);
     },
@@ -85,6 +99,15 @@ export default defineComponent({
     handleChange(file, fileList) {
       this.$emit("change", ...arguments);
       if (file.status === "success") {
+        const uploaded = file.response?.value?.[0] || file.response?.data?.[0];
+        if (uploaded) {
+          const value = {
+            ...normalizeStoredValue(uploaded),
+          };
+          file.value = value;
+          file.url = getFileFullUrl(value.url);
+          if (value.thumbUrl) file.thumbUrl = getFileFullUrl(value.thumbUrl);
+        }
         this.update(fileList);
       }
     },
@@ -126,7 +149,7 @@ export default defineComponent({
                 <IconUpload />
               </ElIcon>
             ) : (
-              <ElButton type="primary">点击上传</ElButton>
+              <ElButton type="primary">{this.formCreateInject?.t("comp.dragger.clickToUpload") || "点击上传"}</ElButton>
             ))}
         </ElUpload>
         <ElDialog

@@ -1,7 +1,8 @@
 import { IFormFieldDef } from "@eimsnext/components";
 import {
   FieldDef,
-  IFieldPerm,
+  FieldType,
+  FormFieldPermission,
   SystemField,
   getDataTitle,
   getCreateBy,
@@ -10,23 +11,27 @@ import {
 } from "@eimsnext/models";
 import { Dictionary } from "@eimsnext/utils";
 
-export interface ITableColumn {
-  field: string;
-  title: string;
-  type: string;
-  format?: string;
-  width?: number;
-  children?: ITableColumn[];
-  mergeField?: string;
-  oriField: string;
-}
+import { ITableColumn } from "@eimsnext/models";
+
+export type { ITableColumn };
 export function buildColumns(
   fields: FieldDef[],
   usingWf: boolean,
   displayFields: IFormFieldDef[],
-  fieldPerms?: IFieldPerm[]
+  formFieldPermissions?: FormFieldPermission[],
+  t?: (key: string) => string,
 ): ITableColumn[] {
-  const dispalyAll = displayFields.length == 0;
+  const canViewField = (field: string) =>
+    formFieldPermissions === undefined ||
+    formFieldPermissions.some((permission) => permission.id === field && permission.visible);
+  const getSystemFieldLabel = (key: "dataTitle" | "flowStatus" | "createBy" | "createTime") =>
+    t ? t(`comp.fieldBlock.systemFields.${key}`) : ({
+      dataTitle: "数据标题",
+      flowStatus: "流程状态",
+      createBy: "提交人",
+      createTime: "提交时间",
+    }[key]);
+  const dispalyAll = displayFields.length == 0 && formFieldPermissions === undefined;
   const subDisplayFields = new Dictionary();
   displayFields.forEach((d) => {
     if (d.isSubField) {
@@ -48,8 +53,8 @@ export function buildColumns(
   });
 
   const columns: ITableColumn[] = [];
-  if (dispalyAll || displayFields.find((d) => d.field == SystemField.DataTitle)) {
-    const dataTitleField = getDataTitle("数据标题");
+  if (canViewField(SystemField.DataTitle) && (dispalyAll || displayFields.find((d) => d.field == SystemField.DataTitle))) {
+    const dataTitleField = getDataTitle(getSystemFieldLabel("dataTitle"));
     columns.push({
       field: dataTitleField.field,
       title: dataTitleField.title,
@@ -60,8 +65,8 @@ export function buildColumns(
     });
   }
 
-  if (usingWf && (dispalyAll || displayFields.find((d) => d.field == SystemField.FlowStatus))) {
-    const statusField = getFlowStatus("流程状态");
+  if (usingWf && canViewField(SystemField.FlowStatus) && (dispalyAll || displayFields.find((d) => d.field == SystemField.FlowStatus))) {
+    const statusField = getFlowStatus(getSystemFieldLabel("flowStatus"));
     columns.push({
       field: statusField.field,
       title: statusField.title,
@@ -73,10 +78,15 @@ export function buildColumns(
   }
 
   fields.forEach((x) => {
+    if (x.type === FieldType.DataSelect) {
+      return;
+    }
+
     if (
-      dispalyAll ||
-      displayFields.find((d) => d.field == x.field) ||
-      subDisplayFields.has(x.field)
+      canViewField(x.field) &&
+      (dispalyAll ||
+        displayFields.find((d) => d.field == x.field) ||
+        subDisplayFields.has(x.field))
     ) {
       let col: ITableColumn = {
         field: x.field,
@@ -92,7 +102,8 @@ export function buildColumns(
           col.field,
           x.columns,
           dispalyAll,
-          subDisplayFields.get(x.field)
+          subDisplayFields.get(x.field),
+          formFieldPermissions,
         );
       } else {
         col.width = 120;
@@ -102,8 +113,8 @@ export function buildColumns(
     }
   });
 
-  if (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateBy)) {
-    const createByField = getCreateBy("提交人");
+  if (canViewField(SystemField.CreateBy) && (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateBy))) {
+    const createByField = getCreateBy(getSystemFieldLabel("createBy"));
     columns.push({
       field: createByField.field,
       title: createByField.title,
@@ -113,8 +124,8 @@ export function buildColumns(
     });
   }
 
-  if (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateTime)) {
-    const createTimeField = getCreateTime("提交时间");
+  if (canViewField(SystemField.CreateTime) && (dispalyAll || displayFields.find((d) => d.field == SystemField.CreateTime))) {
+    const createTimeField = getCreateTime(getSystemFieldLabel("createTime"));
     columns.push({
       field: createTimeField.field,
       title: createTimeField.title,
@@ -132,12 +143,20 @@ function buildSubColumns(
   pField: string,
   fields: FieldDef[],
   dispalyAll: boolean,
-  subDisplayFields?: IFormFieldDef[]
+  subDisplayFields?: IFormFieldDef[],
+  formFieldPermissions?: FormFieldPermission[],
 ): ITableColumn[] {
   const columns: ITableColumn[] = [];
   if (dispalyAll || subDisplayFields) {
     fields.forEach((x) => {
-      if (dispalyAll || subDisplayFields?.find((d) => d.field == x.field)) {
+      if (x.type === FieldType.DataSelect) {
+        return;
+      }
+
+      const fieldId = `${pField}>${x.field}`;
+      const canView = formFieldPermissions === undefined ||
+        formFieldPermissions.some((permission) => permission.id === fieldId && permission.visible);
+      if (canView && (dispalyAll || subDisplayFields?.find((d) => d.field == x.field))) {
         let col: ITableColumn = {
           field: x.field,
           title: x.title,
@@ -146,7 +165,7 @@ function buildSubColumns(
           oriField: `${pField}>${x.field}`,
         };
         if (x.columns && x.columns.length > 0) {
-          col.children = buildSubColumns(col.field, x.columns, dispalyAll);
+          col.children = buildSubColumns(fieldId, x.columns, dispalyAll, undefined, formFieldPermissions);
         } else {
           col.width = 120;
         }

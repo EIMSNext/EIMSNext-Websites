@@ -21,5 +21,12 @@ export interface DashboardItemDef extends CorpModelBase {
 export enum DashItemType {
   Chart = "chart",
   Comp = "comp",
-  Tool = "tool",
+  Filter = "filter",
+  DetailTable = "detailTable",
+  LayoutContainer = "layoutContainer",
+  RealTime = "realTime",
+  Image = "image",
+  Text = "text",
+  QuickFilter = "quickFilter",
+  FilterButton = "filterButton",
 }

@@ -13,13 +13,13 @@
       </template>
       <template #handle>
         <div v-if="isgod" class="handle">
-          <el-button size="small" class="btn-info builder-action-btn" @click="setJson">导入JSON
+          <el-button size="small" class="builder-action-btn" @click="setJson">导入JSON
           </el-button>
-          <el-button size="small" class="btn-info builder-action-btn" @click="setOption">导入Options
+          <el-button size="small" class="builder-action-btn" @click="setOption">导入Options
           </el-button>
-          <el-button size="small" class="btn-info builder-action-btn" @click="showJson">生成JSON
+          <el-button size="small" class="builder-action-btn" @click="showJson">生成JSON
           </el-button>
-          <el-button size="small" class="btn-info builder-action-btn" @click="showOption">生成Options
+          <el-button size="small" class="builder-action-btn" @click="showOption">生成Options
           </el-button>
         </div>
       </template>
@@ -244,11 +244,11 @@ export default {
       content.options = options;
 
       this.$emit("save", content);
-      this.resetDirty(content);
     },
     onCancel() {
       this.$refs.designer.setRule(JSON.parse(this.oldLayout));
       this.$refs.designer.setOptions(JSON.parse(this.oldOptions));
+      this.$refs.designer.resetFieldChangeLogs();
     },
     onPreview() {
       this.$refs.designer.openPreview();
@@ -344,6 +344,7 @@ export default {
     resetDirty(content) {
       this.oldLayout = content?.layout ? JSON.stringify(content.layout) : "";
       this.oldOptions = content?.options ? JSON.stringify(content.options) : "";
+      this.$refs.designer.setFieldChangeLogs(content?.fieldChangeLogs || []);
     },
   },
   beforeCreate() {
@@ -353,15 +354,16 @@ export default {
     this.isgod =
       process.env.NODE_ENV === "development" || this.$route.query.god === "cn";
 
-    if (this.formDef && this.formDef.content) {
-      this.$refs.designer.setFormId(this.formDef.id);
+      if (this.formDef && this.formDef.content) {
+        this.$refs.designer.setFormId(this.formDef.id);
 
-      if (this.formDef.content.layout) {
-        this.$refs.designer.setRule(this.formDef.content.layout);
-      }
+        if (this.formDef.content.layout) {
+          this.$refs.designer.setRule(JSON.parse(this.formDef.content.layout));
+        }
       if (this.formDef.content.options) {
         this.$refs.designer.setOptions(this.formDef.content.options);
       }
+      this.$refs.designer.setFieldChangeLogs(this.formDef.content.fieldChangeLogs || []);
 
       this.oldLayout = JSON.stringify(this.$refs.designer.getJson());
       this.oldOptions = JSON.stringify(this.$refs.designer.getOptionsJson());
@@ -461,6 +463,15 @@ body {
 }
 
 .builder-action-btn {
+  --el-button-bg-color: transparent;
+  --el-button-text-color: var(--et-text-primary);
+  --el-button-border-color: transparent;
+  --el-button-hover-bg-color: var(--et-color-primary);
+  --el-button-hover-text-color: var(--el-color-white, #fff);
+  --el-button-hover-border-color: var(--et-color-primary);
+  --el-button-active-bg-color: var(--et-color-primary-active);
+  --el-button-active-text-color: var(--el-color-white, #fff);
+  --el-button-active-border-color: var(--et-color-primary-active);
   border: none;
 }
 

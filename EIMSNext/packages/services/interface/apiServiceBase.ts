@@ -15,9 +15,9 @@ export abstract class ApiServiceBase<T = IdBase, R = any> extends ServiceBase {
     return this.http().api.query(url, query);
   }
 
-  get<T>(id: string, query?: any): Promise<T> {
+  get<T>(id: string, query?: any, options?: { silentError?: boolean }): Promise<T> {
     let url = this.getUrl(this.modelName(), id);
-    return this.http().api.get<T>(url, query);
+    return this.http().api.get<T>(url, query, true, options);
   }
 
   count(query?: any): Promise<number> {

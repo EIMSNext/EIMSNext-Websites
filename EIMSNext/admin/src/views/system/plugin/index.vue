@@ -4,19 +4,19 @@
       <et-toolbar :left-group="leftBars" />
       <el-table v-loading="loading" :data="plugins" style="width: 100%">
         <el-table-column prop="pluginId" label="Plugin ID" min-width="180" />
-        <el-table-column prop="name" label="名称" min-width="180" />
-        <el-table-column prop="version" label="当前版本" width="120" />
-        <el-table-column label="功能数" width="100">
+        <el-table-column prop="name" :label="$t('admin.pluginManage.name')" min-width="180" />
+        <el-table-column prop="version" :label="$t('admin.pluginManage.currentVersion')" width="120" />
+        <el-table-column :label="$t('admin.pluginManage.functionCount')" width="100">
           <template #default="scope">
             {{ scope.row.functions?.length ?? 0 }}
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="描述" min-width="240" />
+        <el-table-column prop="description" :label="$t('admin.pluginManage.description')" min-width="240" />
       </el-table>
 
       <div v-if="reloadItems.length > 0" class="reload-result mt-[16px]">
         <div class="reload-header">
-          <div class="reload-title">最近一次 reload 结果</div>
+          <div class="reload-title">{{ $t("admin.pluginManage.lastReloadResult") }}</div>
           <div v-if="lastReloadTime" class="reload-time">{{ lastReloadTime }}</div>
         </div>
         <el-alert
@@ -24,27 +24,28 @@
           class="mb-[12px]"
           type="warning"
           :closable="false"
-          title="存在旧版本未释放的插件，请检查是否仍有引用未结束"
+          :title="$t('admin.pluginManage.oldVersionUnreleased')"
         />
         <el-table :data="reloadItems" size="small">
           <el-table-column prop="pluginId" label="Plugin ID" min-width="160" />
-          <el-table-column label="结果" width="120">
+          <el-table-column :label="$t('admin.pluginManage.result')" width="120">
             <template #default="scope">
               <el-tag :type="scope.row.updated ? 'success' : 'info'">
-                {{ scope.row.updated ? '已更新' : '无变化' }}
+                {{ scope.row.updated ? $t('admin.pluginManage.updated') : $t('admin.pluginManage.unchanged') }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="previousVersion" label="旧版本" width="120" />
-          <el-table-column prop="currentVersion" label="当前版本" width="120" />
-          <el-table-column label="卸载结果" width="120">
+          <el-table-column prop="previousVersion" :label="$t('admin.pluginManage.oldVersion')" width="120" />
+          <el-table-column prop="currentVersion" :label="$t('admin.pluginManage.currentVersion')" width="120" />
+          <el-table-column :label="$t('admin.pluginManage.unloadResult')" width="120">
             <template #default="scope">
-              <el-tag :type="scope.row.unloadedOldVersion ? 'success' : 'warning'">
-                {{ scope.row.unloadedOldVersion ? '已释放' : '仍被引用' }}
+              <el-tag v-if="scope.row.updated && scope.row.previousVersion" :type="scope.row.unloadedOldVersion ? 'success' : 'warning'">
+                {{ scope.row.unloadedOldVersion ? $t('admin.pluginManage.released') : $t('admin.pluginManage.stillReferenced') }}
               </el-tag>
+              <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column prop="message" label="信息" min-width="220" />
+          <el-table-column prop="message" :label="$t('admin.pluginManage.info')" min-width="220" />
         </el-table>
       </div>
     </el-card>
@@ -53,7 +54,13 @@
 
 <script setup lang="ts">
 import { ToolbarItem } from "@eimsnext/components";
+import { UserType } from "@eimsnext/models";
 import { systemService } from "@eimsnext/services";
+import { useUserStore } from "@eimsnext/store";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+const userStore = useUserStore();
 
 interface PluginRuntimeInfo {
   pluginId: string;
@@ -92,11 +99,14 @@ const lastReloadTime = ref("");
 const pluginSystemService = systemService as PluginSystemService;
 
 const hasUnloadWarnings = computed(() => reloadItems.value.some((item) => item.updated && !item.unloadedOldVersion));
+const canReload = computed(() => userStore.currentUser.userType === UserType.PlatAdmin);
 
 const loadPlugins = async () => {
   loading.value = true;
   try {
     plugins.value = await pluginSystemService.getPlugins();
+  } catch {
+    ElMessage.error(t("common.loadFailed"));
   } finally {
     loading.value = false;
   }
@@ -109,19 +119,21 @@ const reloadPlugins = async () => {
     reloadItems.value = result.items ?? [];
     lastReloadTime.value = new Date().toLocaleString();
     plugins.value = await pluginSystemService.getPlugins();
+  } catch {
+    ElMessage.error(t("common.operationFailed"));
   } finally {
     loading.value = false;
   }
 };
 
-const leftBars = ref<ToolbarItem[]>([
+const leftBars = computed<ToolbarItem[]>(() => [
   {
     type: "button",
     config: {
-      text: "刷新",
+      text: t("common.refresh"),
       type: "primary",
       command: "refresh",
-      visible: true,
+      visible: canReload.value,
       icon: "el-refresh",
       onCommand: loadPlugins,
     },

@@ -1,5 +1,5 @@
-import { Api, Options, Rule } from "@eimsnext/form-render/element-plus";
-import FormCreate from "@eimsnext/form-render/element-plus";
+import { Api, Options, Rule } from "@eimsnext/form-render-elplus";
+import FormCreate from "@eimsnext/form-render-elplus";
 import {
   Component,
   Plugin,
@@ -12,6 +12,14 @@ import {
 
 //多语言读取函数
 export type t = (name, ...args) => string;
+
+export interface FieldChangeLog {
+  fieldId: string;
+  fieldType: string;
+  fieldLabel: string;
+  deletedBy?: { id?: string; value?: string; label?: string };
+  deletedTime: number;
+}
 
 export type MenuName =
   | "main"
@@ -860,6 +868,12 @@ export declare const FcDesigner: import("vue").DefineComponent<
     openGlobalClassDialog: () => void;
     //设置当前设计的表单Id
     setFormId: (formId: string) => void;
+    //设置字段删除记录
+    setFieldChangeLogs: (logs: FieldChangeLog[]) => void;
+    //获取字段删除记录
+    getFieldChangeLogs: () => FieldChangeLog[];
+    //撤销未保存的字段恢复
+    resetFieldChangeLogs: () => void;
   }
 > &
   FcDesignerProtoType &

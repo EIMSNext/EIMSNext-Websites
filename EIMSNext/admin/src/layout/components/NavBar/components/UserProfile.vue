@@ -11,7 +11,7 @@
             <div class="user-corp">
               <div class="corp-name">{{ contextStore.corpName }}</div>
               <el-tag class="corp-tag">
-                {{ userStore.currentUser.userType == UserType.CorpOwmer ? "我创建的" : "我加入的" }}
+                {{ userStore.currentUser.userType == UserType.CorpOwmer ? t("admin.shell.myCreated") : t("admin.shell.myJoined") }}
               </el-tag>
             </div>
           </div>
@@ -54,13 +54,11 @@ defineOptions({
   name: "UserProfile",
 });
 
-import { useTagsViewStore } from "@/store";
 import { CurrentUser, UserType } from "@eimsnext/models";
 import { useUserStore, useContextStore } from "@eimsnext/store";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
 
-const tagsViewStore = useTagsViewStore();
 const userStore = useUserStore();
 const contextStore = useContextStore();
 const route = useRoute();
@@ -86,20 +84,15 @@ function handleOpenUserProfile() {
  * 注销登出
  */
 function logout() {
-  ElMessageBox.confirm("确定退出系统吗？", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
+  ElMessageBox.confirm(t("admin.shell.logoutConfirm"), t("admin.shell.logoutTitle"), {
+    confirmButtonText: t("common.ok"),
+    cancelButtonText: t("common.cancel"),
     type: "warning",
     lockScroll: false,
   }).then(() => {
-    userStore
-      .logout()
-      .then(() => {
-        tagsViewStore.delAllViews();
-      })
-      .then(() => {
-        router.push(`/login`);
-      });
+    userStore.logout().then(() => {
+      router.push(`/login`);
+    });
   });
 }
 </script>

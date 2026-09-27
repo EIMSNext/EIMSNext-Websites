@@ -8,7 +8,7 @@
       @command="addingField"
     >
       <el-button class="btn-add-trigger">
-        {{ "+ " + t("comp.selectField") }}
+        {{ "+ " + t("common.selectField") }}
       </el-button>
       <template #dropdown>
         <el-dropdown-menu class="trigger-header">
@@ -70,7 +70,7 @@ import {
 } from "../NodeFieldList/type";
 import { nextTick, onMounted, ref, toRef, watch } from "vue";
 import { IFormFieldDef, splitSubField } from "@/FieldSelect/type";
-import { normalizeFormulaValue, validateFormulaFieldList } from "@/FlowDesigner/Dataflow/formula";
+import { normalizeFormulaValue, validateFormulaFieldList } from "@/FlowDesigner/EventFlow/formula";
 const { t } = useLocale();
 
 defineOptions({
@@ -148,6 +148,7 @@ const onInput = (fieldItem: IFormFieldItem) => {
 
 const updateFieldSetting = () => {
   let mapping: Record<string, IFormFieldMap> = {};
+  markMissingSelectedFields();
   selectedFields.value.items.forEach((x) => {
     if (x.value.type == FieldValueType.Formula && x.value.formulaValue) {
       x.value.formulaValue = normalizeFormulaValue(
@@ -212,17 +213,37 @@ const updateFieldSetting = () => {
 
   const validation = validateFormulaFieldList(
     selectedFields.value.items,
-    t("dataflow.formulaInferenceError"),
+    t("eventFlow.formulaInferenceError"),
   );
   errorMap.value = {};
   validation.errors.forEach((item) => {
     errorMap.value[item.field] = item.message;
+  });
+  selectedFields.value.items.forEach((item) => {
+    const valueField = item.value.fieldValue ?? item.value.formulaValue?.drivingField;
+    const hasMissingFormulaRef = item.value.formulaValue?.refs?.some((ref) => ref.field?.missing);
+    if (item.field.missing || valueField?.missing || hasMissingFormulaRef) {
+      errorMap.value[item.field.field] = t("eventFlow.deletedField");
+    }
   });
 };
 
 const emitChange = () => {
   emit("update:modelValue", selectedFields.value);
   emit("change", selectedFields.value);
+};
+
+const markMissingSelectedFields = () => {
+  const currentFields = new Set(allFields.value.map((item) => item.field.field));
+  selectedFields.value.items.forEach((item) => {
+    if (!item.field?.field || currentFields.size === 0) return;
+    if (!currentFields.has(item.field.field)) {
+      item.field.missing = true;
+      if (!item.field.label.includes(t("eventFlow.deletedField"))) {
+        item.field.label = `${item.field.label || item.field.field}（${t("eventFlow.deletedField")}）`;
+      }
+    }
+  });
 };
 
 onMounted(() => {
@@ -241,6 +262,7 @@ watch(
           [],
           true,
         );
+        markMissingSelectedFields();
         fieldSetting.value.fieldMapping = {};
         fieldSetting.value.version = 0;
       }
