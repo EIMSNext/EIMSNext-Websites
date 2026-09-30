@@ -209,7 +209,11 @@ export async function bootstrapWithToken(
 // =============================================================
 
 export function toAccessCodeError(err: any): AccessCodeInvalidError | null {
+  if (err instanceof AccessCodeExpiredError) return err;
   if (err instanceof AccessCodeInvalidError) return err;
+  // 跨模块实例下 instanceof 可能失配（如 HMR 重载），用 name 兜底
+  if (err?.name === "AccessCodeExpiredError") return new AccessCodeExpiredError(err?.message);
+  if (err?.name === "AccessCodeInvalidError") return new AccessCodeInvalidError(err?.message);
   if (err?.name === "PublicTokenExpiredError") return new AccessCodeExpiredError();
   if (err?.name === "PublicTokenError" || err?.response?.status === 401 || err?.response?.status === 429) {
     return new AccessCodeInvalidError();

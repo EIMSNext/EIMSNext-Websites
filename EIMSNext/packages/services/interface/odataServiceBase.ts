@@ -17,13 +17,14 @@ export abstract class ReadonlyODataServiceBase<T = IdBase> extends ServiceBase {
     return this.http().odata.query(this.modelName(), query);
   }
 
-  dynamicCount(query?: any): Promise<number> {
-    let url = this.getApiUrl(this.modelName(), "dynamic/$count");
+  // 按 scope（如 started/approved/cced）查询，走 API 版 $query/$count（OData 版不识别 scope）。
+  countByScope(query?: any): Promise<number> {
+    let url = this.getApiUrl(this.modelName(), "$count");
     return this.http().api.count(url, query);
   }
 
-  dynamicQuery<T>(query?: any): Promise<T[]> {
-    let url = this.getApiUrl(this.modelName(), "dynamic/$query");
+  queryByScope<T>(query?: any): Promise<T[]> {
+    let url = this.getApiUrl(this.modelName(), "$query");
     return this.http().api.query(url, query);
   }
 

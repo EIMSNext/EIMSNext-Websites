@@ -222,7 +222,7 @@ function checkCapslock(event: KeyboardEvent) {
     height: 100%;
 
     .bg-banner {
-      background-image: url("@/assets/images/login/login-image.jpg");
+      background-image: url("@/assets/images/login/login-image.webp");
       background-position: 50%;
       background-repeat: no-repeat;
       background-size: cover;

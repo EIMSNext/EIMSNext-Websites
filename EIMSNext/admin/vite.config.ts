@@ -10,8 +10,41 @@ import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 
 import UnoCSS from "unocss/vite";
 import { resolve } from "path";
+import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
+import { gzipSync, brotliCompressSync, constants as zlibConstants } from "node:zlib";
+import type { Plugin } from "vite";
 
 const pathSrc = resolve(__dirname, "src");
+
+const COMPRESSIBLE = /\.(js|mjs|css|html|svg|json|txt|xml)$/i;
+const MIN_COMPRESS_SIZE = 1024;
+
+// 构建结束对 dist 产物生成 .gz / .br 预压缩文件，由静态服务器按 Accept-Encoding 直接回源
+function staticCompression(outDir: string): Plugin {
+  return {
+    name: "builtin-gzip-brotli",
+    apply: "build",
+    closeBundle() {
+      const walk = (dir: string): string[] =>
+        readdirSync(dir).flatMap((name) => {
+          const full = resolve(dir, name);
+          if (statSync(full).isDirectory()) return walk(full);
+          return COMPRESSIBLE.test(name) && statSync(full).size >= MIN_COMPRESS_SIZE ? [full] : [];
+        });
+
+      for (const file of walk(outDir)) {
+        const buf = readFileSync(file);
+        writeFileSync(`${file}.gz`, gzipSync(buf, { level: 9 }));
+        writeFileSync(
+          `${file}.br`,
+          brotliCompressSync(buf, {
+            params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 9 },
+          })
+        );
+      }
+    },
+  };
+}
 
 const scssAdditionalData = `
   @use "@/styles/variables.scss" as *;
@@ -275,6 +308,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     },
     plugins: [
       vue(),
+      staticCompression(resolve(__dirname, "dist")),
       visualizer({
         filename: "./dist/stats.html",
         open: mode === "production", // 构建后自动打开

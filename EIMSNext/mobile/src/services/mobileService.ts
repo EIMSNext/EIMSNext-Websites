@@ -67,7 +67,7 @@ export const formListViewServiceMobile = {
 
 export const formDataServiceMobile = {
   query(formId: string, skip = 0, top = 20, filter?: any, sort?: any, permissionGroupId?: string): Promise<FormData[]> {
-    return formDataService.dynamicQuery<FormData>({
+    return formDataService.query<FormData>({
       skip,
       take: top,
       filter: filter || `formId eq '${formId}'`,
@@ -76,7 +76,7 @@ export const formDataServiceMobile = {
     });
   },
   count(formId: string, filter?: any, permissionGroupId?: string): Promise<number> {
-    return formDataService.dynamicCount({
+    return formDataService.count({
       filter: filter || `formId eq '${formId}'`,
       scope: permissionGroupId ? { permissionGroupId } : undefined,
     });
@@ -159,7 +159,7 @@ export const taskServiceMobile = {
 
 export const workflowServiceMobile = {
   getMyStarted(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
-    return wfTaskService.dynamicQuery<WfTask>({
+    return wfTaskService.queryByScope<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,
@@ -168,7 +168,7 @@ export const workflowServiceMobile = {
     });
   },
   getApproved(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
-    return wfTaskService.dynamicQuery<WfTask>({
+    return wfTaskService.queryByScope<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,
@@ -177,7 +177,7 @@ export const workflowServiceMobile = {
     });
   },
   getCced(appId?: string, skip = 0, top = 10): Promise<WfTask[]> {
-    return wfTaskService.dynamicQuery<WfTask>({
+    return wfTaskService.queryByScope<WfTask>({
       skip,
       take: top,
       filter: appId ? `appId eq '${appId}'` : undefined,

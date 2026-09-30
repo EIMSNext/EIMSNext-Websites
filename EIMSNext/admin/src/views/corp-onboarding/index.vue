@@ -60,7 +60,7 @@
               <div class="corp-summary">
                 <div class="corp-name-row">
                   <span class="corp-name">{{ corp.name }}</span>
-                  <span class="corp-code">{{ corp.code }}</span>
+                  <span v-if="corp.code" class="corp-code">{{ corp.code }}</span>
                 </div>
                 <div class="corp-description">{{ corp.description || $t("admin.corpOnboarding.noCorpIntro") }}</div>
               </div>
@@ -116,7 +116,7 @@ async function searchCorporates() {
     query.$top = 20;
     query.$orderby = "name";
     query.$filter = keywordValue
-      ? `contains(name,'${keywordValue}') or contains(code,'${keywordValue}')`
+      ? `contains(name,'${keywordValue}')`
       : undefined;
     searchResults.value = await corporateService.query<Corporate>(query);
   } finally {
