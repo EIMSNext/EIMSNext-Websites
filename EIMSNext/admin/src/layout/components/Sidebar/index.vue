@@ -133,6 +133,7 @@
         @editMenu="openEditMenu"
         @editGroup="openEditGroup"
         @deleteMenu="deleteMenu"
+        @create="handleMenuCreate"
         @menusChanged="saveMenus"
       />
     </el-scrollbar>
@@ -464,6 +465,13 @@ const createFolder = () => {
 
   editingGroup.value = undefined;
   showGroupEditor.value = true;
+};
+
+const handleMenuCreate = (kind: "flow-form" | "form" | "dashboard" | "group") => {
+  if (kind === "flow-form") createForm(true);
+  else if (kind === "form") createForm(false);
+  else if (kind === "dashboard") createDashboard();
+  else createFolder();
 };
 </script>
 

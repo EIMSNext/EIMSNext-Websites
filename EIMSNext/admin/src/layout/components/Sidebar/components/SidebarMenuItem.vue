@@ -9,8 +9,32 @@
           @drop.stop.prevent="handleGroupDrop"
         >
           <SidebarMenuItemTitle :icon="groupIcon" :title="item.title" :iconColor="getAppIconColor(item)" />
-          <span v-if="canEdit || canDelete" class="more-wrapper" @click.stop>
-            <el-dropdown placement="bottom-start" size="large" trigger="click">
+          <span v-if="canManage || canEdit || canDelete" class="more-wrapper" @click.stop>
+            <el-dropdown v-if="canManage" placement="bottom-start" size="large" trigger="click">
+              <et-icon icon="el-Plus" @click.prevent="" />
+              <template #dropdown>
+                <el-dropdown-menu class="sidebar-menu-dropdown">
+                  <el-dropdown-item @click="emit('create', 'flow-form')">
+                    <et-icon class="dropdown-item-icon" icon="el-DocumentAdd" size="14px" />
+                    {{ t("admin.newFlowForm") }}
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="emit('create', 'form')">
+                    <et-icon class="dropdown-item-icon" icon="el-Document" size="14px" />
+                    {{ t("admin.newForm") }}
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="emit('create', 'dashboard')">
+                    <et-icon class="dropdown-item-icon" icon="el-DataAnalysis" size="14px" />
+                    {{ t("admin.newDashboard") }}
+                  </el-dropdown-item>
+                  <el-divider class="sidebar-menu-divider" />
+                  <el-dropdown-item @click="emit('create', 'group')">
+                    <et-icon class="dropdown-item-icon" icon="el-FolderAdd" size="14px" />
+                    {{ t("admin.newGroup") }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <el-dropdown v-if="canEdit || canDelete" placement="bottom-start" size="large" trigger="click">
               <et-icon icon="el-More" @click.prevent="" />
               <template #dropdown>
                 <el-dropdown-menu class="sidebar-menu-dropdown">
@@ -38,7 +62,7 @@
           <div class="menu-drag-item">
             <SidebarMenuItem :item="element" :app-id="appId" :can-manage="canManage" :sortable="sortable" @editForm="emit('editForm', $event)"
               @editMenu="emit('editMenu', $event)" @editGroup="emit('editGroup', $event)"
-              @deleteMenu="emit('deleteMenu', $event)" :on-group-drop="onGroupDrop" :can-drop-to-group="canDropToGroup"
+              @deleteMenu="emit('deleteMenu', $event)" @create="emit('create', $event)" :on-group-drop="onGroupDrop" :can-drop-to-group="canDropToGroup"
               :on-drag-start="onDragStart" :on-drag-end="onDragEnd" @menusChanged="emit('menusChanged')" />
           </div>
         </template>
@@ -120,7 +144,7 @@ const props = defineProps<{
   onDragEnd?: () => void;
 }>();
 
-const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "menusChanged"]);
+const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "create", "menusChanged"]);
 const systemStore = useSystemStore();
 const workbenchStore = useWorkbenchStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
@@ -261,6 +285,8 @@ onMounted(() => {
   position: absolute;
   right: var(--et-space-10);
   display: flex;
+  flex-direction: row-reverse;
+  gap: var(--et-space-8);
   visibility: hidden;
 }
 

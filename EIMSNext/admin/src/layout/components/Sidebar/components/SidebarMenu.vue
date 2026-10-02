@@ -5,7 +5,7 @@
     :background-color="variables['menu-background']"
     :text-color="variables['menu-text']"
     :active-text-color="variables['menu-active-text']"
-    :style="{ '--el-menu-hover-bg-color': variables['menu-hover'] }"
+    :style="{ '--el-menu-hover-bg-color': 'var(--et-bg-primary-soft)' }"
     :unique-opened="false"
     :collapse-transition="false"
     mode="vertical"
@@ -38,6 +38,7 @@
              @editMenu="emit('editMenu', $event)"
              @editGroup="emit('editGroup', $event)"
              @deleteMenu="emit('deleteMenu', $event)"
+             @create="emit('create', $event)"
              :on-group-drop="moveMenuToGroup"
              :can-drop-to-group="canDropToGroupTitle"
              :on-drag-start="setDraggingMenu"
@@ -67,7 +68,7 @@ const props = defineProps<{
   sortable?: boolean;
 }>();
 
-const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "menusChanged"]);
+const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "create", "menusChanged"]);
 const currentRoute = useRoute();
 const systemStore = useSystemStore();
 const dragGroup = { name: "app-menu", pull: true, put: true };
@@ -164,6 +165,15 @@ const moveMenuToGroup = (groupMenu: AppMenu): boolean => {
 <style lang="scss" scoped>
 .sidebar-menu {
   width: 100%;
+
+  :deep(.el-menu-item.is-active) {
+    background-color: transparent !important;
+  }
+
+  :deep(.el-menu-item:hover),
+  :deep(.el-sub-menu__title:hover) {
+    background-color: var(--et-bg-primary-soft) !important;
+  }
 }
 
 .menu-drag-ghost {
