@@ -2165,6 +2165,10 @@ export default {
     recordInNode: "选择节点修改数据",
     selectForm: "选择表单",
     dataCondition: "数据筛选条件",
+    deleteTakeLimit_Tips:
+      "单次运行最多删除符合条件的前 200 条记录，超出部分不会处理",
+    updateTakeLimit_Tips:
+      "单次运行最多修改符合条件的前 200 条记录，超出部分不会处理",
     queryCondition: "查询条件",
     sortRule: "排序规则",
     numberOfTake: "查询结果条数",

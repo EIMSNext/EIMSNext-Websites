@@ -2164,6 +2164,10 @@ export default {
     recordInNode: "Record in the Node",
     selectForm: "Select a form",
     dataCondition: "Conditions",
+    deleteTakeLimit_Tips:
+      "Each run deletes at most the first 200 matching records; the rest are not processed.",
+    updateTakeLimit_Tips:
+      "Each run updates at most the first 200 matching records; the rest are not processed.",
     queryCondition: "Conditions",
     sortRule: "Sort Rule",
     numberOfTake: "Number of Take",
