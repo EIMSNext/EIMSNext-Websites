@@ -1,10 +1,39 @@
 import vue from "@vitejs/plugin-vue";
-import { defineConfig, type ConfigEnv, type UserConfig } from "vite";
+import { defineConfig, type ConfigEnv, type Plugin, type UserConfig } from "vite";
 import Components from "unplugin-vue-components/vite";
 import { VantResolver } from "unplugin-vue-components/resolvers";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "path";
 
 const pathSrc = resolve(__dirname, "src");
+
+// 省市区数据的唯一源：admin/public/area/level.json
+// mobile 不再各自维护副本：dev 由此中间件直接回源，build 时原样写入 dist/area/level.json。
+const AREA_SOURCE = resolve(__dirname, "../admin/public/area/level.json");
+const AREA_PUBLIC_URL = "/area/level.json";
+
+const eimsAreaData = (): Plugin => ({
+  name: "eims-area-data",
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      if ((req.url || "").split("?")[0] !== AREA_PUBLIC_URL) return next();
+      if (!existsSync(AREA_SOURCE)) {
+        res.statusCode = 404;
+        res.end("area source not found: admin/public/area/level.json");
+        return;
+      }
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(readFileSync(AREA_SOURCE));
+    });
+  },
+  generateBundle() {
+    if (!existsSync(AREA_SOURCE)) {
+      this.error("area source not found: admin/public/area/level.json");
+      return;
+    }
+    this.emitFile({ type: "asset", fileName: "area/level.json", source: readFileSync(AREA_SOURCE) });
+  },
+});
 
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   return {
@@ -23,6 +52,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     },
     plugins: [
       vue(),
+      eimsAreaData(),
       Components({
         resolvers: [VantResolver()],
         dirs: ["src/components", "src/**/components"],

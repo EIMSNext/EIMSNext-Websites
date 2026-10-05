@@ -1,20 +1,21 @@
 import { uniqueId8 } from "@eimsnext/form-render-core";
-import {getInjectArg, localeProps} from '../../utils';
+import { localeProps } from '../../utils';
 
-const label = '省市区选择器';
+const label = '地址';
 const name = 'fcCity';
 
 export default {
-    menu: 'main',
+    menu: 'subform',
     icon: 'icon-city',
     label,
     name,
     input: true,
     event: ['change'],
-    validate: ['array'],
+    validate: ['object'],
     rule({t}) {
         return {
-            type: name,
+            // 落库字段类型：address，值为 { province, city, district, detail } 对象
+            type: 'address',
             field: `f_${uniqueId8()}`,
             title: t('com.fcCity.name'),
             info: '',
@@ -27,11 +28,12 @@ export default {
             {
                 type: 'select',
                 field: 'level',
-                value: 3,
+                value: 4,
                 options: [
-                    {label: '省会', value: 1},
-                    {label: '省会/城市', value: 2},
-                    {label: '省会/城市/区域', value: 3},
+                    {label: '省', value: 1},
+                    {label: '省-市', value: 2},
+                    {label: '省-市-区', value: 3},
+                    {label: '省-市-区-详细地址', value: 4},
                 ]
             },
             {
@@ -42,21 +44,9 @@ export default {
                 type: 'switch',
                 field: 'clearable'
             },
-            // {
-            //     type: 'FnInput',
-            //     field: 'filter',
-            //     props: {
-            //         body: true,
-            //         button: true,
-            //         fnx: true,
-            //         args: [getInjectArg(t)],
-            //         name: 'filter',
-            //     }
-            // },
-            // {
-            //     type: 'input',
-            //     field: 'api'
-            // },
+            {
+                type: 'DefaultValueConfig',
+            },
         ]);
     }
 };

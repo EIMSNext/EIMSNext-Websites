@@ -263,6 +263,8 @@ export default {
       "tableform",
       "editor",
       "wangeditor",
+      // 地址 = 级联 + 详细地址两行，不能按单行固定高度渲染
+      "address",
     ];
     const distribution =
       ctx.prop?.props?.distribution ||

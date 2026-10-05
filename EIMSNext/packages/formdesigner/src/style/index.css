@@ -1379,56 +1379,6 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     max-width: 100%
 }
 
-.fc-icon[class*="icon-chart-"] {
-    display: inline-block;
-    background-repeat: no-repeat;
-    background-image: url(./chart.png);
-    background-size: 164px;
-    width: 21px;
-    height: 21px;
-    border-radius: 3px;
-    background-color: var(--fc-bg-color-2);
-}
-
-.fc-icon.icon-chart-bar{
-    background-position: -2px -2px;
-}
-
-.fc-icon.icon-chart-stripe{
-    background-position: -25px -2px
-}
-
-.fc-icon.icon-chart-line{
-    background-position: -48px -2px
-}
-
-.fc-icon.icon-chart-area{
-    background-position: -71px -2px
-}
-
-.fc-icon.icon-chart-funnel{
-    background-position: -95px -2px
-}
-
-.fc-icon.icon-chart-gauge{
-    background-position: -118px -2px
-}
-
-.fc-icon.icon-chart-pie{
-    background-position: -141px -2px
-}
-
-.fc-icon.icon-chart-radar{
-    background-position: -2px -25px
-}
-
-.fc-icon.icon-chart-scatter{
-    background-position: -25px -25px
-}
-
-.fc-icon.icon-chart-custom{
-    background-position: -48px -25px
-}
 ._fc-field-title {
     font-weight: 600;
     font-size: 14px;

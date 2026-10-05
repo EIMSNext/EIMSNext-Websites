@@ -94,6 +94,11 @@
           <selected-tags :modelValue="value" :multiple="true" :editable="true" :empty-text="t('comp.emptyEmp')"
             @editTag="selectEmp(true)" />
         </template>
+        <template v-else-if="dataType == ConditionFieldType.Address">
+          <el-cascader class="fc-addr-cond" size="default" v-model="areaValue" :options="areaOptions"
+            :props="{ checkStrictly: true, emitPath: true, checkOnClickNode: true, showPrefix: false }" clearable
+            filterable :teleported="false" @change="onAreaChange"></el-cascader>
+        </template>
         <template v-else>
           <el-input size="default" v-model="value" @blur="onInput"></el-input>
         </template>
@@ -121,6 +126,7 @@ import {
 import { IListItem } from "@/list/type";
 import { computed, ref, watch } from "vue";
 import { isDynamicSelectSource, loadDynamicSelectOptions, type DynamicSelectOption, type DynamicSelectSource } from "@eimsnext/utils";
+import { loadAreaOptions, type IAreaOption } from "@/common/areaData";
 import memberSelectDialog from "@/memberSelect/memberSelectDialog.vue";
 import { useLocale } from "element-plus";
 import { MemberTabs } from "@/memberSelect/type";
@@ -187,6 +193,28 @@ const memberSourceType = computed(() =>
     : "employee",
 );
 
+// address 省市区筛选：值统一为 "省/市/区" 前缀字符串，任意层级可选（checkStrictly）
+const areaOptions = ref<IAreaOption[]>([]);
+const areaValue = ref<string[]>([]);
+loadAreaOptions().then((options) => {
+  areaOptions.value = options;
+});
+const syncAreaValue = () => {
+  if (dataType.value != ConditionFieldType.Address) return;
+  const val = props.modelValue.value;
+  areaValue.value =
+    typeof val == "string" && val
+      ? val.split("/").filter(Boolean)
+      : Array.isArray(val)
+        ? val.filter(Boolean)
+        : [];
+};
+const onAreaChange = (path: string[] | string | null) => {
+  areaValue.value = Array.isArray(path) ? path.filter(Boolean) : [];
+  props.modelValue.value = areaValue.value.join("/");
+  emitChange();
+};
+
 const condValueType = ref(props.modelValue.type);
 const value = ref<any>(props.modelValue.value);
 const rangeValue = ref<any[]>(Array.isArray(props.modelValue.value) ? [...props.modelValue.value] : [null, null]);
@@ -219,6 +247,7 @@ const syncFromModelValue = () => {
   }
 
   rangeValue.value = Array.isArray(props.modelValue.value) ? [...props.modelValue.value] : [null, null];
+  syncAreaValue();
 };
 
 watch(

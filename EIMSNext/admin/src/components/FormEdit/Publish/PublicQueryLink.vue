@@ -182,6 +182,7 @@ function isPublicQueryField(type?: FieldType | string) {
     FieldType.Select1,
     FieldType.Number,
     FieldType.TimeStamp,
+    FieldType.Address,
   ].includes(type as FieldType);
 }
 

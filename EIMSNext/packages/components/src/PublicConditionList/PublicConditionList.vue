@@ -28,6 +28,16 @@
         >
           <el-option v-for="option in getOptions(condition.field!)" :key="String(option.value)" :label="option.label" :value="option.value" />
         </el-select>
+        <el-cascader
+          v-else-if="condition.field!.type === FieldType.Address"
+          v-model="addressValues[condition.field!.field]"
+          class="w-full"
+          :options="areaOptions"
+          :props="{ checkStrictly: true, emitPath: true, checkOnClickNode: true, showPrefix: false }"
+          clearable
+          filterable
+          @change="setAddressCondition(condition, addressValues[condition.field!.field])"
+        />
         <el-input
           v-else
           v-model="scalarValues[condition.field!.field]"
@@ -40,11 +50,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { FieldType } from "@eimsnext/models";
 import { ConditionOperator, ConditionValueType, IConditionList } from "../ConditionList/type";
 import { IFormFieldDef } from "../FieldSelect/type";
 import { isDynamicSelectSource, loadDynamicSelectOptions, type DynamicSelectOption, type DynamicSelectSource } from "@eimsnext/utils";
+import { loadAreaOptions, type IAreaOption } from "@/common/areaData";
 
 defineOptions({ name: "PublicConditionList" });
 const props = defineProps<{
@@ -54,6 +65,9 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(["update:modelValue", "change", "validity-change"]);
 const scalarValues = reactive<Record<string, string | number | undefined>>({});
+const addressValues = reactive<Record<string, string[]>>({});
+const areaOptions = ref<IAreaOption[]>([]);
+loadAreaOptions().then((options) => { areaOptions.value = options; }).catch(() => {});
 const numberValues = reactive<Record<string, [number | null, number | null]>>({});
 const timestampValues = reactive<Record<string, [string | null, string | null]>>({});
 const dynamicOptions = reactive<Record<string, DynamicSelectOption[]>>({});
@@ -105,7 +119,11 @@ const normalize = () => {
   items.forEach((item) => {
     item.field = props.fields.find((field) => field.field === item.field?.field) || item.field;
     if (!item.field || !item.value) return;
-    item.op = isRangeField(item.field.type) ? ConditionOperator.Between : ConditionOperator.Equals;
+    item.op = isRangeField(item.field.type)
+      ? ConditionOperator.Between
+      : item.field.type === FieldType.Address
+        ? ConditionOperator.In
+        : ConditionOperator.Equals;
     item.value.type = ConditionValueType.Custom;
     if (item.field.type === FieldType.Number) {
       const values = Array.isArray(item.value.value) ? item.value.value : [];
@@ -114,6 +132,14 @@ const normalize = () => {
     } else if (item.field.type === FieldType.TimeStamp) {
       const values = Array.isArray(item.value.value) ? item.value.value : [];
       timestampValues[item.field.field] = [values[0] == null ? null : String(values[0]), values[1] == null ? null : String(values[1])];
+    } else if (item.field.type === FieldType.Address) {
+      addressValues[item.field.field] =
+        typeof item.value.value === "string" && item.value.value
+          ? item.value.value.split("/").filter(Boolean)
+          : Array.isArray(item.value.value)
+            ? item.value.value.filter(Boolean)
+            : [];
+      item.value.value = addressValues[item.field.field].join("/");
     } else {
       scalarValues[item.field.field] = item.value.value;
     }
@@ -146,6 +172,12 @@ const setTimestampCondition = (condition: IConditionList, value?: [string | null
 const setScalarCondition = (condition: IConditionList, value?: string | number) => {
   if (!condition.value) return;
   condition.value.value = value;
+  emitChange();
+};
+const setAddressCondition = (condition: IConditionList, path?: string[]) => {
+  if (!condition.value) return;
+  const segments = Array.isArray(path) ? path.filter(Boolean) : [];
+  condition.value.value = segments.join("/");
   emitChange();
 };
 const isFilled = (condition: IConditionList) => {

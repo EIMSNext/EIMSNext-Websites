@@ -58,7 +58,7 @@
             show-overflow-tooltip
           >
             <template #default="{ row }">
-              {{ formatCell(row, field.field) }}
+              {{ formatCell(row, field) }}
             </template>
           </el-table-column>
         </el-table>
@@ -323,8 +323,14 @@ function onDetailClose() {
   currentDetailIndex.value = -1;
 }
 
-function formatCell(row: FormData, field: string) {
-  const value = getFieldValue(row.data, field);
+function formatCell(row: FormData, field: FieldDef) {
+  const value = getFieldValue(row.data, field.field);
+  // 地址值对象 { province, city, district, detail } 没有 label/value，按层级拼成「省 / 市 / 区」
+  if (field.type === FieldType.Address && value && typeof value === "object" && !Array.isArray(value)) {
+    const a = value as { province?: string; city?: string; district?: string };
+    const parts = [a.province, a.city, a.district].filter((s) => s);
+    return parts.length ? parts.join(" / ") : "";
+  }
   return formatValue(value);
 }
 
@@ -396,6 +402,7 @@ function isPublicQueryField(type?: FieldType | string) {
     FieldType.Select1,
     FieldType.Number,
     FieldType.TimeStamp,
+    FieldType.Address,
   ].includes(type as FieldType);
 }
 </script>

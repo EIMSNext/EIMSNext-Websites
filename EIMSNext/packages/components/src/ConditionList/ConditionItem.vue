@@ -228,7 +228,7 @@ const onRemove = () => {
     }
 
     .cond-op {
-      min-width: var(--et-size-90);
+      min-width: var(--et-size-100);
     }
   }
 }

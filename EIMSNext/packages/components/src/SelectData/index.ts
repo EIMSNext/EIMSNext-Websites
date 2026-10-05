@@ -13,7 +13,7 @@ import {
   getUpdateTime,
 } from "@eimsnext/models";
 import { IConditionList, toDynamicFilter } from "../ConditionList/type";
-import { flowStatusArray } from "../common";
+import { flowStatusArray, formatAddressObject } from "../common";
 import dayjs from "dayjs";
 import { getFileFullUrl } from "@eimsnext/utils";
 
@@ -324,6 +324,17 @@ export const formatDataSelectValue = (
       })
       .filter(Boolean)
       .join(", ");
+  }
+
+  // 地址：province + city + district + detail 直接拼接
+  if (field?.type === FieldType.Address) {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      return formatAddressObject(value as Record<string, any>);
+    }
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item ?? "").trim()).filter(Boolean).join("");
+    }
+    return value ? String(value) : "";
   }
 
   if (field?.type === FieldType.ImageUpload) {

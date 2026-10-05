@@ -1,5 +1,5 @@
 import elmFormCreate from './core/index';
-import { FcEditor } from './components';
+import { FcEditor, FcAddress } from './components';
 
 const FormCreate = elmFormCreate();
 
@@ -9,6 +9,6 @@ if (typeof window !== 'undefined') {
 
 const maker = FormCreate.maker;
 
-export { maker, FcEditor }
+export { maker, FcEditor, FcAddress }
 
 export default FormCreate;

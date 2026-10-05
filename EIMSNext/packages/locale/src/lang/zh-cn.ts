@@ -3688,7 +3688,7 @@ export default {
       },
     },
     fcCity: {
-      name: "省市区选择器",
+      name: "地址",
       props: {
         api: "数据链接 URI",
         level: "类型",
@@ -3784,63 +3784,6 @@ export default {
         _loadType: "JSON 规则",
         type: "类型",
       },
-    },
-    lineChart: {
-      name: "折线图",
-      data: "图表数据",
-      pieTypeOpt: {
-        pie: "圆形",
-        doughnut: "环形",
-        "half-doughnut": "半环形",
-      },
-      funnelSortOpt: {
-        descending: "倒序",
-        ascending: "正序",
-      },
-      props: {
-        title: "图表的名称",
-        subtitle: "图表的简介",
-        valueFormat: "格式化数值显示",
-        stack: "多列数据时是否堆叠",
-        smooth: "线条是否平滑过渡",
-        showLegend: "是否显示标记",
-        showSeriesLabel: "是否显示数值",
-        barBackgroundColor: "柱状的背景色",
-        funnelSort: "排序方式",
-        pieType: "形状",
-        min: "最小值",
-        max: "最大值",
-        value: "数值",
-        indicator: "指示器",
-        loadOptions: "初始化",
-      },
-    },
-    areaChart: {
-      name: "体积图",
-    },
-    barChart: {
-      name: "柱状图",
-    },
-    customChart: {
-      name: "自定义图表",
-    },
-    funnelChart: {
-      name: "漏斗图",
-    },
-    gaugeChart: {
-      name: "仪表盘",
-    },
-    pieChart: {
-      name: "饼图",
-    },
-    radarChart: {
-      name: "雷达图",
-    },
-    scatterChart: {
-      name: "散点图",
-    },
-    stripeChart: {
-      name: "条形图",
     },
     fcInlineForm: {
       name: "行内布局",

@@ -113,7 +113,7 @@ export enum FieldType {
   CheckBox = "checkbox",
   Select1 = "select",
   Select2 = "select2",
-  // Address = "address",
+  Address = "address",
   // Location = "location",
   ImageUpload = "imageupload",
   FileUpload = "fileupload",

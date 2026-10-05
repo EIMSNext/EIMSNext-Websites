@@ -65,7 +65,7 @@ import ConfigItem from "./components/style/ConfigItem.vue";
 import ConfigTitle from "./components/style/ConfigTitle.vue";
 import RuleSelect from "./components/RuleSelect.vue";
 import HideConfig from "./components/HideConfig.vue";
-import FcEditor from "@eimsnext/form-render-elplus";
+import FcEditor, { FcAddress } from "@eimsnext/form-render-elplus";
 import SpanInput from "./components/SpanInput.vue";
 import Id from "./components/Id.vue";
 import SerialNo from "./components/serialno/component.jsx";
@@ -80,10 +80,8 @@ import VideoBox from "./components/aide/VideoBox.vue";
 import BarCodeBox from "./components/aide/BarCodeBox.vue";
 import IframeBox from "./components/aide/IframeBox.vue";
 import QrCodeBox from "./components/aide/QrCodeBox.vue";
-import FcCity from "./components/City.vue";
 import FcTitle from "./components/aide/FcTitle.vue";
 import SignaturePad from "./components/SignaturePad.vue";
-import Echarts from "./components/echarts/Echarts.vue";
 import SourceConfig from "./components/SourceConfig.vue";
 import formCreate, { designerForm } from "./utils/form";
 import draggable from "vuedraggable/src/vuedraggable";
@@ -212,9 +210,10 @@ addComponent("BarCodeBox", BarCodeBox);
 addComponent("IframeBox", IframeBox);
 addComponent("QrCodeBox", QrCodeBox);
 addComponent("SignaturePad", SignaturePad);
-addComponent("FcEcharts", Echarts);
 addComponent("FcTitle", FcTitle);
-addComponent("FcCity", FcCity);
+// 省市区实现在 @eimsnext/form-render-elplus（别名 address → fc-address），
+// 这里只保留老规则 type 为 fcCity 的兼容注册。
+addComponent("FcCity", FcAddress);
 addComponent("FcId", Id);
 addComponent("fc-serialno", SerialNo);
 

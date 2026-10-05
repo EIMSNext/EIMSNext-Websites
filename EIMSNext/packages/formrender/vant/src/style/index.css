@@ -78,6 +78,17 @@
   flex: none;
 }
 
+/* 地址选择器：清除按钮 + 箭头渲染在输入框行内（right-icon 插槽），与输入框同一行 */
+.form-create-m .van-field.fc-address-picker .van-field__right-icon {
+  display: flex;
+  align-items: center;
+  color: var(--van-gray-4, #c8c9cc);
+}
+
+.form-create-m .van-field.fc-address-picker .van-field__clear {
+  margin-right: 4px;
+}
+
 .form-create-m .field-layout-content .van-field__control--right {
   text-align: left !important;
 }
@@ -857,6 +868,11 @@
   align-items: center;
   gap: 6px;
   text-align: left;
+}
+
+.fc-address-detail {
+  margin-top: 6px;
+  width: 100%;
 }
 
 .fc-color-picker-swatch,
