@@ -46,6 +46,22 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    sourceMode: {
+      type: String,
+      default: "management",
+    },
+    formId: {
+      type: String,
+      default: "",
+    },
+    fieldId: {
+      type: String,
+      default: "",
+    },
+    sourceType: {
+      type: String,
+      default: "department",
+    },
     // 从FormRender的prop.props中接收formCreateInject
     formCreateInject: {
       type: Object,
@@ -132,12 +148,18 @@ export default defineComponent({
         multiple ? "is-multiple" : "",
       ];
       const memberOptions = {
-        showTabs: MemberTabs.Department | MemberTabs.CurDept,
+        showTabs: props.sourceMode === "form-design"
+          ? MemberTabs.Department | MemberTabs.DynamicParam
+          : MemberTabs.Department,
         cascadedDept: props.cascadedDept,
         multiple: multiple,
         limit: limit,
         limitScope: props.limitScope,
         showContract: props.showContract,
+        sourceMode: props.sourceMode,
+        formId: props.formId,
+        fieldId: props.fieldId,
+        sourceType: props.sourceType,
       };
       return (
         <div class={wrapClass} style={{ width: "100%" }}>

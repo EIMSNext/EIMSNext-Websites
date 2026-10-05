@@ -52,6 +52,7 @@ export default {
                   multiple: true,
                   cascadedDept: true,
                   showContract:true
+                  ,sourceMode: "form-design"
                 },
               },
             ],

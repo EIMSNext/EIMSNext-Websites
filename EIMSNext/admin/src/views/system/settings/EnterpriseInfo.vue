@@ -1,17 +1,17 @@
 <template>
   <div class="panel-wrapper rows-layout">
     <div class="panel-row">
-      <div class="row-label fixed-label-width">企业名称</div>
+      <div class="row-label fixed-label-width">{{ $t("admin.corpOnboarding.corpName") }}</div>
       <div class="row-content">
         <span class="team-name-wrapper" :title="corpName">{{ corpName }}</span>
         <el-link type="primary" underline="never" class="link-btn" @click="emit('edit-name')">
-          修改
+          {{ $t("admin.profile.edit") }}
         </el-link>
       </div>
     </div>
 
     <div class="panel-row">
-      <div class="row-label fixed-label-width">账号模式</div>
+      <div class="row-label fixed-label-width">{{ $t("admin.enterprise.accountMode") }}</div>
       <div class="row-content">
         <div class="fx-corp-account-mode">
           <div class="account-mode-header">
@@ -22,9 +22,9 @@
             </div>
             <div class="corp-auth-btns">
               <div class="mode-bind-tip">
-                如需绑定第三方平台，
+                {{ $t("admin.enterprise.bindTip") }}
                 <a class="biz-hyperlink underline" :href="consultUrl" target="_blank" rel="noopener">
-                  点此咨询
+                  {{ $t("admin.enterprise.consult") }}
                 </a>
               </div>
             </div>
@@ -32,7 +32,7 @@
 
           <div class="corp-detail-wrapper">
             <div class="info-item">
-              <span class="item-name">租户 ID</span>
+              <span class="item-name">{{ $t("admin.enterprise.tenantId") }}</span>
               <span class="item-value">
                 <span class="tenant-id-text">{{ tenantId }}</span>
                 <el-button link class="copy-corp-id" type="primary" @click="copyTenantId">
@@ -49,9 +49,12 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { useContextStore, useUserStore } from "@eimsnext/store";
 import { PlatformType } from "@eimsnext/models";
 import { ElMessage } from "element-plus";
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -71,14 +74,16 @@ const contextStore = useContextStore();
 const userStore = useUserStore();
 
 const platformLabels: Record<string, string> = {
-  [PlatformType.Public]: "公共模式",
-  [PlatformType.Wxwork]: "企业微信模式",
-  [PlatformType.Ding]: "钉钉模式",
-  [PlatformType.Feishu]: "飞书模式",
-  [PlatformType.Private]: "私有模式",
+  [PlatformType.Public]: t("admin.enterprise.mode.public"),
+  [PlatformType.Wxwork]: t("admin.enterprise.mode.wxwork"),
+  [PlatformType.Ding]: t("admin.enterprise.mode.ding"),
+  [PlatformType.Feishu]: t("admin.enterprise.mode.feishu"),
+  [PlatformType.Private]: t("admin.enterprise.mode.private"),
 };
 
-const accountModeText = computed(() => props.accountMode || platformLabels[contextStore.corpPlat] || "公共模式");
+const accountModeText = computed(
+  () => props.accountMode || platformLabels[contextStore.corpPlat] || t("admin.enterprise.mode.public"),
+);
 const corpName = computed(() => contextStore.corpName || "—");
 const tenantId = computed(() => userStore.currentUser.corpId || "—");
 
@@ -100,9 +105,9 @@ const copyTenantId = async () => {
       document.execCommand("copy");
       document.body.removeChild(el);
     }
-    ElMessage.success("租户 ID 已复制");
+    ElMessage.success(t("admin.enterprise.messages.copied"));
   } catch {
-    ElMessage.warning("复制失败，请手动复制");
+    ElMessage.warning(t("admin.enterprise.messages.copyFailed"));
   }
 };
 </script>

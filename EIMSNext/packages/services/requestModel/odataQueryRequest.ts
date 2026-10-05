@@ -70,6 +70,25 @@ export interface IDataScope {
   inheritMemberPermissions?: boolean;
 }
 
+export interface IFormMemberSourceRequest extends IDynamicFindOptions {
+  formId?: string;
+  fieldId?: string;
+  sourceType: "employee" | "department";
+  design?: boolean;
+  departmentId?: string;
+  departmentCascaded?: boolean;
+}
+
+export interface IFormMemberSourceItem {
+  id: string;
+  code: string;
+  label: string;
+  status?: number;
+  type: "employee" | "department";
+  parentId?: string;
+  heriarchyId?: string;
+}
+
 export interface IFormDataPermissionScopeResponse {
   formDataPermissions: FormDataPermissions;
   formFieldPermissions?: FormFieldPermission[] | null;

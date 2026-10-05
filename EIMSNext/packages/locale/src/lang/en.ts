@@ -54,6 +54,7 @@ export default {
     copied: "Copied",
     open: "Open",
     loadFailed: "Load failed",
+    loadMore: "Load more",
     operationFailed: "Operation failed",
     retry: "Retry",
     department: "Department",
@@ -253,6 +254,11 @@ export default {
         dynamic: "Dynamic Assignee",
         curDept: "Current User's Department",
         curUser: "Current User",
+        dynamicParam: "Dynamic parameters",
+      },
+      dynamicParam: {
+        currentUser: "Current User",
+        currentDepartment: "Current User's Department",
       },
       allEmployees: "All Employees",
       cascadeSubDepts: "Include Sub-departments",
@@ -1843,6 +1849,25 @@ export default {
       passwordRules: {
         length: "Password length 8-30",
         categories: "Use digits, uppercase, lowercase, special chars. At least 3 types.",
+      },
+    },
+    enterprise: {
+      title: "Enterprise Settings",
+      basicInfo: "Basic Info",
+      accountMode: "Account Mode",
+      bindTip: "To bind a third-party platform,",
+      consult: "Contact Us",
+      tenantId: "Tenant ID",
+      mode: {
+        public: "Public",
+        wxwork: "WeCom Integration",
+        ding: "DingTalk Integration",
+        feishu: "Feishu Integration",
+        private: "Private",
+      },
+      messages: {
+        copied: "Tenant ID copied",
+        copyFailed: "Copy failed, please copy manually",
       },
     },
     department: {

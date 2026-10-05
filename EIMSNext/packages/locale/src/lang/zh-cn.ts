@@ -55,6 +55,7 @@ export default {
     copied: "已复制",
     open: "打开",
     loadFailed: "加载失败",
+    loadMore: "加载更多",
     operationFailed: "操作失败",
     retry: "重试",
     department: "部门",
@@ -304,6 +305,11 @@ export default {
         dynamic: "动态负责人",
         curDept: "当前用户所处部门",
         curUser: "当前用户",
+        dynamicParam: "动态参数",
+      },
+      dynamicParam: {
+        currentUser: "当前用户",
+        currentDepartment: "当前用户所属部门",
       },
       allEmployees: "全部员工",
       cascadeSubDepts: "动态包含下级部门",
@@ -1842,6 +1848,25 @@ export default {
       passwordRules: {
         length: "密码长度为8-30",
         categories: "可使用数字、大写字母、小写字母及特殊字符，至少包含上述字符中的三种",
+      },
+    },
+    enterprise: {
+      title: "企业设置",
+      basicInfo: "基础信息",
+      accountMode: "账号模式",
+      bindTip: "如需绑定第三方平台，",
+      consult: "点此咨询",
+      tenantId: "租户 ID",
+      mode: {
+        public: "公共模式",
+        wxwork: "企业微信集成",
+        ding: "钉钉集成",
+        feishu: "飞书集成",
+        private: "私有模式",
+      },
+      messages: {
+        copied: "租户 ID 已复制",
+        copyFailed: "复制失败，请手动复制",
       },
     },
     department: {

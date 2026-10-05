@@ -40,6 +40,7 @@ export interface ITreeNode extends IDataItemView {
   checked?: boolean;
   disabled?: boolean;
   readonly?: boolean;
+  isLeaf?: boolean;
   fullLabel?: string;
 }
 

@@ -55,6 +55,7 @@ const props = withDefaults(
   defineProps<{
     def: FormContent;
     data?: FormData;
+    formId?: string;
     isView?: boolean;
     isPublic?: boolean;
     publicToken?: string;
@@ -95,6 +96,35 @@ const clearExistingOptionDefaults = (nodes: any[]) => {
 };
 
 const parsedRules = formCreate.parseJson(props.def.layout!);
+const memberSourceMode = props.isPublic ? "public" : "form-runtime";
+const addMemberSourceContext = (nodes: any[], parentField?: string) => {
+  nodes.forEach((rule) => {
+    if (!rule) return;
+
+    const fieldId = parentField && rule.field ? `${parentField}>${rule.field}` : rule.field;
+    if ([FieldType.Employee1, FieldType.Employee2, FieldType.Department1, FieldType.Department2].includes(rule.type)) {
+      rule.props = {
+        ...(rule.props || {}),
+        sourceMode: memberSourceMode,
+        formId: props.formId || props.data?.formId || "",
+        fieldId: fieldId || "",
+      };
+    }
+
+    if (Array.isArray(rule.children)) addMemberSourceContext(rule.children, parentField);
+    if (Array.isArray(rule.columns)) {
+      rule.columns.forEach((column: any) => {
+        if (Array.isArray(column?.rule)) addMemberSourceContext(column.rule, fieldId);
+      });
+    }
+    if (Array.isArray(rule.props?.columns)) {
+      rule.props.columns.forEach((column: any) => {
+        if (Array.isArray(column?.rule)) addMemberSourceContext(column.rule, fieldId);
+      });
+    }
+  });
+};
+addMemberSourceContext(parsedRules);
 const isExistingData = !!props.data?.id && !props.isNewData;
 if (isExistingData) {
   clearExistingOptionDefaults(parsedRules);
@@ -192,6 +222,7 @@ if (props.formFieldPermissions !== undefined) {
     }
   });
 
+  addMemberSourceContext(layout);
   rules.value = layout;
 }
 

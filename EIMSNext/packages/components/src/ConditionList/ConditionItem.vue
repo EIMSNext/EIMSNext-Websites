@@ -57,6 +57,7 @@
         :operator="op"
         :allow-field-value="allowFieldValue"
         :option-loader="optionLoader"
+        :allow-dynamic-params="allowDynamicParams"
         @change="onInput"
       ></ConditionValue>
     </div>
@@ -96,6 +97,7 @@ const props = defineProps<{
   allowFieldValue?: boolean;
     nodes?: INodeForm[];
     optionLoader?: (source: DynamicSelectSource, keyword?: string) => Promise<DynamicSelectOption[]>;
+    allowDynamicParams?: boolean;
 }>();
 
 const field = ref<IFormFieldDef>(

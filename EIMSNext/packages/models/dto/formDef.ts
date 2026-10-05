@@ -62,6 +62,18 @@ export interface FieldProp {
   format?: string;
   options?: ValueOption[];
   segments?: SerialNoSegment[];
+  memberSource?: MemberSource;
+}
+
+export interface MemberSource {
+  mode?: "all" | "custom";
+  items?: MemberSourceItem[];
+}
+
+export interface MemberSourceItem {
+  type: "department" | "employeeGroup" | "employee" | "dynamic";
+  id: string;
+  cascaded?: boolean;
 }
 export interface ValueOption {
   value: string;

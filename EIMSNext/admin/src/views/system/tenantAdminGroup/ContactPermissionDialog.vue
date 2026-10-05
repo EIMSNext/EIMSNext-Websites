@@ -153,7 +153,6 @@ const employeeGroupCanManage = computed({
 
 const dialogMemberOptions = computed(() => ({
   showTabs: selectingType.value === "dept" ? MemberTabs.Department : MemberTabs.EmployeeGroup,
-  adminScope: true,
 }));
 
 const dialogTags = computed(() =>

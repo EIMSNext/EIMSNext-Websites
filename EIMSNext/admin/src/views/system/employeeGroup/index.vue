@@ -4,7 +4,7 @@
     <div class="main-row">
       <!-- 员工组树 -->
       <div class="employeeGroup-tree-col">
-        <employeeGroup-tree :editable="isUnrestrictedAdmin" admin-scope @employeeGroup-click="handleEmployeeGroupQuery" />
+        <employeeGroup-tree :editable="isUnrestrictedAdmin" @employeeGroupClick="handleEmployeeGroupQuery" />
       </div>
       <!-- 用户列表 -->
       <div class="emp-list-col">
@@ -344,11 +344,8 @@ const managedDepartmentTags = computed<ISelectedTag[]>(() => {
 });
 const memberDialogOptions = computed(() => ({
   showTabs: MemberTabs.Employee,
-  adminScope: true,
   limit: managedDepartmentTags.value.length > 0 ? { depts: managedDepartmentTags.value } : undefined,
 }));
-const appendAdminScope = (query: string) => query ? `${query}&adminScope=true` : "adminScope=true";
-
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
   pageSize.value = pSize;
@@ -391,7 +388,7 @@ const handleQuery = () => {
 const loadCount = () => {
   let query = buildQuery({ filter: queryParams.value.filter });
 
-  employeeService.count(appendAdminScope(query)).then((cnt: number) => {
+  employeeService.count(query).then((cnt: number) => {
     totalRef.value = cnt;
   });
 };
@@ -401,7 +398,7 @@ const loadData = () => {
   query = query ? `${query}&$expand=Departments($expand=Department),Groups` : "$expand=Departments($expand=Department),Groups";
 
   employeeService
-    .query<Employee>(appendAdminScope(query))
+    .query<Employee>(query)
     .then((res: Employee[]) => {
       dataRef.value = res;
     })

@@ -31,7 +31,36 @@
         <et-icon icon="el-plus" />
       </el-button>
     </div>
-    <div class="employeeGroup-tree">
+    <div v-if="keyword.trim()" class="employeeGroup-search" v-loading="searchLoading">
+      <div v-if="searchError" class="search-state">{{ searchError }}</div>
+      <div v-else-if="!searchResults.length && !searchLoading" class="search-state">
+        {{ $t("comp.memberSelect.noResults") }}
+      </div>
+      <div
+        v-for="item in searchResults"
+        :key="item.kind + ':' + item.id"
+        class="search-result-item"
+        @click="handleSearchResultClick(item)"
+      >
+        <et-icon :icon="item.kind === 'group' ? 'el-folder' : 'icon-employee-group'" class="search-result-icon" />
+        <div class="search-result-label">
+          <span>{{ item.label }}</span>
+          <small v-if="item.parentLabel">{{ item.parentLabel }}</small>
+        </div>
+      </div>
+      <el-button
+        v-if="searchHasMore"
+        link
+        type="primary"
+        class="search-more"
+        :loading="searchLoading"
+        :disabled="searchLoading"
+        @click="loadMoreSearch"
+      >
+        {{ $t("common.loadMore") }}
+      </el-button>
+    </div>
+    <div v-else class="employeeGroup-tree">
       <Draggable
         :list="treeItems"
         item-key="id"
@@ -124,14 +153,12 @@ type EmployeeGroupTreeNode = {
   data: EmployeeGroupCategory | EmployeeGroup;
   sortValue: number;
   children: EmployeeGroupTreeNode[];
+  categoryId?: string;
+  isVirtualCategory?: boolean;
 };
 
 const props = defineProps({
   editable: {
-    type: Boolean,
-    default: false,
-  },
-  adminScope: {
     type: Boolean,
     default: false,
   },
@@ -140,7 +167,21 @@ const props = defineProps({
 const treeItems = ref<EmployeeGroupTreeNode[]>([]);
 const allGroups = ref<EmployeeGroupCategory[]>([]);
 const allEmployeeGroups = ref<EmployeeGroup[]>([]);
+const loadedCategoryIds = new Set<string>();
+const loadingCategoryIds = new Set<string>();
+const treePageSize = 1000;
+const searchPageSize = 200;
 const keyword = ref("");
+const searchResults = ref<Array<EmployeeGroupTreeNode & { parentLabel?: string }>>([]);
+const searchLoading = ref(false);
+const searchHasMore = ref(false);
+const searchSkip = ref(0);
+const searchCategorySkip = ref(0);
+const searchCategoryHasMore = ref(false);
+const searchError = ref("");
+const searchRequestId = ref(0);
+let dataRequestId = 0;
+let searchTimer: ReturnType<typeof setTimeout> | undefined;
 const currentGroup = ref<EmployeeGroupCategory>();
 const selectedEmployeeGroup = ref<EmployeeGroup>();
 const showAddEditEmployeeGroupDialog = ref(false);
@@ -151,34 +192,157 @@ const toDeleteNode = ref<EmployeeGroupTreeNode>();
 const draggingNode = ref<EmployeeGroupTreeNode>();
 const dragGroup = { name: "employeeGroup-tree", pull: true, put: true };
 
-const emit = defineEmits(["employeeGroup-click"]);
+const emit = defineEmits(["employeeGroupClick"]);
 
 onBeforeMount(() => {
   loadData();
 });
 
-watch(keyword, () => {
-  refreshTree();
+watch(keyword, (value) => {
+  if (searchTimer) clearTimeout(searchTimer);
+  const text = value.trim();
+  if (!text) {
+    searchRequestId.value++;
+    searchResults.value = [];
+    searchHasMore.value = false;
+    searchError.value = "";
+    refreshTree();
+    return;
+  }
+  searchTimer = setTimeout(() => void searchEmployeeGroups(text, false), 300);
 });
 
-const loadData = () => {
-  let employeeGroupCategorys: EmployeeGroupCategory[] = [];
-  let employeeGroups: EmployeeGroup[] = [];
-  Promise.all([
-    employeeGroupCategoryService.query<EmployeeGroupCategory>(props.adminScope ? "adminScope=true" : "").then((data) => {
-      employeeGroupCategorys = data;
-    }),
-    employeeGroupService.query<EmployeeGroup>(props.adminScope ? "adminScope=true" : "").then((data) => {
-      employeeGroups = data;
-    }),
-  ]).then(() => {
-    allGroups.value = employeeGroupCategorys;
-    allEmployeeGroups.value = employeeGroups;
+const loadGroupsPage = async (categoryId: string) => {
+  const filter = categoryId
+    ? "EmployeeGroupCategoryId eq '" + categoryId.replaceAll("'", "''") + "'"
+    : "EmployeeGroupCategoryId eq ''";
+  const query = "$filter=" + encodeURIComponent(filter);
+  const result = await employeeGroupService.query<EmployeeGroup>(
+    query + "&$orderby=SortValue,Name&$top=" + treePageSize,
+  );
+  return result;
+};
+
+const loadData = async () => {
+  const requestId = ++dataRequestId;
+  loadedCategoryIds.clear();
+  loadingCategoryIds.clear();
+  try {
+    const categoriesResult = await employeeGroupCategoryService.query<EmployeeGroupCategory>(
+      "$orderby=SortValue,Name&$top=" + treePageSize,
+    );
+    if (requestId !== dataRequestId) return;
+    const categories = categoriesResult;
+    allGroups.value = categories;
+    allEmployeeGroups.value = [];
     refreshTree();
-  });
+  } catch (error) {
+    if (requestId === dataRequestId) {
+      console.error(error);
+      ElMessage.error(t("comp.memberSelect.loadFailed", "加载员工组失败"));
+    }
+  }
+};
+
+const loadCategoryGroups = async (categoryId: string) => {
+  if (loadedCategoryIds.has(categoryId) || loadingCategoryIds.has(categoryId)) return;
+  loadingCategoryIds.add(categoryId);
+  try {
+    const page = await loadGroupsPage(categoryId);
+    const pageIds = new Set(page.map((item) => item.id));
+    allEmployeeGroups.value = [
+      ...allEmployeeGroups.value.filter((item) => !pageIds.has(item.id)),
+      ...page,
+    ];
+    loadedCategoryIds.add(categoryId);
+    refreshTree();
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t("comp.memberSelect.loadFailed", "加载员工组失败"));
+  } finally {
+    loadingCategoryIds.delete(categoryId);
+  }
 };
 
 const matchKeyword = (label: string) => !keyword.value || label.includes(keyword.value);
+
+const searchEmployeeGroups = async (text: string, append: boolean) => {
+  const requestId = ++searchRequestId.value;
+  searchLoading.value = true;
+  searchError.value = "";
+  if (!append) {
+    searchSkip.value = 0;
+    searchCategorySkip.value = 0;
+    searchCategoryHasMore.value = true;
+  }
+  const escaped = text.replaceAll("'", "''");
+    const groupFilter = "contains(Name, '" + escaped + "')";
+    const query = "$filter=" + encodeURIComponent(groupFilter);
+    const categoryQuery = "$filter=" + encodeURIComponent(groupFilter);
+    try {
+    const [groupsResult, categoriesResult] = await Promise.all([
+      employeeGroupService.query<EmployeeGroup>(
+        query + "&$orderby=Name&$skip=" + searchSkip.value + "&$top=" + (searchPageSize + 1),
+      ),
+      !append || searchCategoryHasMore.value
+        ? employeeGroupCategoryService.query<EmployeeGroupCategory>(
+            categoryQuery + "&$orderby=Name&$skip=" + searchCategorySkip.value + "&$top=" + (searchPageSize + 1),
+          )
+        : Promise.resolve([] as EmployeeGroupCategory[]),
+    ]);
+    if (requestId !== searchRequestId.value) return;
+    const groups = groupsResult.slice(0, searchPageSize);
+    const categories = categoriesResult.slice(0, searchPageSize);
+    const categoryMap = new Map(allGroups.value.map((item) => [item.id, item.name]));
+    const groupResults = groups.map((item) => ({
+      id: item.id,
+      label: item.name,
+      kind: "employeeGroup" as const,
+      data: item,
+      sortValue: item.sortValue || 0,
+      children: [],
+      parentLabel: item.employeeGroupCategory?.name
+        || categoryMap.get(item.employeeGroupCategoryId)
+        || item.employeeGroupCategoryId,
+    }));
+    const categoryResults = categories.map((item) => ({
+          id: item.id,
+          label: item.name,
+          kind: "group" as const,
+          data: item,
+          sortValue: item.sortValue || 0,
+          children: [],
+          categoryId: item.id,
+        }));
+    const results = [...categoryResults, ...groupResults];
+    searchResults.value = append ? [...searchResults.value, ...results] : results;
+    searchSkip.value += groups.length;
+    searchCategorySkip.value += categories.length;
+    searchCategoryHasMore.value = categoriesResult.length > searchPageSize;
+    searchHasMore.value = groupsResult.length > searchPageSize;
+    searchHasMore.value = searchHasMore.value || searchCategoryHasMore.value;
+  } catch {
+    if (requestId === searchRequestId.value) {
+      searchError.value = "加载失败";
+    }
+  } finally {
+    if (requestId === searchRequestId.value) {
+      searchLoading.value = false;
+    }
+  }
+};
+
+const loadMoreSearch = () => {
+  const text = keyword.value.trim();
+  if (text && !searchLoading.value && searchHasMore.value) {
+    void searchEmployeeGroups(text, true);
+  }
+};
+
+const handleSearchResultClick = async (node: EmployeeGroupTreeNode) => {
+  keyword.value = "";
+  await handleNodeClick(node);
+};
 
 const refreshTree = () => {
   const folders = allGroups.value
@@ -191,10 +355,20 @@ const refreshTree = () => {
       data: group,
       sortValue: group.sortValue || 0,
       children: [],
+      categoryId: group.id,
     }));
-  const folderMap = new Map(folders.map((folder) => [folder.id, folder]));
+  folders.push({
+    id: "__uncategorized__",
+    label: "未分类",
+    kind: "group",
+    data: { id: "", name: "未分类" } as EmployeeGroupCategory,
+    sortValue: Number.MAX_SAFE_INTEGER,
+    children: [],
+    categoryId: "",
+    isVirtualCategory: true,
+  });
+  const folderMap = new Map(folders.map((folder) => [folder.categoryId ?? folder.id, folder]));
   const roots: EmployeeGroupTreeNode[] = [...folders];
-
   allEmployeeGroups.value
     .slice()
     .sort((a, b) => (a.sortValue || 0) - (b.sortValue || 0))
@@ -226,14 +400,17 @@ const refreshTree = () => {
   treeItems.value = filtered.sort((a, b) => (a.sortValue || 0) - (b.sortValue || 0));
 };
 
-const handleNodeClick = (node: EmployeeGroupTreeNode) => {
+const handleNodeClick = async (node: EmployeeGroupTreeNode) => {
   if (node.kind === "employeeGroup") {
     selectedEmployeeGroup.value = node.data as EmployeeGroup;
     currentGroup.value = allGroups.value.find((x) => x.id === selectedEmployeeGroup.value?.employeeGroupCategoryId);
-    emit("employeeGroup-click", node.data);
+    emit("employeeGroupClick", node.data);
   } else {
     selectedEmployeeGroup.value = undefined;
-    currentGroup.value = node.data as EmployeeGroupCategory;
+    currentGroup.value = node.isVirtualCategory ? undefined : node.data as EmployeeGroupCategory;
+    if (node.categoryId !== undefined) {
+      await loadCategoryGroups(node.categoryId);
+    }
   }
 };
 
@@ -244,6 +421,7 @@ const handleAddGroupClick = () => {
 };
 
 const handleAddEmployeeGroupClick = (node: EmployeeGroupTreeNode) => {
+  if (node.isVirtualCategory) return;
   editMode.value = false;
   currentGroup.value = node.data as EmployeeGroupCategory;
   showAddEditEmployeeGroupDialog.value = true;
@@ -256,6 +434,7 @@ const handleEditClick = (node: EmployeeGroupTreeNode) => {
     currentGroup.value = allGroups.value.find((x) => x.id === selectedEmployeeGroup.value?.employeeGroupCategoryId);
     showAddEditEmployeeGroupDialog.value = true;
   } else {
+    if (node.isVirtualCategory) return;
     currentGroup.value = node.data as EmployeeGroupCategory;
     showAddEditGroupDialog.value = true;
   }
@@ -278,30 +457,41 @@ const handleDeleteClick = (node: EmployeeGroupTreeNode) => {
 
 const handleDeleteConfirm = async () => {
   if (!toDeleteNode.value) return;
+  if (toDeleteNode.value.kind === "group" && toDeleteNode.value.isVirtualCategory) {
+    showDeleteDialog.value = false;
+    return;
+  }
   if (toDeleteNode.value.kind === "group" && toDeleteNode.value.children.length > 0) {
     ElMessage.warning(t('comp.addEditEmployeeGroupCategory.cannotDeleteWithEmployeeGroups'));
     showDeleteDialog.value = false;
     return;
   }
 
-  if (toDeleteNode.value.kind === "employeeGroup") {
-    await employeeGroupService.delete(toDeleteNode.value.id);
-  } else {
-    await employeeGroupCategoryService.delete(toDeleteNode.value.id);
-  }
+  try {
+    if (toDeleteNode.value.kind === "employeeGroup") {
+      await employeeGroupService.delete(toDeleteNode.value.id);
+    } else {
+      await employeeGroupCategoryService.delete(toDeleteNode.value.id);
+    }
 
-  loadData();
-  showDeleteDialog.value = false;
+    await loadData();
+    showDeleteDialog.value = false;
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t("comp.memberSelect.loadFailed", "删除员工组失败"));
+  }
 };
 
 const handleRootDragStart = (event: { oldIndex?: number }) => {
   if (event.oldIndex === undefined) return;
-  draggingNode.value = treeItems.value[event.oldIndex];
+  const node = treeItems.value[event.oldIndex];
+  draggingNode.value = node;
 };
 
 const handleChildDragStart = (group: EmployeeGroupTreeNode, event: { oldIndex?: number }) => {
   if (event.oldIndex === undefined) return;
-  draggingNode.value = group.children[event.oldIndex];
+  const node = group.children[event.oldIndex];
+  draggingNode.value = node;
 };
 
 const clearDragging = () => {
@@ -311,13 +501,21 @@ const clearDragging = () => {
 const getDragResult = (source: EmployeeGroupTreeNode) => {
   const rootIndex = treeItems.value.findIndex((item) => item.id === source.id);
   if (rootIndex > -1) {
-    return { employeeGroupCategoryId: "", siblings: treeItems.value };
+    return {
+      employeeGroupCategoryId: source.categoryId ?? "",
+      siblings: treeItems.value.filter((item) => !item.isVirtualCategory),
+    };
   }
 
   for (const group of treeItems.value) {
     if (group.kind !== "group") continue;
     const childIndex = group.children.findIndex((item) => item.id === source.id);
-    if (childIndex > -1) return { employeeGroupCategoryId: group.id, siblings: group.children };
+    if (childIndex > -1) {
+      return {
+        employeeGroupCategoryId: group.categoryId ?? group.id,
+        siblings: group.children,
+      };
+    }
   }
 
   return undefined;
@@ -379,7 +577,7 @@ const dropToGroup = async (group: EmployeeGroupTreeNode) => {
   await employeeGroupService.move({
     id: source.id,
     isGroup: false,
-    employeeGroupCategoryId: group.id,
+    employeeGroupCategoryId: group.categoryId ?? group.id,
     previousId: group.children.at(-1)?.id || "",
     nextId: "",
   });
@@ -412,6 +610,59 @@ const dropToGroup = async (group: EmployeeGroupTreeNode) => {
   min-height: 0;
   width: 100%;
   max-height: calc(100vh - 200px);
+}
+
+.employeeGroup-search {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.search-state {
+  padding: var(--et-space-20);
+  color: var(--et-text-secondary);
+  text-align: center;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  min-height: var(--et-size-40);
+  padding: 0 var(--et-space-10);
+  border-radius: var(--et-radius-4);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--et-bg-hover);
+  }
+}
+
+.search-result-icon {
+  flex: none;
+  margin-right: var(--et-space-8);
+}
+
+.search-result-label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+
+  span,
+  small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    color: var(--et-text-secondary);
+  }
+}
+
+.search-more {
+  display: flex;
+  width: 100%;
+  justify-content: center;
 }
 
 .tree-drag-item {

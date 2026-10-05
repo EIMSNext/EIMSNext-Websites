@@ -91,7 +91,6 @@ export const useUserStore = defineStore("currentuser", () => {
         promises.push(
           useContextStoreHook().setCorpId(currentUser.value.corpId, true),
         );
-          promises.push(useDeptStoreHook().load("", false));
         } else {
           useAppStoreHook().clear();
           useFormStoreHook().clear();

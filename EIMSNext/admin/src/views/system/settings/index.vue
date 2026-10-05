@@ -8,7 +8,7 @@
       </section>
     </template>
     <template v-else-if="kind === 'enterprise'">
-      <h2>基础信息</h2>
+      <h2>{{ $t("admin.enterprise.basicInfo") }}</h2>
       <div class="enterprise-panel">
         <EnterpriseInfo />
       </div>

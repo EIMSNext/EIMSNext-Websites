@@ -14,7 +14,7 @@
         </div>
         <div class="org-menu">{{ $t("admin.department.deptTitle") }}</div>
         <div class="dept-tree-wrapper">
-          <dept-tree :editable="isUnrestrictedAdmin" admin-scope @node-click="handleDeptChanged" />
+          <dept-tree :editable="isUnrestrictedAdmin" @node-click="handleDeptChanged" />
         </div>
       </div>
       <!-- 用户列表 -->
@@ -85,7 +85,6 @@
       v-if="showAddEditDialog"
       :edit="editMode"
       :emp="selectedEmp"
-      admin-scope
       :department-scope-mode="adminPermissions?.contactManageDepartmentScopeMode"
       :department-ids="adminPermissions?.contactManageDepartmentIds || []"
       @cancel="showAddEditDialog = false"
@@ -382,8 +381,6 @@ const canManageDepartment = (departmentId?: string) => {
   if (permissions.contactManageDepartmentScopeMode === ScopeMode.All) return true;
   return permissions.contactManageDepartmentIds.includes(departmentId);
 };
-const appendAdminScope = (query: string) => query ? `${query}&adminScope=true` : "adminScope=true";
-
 const pageChanged = (curPage: number, pSize: number) => {
   pageNum.value = curPage;
   pageSize.value = pSize;
@@ -411,8 +408,8 @@ const loadCount = () => {
   let query = buildQuery({ filter: queryParams.value.filter });
 
   const request = selectedDepartmentId.value
-    ? employeeService.countByDepartment(selectedDepartmentId.value, true, appendAdminScope(query))
-    : employeeService.count(appendAdminScope(query));
+    ? employeeService.countByDepartment(selectedDepartmentId.value, true, query)
+    : employeeService.count(query);
 
   request.then((cnt: number) => {
     totalRef.value = cnt;
@@ -424,8 +421,8 @@ const loadData = () => {
   query = query ? `${query}&$expand=Departments($expand=Department),Groups` : "$expand=Departments($expand=Department),Groups";
 
   const request = selectedDepartmentId.value
-    ? employeeService.queryByDepartment<Employee>(selectedDepartmentId.value, true, appendAdminScope(query))
-    : employeeService.query<Employee>(appendAdminScope(query));
+    ? employeeService.queryByDepartment<Employee>(selectedDepartmentId.value, true, query)
+    : employeeService.query<Employee>(query);
 
   request
     .then((res: Employee[]) => {

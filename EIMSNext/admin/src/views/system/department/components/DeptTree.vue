@@ -25,14 +25,44 @@
       clearable
       :placeholder="$t('employeeGroup.searchPlaceholder')"
     />
+    <div v-if="keyword.trim()" class="search-results" v-loading="searchLoading">
+      <div v-if="searchError" class="search-state">{{ searchError }}</div>
+      <div v-else-if="!searchResults.length && !searchLoading" class="search-state">
+        {{ $t("comp.memberSelect.noResults") }}
+      </div>
+      <div
+        v-for="department in searchResults"
+        :key="department.id"
+        class="search-result-item"
+        @click="handleNodeClick(toNode(department))"
+      >
+        <et-icon icon="icon-organization" class="search-result-icon" color="var(--et-color-success)" />
+        <span class="search-result-label">{{ department.code }} - {{ department.name }}</span>
+      </div>
+      <el-button
+        v-if="searchHasMore"
+        link
+        type="primary"
+        class="search-more"
+        :loading="searchLoading"
+        :disabled="searchLoading"
+        @click="loadMoreSearch"
+      >
+        {{ $t("common.loadMore") }}
+      </el-button>
+    </div>
     <el-tree
+      v-else
       ref="deptTreeRef"
+      :key="treeVersion"
       class="dept-tree mt-2"
       :data="deptList"
       :props="{ children: 'children', label: 'label', disabled: '' }"
       :expand-on-click-node="false"
+      lazy
+      :load="loadTreeNode"
       :filter-node-method="handleFilter"
-      default-expand-all
+      node-key="id"
       @node-click="handleNodeClick"
     >
       <template #default="{ node, data }">
@@ -63,26 +93,30 @@
 
 <script setup lang="ts">
 import { Department } from "@eimsnext/models";
-import { useDeptStore } from "@eimsnext/store";
 import { departmentService } from "@eimsnext/services";
-import { ITreeNode, buildDeptTree } from "@eimsnext/components";
+import { ITreeNode } from "@eimsnext/components";
 import { TreeInstance } from "element-plus";
+import { ElMessage } from "element-plus";
+import { nextTick } from "vue";
 
 const props = defineProps({
   editable: {
     type: Boolean,
     default: false,
   },
-  adminScope: {
-    type: Boolean,
-    default: false,
-  },
 });
 
-const deptStore = useDeptStore();
-const deptList = ref<ITreeNode[]>(); // 部门列表
+const deptList = ref<ITreeNode[]>([]); // 部门列表
+const treeVersion = ref(0);
 const deptTreeRef = ref<TreeInstance>(); // 部门树
-const keyword = ref(); // 部门名称
+const keyword = ref(""); // 部门名称
+const searchResults = ref<Department[]>([]);
+const searchLoading = ref(false);
+const searchHasMore = ref(false);
+const searchError = ref("");
+const searchSkip = ref(0);
+const searchRequestId = ref(0);
+let searchTimer: ReturnType<typeof setTimeout> | undefined;
 const selectedDept = ref<Department>();
 const showAddEditDialog = ref(false);
 const editMode = ref(false);
@@ -91,18 +125,54 @@ const showDeleteDialog = ref(false);
 const emit = defineEmits(["node-click"]);
 
 watch(keyword, (val) => {
-  deptTreeRef.value!.filter(val);
+  if (searchTimer) clearTimeout(searchTimer);
+  const text = String(val || "").trim();
+  if (!text) {
+    searchRequestId.value++;
+    searchResults.value = [];
+    searchHasMore.value = false;
+    searchError.value = "";
+    deptTreeRef.value?.filter("");
+    return;
+  }
+  searchTimer = setTimeout(() => void searchDepartments(text, false), 300);
 });
 
-const loadDepartments = () => props.adminScope
-  ? departmentService.query<Department>("adminScope=true")
-  : deptStore.load();
-
-onBeforeMount(() => {
-  loadDepartments().then((data: Department[]) => {
-    deptList.value = buildDeptTree(data);
-  });
+const pageSize = 200;
+type DepartmentTreeNode = ITreeNode & { isLeaf?: boolean };
+const escapeOData = (value: string) => value.replaceAll("'", "''");
+const toNode = (department: Department, isLeaf = false): DepartmentTreeNode => ({
+  id: department.id,
+  value: department.code,
+  label: department.code + " - " + department.name,
+  type: 1,
+  children: [],
+  data: department,
+  icon: "icon-organization",
+  isLeaf,
 });
+
+const loadDepartments = async (parentId: string) => {
+  const filter = parentId
+    ? "ParentId eq '" + escapeOData(parentId) + "'"
+    : "ParentId eq ''";
+  const query = "$filter=" + encodeURIComponent(filter);
+  const result = await departmentService.query<Department>(
+    query + "&$orderby=Code&$top=1000",
+  );
+  return result.map((item) => toNode(item));
+};
+
+const loadTreeNode = async (node: any, resolve: (nodes: ITreeNode[]) => void) => {
+  const parentId = node.level === 0 ? "" : node.data.id;
+  try {
+    resolve(await loadDepartments(parentId));
+  } catch (error) {
+    console.error(error);
+    ElMessage.error("加载部门失败");
+    resolve([]);
+  }
+};
 
 /**
  * 部门筛选
@@ -136,24 +206,64 @@ const handleEditClick = (data: ITreeNode) => {
 };
 const handleSaved = (data: Department) => {
   showAddEditDialog.value = false;
-  loadDepartments().then((depts: Department[]) => {
-    deptList.value = buildDeptTree(depts);
-  });
+  void refreshTree();
+};
+
+const refreshTree = async () => {
+  deptList.value = [];
+  treeVersion.value++;
+  await nextTick();
+};
+
+const searchDepartments = async (text: string, append: boolean) => {
+  const requestId = ++searchRequestId.value;
+  searchLoading.value = true;
+  searchError.value = "";
+  if (!append) searchSkip.value = 0;
+  const escaped = text.replaceAll("'", "''");
+  const filter = "contains(Name, '" + escaped + "') or contains(Code, '" + escaped + "')";
+  const query = "$filter=" + encodeURIComponent(filter);
+  try {
+    const result = await departmentService.query<Department>(
+      query + "&$orderby=Name&$skip=" + searchSkip.value + "&$top=" + (pageSize + 1),
+    );
+    if (requestId !== searchRequestId.value) return;
+    const items = result.slice(0, pageSize);
+    searchResults.value = append ? [...searchResults.value, ...items] : items;
+    searchSkip.value += items.length;
+    searchHasMore.value = result.length > pageSize;
+  } catch {
+    if (requestId === searchRequestId.value) {
+      searchError.value = "加载失败";
+    }
+  } finally {
+    if (requestId === searchRequestId.value) {
+      searchLoading.value = false;
+    }
+  }
+};
+
+const loadMoreSearch = () => {
+  const text = String(keyword.value || "").trim();
+  if (text && !searchLoading.value && searchHasMore.value) {
+    void searchDepartments(text, true);
+  }
 };
 const handleDeleteClick = (data: ITreeNode) => {
   selectedDept.value = data.data;
   if (selectedDept.value && selectedDept.value.parentId) showDeleteDialog.value = true;
 };
 const handleDeleteConfirm = async () => {
-  await departmentService.delete(selectedDept.value?.id!);
-
-  deptStore.remove(selectedDept.value?.id!);
-  loadDepartments().then((depts: Department[]) => {
-    deptList.value = buildDeptTree(depts);
-    deptStore.load().then();
-  });
-  showDeleteDialog.value = false;
+  try {
+    await departmentService.delete(selectedDept.value?.id!);
+    await refreshTree();
+    showDeleteDialog.value = false;
+  } catch (error) {
+    console.error(error);
+    ElMessage.error("删除部门失败");
+  }
 };
+
 </script>
 <style scoped lang="scss">
 .dept-card {
@@ -173,6 +283,48 @@ const handleDeleteConfirm = async () => {
 
 .search-input {
   margin-bottom: var(--et-space-8);
+}
+
+.search-results {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.search-state {
+  padding: var(--et-space-20);
+  color: var(--et-text-secondary);
+  text-align: center;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  min-height: var(--et-size-40);
+  padding: 0 var(--et-space-10);
+  border-radius: var(--et-radius-4);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--et-bg-hover);
+  }
+}
+
+.search-result-icon {
+  flex: none;
+  margin-right: var(--et-space-8);
+}
+
+.search-result-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-more {
+  display: flex;
+  width: 100%;
+  justify-content: center;
 }
 
 .dept-tree {

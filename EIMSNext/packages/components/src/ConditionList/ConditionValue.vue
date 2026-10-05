@@ -102,6 +102,7 @@
     <memberSelectDialog v-model="showMemberDialog" :tags="value ?? []" :memberOptions="{
       showTabs: memberShowTabs,
       multiple: memberMultiple,
+      sourceType: memberSourceType,
     }" @ok="memberSelected">
     </memberSelectDialog>
   </div>
@@ -138,6 +139,7 @@ const props = defineProps<{
   operator?: string;
   allowFieldValue?: boolean;
   optionLoader?: (source: DynamicSelectSource, keyword?: string) => Promise<DynamicSelectOption[]>;
+  allowDynamicParams?: boolean;
 }>();
 
 const dataType = computed(() => {
@@ -179,6 +181,11 @@ const normalizeSelectedTags = (input: unknown): ISelectedTag[] => {
 const showMemberDialog = ref(false);
 const memberMultiple = ref(false);
 const memberShowTabs = ref(MemberTabs.None);
+const memberSourceType = computed(() =>
+  dataType.value == ConditionFieldType.Department1 || dataType.value == ConditionFieldType.Department2
+    ? "department"
+    : "employee",
+);
 
 const condValueType = ref(props.modelValue.type);
 const value = ref<any>(props.modelValue.value);
@@ -314,12 +321,14 @@ const emitChange = () => {
 };
 
 const selectDept = (multiple: boolean) => {
-  memberShowTabs.value = MemberTabs.Department | MemberTabs.CurDept;
+  memberShowTabs.value = MemberTabs.Department |
+    (props.allowDynamicParams ? MemberTabs.DynamicParam : MemberTabs.CurDept);
   memberMultiple.value = multiple;
   showMemberDialog.value = true;
 };
 const selectEmp = (multiple: boolean) => {
-  memberShowTabs.value = MemberTabs.Employee | MemberTabs.CurUser;
+  memberShowTabs.value = MemberTabs.Employee |
+    (props.allowDynamicParams ? MemberTabs.DynamicParam : MemberTabs.CurUser);
   memberMultiple.value = multiple;
   showMemberDialog.value = true;
 };

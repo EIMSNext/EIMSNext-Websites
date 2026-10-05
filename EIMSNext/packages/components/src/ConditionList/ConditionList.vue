@@ -51,6 +51,7 @@
             :valueBuildSetting="valueBuildSettingRef"
             :allow-field-value="allowFieldValue"
             :option-loader="optionLoader"
+            :allow-dynamic-params="allowDynamicParams"
             @change="onInput"
             @remove="removeGroup(idx)"
           ></ConditionList>
@@ -65,6 +66,7 @@
             :valueBuildSetting="valueBuildSettingRef"
             :allow-field-value="allowFieldValue"
             :option-loader="optionLoader"
+            :allow-dynamic-params="allowDynamicParams"
             @change="onInput"
             @remove="removeItem(idx)"
           ></ConditionItem>
@@ -104,6 +106,7 @@ const props = withDefaults(
     valueBuildSetting?: IFieldBuildSetting;
     allowFieldValue?: boolean;
     optionLoader?: (source: DynamicSelectSource, keyword?: string) => Promise<DynamicSelectOption[]>;
+    allowDynamicParams?: boolean;
   }>(),
   {
     showTitle: true,

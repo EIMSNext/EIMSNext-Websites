@@ -1,5 +1,5 @@
 <template>
-  <FormView v-if="formDef" :def="formDef" :data="formData" :isView="isView" :isNewData="!data?.id" :actions="actions" :formFieldPermissions="formFieldPermissions"
+  <FormView v-if="formDef" :def="formDef" :data="formData" :form-id="formId" :isView="isView" :isNewData="!data?.id" :actions="actions" :formFieldPermissions="formFieldPermissions"
     @draft="saveDraft" @submit="submitData">
   </FormView>
 </template>

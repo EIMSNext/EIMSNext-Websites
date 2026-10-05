@@ -66,7 +66,7 @@ import { useI18n } from "vue-i18n";
 import { ITreeNode, buildDeptTree } from "@eimsnext/components";
 import { Department, Employee, EmployeeDepartmentRequest, EmployeeRequest, EmployeeStatus, PlatformType, ScopeMode } from "@eimsnext/models";
 import { departmentService, employeeService } from "@eimsnext/services";
-import { useContextStore, useDeptStore } from "@eimsnext/store";
+import { useContextStore } from "@eimsnext/store";
 import { ElMessage } from "element-plus";
 
 const { t } = useI18n();
@@ -79,19 +79,16 @@ const props = withDefaults(
   defineProps<{
     edit: boolean;
     emp?: Employee;
-    adminScope?: boolean;
     departmentScopeMode?: ScopeMode;
     departmentIds?: string[];
   }>(),
   {
     edit: false,
-    adminScope: false,
     departmentScopeMode: ScopeMode.All,
     departmentIds: () => [],
   }
 );
 
-const deptStore = useDeptStore();
 const contextStore = useContextStore();
 const deptList = ref<ITreeNode[]>(); // 部门列表
 const showDialog = ref(true);
@@ -144,10 +141,7 @@ const rules = reactive({
 });
 
 onBeforeMount(() => {
-  const loader = props.adminScope
-    ? departmentService.query<Department>("adminScope=true")
-    : deptStore.load();
-  loader.then((data: Department[]) => {
+  departmentService.query<Department>("$orderby=Code&$top=1000").then((data) => {
     deptList.value = filterManageableDepartments(buildDeptTree(data));
     departmentNameMap.value = Object.fromEntries(data.map((x) => [x.id, x.name]));
   });
