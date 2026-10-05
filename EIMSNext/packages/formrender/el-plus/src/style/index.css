@@ -7,6 +7,13 @@
   max-width: 360px;
 }
 
+/* 地址组件的详细地址 textarea 与上方级联同宽（级联内部的 .el-input 受上面的 360px 约束，
+   而 textarea 根类是 .el-textarea，需要单独对齐同一个上限） */
+.fc-form-item .fc-address .el-textarea {
+  width: 100%;
+  max-width: 360px;
+}
+
 .form-create {
   --fc-field-label-line-height: 30px;
   --fc-field-control-line-height: 30px;

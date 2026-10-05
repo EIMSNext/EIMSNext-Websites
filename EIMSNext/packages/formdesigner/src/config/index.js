@@ -77,16 +77,6 @@ import title from "./rule/title";
 import id from "./rule/id";
 import city from "./rule/city";
 import statistic from "./rule/statistic";
-import lineChart from "./rule/charts/lineChart";
-import areaChart from "./rule/charts/areaChart";
-import barChart from "./rule/charts/barChart";
-import stripeChart from "./rule/charts/stripeChart";
-import pieChart from "./rule/charts/pieChart";
-import funnelChart from "./rule/charts/funnelChart";
-import gaugeChart from "./rule/charts/gaugeChart";
-import radarChart from "./rule/charts/radarChart";
-import scatterChart from "./rule/charts/scatterChart";
-import customChart from "./rule/charts/customChart";
 import department1 from "./rule/departmentSelect";
 import department2 from "./rule/departmentSelect2";
 import employee1 from "./rule/employeeSelect";
@@ -159,16 +149,6 @@ const ruleList = [
   barCode,
   iframe,
   qrCodeBox,
-  lineChart,
-  areaChart,
-  barChart,
-  stripeChart,
-  pieChart,
-  funnelChart,
-  gaugeChart,
-  radarChart,
-  scatterChart,
-  customChart,
   row,
   table,
   inlineForm,

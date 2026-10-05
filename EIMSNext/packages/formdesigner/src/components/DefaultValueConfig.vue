@@ -35,6 +35,11 @@
       <el-select v-if="activeRule.type == 'select2'" v-model="customValue" multiple>
         <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
       </el-select>
+      <template v-if="activeRule.type == 'address'">
+        <el-cascader v-model="addressAreaValue" :options="addressOptions" :props="{ emitPath: true, showPrefix: false }" filterable
+          clearable style="width: 100%"></el-cascader>
+        <el-input type="textarea" :rows="2" v-model="addressDetailValue" style="width: 100%; margin-top: 8px"></el-input>
+      </template>
     </el-badge>
     <el-badge v-if="valueMode == 'datalink'" type="warning">
       <DataLinkConfig v-model="dataLinkValue" :title="t('props.v_datalink')"></DataLinkConfig>
@@ -48,6 +53,7 @@
 
 <script>
 import { defineComponent } from "vue";
+import { loadAreaOptions } from "@eimsnext/components";
 
 export default defineComponent({
   name: "DefaultValueConfig",
@@ -58,6 +64,9 @@ export default defineComponent({
   inject: ["designer"],
   mounted() {
     //  console.log("activeRule", this.activeRule)
+    if (this.activeRule?.type == "address") {
+      loadAreaOptions().then((options) => (this.addressOptions = options));
+    }
     if (this.activeRule) {
       if (this.activeRule._computed.value) {
         this.valueMode = 'formula';
@@ -81,6 +90,7 @@ export default defineComponent({
       customValue: null,
       dataLinkValue: null,
       formulaValue: null,
+      addressOptions: [],
     };
   },
   computed: {
@@ -89,6 +99,36 @@ export default defineComponent({
     },
     activeRule() {
       return this.designer.setupState.activeRule;
+    },
+    // address 默认值的省市区部分
+    addressAreaValue: {
+      get() {
+        const value = this.customValue || {};
+        return [value.province, value.city, value.district].filter((item) => !!item);
+      },
+      set(path) {
+        const segments = Array.isArray(path) ? path.filter((item) => !!item) : [];
+        this.customValue = {
+          province: segments[0] || "",
+          city: segments[1] || "",
+          district: segments[2] || "",
+          detail: this.customValue?.detail || "",
+        };
+      },
+    },
+    addressDetailValue: {
+      get() {
+        return this.customValue?.detail || "";
+      },
+      set(detail) {
+        this.customValue = {
+          province: "",
+          city: "",
+          district: "",
+          ...(this.customValue || {}),
+          detail: detail || "",
+        };
+      },
     },
   },
   watch: {

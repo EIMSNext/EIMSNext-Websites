@@ -1,4 +1,5 @@
 import VantFormCreate from './core/index';
+import { FcAddress } from './components';
 
 const FormCreateMobile = VantFormCreate();
 
@@ -8,6 +9,6 @@ if (typeof window !== 'undefined') {
 
 const maker = FormCreateMobile.maker;
 
-export {maker}
+export {maker, FcAddress}
 
 export default FormCreateMobile;

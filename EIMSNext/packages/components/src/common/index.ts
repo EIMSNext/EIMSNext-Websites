@@ -1,4 +1,5 @@
 export * from "./fieldUtils";
+export * from "./areaData";
 import { IListItem } from "../list/type";
 export interface IDataItem {
   id: string;

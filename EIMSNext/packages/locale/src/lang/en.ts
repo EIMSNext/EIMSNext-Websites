@@ -2912,7 +2912,6 @@ export default {
     component: "Component",
     subform: "Subform",
     container: "Container",
-    chart: "Chart",
     tree: "Structure",
   },
   formula: {
@@ -3708,10 +3707,10 @@ export default {
       },
     },
     fcCity: {
-      name: "Province picker",
+      name: "Address",
       props: {
         api: "URI",
-        level: "Level",
+        level: "Type",
         clearable: "Whether to display the clear button",
         disabled: "Disabled",
         filter: "Data filtering, return selectable data",
@@ -3804,63 +3803,6 @@ export default {
         _loadType: "JSON Rules",
         type: "Type",
       },
-    },
-    lineChart: {
-      name: "Line Chart",
-      data: "Chart Data",
-      pieTypeOpt: {
-        pie: "Pie",
-        doughnut: "Doughnut",
-        "half-doughnut": "Half-doughnut",
-      },
-      funnelSortOpt: {
-        descending: "descending",
-        ascending: "ascending",
-      },
-      props: {
-        title: "Chart name",
-        subtitle: "Chart introduction",
-        valueFormat: "Format numerical display",
-        stack: "Whether to stack when there are multiple columns of data",
-        smooth: "Whether the line transitions smoothly",
-        showLegend: "Whether to display the mark",
-        showSeriesLabel: "Whether to display the value",
-        barBackgroundColor: "Column background color",
-        funnelSort: "Sort method",
-        pieType: "Shape",
-        min: "Minimum value",
-        max: "Maximum value",
-        value: "Number",
-        indicator: "Indicator",
-        loadOptions: "Initialization",
-      },
-    },
-    areaChart: {
-      name: "Area Chart",
-    },
-    barChart: {
-      name: "Bar Chart",
-    },
-    customChart: {
-      name: "Custom Chart",
-    },
-    funnelChart: {
-      name: "Funnel Chart",
-    },
-    gaugeChart: {
-      name: "Gauge Chart",
-    },
-    pieChart: {
-      name: "Pie Chart",
-    },
-    radarChart: {
-      name: "Radar Chart",
-    },
-    scatterChart: {
-      name: "Scatter Chart",
-    },
-    stripeChart: {
-      name: "Horizontal bar Chart",
     },
     fcInlineForm: {
       name: "Inline",

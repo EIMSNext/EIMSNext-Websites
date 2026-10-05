@@ -1,6 +1,7 @@
 import { FcSubForm as subForm } from '@eimsnext/form-render-core';
 import Calendar from './calendar';
 import Cascader from './cascader';
+import Address from './address';
 import Checkbox from './checkbox';
 import Select from './select';
 import Uploader from './uploader';
@@ -17,11 +18,14 @@ import { DepartmentSelect, EmployeeSelect } from './organizationSelect';
 import { Collapse, Tabs } from './layout';
 import IconWarning from './icon/IconWarning.vue';
 
+export { Address as FcAddress }
+
 export default [
     subForm,
     IconWarning,
     Calendar,
     Cascader,
+    Address,
     Checkbox,
     Radio,
     Select,

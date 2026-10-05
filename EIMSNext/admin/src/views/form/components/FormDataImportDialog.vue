@@ -276,6 +276,7 @@ import {
   FormFieldPermission,
 } from "@eimsnext/models";
 import { formDataService } from "@eimsnext/services";
+import { formatAddressObject } from "@eimsnext/components";
 
 type ImportField = {
   field: string;
@@ -904,7 +905,11 @@ async function downloadTemplate() {
 function formatEditableValue(value: unknown) {
   if (value == null) return "";
   if (Array.isArray(value)) return value.join("，");
-  if (typeof value === "object") return JSON.stringify(value);
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    if ("province" in obj || "detail" in obj) return formatAddressObject(obj as Record<string, any>);
+    return JSON.stringify(value);
+  }
   return String(value);
 }
 

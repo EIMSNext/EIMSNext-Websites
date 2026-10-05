@@ -14,7 +14,7 @@ import {
   getDataTitle,
   getFlowStatus,
 } from "@eimsnext/models";
-import { IConditionList, IFieldSortList, IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
+import { IConditionList, IFieldSortList, IFormFieldDef, buildFieldListItems, formatAddressObject } from "@eimsnext/components";
 import { SortDirection } from "@eimsnext/services";
 import { getFileFullUrl, uniqueId } from "@eimsnext/utils";
 import { dateFormat } from "@/utils/common";
@@ -208,6 +208,16 @@ export const formatFormValue = (
 
   if (type === FieldType.ImageUpload) {
     return extractImageUrl(normalized);
+  }
+
+  // 地址 { province, city, district, detail } → "省市区详细地址"（与打印一致）
+  if (type === FieldType.Address) {
+    if (normalized && typeof normalized === "object" && !Array.isArray(normalized)) {
+      return formatAddressObject(normalized);
+    }
+    if (Array.isArray(normalized)) {
+      return normalized.map((item: any) => String(item ?? "").trim()).filter(Boolean).join("");
+    }
   }
 
   if (type === FieldType.DataSelect && Array.isArray(normalized)) {
