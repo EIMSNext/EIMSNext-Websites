@@ -290,7 +290,7 @@ const getRowFieldValue = (row: Record<string, any>, field: string) => {
 
 /** Resolves the configured data-title expression for list/card display. */
 export const formatDataTitle = (row: Record<string, any>, formDef: FormDef, t: (key: string) => string) => {
-  const dataTitle = formDef.formSettings?.advanced?.dataTitle;
+  const dataTitle = formDef.formSettings?.dataTitle;
   const customContent = dataTitle?.mode === "custom" ? dataTitle.content || "" : "";
   const tokenFields = Array.from(customContent.matchAll(/\$\{([^}]+)\}/g)).map((match) => match[1].trim());
   const defaultField = (formDef.content?.items || []).find((field) => field.type !== FieldType.TableForm)?.field;
