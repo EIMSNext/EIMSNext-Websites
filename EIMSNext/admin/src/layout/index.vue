@@ -6,7 +6,7 @@
       </el-header>
       <el-container class="layout-main-shell">
         <el-aside width="50px" class="main-left-menu">
-          <el-tooltip :content="t('admin.workbench.title')" placement="right" :hide-after="0">
+          <el-tooltip v-if="!isPlatAdmin" :content="t('admin.workbench.title')" placement="right" :hide-after="0">
             <router-link custom :to="{ path: '/workbench' }" v-slot="{ navigate }">
               <div class="main-left-menu-item" @click="navigate">
                 <!-- <AppIcon :app="workbenchApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
@@ -83,6 +83,7 @@ const userStore = useUserStore();
 const appStore = useAppStore();
 const { items: appsRef } = storeToRefs(appStore);
 const curUser = toRef(userStore.currentUser);
+const isPlatAdmin = computed(() => curUser.value.userType === UserType.PlatAdmin);
 
 const classObj = computed(() => ({
   hideSidebar: !systemStore.sidebar.opened,
@@ -112,6 +113,8 @@ const classObj = computed(() => ({
 .layout-main {
   padding: var(--et-space-0);
   overflow: hidden;
+  height: 100%;
+  min-height: 0;
 }
 
 .main-left-menu {

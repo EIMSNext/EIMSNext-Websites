@@ -357,8 +357,12 @@ onMounted(loadProfiles);
 <style scoped lang="scss">
 .appstore-page {
   width: 1100px;
+  max-width: 100%;
   padding: var(--et-space-20);
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: color-mix(in srgb, var(--et-bg-container) 98%, transparent);
   color: var(--et-text-primary);
 }

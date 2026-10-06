@@ -11,7 +11,20 @@
     <el-tabs v-model="activeTab" class="management-tabs">
       <el-tab-pane name="apps" :label="t('admin.platformAdmin.appPublish')">
         <el-form class="publish-app-form" label-position="top" @submit.prevent>
-          <el-form-item :label="t('admin.platformAdmin.appId')" required>
+          <el-form-item :label="t('admin.platformAdmin.appId')" required style="width: 400px;">
+            <el-select
+              v-model="selectedAppKey"
+              class="id-search-select"
+              filterable
+              remote
+              clearable
+              :remote-method="searchAppOptions"
+              :loading="appSearching"
+              :placeholder="t('admin.appAdmin.searchByName')"
+              @change="onAppSelected"
+            >
+              <el-option v-for="item in appOptions" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
             <el-input v-model="publishAppId" :placeholder="t('admin.platformAdmin.appIdPlaceholder')" />
           </el-form-item>
           <div class="form-actions">
@@ -24,7 +37,20 @@
 
       <el-tab-pane name="app-package" :label="t('admin.platformAdmin.appPackage')">
         <el-form class="publish-app-form" label-position="top" @submit.prevent>
-          <el-form-item :label="t('admin.platformAdmin.appProfileId')" required>
+          <el-form-item :label="t('admin.platformAdmin.appProfileId')" required style="width: 400px;">
+            <el-select
+              v-model="selectedProfileKey"
+              class="id-search-select"
+              filterable
+              remote
+              clearable
+              :remote-method="searchProfileOptions"
+              :loading="profileSearching"
+              :placeholder="t('admin.appAdmin.searchByName')"
+              @change="onProfileSelected"
+            >
+              <el-option v-for="item in profileOptions" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
             <el-input v-model="packageProfileId" :placeholder="t('admin.platformAdmin.appProfileIdPlaceholder')" />
           </el-form-item>
           <div class="form-actions">
@@ -228,11 +254,20 @@ import {
   ECoinChargeType,
   ECoinPrice,
   ECoinTargetType,
+  AppDef,
   AppPackagePreview,
+  AppProfile,
   PluginPublishRequest,
   PluginRuntimeInfo,
 } from "@eimsnext/models";
-import { appDefService, appPackageService, eCoinPriceService, systemService } from "@eimsnext/services";
+import {
+  appDefService,
+  appPackageService,
+  appProfileService,
+  eCoinPriceService,
+  ODataQueryRequest,
+  systemService,
+} from "@eimsnext/services";
 import { Check, Download, Plus, Refresh, Search, Upload } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useI18n } from "vue-i18n";
@@ -255,6 +290,77 @@ const activeTab = ref("apps");
 const publishAppId = ref("");
 const publishingApp = ref(false);
 const packageProfileId = ref("");
+
+const appOptions = ref<AppDef[]>([]);
+const appSearching = ref(false);
+const selectedAppKey = ref("");
+let appSearchRequestId = 0;
+
+const profileOptions = ref<AppProfile[]>([]);
+const profileSearching = ref(false);
+const selectedProfileKey = ref("");
+let profileSearchRequestId = 0;
+
+const escapeODataLiteral = (value: string) => value.replace(/'/g, "''");
+
+const searchAppOptions = async (keyword: string) => {
+  const term = keyword.trim();
+  if (!term) {
+    appOptions.value = [];
+    return;
+  }
+  const requestId = ++appSearchRequestId;
+  appSearching.value = true;
+  try {
+    const query = new ODataQueryRequest();
+    query.$filter = `contains(name,'${escapeODataLiteral(term)}')`;
+    query.$top = 20;
+    const result = await appDefService.query<AppDef>(query);
+    if (requestId !== appSearchRequestId) return;
+    appOptions.value = result || [];
+  } catch {
+    if (requestId === appSearchRequestId) {
+      appOptions.value = [];
+    }
+  } finally {
+    if (requestId === appSearchRequestId) {
+      appSearching.value = false;
+    }
+  }
+};
+
+const onAppSelected = (id: string) => {
+  if (!id) return;
+  publishAppId.value = id;
+};
+
+const searchProfileOptions = async (keyword: string) => {
+  const term = keyword.trim();
+  if (!term) {
+    profileOptions.value = [];
+    return;
+  }
+  const requestId = ++profileSearchRequestId;
+  profileSearching.value = true;
+  try {
+    const result = await appProfileService.query({ keyword: term, take: 20 });
+    if (requestId !== profileSearchRequestId) return;
+    profileOptions.value = result?.items || [];
+  } catch {
+    if (requestId === profileSearchRequestId) {
+      profileOptions.value = [];
+    }
+  } finally {
+    if (requestId === profileSearchRequestId) {
+      profileSearching.value = false;
+    }
+  }
+};
+
+const onProfileSelected = (id: string) => {
+  if (!id) return;
+  packageProfileId.value = id;
+};
 const packageFile = ref<File>();
 const packagePreview = ref<AppPackagePreview>();
 const packageExporting = ref(false);
@@ -543,10 +649,11 @@ onMounted(() => Promise.all([loadRuntimePlugins(), loadPrices()]));
 :deep(.management-tabs > .el-tabs__content) {
   min-height: 0;
   flex: 1;
+  overflow-y: auto;
 }
 
 :deep(.management-tabs .el-tab-pane) {
-  height: 100%;
+  height: auto;
 }
 
 .toolbar {
@@ -582,6 +689,11 @@ onMounted(() => Promise.all([loadRuntimePlugins(), loadPrices()]));
 
 .package-import-field {
   margin-top: var(--et-space-24);
+}
+
+.id-search-select {
+  width: 100%;
+  margin-bottom: var(--et-space-8);
 }
 
 .package-upload {

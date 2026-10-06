@@ -1,7 +1,7 @@
 <template>
   <div class="navbar">
     <div class="navbar__left">
-      <el-popover trigger="click" placement="bottom-start" :width="320" :show-arrow="false">
+      <el-popover v-if="!isPlatAdmin" trigger="click" placement="bottom-start" :width="320" :show-arrow="false">
         <template #reference>
           <div class="platform-entry">
             <et-icon icon="el-Grid" size="24" />

@@ -2,6 +2,8 @@ import defaultSettings from "@/settings";
 import { Themes } from "@/enums/Themes";
 import { generateThemeColors, applyTheme, toggleDarkMode } from "@/utils/theme";
 import { queryUnreadSystemMessageCount } from "@/utils/badge";
+import { useUserStoreHook } from "@eimsnext/store";
+import { UserType } from "@eimsnext/models";
 
 type SettingsValue = boolean | string;
 
@@ -9,6 +11,9 @@ export const useSettingsStore = defineStore("setting", () => {
   // 消息中心
   const messageCenterVisible = ref(false);
   const notificationUnreadCount = ref(0);
+  // 平台管理员无企业消息上下文，避免无意义的 SystemMessage/$count 请求
+  const userStore = useUserStoreHook();
+  const isPlatAdmin = computed(() => userStore.currentUser.userType === UserType.PlatAdmin);
   // 基本设置
   const settingsVisible = ref(false);
   // 应用市场
@@ -58,6 +63,10 @@ export const useSettingsStore = defineStore("setting", () => {
   }
 
   async function refreshNotificationUnreadCount() {
+    if (isPlatAdmin.value) {
+      notificationUnreadCount.value = 0;
+      return;
+    }
     notificationUnreadCount.value = await queryUnreadSystemMessageCount();
   }
 
