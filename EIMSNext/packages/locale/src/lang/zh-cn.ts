@@ -1869,6 +1869,52 @@ export default {
         copyFailed: "复制失败，请手动复制",
       },
     },
+    systemSettings: {
+      version: {
+        current: "当前版本",
+        edition: "企业版",
+        validity: "有效期：{range}",
+        consultBuy: "咨询购买",
+        uploadProof: "上传凭证",
+        coinRate: "（1 云币 = ￥1）",
+        recharge: "充值",
+        paymentSettings: "支付设置",
+        consumptionStats: "消耗统计",
+        usageLog: "使用日志",
+      },
+      enterpriseSettings: {
+        culture: {
+          title: "企业文化",
+          customLogin: "自定义登录页",
+          customLoginTip: "自定义登录页 Logo、展示图及登录方式等，对企业账号 URL 和发布给成员的内链生效。",
+          style: "企业风格",
+          styleTip: "自定义企业风格。",
+        },
+        collaboration: {
+          title: "企业协作",
+          notifyMute: "提醒屏蔽",
+          notifyMuteTip: "可以设置成员是否接收应用内相关提醒。",
+          systemTimezone: "系统时区",
+          systemTimezoneFollow: "跟随成员设备实时区",
+          systemTimezoneTip: "系统内所有的时间都基于系统时区显示。",
+        },
+        themeColor: {
+          title: "企业主题色",
+          tip: "对企业内所有功能模块的电脑端和移动端同时生效",
+          saved: "企业主题色已保存",
+          saveFailed: "保存失败，请重试",
+        },
+        style: {
+          saved: "设置已保存",
+          saveFailed: "保存失败，请重试",
+        },
+        learnMore: "了解更多",
+      },
+      productStyle: {
+        title: "产品样式",
+        customWorkbenchTip: "配置工作台默认布局，自定义内容优先级和入口。",
+      },
+    },
     department: {
       title: "员工",
       active: "在职员工",

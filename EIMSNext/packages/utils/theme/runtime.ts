@@ -1,3 +1,19 @@
+/** 系统默认主题色。 */
+export const DEFAULT_THEME_COLOR = "#00c29a";
+
+/** 企业主题色在企业配置（CorporateSetting）中的名称。 */
+export const CORP_THEME_COLOR_SETTING_NAME = "theme_color";
+
+/** 企业自定义风格开关在企业配置（CorporateSetting）中的名称。 */
+export const CORP_STYLE_ENABLED_SETTING_NAME = "style_enabled";
+
+/**
+ * 计算生效的主题色，优先级：用户自定义 > 企业主题色 > 系统默认。
+ */
+export function resolveThemeColor(userColor?: string, corpColor?: string) {
+  return userColor || corpColor || DEFAULT_THEME_COLOR;
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -47,7 +63,7 @@ function normalizeHex(hex: string) {
     return rgbHex;
   }
 
-  return "#4080ff";
+  return DEFAULT_THEME_COLOR;
 }
 
 function hexToRgb(hex: string): [number, number, number] {

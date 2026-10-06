@@ -11,6 +11,7 @@ export * from "./dto/client";
 export * from "./dto/clientGrant";
 export * from "./dto/resourceConfig";
 export * from "./dto/corporate";
+export * from "./dto/corporateSetting";
 export * from "./dto/efRunLog";
 export * from "./dto/employee";
 export * from "./dto/formData";

@@ -20,14 +20,14 @@
                 {{ accountModeText }}
               </el-tag>
             </div>
-            <div class="corp-auth-btns">
+            <!-- <div class="corp-auth-btns">
               <div class="mode-bind-tip">
                 {{ $t("admin.enterprise.bindTip") }}
                 <a class="biz-hyperlink underline" :href="consultUrl" target="_blank" rel="noopener">
                   {{ $t("admin.enterprise.consult") }}
                 </a>
               </div>
-            </div>
+            </div> -->
           </div>
 
           <div class="corp-detail-wrapper">
