@@ -11,6 +11,7 @@ import {
 import { queryUnreadSystemMessageCount } from "@/utils/badge";
 import { corporateSettingService } from "@eimsnext/services";
 import { useUserStoreHook } from "@eimsnext/store";
+import { UserType } from "@eimsnext/models";
 import { bus } from "@eimsnext/utils";
 
 type SettingsValue = boolean | string;

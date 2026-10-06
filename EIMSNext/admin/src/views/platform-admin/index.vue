@@ -299,6 +299,7 @@ let appSearchRequestId = 0;
 const profileOptions = ref<AppProfile[]>([]);
 const profileSearching = ref(false);
 const selectedProfileKey = ref("");
+const packageProfileName = ref("");
 let profileSearchRequestId = 0;
 
 const escapeODataLiteral = (value: string) => value.replace(/'/g, "''");
@@ -360,6 +361,8 @@ const searchProfileOptions = async (keyword: string) => {
 const onProfileSelected = (id: string) => {
   if (!id) return;
   packageProfileId.value = id;
+  const matched = profileOptions.value.find((x) => x.id === id);
+  packageProfileName.value = matched?.name || "";
 };
 const packageFile = ref<File>();
 const packagePreview = ref<AppPackagePreview>();
@@ -445,6 +448,11 @@ const doPublishApp = async () => {
   }
 };
 
+const buildPackageFileName = (rawName: string, profileId: string) => {
+  const safe = rawName.replace(/[\\/:*?"<>|]/g, "_").trim() || "app";
+  return `${safe}-${profileId}.eimsapp`;
+};
+
 const exportAppPackage = async () => {
   const profileId = packageProfileId.value.trim();
   if (!profileId) return;
@@ -454,7 +462,7 @@ const exportAppPackage = async () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `app-package-${profileId}.eimsapp`;
+    link.download = buildPackageFileName(packageProfileName.value, profileId);
     document.body.appendChild(link);
     link.click();
     link.remove();
