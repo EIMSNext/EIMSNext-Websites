@@ -98,7 +98,7 @@
           </el-aside>
           <el-aside
             class="_fc-l"
-            :width="activeModule === 'language' ? '450px' : '250px'"
+            :width="activeModule === 'language' ? '450px' : '260px'"
           >
             <AiChat v-if="activeModule === 'ai'"></AiChat>
             <LanguageConfig v-if="activeModule === 'language'"></LanguageConfig>
