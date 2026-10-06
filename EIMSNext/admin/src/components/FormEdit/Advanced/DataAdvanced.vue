@@ -71,7 +71,7 @@ const businessFields = computed(() =>
 const defaultFieldLabel = computed(() => businessFields.value[0]?.label || "");
 
 watch(
-  () => props.formDef.formSettings?.advanced?.dataTitle,
+  () => props.formDef.formSettings?.dataTitle,
   (dataTitle) => {
     mode.value = dataTitle?.mode === "custom" ? "custom" : "default";
     content.value = dataTitle?.content || "";
@@ -79,13 +79,10 @@ watch(
   { immediate: true, deep: true }
 );
 
-function ensureFormSettings() {
-  const formSettings: FormSettings = props.formDef.formSettings
+function ensureFormSettings(): FormSettings {
+  return props.formDef.formSettings
     ? JSON.parse(JSON.stringify(props.formDef.formSettings))
     : {};
-
-  formSettings.advanced ??= {};
-  return formSettings;
 }
 
 function validateCustomTitle() {
@@ -113,7 +110,7 @@ async function save() {
     mode: mode.value,
     content: mode.value === "custom" ? content.value : "",
   };
-  formSettings.advanced!.dataTitle = dataTitle;
+  formSettings.dataTitle = dataTitle;
 
   const request = {
     id: props.formDef.id,

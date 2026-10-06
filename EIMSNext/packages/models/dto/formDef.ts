@@ -22,10 +22,6 @@ export interface FormDef extends CorpModelBase {
 }
 
 export interface FormSettings {
-  advanced?: DataAdvancedSettings;
-}
-
-export interface DataAdvancedSettings {
   dataTitle?: DataTitleSettings;
 }
 

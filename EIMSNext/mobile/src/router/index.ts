@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { appSetting } from '@eimsnext/utils'
+import { applyCorpThemeIfNeeded } from '@/theme'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -68,14 +69,23 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to) => {
+// 每个登录会话只读取一次企业主题色
+let corpThemeApplied = false
+
+router.beforeEach(async (to) => {
   const token = localStorage.getItem(appSetting.tokenKey || 'jat')
   if (to.meta.requireAuth && !token) {
+    corpThemeApplied = false
     return {
       path: '/login',
       query: { redirect: to.fullPath },
       replace: true
     }
+  }
+
+  if (token && to.meta.requireAuth && !corpThemeApplied) {
+    corpThemeApplied = true
+    await applyCorpThemeIfNeeded()
   }
 })
 

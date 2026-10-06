@@ -1870,6 +1870,52 @@ export default {
         copyFailed: "Copy failed, please copy manually",
       },
     },
+    systemSettings: {
+      version: {
+        current: "Current Version",
+        edition: "Enterprise Edition",
+        validity: "Validity: {range}",
+        consultBuy: "Contact Sales",
+        uploadProof: "Upload Proof",
+        coinRate: "(1 Coin = ¥1)",
+        recharge: "Recharge",
+        paymentSettings: "Payment Settings",
+        consumptionStats: "Consumption Stats",
+        usageLog: "Usage Log",
+      },
+      enterpriseSettings: {
+        culture: {
+          title: "Corporate Culture",
+          customLogin: "Custom Login Page",
+          customLoginTip: "Customize the login page logo, banners and login methods. Applies to your enterprise account URL and internal links sent to members.",
+          style: "Enterprise Style",
+          styleTip: "Customize the enterprise style.",
+        },
+        collaboration: {
+          title: "Enterprise Collaboration",
+          notifyMute: "Mute Notifications",
+          notifyMuteTip: "Configure whether members receive in-app notifications.",
+          systemTimezone: "System Time Zone",
+          systemTimezoneFollow: "Follow member device time zone",
+          systemTimezoneTip: "All times in the system are displayed based on the system time zone.",
+        },
+        themeColor: {
+          title: "Enterprise Theme Color",
+          tip: "Takes effect across all modules on both desktop and mobile.",
+          saved: "Enterprise theme color saved",
+          saveFailed: "Save failed, please try again",
+        },
+        style: {
+          saved: "Settings saved",
+          saveFailed: "Save failed, please try again",
+        },
+        learnMore: "Learn More",
+      },
+      productStyle: {
+        title: "Product Style",
+        customWorkbenchTip: "Configure the default workbench layout, content priority and entries.",
+      },
+    },
     department: {
       title: "Employees",
       active: "Active Employees",

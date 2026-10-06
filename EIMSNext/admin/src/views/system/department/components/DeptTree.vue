@@ -353,6 +353,13 @@ const handleDeleteConfirm = async () => {
   :deep(.el-tree-node__content) {
     flex-shrink: 0;
   }
+
+  // el-tree 懒加载时会在展开箭头与节点文案之间插入 loading 图标：它会占位把文案顶开，
+  // 且自身的出现/消失也会让节点行闪一下。这里直接隐藏，
+  // 加载反馈由展开动画与子节点出现来体现。
+  :deep(.el-tree-node__loading-icon) {
+    display: none;
+  }
 }
 
 .node-data {
