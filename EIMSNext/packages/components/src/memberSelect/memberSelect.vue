@@ -1647,8 +1647,7 @@ const employeeGroupFilter = (value: string, data: any) => {
 };
 
 const removeTag = (tag: ISelectedTag) => {
-  //@ts-ignore
-  if (tag.type == TagType.Department) {
+  if (tag.type == DataItemType.Department) {
     if (deptTree.value)
       deptTree.value.setChecked(tag.id, false, orgCascade.value);
     else if (curDeptTree.value)

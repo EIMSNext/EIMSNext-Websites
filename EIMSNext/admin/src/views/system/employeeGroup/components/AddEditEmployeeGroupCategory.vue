@@ -8,7 +8,7 @@
     @cancel="cancel"
     @ok="save"
   >
-      <el-form :model="formData" :rules="rules" label-width="80px" class="dialog-form">
+      <el-form :model="formData" :rules="rules" label-width="100px" class="dialog-form">
         <el-form-item :label="$t('comp.addEditEmployeeGroupCategory.groupName')" prop="name">
           <el-input v-model="formData.name" :placeholder="$t('comp.addEditEmployeeGroupCategory.groupNamePlaceholder')" />
         </el-form-item>

@@ -86,7 +86,7 @@
                 <div class="node-wrapper">
                   <et-icon icon="el-folder" icon-class="node-icon" />
                   <span class="node-label">{{ element.label }}</span>
-                  <div v-if="editable" class="node-action">
+                  <div v-if="editable && element.id!='__uncategorized__'" class="node-action">                    
                     <et-icon icon="el-Plus" class="action-item" @click.stop="handleAddEmployeeGroupClick(element)" />
                     <et-icon icon="el-Edit" class="action-item" @click.stop="handleEditClick(element)" />
                     <et-icon icon="el-Delete" class="action-item" @click.stop="handleDeleteClick(element)" />

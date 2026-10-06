@@ -21,24 +21,23 @@
         <el-input v-model="formData.workEmail" :placeholder="$t('department.emailPlaceholder')" maxlength="50" />
       </el-form-item>
       <el-form-item :label="$t('department.department')" prop="departments">
-        <el-tree-select
-          v-model="selectedDepartmentIds"
-          :placeholder="$t('department.departmentPlaceholder')"
-          :data="deptList"
-          :props="{ children: 'children', label: 'label', disabled: 'disabled' }"
-          node-key="id"
-          value-key="id"
-          multiple
-          collapse-tags
-          collapse-tags-tooltip
-          filterable
-          check-strictly
-          :render-after-expand="false"
+        <selected-tags
+          :model-value="deptTags"
+          :editable="true"
+          class="dept-tags-trigger"
+          :empty-text="$t('department.departmentPlaceholder')"
+          @edit-tag="showMemberDialog = true"
         />
-        <div v-if="selectedDepartmentIds.length" class="department-relations">
-          <div v-for="departmentId in selectedDepartmentIds" :key="departmentId" class="department-relation-row">
-            <span class="department-relation-name">{{ getDepartmentName(departmentId) }}</span>
-            <el-checkbox v-model="departmentManagers[departmentId]">{{ $t("department.manager") }}</el-checkbox>
+        <member-select-dialog
+          v-model="showMemberDialog"
+          :tags="deptTags"
+          :member-options="memberOptions"
+          @ok="onDeptTagsChanged"
+        />
+        <div v-if="deptTags.length" class="department-relations">
+          <div v-for="tag in deptTags" :key="tag.id" class="department-relation-row">
+            <span class="department-relation-name">{{ tag.label }}</span>
+            <el-checkbox v-model="departmentManagers[tag.id]">{{ $t("department.manager") }}</el-checkbox>
           </div>
         </div>
       </el-form-item>
@@ -63,7 +62,7 @@
 </template>
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
-import { ITreeNode, buildDeptTree } from "@eimsnext/components";
+import { DataItemType, ISelectedTag, MemberSelectDialog, MemberTabs, SelectedTags } from "@eimsnext/components";
 import { Department, Employee, EmployeeDepartmentRequest, EmployeeRequest, EmployeeStatus, PlatformType, ScopeMode } from "@eimsnext/models";
 import { departmentService, employeeService } from "@eimsnext/services";
 import { useContextStore } from "@eimsnext/store";
@@ -90,12 +89,11 @@ const props = withDefaults(
 );
 
 const contextStore = useContextStore();
-const deptList = ref<ITreeNode[]>(); // 部门列表
 const showDialog = ref(true);
 const title = computed(() => props.edit ? t("department.editEmployee") : t("department.addEmployee"));
 const showSaveAndInvite = computed(() => contextStore.corpPlat === PlatformType.Public);
-const departmentNameMap = ref<Record<string, string>>({});
-const selectedDepartmentIds = ref<string[]>([]);
+const deptTags = ref<ISelectedTag[]>([]);
+const showMemberDialog = ref(false);
 const departmentManagers = reactive<Record<string, boolean>>({});
 const formData = ref<EmployeeRequest>({
   id: "",
@@ -116,8 +114,26 @@ if (props.edit && props.emp) {
       sortValue: index,
     })) ?? [],
   };
-  selectedDepartmentIds.value = props.emp.departments?.map((x) => x.departmentId) ?? [];
 }
+
+const memberOptions = computed(() => ({
+  showTabs: MemberTabs.Department,
+  multiple: true,
+  cascadedDept: false,
+  ...(props.departmentScopeMode === ScopeMode.Partial && props.departmentIds.length > 0
+    ? {
+        limit: {
+          depts: props.departmentIds.map((id) => ({
+            id,
+            value: id,
+            label: "",
+            type: DataItemType.Department,
+            cascadedDept: false,
+          })),
+        },
+      }
+    : {}),
+}));
 
 const rules = reactive({
   code: [{ required: true, message: t("admin.department.messages.codeRequired"), trigger: "blur" }],
@@ -140,44 +156,43 @@ const rules = reactive({
   inviteId: [{ message: t("admin.department.messages.employeeGroupRequired"), trigger: "blur" }],
 });
 
-onBeforeMount(() => {
-  departmentService.query<Department>("$orderby=Code&$top=1000").then((data) => {
-    deptList.value = filterManageableDepartments(buildDeptTree(data));
-    departmentNameMap.value = Object.fromEntries(data.map((x) => [x.id, x.name]));
-  });
+onBeforeMount(async () => {
+  const initialIds = props.emp?.departments?.map((x) => x.departmentId) ?? [];
+  if (initialIds.length === 0) return;
+
+  const departments = await Promise.all(
+    initialIds.map((id) =>
+      departmentService.get<Department>(id, undefined, { silentError: true }).catch(() => undefined),
+    ),
+  );
+  deptTags.value = initialIds.map((id, index) => ({
+    id,
+    value: id,
+    label: departments[index]?.name ?? id,
+    type: DataItemType.Department,
+    cascadedDept: false,
+  }));
 });
 
-const filterManageableDepartments = (nodes: ITreeNode[]) => {
-  if (props.departmentScopeMode !== ScopeMode.Partial || props.departmentIds.length === 0) return nodes;
-
-  const allowedIds = new Set(props.departmentIds);
-  const filterNode = (node: ITreeNode): ITreeNode | undefined => {
-    const children = node.children?.map(filterNode).filter((child): child is ITreeNode => !!child) || [];
-    if (allowedIds.has(node.id)) return { ...node, children };
-    if (children.length > 0) return { ...node, disabled: true, children };
-    return undefined;
-  };
-
-  return nodes.map(filterNode).filter((node): node is ITreeNode => !!node);
+const onDeptTagsChanged = (tags: ISelectedTag[]) => {
+  deptTags.value = tags;
+  showMemberDialog.value = false;
 };
 
 const emit = defineEmits(["cancel", "ok"]);
 const cancel = () => {
   emit("cancel");
 };
-const getDepartmentName = (departmentId: string) => {
-  return departmentNameMap.value[departmentId] ?? departmentId;
-};
 
-watch(selectedDepartmentIds, (departmentIds) => {
-  departmentIds.forEach((departmentId) => {
-    if (departmentManagers[departmentId] === undefined) {
-      departmentManagers[departmentId] = false;
+watch(deptTags, (tags) => {
+  tags.forEach((tag) => {
+    if (departmentManagers[tag.id] === undefined) {
+      departmentManagers[tag.id] = false;
     }
   });
 
   Object.keys(departmentManagers).forEach((departmentId) => {
-    if (!departmentIds.includes(departmentId)) {
+    if (!tags.some((tag) => tag.id === departmentId)) {
       delete departmentManagers[departmentId];
     }
   });
@@ -186,9 +201,9 @@ watch(selectedDepartmentIds, (departmentIds) => {
 });
 
 const buildDepartments = (): EmployeeDepartmentRequest[] => {
-  return selectedDepartmentIds.value.map((departmentId, index) => ({
-    departmentId,
-    isManager: !!departmentManagers[departmentId],
+  return deptTags.value.map((tag, index) => ({
+    departmentId: tag.id,
+    isManager: !!departmentManagers[tag.id],
     sortValue: index,
   }));
 };
@@ -241,6 +256,10 @@ const save = async () => {
 <style lang="scss" scoped>
 .dialog-form {
   padding: var(--et-space-12) var(--et-space-20);
+}
+
+.dept-tags-trigger {
+  width: 100%;
 }
 
 .department-relations {
