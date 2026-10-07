@@ -32,3 +32,27 @@ export function loadAreaOptions(force = false): Promise<IAreaOption[]> {
   }
   return areaOptionsPromise;
 }
+
+// 类型层级规整：1=省 2=省-市 3=省-市-区 4=省-市-区-详细地址。
+// 未设置时按 4（完整形态）处理，与地址组件、设计器类型下拉的默认值一致。
+// 运行时控件、设计器默认值选择器、筛选/查询条件共用同一口径。
+export function normalizeAreaLevel(level?: number): number {
+  const value = Number(level);
+  return Math.min(Math.max(Number.isFinite(value) && value > 0 ? value : 4, 1), 4);
+}
+
+// 按类型层级截断级联树（只影响展示层级，不改动已存的值）。
+// 级联最多三级：4（含详细地址）在级联部分与 3 相同，详细地址由单独控件承载。
+export function limitAreaDepth(
+  options: IAreaOption[],
+  level?: number,
+): IAreaOption[] {
+  const depth = Math.min(normalizeAreaLevel(level), 3);
+  return (Array.isArray(options) ? options : []).map((item) => {
+    const option: IAreaOption = { value: item.value, label: item.label };
+    if (depth > 1 && Array.isArray(item.children) && item.children.length) {
+      option.children = limitAreaDepth(item.children, depth - 1);
+    }
+    return option;
+  });
+}

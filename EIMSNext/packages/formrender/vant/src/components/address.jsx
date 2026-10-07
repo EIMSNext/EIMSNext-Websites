@@ -32,6 +32,12 @@ export default defineComponent({
         api: String,
     },
     emits: ['update:modelValue', 'change', 'fc.el'],
+    computed: {
+        // 占位文本跟随类型层级：省 / 省-市 / 省-市-区
+        placeholderText() {
+            return ['省', '省-市', '省-市-区'][Math.min(Math.max(this.level || 4, 1), 3) - 1] || '省-市-区';
+        },
+    },
     setup(props, _) {
         const raw = ref([]);
         const options = ref([]);
@@ -66,9 +72,12 @@ export default defineComponent({
                     options.value = tidyOptions(raw.value, areaLevel());
                 });
 
+        // 按类型层级截断显示（省=1 / 省-市=2 / 省-市-区=3）；比层级深的值仍留在数据里，不改动
+        const visibleSegments = (value) =>
+            [value.province, value.city, value.district].slice(0, areaLevel()).filter(item => !!item);
+
         const syncFromModel = (val) => {
-            const value = val || {};
-            const segments = [value.province, value.city, value.district].filter(item => !!item);
+            const segments = visibleSegments(val || {});
             areaValue.value = segments.length ? segments[segments.length - 1] : '';
             inputValue.value = segments.join(' / ');
         };
@@ -79,6 +88,8 @@ export default defineComponent({
             if (raw.value.length) {
                 options.value = tidyOptions(raw.value, areaLevel());
             }
+            // 层级变了，显示也要跟着截断/放开展示
+            syncFromModel(modelValue.value);
         });
 
         const emitValue = (value) => {
@@ -159,7 +170,7 @@ export default defineComponent({
     },
     render() {
         return <>
-            <van-field ref="el" class="fc-address-picker" placeholder={this.placeholder || '省-市-区'} readonly
+            <van-field ref="el" class="fc-address-picker" placeholder={this.placeholder || this.placeholderText} readonly
                 disabled={this.$props.disabled}
                 onClick={this.open}
                 model-value={this.inputValue} border={false} v-slots={{

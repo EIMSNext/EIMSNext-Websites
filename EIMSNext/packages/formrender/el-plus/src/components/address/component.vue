@@ -1,7 +1,7 @@
 <template>
     <div class="fc-address" style="width: 100%">
         <el-cascader class="fc-address-cascader" style="width: 100%" :modelValue="areaValue" :options="options"
-            :props="{ emitPath: true }" :placeholder="placeholder || '省-市-区'" clearable filterable
+            :props="{ emitPath: true }" :placeholder="placeholder || placeholderText" clearable filterable
             :disabled="disabled" @update:modelValue="onAreaChange"></el-cascader>
         <el-input v-if="level >= 4" class="fc-address-detail" style="width: 100%; margin-top: 8px" type="textarea"
             :autosize="{ minRows: 3, maxRows: 6 }" :modelValue="detailValue"
@@ -45,6 +45,8 @@ export default defineComponent({
     data() {
         return {
             options: [],
+            // 原始数据留着：level（省 / 省-市 / 省-市-区）变化时要按新层级重建选项
+            raw: [],
         }
     },
     computed: {
@@ -52,12 +54,29 @@ export default defineComponent({
         areaLevel() {
             return Math.min(Math.max(this.level || 4, 1), 3);
         },
+        // 占位文本跟随类型层级：省 / 省-市 / 省-市-区
+        placeholderText() {
+            return ['省', '省-市', '省-市-区'][this.areaLevel - 1] || '省-市-区';
+        },
         areaValue() {
             const value = this.modelValue || {};
-            return [value.province, value.city, value.district].filter(item => !!item);
+            // 只回显当前层级内的部分：层级调浅后不能还显示更深级别的值
+            return [value.province, value.city, value.district]
+                .slice(0, this.areaLevel)
+                .filter(item => !!item);
         },
         detailValue() {
             return this.modelValue?.detail || '';
+        },
+    },
+    watch: {
+        // 层级改变要重建选项。之前只在 created() 里构建过一次，
+        // 导致改了类型（如 省 → 省-市）下拉仍是旧层级，只能选到省。
+        // 只截断显示，不改动已存的值（比层级深的部分仍留在数据里）。
+        level() {
+            if (this.raw.length) {
+                this.buildOptions();
+            }
         },
     },
     methods: {
@@ -70,11 +89,16 @@ export default defineComponent({
                 return option;
             });
         },
+        buildOptions() {
+            // 注意：走 filter 分支时由调用方自行决定层级，不会按 areaLevel 限深（目前无调用方使用 filter）。
+            this.options = markRaw(this.filter ? this.filter(this.raw) || [] : this.tidyOptions(this.raw, this.areaLevel));
+        },
         loadData(uri) {
             return fetch(uri).then((res) => {
                 return res.json();
             }).then((res) => {
-                this.options = markRaw(this.filter ? this.filter(res) || [] : this.tidyOptions(res, this.areaLevel));
+                this.raw = markRaw(Array.isArray(res) ? res : []);
+                this.buildOptions();
             });
         },
         emitValue(value) {

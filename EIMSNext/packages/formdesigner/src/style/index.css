@@ -409,6 +409,14 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     font-size: 12px !important;
 }
 
+/* 描述项的空隙：渲染器给"多行字段"加了 padding-bottom: 10px，设计器面板项本身还有
+   margin-bottom: 10px，两者叠起来与下一节的空隙偏大。这里只对描述项去掉 padding，
+   保留面板统一的 margin，其它配置项不受影响。
+   （选择器权重与渲染器那条相同，靠 !important 保证生效，作用域仅限描述项） */
+._fc-r-config ._fc-desc-item {
+    padding-bottom: 0 !important;
+}
+
 /* 字号档位对应的像素值：wangEditor 只写 <font size=N>，库内没有任何映射，
    所以这里（以及运行态的 `.fc-field-desc`）自行定义 12 / 14 / 16 / 18 / 20 / 22 */
 ._fc-r-config .w-e-text-container font[size="1"] { font-size: 12px; }
@@ -417,6 +425,18 @@ body[class*="fd-theme-"] ._fd-config-dialog {
 ._fc-r-config .w-e-text-container font[size="4"] { font-size: 18px; }
 ._fc-r-config .w-e-text-container font[size="5"] { font-size: 20px; }
 ._fc-r-config .w-e-text-container font[size="6"] { font-size: 22px; }
+
+/* 编辑器内容行距：wangEditor 只写 <p>，没有附带任何样式，段落会吃到浏览器默认的
+   1em 上下外边距（两个字高），看起来"行距大得可怕"。这里统一抹平并收紧行高。 */
+._fc-r-config .w-e-text-container p,
+._fc-r-config .w-e-text-container .w-e-text > div {
+    margin: 0;
+    line-height: 1.4;
+}
+
+._fc-r-config .w-e-text-container {
+    line-height: 1.4;
+}
 
 ._fc-r-name-input .el-input-group__append {
     width: 25px;

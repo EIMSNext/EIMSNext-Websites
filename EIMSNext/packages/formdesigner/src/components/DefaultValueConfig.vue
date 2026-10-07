@@ -36,9 +36,9 @@
         <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
       </el-select>
       <template v-if="activeRule.type == 'address'">
-        <el-cascader v-model="addressAreaValue" :options="addressOptions" :props="{ emitPath: true, showPrefix: false }" filterable
+        <el-cascader v-model="addressAreaValue" :options="addressCascaderOptions" :props="{ emitPath: true, showPrefix: false }" filterable
           clearable style="width: 100%"></el-cascader>
-        <el-input type="textarea" :rows="2" v-model="addressDetailValue" style="width: 100%; margin-top: 8px"></el-input>
+        <el-input v-if="addressLevel >= 4" type="textarea" :rows="2" v-model="addressDetailValue" style="width: 100%; margin-top: 8px"></el-input>
       </template>
     </el-badge>
     <el-badge v-if="valueMode == 'datalink'" type="warning">
@@ -53,7 +53,7 @@
 
 <script>
 import { defineComponent } from "vue";
-import { loadAreaOptions } from "@eimsnext/components";
+import { limitAreaDepth, loadAreaOptions } from "@eimsnext/components";
 
 export default defineComponent({
   name: "DefaultValueConfig",
@@ -104,7 +104,10 @@ export default defineComponent({
     addressAreaValue: {
       get() {
         const value = this.customValue || {};
-        return [value.province, value.city, value.district].filter((item) => !!item);
+        // 只回显当前层级内的部分
+        return [value.province, value.city, value.district]
+          .slice(0, Math.min(this.addressLevel, 3))
+          .filter((item) => !!item);
       },
       set(path) {
         const segments = Array.isArray(path) ? path.filter((item) => !!item) : [];
@@ -129,6 +132,16 @@ export default defineComponent({
           detail: detail || "",
         };
       },
+    },
+    // 地址类型层级：1=省 2=省-市 3=省-市-区 4=省-市-区-详细地址
+    addressLevel() {
+      const level = Number(this.activeRule?.props?.level);
+      return Math.min(Math.max(Number.isFinite(level) && level > 0 ? level : 4, 1), 4);
+    },
+    // 默认值选择器只展示到类型要求的层级（级联最多 3 级，详细地址单独一栏）。
+    // 限深与筛选条件、运行时控件共用 @eimsnext/components 的实现，避免两处口径漂移。
+    addressCascaderOptions() {
+      return limitAreaDepth(this.addressOptions, this.addressLevel);
     },
   },
   watch: {

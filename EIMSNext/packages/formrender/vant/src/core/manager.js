@@ -191,11 +191,16 @@ export default {
     const uni = `${this.key}${ctx.key}`;
     const col = rule.col;
     const isTitle = this.isTitle(rule) && wrap.title !== false;
-    // 字段描述只在标题显示时出现：标题隐藏、无标题、或不包表单项（raw 布局）时都不渲染。
+    // 不包表单项（raw 布局）：分割线、HTML 这类内容型规则走这里
+    const isRawLayout = isFalse(wrap.show);
+    // 内容型规则（分割线等）没有表单标题，标题即元素自身内容，描述照常显示（放在元素下方）。
+    // 用 ignore（不参与数据收集）作为判据，避免依赖 field 是否被自动生成。
+    const isContentRule = isRawLayout && rule.ignore === true;
+    // 字段描述只在标题显示时出现：标题隐藏、无标题时都不渲染。
     // 渲染前先做白名单净化；再判空 —— 富文本编辑器清空后会产出 <p><br></p> 这类占位
     // HTML，不兜掉会白白多出一行空白。
     const descHtml =
-      isTitle && !isFalse(wrap.show) ? sanitizeRichText(rule.desc) : "";
+      isTitle || isContentRule ? sanitizeRichText(rule.desc) : "";
     const hasDesc = hasRichTextContent(descHtml);
     const { col: _col } = this.rule.props;
     delete wrap.title;
@@ -206,15 +211,26 @@ export default {
         class: "field-component",
         key: `${uni}fc`,
       },
-      // 描述放在控件之前（标题下方、控件上方）。挂在 field-component 内部，
-      // 避免和 van-field__value 的 flex 行布局相互影响。
-      { default: () => (hasDesc ? [this.makeDesc(descHtml, uni), children] : children) }
+      // 表单字段：描述在标题下方、控件上方；内容型规则（分割线等）：描述在元素下方。
+      // 都挂在 field-component 内部，避免和 van-field__value 的 flex 行布局相互影响。
+      {
+        default: () =>
+          hasDesc
+            ? isContentRule
+              ? [children, this.makeDesc(descHtml, uni)]
+              : [this.makeDesc(descHtml, uni), children]
+            : children,
+      }
     );
     const item = isFalse(wrap.show)
       ? this.$r(
           {
             type: "div",
-            class: this.$render.mergeClass(rule.className, "field-layout-raw"),
+            // 内容型规则带描述时打标记类：CSS 用它收窄分割线自身的下边距
+            class: this.$render.mergeClass(
+              rule.className,
+              `field-layout-raw${isContentRule && hasDesc ? " field-has-desc" : ""}`
+            ),
             key: `${uni}raw`,
           },
           { default: () => component }

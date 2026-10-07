@@ -32,7 +32,7 @@
           v-else-if="condition.field!.type === FieldType.Address"
           v-model="addressValues[condition.field!.field]"
           class="w-full"
-          :options="areaOptions"
+          :options="getAreaOptions(condition.field!)"
           :props="{ checkStrictly: true, emitPath: true, checkOnClickNode: true, showPrefix: false }"
           clearable
           filterable
@@ -55,7 +55,7 @@ import { FieldType } from "@eimsnext/models";
 import { ConditionOperator, ConditionValueType, IConditionList } from "../ConditionList/type";
 import { IFormFieldDef } from "../FieldSelect/type";
 import { isDynamicSelectSource, loadDynamicSelectOptions, type DynamicSelectOption, type DynamicSelectSource } from "@eimsnext/utils";
-import { loadAreaOptions, type IAreaOption } from "@/common/areaData";
+import { loadAreaOptions, limitAreaDepth, normalizeAreaLevel, type IAreaOption } from "@/common/areaData";
 
 defineOptions({ name: "PublicConditionList" });
 const props = defineProps<{
@@ -66,8 +66,17 @@ const props = defineProps<{
 const emit = defineEmits(["update:modelValue", "change", "validity-change"]);
 const scalarValues = reactive<Record<string, string | number | undefined>>({});
 const addressValues = reactive<Record<string, string[]>>({});
-const areaOptions = ref<IAreaOption[]>([]);
-loadAreaOptions().then((options) => { areaOptions.value = options; }).catch(() => {});
+const rawAreaOptions = ref<IAreaOption[]>([]);
+loadAreaOptions().then((options) => { rawAreaOptions.value = options; }).catch(() => {});
+// 地址条件的级联层级跟随各自字段类型（省=1 / 省-市=2 / 省-市-区=3），只截断显示
+const trimmedAreaOptions = computed<Record<number, IAreaOption[]>>(() => ({
+  1: limitAreaDepth(rawAreaOptions.value, 1),
+  2: limitAreaDepth(rawAreaOptions.value, 2),
+}));
+const getAreaOptions = (field: IFormFieldDef) => {
+  const level = normalizeAreaLevel(field?.level);
+  return level >= 3 ? rawAreaOptions.value : trimmedAreaOptions.value[level] || [];
+};
 const numberValues = reactive<Record<string, [number | null, number | null]>>({});
 const timestampValues = reactive<Record<string, [string | null, string | null]>>({});
 const dynamicOptions = reactive<Record<string, DynamicSelectOption[]>>({});
@@ -133,12 +142,14 @@ const normalize = () => {
       const values = Array.isArray(item.value.value) ? item.value.value : [];
       timestampValues[item.field.field] = [values[0] == null ? null : String(values[0]), values[1] == null ? null : String(values[1])];
     } else if (item.field.type === FieldType.Address) {
-      addressValues[item.field.field] =
+      const segments =
         typeof item.value.value === "string" && item.value.value
           ? item.value.value.split("/").filter(Boolean)
           : Array.isArray(item.value.value)
             ? item.value.value.filter(Boolean)
             : [];
+      // 已存值可能比当前类型更深，按层级截断，与选项层级保持一致
+      addressValues[item.field.field] = segments.slice(0, normalizeAreaLevel(item.field.level));
       item.value.value = addressValues[item.field.field].join("/");
     } else {
       scalarValues[item.field.field] = item.value.value;

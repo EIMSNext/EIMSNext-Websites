@@ -43,6 +43,57 @@ export interface FieldChangeLog {
   deletedBy?: Operator;
   deletedTime: number;
 }
+
+/**
+ * 从表单定义的 Layout（原始规则 JSON）里提取「字段名 → 地址层级 level」。
+ *
+ * 后端 FormLayoutParser 只把白名单 props（required / memberSource / format / options…）
+ * 映射进 FormContent.Items，地址的 level 会被丢掉；这里直接读 Layout 原文兜底，
+ * 让筛选/查询条件也能按字段类型截断级联层级。（只读，不修改任何结构）
+ */
+export function buildFieldLevelMap(
+  content?: Pick<FormContent, "layout">,
+): Record<string, number> {
+  const map: Record<string, number> = {};
+  if (!content?.layout) {
+    return map;
+  }
+  let parsed: any;
+  try {
+    parsed = JSON.parse(content.layout);
+  } catch {
+    return map;
+  }
+
+  const walk = (rules: any, parentField?: string) => {
+    (Array.isArray(rules) ? rules : []).forEach((rule) => {
+      if (!rule || typeof rule !== "object") return;
+      const level = Number(rule.props?.level);
+      const field = typeof rule.field === "string" ? rule.field : "";
+      if (field && Number.isFinite(level) && level > 0) {
+        map[field] = level;
+        // 子表单列在字段定义里的键是「父字段>子字段」
+        if (parentField) {
+          map[`${parentField}>${field}`] = level;
+        }
+      }
+      if (Array.isArray(rule.children)) {
+        walk(rule.children, field || parentField);
+      }
+    });
+  };
+
+  // Layout 存在两种历史形态：规则数组，或 { root: { children: [...] } }
+  if (Array.isArray(parsed)) {
+    walk(parsed);
+  } else if (parsed && typeof parsed === "object") {
+    if (Array.isArray(parsed.children)) walk(parsed.children);
+    if (parsed.root && Array.isArray(parsed.root.children)) {
+      walk(parsed.root.children);
+    }
+  }
+  return map;
+}
 export class FieldDef {
   field: string = "";
   title: string = "";
@@ -59,6 +110,8 @@ export interface FieldProp {
   options?: ValueOption[];
   segments?: SerialNoSegment[];
   memberSource?: MemberSource;
+  // 地址字段的层级：1=省 2=省-市 3=省-市-区 4=省-市-区-详细地址
+  level?: number;
 }
 
 export interface MemberSource {

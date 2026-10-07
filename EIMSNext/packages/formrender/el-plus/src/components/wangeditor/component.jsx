@@ -72,6 +72,8 @@ export default defineComponent({
         {...attrs}
         onInput={this.result}
         id={`editor${this.uni}`}
+        // 带上 fc-editor 类，便于用 CSS 收紧编辑器内容的行距（不再只依赖编译选项）
+        class={`fc-editor${attrs.class ? ` ${attrs.class}` : ""}`}
         style="line-height: normal;"
       />
     );

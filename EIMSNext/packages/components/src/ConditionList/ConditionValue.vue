@@ -126,7 +126,7 @@ import {
 import { IListItem } from "@/list/type";
 import { computed, ref, watch } from "vue";
 import { isDynamicSelectSource, loadDynamicSelectOptions, type DynamicSelectOption, type DynamicSelectSource } from "@eimsnext/utils";
-import { loadAreaOptions, type IAreaOption } from "@/common/areaData";
+import { loadAreaOptions, limitAreaDepth, normalizeAreaLevel, type IAreaOption } from "@/common/areaData";
 import memberSelectDialog from "@/memberSelect/memberSelectDialog.vue";
 import { useLocale } from "element-plus";
 import { MemberTabs } from "@/memberSelect/type";
@@ -194,20 +194,30 @@ const memberSourceType = computed(() =>
 );
 
 // address 省市区筛选：值统一为 "省/市/区" 前缀字符串，任意层级可选（checkStrictly）
-const areaOptions = ref<IAreaOption[]>([]);
+const rawAreaOptions = ref<IAreaOption[]>([]);
 const areaValue = ref<string[]>([]);
 loadAreaOptions().then((options) => {
-  areaOptions.value = options;
-});
+  rawAreaOptions.value = options;
+}).catch(() => {});
+// 级联层级跟随字段类型（省=1 / 省-市=2 / 省-市-区=3），只截断显示
+const areaOptions = computed(() => limitAreaDepth(rawAreaOptions.value, props.fieldDef?.level));
 const syncAreaValue = () => {
   if (dataType.value != ConditionFieldType.Address) return;
   const val = props.modelValue.value;
-  areaValue.value =
+  const segments =
     typeof val == "string" && val
       ? val.split("/").filter(Boolean)
       : Array.isArray(val)
         ? val.filter(Boolean)
         : [];
+  // 已存值可能比当前类型更深（改过类型的历史条件），按层级截断显示，与选项层级保持一致
+  const truncated = segments.slice(0, normalizeAreaLevel(props.fieldDef?.level));
+  areaValue.value = truncated;
+  // 与 PublicConditionList 口径一致：值也一并规范化到当前层级（只截断，不额外上报 change）。
+  // 长度相同时不写回，保证幂等、不会和 modelValue 的监听互相触发。
+  if (truncated.length < segments.length) {
+    props.modelValue.value = truncated.join("/");
+  }
 };
 const onAreaChange = (path: string[] | string | null) => {
   areaValue.value = Array.isArray(path) ? path.filter(Boolean) : [];

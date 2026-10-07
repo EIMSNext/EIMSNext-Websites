@@ -116,10 +116,53 @@
 .form-create .fc-field-desc font[size="5"] { font-size: 20px; }
 .form-create .fc-field-desc font[size="6"] { font-size: 22px; }
 
-/* 描述多占一行，单行字段的固定高度要放开（其余形态本来height就是 auto） */
-.form-create .field-layout-content.field-has-desc.field-layout-single {
+/* 带描述时统一放开固定高度：任何布局形态都不允许把描述或控件挤出可见区域。
+   注意保留原来固定高度里的底部余量（否则会变成"描述下面没空间"的拥挤感）。 */
+.form-create .field-layout-content.field-has-desc {
   height: auto;
+  overflow: visible;
+  padding-bottom: var(--fc-field-block-gap);
+}
+
+.form-create .field-layout-content.field-has-desc > .el-form-item__content {
+  overflow: visible;
+}
+
+.form-create .field-layout-content.field-has-desc.field-layout-single {
   min-height: var(--fc-field-single-height);
+}
+
+/* 无标题的单行字段本来只有一行控件高，带描述时按内容高度撑开（不再锁到整行高度） */
+.form-create .field-layout-content.field-has-desc.field-layout-no-label,
+.form-create .field-layout-content.field-has-desc.field-layout-no-label.field-layout-single {
+  height: auto;
+  min-height: var(--fc-field-control-line-height);
+}
+
+/* 分割线后紧跟描述时（渲染器打的 field-has-desc 标记类）：
+   只收掉分割线自身下外边距、并把描述上提一档贴住线；盒子高度保持原样 ——
+   一旦缩高会把"标题与线之间"的间距一起压掉（那就改反了）。 */
+.form-create .field-layout-raw.field-has-desc .fc-divider-enhanced {
+  margin-bottom: 0;
+}
+
+.form-create .field-layout-raw.field-has-desc > .fc-field-desc {
+  margin-top: calc(-1 * var(--fc-divider-desc-overlap, 5px));
+}
+
+/* 富文本编辑器（FcEditor / wangEditor）内容区行距：默认会吃到全局段落样式与偏大的行高，
+   在表单与配置面板里显得行距过大，这里统一收紧并抹平段落外边距。
+   选择器不依赖编辑器的内部容器类名（.w-e-text-container / [data-slate-editor] 都覆盖），
+   直接作用在 fc-editor 内的段落上，换版本也不会失效。 */
+.fc-editor p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.fc-editor .w-e-text-container,
+.fc-editor .w-e-text-container .w-e-text,
+.fc-editor .w-e-text-container [data-slate-editor] {
+  line-height: 1.4;
 }
 
 .fc-radio-group,

@@ -14,6 +14,7 @@
 
 <script setup lang="ts">
 import { useFormStore } from "@eimsnext/store";
+import { buildFieldLevelMap } from "@eimsnext/models";
 import { IFormFieldDef, buildFieldListItems } from "./type";
 import { computed, ref, watch } from "vue";
 import { IListItem } from "@/list/type";
@@ -89,12 +90,20 @@ watch(
     if (newFormId) {
       formStore.get(newFormId).then((form) => {
         if (form?.content?.items) {
-          fieldList.value = appendMissingSelectedField(
-            buildFieldListItems(newFormId, form?.content?.items, form.usingWorkflow, undefined, {
-              ...(props.fieldLimit || {}),
-              t,
-            }),
-          );
+          // 后端 Items 里的 props 是白名单映射，地址字段的 level 不在其中（会被丢掉）。
+          // 这里用表单定义的 Layout 原文兜底，让地址筛选条件能按类型截断级联层级。
+          const levelMap = buildFieldLevelMap(form.content);
+          const items = buildFieldListItems(newFormId, form?.content?.items, form.usingWorkflow, undefined, {
+            ...(props.fieldLimit || {}),
+            t,
+          });
+          items.forEach((item) => {
+            const field = item.data as IFormFieldDef | undefined;
+            if (field && field.level == null) {
+              field.level = levelMap[field.field];
+            }
+          });
+          fieldList.value = appendMissingSelectedField(items);
         }
       });
     }

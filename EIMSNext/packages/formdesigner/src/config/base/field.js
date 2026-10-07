@@ -32,6 +32,9 @@ export default function field({ t }) {
       field: "desc",
       value: "",
       title: t("form.desc"),
+      // 仅用于样式定位（去掉与下一节叠加的双份间距），不参与数据。
+      // 用 className 才能加到表单项上（渲染器是用 className 拼表单项 class 的）
+      className: "_fc-desc-item",
       props: {
         config: {
           // 只保留文字排版相关按钮：链接与图片按需求去掉

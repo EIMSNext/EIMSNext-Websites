@@ -82,6 +82,8 @@ export const getCurrentFormFields = (designer, currentField, contextRule) => {
       type: fieldType,
       format: rule.props?.format,
       options: rule.options || rule.props?.options,
+      // 地址字段层级：查询条件要按类型截断级联层级
+      level: rule.props?.level,
     });
   });
   return fields;

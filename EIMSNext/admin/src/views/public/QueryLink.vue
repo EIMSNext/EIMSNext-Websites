@@ -120,6 +120,7 @@ import {
 } from "@eimsnext/components";
 import { loadDynamicSelectOptions, type DynamicSelectOption, type DynamicSelectSource } from "@eimsnext/utils";
 import {
+  buildFieldLevelMap,
   FieldDef,
   FieldType,
   FormContent,
@@ -171,6 +172,8 @@ const queryLoading = ref(false);
 const detailVisible = ref(false);
 const currentDetailIndex = ref(-1);
 
+// Items 的 props 是后端白名单映射，地址的 level 不在其中，用 Layout 原文兜底
+const fieldLevels = computed(() => buildFieldLevelMap(formDef.value?.content));
 const ordinaryFields = computed(() => flattenFields(formDef.value?.content?.items || []));
 const queryableFields = computed(() => ordinaryFields.value.filter((field) => isPublicQueryField(field.type)));
 const queryFields = computed<IFormFieldDef[]>(() => resolveFields(publicSetting.value?.form?.queryLink?.queryFields || [], queryableFields.value).map((field) => ({
@@ -180,6 +183,7 @@ const queryFields = computed<IFormFieldDef[]>(() => resolveFields(publicSetting.
   type: field.type,
   format: field.props?.format,
   options: field.props?.options,
+  level: field.props?.level ?? fieldLevels.value[field.field],
   source: field.type === FieldType.Select1
     ? (field as FieldDef & { effect?: { source?: DynamicSelectSource } }).effect?.source
     : undefined,

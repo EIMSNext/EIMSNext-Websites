@@ -410,13 +410,20 @@
                           t("form.title")
                         }}</span>
                       </div>
-                      <!-- 当前字段的类型，只读提示，随当前选中的组件变化 -->
+                      <!-- 当前字段的类型，只读提示，随当前选中的组件变化。
+                           名称口径必须与左侧组件列表一致（com.<组件名>.name），
+                           不能取规则的 name —— 那是自动生成的 ref_xxx 字段名。 -->
                       <span v-if="activeRule" class="_fc-field-type-badge">{{
-                        activeRule.title
+                        activeRuleTypeName()
                       }}</span>
                     </div>
+                    <!-- key 必须随选中组件变化：基础面板的 rule 是固定的一份，
+                         form-create 又不会响应 modelValue（表单数据）的后续变化，
+                         不重建的话面板会一直停留在上一个组件的值（描述、标题等都会残留）。
+                         validateForm 用的就是这个办法。 -->
                     <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api" :rule="baseForm.rule"
-                      :option="baseForm.options" :modelValue="baseForm.value" @change="baseChange">
+                      :option="baseForm.options" :key="activeRule && activeRule._fc_id" :modelValue="baseForm.value"
+                      @change="baseChange">
                       <template #title="scope">
                         <template v-if="scope.rule.warning">
                           <Warning :tooltip="scope.rule.warning">
@@ -2181,6 +2188,31 @@ export default defineComponent({
         data.activeTab = "form";
         fcx.active = "";
       },
+      // 「字段名称」行末尾的类型徽标文案：口径与左侧组件列表完全一致
+      // （左侧用 t("com." + 组件名 + ".name") 取名字），不能取规则的 name ——
+      // 那是自动生成的 ref_xxx 字段名，与组件类型无关。
+      activeRuleTypeName() {
+        const rule = data.activeRule;
+        if (!rule) return "";
+        // 设计器把无法解析出拖拽配置的规则标记为 "_"（历史/未知规则），这个值不能当组件名用
+        const dragTag =
+          rule._fc_drag_tag && rule._fc_drag_tag !== "_"
+            ? rule._fc_drag_tag
+            : "";
+        const config =
+          (dragTag && data.dragRuleList[dragTag]) ||
+          data.dragRuleList[rule.type];
+        const configName = (config && config.name) || dragTag || rule.type;
+        const key = "com." + configName + ".name";
+        const text = t(key);
+        // vue-i18n 在缺键时会把 key 原样返回，这里要兜掉
+        return (
+          (text && text !== key ? text : "") ||
+          (config && config.label) ||
+          rule.type ||
+          ""
+        );
+      },
       setOption(opt) {
         const defOptions = deepCopy(methods.getConfig("formOptions", {}));
         const defForm = defOptions.form || {};
@@ -3007,6 +3039,10 @@ export default defineComponent({
             }
           }
           methods.watchActiveRule();
+          // 面板改的是规则对象的属性，form-create 感知不到这种直接赋值，
+          // 画布要等下次整体重建（例如切换组件）才会重绘。这里主动刷新一次，
+          // 让"输入描述"这类改动即时反映到设计区。
+          data.dragForm.api.refresh();
           methods.syncTableFormColumn(column);
           data.activeRule._menu?.watch?.[org]?.({
             field: org,
