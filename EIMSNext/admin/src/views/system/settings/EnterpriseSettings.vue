@@ -1,11 +1,11 @@
 <template>
   <div class="enterprise-settings">
     <h2>{{ $t("admin.systemSettings.enterpriseSettings.culture.title") }}</h2>
-    <SettingRow :label="$t('admin.systemSettings.enterpriseSettings.culture.customLogin')">
+    <!-- <SettingRow :label="$t('admin.systemSettings.enterpriseSettings.culture.customLogin')">
       <el-switch v-model="login" />
       <el-button>{{ $t("common.set") }}</el-button>
       <span>{{ $t("admin.systemSettings.enterpriseSettings.culture.customLoginTip") }}</span>
-    </SettingRow>
+    </SettingRow> -->
     <SettingRow :label="$t('admin.systemSettings.enterpriseSettings.culture.style')">
       <el-switch v-model="styleEnabled" :loading="styleSaving" @change="saveStyleEnabled" />
       <CorpThemeColorPicker
@@ -22,13 +22,13 @@
     </SettingRow>
     <hr />
     <h2>{{ $t("admin.systemSettings.enterpriseSettings.collaboration.title") }}</h2>
-    <SettingRow :label="$t('admin.systemSettings.enterpriseSettings.collaboration.notifyMute')">
+    <!-- <SettingRow :label="$t('admin.systemSettings.enterpriseSettings.collaboration.notifyMute')">
       <el-button>{{ $t("common.set") }}</el-button>
       <span>{{ $t("admin.systemSettings.enterpriseSettings.collaboration.notifyMuteTip") }}<el-link
           type="primary"
           underline="never"
         >{{ $t("admin.systemSettings.enterpriseSettings.learnMore") }}</el-link></span>
-    </SettingRow>
+    </SettingRow> -->
     <SettingRow :label="$t('admin.systemSettings.enterpriseSettings.collaboration.systemTimezone')">
       <span>{{ $t("admin.systemSettings.enterpriseSettings.collaboration.systemTimezoneFollow") }}</span>
       <el-link type="primary" underline="never">{{ $t("admin.profile.edit") }}</el-link>
