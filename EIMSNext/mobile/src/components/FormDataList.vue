@@ -81,7 +81,7 @@ import {
 import MobilePage from "@/components/base/MobilePage.vue";
 import { SortDirection, type IDynamicFilter } from "@eimsnext/services";
 import { FlagEnum } from "@eimsnext/utils";
-import { formDataPermissionGroupServiceMobile, formDataServiceMobile, formServiceMobile, formListViewServiceMobile } from "@/services/mobileService";
+import { createNonDraftFilter, formDataPermissionGroupServiceMobile, formDataServiceMobile, formServiceMobile, formListViewServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
 const route = useRoute();
@@ -201,14 +201,15 @@ const parseSettings = (value?: string): FormListViewSettings => {
   }
 };
 
+// 与 PC 列表一致：始终排除草稿数据
 const buildFilter = () => {
-  const base: IDynamicFilter = { field: "formId", type: "none", op: "eq", value: formId };
-  if (!currentView.value?.defaultFilter) return base;
+  const nonDraft = createNonDraftFilter(formId);
+  if (!currentView.value?.defaultFilter) return nonDraft;
   try {
     const viewFilter = JSON.parse(currentView.value.defaultFilter);
-    return { rel: "and", items: [base, toDynamicFilter(viewFilter)] };
+    return { rel: "and", items: [...(nonDraft.items || []), toDynamicFilter(viewFilter)] };
   } catch {
-    return base;
+    return nonDraft;
   }
 };
 

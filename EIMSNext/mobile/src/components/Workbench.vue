@@ -1,5 +1,10 @@
 <template>
   <MobilePage :title="t('mobile.workbench.title')" @back="goBack">
+    <template #right>
+      <van-button class="logout-button" size="mini" plain type="danger" @click="showLogoutConfirm = true">
+        {{ t("navbar.logout") }}
+      </van-button>
+    </template>
     <div class="workbench-content">
       <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
         <MobileCard class="task-card" @click="goToMyTasks">
@@ -48,6 +53,14 @@
       </van-pull-refresh>
     </div>
   </MobilePage>
+
+  <van-dialog
+    v-model:show="showLogoutConfirm"
+    :title="t('shell.logoutTitle')"
+    :message="t('shell.logoutConfirm')"
+    show-cancel-button
+    @confirm="handleLogout"
+  />
 </template>
 
 <script setup lang="ts">
@@ -55,6 +68,7 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { AppDef } from "@eimsnext/models";
+import { useUserStoreHook } from "@eimsnext/store";
 import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
 import { appServiceMobile, taskServiceMobile } from "@/services/mobileService";
@@ -64,6 +78,7 @@ const { t } = useI18n();
 const refreshing = ref(false);
 const taskCount = ref(0);
 const apps = ref<AppDef[]>([]);
+const showLogoutConfirm = ref(false);
 
 const goBack = () => router.back();
 const goToMyTasks = () => router.push("/wftask");
@@ -82,6 +97,17 @@ const loadTaskCount = async () => {
   taskCount.value = await taskServiceMobile.getCount();
 };
 
+// 与 PC 端一致：走 userStore.logout() -> identityService.logout()
+const handleLogout = async () => {
+  try {
+    await useUserStoreHook().logout();
+  } catch {
+    // userStore.logout 内部会清理本地 token，服务端拒绝（如 token 已过期）时忽略
+  } finally {
+    await router.replace("/login");
+  }
+};
+
 const onRefresh = async () => {
   await Promise.all([loadApps(), loadTaskCount()]);
   refreshing.value = false;
@@ -93,6 +119,10 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.logout-button {
+  padding: 0 8px;
+}
+
 .workbench-content {
   padding: 12px;
 }

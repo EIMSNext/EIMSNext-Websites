@@ -14,19 +14,19 @@
       <div v-else-if="list.length === 0" class="workflow-empty">{{ t('common.noData') }}</div>
       <div v-else class="workflow-list">
         <MobileCard
-          v-for="task in list"
-          :key="task.id"
+          v-for="item in list"
+          :key="item.id"
           class="workflow-card"
-          @click="currentTab === 'task' ? emit('open-approval', task) : emit('open-detail', task)"
+          @click="currentTab === 'task' ? emit('open-approval', item) : emit('open-detail', item)"
         >
           <div class="workflow-card-header">
-            <div class="workflow-form-name">{{ task.formName }}</div>
-            <div class="workflow-time">{{ task.approveNodeStartTime || task.createTime || task.updateTime }}</div>
+            <div class="workflow-form-name">{{ item.formName }}</div>
+            <div class="workflow-time">{{ item.time }}</div>
           </div>
-          <div class="workflow-node">{{ task.approveNodeName || t('mobile.workflow.record') }}</div>
-          <div class="workflow-starter">{{ t('mobile.workflow.starter') }}: {{ task.starter?.label || '-' }}</div>
+          <div class="workflow-node">{{ item.nodeName || t('mobile.workflow.record') }}</div>
+          <div class="workflow-starter">{{ t('mobile.workflow.starter') }}: {{ item.starterLabel || '-' }}</div>
           <div class="workflow-brief">
-            <div v-for="item in task.dataBrief?.slice(0, 2)" :key="item.field">{{ item.title }}: {{ item.value }}</div>
+            <div v-for="brief in item.dataBrief.slice(0, 2)" :key="brief.field">{{ brief.title }}: {{ brief.value }}</div>
           </div>
         </MobileCard>
       </div>
@@ -37,9 +37,8 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import type { WfTask } from "@eimsnext/models";
 import MobileCard from "@/components/base/MobileCard.vue";
-import { taskServiceMobile, workflowServiceMobile } from "@/services/mobileService";
+import { type WorkflowTaskItem, workflowServiceMobile } from "@/services/mobileService";
 
 const props = defineProps<{
   activeTab: string;
@@ -48,15 +47,15 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   "change-tab": [tab: string];
-  "open-approval": [task: WfTask];
-  "open-detail": [task: WfTask];
+  "open-approval": [item: WorkflowTaskItem];
+  "open-detail": [item: WorkflowTaskItem];
 }>();
 
 const { t } = useI18n();
 const currentTab = ref(props.activeTab);
 const refreshing = ref(false);
 const loading = ref(false);
-const list = ref<WfTask[]>([]);
+const list = ref<WorkflowTaskItem[]>([]);
 const loadError = ref(false);
 
 const load = async () => {
@@ -64,7 +63,7 @@ const load = async () => {
   loadError.value = false;
   try {
     if (currentTab.value === "task") {
-      list.value = await taskServiceMobile.query(props.appId || undefined, 0, 20);
+      list.value = await workflowServiceMobile.getTasks(props.appId || undefined, 0, 20);
     } else if (currentTab.value === "started") {
       list.value = await workflowServiceMobile.getMyStarted(props.appId || undefined, 0, 20);
     } else if (currentTab.value === "approved") {

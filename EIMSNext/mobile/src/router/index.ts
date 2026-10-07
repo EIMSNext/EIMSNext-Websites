@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { appSetting } from '@eimsnext/utils'
+import { useUserStoreHook } from '@eimsnext/store'
 import { applyCorpThemeIfNeeded } from '@/theme'
 
 const routes: RouteRecordRaw[] = [
@@ -71,15 +72,40 @@ const router = createRouter({
 
 // 每个登录会话只读取一次企业主题色
 let corpThemeApplied = false
+// 每个登录会话只校验一次登录态（token 过期时服务端会返回 401）
+let sessionChecked = false
+
+const toLogin = (redirect: string) => ({
+  path: '/login',
+  query: { redirect },
+  replace: true
+})
 
 router.beforeEach(async (to) => {
   const token = localStorage.getItem(appSetting.tokenKey || 'jat')
+
+  if (to.path === '/login') {
+    corpThemeApplied = false
+    sessionChecked = false
+  }
+
   if (to.meta.requireAuth && !token) {
     corpThemeApplied = false
-    return {
-      path: '/login',
-      query: { redirect: to.fullPath },
-      replace: true
+    sessionChecked = false
+    return toLogin(to.fullPath)
+  }
+
+  // token 可能已过期，进入受保护页面前用一次 getCurrentUser 校验有效性，
+  // 与 PC 端登录后 userStore.initialize() 的机制保持一致
+  if (token && to.meta.requireAuth && !sessionChecked) {
+    try {
+      await useUserStoreHook().initialize(true)
+      sessionChecked = true
+    } catch {
+      localStorage.removeItem(appSetting.tokenKey || 'jat')
+      corpThemeApplied = false
+      sessionChecked = false
+      return toLogin(to.fullPath)
     }
   }
 

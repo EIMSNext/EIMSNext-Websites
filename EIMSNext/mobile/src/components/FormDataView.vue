@@ -23,7 +23,7 @@
       <div v-if="isAdd || editing" class="detail-footer-actions">
         <van-button block :loading="saving" :disabled="saving" @click="() => handleSave()">{{ t("common.save") }}</van-button>
         <van-button
-          v-if="isAdd && formDef?.usingWorkflow"
+          v-if="formDef?.usingWorkflow"
           block
           type="primary"
           :loading="saving"
@@ -93,7 +93,7 @@ const handleSave = async (action = DataAction.Save) => runSave(async () => {
     if (isAdd.value && formDef.value) {
       await formDataServiceMobile.post(formDef.value, formData.value, action);
     } else if (currentData.value) {
-      await formDataServiceMobile.put(currentData.value, formData.value);
+      await formDataServiceMobile.put(currentData.value, formData.value, action);
     }
     showToast(t("common.saveSuccess"));
     router.back();
