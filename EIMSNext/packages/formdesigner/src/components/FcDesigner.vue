@@ -382,10 +382,11 @@
                                             </template>
             </el-input>
             </template> -->
-                <!-- </template>
-                                <template v-if="activeRuleChildren">
-                                    <SubList></SubList>
-                                </template> -->
+                <!-- 子项列表（标签页的标签、折叠面板的面板）：只有声明了 children 的容器才有，
+                     子表单走 subForm + columns，不受影响。 -->
+                <template v-if="activeRuleChildren">
+                  <SubList></SubList>
+                </template>
                 <div v-if="isgod && activeRule" class="_fc-r-name-config" style="margin-bottom: 6px">
                   <div style="margin-bottom: 6px">
                     <span class="_fc-field-title"> 字段标识 </span>
