@@ -93,7 +93,7 @@ export default defineComponent({
                 newRule = replaceRule.children[0];
             }
             if (newRule.field && activeRule.field) {
-                ['title', 'info', 'field', 'validate', 'computed', 'control', '$required', 'style'].forEach(k => {
+                ['title', 'info', 'desc', 'field', 'validate', 'computed', 'control', '$required', 'style'].forEach(k => {
                     newRule[k] = activeRule[k];
                 });
             } else if (activeRule?.computed?.hidden) {

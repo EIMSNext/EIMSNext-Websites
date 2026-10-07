@@ -76,7 +76,9 @@ export default defineComponent({
       />
     );
   },
-  beforeDestroy() {
+  // Vue 3 不再调用 beforeDestroy（那是 Vue 2 的钩子），编辑器实例会泄漏。
+  // 这个组件现在被用在基础配置面板里，字段切换会反复创建，必须用 beforeUnmount 销毁。
+  beforeUnmount() {
     this.editor && this.editor.destroy();
     this.editor = null;
   },

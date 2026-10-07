@@ -1,60 +1,25 @@
 <template>
-  <el-container
-    class="_fc-designer"
-    :style="height ? `height:${dragHeight};flex:initial;` : ''"
-    @dragenter="handleDragenter"
-    @dragleave="handleDragleave"
-    @drop="handleDrop"
-  >
+  <el-container class="_fc-designer" :style="height ? `height:${dragHeight};flex:initial;` : ''"
+    @dragenter="handleDragenter" @dragleave="handleDragleave" @drop="handleDrop">
     <el-config-provider :locale="elmLocale">
       <el-main>
         <el-container style="height: 100%" :key="locale && locale.name">
-          <el-aside
-            class="_fc-l-menu"
-            width="40px"
-            v-if="false !== getConfig('showMenuBar')"
-          >
-            <el-tooltip
-              effect="dark"
-              :content="t('designer.formList')"
-              placement="right"
-              :hide-after="0"
-              v-if="formListRef && formListRef.length"
-            >
-              <div
-                class="_fc-l-menu-item _fc-l-menu-form"
-                :class="{ active: activeModule === 'form' }"
-                @click="activeModule = 'form'"
-              >
+          <el-aside class="_fc-l-menu" width="40px" v-if="false !== getConfig('showMenuBar')">
+            <el-tooltip effect="dark" :content="t('designer.formList')" placement="right" :hide-after="0"
+              v-if="formListRef && formListRef.length">
+              <div class="_fc-l-menu-item _fc-l-menu-form" :class="{ active: activeModule === 'form' }"
+                @click="activeModule = 'form'">
                 <i class="fc-icon icon-menu2"></i>
               </div>
             </el-tooltip>
-            <el-tooltip
-              effect="dark"
-              :content="t('designer.comList')"
-              placement="right"
-              :hide-after="0"
-            >
-              <div
-                class="_fc-l-menu-item"
-                :class="{ active: activeModule === 'base' }"
-                @click="activeModule = 'base'"
-              >
+            <el-tooltip effect="dark" :content="t('designer.comList')" placement="right" :hide-after="0">
+              <div class="_fc-l-menu-item" :class="{ active: activeModule === 'base' }" @click="activeModule = 'base'">
                 <i class="fc-icon icon-menu"></i>
               </div>
             </el-tooltip>
-            <el-tooltip
-              effect="dark"
-              :content="t('designer.pageManage')"
-              placement="right"
-              :hide-after="0"
-              v-if="getConfig('showPageManage', true)"
-            >
-              <div
-                class="_fc-l-menu-item"
-                :class="{ active: activeModule === 'page' }"
-                @click="activeModule = 'page'"
-              >
+            <el-tooltip effect="dark" :content="t('designer.pageManage')" placement="right" :hide-after="0"
+              v-if="getConfig('showPageManage', true)">
+              <div class="_fc-l-menu-item" :class="{ active: activeModule === 'page' }" @click="activeModule = 'page'">
                 <el-badge :value="pageCount" :hidden="pageCount < 1">
                   <i class="fc-icon icon-page"></i>
                 </el-badge>
@@ -66,18 +31,10 @@
                                 <i class="fc-icon icon-data"></i>
                             </div>
                         </el-tooltip> -->
-            <el-tooltip
-              v-if="getConfig('showLanguage', true)"
-              effect="dark"
-              :content="t('language.name')"
-              placement="right"
-              :hide-after="0"
-            >
-              <div
-                class="_fc-l-menu-item"
-                :class="{ active: activeModule === 'language' }"
-                @click="activeModule = 'language'"
-              >
+            <el-tooltip v-if="getConfig('showLanguage', true)" effect="dark" :content="t('language.name')"
+              placement="right" :hide-after="0">
+              <div class="_fc-l-menu-item" :class="{ active: activeModule === 'language' }"
+                @click="activeModule = 'language'">
                 <i class="fc-icon icon-language"></i>
               </div>
             </el-tooltip>
@@ -96,10 +53,7 @@
                             </div>
                         </el-tooltip> -->
           </el-aside>
-          <el-aside
-            class="_fc-l"
-            :width="activeModule === 'language' ? '450px' : '260px'"
-          >
+          <el-aside class="_fc-l" :width="activeModule === 'language' ? '450px' : '260px'">
             <AiChat v-if="activeModule === 'ai'"></AiChat>
             <LanguageConfig v-if="activeModule === 'language'"></LanguageConfig>
             <!-- <JsonPreview v-if="activeModule === 'json'"></JsonPreview> -->
@@ -115,42 +69,27 @@
                   <div class="_fc-l-label">
                     {{ t("form.globalEvent") }}
                   </div>
-                  <GlobalEventConfig
-                    ref="globalEvent"
-                    v-model="formOptions.globalEvent"
-                  >
+                  <GlobalEventConfig ref="globalEvent" v-model="formOptions.globalEvent">
                   </GlobalEventConfig>
                   <div class="_fc-l-label">
                     {{ t("form.globalFetch") }}
                   </div>
-                  <GlobalFetchConfig
-                    ref="globalFetch"
-                    v-model="formOptions.globalData"
-                  >
+                  <GlobalFetchConfig ref="globalFetch" v-model="formOptions.globalData">
                   </GlobalFetchConfig>
                   <div class="_fc-l-label">
                     {{ t("form.globalClass") }}
                   </div>
-                  <GlobalClassConfig
-                    ref="globalClass"
-                    v-model="formOptions.globalClass"
-                  >
+                  <GlobalClassConfig ref="globalClass" v-model="formOptions.globalClass">
                   </GlobalClassConfig>
                   <div class="_fc-l-label">
                     {{ t("computed.variable.title") }}
                   </div>
-                  <GlobalVariableConfig
-                    ref="globalVariable"
-                    v-model="formOptions.globalVariable"
-                  >
+                  <GlobalVariableConfig ref="globalVariable" v-model="formOptions.globalVariable">
                   </GlobalVariableConfig>
                 </div>
               </el-main>
             </el-container>
-            <el-container
-              v-if="formListRef && formListRef.length"
-              v-show="activeModule === 'form'"
-            >
+            <el-container v-if="formListRef && formListRef.length" v-show="activeModule === 'form'">
               <el-main>
                 <div class="_fc-l-label">
                   {{ t("designer.formList") }}
@@ -171,78 +110,42 @@
                 <div class="_fc-l-info">
                   {{ t("warning.pageManage") }}
                 </div>
-                <PageInput
-                  @delete="deletePage"
-                  @copy="copyPage"
-                  @add="addPage"
-                  @change="changePage"
-                >
+                <PageInput @delete="deletePage" @copy="copyPage" @add="addPage" @change="changePage">
                 </PageInput>
               </el-main>
             </el-container>
             <el-container v-if="activeModule === 'base'">
               <el-header height="40px" class="_fc-l-tabs">
-                <div
-                  class="_fc-l-tab"
-                  :class="{ active: activeMenuTab === 'menu' }"
-                  @click="activeMenuTab = 'menu'"
-                >
+                <div class="_fc-l-tab" :class="{ active: activeMenuTab === 'menu' }" @click="activeMenuTab = 'menu'">
                   {{ t("menu.component") }}
                 </div>
-                <div
-                  class="_fc-l-tab"
-                  v-if="field && field.length > 0"
-                  :class="{ active: activeMenuTab === 'field' }"
-                  @click="activeMenuTab = 'field'"
-                >
+                <div class="_fc-l-tab" v-if="field && field.length > 0" :class="{ active: activeMenuTab === 'field' }"
+                  @click="activeMenuTab = 'field'">
                   {{ t("props.field") }}
                 </div>
-                <div
-                  class="_fc-l-tab"
-                  :class="{ active: activeMenuTab === 'tree' }"
-                  @click="activeMenuTab = 'tree'"
-                >
+                <div class="_fc-l-tab" :class="{ active: activeMenuTab === 'tree' }" @click="activeMenuTab = 'tree'">
                   {{ t("menu.tree") }}
                 </div>
               </el-header>
               <el-main v-show="activeMenuTab === 'menu'">
                 <template v-for="(item, index) in menuList" :key="index">
-                  <div
-                    class="_fc-l-group"
-                    :class="{ 'is-template': item.name === 'template' }"
-                    v-if="
-                      (item.name === 'template'
-                        ? config.showTemplate !== false
-                        : true) && hiddenMenu.indexOf(item.name) === -1
-                    "
-                  >
+                  <div class="_fc-l-group" :class="{ 'is-template': item.name === 'template' }" v-if="
+                    (item.name === 'template'
+                      ? config.showTemplate !== false
+                      : true) && hiddenMenu.indexOf(item.name) === -1
+                  ">
                     <h4 class="_fc-l-title" @click="item.hidden = !item.hidden">
                       {{ t("menu." + item.name) || item.title }}
-                      <i
-                        class="fc-icon icon-arrow"
-                        :class="{ down: !item.hidden }"
-                      />
+                      <i class="fc-icon icon-arrow" :class="{ down: !item.hidden }" />
                     </h4>
-                    <fcDraggable
-                      :group="{ name: 'default', pull: 'clone', put: false }"
-                      :sort="false"
-                      itemKey="name"
-                      class="_fc-l-list"
-                      :list="item.list"
-                      v-show="!item.hidden"
-                    >
+                    <fcDraggable :group="{ name: 'default', pull: 'clone', put: false }" :sort="false" itemKey="name"
+                      class="_fc-l-list" :list="item.list" v-show="!item.hidden">
                       <template #item="{ element }">
-                        <div
-                          class="_fc-l-item"
-                          :class="{ 'is-inline': element.inline }"
-                          v-if="hiddenItem.indexOf(element.name) === -1"
-                          @click="clickMenu(element)"
-                        >
-                            <template v-if="item.name !== 'template'">
+                        <div class="_fc-l-item" :class="{ 'is-inline': element.inline }"
+                          v-if="hiddenItem.indexOf(element.name) === -1" @click="clickMenu(element)">
+                          <template v-if="item.name !== 'template'">
                             <div class="_fc-l-icon">
-                              <et-icon
-                                :icon="fieldIcons[element.name] || 'el-EditPen'"
-                              />
+                              <et-icon :icon="fieldIcons[element.name] || 'el-EditPen'" />
                             </div>
                             <span class="_fc-l-name">{{
                               t("com." + element.name + ".name") ||
@@ -262,71 +165,37 @@
                 <FieldList :field="fieldRef"></FieldList>
               </el-main>
               <el-main v-if="activeMenuTab === 'tree'">
-                <el-tree
-                  ref="treeRef"
-                  class="_fc-struct-tree"
-                  :data="treeInfo"
-                  default-expand-all
-                  :expand-on-click-node="false"
-                  :indent="10"
-                  @currentChange="treeChange"
-                >
+                <el-tree ref="treeRef" class="_fc-struct-tree" :data="treeInfo" default-expand-all
+                  :expand-on-click-node="false" :indent="10" @currentChange="treeChange">
                   <template #default="{ node, data }">
-                    <div
-                      class="_fc-tree-node"
-                      :class="{ active: activeRule === data.rule }"
-                    >
+                    <div class="_fc-tree-node" :class="{ active: activeRule === data.rule }">
                       <div class="_fc-tree-label">
-                        <i
-                          class="fc-icon"
-                          :class="
-                            (data.rule._menu && data.rule._menu.icon) ||
-                            'icon-cell'
-                          "
-                        ></i>
+                        <i class="fc-icon" :class="(data.rule._menu && data.rule._menu.icon) ||
+                          'icon-cell'
+                          "></i>
                         <span>{{ getTitle(data.rule) }}</span>
                       </div>
-                      <div
-                        class="_fc-tree-more"
-                        @click.stop
-                        v-if="!data.slot && !data.rule._fc_page_tag"
-                      >
-                        <i
-                          class="fc-icon"
-                          :class="
-                            data.rule._hidden === true
-                              ? 'icon-eye-close'
-                              : 'icon-eye'
-                          "
-                          @click="toolHidden(data.rule)"
-                          style="margin-right: 8px"
-                        ></i>
+                      <div class="_fc-tree-more" @click.stop v-if="!data.slot && !data.rule._fc_page_tag">
+                        <i class="fc-icon" :class="data.rule._hidden === true
+                          ? 'icon-eye-close'
+                          : 'icon-eye'
+                          " @click="toolHidden(data.rule)" style="margin-right: 8px"></i>
                         <el-dropdown trigger="click" size="default">
                           <i class="fc-icon icon-more"></i>
                           <template #dropdown>
                             <el-dropdown-menu>
-                              <el-dropdown-item
-                                v-if="data.rule._fc_drag_tag !== '_'"
-                                key="1"
-                                @click="toolHandle(data.rule, 'copy')"
-                              >
+                              <el-dropdown-item v-if="data.rule._fc_drag_tag !== '_'" key="1"
+                                @click="toolHandle(data.rule, 'copy')">
                                 {{ t("props.copy") }}
                               </el-dropdown-item>
-                              <el-dropdown-item
-                                v-if="
-                                  data.rule._menu &&
-                                  data.rule._menu.children &&
-                                  data.rule._fc_drag_tag !== '_'
-                                "
-                                key="2"
-                                @click="toolHandle(data.rule, 'addChild')"
-                              >
+                              <el-dropdown-item v-if="
+                                data.rule._menu &&
+                                data.rule._menu.children &&
+                                data.rule._fc_drag_tag !== '_'
+                              " key="2" @click="toolHandle(data.rule, 'addChild')">
                                 {{ t("form.appendChild") }}
                               </el-dropdown-item>
-                              <el-dropdown-item
-                                key="3"
-                                @click="toolHandle(data.rule, 'delete')"
-                              >
+                              <el-dropdown-item key="3" @click="toolHandle(data.rule, 'delete')">
                                 {{ t("props.delete") }}
                               </el-dropdown-item>
                             </el-dropdown-menu>
@@ -337,11 +206,7 @@
                   </template>
                 </el-tree>
               </el-main>
-              <el-footer
-                v-show="activeMenuTab === 'menu'"
-                height="46px"
-                class="_fc-field-recycle-entry"
-              >
+              <el-footer v-show="activeMenuTab === 'menu'" height="46px" class="_fc-field-recycle-entry">
                 <el-button text @click="fieldRecycleVisible = true">
                   <et-icon icon="el-RefreshLeft" />
                   <span>{{ t("designer.fieldRecycle.title") }}</span>
@@ -369,16 +234,10 @@
                     <div class="line"></div>
                   </template>
                   <div>
-                    <i
-                      class="fc-icon icon-pre-step"
-                      :class="{ disabled: !operation.list[operation.idx - 1] }"
-                      @click="prevOperationRecord"
-                    ></i>
-                    <i
-                      class="fc-icon icon-next-step"
-                      :class="{ disabled: !operation.list[operation.idx + 1] }"
-                      @click="nextOperationRecord"
-                    ></i>
+                    <i class="fc-icon icon-pre-step" :class="{ disabled: !operation.list[operation.idx - 1] }"
+                      @click="prevOperationRecord"></i>
+                    <i class="fc-icon icon-next-step" :class="{ disabled: !operation.list[operation.idx + 1] }"
+                      @click="nextOperationRecord"></i>
                   </div>
                 </template>
               </div>
@@ -395,34 +254,21 @@
                                             t('props.preview')
                                         }}
                                     </el-button> -->
-                  <el-popconfirm
-                    :title="t('designer.clearWarn')"
-                    width="200px"
-                    :confirm-button-text="t('props.clear')"
-                    :cancel-button-text="t('props.cancel')"
-                    @confirm="clearDragRule"
-                  >
+                  <el-popconfirm :title="t('designer.clearWarn')" width="200px" :confirm-button-text="t('props.clear')"
+                    :cancel-button-text="t('props.cancel')" @confirm="clearDragRule">
                     <template #reference>
-                      <el-button class="btn-delete" style="border: none"
-                        ><i class="fc-icon icon-delete"></i
-                        >{{ t("props.clear") }}
+                      <el-button class="btn-delete" style="border: none"><i class="fc-icon icon-delete"></i>{{
+                        t("props.clear") }}
                       </el-button>
                     </template>
                   </el-popconfirm>
-                  <el-dropdown
-                    trigger="click"
-                    size="default"
-                    v-if="handle && handle.length"
-                  >
+                  <el-dropdown trigger="click" size="default" v-if="handle && handle.length">
                     <el-button class="_fd-m-extend" plain>
                       <i class="fc-icon icon-more"></i>
                     </el-button>
                     <template #dropdown>
                       <el-dropdown-menu>
-                        <el-dropdown-item
-                          v-for="item in handle"
-                          @click.stop="triggerHandle(item)"
-                        >
+                        <el-dropdown-item v-for="item in handle" @click.stop="triggerHandle(item)">
                           <div>{{ item.label }}</div>
                         </el-dropdown-item>
                       </el-dropdown-menu>
@@ -432,58 +278,33 @@
                 <template v-if="getConfig('showInputData', true)">
                   <div class="line"></div>
                   <div class="_fd-input-btn">
-                    <i class="fc-icon icon-check" v-if="inputCheckStatus"></i
-                    ><span>{{ t("props.inputData") }}: </span>
-                    <el-switch
-                      :model-value="inputForm.state"
-                      inline-prompt
-                      @update:model-value="openInputData"
-                    />
+                    <i class="fc-icon icon-check" v-if="inputCheckStatus"></i><span>{{ t("props.inputData") }}: </span>
+                    <el-switch :model-value="inputForm.state" inline-prompt @update:model-value="openInputData" />
                   </div>
                 </template>
               </div>
             </el-header>
             <el-main class="_fc-m-con">
-              <div
-                class="_fc-m-drag"
-                :class="device"
-                ref="dragCon"
-                :style="{
-                  '--fc-drag-empty': `'${t('designer.dragEmpty')}'`,
-                  '--fc-child-empty': `'${t('designer.childEmpty')}'`,
-                }"
-              >
+              <div class="_fc-m-drag" :class="device" ref="dragCon" :style="{
+                '--fc-drag-empty': `'${t('designer.dragEmpty')}'`,
+                '--fc-child-empty': `'${t('designer.childEmpty')}'`,
+              }">
                 <div class="_fc-m-input" v-if="inputForm.state">
-                  <ViewForm
-                    :key="inputForm.key"
-                    :rule="inputForm.rule"
-                    :option="inputForm.option"
-                    v-model:api="inputForm.api"
-                    :disabled="false"
-                  >
+                  <ViewForm :key="inputForm.key" :rule="inputForm.rule" :option="inputForm.option"
+                    v-model:api="inputForm.api" :disabled="false">
                     <template v-for="(_, name) in $slots" #[name]="scope">
                       <slot :name="name" v-bind="scope ?? {}" />
                     </template>
                   </ViewForm>
                 </div>
                 <template v-else-if="device === 'mobile' && !onlyPC">
-                  <DragFormMobile
-                    driver="elm"
-                    :rule="dragForm.rule"
-                    :option="formOptions"
-                    v-model:api="dragForm.api"
-                  >
+                  <DragFormMobile driver="elm" :rule="dragForm.rule" :option="formOptions" v-model:api="dragForm.api">
                     <template v-for="(_, name) in $slots" #[name]="scope">
                       <slot :name="name" v-bind="scope ?? {}" />
                     </template>
                   </DragFormMobile>
                 </template>
-                <DragForm
-                  v-else
-                  :rule="dragForm.rule"
-                  :option="formOptions"
-                  v-model:api="dragForm.api"
-                >
+                <DragForm v-else :rule="dragForm.rule" :option="formOptions" v-model:api="dragForm.api">
                   <template v-for="(_, name) in $slots" #[name]="scope">
                     <slot :name="name" v-bind="scope ?? {}" />
                   </template>
@@ -502,47 +323,26 @@
               </div>
             </el-main>
           </el-container>
-          <el-aside
-            class="_fc-r"
-            width="320px"
-            v-if="!config || config.showConfig !== false"
-          >
+          <el-aside class="_fc-r" width="320px" v-if="!config || config.showConfig !== false">
             <el-container style="height: 100%">
               <el-header height="auto" class="_fc-r-tabs">
-                <div
-                  class="_fc-r-tab"
-                  :class="{ active: activeTab === 'props' }"
-                  v-if="
-                    !!activeRule ||
-                    customForm.isShow ||
-                    (config && config.showFormConfig === false)
-                  "
-                  @click="activeTab = 'props'"
-                >
+                <div class="_fc-r-tab" :class="{ active: activeTab === 'props' }" v-if="
+                  !!activeRule ||
+                  customForm.isShow ||
+                  (config && config.showFormConfig === false)
+                " @click="activeTab = 'props'">
                   {{ t("designer.component") }}
                 </div>
-                <div
-                  class="_fc-r-tab"
-                  v-if="!config || config.showFormConfig !== false"
-                  :class="{ active: activeTab === 'form' }"
-                  @click="activeTab = 'form'"
-                >
+                <div class="_fc-r-tab" v-if="!config || config.showFormConfig !== false"
+                  :class="{ active: activeTab === 'form' }" @click="activeTab = 'form'">
                   {{ t("designer.form") }}
                 </div>
                 <!-- <ToolsBar v-if="activeTab === 'props'"></ToolsBar> -->
               </el-header>
-              <el-main
-                class="_fc-r-tab-form"
-                v-show="activeTab === 'form'"
-                v-if="!config || config.showFormConfig !== false"
-              >
-                <DragForm
-                  :rule="form.rule"
-                  :option="form.option"
-                  :modelValue="form.value"
-                  @change="formOptChange"
-                  v-model:api="form.api"
-                >
+              <el-main class="_fc-r-tab-form" v-show="activeTab === 'form'"
+                v-if="!config || config.showFormConfig !== false">
+                <DragForm :rule="form.rule" :option="form.option" :modelValue="form.value" @change="formOptChange"
+                  v-model:api="form.api">
                   <template #title="scope">
                     <template v-if="scope.rule.warning">
                       <Warning :tooltip="scope.rule.warning">
@@ -555,17 +355,12 @@
                   </template>
                 </DragForm>
               </el-main>
-              <el-main
-                class="_fc-r-tab-props"
-                v-show="activeTab === 'props'"
-                :key="
-                  activeRule
-                    ? activeRule._fc_id
-                    : customForm.config
-                      ? customForm.key
-                      : ''
-                "
-              >
+              <el-main class="_fc-r-tab-props" v-show="activeTab === 'props'" :key="activeRule
+                ? activeRule._fc_id
+                : customForm.config
+                  ? customForm.key
+                  : ''
+                ">
                 <!-- <template
                                     v-if="activeRule || (customForm.config && (customForm.config.name || customForm.config.label))"> -->
                 <!-- <p class="_fc-r-title">{{ t('designer.type') }}</p>
@@ -591,54 +386,37 @@
                                 <template v-if="activeRuleChildren">
                                     <SubList></SubList>
                                 </template> -->
-                <div
-                  v-if="isgod && activeRule"
-                  class="_fc-r-name-config"
-                  style="margin-bottom: 6px"
-                >
+                <div v-if="isgod && activeRule" class="_fc-r-name-config" style="margin-bottom: 6px">
                   <div style="margin-bottom: 6px">
                     <span class="_fc-field-title"> 字段标识 </span>
                   </div>
-                  <FieldInput
-                    class="_fc-r-name-input"
-                    :model-value="activeRule.field"
-                    simple
-                    disabled
-                    @update:model-value="updateActiveField"
-                  ></FieldInput>
+                  <FieldInput class="_fc-r-name-input" :model-value="activeRule.field" simple disabled
+                    @update:model-value="updateActiveField"></FieldInput>
                 </div>
-                <div
-                  class="_fc-r-config"
-                  :style="{ 'grid-template-areas': configFormOrderStyle }"
-                >
+                <div class="_fc-r-config" :style="{ 'grid-template-areas': configFormOrderStyle }">
                   <div style="grid-area: base">
                     <!-- <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
                                             t('designer.rule')
                                             }}
                                         </ConfigTitle> -->
-                    <div
-                      style="
+                    <div style="
                         display: flex;
                         justify-content: space-between;
+                        align-items: center;
                         margin-bottom: 10px;
-                      "
-                    >
+                      ">
                       <div>
-                        <span style="color: #eb5050">*</span
-                        ><span class="_fc-field-title">{{
+                        <span style="color: #eb5050">*</span><span class="_fc-field-title">{{
                           t("form.title")
                         }}</span>
                       </div>
-                      <!-- <TypeSelect></TypeSelect> -->
+                      <!-- 当前字段的类型，只读提示，随当前选中的组件变化 -->
+                      <span v-if="activeRule" class="_fc-field-type-badge">{{
+                        activeRule.title
+                      }}</span>
                     </div>
-                    <DragForm
-                      v-show="baseForm.isShow"
-                      v-model:api="baseForm.api"
-                      :rule="baseForm.rule"
-                      :option="baseForm.options"
-                      :modelValue="baseForm.value"
-                      @change="baseChange"
-                    >
+                    <DragForm v-show="baseForm.isShow" v-model:api="baseForm.api" :rule="baseForm.rule"
+                      :option="baseForm.options" :modelValue="baseForm.value" @change="baseChange">
                       <template #title="scope">
                         <template v-if="scope.rule.warning">
                           <Warning :tooltip="scope.rule.warning">
@@ -658,15 +436,9 @@
                                             <PropsInput v-if="activeRule && getConfig('showCustomProps', true)">
                                             </PropsInput> -->
                     <!-- </ConfigTitle> -->
-                    <DragForm
-                      v-show="propsForm.isShow"
-                      v-model:api="propsForm.api"
-                      :rule="propsForm.rule"
-                      :option="propsForm.options"
-                      :modelValue="propsForm.value"
-                      @change="propChange"
-                      @removeField="propRemoveField"
-                    >
+                    <DragForm v-show="propsForm.isShow" v-model:api="propsForm.api" :rule="propsForm.rule"
+                      :option="propsForm.options" :modelValue="propsForm.value" @change="propChange"
+                      @removeField="propRemoveField">
                       <template #title="scope">
                         <template v-if="scope.rule.warning">
                           <Warning :tooltip="scope.rule.warning">
@@ -682,22 +454,16 @@
                                             id="_fd-config-props">
                                             {{ t('designer.props') }}
                                         </ConfigTitle> -->
-                    <DragForm
-                      v-if="customForm.isShow && customForm.propsShow"
-                      v-model:api="customForm.api"
-                      :rule="customForm.rule"
-                      :option="customForm.options"
-                      :key="customForm.key"
-                      @change="customFormChange"
-                    ></DragForm>
+                    <DragForm v-if="customForm.isShow && customForm.propsShow" v-model:api="customForm.api"
+                      :rule="customForm.rule" :option="customForm.options" :key="customForm.key"
+                      @change="customFormChange">
+                    </DragForm>
 
                     <!--隐藏-->
                     <div v-if="activeRule" class="_fd-checkbox-input">
-                      <el-checkbox
-                        :modelValue="activeRule._hidden"
-                        @update:modelValue="toolHidden(activeRule)"
-                        >{{ t("props.hide") }}</el-checkbox
-                      >
+                      <el-checkbox :modelValue="activeRule._hidden" @update:modelValue="toolHidden(activeRule)">{{
+                        t("props.hide")
+                      }}</el-checkbox>
                     </div>
                   </div>
                   <div style="grid-area: validate">
@@ -706,15 +472,9 @@
                                                 t('designer.validate')
                                             }}
                                             </ConfigTitle> -->
-                      <DragForm
-                        v-if="validateForm.isShow"
-                        v-model:api="validateForm.api"
-                        :rule="validateForm.rule"
-                        :option="validateForm.options"
-                        :modelValue="validateForm.value"
-                        @change="validateChange"
-                        :key="activeRule._fc_id"
-                      ></DragForm>
+                      <DragForm v-if="validateForm.isShow" v-model:api="validateForm.api" :rule="validateForm.rule"
+                        :option="validateForm.options" :modelValue="validateForm.value" @change="validateChange"
+                        :key="activeRule._fc_id"></DragForm>
                     </template>
                   </div>
                   <div style="grid-area: advanced">
@@ -722,14 +482,8 @@
                                             t('designer.advanced')
                                         }}
                                         </ConfigTitle> -->
-                    <DragForm
-                      v-show="advancedForm.isShow"
-                      v-model:api="advancedForm.api"
-                      :rule="advancedForm.rule"
-                      :option="advancedForm.options"
-                      :modelValue="advancedForm.value"
-                      @change="computedChange"
-                    >
+                    <DragForm v-show="advancedForm.isShow" v-model:api="advancedForm.api" :rule="advancedForm.rule"
+                      :option="advancedForm.options" :modelValue="advancedForm.value" @change="computedChange">
                     </DragForm>
                   </div>
                   <!-- <div style="grid-area: slots;">
@@ -745,86 +499,45 @@
                     <ConfigTitle v-if="styleForm.isShow" id="_fd-config-style">
                       {{ t("designer.style") }}
                     </ConfigTitle>
-                    <DragForm
-                      v-show="styleForm.isShow"
-                      :rule="styleForm.rule"
-                      :option="styleForm.options"
-                      :modelValue="styleForm.value"
-                      @change="styleChange"
-                      v-model:api="styleForm.api"
-                    ></DragForm>
+                    <DragForm v-show="styleForm.isShow" :rule="styleForm.rule" :option="styleForm.options"
+                      :modelValue="styleForm.value" @change="styleChange" v-model:api="styleForm.api"></DragForm>
                   </div>
                   <div style="grid-area: event">
                     <ConfigTitle v-if="eventShow" id="_fd-config-event">
                       {{ t("designer.event") }}
                     </ConfigTitle>
-                    <EventConfig
-                      v-if="eventShow"
-                      :event-name="(activeRule && activeRule._menu.event) || []"
-                      :component-name="
-                        (activeRule && activeRule._menu.name) || ''
-                      "
-                      :model-value="(activeRule && activeRule._on) || {}"
-                      @update:modelValue="changeEvent"
-                    >
+                    <EventConfig v-if="eventShow" :event-name="(activeRule && activeRule._menu.event) || []"
+                      :component-name="(activeRule && activeRule._menu.name) || ''
+                        " :model-value="(activeRule && activeRule._on) || {}" @update:modelValue="changeEvent">
                     </EventConfig>
                   </div>
                 </div>
               </el-main>
             </el-container>
           </el-aside>
-          <el-drawer
-            v-model="preview.state"
-            direction="btt"
-            size="95%"
-            :with-header="false"
-            :destroy-on-close="true"
-            class="_fd-preview-drawer formdatadialog"
-            append-to-body
-          >
+          <el-drawer v-model="preview.state" direction="btt" size="95%" :with-header="false" :destroy-on-close="true"
+            class="_fd-preview-drawer formdatadialog" append-to-body>
             <div class="_fd-preview-toolbar">
               <div class="_fd-preview-device" v-if="!onlyPC">
-                <button
-                  type="button"
-                  :class="{ active: previewDevice === 'pc' }"
-                  :title="t('props.pc')"
-                  :aria-label="t('props.pc')"
-                  @click="previewDevice = 'pc'"
-                >
+                <button type="button" :class="{ active: previewDevice === 'pc' }" :title="t('props.pc')"
+                  :aria-label="t('props.pc')" @click="previewDevice = 'pc'">
                   <i class="fc-icon icon-pc"></i>
                 </button>
-                <button
-                  type="button"
-                  :class="{ active: previewDevice === 'mobile' }"
-                  :title="t('props.mobile')"
-                  :aria-label="t('props.mobile')"
-                  @click="previewDevice = 'mobile'"
-                >
+                <button type="button" :class="{ active: previewDevice === 'mobile' }" :title="t('props.mobile')"
+                  :aria-label="t('props.mobile')" @click="previewDevice = 'mobile'">
                   <i class="fc-icon icon-mobile"></i>
                 </button>
               </div>
-              <button
-                class="_fd-preview-close"
-                type="button"
-                :title="t('props.close')"
-                :aria-label="t('props.close')"
-                @click="preview.state = false"
-              >
+              <button class="_fd-preview-close" type="button" :title="t('props.close')" :aria-label="t('props.close')"
+                @click="preview.state = false">
                 <et-icon icon="el-Close" />
               </button>
             </div>
             <template v-if="previewDevice === 'mobile'">
               <div class="_fd-preview-mobile">
                 <div :id="previewPopupTarget">
-                  <ViewFormMobile
-                    driver="elm"
-                    :rule="preview.rule"
-                    :option="preview.option"
-                    @submit="previewSubmit"
-                    @reset="previewReset"
-                    v-model:api="preview.api"
-                    v-if="preview.state"
-                  >
+                  <ViewFormMobile driver="elm" :rule="preview.rule" :option="preview.option" @submit="previewSubmit"
+                    @reset="previewReset" v-model:api="preview.api" v-if="preview.state">
                     <template v-for="(_, name) in $slots" #[name]="scope">
                       <slot :name="name" v-bind="scope ?? {}" />
                     </template>
@@ -834,14 +547,8 @@
             </template>
             <template v-else>
               <div class="data-container">
-                <ViewForm
-                  :rule="preview.rule"
-                  :option="preview.option"
-                  @submit="previewSubmit"
-                  @reset="previewReset"
-                  v-model:api="preview.api"
-                  v-if="preview.state"
-                >
+                <ViewForm :rule="preview.rule" :option="preview.option" @submit="previewSubmit" @reset="previewReset"
+                  v-model:api="preview.api" v-if="preview.state">
                   <template v-for="(_, name) in $slots" #[name]="scope">
                     <slot :name="name" v-bind="scope ?? {}" />
                   </template>
@@ -851,15 +558,8 @@
           </el-drawer>
         </el-container>
       </el-main>
-      <FieldRecycleBin
-        v-model="fieldRecycleVisible"
-        :logs="fieldChangeLogs"
-        :loading="fieldRecycleLoading"
-        :t="t"
-        @restore="restoreFieldChangeLogs"
-        @purge="purgeFieldChangeLogs"
-        @clear="clearFieldChangeLogs"
-      />
+      <FieldRecycleBin v-model="fieldRecycleVisible" :logs="fieldChangeLogs" :loading="fieldRecycleLoading" :t="t"
+        @restore="restoreFieldChangeLogs" @purge="purgeFieldChangeLogs" @clear="clearFieldChangeLogs" />
     </el-config-provider>
   </el-container>
 </template>
@@ -1240,8 +940,8 @@ export default defineComponent({
             input:
               configRef.value?.updateConfigOnBlur !== false
                 ? {
-                    modelEmit: "blur",
-                  }
+                  modelEmit: "blur",
+                }
                 : {},
             select: {
               props: {
@@ -1269,8 +969,8 @@ export default defineComponent({
             input:
               configRef.value?.updateConfigOnBlur !== false
                 ? {
-                    modelEmit: "blur",
-                  }
+                  modelEmit: "blur",
+                }
                 : {},
             select: {
               props: {
@@ -1298,8 +998,8 @@ export default defineComponent({
             input:
               configRef.value?.updateConfigOnBlur !== false
                 ? {
-                    modelEmit: "blur",
-                  }
+                  modelEmit: "blur",
+                }
                 : {},
             select: {
               props: {
@@ -1360,8 +1060,8 @@ export default defineComponent({
             input:
               configRef.value?.updateConfigOnBlur !== false
                 ? {
-                    modelEmit: "blur",
-                  }
+                  modelEmit: "blur",
+                }
                 : {},
             inputNumber: {
               props: {
@@ -1395,8 +1095,8 @@ export default defineComponent({
             input:
               configRef.value?.updateConfigOnBlur !== false
                 ? {
-                    modelEmit: "blur",
-                  }
+                  modelEmit: "blur",
+                }
                 : {},
             select: {
               props: {
@@ -1887,9 +1587,9 @@ export default defineComponent({
         data.operation = data.pageData[0]
           ? data.pageData[0].operation
           : {
-              idx: -1,
-              list: [],
-            };
+            idx: -1,
+            list: [],
+          };
         data.pageData = [
           {
             default: true,
@@ -2148,8 +1848,8 @@ export default defineComponent({
                   : null;
         const groupName =
           group === true ||
-          group === "tableform-root" ||
-          group === "tableform-column"
+            group === "tableform-root" ||
+            group === "tableform-column"
             ? "default"
             : group;
         const resolveTargetRule = () => {
@@ -3400,9 +3100,9 @@ export default defineComponent({
             () => propsRule,
             is.Function(def)
               ? {
-                  rule: def,
-                  append: true,
-                }
+                rule: def,
+                append: true,
+              }
               : def,
             rule,
             {
@@ -3601,6 +3301,8 @@ export default defineComponent({
             field: rule.field,
             title: rule.title || "",
             info: rule.info,
+            // 描述信息是顶层字段，必须一起回填，否则切换组件时面板会沿用上一个组件的值
+            desc: rule.desc || "",
             ignore: rule.ignore || false,
             _control: rule._control,
             ...formData,
@@ -4184,7 +3886,7 @@ export default defineComponent({
             if (
               columnContext &&
               methods.getTableFormColumnChildren(columnContext.column).length >
-                0
+              0
             ) {
               methods.insertTableFormColumnAfter(columnContext, rule);
             } else if (tableFormContext) {
@@ -4377,9 +4079,9 @@ export default defineComponent({
                 menuName + (isDefault ? "" : "-slot-" + k),
                 _rule
                   ? slotChildren[k].map((item) => {
-                      delete item.slot;
-                      return item;
-                    })
+                    delete item.slot;
+                    return item;
+                  })
                   : methods.loadRule(slotChildren[k]),
                 k
               );
@@ -4647,7 +4349,7 @@ export default defineComponent({
         }
         toolVm.$emit(event);
       },
-      handleAddBefore() {},
+      handleAddBefore() { },
       handleRemoveBefore({ parent, rule }) {
         // let rules;
         // if (rule._menu && ['array', 'object'].indexOf(rule._menu.subForm) > -1) {
@@ -4669,8 +4371,8 @@ export default defineComponent({
         // }
         // return flag;
       },
-      handleCopyBefore() {},
-      handleSortBefore() {},
+      handleCopyBefore() { },
+      handleSortBefore() { },
       addOperationRecord() {
         const rule = methods.getPageJson();
         const formData = deepCopy(data.inputForm.data);
@@ -4939,5 +4641,17 @@ export default defineComponent({
   color: var(--el-color-danger);
   font-size: 12px;
   line-height: 1;
+}
+
+/* 字段类型徽标：跟在「字段名称」这一行的末尾，浅灰底、仅文字 */
+._fc-field-type-badge {
+  border-radius: 4px;
+  background-color: #f4f4f5;
+  color: #131d2ec7;
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: center;
 }
 </style>

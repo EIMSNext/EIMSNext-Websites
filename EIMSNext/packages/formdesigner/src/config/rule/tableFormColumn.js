@@ -17,6 +17,7 @@ export default {
   hiddenBaseField: [
     "title",
     "info",
+    "desc",
     "labelConfig",
     "formCreateWrap>title",
     "formCreateCol>span",

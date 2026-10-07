@@ -35,6 +35,7 @@ export default {
         limit: 5,
         multiple: true,
         autoUpload: true,
+        compress: true,
         accept: "image/*",
         onSuccess:
           "$FNX:const res = $inject.args[0];\nconst file = $inject.args[1];\nconst uploaded = res.value[0];\n\nfile.value = {id:uploaded.id, name:uploaded.fileName, url:uploaded.savePath};",
@@ -53,6 +54,13 @@ export default {
       //   field: "readonly",
       //   wrap: { show: false },
       // },
+      { type: "GroupLabel", props: { title: t("props.imageProcess") } },
+      {
+        type: "CheckBoxInput",
+        field: "compress",
+        value: true,
+        wrap: { show: false },
+      },
       { type: "GroupLabel", props: { title: t("props.othersetting") } },
       {
         type: "CheckBoxInput",

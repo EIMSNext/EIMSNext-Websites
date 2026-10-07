@@ -4,14 +4,14 @@
 .fc-form-item .et-deparment1,
 .fc-form-item .et-employee1 {
   width: 100%;
-  max-width: 360px;
+  max-width: var(--fc-field-control-width, 360px);
 }
 
 /* 地址组件的详细地址 textarea 与上方级联同宽（级联内部的 .el-input 受上面的 360px 约束，
    而 textarea 根类是 .el-textarea，需要单独对齐同一个上限） */
 .fc-form-item .fc-address .el-textarea {
   width: 100%;
-  max-width: 360px;
+  max-width: var(--fc-field-control-width, 360px);
 }
 
 .form-create {
@@ -20,6 +20,8 @@
   --fc-field-single-height: 80px;
   --fc-field-block-gap: 10px;
   --fc-field-option-gap: 4px;
+  /* 单行控件的最大宽度：单行文本框、下拉、上传触发条共用同一口径 */
+  --fc-field-control-width: 360px;
 }
 
 .form-create .field-layout-content {
@@ -87,6 +89,37 @@
 
 .form-create .field-layout-content .field-name {
   line-height: var(--fc-field-label-line-height);
+}
+
+/* 字段描述：设计器里配的富文本说明，渲染在标题与控件之间。
+   标题隐藏或无标题时不会渲染，所以这里不处理无标题场景。 */
+.form-create .fc-field-desc {
+  display: block;
+  box-sizing: border-box;
+  margin: 0 0 var(--fc-field-option-gap);
+  color: var(--et-text-secondary, #525967);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+/* 富文本自带 <p> 的外边距会额外撑高，这里抹平 */
+.form-create .fc-field-desc p {
+  margin: 0;
+}
+
+/* 描述里的字号档位与设计器面板一致（12 / 14 / 16 / 18 / 20 / 22）。
+   wangEditor 只写 <font size=N>，浏览器默认映射与面板不同，这里对齐。 */
+.form-create .fc-field-desc font[size="1"] { font-size: 12px; }
+.form-create .fc-field-desc font[size="2"] { font-size: 14px; }
+.form-create .fc-field-desc font[size="3"] { font-size: 16px; }
+.form-create .fc-field-desc font[size="4"] { font-size: 18px; }
+.form-create .fc-field-desc font[size="5"] { font-size: 20px; }
+.form-create .fc-field-desc font[size="6"] { font-size: 22px; }
+
+/* 描述多占一行，单行字段的固定高度要放开（其余形态本来height就是 auto） */
+.form-create .field-layout-content.field-has-desc.field-layout-single {
+  height: auto;
+  min-height: var(--fc-field-single-height);
 }
 
 .fc-radio-group,

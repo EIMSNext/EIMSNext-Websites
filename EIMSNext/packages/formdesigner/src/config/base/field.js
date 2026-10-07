@@ -24,6 +24,41 @@ export default function field({ t }) {
         title: t("props.showTitle"),
       },
     },
+    // 字段描述：富文本，运行时渲染在标题下方（标题隐藏时不显示）。
+    // 面板只有三百多像素宽，工具栏按效果图压成单行 9 个按钮，并去掉全屏按钮；
+    // 编辑区也跟着收矮，避免整个表单项过高。
+    {
+      type: "fcEditor",
+      field: "desc",
+      value: "",
+      title: t("form.desc"),
+      props: {
+        config: {
+          // 只保留文字排版相关按钮：链接与图片按需求去掉
+          menus: [
+            "bold",
+            "italic",
+            "underline",
+            "justify",
+            "foreColor",
+            "fontSize",
+          ],
+          // 字号档位：12 / 14 / 16 / 18 / 20 / 22
+          // wangEditor 底层只会写 <font size=N>，具体像素值由两端 CSS 定义，
+          // 这里 value 用 1~6 与 CSS 里的 font[size="N"] 一一对应。
+          fontSizes: {
+            s12: { name: "12", value: "1" },
+            s14: { name: "14", value: "2" },
+            s16: { name: "16", value: "3" },
+            s18: { name: "18", value: "4" },
+            s20: { name: "20", value: "5" },
+            s22: { name: "22", value: "6" },
+          },
+          showFullScreen: false,
+          height: 80,
+        },
+      },
+    },
     {
       type: "SpanInput",
       field: "formCreateCol>span",

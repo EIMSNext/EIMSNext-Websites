@@ -370,6 +370,54 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     grid-template-areas: "base" "props" "validate" "advanced" "slots" "style" "event";
 }
 
+/* wangEditor 的下拉（字号/颜色）默认从图标右侧展开。右侧配置面板贴着屏幕右边缘，
+   下拉会跑到屏幕外点不到；这里改成向左展开，保证始终落在面板内。
+   （`. _fc-r-config .w-e-toolbar .w-e-droplist` 的选择器权重高于库里的
+   `.w-e-toolbar .w-e-droplist`，且库没有用行内样式定位，所以无需 !important） */
+._fc-r-config .w-e-toolbar .w-e-droplist {
+    right: 0;
+    left: auto;
+}
+
+/* 面板空间有限，把富文本编辑器整体压小（库默认菜单 40×40、工具栏内边距 6px） */
+._fc-r-config .w-e-toolbar {
+    padding: 0 2px;
+}
+
+._fc-r-config .w-e-toolbar .w-e-menu {
+    width: 26px;
+    height: 26px;
+}
+
+._fc-r-config .w-e-toolbar .w-e-menu i {
+    font-size: 13px;
+}
+
+/* 正文区左右留内边距，文字不再贴着边框
+   （库里 `.w-e-text-container, .w-e-menu-panel { padding: 0 }`，这里用更高权重盖回来） */
+._fc-r-config .w-e-text-container {
+    padding: 0 3px;
+}
+
+/* 正文默认字号 12px，与运行态 `.fc-field-desc` 一致（所见即所得）。
+   库里把段落字号写死了 `.w-e-text-container p { font-size: 16px !important }`，
+   因此这里必须同时带 !important 并保持更高权重才能生效；
+   工具栏里选中的字号是 `<font size>` 元素，仍会覆盖这个默认值。 */
+._fc-r-config .w-e-text-container,
+._fc-r-config .w-e-text-container [contenteditable],
+._fc-r-config .w-e-text-container p {
+    font-size: 12px !important;
+}
+
+/* 字号档位对应的像素值：wangEditor 只写 <font size=N>，库内没有任何映射，
+   所以这里（以及运行态的 `.fc-field-desc`）自行定义 12 / 14 / 16 / 18 / 20 / 22 */
+._fc-r-config .w-e-text-container font[size="1"] { font-size: 12px; }
+._fc-r-config .w-e-text-container font[size="2"] { font-size: 14px; }
+._fc-r-config .w-e-text-container font[size="3"] { font-size: 16px; }
+._fc-r-config .w-e-text-container font[size="4"] { font-size: 18px; }
+._fc-r-config .w-e-text-container font[size="5"] { font-size: 20px; }
+._fc-r-config .w-e-text-container font[size="6"] { font-size: 22px; }
+
 ._fc-r-name-input .el-input-group__append {
     width: 25px;
     padding: 0;

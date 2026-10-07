@@ -1225,7 +1225,8 @@ onUnmounted(() => {
 :deep(.table-image-thumb) {
   width: var(--et-size-40);
   height: var(--et-size-40);
-  border-radius: var(--et-radius-4);
+  border: 1px solid var(--et-border-color-light);
+  border-radius: var(--et-radius-6);
   object-fit: cover;
   cursor: pointer;
 }

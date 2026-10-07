@@ -7,6 +7,7 @@ import {
   extend,
   getFilledTextColor,
 } from "@eimsnext/form-render-core";
+import { hasRichTextContent, sanitizeRichText } from "@eimsnext/utils";
 
 function isTooltip(info) {
   return info.type === "tooltip";
@@ -186,6 +187,12 @@ export default {
     const uni = `${this.key}${ctx.key}`;
     const col = rule.col || {};
     const isTitle = this.isTitle(rule) && wrap.title !== false;
+    // 字段描述只在标题显示时出现：标题隐藏、无标题、或不包表单项（raw 布局）时都不渲染。
+    // 渲染前先做白名单净化；再判空 —— 富文本编辑器清空后会产出 <p><br></p> 这类占位
+    // HTML，不兜掉会白白多出一行空白。
+    const descHtml =
+      isTitle && !isFalse(wrap.show) ? sanitizeRichText(rule.desc) : "";
+    const hasDesc = hasRichTextContent(descHtml);
     const labelWidth = !col.labelWidth && !isTitle ? 0 : col.labelWidth;
     const { inline, col: _col } = this.rule.props;
     delete wrap.title;
@@ -196,7 +203,9 @@ export default {
         class: "field-component",
         key: `${uni}fc`,
       },
-      { default: () => children }
+      // 描述放在控件之前（标题下方、控件上方）。挂在 field-component 内部，
+      // 避免和 el-form-item__content 的 flex 行布局相互影响。
+      { default: () => (hasDesc ? [this.makeDesc(descHtml, uni), children] : children) }
     );
     const item = isFalse(wrap.show)
       ? this.$r(
@@ -222,7 +231,9 @@ export default {
               },
               class: this.$render.mergeClass(
                 rule.className,
-                `fc-form-item field-layout-content ${layoutClass}`
+                `fc-form-item field-layout-content ${layoutClass}${
+                  hasDesc ? " field-has-desc" : ""
+                }`
               ),
               key: `${uni}fi`,
               ref: ctx.wrapRef,
@@ -261,6 +272,9 @@ export default {
       "subform",
       "object",
       "tableform",
+      // 富文本框（规则名是 fcEditor）：编辑器自带一块较高的编辑区，
+      // 不能按单行字段的固定高度渲染（原来的 editor / wangeditor 是陈旧名字，匹配不上）
+      "fceditor",
       "editor",
       "wangeditor",
       // 地址 = 级联 + 详细地址两行，不能按单行固定高度渲染
@@ -351,6 +365,19 @@ export default {
     delete _prop.props.native;
 
     return this.$r(_prop, children);
+  },
+  /**
+   * 字段描述（设计器里配的富文本说明）：常驻显示在标题下方、控件上方。
+   * 传入的 descHtml 必须已经过 sanitizeRichText 净化（调用方负责），
+   * 这里按 HTML 渲染 —— 与核心 html 组件同一套做法（props.innerHTML）。
+   */
+  makeDesc(descHtml, uni) {
+    return this.$r({
+      type: "div",
+      class: "fc-field-desc",
+      key: `${uni}desc`,
+      props: { innerHTML: descHtml },
+    });
   },
   makeCol(rule, uni, children) {
     const col = rule.col;

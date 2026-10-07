@@ -51,6 +51,37 @@
   box-sizing: border-box;
 }
 
+/* 字段描述：设计器里配的富文本说明，渲染在标题与控件之间。
+   标题隐藏或无标题时不会渲染，所以这里不处理无标题场景。 */
+.form-create-m .fc-field-desc {
+  display: block;
+  box-sizing: border-box;
+  margin: 0 0 var(--fc-field-option-gap);
+  color: var(--van-text-color-2, #969799);
+  font-size: var(--fc-field-label-font-size);
+  line-height: 18px;
+}
+
+/* 富文本自带 <p> 的外边距会额外撑高，这里抹平 */
+.form-create-m .fc-field-desc p {
+  margin: 0;
+}
+
+/* 描述里的字号档位与设计器面板一致（12 / 14 / 16 / 18 / 20 / 22）。
+   wangEditor 只写 <font size=N>，浏览器默认映射与面板不同，这里对齐。 */
+.form-create-m .fc-field-desc font[size="1"] { font-size: 12px; }
+.form-create-m .fc-field-desc font[size="2"] { font-size: 14px; }
+.form-create-m .fc-field-desc font[size="3"] { font-size: 16px; }
+.form-create-m .fc-field-desc font[size="4"] { font-size: 18px; }
+.form-create-m .fc-field-desc font[size="5"] { font-size: 20px; }
+.form-create-m .fc-field-desc font[size="6"] { font-size: 22px; }
+
+/* 描述多占一行，单行字段的固定高度要放开（其余形态本来height就是 auto） */
+.form-create-m .field-layout-content.field-has-desc.field-layout-single {
+  height: auto;
+  min-height: var(--fc-field-single-height);
+}
+
 .form-create-m .field-layout-content .van-field__value,
 .form-create-m .field-layout-content .van-field__control {
   text-align: left;

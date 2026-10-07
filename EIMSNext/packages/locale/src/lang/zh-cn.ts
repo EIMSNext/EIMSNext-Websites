@@ -469,6 +469,14 @@ export default {
       dragHere: "将文件拖到此处或",
       clickToUpload: "点击上传",
     },
+    upload: {
+      select: "选择",
+      fileHint: "或拖拽文件后上传，单个{0}以内",
+      imageHint: "或拖拽图片后上传，单张{0}以内",
+      dragging: "松开即可上传",
+      compressing: "压缩中…",
+      uploadFailed: "上传失败",
+    },
     formFieldSelect: {
       pleaseSelectField: "请选择字段",
     },
@@ -2462,6 +2470,7 @@ export default {
     field: "字段 ID",
     title: "字段名称",
     info: "提示信息",
+    desc: "描述信息",
     ignore: "忽略字段",
     native: "是否显示标题",
     control: "联动数据",
@@ -3225,6 +3234,7 @@ export default {
     v_datalink: "数据联动",
     v_formula: "公式联动",
     othersetting: "其他设置",
+    imageProcess: "图片处理",
   },
   slots: {
     prefix: "头部内容",
@@ -3738,8 +3748,8 @@ export default {
       props: {
         api: "数据链接 URI",
         level: "类型",
-        clearable: "是否显示清除按钮",
-        disabled: "是否禁用",
+        clearable: "显示清除按钮",
+        disabled: "禁用",
         filter: "数据过滤,返回可选择数据",
       },
     },
@@ -4359,6 +4369,7 @@ export default {
         limit: "最大允许上传个数",
         readonly: "只读",
         disabled: "禁用",
+        compress: "自动压缩图片",
       },
     },
     fileupload: {

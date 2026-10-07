@@ -418,6 +418,14 @@ export default {
       dragHere: "Drag files here or",
       clickToUpload: "click to upload",
     },
+    upload: {
+      select: "Select",
+      fileHint: "or drag & drop to upload, up to {0} each",
+      imageHint: "or drag & drop images to upload, up to {0} each",
+      dragging: "Drop to upload",
+      compressing: "Compressing…",
+      uploadFailed: "Upload failed",
+    },
     formFieldSelect: {
       pleaseSelectField: "Please select a field",
     },
@@ -2464,6 +2472,7 @@ export default {
     field: "Field",
     title: "Title",
     info: "Info",
+    desc: "Description",
     ignore: "ignore field",
     native: "Whether to display title",
     control: "Control",
@@ -3245,6 +3254,7 @@ export default {
     v_datalink: "Data Link",
     v_formula: "Formula Link",
     othersetting: "Other Settings",
+    imageProcess: "Image Processing",
   },
   slots: {
     prefix: "Prefix",
@@ -3782,7 +3792,7 @@ export default {
       props: {
         api: "URI",
         level: "Type",
-        clearable: "Whether to display the clear button",
+        clearable: "Display the clear button",
         disabled: "Disabled",
         filter: "Data filtering, return selectable data",
       },
@@ -4443,6 +4453,7 @@ export default {
         limit: "Maximum number of uploads allowed",
         readonly: "Readonly",
         disabled: "Disabled",
+        compress: "Auto compress images",
       },
     },
     fileupload: {
