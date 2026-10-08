@@ -3534,8 +3534,12 @@ export default {
       props: {
         type: "风格类型",
         closable: "标签可关闭",
-        tabPosition: "选项卡所在位置",
+        tabPosition: "选项卡位置",
         stretch: "标签宽度自动撑开",
+        style: "样式",
+        tabColorCustom: "自定义颜色",
+        positionLeft: "左侧",
+        positionRight: "右侧",
       },
     },
     elTag: {

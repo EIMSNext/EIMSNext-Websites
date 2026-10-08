@@ -6,6 +6,7 @@ import slider from './slider';
 import timePicker from './timePicker';
 import row from './row';
 import select, { select2, fcSelect } from './select';
+import tabs from './tabs';
 
 export default [
     datePicker,
@@ -17,5 +18,6 @@ export default [
     row,
     select,
     select2,
-    fcSelect
+    fcSelect,
+    tabs,
 ]

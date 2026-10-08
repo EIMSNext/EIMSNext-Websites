@@ -3567,6 +3567,10 @@ export default {
         closable: "Tab Closable",
         tabPosition: "Tab position",
         stretch: "Self-stretching",
+        style: "Style",
+        tabColorCustom: "Custom color",
+        positionLeft: "Left",
+        positionRight: "Right",
       },
     },
     elTag: {
