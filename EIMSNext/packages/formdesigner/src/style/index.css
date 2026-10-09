@@ -991,6 +991,20 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     font-weight: 400;
 }
 
+/* 标签页内容区是嵌套较深的落点，空态需要比普通容器更高，否则几乎没有地方往标签里拖控件 */
+._fc-m .el-tab-pane ._fd-elTabPane-drag.drag-holder {
+    min-height: 160px;
+}
+
+/* 折叠面板默认全部收起，内容区高度为 0 就没有落点；仅画布内强制展开，预览与运行态不受影响 */
+._fc-m .el-collapse-item__wrap {
+    display: block !important;
+}
+
+._fc-m .el-collapse-item__arrow {
+    transform: rotate(90deg);
+}
+
 ._fc-tabs .el-tabs__nav-scroll {
     padding: 0 15px;
 }

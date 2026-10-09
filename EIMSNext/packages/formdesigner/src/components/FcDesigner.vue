@@ -384,10 +384,10 @@
             </template> -->
                 <!-- 子项列表（标签页的标签、折叠面板的面板）：只有声明了 children 的容器才有，
                      子表单走 subForm + columns，不受影响。 -->
-                <template v-if="activeRuleChildren">
+                <template v-if="activeRuleChildren && !panelItemsMenu">
                   <SubList></SubList>
                 </template>
-                <div v-if="isgod && activeRule" class="_fc-r-name-config" style="margin-bottom: 6px">
+                <div v-if="isgod && activeRule && !isContainerStyleOnly" class="_fc-r-name-config" style="margin-bottom: 6px">
                   <div style="margin-bottom: 6px">
                     <span class="_fc-field-title"> 字段标识 </span>
                   </div>
@@ -395,7 +395,7 @@
                     @update:model-value="updateActiveField"></FieldInput>
                 </div>
                 <div class="_fc-r-config" :style="{ 'grid-template-areas': configFormOrderStyle }">
-                  <div style="grid-area: base">
+                  <div style="grid-area: base" v-if="!isContainerStyleOnly">
                     <!-- <ConfigTitle v-if="baseForm.isShow" id="_fd-config-base">{{
                                             t('designer.rule')
                                             }}
@@ -468,13 +468,13 @@
                     </DragForm>
 
                     <!--隐藏-->
-                    <div v-if="activeRule" class="_fd-checkbox-input">
+                    <div v-if="activeRule && !isContainerStyleOnly" class="_fd-checkbox-input">
                       <el-checkbox :modelValue="activeRule._hidden" @update:modelValue="toolHidden(activeRule)">{{
                         t("props.hide")
                       }}</el-checkbox>
                     </div>
                   </div>
-                  <div style="grid-area: validate">
+                  <div style="grid-area: validate" v-if="!isContainerStyleOnly">
                     <template v-if="activeRule">
                       <!-- <ConfigTitle v-if="validateForm.isShow" id="_fd-config-validate">{{
                                                 t('designer.validate')
@@ -485,7 +485,7 @@
                         :key="activeRule._fc_id"></DragForm>
                     </template>
                   </div>
-                  <div style="grid-area: advanced">
+                  <div style="grid-area: advanced" v-if="!isContainerStyleOnly">
                     <!-- <ConfigTitle v-if="advancedForm.isShow" id="_fd-config-advanced">{{
                                             t('designer.advanced')
                                         }}
@@ -510,7 +510,7 @@
                     <DragForm v-show="styleForm.isShow" :rule="styleForm.rule" :option="styleForm.options"
                       :modelValue="styleForm.value" @change="styleChange" v-model:api="styleForm.api"></DragForm>
                   </div>
-                  <div style="grid-area: event">
+                  <div style="grid-area: event" v-if="!isContainerStyleOnly">
                     <ConfigTitle v-if="eventShow" id="_fd-config-event">
                       {{ t("designer.event") }}
                     </ConfigTitle>
@@ -834,7 +834,18 @@ export default defineComponent({
       }
       return null;
     });
+    // 标签页/折叠面板是纯布局容器：属性面板只保留 样式/颜色/位置(tabs)/选项卡，
+    // 其余（字段标识、名称、CSS 样式、高级、事件、隐藏）一概隐藏。
+    const isContainerStyleOnly = computed(() => {
+      const r = data.activeRule;
+      return !!r && (r._menu.name === "tabs" || r._menu.name === "collapse");
+    });
+
     const configFormOrderStyle = computed(() => {
+      // 容器类组件只展示 属性 区，避免被隐藏的 base/style/advanced/event 留空行。
+      if (isContainerStyleOnly.value) {
+        return '"props"';
+      }
       const def = [
         "base",
         "props",
@@ -1121,21 +1132,38 @@ export default defineComponent({
     });
     const activeRuleChildren = computed(() => {
       const rule = data.activeRule;
-      if (!rule || !rule._menu.children) {
+      if (!rule || !rule._menu || !rule._menu.children) {
         return null;
       }
       const dragRule = data.dragRuleList[rule._fc_drag_tag];
       const subDragRule = data.dragRuleList[rule._menu.children];
+      if (!subDragRule) {
+        return null;
+      }
       let children = rule.children;
-      if (dragRule.inside) {
+      if (!Array.isArray(children)) {
+        return null;
+      }
+      if (dragRule && dragRule.inside) {
+        if (!children[0] || !Array.isArray(children[0].children)) {
+          return null;
+        }
         children = children[0].children;
       }
-      if (!subDragRule.inside) {
-        children = children.map((item) => {
-          return item.children[0];
-        });
+      if (subDragRule.inside !== true) {
+        children = children
+          .map((item) => (item && Array.isArray(item.children) ? item.children[0] : item))
+          .filter(Boolean);
       }
-      return children.filter((item) => item._fc_drag_tag === subDragRule.name);
+      return children.filter(
+        (item) => item && item._fc_drag_tag === subDragRule.name
+      );
+    });
+    // 标签页 / 折叠面板的子项在各自的属性面板里配置（ItemsConfig），
+    // 不再复用面板顶部的通用子节点列表。
+    const panelItemsMenu = computed(() => {
+      const menu = data.activeRule && data.activeRule._menu;
+      return !!menu && (menu.name === "tabs" || menu.name === "collapse");
     });
 
     watch(
@@ -4135,6 +4163,8 @@ export default defineComponent({
         if (config.children && !_rule && !flag && config.childrenLen !== 0) {
           for (let i = 0; i < (config.childrenLen || 1); i++) {
             const child = methods.makeRule(data.dragRuleList[config.children]);
+            config.defaultChildRule &&
+              config.defaultChildRule(child, i, t);
             (drag ? drag.children : slotChildren.default).push(child);
           }
         }
@@ -4637,10 +4667,12 @@ export default defineComponent({
       hiddenDragMenu,
       hiddenDragBtn,
       activeRuleChildren,
+      panelItemsMenu,
       dragConHeight,
       pageCount,
       elmLocale,
       configFormOrderStyle,
+      isContainerStyleOnly,
     };
   },
   created() {

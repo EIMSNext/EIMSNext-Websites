@@ -3469,6 +3469,10 @@ export default {
       },
       props: {
         accordion: "手风琴模式",
+        style: "样式",
+        collapseColorCustom: "自定义颜色",
+        items: "多面板显示",
+        addItem: "添加面板",
       },
     },
     elCollapseItem: {
@@ -3540,6 +3544,9 @@ export default {
         tabColorCustom: "自定义颜色",
         positionLeft: "左侧",
         positionRight: "右侧",
+        items: "多标签显示",
+        addItem: "添加标签页",
+        tabLabel: "标签页{0}",
       },
     },
     elTag: {

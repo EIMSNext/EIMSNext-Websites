@@ -7,6 +7,7 @@ import timePicker from './timePicker';
 import row from './row';
 import select, { select2, fcSelect } from './select';
 import tabs from './tabs';
+import collapse from './collapse';
 
 export default [
     datePicker,
@@ -20,4 +21,5 @@ export default [
     select2,
     fcSelect,
     tabs,
+    collapse,
 ]

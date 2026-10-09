@@ -761,28 +761,29 @@
 
 /* ===== 标签页增强样式 ===== */
 /* 全局作用域（无 .form-create 前缀）：设计态属性面板的样式预览不在 .form-create 容器内，
-   需让样式类同时在设计器预览与运行态生效。fc-tabs-enhanced 仅加在我们增强过的 el-tabs 上，不会外溢。 */
+   需让样式类同时在设计器预览与运行态生效。fc-tabs-enhanced 仅加在我们增强过的 el-tabs 上，不会外溢。
+   --fc-tabs-color 为自定义颜色（缺省为主题主色），各样式使用它的位置不同：
+   下划线=文字+下划线；卡片=文字+上边线；描边=文字；填充/胶囊=实心底色+底部整线。 */
 .fc-tabs-enhanced {
   --fc-tabs-color: var(--et-color-primary, #4080ff);
+  --fc-tabs-fill: var(--el-fill-color-light, #f5f7fa);
+  --fc-tabs-line: var(--el-border-color-lighter, #ebeef5);
 }
 
 .fc-tabs-enhanced.fc-tabs-style-pill .el-tabs__active-bar,
 .fc-tabs-enhanced.fc-tabs-style-card .el-tabs__active-bar,
 .fc-tabs-enhanced.fc-tabs-style-boxed .el-tabs__active-bar,
-.fc-tabs-enhanced.fc-tabs-style-filled .el-tabs__active-bar,
-.fc-tabs-enhanced.fc-tabs-style-soft .el-tabs__active-bar {
+.fc-tabs-enhanced.fc-tabs-style-filled .el-tabs__active-bar {
   display: none;
 }
 
-.fc-tabs-enhanced.fc-tabs-style-pill .el-tabs__nav-wrap::after,
-.fc-tabs-enhanced.fc-tabs-style-card .el-tabs__nav-wrap::after,
-.fc-tabs-enhanced.fc-tabs-style-boxed .el-tabs__nav-wrap::after,
-.fc-tabs-enhanced.fc-tabs-style-filled .el-tabs__nav-wrap::after,
-.fc-tabs-enhanced.fc-tabs-style-soft .el-tabs__nav-wrap::after {
-  display: none;
+/* 下划线 */
+.fc-tabs-enhanced.fc-tabs-style-underline .el-tabs__nav-wrap::after {
+  height: 1px;
 }
 
 .fc-tabs-enhanced.fc-tabs-style-underline .el-tabs__active-bar {
+  height: 3px;
   background-color: var(--fc-tabs-color);
 }
 
@@ -791,67 +792,84 @@
   font-weight: 600;
 }
 
+/* 卡片：导航条浅底、激活项白底并从顶部起一条强调线 */
+.fc-tabs-enhanced.fc-tabs-style-card .el-tabs__nav-wrap {
+  background-color: var(--fc-tabs-fill);
+}
+
+.fc-tabs-enhanced.fc-tabs-style-card .el-tabs__nav-wrap::after {
+  display: none;
+}
+
+.fc-tabs-enhanced.fc-tabs-style-card .el-tabs__item.is-active {
+  background-color: var(--el-bg-color, #fff);
+  color: var(--fc-tabs-color);
+  box-shadow: inset 0 3px 0 var(--fc-tabs-color);
+  font-weight: 600;
+}
+
+/* 描边：圆角卡片，激活项白底 */
+.fc-tabs-enhanced.fc-tabs-style-boxed .el-tabs__nav-wrap::after {
+  height: 1px;
+  background-color: var(--fc-tabs-line);
+}
+
+.fc-tabs-enhanced.fc-tabs-style-boxed .el-tabs__item {
+  height: 36px;
+  padding: 0 16px;
+  margin-right: 8px;
+  background-color: var(--fc-tabs-fill);
+  border: 1px solid var(--fc-tabs-line);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+}
+
+.fc-tabs-enhanced.fc-tabs-style-boxed .el-tabs__item.is-active {
+  background-color: var(--el-bg-color, #fff);
+  color: var(--fc-tabs-color);
+  font-weight: 600;
+}
+
+/* 填充：激活项实心，底部整条强调线 */
+.fc-tabs-enhanced.fc-tabs-style-filled .el-tabs__nav-wrap::after {
+  height: 2px;
+  background-color: var(--fc-tabs-color);
+}
+
+.fc-tabs-enhanced.fc-tabs-style-filled .el-tabs__item {
+  height: 36px;
+  padding: 0 16px;
+  margin-right: 8px;
+  background-color: var(--fc-tabs-fill);
+  border-radius: 8px 8px 0 0;
+}
+
+.fc-tabs-enhanced.fc-tabs-style-filled .el-tabs__item.is-active {
+  background-color: var(--fc-tabs-color);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 胶囊：激活项实心胶囊，底部整条强调线 */
+.fc-tabs-enhanced.fc-tabs-style-pill .el-tabs__nav-wrap::after {
+  height: 2px;
+  background-color: var(--fc-tabs-color);
+}
+
 .fc-tabs-enhanced.fc-tabs-style-pill .el-tabs__item {
-  border-radius: 999px;
+  height: 30px;
+  padding: 0 16px;
+  margin-right: 8px;
+  margin-bottom: 4px;
+  background-color: var(--fc-tabs-fill);
+  border-radius: 6px;
   transition: background-color 0.2s, color 0.2s;
 }
 
 .fc-tabs-enhanced.fc-tabs-style-pill .el-tabs__item.is-active {
   background-color: var(--fc-tabs-color);
   color: #fff;
-}
-
-.fc-tabs-enhanced.fc-tabs-style-card .el-tabs__header {
-  border: 1px solid var(--el-border-color-lighter, #ebeef5);
-  border-radius: 8px;
-  overflow: hidden;
-  background: #fff;
-}
-
-.fc-tabs-enhanced.fc-tabs-style-card .el-tabs__item.is-active {
-  color: var(--fc-tabs-color);
-  box-shadow: inset 0 2px 0 var(--fc-tabs-color);
   font-weight: 600;
-}
-
-.fc-tabs-enhanced.fc-tabs-style-boxed .el-tabs__item {
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  margin-right: 6px;
-}
-
-.fc-tabs-enhanced.fc-tabs-style-boxed .el-tabs__item.is-active {
-  border-color: var(--fc-tabs-color);
-  color: var(--fc-tabs-color);
-}
-
-.fc-tabs-enhanced.fc-tabs-style-filled .el-tabs__item {
-  background: var(--el-fill-color-light, #f5f7fa);
-  border-radius: 6px;
-  margin-right: 4px;
-}
-
-.fc-tabs-enhanced.fc-tabs-style-filled .el-tabs__item.is-active {
-  background: var(--fc-tabs-color);
-  color: #fff;
-}
-
-.fc-tabs-enhanced.fc-tabs-style-soft .el-tabs__nav-wrap {
-  background: color-mix(in srgb, var(--fc-tabs-color) 10%, transparent);
-  border-radius: 999px;
-  padding: 4px;
-  box-sizing: border-box;
-}
-
-.fc-tabs-enhanced.fc-tabs-style-soft .el-tabs__item {
-  border-radius: 999px;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.fc-tabs-enhanced.fc-tabs-style-soft .el-tabs__item.is-active {
-  background: #fff;
-  color: var(--fc-tabs-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .fc-tabs-enhanced.el-tabs--left .el-tabs__header,
@@ -865,21 +883,122 @@
 }
 
 .fc-tabs-enhanced.el-tabs--left.fc-tabs-style-card .el-tabs__item.is-active {
-  box-shadow: inset 2px 0 0 var(--fc-tabs-color);
+  box-shadow: inset 3px 0 0 var(--fc-tabs-color);
 }
 
 .fc-tabs-enhanced.el-tabs--right.fc-tabs-style-card .el-tabs__item.is-active {
-  box-shadow: inset -2px 0 0 var(--fc-tabs-color);
+  box-shadow: inset -3px 0 0 var(--fc-tabs-color);
 }
 
 .fc-tabs-enhanced.el-tabs--bottom.fc-tabs-style-card .el-tabs__item.is-active {
-  box-shadow: inset 0 -2px 0 var(--fc-tabs-color);
+  box-shadow: inset 0 -3px 0 var(--fc-tabs-color);
 }
 
-/* 竖向布局下，boxed/filled 去掉横向 margin-right，避免竖排页签右侧留白错位 */
+/* 竖向布局下，boxed/filled/pill 去掉横向 margin-right，避免竖排页签右侧留白错位 */
 .fc-tabs-enhanced.el-tabs--left.fc-tabs-style-boxed .el-tabs__item,
 .fc-tabs-enhanced.el-tabs--right.fc-tabs-style-boxed .el-tabs__item,
 .fc-tabs-enhanced.el-tabs--left.fc-tabs-style-filled .el-tabs__item,
-.fc-tabs-enhanced.el-tabs--right.fc-tabs-style-filled .el-tabs__item {
+.fc-tabs-enhanced.el-tabs--right.fc-tabs-style-filled .el-tabs__item,
+.fc-tabs-enhanced.el-tabs--left.fc-tabs-style-pill .el-tabs__item,
+.fc-tabs-enhanced.el-tabs--right.fc-tabs-style-pill .el-tabs__item {
   margin-right: 0;
+  margin-bottom: 6px;
+}
+
+
+/* ===== 折叠面板增强样式 ===== */
+/* 与标签页共用同一套 5 样式（下划线/卡片/描边/填充/胶囊），自定义色 --fc-collapse-color
+   的生效区域与标签页一致：下划线=文字+下线；卡片=文字+上线；描边=文字；填充/胶囊=实心底色+白字。
+   全局作用域：设计态属性面板预览不在 .form-create 内，需同时作用于设计器与运行态。 */
+.fc-collapse-enhanced {
+  --fc-collapse-color: var(--et-color-primary, #4080ff);
+  --fc-collapse-fill: var(--el-fill-color-light, #f5f7fa);
+  --fc-collapse-line: var(--el-border-color-lighter, #ebeef5);
+  border-top: none;
+  border-bottom: none;
+}
+
+/* 去掉 el-collapse 默认分隔线，由各样式自行控制 */
+.fc-collapse-enhanced .el-collapse-item__header {
+  border-bottom: none;
+}
+
+.fc-collapse-enhanced .el-collapse-item__header.is-active {
+  color: var(--fc-collapse-color);
+  font-weight: 600;
+}
+
+.fc-collapse-enhanced .el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: var(--fc-collapse-color);
+}
+
+/* 下划线：展开项 文字 + 底部 3px 线；收起项 1px 浅线 */
+.fc-collapse-enhanced.fc-collapse-style-underline .el-collapse-item__header {
+  border-bottom: 1px solid var(--fc-collapse-line);
+}
+
+.fc-collapse-enhanced.fc-collapse-style-underline .el-collapse-item__header.is-active {
+  border-bottom: 3px solid var(--fc-collapse-color);
+}
+
+/* 卡片：头部区浅底，展开项 文字 + 顶部 3px 内嵌线 */
+.fc-collapse-enhanced.fc-collapse-style-card .el-collapse-item {
+  background-color: var(--fc-collapse-fill);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.fc-collapse-enhanced.fc-collapse-style-card .el-collapse-item:last-child {
+  margin-bottom: 0;
+}
+
+.fc-collapse-enhanced.fc-collapse-style-card .el-collapse-item__header.is-active {
+  box-shadow: inset 0 3px 0 var(--fc-collapse-color);
+}
+
+/* 描边：每项圆角描边卡片，展开项 文字着色（白底） */
+.fc-collapse-enhanced.fc-collapse-style-boxed .el-collapse-item {
+  border: 1px solid var(--fc-collapse-line);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.fc-collapse-enhanced.fc-collapse-style-boxed .el-collapse-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 填充：展开项 实心底色 + 白字 + 底部整线（收起项之间留间距成胶囊条） */
+.fc-collapse-enhanced.fc-collapse-style-filled .el-collapse-item__header:not(.is-active) {
+  margin-bottom: 4px;
+}
+
+.fc-collapse-enhanced.fc-collapse-style-filled .el-collapse-item__header.is-active {
+  background-color: var(--fc-collapse-color);
+  color: #fff;
+  border-bottom: 2px solid var(--fc-collapse-color);
+}
+
+.fc-collapse-enhanced.fc-collapse-style-filled .el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: #fff;
+}
+
+/* 胶囊：展开项 实心胶囊 + 白字（收起项之间留间距） */
+.fc-collapse-enhanced.fc-collapse-style-pill .el-collapse-item__header:not(.is-active) {
+  margin-bottom: 4px;
+}
+
+.fc-collapse-enhanced.fc-collapse-style-pill .el-collapse-item__header {
+  border-radius: 6px;
+  padding: 0 16px;
+}
+
+.fc-collapse-enhanced.fc-collapse-style-pill .el-collapse-item__header.is-active {
+  background-color: var(--fc-collapse-color);
+  color: #fff;
+}
+
+.fc-collapse-enhanced.fc-collapse-style-pill .el-collapse-item__header.is-active .el-collapse-item__arrow {
+  color: #fff;
 }

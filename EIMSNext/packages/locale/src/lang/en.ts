@@ -3500,6 +3500,10 @@ export default {
       },
       props: {
         accordion: "Whether it is in accordion mode",
+        style: "Style",
+        collapseColorCustom: "Custom color",
+        items: "Panels",
+        addItem: "Add panel",
       },
     },
     elCollapseItem: {
@@ -3571,6 +3575,9 @@ export default {
         tabColorCustom: "Custom color",
         positionLeft: "Left",
         positionRight: "Right",
+        items: "Tabs",
+        addItem: "Add tab",
+        tabLabel: "Tab {0}",
       },
     },
     elTag: {
