@@ -52,7 +52,7 @@
         <span class="page-setup-summary">{{ pageSetupSummary }}</span>
       </div>
       <div class="right">
-        <el-button @click="openPageSetupDialog">{{ t("admin.printDesigner.settings") }}</el-button>
+        <el-button>{{ t("admin.printDesigner.settings") }}</el-button>
         <el-button :loading="previewing" :disabled="!designerReady" @click="preview">{{ t("admin.printDesigner.preview") }}</el-button>
         <el-button :loading="saving" :disabled="!designerReady" @click="save">{{ t("common.save") }}</el-button>
       </div>
@@ -261,7 +261,7 @@ const pointToMm = (point: number) => Number((point * 25.4 / 72).toFixed(2));
 const createDefaultWorkbookData = () => ({
   id: DEFAULT_SHEET_ID,
   name: DEFAULT_SHEET_ID,
-  appVersion: "0.21.0",
+  appVersion: "1.0.3",
   locale: "zhCN",
   sheetOrder: [DEFAULT_SHEET_ID],
   sheets: {
@@ -449,7 +449,43 @@ const hiddenMenuItems: Record<string, { hidden: boolean }> = {
   "ribbon.formulas": { hidden: true },
   "formula-bar": { hidden: true },
   "sheet.toolbar.text-to-number": { hidden: true },
+  "sheet.operation.open.numfmt.panel": { hidden: true },
+  "sheet.command.numfmt.set.currency": { hidden: true },
+  "sheet.command.numfmt.set.percent": { hidden: true },
+  "sheet.command.numfmt.add.decimal.command": { hidden: true },
+  "sheet.command.numfmt.subtract.decimal.command": { hidden: true },
+  "sheet.command.set-shrink-to-fit": { hidden: true },
+  "sheet.command.set-text-rotation": { hidden: true },
+  "sheet.command.set-range-font-increase": { hidden: true },
+  "sheet.command.set-range-font-decrease": { hidden: true },
+  "sheet.toolbar.sheet-frozen": { hidden: true },
+  "sheet.menu.zoom-ratio": { hidden: true },
+  "sheet.command.toggle-gridlines": { hidden: true },
+  "base-ui.operation.toggle-fullscreen": { hidden: true },
+  "ui.operation.open-feature-search": { hidden: true },
 };
+
+// 仅保留服务端 EIMSNext.Print/fonts 目录实际内置的字体（value 必须与 TTF 的 family name 一致，
+// 服务端 FontsCache 按 SKTypeface.FamilyName 做空白/大小写不敏感匹配）
+const printFontFamilies = [
+  { value: "SimSun", label: "宋体" },
+  { value: "NSimSun", label: "新宋体" },
+  { value: "SimHei", label: "黑体" },
+  { value: "KaiTi", label: "楷体" },
+  { value: "FangSong", label: "仿宋" },
+  // { value: "YouYuan", label: "幼圆" },
+  // { value: "DengXian", label: "等线" },
+  { value: "Microsoft YaHei", label: "微软雅黑" },
+  { value: "STLiti", label: "华文隶书" },
+  { value: "STXihei", label: "华文细黑" },
+  { value: "STXingkai", label: "华文行楷" },
+  { value: "STXinwei", label: "华文新魏" },
+  { value: "FZYaoTi", label: "方正姚体" },
+  { value: "Arial", label: "Arial" },
+  { value: "Arial Black", label: "Arial Black" },
+  { value: "Times New Roman", label: "Times New Roman" },
+  { value: "Verdana", label: "Verdana" },
+];
 
 const syncPageSettingsDraft = () => {
   const nextSettings = clonePageSettings(pageSettings.value);
@@ -507,16 +543,18 @@ const createPageSetupMenuIcon = (react: any) => {
   };
 };
 
-const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: any) => {
-  runtimeApi.registerComponent(PAGE_SETUP_MENU_ICON_ID, createPageSetupMenuIcon(modules.react));
+const registerPageSetupToolbarMenu = (modules: LoadedUniverModules, runtimeApi: any, univer: InstanceType<UniverModule["Univer"]>) => {
+  // 菜单项 icon 只从 IconManager 解析（1.0 机制）；__getInjector 在 Univer 实例上（非 FUniver），IconManager 由 UniverUIPlugin onStarting 注册
+  univer.__getInjector().get(modules.ui.IconManager).register(PAGE_SETUP_MENU_ICON_ID, createPageSetupMenuIcon(modules.react));
   runtimeApi.createMenu({
     id: PAGE_SETUP_MENU_ID,
     title: t("admin.printDesigner.pageSetupMenu"),
     tooltip: t("admin.printDesigner.pageSetupMenu"),
     icon: PAGE_SETUP_MENU_ICON_ID,
-    order: 1000,
+    // 与「背景图片」同组（VIEW/DISPLAY，其 order=0.5），排其后实现位置互换
+    order: 1,
     action: openPageSetupDialog,
-  }).appendTo([modules.ui.RibbonPosition.INSERT, modules.ui.RibbonInsertGroup.MEDIA]);
+  }).appendTo([modules.ui.RibbonPosition.VIEW, modules.ui.RibbonViewGroup.DISPLAY]);
 };
 
 const disposeDesigner = () => {
@@ -846,6 +884,8 @@ const initSheet = async (data: Record<string, unknown>) => {
     contextMenu: true,
     headerMenu: true,
     ribbonType: "simple",
+    menu: hiddenMenuItems,
+    customFontFamily: { override: true, list: printFontFamilies },
   });
   univer.registerPlugin(modules.drawing.UniverDrawingPlugin);
   univer.registerPlugin(modules.drawingUi.UniverDrawingUIPlugin);
@@ -864,7 +904,7 @@ const initSheet = async (data: Record<string, unknown>) => {
   univer.registerPlugin(modules.sheetsDrawingUi.UniverSheetsDrawingUIPlugin);
 
   const runtimeApi = modules.coreFacade.FUniver.newAPI(univer);
-  registerPageSetupToolbarMenu(modules, runtimeApi);
+  registerPageSetupToolbarMenu(modules, runtimeApi, univer);
   const runtimeWorkbook = runtimeApi.createWorkbook(data);
   const renderManagerService = (univer as any).__getInjector?.().get(modules.render.IRenderManagerService);
   const runtimeUnitId = typeof runtimeWorkbook?.getId === "function"

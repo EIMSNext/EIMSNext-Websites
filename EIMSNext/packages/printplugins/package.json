@@ -1,6 +1,6 @@
 {
   "name": "@eimsnext/print-plugins",
-  "version": "0.21.1",
+  "version": "1.0.3",
   "description": "",
   "type": "module",
   "main": "./dist/index.js",
@@ -13,8 +13,8 @@
   "author": "",
   "license": "",
   "peerDependencies": {
-    "@univerjs/core": "^0.21.1",
-    "@univerjs/engine-render": "^0.21.1"
+    "@univerjs/core": "^1.0.3",
+    "@univerjs/engine-render": "^1.0.3"
   },
   "scripts": {
     "build": "vite build"
