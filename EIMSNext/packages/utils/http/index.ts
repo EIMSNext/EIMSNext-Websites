@@ -15,6 +15,7 @@ import {
 } from "./interface";
 import type { HttpRequestConfig } from "./interface";
 import { setupHttp } from "./setupHttp";
+import { buildCallbackUrl, consumeCallbackToken } from "./callbackToken";
 export { useSubmitGuard } from "../useSubmitGuard";
 
 export {
@@ -33,4 +34,6 @@ export {
   HttpInterceptors,
   HttpRequestConfig,
   setupHttp,
+  buildCallbackUrl,
+  consumeCallbackToken,
 };

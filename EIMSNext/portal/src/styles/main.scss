@@ -1,0 +1,1048 @@
+/* ============================================================
+ * PC：复刻 admin（--et-* token + el-plus 组件观感，值取自
+ * packages/components/src/theme/_light|dark|_base.scss 与 el 默认值）
+ * Mobile：按原型参考图（登录=居中卡片+填充输入框；注册=无卡片+描边输入框）
+ * ============================================================ */
+
+:root {
+  --et-color-primary: #4080ff;
+  --et-color-primary-hover: #79a6ff;
+  --et-color-primary-active: #3366cc;
+  --et-text-primary: #141e31;
+  --et-text-secondary: #525967;
+  --et-text-tertiary: #838892;
+  --et-text-placeholder: #a8abb2;
+  --et-bg-base: #ffffff;
+  --et-bg-container: #ffffff;
+  --et-bg-muted: #f0f2f5;
+  --et-fill-color-light: #f5f7fa;
+  --et-border-color: #dcdfe6;
+  --et-radius-4: 4px;
+  --el-text-color-regular: #606266;
+  --el-color-warning: #e6a23c;
+  --el-box-shadow: 0 12px 32px 4px rgb(0 0 0 / 4%), 0 8px 20px rgb(0 0 0 / 8%), 0 4px 12px rgb(0 0 0 / 12%);
+  --el-box-shadow-light: 0 0 12px rgb(0 0 0 / 12%);
+  --el-dropdown-menu-box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+}
+
+html.dark {
+  --et-text-primary: #e5eaf3;
+  --et-text-secondary: #cfd3dc;
+  --et-text-tertiary: #8f959e;
+  --et-text-placeholder: #71757c;
+  --et-bg-base: #1a1d24;
+  --et-bg-container: #1a1d24;
+  --et-bg-muted: #2b303b;
+  --et-fill-color-light: rgb(255 255 255 / 8%);
+  --et-border-color: #3a404b;
+  --el-text-color-regular: #cfd3dc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", Arial, sans-serif;
+  color: var(--et-text-primary);
+}
+
+/* ---------- mobile token（值取自 mobile/src/styles/index.scss） ---------- */
+
+html.device-mobile {
+  color-scheme: light;
+  --mobile-bg-page: #f5f5f5;
+  --mobile-bg-card: #ffffff;
+  --mobile-fill: #f2f3f5;
+  --mobile-border-color: #ebedf0;
+  --mobile-text-primary: #323233;
+  --mobile-text-secondary: #646566;
+  --mobile-text-tertiary: #969799;
+
+  body {
+    background-color: var(--mobile-bg-page);
+    color: var(--mobile-text-primary);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+html.device-mobile.dark {
+  color-scheme: dark;
+  --mobile-bg-page: #111827;
+  --mobile-bg-card: #1f2937;
+  --mobile-fill: rgb(255 255 255 / 8%);
+  --mobile-border-color: #374151;
+  --mobile-text-primary: #f3f4f6;
+  --mobile-text-secondary: #d1d5db;
+  --mobile-text-tertiary: #9ca3af;
+}
+
+/* ============================================================
+ * PC —— admin 观感（登录/注册均无卡片）
+ * ============================================================ */
+
+.pc-logo {
+  height: 36px;
+}
+
+.pc-login {
+  align-items: center;
+  background: var(--et-bg-muted);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  .brand-logo {
+    left: 60px;
+    position: absolute;
+    top: 40px;
+    z-index: 9;
+    height: 24px;
+    padding: 0;
+  }
+
+  .lang-switch {
+    align-items: center;
+    color: var(--et-text-tertiary);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 14px;
+    gap: 5px;
+    justify-content: center;
+    line-height: 18px;
+    position: absolute;
+    right: 24px;
+    top: 24px;
+  }
+
+  .banner {
+    position: relative;
+    flex: 0.58;
+    height: 100%;
+
+    .bg-banner {
+      background-image: url("@/assets/images/login/login-image.webp");
+      background-position: 50%;
+      background-repeat: no-repeat;
+      background-size: cover;
+      height: 100%;
+      width: 100%;
+    }
+  }
+
+  .main {
+    align-items: center;
+    display: flex;
+    flex: 0.42;
+    height: 100%;
+    justify-content: center;
+    overflow-y: auto;
+    position: relative;
+
+    .content {
+      width: 320px;
+
+      .login-title {
+        font-size: 32px;
+        font-weight: 500;
+        line-height: 48px;
+      }
+
+      .login-register {
+        font-size: 14px;
+        line-height: 20px;
+        margin: 10px 0 40px;
+      }
+    }
+  }
+}
+
+.pc-register .pc-login .main .content {
+  width: 420px;
+
+  .login-register {
+    margin: 10px 0 24px;
+  }
+}
+
+.pc-link {
+  color: var(--et-color-primary);
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--et-color-primary-hover);
+  }
+}
+
+/* el-input large 观感 */
+.pc-field {
+  position: relative;
+  height: 40px;
+  margin-top: 16px;
+
+  &.first-item {
+    margin-top: 0;
+  }
+
+  input {
+    background: var(--et-bg-container);
+    border: 1px solid var(--et-border-color);
+    border-radius: var(--et-radius-4);
+    color: var(--el-text-color-regular);
+    font-size: 14px;
+    height: 100%;
+    line-height: 38px;
+    outline: none;
+    padding: 0 11px;
+    transition: border-color 0.2s;
+    width: 100%;
+
+    &::placeholder {
+      color: var(--et-text-placeholder);
+    }
+
+    &:hover {
+      border-color: var(--et-text-placeholder);
+    }
+
+    &:focus {
+      border-color: var(--et-color-primary);
+      box-shadow: 0 0 0 1px var(--et-color-primary) inset;
+    }
+  }
+
+  &.has-toggle input {
+    padding-right: 34px;
+  }
+
+  .input-toggle {
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--et-text-placeholder);
+    cursor: pointer;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 34px;
+
+    svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+}
+
+html.dark .pc-field input {
+  background: rgb(20 22 26 / 72%);
+}
+
+.pc-form-item-error {
+  color: #c93636;
+  font-size: 12px;
+  line-height: 18px;
+  margin-top: 6px;
+}
+
+.pc-form-item-notice {
+  color: #23c343;
+  font-size: 12px;
+  line-height: 18px;
+  margin-top: 6px;
+}
+
+.capslock-tip {
+  color: var(--el-color-warning);
+  font-size: 12px;
+  line-height: 18px;
+  margin-top: 6px;
+}
+
+/* el-checkbox 观感（admin 上为未绑定的摆设，此处保持一致） */
+.pc-options {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 12px;
+
+  .pc-checkbox {
+    align-items: center;
+    color: var(--el-text-color-regular);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    user-select: none;
+
+    .box {
+      background: var(--et-bg-container);
+      border: 1px solid var(--et-border-color);
+      border-radius: 2px;
+      display: inline-flex;
+      height: 14px;
+      margin-right: 8px;
+      position: relative;
+      width: 14px;
+
+      &::after {
+        border: 1px solid #fff;
+        border-left: 0;
+        border-top: 0;
+        content: "";
+        height: 7px;
+        left: 4px;
+        opacity: 0;
+        position: absolute;
+        top: 1px;
+        transform: rotate(45deg) scaleY(1);
+        width: 3px;
+      }
+    }
+  }
+
+  .forget-password {
+    cursor: pointer;
+    flex: auto;
+    justify-content: flex-end;
+    text-align: right;
+  }
+}
+
+/* el-button primary large 观感（注册页 admin 覆写高度 44px） */
+.pc-btn {
+  background: var(--et-color-primary);
+  border: none;
+  border-radius: var(--et-radius-4);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  height: 40px;
+  margin-top: 28px;
+  padding: 0 15px;
+  transition: background-color 0.2s;
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    background: var(--et-color-primary-hover);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--et-color-primary-active);
+  }
+
+  &:disabled {
+    background: var(--et-color-primary-hover);
+    color: rgb(255 255 255 / 80%);
+    cursor: not-allowed;
+  }
+}
+
+.pc-register .pc-btn {
+  height: 44px;
+  margin-top: 24px;
+}
+
+/* el-switch inline-prompt（Moon/Sunny）观感 */
+.pc-switch {
+  background: var(--et-border-color);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 20px;
+  padding: 0;
+  position: relative;
+  transition: background-color 0.2s;
+  width: 40px;
+
+  .knob {
+    align-items: center;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    height: 16px;
+    justify-content: center;
+    left: 2px;
+    position: absolute;
+    top: 2px;
+    transition: left 0.2s;
+    width: 16px;
+  }
+
+  .icon {
+    align-items: center;
+    color: #7d8085;
+    display: flex;
+    height: 16px;
+    justify-content: center;
+    position: absolute;
+    top: 2px;
+    width: 16px;
+
+    svg {
+      height: 12px;
+      width: 12px;
+    }
+  }
+
+  .icon-sun {
+    right: 3px;
+  }
+
+  .icon-moon {
+    display: none;
+    left: 3px;
+    color: #fff;
+  }
+
+  &.on {
+    background: var(--et-color-primary);
+
+    .knob {
+      left: 22px;
+    }
+
+    .icon-sun {
+      display: none;
+    }
+
+    .icon-moon {
+      display: flex;
+    }
+  }
+}
+
+/* LangSelect 观感（et-icon language + label + dropdown） */
+.pc-lang {
+  position: relative;
+
+  .trigger {
+    align-items: center;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    gap: 5px;
+    padding: 0;
+
+    svg {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  .menu {
+    background: var(--et-bg-container);
+    border-radius: 4px;
+    box-shadow: var(--el-dropdown-menu-box-shadow);
+    padding: 6px 0;
+    position: absolute;
+    right: 0;
+    top: 26px;
+    z-index: 100;
+
+    button {
+      background: none;
+      border: none;
+      color: var(--et-text-primary);
+      cursor: pointer;
+      display: block;
+      font-size: 14px;
+      line-height: 22px;
+      padding: 5px 16px;
+      text-align: left;
+      white-space: nowrap;
+      width: 100%;
+
+      &:hover {
+        background: var(--et-fill-color-light);
+      }
+
+      &.active {
+        color: var(--et-color-primary);
+      }
+    }
+  }
+}
+
+/* 注册页：验证码 append（原型为灰底 + 分隔线，min-width 104） */
+.pc-code-row {
+  display: flex;
+
+  input {
+    border-radius: var(--et-radius-4) 0 0 var(--et-radius-4);
+    border-right: none;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .append {
+    align-items: center;
+    background: var(--et-fill-color-light);
+    border: 1px solid var(--et-border-color);
+    border-radius: 0 var(--et-radius-4) var(--et-radius-4) 0;
+    color: var(--et-text-tertiary);
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    justify-content: center;
+    min-width: 104px;
+    padding: 0 12px;
+
+    &:disabled {
+      color: var(--et-text-placeholder);
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* 注册页：区号固定框（88px，带下拉箭头，仅 +86 一项） */
+.pc-area {
+  align-items: center;
+  border: 1px solid var(--et-border-color);
+  border-radius: var(--et-radius-4);
+  color: var(--el-text-color-regular);
+  cursor: default;
+  display: flex;
+  flex: none;
+  font-size: 14px;
+  gap: 6px;
+  height: 40px;
+  justify-content: center;
+  width: 88px;
+
+  svg {
+    color: var(--et-text-placeholder);
+    height: 14px;
+    width: 14px;
+  }
+}
+
+.pc-phone-row {
+  display: flex;
+  gap: 12px;
+
+  .pc-field {
+    flex: 1;
+  }
+}
+
+.agreement-text {
+  color: var(--et-text-secondary);
+  font-size: 13px;
+  line-height: 22px;
+  margin-top: 20px;
+}
+
+.help-link-row {
+  align-items: center;
+  color: var(--et-text-secondary);
+  display: flex;
+  font-size: 14px;
+  gap: 4px;
+  line-height: 20px;
+  margin-top: 16px;
+}
+
+.password-tips {
+  background: var(--et-bg-container);
+  border-radius: 12px;
+  box-shadow: var(--el-box-shadow-light);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 14px 16px;
+  position: absolute;
+  z-index: 20;
+
+  div {
+    align-items: flex-start;
+    color: var(--et-text-secondary);
+    display: flex;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  div.passed {
+    color: var(--et-text-primary);
+  }
+
+  .tip-icon {
+    margin-right: 8px;
+    width: 16px;
+  }
+}
+
+/* admin 暗黑：整页变背景图 */
+html.dark .pc-login {
+  background: url("@/assets/images/login/login-background-dark.jpg") no-repeat center right;
+}
+
+/* admin ≤960px 断点 */
+@media (max-width: 960px) {
+  .pc-login {
+    .banner {
+      display: none;
+    }
+
+    .main {
+      flex: 1;
+      padding: 88px 16px 24px;
+    }
+
+    .brand-logo {
+      left: 24px;
+      top: 24px;
+    }
+  }
+
+  .pc-login .main .content,
+  .pc-register .pc-login .main .content {
+    max-width: 420px;
+    width: 100%;
+  }
+}
+
+/* ---------- PC 找回密码（admin forget-password 页 1:1） ---------- */
+
+.pc-forget {
+  align-items: center;
+  background: var(--et-bg-muted);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.pc-forget-panel {
+  background: var(--et-bg-base);
+  border-radius: 8px;
+  box-shadow: var(--el-box-shadow-light);
+  max-width: 420px;
+  padding: 40px;
+  text-align: center;
+  width: calc(100% - 48px);
+
+  h1 {
+    color: var(--et-text-primary);
+    font-size: 24px;
+    margin: 0 0 16px;
+  }
+
+  p {
+    color: var(--et-text-secondary);
+    line-height: 24px;
+    margin: 0 0 24px;
+  }
+}
+
+html.dark .pc-forget {
+  background: url("@/assets/images/login/login-background-dark.jpg") no-repeat center right;
+}
+
+/* ============================================================
+ * Mobile —— 原型参考图（登录=居中卡片；注册=无卡片左对齐）
+ * ============================================================ */
+
+.m-page {
+  background-color: var(--mobile-bg-page);
+  color: var(--mobile-text-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- 登录：居中卡片 ---------- */
+
+.m-login-body {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  padding: 24px;
+}
+
+.m-card {
+  background: var(--mobile-bg-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 6%);
+  padding: 0 24px 24px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.m-card-title {
+  border-bottom: 1px solid var(--mobile-border-color);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 -24px 20px;
+  padding: 16px 24px;
+  text-align: center;
+}
+
+.m-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.m-link {
+  color: var(--et-color-primary);
+  text-decoration: none;
+}
+
+.m-field {
+  align-items: center;
+  background: var(--mobile-bg-card);
+  border: 1px solid var(--mobile-border-color);
+  border-radius: 6px;
+  display: flex;
+  height: 44px;
+  padding: 0 12px;
+
+  &.filled {
+    background: var(--mobile-fill);
+    border: none;
+  }
+
+  &.outlined:focus-within {
+    border-color: var(--et-color-primary);
+  }
+
+  input {
+    background: transparent;
+    border: none;
+    color: var(--mobile-text-primary);
+    flex: 1;
+    font-size: 16px;
+    min-width: 0;
+    outline: none;
+
+    &::placeholder {
+      color: var(--mobile-text-tertiary);
+    }
+  }
+
+  .input-toggle {
+    background: none;
+    border: none;
+    color: var(--mobile-text-tertiary);
+    cursor: pointer;
+    display: flex;
+    padding: 0 0 0 8px;
+
+    svg {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  .m-send {
+    background: var(--mobile-fill);
+    border: none;
+    color: var(--mobile-text-tertiary);
+    cursor: pointer;
+    flex: none;
+    font-size: 14px;
+    margin: 0 -12px 0 8px;
+    min-width: 104px;
+    padding: 12px;
+    text-align: center;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+}
+
+.m-check-row {
+  align-items: center;
+  display: flex;
+  font-size: 14px;
+  justify-content: space-between;
+
+  .m-check {
+    align-items: center;
+    color: var(--mobile-text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    gap: 8px;
+    user-select: none;
+
+    .box {
+      background: var(--mobile-bg-card);
+      border: 1px solid var(--mobile-border-color);
+      border-radius: 2px;
+      display: inline-flex;
+      height: 16px;
+      position: relative;
+      width: 16px;
+
+      &::after {
+        border: 1px solid #fff;
+        border-left: 0;
+        border-top: 0;
+        content: "";
+        height: 8px;
+        left: 4px;
+        opacity: 0;
+        position: absolute;
+        top: 1px;
+        transform: rotate(45deg);
+        width: 5px;
+      }
+    }
+  }
+}
+
+.m-links-row {
+  display: flex;
+  font-size: 14px;
+  justify-content: flex-end;
+
+  .m-link {
+    color: var(--et-color-primary);
+    text-decoration: none;
+  }
+}
+
+/* 原型按钮：块级、6px 圆角（非全圆） */
+.m-btn {
+  background: var(--et-color-primary);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  height: 44px;
+  width: 100%;
+
+  &:active:not(:disabled) {
+    background: var(--et-color-primary-active);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.m-error {
+  color: #ee0a24;
+  font-size: 13px;
+  line-height: 20px;
+  margin: -4px 0 0;
+}
+
+.m-notice {
+  color: #07c160;
+  font-size: 13px;
+  line-height: 20px;
+  margin: -4px 0 0;
+}
+
+.m-agreement {
+  color: var(--mobile-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+
+  .m-link {
+    color: var(--et-color-primary);
+    text-decoration: none;
+  }
+}
+
+.m-help-row {
+  color: var(--mobile-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+
+  .m-link {
+    color: var(--et-color-primary);
+    text-decoration: none;
+  }
+}
+
+/* ---------- 注册：无卡片、左对齐 ---------- */
+
+.m-register-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 32px 24px 16px;
+}
+
+.m-reg-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 16px 0 8px;
+}
+
+.m-reg-sub {
+  color: var(--mobile-text-secondary);
+  font-size: 13px;
+  margin: 0 0 24px;
+
+  .m-link {
+    color: var(--et-color-primary);
+    text-decoration: none;
+  }
+}
+
+.m-phone-row {
+  display: flex;
+  gap: 12px;
+
+  .m-select {
+    align-items: center;
+    background: var(--mobile-bg-card);
+    border: 1px solid var(--mobile-border-color);
+    border-radius: 6px;
+    color: var(--mobile-text-primary);
+    cursor: default;
+    display: flex;
+    flex: none;
+    font-size: 16px;
+    gap: 6px;
+    height: 44px;
+    justify-content: center;
+    width: 90px;
+
+    svg {
+      color: var(--mobile-text-tertiary);
+      height: 14px;
+      width: 14px;
+    }
+  }
+
+  .m-field {
+    flex: 1;
+  }
+}
+
+.m-register-body .steps .step {
+  height: 24px;
+  width: 24px;
+}
+
+/* ---------- 语言切换（登录页右下 / 注册页左下） ---------- */
+
+.m-lang {
+  padding: 0 24px 20px;
+  position: relative;
+
+  &.right {
+    align-items: flex-end;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .trigger {
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--mobile-text-secondary);
+    cursor: pointer;
+    display: flex;
+    font-size: 13px;
+    gap: 5px;
+    padding: 0;
+
+    svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+
+  .menu {
+    background: var(--mobile-bg-card);
+    border-radius: 8px;
+    bottom: 40px;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+    padding: 6px 0;
+    position: absolute;
+    z-index: 100;
+
+    &.right {
+      right: 24px;
+    }
+
+    &.left {
+      left: 24px;
+    }
+
+    button {
+      background: none;
+      border: none;
+      color: var(--mobile-text-primary);
+      cursor: pointer;
+      display: block;
+      font-size: 14px;
+      line-height: 22px;
+      padding: 6px 16px;
+      text-align: left;
+      white-space: nowrap;
+      width: 100%;
+
+      &.active {
+        color: var(--et-color-primary);
+      }
+    }
+  }
+}
+
+/* ---------- 找回密码 / 过渡页 ---------- */
+
+.m-hint {
+  color: var(--mobile-text-secondary);
+  font-size: 14px;
+  line-height: 22px;
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+.center-page {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.spinner {
+  animation: auth-spin 0.8s linear infinite;
+  border: 3px solid var(--et-border-color);
+  border-radius: 50%;
+  border-top-color: var(--et-color-primary);
+  height: 28px;
+  width: 28px;
+}
+
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
