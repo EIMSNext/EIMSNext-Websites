@@ -11,8 +11,8 @@
                 <div class="_fd-tabs-style-trigger" :class="{active: visible}">
                     <el-tabs
                         :model-value="String(activeIndex)"
+                        :type="previewType(currentValue)"
                         class="fc-tabs-enhanced"
-                        :class="'fc-tabs-style-' + currentValue"
                         :style="previewVars"
                     >
                         <el-tab-pane
@@ -37,8 +37,8 @@
                 >
                     <el-tabs
                         :model-value="String(activeIndex)"
+                        :type="previewType(item.value)"
                         class="fc-tabs-enhanced"
-                        :class="'fc-tabs-style-' + item.value"
                         :style="previewVars"
                     >
                         <el-tab-pane
@@ -57,8 +57,8 @@
 <script>
 import {defineComponent} from 'vue';
 
-const DEFAULT_STYLE = 'underline';
-const DEFAULT_PREVIEW_COUNT = 3;
+const DEFAULT_STYLE = 'default';
+const PREVIEW_LABEL_LIMIT = 3;
 
 export default defineComponent({
     name: 'TabsStyleSelect',
@@ -83,17 +83,16 @@ export default defineComponent({
         previewVars() {
             return this.color ? {'--fc-tabs-color': this.color} : {};
         },
-        // 预览直接复用画布上的面板标题与激活项，做到「右边下拉 = 左边标签」。
+        // 预览取前 3 个面板标题：面板过多时整行挤满会被截断，看不全反而失真。
         previewLabels() {
             const labels = (this.activeRule.children || [])
                 .map((pane) => (pane && pane.props ? pane.props.label : ''))
                 .filter(Boolean);
             if (labels.length) {
-                return labels;
+                return labels.slice(0, PREVIEW_LABEL_LIMIT);
             }
             const t = this.designer?.setupState?.t;
-            const count = DEFAULT_PREVIEW_COUNT;
-            return Array.from({length: count}, (_, i) =>
+            return Array.from({length: PREVIEW_LABEL_LIMIT}, (_, i) =>
                 t ? t('com.tabs.props.tabLabel', [String(i + 1)]) : `标签页${i + 1}`
             );
         },
@@ -102,22 +101,24 @@ export default defineComponent({
             const index = children.findIndex(
                 (pane) => pane && pane.props && pane.props.name === this.activeProps.modelValue
             );
-            return index > -1 ? index : 0;
+            return index > -1 ? Math.min(index, PREVIEW_LABEL_LIMIT - 1) : 0;
         },
     },
     data() {
         return {
             visible: false,
             options: [
-                {label: '下划线', value: 'underline'},
+                {label: '默认选项卡', value: 'default'},
                 {label: '卡片', value: 'card'},
-                {label: '描边', value: 'boxed'},
-                {label: '填充', value: 'filled'},
-                {label: '胶囊', value: 'pill'},
+                {label: '带边框卡片', value: 'border-card'},
             ],
         };
     },
     methods: {
+        // 官方样式直接映射 el-tabs 的 type；default 不传 type
+        previewType(value) {
+            return value === 'card' || value === 'border-card' ? value : undefined;
+        },
         selectStyle(value) {
             this.$emit('update:modelValue', value);
             this.$emit('change', value);
@@ -173,19 +174,29 @@ export default defineComponent({
 ._fd-tabs-style-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     padding-right: 2px;
 }
 
 ._fd-tabs-style-option {
     width: 100%;
-    height: 44px;
-    padding: 4px 8px;
+    height: 38px;
+    padding: 3px 6px;
     box-sizing: border-box;
     border: 1px solid var(--fc-line-color-2, #dcdfe6);
     border-radius: 4px;
     background: var(--fc-bg-color-1, #fff);
     cursor: pointer;
+    overflow: hidden;
+}
+
+/* 预览用紧凑标签：默认 40px 高的 el-tabs__item 会撑破选项高度，导致选项之间互相遮挡 */
+._fd-tabs-style-option .el-tabs__item,
+._fd-tabs-style-trigger .el-tabs__item {
+    height: 28px;
+    line-height: 28px;
+    font-size: 12px;
+    padding: 0 12px;
 }
 
 ._fd-tabs-style-option:hover,

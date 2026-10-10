@@ -12,6 +12,11 @@ export default {
   dragBtn: false,
   inside: true,
   mask: false,
+  // 纯布局子容器：不可选中（无样式可配置），画布上不显示工具按钮；
+  // 删除面板时字段先转移到兄弟面板（rescueChildrenOnDelete）。
+  selectable: false,
+  handleBtn: false,
+  rescueChildrenOnDelete: true,
   easySlots: [{ value: "icon", type: "icon" }],
   rule({ t }) {
     return {

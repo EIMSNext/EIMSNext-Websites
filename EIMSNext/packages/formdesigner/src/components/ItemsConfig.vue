@@ -15,7 +15,19 @@
         <template #item="{ element, index }">
           <div class="_fc-items-config-row">
             <i class="fc-icon icon-drag"></i>
-            <span class="_fc-items-config-label" @click="selectChild(element)">
+            <el-input
+              v-if="editingIndex === index"
+              ref="editInput"
+              v-model="editValue"
+              size="small"
+              @blur="commitEdit(element)"
+              @keyup.enter="commitEdit(element)"
+            ></el-input>
+            <span
+              v-else
+              class="_fc-items-config-label"
+              @click="startEdit(index, element)"
+            >
               {{ childLabel(element, index) }}
             </span>
             <i class="fc-icon icon-copy" @click="copyChild(element)"></i>
@@ -46,6 +58,12 @@ export default defineComponent({
   props: {
     title: String,
     addText: String,
+  },
+  data() {
+    return {
+      editingIndex: -1,
+      editValue: "",
+    };
   },
   computed: {
     t() {
@@ -115,8 +133,25 @@ export default defineComponent({
         String(children.indexOf(child) + 1),
       ]);
     },
-    selectChild(element) {
-      this.designer.setupState.triggerActive(element);
+    // 点击标题就地编辑文本，不切换画布选中；空值不生效，避免出现无标题面板。
+    startEdit(index, element) {
+      this.editingIndex = index;
+      this.editValue = (element.props || {})[this.childPropKey] || "";
+      this.$nextTick(() => {
+        const input = this.$refs.editInput;
+        const el = Array.isArray(input) ? input[0] : input;
+        el && el.focus && el.focus();
+      });
+    },
+    commitEdit(element) {
+      if (this.editingIndex < 0) return;
+      const value = (this.editValue || "").trim();
+      if (value) {
+        element.props = element.props || {};
+        element.props[this.childPropKey] = value;
+      }
+      this.editingIndex = -1;
+      this.editValue = "";
     },
     onEnd({ oldIndex, newIndex }) {
       if (oldIndex === newIndex) return;

@@ -1,11 +1,7 @@
 import { uniqueId8 } from '@eimsnext/form-render-core';
 
 const name = 'tabs';
-const DEFAULT_STYLE = 'underline';
 const DEFAULT_COLOR = 'var(--et-color-primary, #4080ff)';
-const STYLE_NAMES = ['underline', 'card', 'boxed', 'filled', 'pill'];
-
-const getStyleName = (style) => (STYLE_NAMES.indexOf(style) > -1 ? style : DEFAULT_STYLE);
 
 // el-tabs 只渲染 name 与 modelValue 相等的面板，其余面板会被置为 display:none。
 // 面板 name 丢失/重复，或 modelValue 指向已被删除的面板时，运行态整块内容区空白、
@@ -46,25 +42,27 @@ export default {
     name,
     mergeProp(ctx) {
         const props = ctx.prop.props || {};
-        const tabStyle = getStyleName(props.tabStyle);
-        const tabColorCustom = props.tabColorCustom === true || props.tabColorCustom === 'true';
-        const tabColor = tabColorCustom && props.tabColor ? props.tabColor : DEFAULT_COLOR;
+        // tabStyle 映射 el-tabs 官方 type：default(无 type)/card/border-card
+        const type = props.tabStyle === 'card' || props.tabStyle === 'border-card' ? props.tabStyle : '';
+        const colorCustom = props.tabColorCustom === true || props.tabColorCustom === 'true';
+        const color = colorCustom && props.tabColor ? props.tabColor : DEFAULT_COLOR;
 
         delete props.tabStyle;
         delete props.tabColor;
         delete props.tabColorCustom;
-        // tabPosition 是 el-tabs 原生 prop，保留透传，不在这里删除。
+        if (type) {
+            props.type = type;
+        }
 
         ctx.prop.props = props;
         ctx.prop.class = [
             ctx.prop.class,
             'fc-tabs-enhanced',
-            `fc-tabs-style-${tabStyle}`,
         ].filter(Boolean);
         ctx.prop.style = [
             ctx.prop.style,
             {
-                '--fc-tabs-color': tabColor,
+                '--fc-tabs-color': color,
             },
         ];
         normalizePaneNames(ctx.prop);

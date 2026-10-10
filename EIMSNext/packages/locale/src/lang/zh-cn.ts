@@ -3469,8 +3469,6 @@ export default {
       },
       props: {
         accordion: "手风琴模式",
-        style: "样式",
-        collapseColorCustom: "自定义颜色",
         items: "多面板显示",
         addItem: "添加面板",
       },

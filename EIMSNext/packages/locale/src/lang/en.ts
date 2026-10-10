@@ -3500,8 +3500,6 @@ export default {
       },
       props: {
         accordion: "Whether it is in accordion mode",
-        style: "Style",
-        collapseColorCustom: "Custom color",
         items: "Panels",
         addItem: "Add panel",
       },

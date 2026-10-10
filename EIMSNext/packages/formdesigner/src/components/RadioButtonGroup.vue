@@ -38,16 +38,22 @@ export default defineComponent({
 
 <style>
 ._fd-radio-button-group {
-  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
 }
 
-._fd-radio-button-group .el-radio-button {
-  flex: 1;
-}
-
+/* 窄面板里一行放不下 4 个选项，改为独立按钮的 2×2 网格 */
 ._fd-radio-button-group .el-radio-button__inner {
   width: 100%;
-  padding: 4px;
-  line-height: 24px;
+  border: 1px solid var(--el-border-color, #dcdfe6);
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  padding: 5px 4px;
+  line-height: 20px;
+}
+
+._fd-radio-button-group .el-radio-button.is-active .el-radio-button__inner {
+  color: var(--el-color-primary);
 }
 </style>

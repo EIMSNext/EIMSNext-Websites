@@ -836,6 +836,19 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     width: 100%;
 }
 
+/* 画布根行是 gutter 布局：el-row 左右 -10px 负 margin 会把画布撑出 20px 水平滚动条。
+   gutter 值是 el-row/el-col 的内联样式，须 !important 覆盖；根级成对抵消（净宽度回到容器宽，
+   内容位置不变），嵌套在各容器内部的行不受影响。 */
+._fc-m-drag > form > .el-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+._fc-m-drag > form > .el-row > .el-col.is-guttered {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
 /* Keep the canvas spacing predictable without stacking the item and drag-tool padding. */
 ._fc-designer ._fc-m-drag > form > .el-row > ._fd-drag-tool > ._fd-drag-box > ._fd-drag-item,
 ._fc-designer ._fc-m-drag > form > .van-row > ._fd-drag-tool > ._fd-drag-box > ._fd-drag-item {
@@ -991,9 +1004,11 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     font-weight: 400;
 }
 
-/* 标签页内容区是嵌套较深的落点，空态需要比普通容器更高，否则几乎没有地方往标签里拖控件 */
-._fc-m .el-tab-pane ._fd-elTabPane-drag.drag-holder {
-    min-height: 160px;
+/* 标签页/折叠面板是容器落点：常驻最小高度（控件少时高度不变，超出时自动撑高）。
+   不能只在空态生效，否则拖入一个控件后面板就塌缩成内容高度，没法继续往里拖。 */
+._fc-m .el-tab-pane ._fd-elTabPane-drag,
+._fc-m .el-collapse-item__content ._fd-elCollapseItem-drag {
+    min-height: 360px;
 }
 
 /* 折叠面板默认全部收起，内容区高度为 0 就没有落点；仅画布内强制展开，预览与运行态不受影响 */

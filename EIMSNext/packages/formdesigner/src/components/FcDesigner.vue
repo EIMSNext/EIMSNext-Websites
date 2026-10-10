@@ -2704,6 +2704,53 @@ export default defineComponent({
         }
         return null;
       },
+      // 取出一个面板（elTabPane/elCollapseItem）内的字段规则（DragTool 包装规则）。
+      // 从源 DragBox 剪切（而非复制），保证规则只存在于一个容器中，删除容器时不被连带移除。
+      extractPaneChildren(paneRule) {
+        const fields = [];
+        const dragTool = paneRule && paneRule.children && paneRule.children[0];
+        if (!dragTool || dragTool.type !== "DragTool") {
+          return fields;
+        }
+        (dragTool.children || []).forEach((child) => {
+          if (child && child.type === "DragBox") {
+            fields.push(...child.children.splice(0));
+          } else {
+            fields.push(child);
+          }
+        });
+        return fields;
+      },
+      collectContainerChildren(containerRule) {
+        const fields = [];
+        (containerRule?.children || []).forEach((pane) => {
+          fields.push(...methods.extractPaneChildren(pane));
+        });
+        return fields;
+      },
+      // 把字段规则塞进目标面板的落点；成功返回 true。
+      insertIntoPane(paneRule, fields) {
+        const dragTool = paneRule && paneRule.children && paneRule.children[0];
+        if (!dragTool || dragTool.type !== "DragTool" || !fields.length) {
+          return false;
+        }
+        const box = (dragTool.children || []).find(
+          (c) => c && c.type === "DragBox"
+        );
+        if (box) {
+          box.children.push(...fields);
+        } else {
+          dragTool.children.push(...fields);
+        }
+        return true;
+      },
+      // 把字段规则插到容器组件（tabs/collapse）在主容器中的位置之后。
+      insertIntoRootAfter(containerRule, fields) {
+        const tool = containerRule.__fc__.parent.rule;
+        const mainRoot = tool.__fc__.parent.rule;
+        const idx = mainRoot.children.indexOf(tool);
+        mainRoot.children.splice(idx + 1, 0, ...fields);
+      },
       getTableFormColumnChildren(rule) {
         if (!methods.isTableFormColumnRule(rule)) {
           return [];
@@ -2737,6 +2784,10 @@ export default defineComponent({
         return child?.type === "DragTool" ? child.children[0] : child;
       },
       resolveActiveRule(rule) {
+        // elTabPane/elCollapseItem 是纯布局子容器，没有自己的配置面板，选中时落到父容器上。
+        if (rule && methods.isRuleName(rule, ["elTabPane", "elCollapseItem"])) {
+          rule = methods.getComponentParent(rule) || rule;
+        }
         if (!methods.isTableFormColumnRule(rule)) {
           return rule;
         }
@@ -4220,6 +4271,7 @@ export default defineComponent({
           hidden: rule._hidden === true || rule._display === false,
           handleBtn: config.handleBtn,
           only,
+          selectable: config.selectable !== false,
           subForm: !!config.subForm,
           tableFormColumnChild: !!rule.tableFormColumnChild,
         };
@@ -4243,6 +4295,20 @@ export default defineComponent({
                     methods.handleRemoveBefore({ parent, rule: parent }) !==
                     false
                   ) {
+                    // 面板删除不连带删字段：先转移到兄弟面板，没有兄弟面板就落到主容器。
+                    if (parent._menu && parent._menu.rescueChildrenOnDelete) {
+                      const fields = methods.extractPaneChildren(parent);
+                      if (fields.length) {
+                        const top = methods.getParent(self);
+                        const sibling = (top.root.children || []).find(
+                          (item) =>
+                            item !== parent && methods.insertIntoPane(item, fields)
+                        );
+                        if (!sibling) {
+                          methods.insertIntoRootAfter(top.root, fields);
+                        }
+                      }
+                    }
                     const column = methods.getComponentParent(parent);
                     parent.__fc__.rm();
                     methods.removeTableFormColumnIfEmpty(column);
@@ -4321,20 +4387,28 @@ export default defineComponent({
                 }
               },
               delete: ({ self }) => {
+                const container = self.children[0];
                 if (
                   methods.handleRemoveBefore({
                     parent: self,
-                    rule: self.children[0],
+                    rule: container,
                   }) !== false
                 ) {
-                  const column = methods.getComponentParent(self.children[0]);
-                  vm.emit("delete", self.children[0]);
+                  // 容器删除不连带删字段：所有面板内的字段移到主容器。
+                  if (container._menu && container._menu.rescueChildrenOnDelete) {
+                    const fields = methods.collectContainerChildren(container);
+                    if (fields.length) {
+                      methods.insertIntoRootAfter(container, fields);
+                    }
+                  }
+                  const column = methods.getComponentParent(container);
+                  vm.emit("delete", container);
                   self.__fc__.rm();
                   methods.removeTableFormColumnIfEmpty(column);
-                  if (data.activeRule === self.children[0]) {
+                  if (data.activeRule === container) {
                     methods.clearActiveRule();
                   }
-                  methods.handleRemoveAfter({ rule: self.children[0] });
+                  methods.handleRemoveAfter({ rule: container });
                 }
               },
               create: ({ self }) => {

@@ -6,8 +6,8 @@ const name = "tabs";
 
 const DEFAULT_PANE_COUNT = 3;
 
-const DEFAULT_STYLE = "underline";
-const STYLE_NAMES = ["underline", "card", "boxed", "filled", "pill"];
+// 只用 el-tabs 官方三种样式：默认选项卡 / 卡片 / 带边框卡片，渲染端直接映射 type。
+const DEFAULT_STYLE = "default";
 
 const DEFAULT_COLOR = "#4080ff";
 
@@ -47,8 +47,6 @@ const tabColors = [
     "#d1d5db",
 ];
 
-const getStyle = (style) => (STYLE_NAMES.indexOf(style) > -1 ? style : DEFAULT_STYLE);
-
 // el-tabs 只渲染 name 与 modelValue 相等的面板，其余面板会被置为 display:none。
 // 面板 name 丢失/重复，或 modelValue 指向已被删除的面板时，设计态下方内容区高度为 0、无法拖入控件，
 // 运行态下则整块面板空白，因此这里统一补齐。
@@ -81,6 +79,9 @@ export default {
     style: false,
     advanced: false,
     event: [],
+    // 容器工具条只保留删除（无复制）；删除时子控件全部移到主容器而非连带删除。
+    handleBtn: ["delete"],
+    rescueChildrenOnDelete: true,
     children: "elTabPane",
     childrenLen: DEFAULT_PANE_COUNT,
     // 默认生成的选项卡按 标签页1/2/3 命名（设计器按 childrenLen 批量生成，标识符由 tabPane 自己生成）。
@@ -120,16 +121,7 @@ export default {
         };
     },
     loadRule(rule) {
-        if (!rule.props) {
-            rule.props = {};
-        }
-        rule.props.tabStyle = getStyle(rule.props.tabStyle);
-        if (rule.props.tabColorCustom === undefined) {
-            rule.props.tabColorCustom = false;
-        }
         normalizeTabPaneNames(rule);
-        // tabColor 有值保留，无值留空（运行时回退主题主色）。
-        // tabPosition 是 el-tabs 原生 prop，保持原样透传，不在这里兜底。
     },
     props(_, {t}) {
         return localeProps(t, name + ".props", [
@@ -182,8 +174,6 @@ export default {
                     options: [
                         {value: "top", label: t("props.top")},
                         {value: "left", label: t("com.tabs.props.positionLeft")},
-                        {value: "right", label: t("com.tabs.props.positionRight")},
-                        {value: "bottom", label: t("props.bottom")},
                     ],
                 },
             },
