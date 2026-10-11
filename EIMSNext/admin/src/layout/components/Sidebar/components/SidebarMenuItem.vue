@@ -4,38 +4,55 @@
       <template #title>
         <div
           class="menu-title-row group-drop-target"
-          :class="{ 'menu-title-row-expanded': isSidebarOpened }"
           @dragover.prevent
           @drop.stop.prevent="handleGroupDrop"
         >
-          <SidebarMenuItemTitle :icon="groupIcon" :title="item.title" :iconColor="getAppIconColor(item)" />
+          <SidebarMenuItemTitle
+            :icon="groupIcon"
+            :is-group="true"
+            :title="item.title"
+            :iconColor="getAppIconColor(item)"
+          />
           <span v-if="canManage || canEdit || canDelete" class="more-wrapper" @click.stop>
             <el-dropdown v-if="canManage" placement="bottom-start" size="large" trigger="click">
-              <et-icon icon="el-Plus" @click.prevent="" />
+              <et-icon icon="el-Plus" class="menu-icon" @click.prevent="" />
               <template #dropdown>
                 <el-dropdown-menu class="sidebar-menu-dropdown">
-                  <el-dropdown-item @click="emit('create', 'flow-form')">
+                  <el-dropdown-item
+                    @click="emit('create', { kind: 'flow-form', parentMenuId: item.menuId })"
+                  >
                     <et-icon class="dropdown-item-icon" icon="el-DocumentAdd" size="14px" />
                     {{ t("admin.newFlowForm") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="emit('create', 'form')">
+                  <el-dropdown-item @click="emit('create', { kind: 'form', parentMenuId: item.menuId })">
                     <et-icon class="dropdown-item-icon" icon="el-Document" size="14px" />
                     {{ t("admin.newForm") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="emit('create', 'dashboard')">
+                  <el-dropdown-item
+                    @click="emit('create', { kind: 'dashboard', parentMenuId: item.menuId })"
+                  >
                     <et-icon class="dropdown-item-icon" icon="el-DataAnalysis" size="14px" />
                     {{ t("admin.newDashboard") }}
                   </el-dropdown-item>
-                  <el-divider class="sidebar-menu-divider" />
-                  <el-dropdown-item @click="emit('create', 'group')">
-                    <et-icon class="dropdown-item-icon" icon="el-FolderAdd" size="14px" />
-                    {{ t("admin.newGroup") }}
-                  </el-dropdown-item>
+                  <template v-if="canAddSubGroup">
+                    <el-divider class="sidebar-menu-divider" />
+                    <el-dropdown-item
+                      @click="emit('create', { kind: 'group', parentMenuId: item.menuId })"
+                    >
+                      <et-icon class="dropdown-item-icon" icon="el-FolderAdd" size="14px" />
+                      {{ t("admin.newGroup") }}
+                    </el-dropdown-item>
+                  </template>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <el-dropdown v-if="canEdit || canDelete" placement="bottom-start" size="large" trigger="click">
-              <et-icon icon="el-More" @click.prevent="" />
+            <el-dropdown
+              v-if="canEdit || canDelete"
+              placement="bottom-start"
+              size="large"
+              trigger="click"
+            >
+              <et-icon icon="el-More" class="menu-icon" @click.prevent="" />
               <template #dropdown>
                 <el-dropdown-menu class="sidebar-menu-dropdown">
                   <el-dropdown-item v-if="canEdit" @click="emit('editGroup', item)">
@@ -54,16 +71,42 @@
         </div>
       </template>
 
-      <Draggable v-if="item.subMenus" :list="item.subMenus" item-key="menuId" tag="div" data-menu-type="submenu"
-        :group="dragGroup" filter=".more-wrapper, .more-wrapper *" :prevent-on-filter="false" :disabled="!canManage || !sortable" :move="handleSubMenuMove"
-        ghost-class="menu-drag-ghost" :animation="180" @start="handleSubMenuDragStart" @end="handleDragEnd"
-        @change="handleSubMenuChange">
+      <Draggable
+        v-if="item.subMenus"
+        :list="item.subMenus"
+        item-key="menuId"
+        tag="div"
+        data-menu-type="submenu"
+        :group="dragGroup"
+        filter=".more-wrapper, .more-wrapper *"
+        :prevent-on-filter="false"
+        :disabled="!canManage || !sortable"
+        :move="handleSubMenuMove"
+        ghost-class="menu-drag-ghost"
+        :animation="180"
+        @start="handleSubMenuDragStart"
+        @end="handleDragEnd"
+        @change="handleSubMenuChange"
+      >
         <template #item="{ element }">
           <div class="menu-drag-item">
-            <SidebarMenuItem :item="element" :app-id="appId" :can-manage="canManage" :sortable="sortable" @editForm="emit('editForm', $event)"
-              @editMenu="emit('editMenu', $event)" @editGroup="emit('editGroup', $event)"
-              @deleteMenu="emit('deleteMenu', $event)" @create="emit('create', $event)" :on-group-drop="onGroupDrop" :can-drop-to-group="canDropToGroup"
-              :on-drag-start="onDragStart" :on-drag-end="onDragEnd" @menusChanged="emit('menusChanged')" />
+            <SidebarMenuItem
+              :item="element"
+              :app-id="appId"
+              :level="level + 1"
+              :can-manage="canManage"
+              :sortable="sortable"
+              @editForm="emit('editForm', $event)"
+              @editMenu="emit('editMenu', $event)"
+              @editGroup="emit('editGroup', $event)"
+              @deleteMenu="emit('deleteMenu', $event)"
+              @create="emit('create', $event)"
+              :on-group-drop="onGroupDrop"
+              :can-drop-to-group="canDropToGroup"
+              :on-drag-start="onDragStart"
+              :on-drag-end="onDragEnd"
+              @menusChanged="emit('menusChanged')"
+            />
           </div>
         </template>
       </Draggable>
@@ -84,7 +127,7 @@
       />
       <span class="more-wrapper" @click.stop>
         <el-dropdown placement="bottom-start" size="large" trigger="click">
-          <et-icon icon="el-More" @click.prevent="" />
+          <et-icon icon="el-More" class="menu-icon" @click.prevent="" />
           <template #dropdown>
             <el-dropdown-menu class="sidebar-menu-dropdown">
               <el-dropdown-item v-if="canEdit" @click="editForm(item.menuId, currentMenuType)">
@@ -108,7 +151,9 @@
                   size="14px"
                   :color="isFavorite ? 'var(--et-color-warning)' : 'currentcolor'"
                 />
-                {{ t(isFavorite ? "admin.workbench.removeFavorite" : "admin.workbench.addFavorite") }}
+                {{
+                  t(isFavorite ? "admin.workbench.removeFavorite" : "admin.workbench.addFavorite")
+                }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -125,6 +170,7 @@ defineOptions({
 });
 
 import { getAppIconColor, getFormIcon } from "@/utils/common";
+import { MAX_MENU_DEPTH } from "@/utils/appEntry";
 import { AppMenu, FormType, WorkbenchTargetType } from "@eimsnext/models";
 import { ConfirmResult, EtConfirm } from "@eimsnext/components";
 import { ElMessage } from "element-plus";
@@ -136,6 +182,7 @@ const { t } = useI18n();
 const props = defineProps<{
   item: AppMenu;
   appId: string;
+  level?: number;
   canManage?: boolean;
   sortable?: boolean;
   onGroupDrop?: (groupMenu: AppMenu) => boolean;
@@ -144,10 +191,19 @@ const props = defineProps<{
   onDragEnd?: () => void;
 }>();
 
-const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "create", "menusChanged"]);
+const emit = defineEmits([
+  "editForm",
+  "editMenu",
+  "editGroup",
+  "deleteMenu",
+  "create",
+  "menusChanged",
+]);
 const systemStore = useSystemStore();
 const workbenchStore = useWorkbenchStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
+const level = computed(() => props.level ?? 1);
+const canAddSubGroup = computed(() => level.value < MAX_MENU_DEPTH);
 const canManage = computed(() => !!props.canManage);
 const canEdit = computed(() => canManage.value && props.item.editable !== false);
 const canDelete = computed(() => canManage.value && props.item.deletable !== false);
@@ -156,17 +212,21 @@ const dragGroup = { name: "app-menu", pull: true, put: true };
 const groupIndex = computed(() => `group-${props.item.menuId}`);
 const subMenuRef = ref();
 const expandedKeys = ref<string[]>([]);
-const groupIcon = computed(() => expandedKeys.value.includes(groupIndex.value) ? "el-folder-open" : "el-folder");
+const groupIcon = computed(() =>
+  expandedKeys.value.includes(groupIndex.value) ? "el-folder-open" : "el-folder"
+);
 const getMenuType = (menuType: FormType | number | undefined): FormType => {
   if (menuType === undefined) return FormType.Form;
-  if (typeof menuType === 'string') return menuType as FormType;
+  if (typeof menuType === "string") return menuType as FormType;
   return String(menuType) as FormType;
 };
 
 const currentMenuType = computed(() => getMenuType(props.item.menuType));
 const isFavorite = computed(() =>
   workbenchStore.isFavorite(
-    currentMenuType.value === FormType.Dashboard ? WorkbenchTargetType.Dashboard : WorkbenchTargetType.Form,
+    currentMenuType.value === FormType.Dashboard
+      ? WorkbenchTargetType.Dashboard
+      : WorkbenchTargetType.Form,
     props.item.menuId
   )
 );
@@ -180,7 +240,10 @@ const routeTo = computed(() => ({
 const toggleFavorite = async () => {
   await workbenchStore.loadFavorites();
   await workbenchStore.toggleFavorite({
-    targetType: currentMenuType.value === FormType.Dashboard ? WorkbenchTargetType.Dashboard : WorkbenchTargetType.Form,
+    targetType:
+      currentMenuType.value === FormType.Dashboard
+        ? WorkbenchTargetType.Dashboard
+        : WorkbenchTargetType.Form,
     targetId: props.item.menuId,
   });
 };
@@ -216,10 +279,17 @@ function handleSubMenuDragStart(event: { oldIndex?: number }) {
   }
 }
 
-function handleSubMenuMove(event: { draggedContext?: { element?: AppMenu }; relatedContext?: { element?: AppMenu }; originalEvent?: { target?: EventTarget | null } }) {
+function handleSubMenuMove(event: {
+  draggedContext?: { element?: AppMenu };
+  relatedContext?: { element?: AppMenu };
+  originalEvent?: { target?: EventTarget | null };
+}) {
   if (!canManage.value || !sortable.value) return false;
   if (event.draggedContext?.element?.editable === false) return false;
-  return !props.canDropToGroup?.(event.relatedContext?.element, event.originalEvent?.target ?? null);
+  return !props.canDropToGroup?.(
+    event.relatedContext?.element,
+    event.originalEvent?.target ?? null
+  );
 }
 
 function handleDragEnd() {
@@ -235,13 +305,16 @@ async function deleteGroup(menu: AppMenu) {
     return;
   }
 
-  const message = menuType === FormType.Group ? t("admin.misc.groupDeleteContent") : t("admin.deleteFormConfirm_Content");
+  const message =
+    menuType === FormType.Group
+      ? t("admin.misc.groupDeleteContent")
+      : t("admin.deleteFormConfirm_Content");
   const confirm = await EtConfirm.showDialog(
     message,
     {
       title: t("admin.deleteFormConfirm_Title", [menu.title || ""]),
     },
-    t,
+    t
   );
 
   if (confirm == ConfirmResult.Yes) {
@@ -259,6 +332,11 @@ onMounted(() => {
   display: none !important;
 }
 
+// 箭头已隐藏，去掉 EP 为箭头预留的右内边距，让分组标题占满整行
+:deep(.el-sub-menu__title) {
+  padding-right: var(--et-space-8) !important;
+}
+
 .menu-title-row {
   width: 100%;
   min-width: 0;
@@ -266,12 +344,8 @@ onMounted(() => {
   align-items: center;
 }
 
-.menu-title-row-expanded {
-  padding-right: var(--et-size-30);
-}
-
-:deep(.el-menu-item.menu-item-expanded) {
-  padding-right: var(--et-size-64) !important;
+.menu-item-expanded {
+  padding-right: var(--et-space-8) !important;
 }
 
 .el-menu-item:hover,
@@ -283,11 +357,21 @@ onMounted(() => {
 
 .more-wrapper {
   position: absolute;
-  right: var(--et-space-10);
+  right: var(--et-space-8);
   display: flex;
   flex-direction: row-reverse;
-  gap: var(--et-space-8);
+  align-items: center;
+  gap: var(--et-space-4);
   visibility: hidden;
+  background-color: var(--et-bg-container);
+  background-image: linear-gradient(var(--et-bg-primary-soft), var(--et-bg-primary-soft));
+
+  // EP 给菜单内 .el-icon 强加 width: var(--el-menu-icon-width)(24px) + margin-right: 5px，
+  // 使 more/add 字形间空出约 15px；此处恢复为贴合字形宽度并去掉右间距
+  :deep(.el-icon) {
+    width: 1em;
+    margin-right: 0;
+  }
 }
 
 .sidebar-menu-dropdown {
