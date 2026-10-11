@@ -127,11 +127,23 @@ export default defineComponent({
       child.props = child.props || {};
       // 拷贝出来的面板会沿用原面板的标识符，重复标识符会让 el-tabs/el-collapse 的激活判定错乱。
       child.props.name = uniqueId8();
-      if (this.childMenuName !== "elTabPane") return;
-      const children = this.rule.children || [];
-      child.props.label = this.t("com.tabs.props.tabLabel", [
-        String(children.indexOf(child) + 1),
-      ]);
+      if (this.childMenuName === "elTabPane") {
+        const children = this.rule.children || [];
+        child.props.label = this.t("com.tabs.props.tabLabel", [
+          String(children.indexOf(child) + 1),
+        ]);
+        return;
+      }
+      // 折叠面板：新面板默认展开，否则收起态没有落点无法拖入控件。
+      const props = this.rule.props || (this.rule.props = {});
+      if (props.accordion) {
+        props.modelValue = child.props.name;
+      } else {
+        if (!Array.isArray(props.modelValue)) props.modelValue = [];
+        if (props.modelValue.indexOf(child.props.name) < 0) {
+          props.modelValue.push(child.props.name);
+        }
+      }
     },
     // 点击标题就地编辑文本，不切换画布选中；空值不生效，避免出现无标题面板。
     startEdit(index, element) {
