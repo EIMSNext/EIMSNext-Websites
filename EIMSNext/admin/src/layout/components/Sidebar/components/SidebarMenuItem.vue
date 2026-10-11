@@ -14,7 +14,7 @@
             :iconColor="getAppIconColor(item)"
           />
           <span v-if="canManage || canEdit || canDelete" class="more-wrapper" @click.stop>
-            <el-dropdown v-if="canManage" placement="bottom-start" size="large" trigger="click">
+            <el-dropdown v-if="canManage && canAddMenu" placement="bottom-start" size="large" trigger="click">
               <et-icon icon="el-Plus" class="menu-icon" @click.prevent="" />
               <template #dropdown>
                 <el-dropdown-menu class="sidebar-menu-dropdown">
@@ -203,7 +203,9 @@ const systemStore = useSystemStore();
 const workbenchStore = useWorkbenchStore();
 const isSidebarOpened = computed(() => systemStore.sidebar.opened);
 const level = computed(() => props.level ?? 1);
-const canAddSubGroup = computed(() => level.value < MAX_MENU_DEPTH);
+// 深度 3 是叶子菜单允许到达的最后一层，因此二级分组不能再创建三级分组。
+const canAddSubGroup = computed(() => level.value < MAX_MENU_DEPTH - 1);
+const canAddMenu = computed(() => level.value < MAX_MENU_DEPTH);
 const canManage = computed(() => !!props.canManage);
 const canEdit = computed(() => canManage.value && props.item.editable !== false);
 const canDelete = computed(() => canManage.value && props.item.deletable !== false);

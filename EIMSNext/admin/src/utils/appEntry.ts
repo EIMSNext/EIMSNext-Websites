@@ -113,7 +113,7 @@ export function moveMenuUnder(menus: AppMenu[], menuId: string, parentId: string
   const attach = (list: AppMenu[]): boolean => {
     for (const menu of list) {
       if (menu.menuId === parentId) {
-        menu.subMenus = [...(menu.subMenus ?? []), { ...target, subMenus: undefined }];
+        menu.subMenus = [...(menu.subMenus ?? []), target];
         return true;
       }
       if (menu.subMenus && attach(menu.subMenus)) return true;

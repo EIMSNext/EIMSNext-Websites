@@ -439,14 +439,21 @@ const closeGroupDialog = () => {
 
 // 新建的表单/仪表盘由服务端插在菜单根层，若要落在某个分组下，建完再整体挪一次
 const moveMenuToParent = async (menuId: string, parentId: string) => {
-  if (!app.value) return;
+  if (!app.value) {
+    contextStore.setAppChanged();
+    return;
+  }
 
   const merged = moveMenuUnder(
     mergeMenuStructure(app.value.appMenus ?? [], appMenus.value),
     menuId,
     parentId,
   );
-  if (!merged) return;
+  if (!merged) {
+    contextStore.setAppChanged();
+    ElMessage.warning(t("common.saveFailed"));
+    return;
+  }
 
   try {
     const updated = await appDefService.saveMenus({
@@ -455,6 +462,7 @@ const moveMenuToParent = async (menuId: string, parentId: string) => {
     });
     handleAppUpdated(updated);
   } catch (error: any) {
+    contextStore.setAppChanged();
     ElMessage.warning(error?.message || t("common.saveFailed"));
   }
 };

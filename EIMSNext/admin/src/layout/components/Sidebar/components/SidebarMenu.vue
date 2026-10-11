@@ -106,6 +106,11 @@ const containsMenu = (menu: AppMenu, targetMenuId: string): boolean => {
   return (menu.subMenus || []).some((subMenu) => containsMenu(subMenu, targetMenuId));
 };
 
+const subtreeHeight = (menu: AppMenu): number => {
+  const children = menu.subMenus || [];
+  return children.length === 0 ? 1 : 1 + Math.max(...children.map(subtreeHeight));
+};
+
 const depthOf = (menuId: string, menus: AppMenu[] = props.menuList, depth = 1): number => {
   for (const menu of menus) {
     if (menu.menuId === menuId) return depth;
@@ -124,7 +129,11 @@ const canDropToGroupTitle = (groupMenu: AppMenu | undefined, eventTarget: EventT
   if (sourceMenu.editable === false || groupMenu.editable === false) return false;
   if (getMenuType(groupMenu.menuType) !== FormType.Group) return false;
   if (containsMenu(sourceMenu, groupMenu.menuId)) return false;
-  if (depthOf(groupMenu.menuId) >= MAX_MENU_DEPTH) return false;
+  if (
+    getMenuType(sourceMenu.menuType) === FormType.Group &&
+    depthOf(groupMenu.menuId) >= MAX_MENU_DEPTH - 1
+  ) return false;
+  if (depthOf(groupMenu.menuId) + subtreeHeight(sourceMenu) > MAX_MENU_DEPTH) return false;
   return eventTarget instanceof HTMLElement && !!eventTarget.closest(".group-drop-target");
 };
 
@@ -160,7 +169,11 @@ const moveMenuToGroup = (groupMenu: AppMenu): boolean => {
   if (sourceMenu.editable === false || groupMenu.editable === false) return false;
   if (getMenuType(groupMenu.menuType) !== FormType.Group) return false;
   if (containsMenu(sourceMenu, groupMenu.menuId)) return false;
-  if (depthOf(groupMenu.menuId) >= MAX_MENU_DEPTH) return false;
+  if (
+    getMenuType(sourceMenu.menuType) === FormType.Group &&
+    depthOf(groupMenu.menuId) >= MAX_MENU_DEPTH - 1
+  ) return false;
+  if (depthOf(groupMenu.menuId) + subtreeHeight(sourceMenu) > MAX_MENU_DEPTH) return false;
 
   const sourceEntry = findMenuEntry(props.menuList, sourceMenu.menuId);
   const targetEntry = findMenuEntry(props.menuList, groupMenu.menuId);
