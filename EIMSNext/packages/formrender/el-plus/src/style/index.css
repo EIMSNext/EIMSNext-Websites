@@ -771,3 +771,17 @@
 .fc-tabs-enhanced > .el-tabs__header {
   --el-color-primary: var(--fc-tabs-color, var(--et-color-primary, #4080ff));
 }
+
+/* 顶部标签页首个页签左内边距：EP 把 active-bar 渲染成 nav 的第一个子元素，
+   真正的第一个页签是 :nth-child(2)，且 EP 默认把它的 padding-left 压成 0（贴左边缘）。
+   恢复 20px 与其余页签的文字缩进对齐；激活下划线定位 = offsetLeft + paddingLeft，会自动跟随。 */
+.fc-tabs-enhanced.el-tabs--top > .el-tabs__header .el-tabs__item:nth-child(2) {
+  padding-left: 20px;
+}
+
+/* ===== 折叠面板 ===== */
+/* EP 默认标题 13px，与表单整体 14px 不一致；对齐到 14px。
+   .el-collapse 与同名变量同特异性定义，须提升特异性保证覆盖。 */
+.el-collapse.fc-collapse-enhanced {
+  --el-collapse-header-font-size: 14px;
+}

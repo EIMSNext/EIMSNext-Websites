@@ -30,6 +30,7 @@ defineOptions({
 const props = defineProps<{
   appId: string;
   menu?: AppMenu;
+  parentMenuId?: string;
 }>();
 
 const emit = defineEmits(["cancel", "ok"]);
@@ -70,6 +71,7 @@ const save = async () => {
     const payload: CreateAppGroupRequest = {
       appId: props.appId,
       name: formData.value.name,
+      parentMenuId: props.parentMenuId,
     };
     app = await appDefService.createGroup(payload);
   }

@@ -1009,15 +1009,9 @@ body[class*="fd-theme-"] ._fd-config-dialog {
 ._fc-m .el-tab-pane ._fd-elTabPane-drag,
 ._fc-m .el-collapse-item__content ._fd-elCollapseItem-drag {
     min-height: 360px;
-}
-
-/* 折叠面板默认全部收起，内容区高度为 0 就没有落点；仅画布内强制展开，预览与运行态不受影响 */
-._fc-m .el-collapse-item__wrap {
-    display: block !important;
-}
-
-._fc-m .el-collapse-item__arrow {
-    transform: rotate(90deg);
+    /* 面板 DragBox 带 el-col-24 → 命中 flex-wrap 布局但缺 align-content，
+       min-height 撑高后多余空间被摊到行间，控件之间出现大缝；压回顶部堆叠。 */
+    align-content: flex-start;
 }
 
 ._fc-tabs .el-tabs__nav-scroll {
