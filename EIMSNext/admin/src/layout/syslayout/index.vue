@@ -80,7 +80,12 @@ const menuGroups = computed<SysMenuGroup[]>(() => {
     {
       title: "admin.shellMenu.basicInfo",
       items: [
-        { path: "version", icon: "icon-flowdefault", label: "admin.shellMenu.versionInfo" },
+        {
+          path: "version",
+          icon: "icon-flowdefault",
+          label: "admin.shellMenu.versionInfo",
+          visible: false,
+        },
         { path: "enterprise", icon: "icon-adminFilled", label: "admin.shellMenu.enterpriseInfo" },
       ],
     },
@@ -90,7 +95,7 @@ const menuGroups = computed<SysMenuGroup[]>(() => {
         { path: "department", icon: "icon-organization", label: "admin.shellMenu.org" },
         {
           path: "employeeGroup",
-          icon: "icon-employee-group",
+          icon: "employeeGroup",
           label: "admin.shellMenu.employeeGroup",
         },
       ],
@@ -154,13 +159,15 @@ const menuGroups = computed<SysMenuGroup[]>(() => {
 
 <style lang="scss" scoped>
 .sidebar-container {
+  bottom: 0;
+  left: var(--et-size-45);
   position: fixed;
-  top: 0;
-  height: 100vh;
+  top: var(--et-size-50);
   overflow-y: auto;
   z-index: 999;
   width: $sidebar-width;
   background-color: $menu-background;
+  border-left: 1px solid var(--et-border-color-light);
   transition: width 0.28s;
 
   :deep(.el-menu) {
@@ -170,7 +177,7 @@ const menuGroups = computed<SysMenuGroup[]>(() => {
 
 .main-container {
   position: relative;
-  height: 100%;
+  height: calc(100vh - var(--et-size-50));
   margin-left: $sidebar-width;
   overflow: hidden;
   transition: margin-left 0.28s;

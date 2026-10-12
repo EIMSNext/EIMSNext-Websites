@@ -90,6 +90,7 @@
               v-model="dataFilter"
               :formId="formDef.id"
               :max-level="1"
+              :allow-dynamic-params="true"
               @change="dataFilterChanged"
               @remove="dataFilterClear"
             ></ConditionList>

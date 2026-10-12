@@ -14,7 +14,7 @@ import {
   getDataTitle,
   getFlowStatus,
 } from "@eimsnext/models";
-import { IConditionList, IFieldSortList, IFormFieldDef, buildFieldListItems } from "@eimsnext/components";
+import { IConditionList, IFieldSortList, IFormFieldDef, buildFieldListItems, formatAddressObject } from "@eimsnext/components";
 import { SortDirection } from "@eimsnext/services";
 import { getFileFullUrl, uniqueId } from "@eimsnext/utils";
 import { dateFormat } from "@/utils/common";
@@ -181,6 +181,56 @@ export const extractImageUrl = (value: any): string => {
   return "";
 };
 
+/** 列表里附件最多平铺展示的个数，超出用 `+N` 收起。 */
+export const MAX_FILE_DISPLAY = 2;
+
+/** 附件/图片单个展示项。 */
+export interface FileDisplayItem {
+  name: string;
+  url: string;
+  thumbUrl: string;
+}
+
+const fileNameFromUrl = (url: string): string => String(url || "").split("/").pop() || "";
+
+/**
+ * 把附件/图片字段的值归一化为展示项列表。
+ *
+ * 兼容三种存量形态：字符串相对路径、`{ name, url }`、以及服务端返回的
+ * `{ fileName, savePath, thumbPath }`。
+ */
+export const getFileDisplayItems = (value: any): FileDisplayItem[] => {
+  const normalized = normalizeValue(value);
+  const list = Array.isArray(normalized) ? normalized : [normalized];
+  const items: FileDisplayItem[] = [];
+
+  list.forEach((item) => {
+    if (item === undefined || item === null || item === "") return;
+    if (typeof item === "string") {
+      items.push({ name: fileNameFromUrl(item), url: getFileFullUrl(item), thumbUrl: "" });
+      return;
+    }
+    if (typeof item !== "object") return;
+
+    const url = item.url || item.savePath || "";
+    if (!url) return;
+    const thumb = item.thumbUrl || item.thumbPath || "";
+    items.push({
+      name: item.name || item.fileName || fileNameFromUrl(url),
+      url: getFileFullUrl(url),
+      thumbUrl: thumb ? getFileFullUrl(thumb) : "",
+    });
+  });
+
+  return items;
+};
+
+/** 字段类型是否按附件列表展示。 */
+export const isFileFieldType = (type?: string) => type === FieldType.FileUpload;
+
+/** 字段类型是否按图片展示。 */
+export const isImageFieldType = (type?: string) => type === FieldType.ImageUpload;
+
 export const formatFormValue = (
   value: any,
   fieldDef?: Pick<FieldDef, "type" | "props"> | { type?: string; format?: string },
@@ -208,6 +258,16 @@ export const formatFormValue = (
 
   if (type === FieldType.ImageUpload) {
     return extractImageUrl(normalized);
+  }
+
+  // 地址 { province, city, district, detail } → "省市区详细地址"（与打印一致）
+  if (type === FieldType.Address) {
+    if (normalized && typeof normalized === "object" && !Array.isArray(normalized)) {
+      return formatAddressObject(normalized);
+    }
+    if (Array.isArray(normalized)) {
+      return normalized.map((item: any) => String(item ?? "").trim()).filter(Boolean).join("");
+    }
   }
 
   if (type === FieldType.DataSelect && Array.isArray(normalized)) {
@@ -280,7 +340,7 @@ const getRowFieldValue = (row: Record<string, any>, field: string) => {
 
 /** Resolves the configured data-title expression for list/card display. */
 export const formatDataTitle = (row: Record<string, any>, formDef: FormDef, t: (key: string) => string) => {
-  const dataTitle = formDef.formSettings?.advanced?.dataTitle;
+  const dataTitle = formDef.formSettings?.dataTitle;
   const customContent = dataTitle?.mode === "custom" ? dataTitle.content || "" : "";
   const tokenFields = Array.from(customContent.matchAll(/\$\{([^}]+)\}/g)).map((match) => match[1].trim());
   const defaultField = (formDef.content?.items || []).find((field) => field.type !== FieldType.TableForm)?.field;

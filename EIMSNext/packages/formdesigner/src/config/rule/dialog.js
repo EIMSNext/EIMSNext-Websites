@@ -15,7 +15,7 @@ export default {
     advanced: false,
     input: true,
     subForm: 'object',
-    hiddenBaseField: ['title', 'info', 'formCreateCol>span', 'labelConfig', '_control'],
+    hiddenBaseField: ['title', 'info', 'desc', 'formCreateCol>span', 'labelConfig', '_control'],
     languageKey: ['close', 'ok'],
     event: ['confirm', 'submit', 'validateFail', 'open', 'opened', 'close', 'closed', 'openAutoFocus', 'closeAutoFocus'],
     container: {

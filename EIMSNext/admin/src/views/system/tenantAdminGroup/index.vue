@@ -533,11 +533,10 @@ const idsToEmployeeGroupTags = (ids: string[]): ISelectedTag[] => {
 };
 
 const memberDialogOptions = computed(() => {
-  const adminScope = adminPermissions.value?.isNormalAdmin ?? true;
   if (memberDialogTarget.value === "appDepartments")
-    return { showTabs: MemberTabs.Department, adminScope };
-  if (memberDialogTarget.value === "appEmployeeGroups") return { showTabs: MemberTabs.EmployeeGroup, adminScope };
-  return { showTabs: MemberTabs.Employee, adminScope };
+    return { showTabs: MemberTabs.Department };
+  if (memberDialogTarget.value === "appEmployeeGroups") return { showTabs: MemberTabs.EmployeeGroup };
+  return { showTabs: MemberTabs.Employee };
 });
 
 const memberDialogTags = computed(() => {
@@ -590,9 +589,9 @@ const loadData = async () => {
   try {
     const [tenantAdminGroups, empList, deptList, employeeGroupList, appList, permissions] = await Promise.all([
       tenantAdminGroupService.query<TenantAdminGroup>(),
-      employeeService.query<Employee>("$filter=status eq 0&adminScope=true"),
-      departmentService.query<Department>("adminScope=true"),
-      employeeGroupService.query<EmployeeGroup>("adminScope=true"),
+      employeeService.query<Employee>("$filter=status eq 0"),
+      departmentService.query<Department>(),
+      employeeGroupService.query<EmployeeGroup>(),
       appDefService.query<AppDef>(),
       systemService.getAdminPermissions(),
     ]);

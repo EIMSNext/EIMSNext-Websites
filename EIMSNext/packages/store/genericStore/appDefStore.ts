@@ -9,7 +9,7 @@ export const useAppDefStore = createStore<AppDef>("appdefs", "AppDef", [
     sortIndex: -1,
     appMenus: [],
   } as AppDef,
-]);
+], "?$top=100");
 
 export function useAppDefStoreHook() {
   return useAppDefStore(store);

@@ -9,7 +9,10 @@ export enum MemberTabs {
   Dynamic = 8,
   CurDept = 16,
   CurUser = 32,
+  DynamicParam = 64,
 }
+
+export type MemberSourceMode = "management" | "form-design" | "form-runtime" | "public";
 
 export interface IMemberLimit {
   depts?: ISelectedTag[];
@@ -25,7 +28,10 @@ export interface IMemberSelectOptions {
   dynamicMembers?: ISelectedTag[];
   dynamicManagerLevels?: number[];
   showContract?: false;
-  adminScope?: boolean;
+  sourceMode?: MemberSourceMode;
+  formId?: string;
+  fieldId?: string;
+  sourceType?: "employee" | "department";
 }
 
 export interface IDynamicMemberGroup extends IListItem {

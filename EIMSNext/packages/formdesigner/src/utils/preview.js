@@ -1,4 +1,5 @@
 import { getFilledTextColor, is } from "@eimsnext/form-render-core";
+import { formatAddressObject } from "@eimsnext/components";
 import dayjs from "dayjs";
 
 const findTreeLabel = function (find, data, key, props) {
@@ -178,6 +179,16 @@ export default function renderPreview(_, ctx) {
       fit: "cover",
       style: { height: "90px" },
     });
+  } else if (
+    val &&
+    typeof val === "object" &&
+    !Array.isArray(val) &&
+    ("province" in val || "detail" in val)
+  ) {
+    // 地址 { province, city, district, detail } → "省市区详细地址"（避免 [object Object]）
+    val = formatAddressObject(val);
+  } else if (Array.isArray(val) && type === "address") {
+    val = val.map((item) => String(item ?? "").trim()).join("");
   } else if (typeof val === "boolean") {
     val = val ? "是" : "否";
   }

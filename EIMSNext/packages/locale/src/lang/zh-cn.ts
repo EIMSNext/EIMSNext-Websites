@@ -55,6 +55,7 @@ export default {
     copied: "已复制",
     open: "打开",
     loadFailed: "加载失败",
+    loadMore: "加载更多",
     operationFailed: "操作失败",
     retry: "重试",
     department: "部门",
@@ -192,17 +193,17 @@ export default {
       title: "请在虚线框内书写",
     },
     addEditEmployeeGroupCategory: {
-      groupName: "分组名称",
-      groupNamePlaceholder: "请输入分组名称",
-      groupDesc: "分组描述",
-      groupDescPlaceholder: "请输入分组描述",
-      editGroup: "修改分组信息",
-      addGroup: "添加分组",
-      groupNameRequired: "分组名称不能为空",
-      cannotDeleteWithEmployeeGroups: "当前分组下存在员工组，不能删除",
+      groupName: "员工组类别",
+      groupNamePlaceholder: "请输入类别名称",
+      groupDesc: "类别描述",
+      groupDescPlaceholder: "请输入类别描述",
+      editGroup: "修改类别信息",
+      addGroup: "添加类别",
+      groupNameRequired: "类别名称不能为空",
+      cannotDeleteWithEmployeeGroups: "当前类别下存在员工组，不能删除",
     },
     addEditEmployeeGroup: {
-      employeeGroupCategory: "员工组分类",
+      employeeGroupCategory: "员工组类别",
       employeeGroupName: "员工组名称",
       employeeGroupNamePlaceholder: "请输入员工组名称",
       employeeGroupDesc: "员工组描述",
@@ -304,6 +305,11 @@ export default {
         dynamic: "动态负责人",
         curDept: "当前用户所处部门",
         curUser: "当前用户",
+        dynamicParam: "动态参数",
+      },
+      dynamicParam: {
+        currentUser: "当前用户",
+        currentDepartment: "当前用户所属部门",
       },
       allEmployees: "全部员工",
       cascadeSubDepts: "动态包含下级部门",
@@ -462,6 +468,14 @@ export default {
     dragger: {
       dragHere: "将文件拖到此处或",
       clickToUpload: "点击上传",
+    },
+    upload: {
+      select: "选择",
+      fileHint: "或拖拽文件后上传，单个{0}以内",
+      imageHint: "或拖拽图片后上传，单张{0}以内",
+      dragging: "松开即可上传",
+      compressing: "压缩中…",
+      uploadFailed: "上传失败",
     },
     formFieldSelect: {
       pleaseSelectField: "请选择字段",
@@ -1409,8 +1423,8 @@ export default {
       containerMissing: "未找到打印设计器容器",
       renderServiceMissing: "Univer 渲染服务未初始化，无法加载打印区域插件",
       unitIdMissing: "Univer 工作簿缺少 unitId，无法加载打印区域插件",
-      eventApiChanged: "Univer 0.21 运行时事件接口发生变化，请检查 facade Event 定义",
-      metadataApiMissing: "Univer 0.21 运行时未提供 setCustomMetaData，打印字段元数据写入失败",
+      eventApiChanged: "Univer 运行时事件接口发生变化，请检查 facade Event 定义",
+      metadataApiMissing: "Univer 运行时未提供 setCustomMetaData，打印字段元数据写入失败",
       initFailed: "打印设计器初始化失败",
       previewTitle: "打印预览",
       previewFailed: "打印失败",
@@ -1844,6 +1858,71 @@ export default {
         categories: "可使用数字、大写字母、小写字母及特殊字符，至少包含上述字符中的三种",
       },
     },
+    enterprise: {
+      title: "企业设置",
+      basicInfo: "基础信息",
+      accountMode: "账号模式",
+      bindTip: "如需绑定第三方平台，",
+      consult: "点此咨询",
+      tenantId: "租户 ID",
+      mode: {
+        public: "公共模式",
+        wxwork: "企业微信集成",
+        ding: "钉钉集成",
+        feishu: "飞书集成",
+        private: "私有模式",
+      },
+      messages: {
+        copied: "租户 ID 已复制",
+        copyFailed: "复制失败，请手动复制",
+      },
+    },
+    systemSettings: {
+      version: {
+        current: "当前版本",
+        edition: "企业版",
+        validity: "有效期：{range}",
+        consultBuy: "咨询购买",
+        uploadProof: "上传凭证",
+        coinRate: "（1 云币 = ￥1）",
+        recharge: "充值",
+        paymentSettings: "支付设置",
+        consumptionStats: "消耗统计",
+        usageLog: "使用日志",
+      },
+      enterpriseSettings: {
+        culture: {
+          title: "企业文化",
+          customLogin: "自定义登录页",
+          customLoginTip: "自定义登录页 Logo、展示图及登录方式等，对企业账号 URL 和发布给成员的内链生效。",
+          style: "企业风格",
+          styleTip: "自定义企业风格。",
+        },
+        collaboration: {
+          title: "企业协作",
+          notifyMute: "提醒屏蔽",
+          notifyMuteTip: "可以设置成员是否接收应用内相关提醒。",
+          systemTimezone: "系统时区",
+          systemTimezoneFollow: "跟随成员设备实时区",
+          systemTimezoneTip: "系统内所有的时间都基于系统时区显示。",
+        },
+        themeColor: {
+          title: "企业主题色",
+          tip: "对企业内所有功能模块的电脑端和移动端同时生效",
+          saved: "企业主题色已保存",
+          saveFailed: "保存失败，请重试",
+        },
+        style: {
+          saved: "设置已保存",
+          saveFailed: "保存失败，请重试",
+        },
+        learnMore: "了解更多",
+      },
+      productStyle: {
+        title: "产品样式",
+        customWorkbenchTip: "配置工作台默认布局，自定义内容优先级和入口。",
+      },
+    },
     department: {
       title: "员工",
       active: "在职员工",
@@ -2165,6 +2244,10 @@ export default {
     recordInNode: "选择节点修改数据",
     selectForm: "选择表单",
     dataCondition: "数据筛选条件",
+    deleteTakeLimit_Tips:
+      "单次运行最多删除符合条件的前 200 条记录，超出部分不会处理",
+    updateTakeLimit_Tips:
+      "单次运行最多修改符合条件的前 200 条记录，超出部分不会处理",
     queryCondition: "查询条件",
     sortRule: "排序规则",
     numberOfTake: "查询结果条数",
@@ -2307,6 +2390,7 @@ export default {
       },
     },
     otherLoginMethods: "其他登录方式",
+    invalidRedirect: "跳转地址无效或缺失，无法返回业务系统",
   },
   register: {
     title: "注册简祎沄账号",
@@ -2387,6 +2471,7 @@ export default {
     field: "字段 ID",
     title: "字段名称",
     info: "提示信息",
+    desc: "描述信息",
     ignore: "忽略字段",
     native: "是否显示标题",
     control: "联动数据",
@@ -3150,6 +3235,7 @@ export default {
     v_datalink: "数据联动",
     v_formula: "公式联动",
     othersetting: "其他设置",
+    imageProcess: "图片处理",
   },
   slots: {
     prefix: "头部内容",
@@ -3384,6 +3470,8 @@ export default {
       },
       props: {
         accordion: "手风琴模式",
+        items: "多面板显示",
+        addItem: "添加面板",
       },
     },
     elCollapseItem: {
@@ -3449,8 +3537,15 @@ export default {
       props: {
         type: "风格类型",
         closable: "标签可关闭",
-        tabPosition: "选项卡所在位置",
+        tabPosition: "选项卡位置",
         stretch: "标签宽度自动撑开",
+        style: "样式",
+        tabColorCustom: "自定义颜色",
+        positionLeft: "左侧",
+        positionRight: "右侧",
+        items: "多标签显示",
+        addItem: "添加标签页",
+        tabLabel: "标签页{0}",
       },
     },
     elTag: {
@@ -3659,12 +3754,12 @@ export default {
       },
     },
     fcCity: {
-      name: "省市区选择器",
+      name: "地址",
       props: {
         api: "数据链接 URI",
         level: "类型",
-        clearable: "是否显示清除按钮",
-        disabled: "是否禁用",
+        clearable: "显示清除按钮",
+        disabled: "禁用",
         filter: "数据过滤,返回可选择数据",
       },
     },
@@ -3755,63 +3850,6 @@ export default {
         _loadType: "JSON 规则",
         type: "类型",
       },
-    },
-    lineChart: {
-      name: "折线图",
-      data: "图表数据",
-      pieTypeOpt: {
-        pie: "圆形",
-        doughnut: "环形",
-        "half-doughnut": "半环形",
-      },
-      funnelSortOpt: {
-        descending: "倒序",
-        ascending: "正序",
-      },
-      props: {
-        title: "图表的名称",
-        subtitle: "图表的简介",
-        valueFormat: "格式化数值显示",
-        stack: "多列数据时是否堆叠",
-        smooth: "线条是否平滑过渡",
-        showLegend: "是否显示标记",
-        showSeriesLabel: "是否显示数值",
-        barBackgroundColor: "柱状的背景色",
-        funnelSort: "排序方式",
-        pieType: "形状",
-        min: "最小值",
-        max: "最大值",
-        value: "数值",
-        indicator: "指示器",
-        loadOptions: "初始化",
-      },
-    },
-    areaChart: {
-      name: "体积图",
-    },
-    barChart: {
-      name: "柱状图",
-    },
-    customChart: {
-      name: "自定义图表",
-    },
-    funnelChart: {
-      name: "漏斗图",
-    },
-    gaugeChart: {
-      name: "仪表盘",
-    },
-    pieChart: {
-      name: "饼图",
-    },
-    radarChart: {
-      name: "雷达图",
-    },
-    scatterChart: {
-      name: "散点图",
-    },
-    stripeChart: {
-      name: "条形图",
     },
     fcInlineForm: {
       name: "行内布局",
@@ -4341,6 +4379,7 @@ export default {
         limit: "最大允许上传个数",
         readonly: "只读",
         disabled: "禁用",
+        compress: "自动压缩图片",
       },
     },
     fileupload: {

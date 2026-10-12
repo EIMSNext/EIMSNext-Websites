@@ -1,4 +1,5 @@
 export * from "./fieldUtils";
+export * from "./areaData";
 import { IListItem } from "../list/type";
 export interface IDataItem {
   id: string;
@@ -40,6 +41,7 @@ export interface ITreeNode extends IDataItemView {
   checked?: boolean;
   disabled?: boolean;
   readonly?: boolean;
+  isLeaf?: boolean;
   fullLabel?: string;
 }
 

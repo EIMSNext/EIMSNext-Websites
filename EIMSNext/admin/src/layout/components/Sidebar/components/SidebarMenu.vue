@@ -5,7 +5,7 @@
     :background-color="variables['menu-background']"
     :text-color="variables['menu-text']"
     :active-text-color="variables['menu-active-text']"
-    :style="{ '--el-menu-hover-bg-color': variables['menu-hover'] }"
+    :style="{ '--el-menu-hover-bg-color': 'var(--et-bg-primary-soft)' }"
     :unique-opened="false"
     :collapse-transition="false"
     mode="vertical"
@@ -38,6 +38,7 @@
              @editMenu="emit('editMenu', $event)"
              @editGroup="emit('editGroup', $event)"
              @deleteMenu="emit('deleteMenu', $event)"
+             @create="emit('create', $event)"
              :on-group-drop="moveMenuToGroup"
              :can-drop-to-group="canDropToGroupTitle"
              :on-drag-start="setDraggingMenu"
@@ -53,6 +54,7 @@
 <script lang="ts" setup>
 import variables from "@/styles/variables.module.scss";
 import { useSystemStore } from "@/store";
+import { MAX_MENU_DEPTH } from "@/utils/appEntry";
 import { AppMenu, FormType } from "@eimsnext/models";
 import Draggable from "vuedraggable";
 
@@ -67,7 +69,7 @@ const props = defineProps<{
   sortable?: boolean;
 }>();
 
-const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "menusChanged"]);
+const emit = defineEmits(["editForm", "editMenu", "editGroup", "deleteMenu", "create", "menusChanged"]);
 const currentRoute = useRoute();
 const systemStore = useSystemStore();
 const dragGroup = { name: "app-menu", pull: true, put: true };
@@ -99,13 +101,39 @@ const handleRootDragStart = (event: { oldIndex?: number }) => {
   }
 };
 
+const containsMenu = (menu: AppMenu, targetMenuId: string): boolean => {
+  if (menu.menuId === targetMenuId) return true;
+  return (menu.subMenus || []).some((subMenu) => containsMenu(subMenu, targetMenuId));
+};
+
+const subtreeHeight = (menu: AppMenu): number => {
+  const children = menu.subMenus || [];
+  return children.length === 0 ? 1 : 1 + Math.max(...children.map(subtreeHeight));
+};
+
+const depthOf = (menuId: string, menus: AppMenu[] = props.menuList, depth = 1): number => {
+  for (const menu of menus) {
+    if (menu.menuId === menuId) return depth;
+
+    const matched = depthOf(menuId, menu.subMenus || [], depth + 1);
+    if (matched > 0) return matched;
+  }
+
+  return 0;
+};
+
 const canDropToGroupTitle = (groupMenu: AppMenu | undefined, eventTarget: EventTarget | null): boolean => {
   if (!sortable.value) return false;
   const sourceMenu = draggingMenu.value;
   if (!sourceMenu || !groupMenu) return false;
   if (sourceMenu.editable === false || groupMenu.editable === false) return false;
   if (getMenuType(groupMenu.menuType) !== FormType.Group) return false;
-  if (getMenuType(sourceMenu.menuType) === FormType.Group) return false;
+  if (containsMenu(sourceMenu, groupMenu.menuId)) return false;
+  if (
+    getMenuType(sourceMenu.menuType) === FormType.Group &&
+    depthOf(groupMenu.menuId) >= MAX_MENU_DEPTH - 1
+  ) return false;
+  if (depthOf(groupMenu.menuId) + subtreeHeight(sourceMenu) > MAX_MENU_DEPTH) return false;
   return eventTarget instanceof HTMLElement && !!eventTarget.closest(".group-drop-target");
 };
 
@@ -113,11 +141,6 @@ const handleRootMove = (event: { draggedContext?: { element?: AppMenu }; related
   if (!sortable.value) return false;
   if (event.draggedContext?.element?.editable === false) return false;
   return !canDropToGroupTitle(event.relatedContext?.element, event.originalEvent?.target ?? null);
-};
-
-const containsMenu = (menu: AppMenu, targetMenuId: string): boolean => {
-  if (menu.menuId === targetMenuId) return true;
-  return (menu.subMenus || []).some((subMenu) => containsMenu(subMenu, targetMenuId));
 };
 
 const findMenuEntry = (
@@ -145,8 +168,12 @@ const moveMenuToGroup = (groupMenu: AppMenu): boolean => {
   if (!sourceMenu || sourceMenu.menuId === groupMenu.menuId) return false;
   if (sourceMenu.editable === false || groupMenu.editable === false) return false;
   if (getMenuType(groupMenu.menuType) !== FormType.Group) return false;
-  if (getMenuType(sourceMenu.menuType) === FormType.Group) return false;
   if (containsMenu(sourceMenu, groupMenu.menuId)) return false;
+  if (
+    getMenuType(sourceMenu.menuType) === FormType.Group &&
+    depthOf(groupMenu.menuId) >= MAX_MENU_DEPTH - 1
+  ) return false;
+  if (depthOf(groupMenu.menuId) + subtreeHeight(sourceMenu) > MAX_MENU_DEPTH) return false;
 
   const sourceEntry = findMenuEntry(props.menuList, sourceMenu.menuId);
   const targetEntry = findMenuEntry(props.menuList, groupMenu.menuId);
@@ -164,6 +191,15 @@ const moveMenuToGroup = (groupMenu: AppMenu): boolean => {
 <style lang="scss" scoped>
 .sidebar-menu {
   width: 100%;
+
+  :deep(.el-menu-item.is-active) {
+    background-color: transparent !important;
+  }
+
+  :deep(.el-menu-item:hover),
+  :deep(.el-sub-menu__title:hover) {
+    background-color: var(--et-bg-primary-soft) !important;
+  }
 }
 
 .menu-drag-ghost {

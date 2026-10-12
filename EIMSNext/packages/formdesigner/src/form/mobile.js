@@ -1,4 +1,4 @@
-import formCreateMobile from '@eimsnext/form-render-vant';
+import formCreateMobile, { FcAddress } from '@eimsnext/form-render-vant';
 import '@eimsnext/form-render-vant/dist/index.css';
 import { formulas } from '@eimsnext/utils';
 import StepForm from '../components/mobile/stepForm/StepForm.vue';
@@ -8,12 +8,10 @@ import Table from '../components/table/Table.vue';
 import TableForm from '../components/tableForm/TableForm.vue';
 import Cell from '../components/cell/Cell.vue';
 import Value from '../components/value/Value.vue';
-import FcCity from '../components/mobile/City.vue';
 import Slot from '../components/slotComponent/SlotComponent.vue';
 import {getFilledTextColor, is} from '@eimsnext/form-render-core';
 import Json from '../components/jsonComponent/JsonComponent.vue';
 import InlineForm from '../components/InlineForm.vue';
-import Echarts from '../components/echarts/Echarts.vue';
 import SignaturePad from '../components/mobile/SignaturePad.vue';
 import Id from '../components/Id.vue';
 import FcTitle from '../components/aide/FcTitle.vue';
@@ -324,14 +322,15 @@ formCreateMobile.component('FcInlineForm', InlineForm);
 formCreateMobile.component('TableForm', TableForm);
 formCreateMobile.component('DataTable', DataTable);
 formCreateMobile.component('FcValue', Value);
-formCreateMobile.component('FcCity', FcCity);
+// 地址（address）由 @eimsnext/form-render-vant 自带的 fc-address 组件渲染（别名 address → fc-address），
+// 移动端画布与运行时共用同一实现，这里只保留老规则 type 为 fcCity 的兼容注册。
+formCreateMobile.component('FcCity', FcAddress);
 formCreateMobile.component('AudioBox', AudioBox);
 formCreateMobile.component('VideoBox', VideoBox);
 formCreateMobile.component('BarCodeBox', BarCodeBox);
 formCreateMobile.component('IframeBox', IframeBox);
 formCreateMobile.component('QrCodeBox', QrCodeBox);
 formCreateMobile.component('SignaturePad', SignaturePad);
-formCreateMobile.component('FcEcharts', Echarts);
 formCreateMobile.component('FcTitle', FcTitle);
 formCreateMobile.component('FcId', Id);
 formCreateMobile.loadjs = loadjs;

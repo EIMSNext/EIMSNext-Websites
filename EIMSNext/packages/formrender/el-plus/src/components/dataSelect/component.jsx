@@ -170,7 +170,7 @@ export default defineComponent({
           : (page - 1) * size + data.length + (data.length === size ? 1 : 0);
         const selectedId = selectedValue.value?.dataId;
         selectedRecord.value = selectedId
-          ? formData.value.find((item) => String(item.id || item._id || "") === selectedId) || null
+          ? formData.value.find((item) => String(item.id || "") === selectedId) || null
           : null;
       } catch (err) {
         error.value = t("com.dataselect.fetchFailed") || "获取表单数据失败，请重试";

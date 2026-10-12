@@ -22,6 +22,9 @@ export interface IFormFieldDef {
   format?: string;
   options?: ValueOption[];
   source?: DynamicSelectSource;
+  // 地址字段的层级（1=省 2=省-市 3=省-市-区 4=省-市-区-详细地址），
+  // 供筛选/查询条件按字段类型截断级联显示用。
+  level?: number;
   isSubField?: boolean;
   nodeId?: string;
   singleResultNode?: boolean;
@@ -46,6 +49,7 @@ export function toFormFieldDef(
       type: field.type,
       format: field.props?.format,
       options: field.props?.options,
+      level: field.props?.level,
       source: getDynamicSelectSource(field),
       isSubField: true,
       nodeId: nodeId,
@@ -60,6 +64,7 @@ export function toFormFieldDef(
       type: field.type,
       format: field.props?.format,
       options: field.props?.options,
+      level: field.props?.level,
       source: getDynamicSelectSource(field),
       isSubField: false,
       nodeId: nodeId,

@@ -370,6 +370,74 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     grid-template-areas: "base" "props" "validate" "advanced" "slots" "style" "event";
 }
 
+/* wangEditor 的下拉（字号/颜色）默认从图标右侧展开。右侧配置面板贴着屏幕右边缘，
+   下拉会跑到屏幕外点不到；这里改成向左展开，保证始终落在面板内。
+   （`. _fc-r-config .w-e-toolbar .w-e-droplist` 的选择器权重高于库里的
+   `.w-e-toolbar .w-e-droplist`，且库没有用行内样式定位，所以无需 !important） */
+._fc-r-config .w-e-toolbar .w-e-droplist {
+    right: 0;
+    left: auto;
+}
+
+/* 面板空间有限，把富文本编辑器整体压小（库默认菜单 40×40、工具栏内边距 6px） */
+._fc-r-config .w-e-toolbar {
+    padding: 0 2px;
+}
+
+._fc-r-config .w-e-toolbar .w-e-menu {
+    width: 26px;
+    height: 26px;
+}
+
+._fc-r-config .w-e-toolbar .w-e-menu i {
+    font-size: 13px;
+}
+
+/* 正文区左右留内边距，文字不再贴着边框
+   （库里 `.w-e-text-container, .w-e-menu-panel { padding: 0 }`，这里用更高权重盖回来） */
+._fc-r-config .w-e-text-container {
+    padding: 0 3px;
+}
+
+/* 正文默认字号 12px，与运行态 `.fc-field-desc` 一致（所见即所得）。
+   库里把段落字号写死了 `.w-e-text-container p { font-size: 16px !important }`，
+   因此这里必须同时带 !important 并保持更高权重才能生效；
+   工具栏里选中的字号是 `<font size>` 元素，仍会覆盖这个默认值。 */
+._fc-r-config .w-e-text-container,
+._fc-r-config .w-e-text-container [contenteditable],
+._fc-r-config .w-e-text-container p {
+    font-size: 12px !important;
+}
+
+/* 描述项的空隙：渲染器给"多行字段"加了 padding-bottom: 10px，设计器面板项本身还有
+   margin-bottom: 10px，两者叠起来与下一节的空隙偏大。这里只对描述项去掉 padding，
+   保留面板统一的 margin，其它配置项不受影响。
+   （选择器权重与渲染器那条相同，靠 !important 保证生效，作用域仅限描述项） */
+._fc-r-config ._fc-desc-item {
+    padding-bottom: 0 !important;
+}
+
+/* 字号档位对应的像素值：wangEditor 只写 <font size=N>，库内没有任何映射，
+   所以这里（以及运行态的 `.fc-field-desc`）自行定义 12 / 14 / 16 / 18 / 20 / 22 */
+._fc-r-config .w-e-text-container font[size="1"] { font-size: 12px; }
+._fc-r-config .w-e-text-container font[size="2"] { font-size: 14px; }
+._fc-r-config .w-e-text-container font[size="3"] { font-size: 16px; }
+._fc-r-config .w-e-text-container font[size="4"] { font-size: 18px; }
+._fc-r-config .w-e-text-container font[size="5"] { font-size: 20px; }
+._fc-r-config .w-e-text-container font[size="6"] { font-size: 22px; }
+
+/* 编辑器内容行距：wangEditor 只写 <p>，没有附带任何样式，段落会吃到浏览器默认的
+   1em 上下外边距（两个字高），看起来"行距大得可怕"。这里统一抹平并收紧行高。 */
+._fc-r-config .w-e-text-container p,
+._fc-r-config .w-e-text-container .w-e-text > div {
+    margin: 0;
+    line-height: 1.4;
+}
+
+._fc-r-config .w-e-text-container {
+    line-height: 1.4;
+}
+
 ._fc-r-name-input .el-input-group__append {
     width: 25px;
     padding: 0;
@@ -581,7 +649,7 @@ body[class*="fd-theme-"] ._fd-config-dialog {
 }
 
 ._fc-l-item ._fc-l-name {
-    font-size: 12px;
+    font-size: 13px;
 }
 
 ._fc-l-item ._fc-l-icon {
@@ -768,6 +836,19 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     width: 100%;
 }
 
+/* 画布根行是 gutter 布局：el-row 左右 -10px 负 margin 会把画布撑出 20px 水平滚动条。
+   gutter 值是 el-row/el-col 的内联样式，须 !important 覆盖；根级成对抵消（净宽度回到容器宽，
+   内容位置不变），嵌套在各容器内部的行不受影响。 */
+._fc-m-drag > form > .el-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+._fc-m-drag > form > .el-row > .el-col.is-guttered {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
 /* Keep the canvas spacing predictable without stacking the item and drag-tool padding. */
 ._fc-designer ._fc-m-drag > form > .el-row > ._fd-drag-tool > ._fd-drag-box > ._fd-drag-item,
 ._fc-designer ._fc-m-drag > form > .van-row > ._fd-drag-tool > ._fd-drag-box > ._fd-drag-item {
@@ -921,6 +1002,16 @@ body[class*="fd-theme-"] ._fd-config-dialog {
 
 ._fc-tabs .el-tabs__item {
     font-weight: 400;
+}
+
+/* 标签页/折叠面板是容器落点：常驻最小高度（控件少时高度不变，超出时自动撑高）。
+   不能只在空态生效，否则拖入一个控件后面板就塌缩成内容高度，没法继续往里拖。 */
+._fc-m .el-tab-pane ._fd-elTabPane-drag,
+._fc-m .el-collapse-item__content ._fd-elCollapseItem-drag {
+    min-height: 360px;
+    /* 面板 DragBox 带 el-col-24 → 命中 flex-wrap 布局但缺 align-content，
+       min-height 撑高后多余空间被摊到行间，控件之间出现大缝；压回顶部堆叠。 */
+    align-content: flex-start;
 }
 
 ._fc-tabs .el-tabs__nav-scroll {
@@ -1379,56 +1470,6 @@ body[class*="fd-theme-"] ._fd-config-dialog {
     max-width: 100%
 }
 
-.fc-icon[class*="icon-chart-"] {
-    display: inline-block;
-    background-repeat: no-repeat;
-    background-image: url(./chart.png);
-    background-size: 164px;
-    width: 21px;
-    height: 21px;
-    border-radius: 3px;
-    background-color: var(--fc-bg-color-2);
-}
-
-.fc-icon.icon-chart-bar{
-    background-position: -2px -2px;
-}
-
-.fc-icon.icon-chart-stripe{
-    background-position: -25px -2px
-}
-
-.fc-icon.icon-chart-line{
-    background-position: -48px -2px
-}
-
-.fc-icon.icon-chart-area{
-    background-position: -71px -2px
-}
-
-.fc-icon.icon-chart-funnel{
-    background-position: -95px -2px
-}
-
-.fc-icon.icon-chart-gauge{
-    background-position: -118px -2px
-}
-
-.fc-icon.icon-chart-pie{
-    background-position: -141px -2px
-}
-
-.fc-icon.icon-chart-radar{
-    background-position: -2px -25px
-}
-
-.fc-icon.icon-chart-scatter{
-    background-position: -25px -25px
-}
-
-.fc-icon.icon-chart-custom{
-    background-position: -48px -25px
-}
 ._fc-field-title {
     font-weight: 600;
     font-size: 14px;

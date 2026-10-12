@@ -81,7 +81,7 @@ import {
 import MobilePage from "@/components/base/MobilePage.vue";
 import { SortDirection, type IDynamicFilter } from "@eimsnext/services";
 import { FlagEnum } from "@eimsnext/utils";
-import { formDataPermissionGroupServiceMobile, formDataServiceMobile, formServiceMobile, formListViewServiceMobile } from "@/services/mobileService";
+import { createNonDraftFilter, formDataPermissionGroupServiceMobile, formDataServiceMobile, formServiceMobile, formListViewServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
 const route = useRoute();
@@ -171,6 +171,15 @@ const formatCell = (row: FormData, field: string) => {
   const value = row.data?.[field];
   if (value === null || value === undefined) return "";
   const fieldDef = form.value?.content?.items?.find((item) => item.field === field);
+  // 地址：province + city + district + detail 直接拼接（与打印一致）
+  if (fieldDef?.type === FieldType.Address) {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      const addr = value as Record<string, any>;
+      return ["province", "city", "district", "detail"].map((key) => String(addr[key] ?? "").trim()).join("");
+    }
+    if (Array.isArray(value)) return value.map((item: any) => String(item ?? "").trim()).filter(Boolean).join("");
+    return String(value);
+  }
   if (fieldDef?.type === FieldType.TimeStamp) return formatDate(value, fieldDef.props?.format);
   if (fieldDef?.type === FieldType.ImageUpload) return imageText(value);
   if (Array.isArray(value)) return value.map((item) => item?.label || item?.name || item).join(", ");
@@ -192,14 +201,15 @@ const parseSettings = (value?: string): FormListViewSettings => {
   }
 };
 
+// 与 PC 列表一致：始终排除草稿数据
 const buildFilter = () => {
-  const base: IDynamicFilter = { field: "formId", type: "none", op: "eq", value: formId };
-  if (!currentView.value?.defaultFilter) return base;
+  const nonDraft = createNonDraftFilter(formId);
+  if (!currentView.value?.defaultFilter) return nonDraft;
   try {
     const viewFilter = JSON.parse(currentView.value.defaultFilter);
-    return { rel: "and", items: [base, toDynamicFilter(viewFilter)] };
+    return { rel: "and", items: [...(nonDraft.items || []), toDynamicFilter(viewFilter)] };
   } catch {
-    return base;
+    return nonDraft;
   }
 };
 

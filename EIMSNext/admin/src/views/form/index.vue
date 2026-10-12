@@ -753,7 +753,7 @@ const handleQuery = () => {
 };
 
 const loadCount = () => {
-  formDataService.dynamicCount(queryParams.value).then((cnt: number) => {
+  formDataService.count(queryParams.value).then((cnt: number) => {
     totalRef.value = cnt;
   }).catch(() => {
     totalRef.value = 0;
@@ -762,7 +762,7 @@ const loadCount = () => {
   });
 };
 const loadData = () => {
-  formDataService.dynamicQuery<FormData>(queryParams.value).then((res: FormData[]) => {
+  formDataService.query<FormData>(queryParams.value).then((res: FormData[]) => {
     dataRef.value = res;
     processData();
   }).catch(() => {
@@ -771,10 +771,10 @@ const loadData = () => {
   });
 };
 const loadDraftCount = async () => {
-  draftTotalRef.value = await formDataService.dynamicCount(draftQueryParams.value);
+  draftTotalRef.value = await formDataService.count(draftQueryParams.value);
 };
 const loadDraftRows = async () => {
-  draftRows.value = await formDataService.dynamicQuery<FormData>(draftQueryParams.value);
+  draftRows.value = await formDataService.query<FormData>(draftQueryParams.value);
 };
 const refreshDraftCount = async () => {
   if (!formDef.value) return;
@@ -1225,7 +1225,8 @@ onUnmounted(() => {
 :deep(.table-image-thumb) {
   width: var(--et-size-40);
   height: var(--et-size-40);
-  border-radius: var(--et-radius-4);
+  border: 1px solid var(--et-border-color-light);
+  border-radius: var(--et-radius-6);
   object-fit: cover;
   cursor: pointer;
 }

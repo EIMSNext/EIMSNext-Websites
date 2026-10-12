@@ -1,7 +1,7 @@
 import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } from "vue-router";
 import { accessToken } from "@eimsnext/utils";
 import router from "@/router";
-import { usePermissionStore } from "@/store";
+import { usePermissionStore, useSettingsStore } from "@/store";
 import { useUserStore, useAppStore } from "@eimsnext/store";
 import { AppMenu, UserType, WorkbenchRecentVisit, WorkbenchRecentVisitRequest, WorkbenchTargetType } from "@eimsnext/models";
 import { workbenchRecentVisitService } from "@eimsnext/services";
@@ -20,6 +20,9 @@ export function setupPermission() {
         } catch {
           console.warn("userStore.initialize failed, continuing with cached data");
         }
+
+        // 读取企业主题色（用户未自定义时作为默认主题色生效）
+        await useSettingsStore().loadCorpTheme();
 
         const isPlatAdmin = userStore.currentUser.userType === UserType.PlatAdmin;
         const needsCorpOnboarding = !userStore.currentUser.corpId && !isPlatAdmin;

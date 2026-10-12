@@ -51,6 +51,22 @@
                   class="table-image-thumb table-image-thumb-spaced"
                 />
               </template>
+              <template v-else-if="isFileFieldType(col.type)">
+                <span class="table-file-list">
+                  <span
+                    v-for="(item, index) in getRowFileItems(scope.row, col.field).slice(0, MAX_FILE_DISPLAY)"
+                    :key="`${item.name}-${index}`"
+                    class="table-file-chip"
+                    :title="item.name"
+                  >
+                    <i class="table-file-badge" :class="`is-${getFileKind(item.name).tone}`">{{ getFileKind(item.name).label }}</i>
+                    <em class="table-file-name">{{ item.name }}</em>
+                  </span>
+                  <span v-if="getRowFileItems(scope.row, col.field).length > MAX_FILE_DISPLAY" class="table-file-more">
+                    +{{ getRowFileItems(scope.row, col.field).length - MAX_FILE_DISPLAY }}
+                  </span>
+                </span>
+              </template>
                 <template v-else-if="getColoredItems(scope.row, col.field).length">
                   <template v-for="(item, index) in getColoredItems(scope.row, col.field)" :key="`${item.value}-${index}`">
                     <span v-if="showOptionSeparator(getColoredItems(scope.row, col.field), index)" class="colored-option-separator">, </span>
@@ -98,6 +114,29 @@
                   <span v-else>{{ item.label ?? item.value }}</span>
                 </template>
               </span>
+              <span v-else-if="isImageFieldType(field.type)" class="fv-card-images">
+                <img
+                  v-for="(item, index) in getRowFileItems(row, field.field).slice(0, 3)"
+                  :key="`${item.url}-${index}`"
+                  :src="item.thumbUrl || item.url"
+                  class="fv-card-thumb"
+                  alt=""
+                />
+              </span>
+              <span v-else-if="isFileFieldType(field.type)" class="fv-card-files">
+                <span
+                  v-for="(item, index) in getRowFileItems(row, field.field).slice(0, MAX_FILE_DISPLAY)"
+                  :key="`${item.name}-${index}`"
+                  class="fv-file-chip"
+                  :title="item.name"
+                >
+                  <i class="fv-file-badge" :class="`is-${getFileKind(item.name).tone}`">{{ getFileKind(item.name).label }}</i>
+                  <em>{{ item.name }}</em>
+                </span>
+                <span v-if="getRowFileItems(row, field.field).length > MAX_FILE_DISPLAY" class="fv-file-more">
+                  +{{ getRowFileItems(row, field.field).length - MAX_FILE_DISPLAY }}
+                </span>
+              </span>
               <span v-else class="fv-card-field-text">{{ value || "--" }}</span>
             </template>
           </FormListViewCard>
@@ -142,10 +181,21 @@ import { computed, ref } from "vue";
 import { FormData, FormDef, FormListView, FormListViewField, FormListViewSettings, FormListViewType, FlowStatus, SystemField } from "@eimsnext/models";
 import type { TableInstance, TableTooltipData } from "element-plus";
 import { flowStatusArray } from "@eimsnext/components";
-import { getFilledTextColor } from "@eimsnext/utils";
+import { getFileKind, getFilledTextColor } from "@eimsnext/utils";
 import { useI18n } from "vue-i18n";
 import { ITableColumn } from "../type";
-import { extractImageUrl, flattenDataItem, formatDataTitle, formatFormValue, findFieldDef, getColoredOptionItems } from "../listViewUtils";
+import {
+  MAX_FILE_DISPLAY,
+  extractImageUrl,
+  flattenDataItem,
+  formatDataTitle,
+  formatFormValue,
+  findFieldDef,
+  getColoredOptionItems,
+  getFileDisplayItems,
+  isFileFieldType,
+  isImageFieldType,
+} from "../listViewUtils";
 import FormListViewCard from "./FormListViewCard.vue";
 
 const props = defineProps<{
@@ -252,13 +302,24 @@ const formatCell = (row: any, field: string, value?: any) => {
   return formatFormValue(value ?? row[field], fieldDef, getFlowStatusName);
 };
 
-const isImageColumn = (col: any) => col?.type === "imageupload";
+const isImageColumn = (col: any) => isImageFieldType(col?.type);
 
 const getImageUrls = (row: any, field: string): string[] => {
   const value = row[field];
   const list = Array.isArray(value) ? value : [value];
   return list.map((item) => extractImageUrl(item)).filter(Boolean);
 };
+
+/** 取行上的字段值（兼容平铺后的子表字段名）。 */
+const getRowValue = (row: any, field: string) => {
+  const flattened = flattenDataItem(row);
+  return flattened[field] !== undefined
+    ? flattened[field]
+    : flattened[field.split(">").pop() || field];
+};
+
+/** 附件/图片字段的展示项。 */
+const getRowFileItems = (row: any, field: string) => getFileDisplayItems(getRowValue(row, field));
 
 const tableToolFormatter = (data: TableTooltipData<FormData>) => formatCell(data.row, data.column.property, data.cellValue);
 
@@ -416,5 +477,146 @@ const kanbanGroups = computed(() => {
   overflow: auto;
   padding: var(--et-space-16);
   background: var(--et-bg-page);
+}
+
+/* ------------------------------------------------------------ 附件展示（表单内上传控件同款徽标） */
+
+.table-file-list {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--et-space-6);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.table-file-chip {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--et-space-4);
+  min-width: 0;
+  max-width: 160px;
+  padding: 1px var(--et-space-6) 1px 1px;
+  border: 1px solid var(--et-border-color-light);
+  border-radius: var(--et-radius-4);
+  background: var(--et-bg-container);
+}
+
+.table-file-more,
+.fv-file-more {
+  flex: 0 0 auto;
+  color: var(--et-text-tertiary);
+  font-size: var(--et-font-size-12);
+}
+
+.table-file-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--et-text-primary);
+  font-size: var(--et-font-size-12);
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-file-badge,
+.fv-file-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--et-radius-3);
+  color: #fff;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.table-file-badge.is-pdf,
+.fv-file-badge.is-pdf {
+  background: #e34d59;
+}
+
+.table-file-badge.is-doc,
+.fv-file-badge.is-doc {
+  background: #3a7bef;
+}
+
+.table-file-badge.is-xls,
+.fv-file-badge.is-xls {
+  background: #2ba471;
+}
+
+.table-file-badge.is-ppt,
+.fv-file-badge.is-ppt {
+  background: #ed7b2f;
+}
+
+.table-file-badge.is-zip,
+.fv-file-badge.is-zip {
+  background: #d4a017;
+}
+
+.table-file-badge.is-txt,
+.fv-file-badge.is-txt {
+  background: #7f8a9c;
+}
+
+.table-file-badge.is-image,
+.fv-file-badge.is-image {
+  background: #13a8a8;
+}
+
+.table-file-badge.is-other,
+.fv-file-badge.is-other {
+  background: #9aa4b2;
+}
+
+/* ------------------------------------------------------------ 卡片/看板里的附件与图片 */
+
+.fv-card-files {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--et-space-4);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.fv-file-chip {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--et-space-4);
+  min-width: 0;
+  max-width: 120px;
+  padding: 1px var(--et-space-4);
+  border: 1px solid var(--et-border-color-light);
+  border-radius: var(--et-radius-4);
+}
+
+.fv-file-chip em {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--et-text-primary);
+  font-size: var(--et-font-size-12);
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fv-card-images {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--et-space-4);
+}
+
+.fv-card-thumb {
+  width: var(--et-size-32);
+  height: var(--et-size-32);
+  border: 1px solid var(--et-border-color-light);
+  border-radius: var(--et-radius-4);
+  object-fit: cover;
 }
 </style>

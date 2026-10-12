@@ -154,7 +154,9 @@ async function bootstrap(accessCode?: string) {
   accessCodeError.value = false;
   accessCodeExpired.value = false;
   try {
-    if (!publicHttp.token.value) {
+    // 初始无码靠 challenge 拿 token；提交访问码时必须用该码重新申请 token 由后端校验，
+    // 否则 challenge token 已在 publicHttp.token 中会导致访问码形同虚设。
+    if (!publicHttp.token.value || accessCode) {
       await bootstrapWithToken(publicHttp, dashboardId.value, PublicScope.DashLink, accessCode);
     }
     accessCodeGate.value = false;
@@ -162,7 +164,7 @@ async function bootstrap(accessCode?: string) {
   } catch (err: any) {
     if (toAccessCodeError(err)) {
       accessCodeGate.value = true;
-      accessCodeExpired.value = err instanceof AccessCodeExpiredError;
+      accessCodeExpired.value = err instanceof AccessCodeExpiredError || err?.name === "AccessCodeExpiredError";
       accessCodeError.value = !!accessCode && !accessCodeExpired.value;
     } else {
       dashboard.value = undefined;

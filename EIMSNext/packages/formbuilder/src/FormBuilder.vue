@@ -135,7 +135,7 @@ export default {
         showTemplate: false, //隐藏模板
         showMenuTree: true, //隐藏大纲
         showPageManage: false, //是否显示模块管理
-        hiddenMenu: ["container", "chart"],
+        hiddenMenu: ["container"],
         hiddenItem: [
           "slider",
           "colorPicker",
@@ -164,7 +164,6 @@ export default {
           "elSegmented",
           "password",
           "elMention",
-          "fcCity",
           "signaturePad",
           "fcId",
           "elAlert",

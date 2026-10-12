@@ -1,4 +1,5 @@
 import {
+  buildFieldLevelMap,
   FieldDef,
   FieldType,
   FlowStatus,
@@ -13,7 +14,7 @@ import {
   getUpdateTime,
 } from "@eimsnext/models";
 import { IConditionList, toDynamicFilter } from "../ConditionList/type";
-import { flowStatusArray } from "../common";
+import { flowStatusArray, formatAddressObject } from "../common";
 import dayjs from "dayjs";
 import { getFileFullUrl } from "@eimsnext/utils";
 
@@ -23,6 +24,8 @@ export interface IDataSelectField {
   type: FieldType;
   format?: string;
   options?: any[];
+  // 地址字段层级（1=省 2=省-市 3=省-市-区 4=省-市-区-详细地址），供筛选条件截断级联显示
+  level?: number;
 }
 
 export interface IDataSelectMapping {
@@ -78,21 +81,26 @@ export const toDataSelectField = (field: FieldDef, parent?: FieldDef): IDataSele
   type: field.type,
   format: field.props?.format,
   options: field.props?.options,
+  level: field.props?.level,
 });
 
 export const buildDataSelectFields = (form?: FormDef, includeSystemFields: boolean = false) => {
   const result: IDataSelectField[] = [];
   const items = form?.content?.items || [];
+  // Items 里的 props 是后端白名单映射，地址的 level 不在其中，用 Layout 原文兜底
+  const levelMap = buildFieldLevelMap(form?.content);
+  const push = (field: IDataSelectField) =>
+    result.push({ ...field, level: field.level ?? levelMap[field.field] });
 
   items.forEach((item) => {
     if (item.type === FieldType.TableForm && item.columns?.length) {
       item.columns.forEach((sub) => {
-        result.push(toDataSelectField(sub, item));
+        push(toDataSelectField(sub, item));
       });
       return;
     }
 
-    result.push(toDataSelectField(item));
+    push(toDataSelectField(item));
   });
 
   if (!includeSystemFields || !form) {
@@ -326,6 +334,17 @@ export const formatDataSelectValue = (
       .join(", ");
   }
 
+  // 地址：province + city + district + detail 直接拼接
+  if (field?.type === FieldType.Address) {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      return formatAddressObject(value as Record<string, any>);
+    }
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item ?? "").trim()).filter(Boolean).join("");
+    }
+    return value ? String(value) : "";
+  }
+
   if (field?.type === FieldType.ImageUpload) {
     return renderImageValue(value);
   }
@@ -380,7 +399,7 @@ export const buildDataSelectValue = (
   return {
     appId: String(record?.appId || ""),
     formId: String(record?.formId || ""),
-    dataId: String(record?.id || record?._id || ""),
+    dataId: String(record?.id || ""),
     data,
   };
 };

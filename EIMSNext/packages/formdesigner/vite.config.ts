@@ -27,8 +27,6 @@ export default defineConfig({
         "@eimsnext/store",
         "@eimsnext/utils",
         "element-plus/es/locale/lang/zh-cn",
-        "codemirror",
-        "codemirror/lib/codemirror",
         "dayjs",
         "js-beautify",
         "jsbarcode",

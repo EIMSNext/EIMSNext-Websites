@@ -5,7 +5,10 @@
       <section class="detail-hero">
         <div class="detail-hero-main">
           <div class="title-row">
-            <img v-if="profile.icon" :src="profile.icon" class="profile-icon" :alt="profile.name" />
+            <img v-if="iconSrc" :src="iconSrc" class="profile-icon" :alt="profile.name" @error="onIconError" />
+            <div v-else class="profile-icon profile-icon--default">
+              <et-icon icon="icon-appdefault" size="34px" color="#fff" />
+            </div>
             <div class="title-copy">
               <div class="title-topline">
                 <h1 class="detail-title">{{ profile.name }}</h1>
@@ -102,10 +105,17 @@ const route = useRoute();
 const router = useRouter();
 const profile = ref<AppProfile>();
 const activeImage = ref("");
+const iconBroken = ref(false);
 const installing = ref(false);
 const loading = ref(false);
 const loadError = ref(false);
 let detailRequestId = 0;
+
+const iconSrc = computed(() => (iconBroken.value ? "" : profile.value?.icon || ""));
+
+function onIconError() {
+  iconBroken.value = true;
+}
 
 const galleryImages = computed(() => {
   const item = profile.value;
@@ -118,6 +128,7 @@ function close() {
   detailRequestId += 1;
   profile.value = undefined;
   activeImage.value = "";
+  iconBroken.value = false;
   loadError.value = false;
   loading.value = false;
   emit("update:modelValue", false);
@@ -128,6 +139,7 @@ async function loadDetail() {
   const requestId = ++detailRequestId;
   profile.value = undefined;
   activeImage.value = "";
+  iconBroken.value = false;
   loadError.value = false;
   loading.value = true;
   try {
@@ -206,6 +218,13 @@ const { t } = useI18n();
   border-radius: 20px;
   object-fit: cover;
   box-shadow: 0 16px 28px rgba(15, 23, 42, 0.12);
+}
+
+.profile-icon--default {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--et-color-primary);
 }
 
 .title-topline {

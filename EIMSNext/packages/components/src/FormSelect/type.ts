@@ -20,18 +20,26 @@ export function buildFormListItems(
 ): IFormItem[] {
   const items: IFormItem[] = [];
   const exclude = options?.exclude || [];
-  app.appMenus.forEach((x) => {
-    if (x.menuType == FormType.Form && exclude.indexOf(x.menuId) == -1) {
-      let item: IFormItem = {
-        id: x.menuId,
-        label: x.title!,
-        icon: x.icon,
-        iconColor: x.iconColor,
-      };
+  const collect = (menus: AppDef["appMenus"]) => {
+    menus.forEach((x) => {
+      const menuType = String(x.menuType);
+      if (menuType === FormType.Group) {
+        collect(x.subMenus || []);
+        return;
+      }
 
-      items.push(item);
-    }
-  });
+      if (menuType === FormType.Form && !exclude.includes(x.menuId)) {
+        items.push({
+          id: x.menuId,
+          label: x.title!,
+          icon: x.icon,
+          iconColor: x.iconColor,
+        });
+      }
+    });
+  };
+
+  collect(app.appMenus || []);
 
   return items;
 }

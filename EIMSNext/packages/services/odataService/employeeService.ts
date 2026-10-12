@@ -42,9 +42,10 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
 
     queryByDepartment<T>(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<T[]> {
         // 级联过滤直接用关系表上的层级路径快照 HeriarchyId，无需经 d/Department 导航联表。
+        const escapedDepartmentId = departmentId.replaceAll("'", "''");
         const deptFilter = cascadedDept
-            ? `Departments/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
-            : `Departments/any(d: d/DepartmentId eq '${departmentId}')`;
+            ? `Departments/any(d: contains(d/HeriarchyId, '|${escapedDepartmentId}|'))`
+            : `Departments/any(d: d/DepartmentId eq '${escapedDepartmentId}')`;
 
         const { body, urlParams } = this.buildDeptQuery(deptFilter, query, true);
         const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
@@ -52,9 +53,10 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
     }
 
     countByDepartment(departmentId: string, cascadedDept: boolean = false, query?: string): Promise<number> {
+        const escapedDepartmentId = departmentId.replaceAll("'", "''");
         const deptFilter = cascadedDept
-            ? `Departments/any(d: contains(d/HeriarchyId, '|${departmentId}|'))`
-            : `Departments/any(d: d/DepartmentId eq '${departmentId}')`;
+            ? `Departments/any(d: contains(d/HeriarchyId, '|${escapedDepartmentId}|'))`
+            : `Departments/any(d: d/DepartmentId eq '${escapedDepartmentId}')`;
 
         const { body, urlParams } = this.buildDeptQuery(deptFilter, query, true);
         const url = urlParams ? `${this.modelName()}?${urlParams}` : this.modelName();
@@ -70,31 +72,22 @@ export class EmployeeService extends ODataServiceBase<Employee, EmployeeRequest>
     }
 
     private buildDeptQuery(deptFilter: string, query?: string, includeRelations = false): { body: string; urlParams: string } {
+        const params = new URLSearchParams();
         const urlParams = new URLSearchParams();
-        const bodyParams = new URLSearchParams();
 
         if (query) {
-            const params = new URLSearchParams(query);
-            for (const [key, value] of params.entries()) {
-                if (key === "adminScope") {
-                    urlParams.set(key, value);
-                } else {
-                    bodyParams.set(key, value);
-                }
-            }
+            const inputParams = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
+            for (const [key, value] of inputParams.entries()) params.set(key, value);
         }
 
-        const existingFilter = bodyParams.get("$filter");
+        const existingFilter = params.get("$filter");
         const combinedFilter = existingFilter
             ? `(${existingFilter}) and (${deptFilter})`
             : deptFilter;
-        bodyParams.set("$filter", combinedFilter);
-        if (includeRelations) bodyParams.set("$expand", "Departments($expand=Department),Groups");
+        params.set("$filter", combinedFilter);
+        if (includeRelations) params.set("$expand", "Departments($expand=Department),Groups");
 
-        return {
-            body: bodyParams.toString(),
-            urlParams: urlParams.toString(),
-        };
+        return { body: params.toString(), urlParams: urlParams.toString() };
     }
 }
 

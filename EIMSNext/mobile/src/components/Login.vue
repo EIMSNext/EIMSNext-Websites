@@ -98,8 +98,11 @@ const handleLogin = async () => {
     showToast(t('mobile.login.success'))
     const redirect = (router.currentRoute.value.query.redirect as string) || '/workbench'
     router.replace(redirect)
-  } catch {
-    showToast(t('mobile.login.failed'))
+  } catch (e: any) {
+    // 认证类请求被全局错误处理器排除，这里展示后端返回的具体原因
+    const data = e?.response?.data || {}
+    const message = data.message || data.error_description || data.error
+    showToast(message || t('mobile.login.failed'))
   } finally {
     loading.value = false
   }

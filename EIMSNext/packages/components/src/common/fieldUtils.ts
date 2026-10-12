@@ -36,6 +36,13 @@ export const flattenDataItem = (item: any) => {
   return dataItem;
 };
 
+// 地址对象 { province, city, district, detail } → "省市区详细地址"
+// 与打印规则一致：province + city + district + detail 直接拼接，不加分隔符。
+export const formatAddressObject = (value: Record<string, any>): string => {
+  const parts = ["province", "city", "district", "detail"].map((key) => String(value?.[key] ?? "").trim());
+  return parts.join("");
+};
+
 export const dateFormat = (val: any, fmt?: string) => {
   const format = (fmt || "YYYY-MM-DD")
     .replace(/yyyy/g, "YYYY")
@@ -95,6 +102,16 @@ export const formatFormValue = (
   if (type === FieldType.CheckBox || type === FieldType.Select2 || type === FieldType.Employee2 || type === FieldType.Department2) {
     if (Array.isArray(normalized)) {
       return normalized.map((item: any) => item?.label || item?.name || item?.value || item).filter(Boolean).join(", ");
+    }
+  }
+
+  // 地址字段值为 { province, city, district, detail }，显示为 "省市区详细地址"
+  if (type === FieldType.Address) {
+    if (normalized && typeof normalized === "object" && !Array.isArray(normalized)) {
+      return formatAddressObject(normalized as Record<string, any>);
+    }
+    if (Array.isArray(normalized)) {
+      return normalized.map((item: any) => String(item ?? "").trim()).filter(Boolean).join("");
     }
   }
 

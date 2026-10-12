@@ -1,11 +1,402 @@
-._fc-upload{
-    width: 100%;
+/**
+ * 上传控件皮肤。
+ *
+ * 表现层完全由这里接管，行为仍由 Element Plus 的 ElUpload 提供：
+ * - 触发区：`.el-upload` 里的 `.el-upload-dragger`（一行虚线框，拖拽悬停变主色）
+ * - 附件列表：`.el-upload-list--text` 的每行由 `#file` 插槽自绘
+ * - 图片列表：`.el-upload-list--picture-card` 的卡片由 `#file` 插槽自绘，触发器用 order:-1 提升到网格上方
+ *
+ * 所有选择器都收在 `._fc-upload` 之下，避免污染全局。
+ */
+
+._fc-upload {
+  width: 100%;
 }
+
+/* ------------------------------------------------------------ 触发条 */
+
+._fc-upload .el-upload--text,
+._fc-upload .el-upload--picture-card {
+  width: 100%;
+  height: auto;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* 图片形态下，ElUpload 的触发器被放进 picture-card 网格里当作 append 渲染，
+   这里把它顶到整行最前面，避免出现在图片后面。 */
+._fc-upload .el-upload--picture-card {
+  order: -1;
+  flex: 0 0 100%;
+}
+
+._fc-upload .el-upload--picture-card:hover,
+._fc-upload .el-upload--picture-card:focus {
+  border-color: transparent;
+  color: inherit;
+}
+
+._fc-upload .el-upload-dragger {
+  display: flex;
+  align-items: center;
+  /* 与单行文本框同宽（--fc-field-control-width 定义在 style/index.css，兜底 360px） */
+  max-width: var(--fc-field-control-width, 360px);
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--et-space-12);
+  border: 1px dashed var(--et-border-color);
+  border-radius: var(--et-radius-6);
+  background: var(--et-bg-container);
+  cursor: pointer;
+  transition: border-color var(--et-duration-fast) var(--et-ease-standard),
+    background-color var(--et-duration-fast) var(--et-ease-standard);
+}
+
+._fc-upload .el-upload-dragger:hover {
+  border-color: var(--et-color-primary);
+  background: var(--el-color-primary-light-9);
+}
+
+._fc-upload .el-upload-dragger.is-dragover {
+  border: 1px dashed var(--et-color-primary);
+  background: var(--el-color-primary-light-9);
+}
+
+._fc-upload .el-upload.is-disabled .el-upload-dragger {
+  border-style: solid;
+  border-color: var(--et-border-color-light);
+  background: var(--et-bg-muted);
+  cursor: default;
+}
+
+._fc-upload .el-upload.is-disabled .el-upload-dragger:hover {
+  border-color: var(--et-border-color-light);
+  background: var(--et-bg-muted);
+}
+
+._fc-upload__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--et-space-4);
+  width: 100%;
+  min-height: 40px;
+  font-size: var(--et-font-size-13);
+}
+
+._fc-upload__select {
+  flex: 0 0 auto;
+  color: var(--et-color-primary);
+}
+
+._fc-upload__hint {
+  /* 不再撑满整行，让「选择 + 提示」作为一个整体居中显示 */
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--et-text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+._fc-upload__hint-drag {
+  display: none;
+}
+
+._fc-upload .el-upload-dragger.is-dragover ._fc-upload__hint-normal {
+  display: none;
+}
+
+._fc-upload .el-upload-dragger.is-dragover ._fc-upload__hint-drag {
+  display: inline;
+}
+
+/* ------------------------------------------------------------ 附件：文本行列表 */
+
+._fc-upload .el-upload-list--text {
+  margin-top: var(--et-space-8);
+  border: 1px solid var(--et-border-color-light);
+  border-radius: var(--et-radius-6);
+  overflow: hidden;
+}
+
+._fc-upload .el-upload-list--text:empty,
+._fc-upload .el-upload-list--text:not(:has(li)) {
+  display: none;
+}
+
+._fc-upload .el-upload-list--text .el-upload-list__item {
+  display: flex;
+  align-items: center;
+  height: auto;
+  min-height: 56px;
+  margin: 0;
+  padding: var(--et-space-8) var(--et-space-40) var(--et-space-8) var(--et-space-12);
+  border-bottom: 1px solid var(--et-border-color-light);
+  border-radius: 0;
+  background: var(--et-bg-container);
+  color: var(--et-text-primary);
+  font-size: var(--et-font-size-13);
+  transition: background-color var(--et-duration-fast) var(--et-ease-standard);
+}
+
+._fc-upload .el-upload-list--text .el-upload-list__item:last-child {
+  border-bottom: none;
+}
+
+._fc-upload .el-upload-list--text .el-upload-list__item:hover {
+  background: var(--et-bg-hover);
+}
+
+._fc-upload .el-upload-list--text .el-upload-list__item-status-label {
+  display: none;
+}
+
+._fc-upload .el-upload-list__item .el-icon--close-tip {
+  display: none;
+}
+
+/* EP 自带的删除图标：默认透明，行悬停时出现 */
+._fc-upload .el-upload-list__item > .el-icon--close {
+  position: absolute;
+  top: 50%;
+  right: var(--et-space-12);
+  transform: translateY(-50%);
+  color: var(--et-text-tertiary);
+  font-size: var(--et-font-size-16);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--et-duration-fast) var(--et-ease-standard),
+    color var(--et-duration-fast) var(--et-ease-standard);
+}
+
+._fc-upload .el-upload-list__item:hover > .el-icon--close,
+._fc-upload .el-upload-list__item.focusing > .el-icon--close {
+  opacity: 1;
+}
+
+._fc-upload .el-upload-list__item > .el-icon--close:hover {
+  color: var(--et-color-danger);
+}
+
+._fc-upload__row {
+  display: flex;
+  align-items: center;
+  gap: var(--et-space-10);
+  width: 100%;
+  min-width: 0;
+}
+
+._fc-upload__badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: var(--et-size-28);
+  height: var(--et-size-28);
+  border-radius: var(--et-radius-4);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+._fc-upload__badge.is-pdf {
+  background: #e34d59;
+}
+
+._fc-upload__badge.is-doc {
+  background: #3a7bef;
+}
+
+._fc-upload__badge.is-xls {
+  background: #2ba471;
+}
+
+._fc-upload__badge.is-ppt {
+  background: #ed7b2f;
+}
+
+._fc-upload__badge.is-zip {
+  background: #d4a017;
+}
+
+._fc-upload__badge.is-txt {
+  background: #7f8a9c;
+}
+
+._fc-upload__badge.is-image {
+  background: #13a8a8;
+}
+
+._fc-upload__badge.is-other {
+  background: #9aa4b2;
+}
+
+._fc-upload__meta {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--et-space-8);
+  min-width: 0;
+}
+
+._fc-upload__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--et-text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+._fc-upload__state {
+  flex: 0 0 auto;
+  color: var(--et-text-tertiary);
+  font-size: var(--et-font-size-12);
+}
+
+._fc-upload__state.is-error {
+  color: var(--et-color-danger);
+}
+
+._fc-upload__bar {
+  display: inline-block;
+  flex: 0 0 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--et-fill-color-light);
+  overflow: hidden;
+}
+
+._fc-upload__bar > i {
+  display: block;
+  height: 100%;
+  background: var(--et-color-primary);
+  transition: width var(--et-duration-fast) var(--et-ease-linear);
+}
+
+/* ------------------------------------------------------------ 图片：卡片网格 */
+
+._fc-upload .el-upload-list--picture-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--et-space-12);
+  margin-top: 0;
+}
+
+._fc-upload .el-upload-list--picture-card .el-upload-list__item {
+  position: relative;
+  width: 180px;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--et-border-color-light);
+  border-radius: var(--et-radius-6);
+  background: var(--et-bg-container);
+  overflow: hidden;
+  transition: border-color var(--et-duration-fast) var(--et-ease-standard),
+    box-shadow var(--et-duration-fast) var(--et-ease-standard);
+}
+
+._fc-upload .el-upload-list--picture-card .el-upload-list__item:hover {
+  border-color: var(--et-color-primary);
+  box-shadow: var(--et-shadow-sm);
+}
+
+._fc-upload .el-upload-list--picture-card .el-upload-list__item-status-label,
+._fc-upload .el-upload-list--picture-card .el-upload-list__item > .el-icon--close {
+  display: none;
+}
+
+._fc-upload__card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+._fc-upload__thumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 132px;
+  background: var(--et-bg-muted);
+  overflow: hidden;
+}
+
+._fc-upload__thumb > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+._fc-upload__thumb > svg {
+  width: var(--et-size-28);
+  height: var(--et-size-28);
+  color: var(--et-text-placeholder);
+}
+
+._fc-upload__caption {
+  padding: var(--et-space-6) var(--et-space-8);
+  border-top: 1px solid var(--et-border-color-light);
+  color: var(--et-text-secondary);
+  font-size: var(--et-font-size-12);
+  line-height: var(--et-line-height-18);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+._fc-upload__mask {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--et-space-6);
+  background: var(--et-overlay-color);
+  color: #fff;
+  font-size: var(--et-font-size-12);
+}
+
+._fc-upload__mask.is-error {
+  background: rgb(201 54 54 / 82%);
+}
+
+._fc-upload__percent {
+  font-size: var(--et-font-size-16);
+}
+
+._fc-upload__mask ._fc-upload__bar {
+  flex: 0 0 60%;
+  background: rgb(255 255 255 / 35%);
+}
+
+._fc-upload__mask ._fc-upload__bar > i {
+  background: #fff;
+}
+
+/* EP 的预览/删除悬浮层 */
+._fc-upload .el-upload-list--picture-card .el-upload-list__item-actions {
+  background: var(--et-overlay-color);
+}
+
+._fc-upload .el-upload-list--picture-card .el-upload-list__item-actions span {
+  color: #fff;
+}
+
+/* ------------------------------------------------------------ 达到数量上限 */
 
 ._fc-exceed .el-upload {
-    display: none;
+  display: none !important;
 }
 
-.el-upload-list.is-disabled .el-upload {
-    cursor: not-allowed !important;
+._fc-upload .el-upload-list.is-disabled .el-upload {
+  cursor: not-allowed !important;
 }

@@ -7,7 +7,10 @@
 
     <div class="py-1 flex-x-between">
       <span>{{ t("settings.themeColor") }}</span>
-      <ThemeColorPicker v-model="settingsStore.themeColor" @update:model-value="changeThemeColor" />
+      <ThemeColorPicker
+        :model-value="settingsStore.themeColor"
+        @update:model-value="changeThemeColor"
+      />
     </div>
 
     <div class="py-1 flex-x-between">

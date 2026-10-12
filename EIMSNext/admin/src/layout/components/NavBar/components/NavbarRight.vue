@@ -1,6 +1,6 @@
 <template>
   <div class="navbar__right">
-    <div class="workbench-trigger" @click="router.push('/workbench/customize')">
+    <div v-if="!isPlatAdmin" class="workbench-trigger" @click="router.push('/workbench/customize')">
       <div class="appstore-entry">
         <et-icon icon="el-Monitor" size="18" /><span>{{ $t("admin.workbench.customize") }}</span>
       </div>
@@ -15,7 +15,7 @@
     <!-- 全屏 -->
     <Fullscreen />
     <!-- 消息通知 -->
-    <Notification @click="settingStore.messageCenterVisible = true" />
+    <Notification v-if="!isPlatAdmin" @click="settingStore.messageCenterVisible = true" />
     <!-- </template> -->
     <!-- 语言选择 -->
     <LangSelect :show-label="false" />
@@ -33,11 +33,15 @@
 <script setup lang="ts">
 import defaultSettings from "@/settings";
 import { useSettingsStore } from "@/store";
+import { useUserStore } from "@eimsnext/store";
+import { UserType } from "@eimsnext/models";
 import UserProfile from "./UserProfile.vue";
 import AppStoreDrawer from "@/views/appstore/components/AppStoreDrawer.vue";
 
 const router = useRouter();
 const settingStore = useSettingsStore();
+const userStore = useUserStore();
+const isPlatAdmin = computed(() => userStore.currentUser.userType === UserType.PlatAdmin);
 </script>
 
 <style lang="scss" scoped>

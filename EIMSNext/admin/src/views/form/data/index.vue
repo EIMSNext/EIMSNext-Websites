@@ -187,7 +187,7 @@ import {
   wfTaskLogService,
 } from "@eimsnext/services";
 import { useFormStore } from "@eimsnext/store";
-import { ShareLinkBar, ToolbarItem } from "@eimsnext/components";
+import { ShareLinkBar, ToolbarItem, formatAddressObject } from "@eimsnext/components";
 import { useTagsViewStore } from "@/store";
 import { useI18n } from "vue-i18n";
 import FormView from "@/components/FormView/index.vue";
@@ -241,7 +241,11 @@ const getOperatorInitial = (label?: string) => {
 
 const formatChangeValue = (value: unknown) => {
   if (value === null || value === undefined || value === "") return "-";
-  if (typeof value === "object") return JSON.stringify(value);
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    if ("province" in obj || "detail" in obj) return formatAddressObject(obj as Record<string, any>);
+    return JSON.stringify(value);
+  }
   return String(value);
 };
 

@@ -54,6 +54,9 @@
       @remove="onCondClear"
     >
     </ConditionList>
+    <div class="take-limit-tips mt-[8px]">
+      {{ t("eventFlow.updateTakeLimit_Tips") }}
+    </div>
     <div>
       <el-checkbox
         v-model="activeData.metadata.updateMeta!.insertIfNoData"
@@ -525,6 +528,11 @@ init();
 }
 
 .sub-cond-panel {
+  background-color: var(--et-bg-muted);
+  padding: var(--et-space-10);
+}
+
+.take-limit-tips {
   background-color: var(--et-bg-muted);
   padding: var(--et-space-10);
 }

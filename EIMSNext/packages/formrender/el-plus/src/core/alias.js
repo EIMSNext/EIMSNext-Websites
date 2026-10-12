@@ -53,6 +53,7 @@ export default {
   switch: "el-switch",
   select: "fc-select",
   select2: "fc-select",
+  address: "fc-address",
   checkbox: "fc-checkbox",
   radio: "fc-radio",
   number: "el-input-number",

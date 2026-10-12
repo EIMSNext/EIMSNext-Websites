@@ -8,7 +8,7 @@
     @cancel="cancel"
     @ok="save"
   >
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px" class="dialog-form">
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" class="dialog-form">
         <el-form-item :label="$t('comp.addEditEmployeeGroup.employeeGroupCategory')">
           <el-input :model-value="pCategory.name" readonly />
         </el-form-item>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <script src="appSetting.local.js"></script>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="简祎沄 - 账号登录" />
+    <title>简祎沄 - 登录</title>
+  </head>
+  <body>
+    <div id="app">
+      <div class="loader"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+    <style>
+      html,
+      body,
+      #app {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .loader {
+        --d: 22px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 4px;
+        height: 4px;
+        color: #4080ff;
+        border-radius: 50%;
+        box-shadow:
+          calc(1 * var(--d)) calc(0 * var(--d)) 0 0,
+          calc(0.707 * var(--d)) calc(0.707 * var(--d)) 0 1px,
+          calc(0 * var(--d)) calc(1 * var(--d)) 0 2px,
+          calc(-0.707 * var(--d)) calc(0.707 * var(--d)) 0 3px,
+          calc(-1 * var(--d)) calc(0 * var(--d)) 0 4px,
+          calc(-0.707 * var(--d)) calc(-0.707 * var(--d)) 0 5px,
+          calc(0 * var(--d)) calc(-1 * var(--d)) 0 6px,
+          calc(0.707 * var(--d)) calc(-0.707 * var(--d)) 0 7px;
+        animation: l27 1s infinite steps(8);
+      }
+
+      @keyframes l27 {
+        100% {
+          transform: rotate(1turn);
+        }
+      }
+    </style>
+  </body>
+</html>

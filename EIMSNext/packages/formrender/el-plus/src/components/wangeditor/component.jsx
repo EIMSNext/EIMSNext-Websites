@@ -72,11 +72,15 @@ export default defineComponent({
         {...attrs}
         onInput={this.result}
         id={`editor${this.uni}`}
+        // 带上 fc-editor 类，便于用 CSS 收紧编辑器内容的行距（不再只依赖编译选项）
+        class={`fc-editor${attrs.class ? ` ${attrs.class}` : ""}`}
         style="line-height: normal;"
       />
     );
   },
-  beforeDestroy() {
+  // Vue 3 不再调用 beforeDestroy（那是 Vue 2 的钩子），编辑器实例会泄漏。
+  // 这个组件现在被用在基础配置面板里，字段切换会反复创建，必须用 beforeUnmount 销毁。
+  beforeUnmount() {
     this.editor && this.editor.destroy();
     this.editor = null;
   },

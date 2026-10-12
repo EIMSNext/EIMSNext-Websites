@@ -252,7 +252,7 @@
 </template>
 
 <script>
-import { uniqueId, deepExtend, is } from '@eimsnext/form-render-core';
+import { uniqueId, deepExtend, deepCopy, is } from '@eimsnext/form-render-core';
 import {defineComponent} from 'vue';
 import FnEditor from './FnEditor.vue';
 import {getInjectArg} from '../utils';

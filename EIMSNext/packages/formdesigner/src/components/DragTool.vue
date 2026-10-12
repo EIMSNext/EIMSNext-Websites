@@ -80,6 +80,8 @@ export default defineComponent({
     mask: Boolean,
     actions: Array,
     handleBtn: [Boolean, Array],
+    // 纯布局子容器（如 elTabPane/elCollapseItem）没有可配置项，不允许被选中。
+    selectable: {type: Boolean, default: true},
     formCreateInject: Object,
     unique: String,
     only: Boolean,
@@ -128,6 +130,7 @@ export default defineComponent({
       this.$emit("action", idx);
     },
     active() {
+      if (!this.selectable) return;
       if (this.fcx.active === this.id) return;
       this.fcx.active = this.id;
       this.$emit("active");
@@ -191,10 +194,7 @@ export default defineComponent({
   outline: 1px dashed var(--fc-line-color-1);
 }
 
-._fd-drag-tool:not(.active):hover>div>._fd-drag-btn {
-  display: flex !important;
-  opacity: 0.7;
-}
+/* 操作按钮只在选中后出现，hover 不再显示。 */
 
 ._fd-drag-tool:has(._fd-drag-tool:hover) > ._fd-drag-r {
   display: none !important;

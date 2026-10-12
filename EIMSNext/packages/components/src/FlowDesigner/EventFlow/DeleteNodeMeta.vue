@@ -55,6 +55,9 @@
       @change="onCondition"
       @remove="onCondClear"
     ></ConditionList>
+    <div class="take-limit-tips mt-[8px]">
+      {{ t("eventFlow.deleteTakeLimit_Tips") }}
+    </div>
   </template>
 </template>
 <script lang="ts" setup>
@@ -164,5 +167,10 @@ init();
 .mode-select {
   width: var(--et-size-300);
   margin-right: var(--et-space-5);
+}
+
+.take-limit-tips {
+  background-color: var(--et-bg-muted);
+  padding: var(--et-space-10);
 }
 </style>

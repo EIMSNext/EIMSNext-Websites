@@ -46,6 +46,7 @@ export interface EditAppMenuRequest {
 export interface CreateAppGroupRequest {
   appId: string;
   name: string;
+  parentMenuId?: string;
 }
 
 export interface EditAppGroupRequest {

@@ -1,12 +1,13 @@
 import { Themes } from "./enums/Themes";
 import { Language } from "./enums/Language";
+import { DEFAULT_THEME_COLOR } from "@eimsnext/utils";
 
 // 检查用户的操作系统是否使用深色模式
 const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
 const defaultSettings: AppSettings = {
   // 系统Title
-  title: "东风低代码 - EIMS Next",
+  title: "简祎沄 - 东风低代码 - EIMS Next",
   // 系统版本
   version: "1.0.0",
   // 是否显示设置
@@ -21,8 +22,8 @@ const defaultSettings: AppSettings = {
   theme: mediaQueryList.matches ? Themes.DARK : Themes.LIGHT,
   // 语言
   language: Language.ZH_CN,
-  // 主题颜色
-  themeColor: "#4080FF",
+  // 主题颜色（系统默认）
+  themeColor: DEFAULT_THEME_COLOR,
   // 是否开启水印
   watermarkEnabled: false,
   // 水印内容

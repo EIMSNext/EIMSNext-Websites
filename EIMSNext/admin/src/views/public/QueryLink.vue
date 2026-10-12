@@ -58,7 +58,7 @@
             show-overflow-tooltip
           >
             <template #default="{ row }">
-              {{ formatCell(row, field.field) }}
+              {{ formatCell(row, field) }}
             </template>
           </el-table-column>
         </el-table>
@@ -120,6 +120,7 @@ import {
 } from "@eimsnext/components";
 import { loadDynamicSelectOptions, type DynamicSelectOption, type DynamicSelectSource } from "@eimsnext/utils";
 import {
+  buildFieldLevelMap,
   FieldDef,
   FieldType,
   FormContent,
@@ -171,6 +172,8 @@ const queryLoading = ref(false);
 const detailVisible = ref(false);
 const currentDetailIndex = ref(-1);
 
+// Items 的 props 是后端白名单映射，地址的 level 不在其中，用 Layout 原文兜底
+const fieldLevels = computed(() => buildFieldLevelMap(formDef.value?.content));
 const ordinaryFields = computed(() => flattenFields(formDef.value?.content?.items || []));
 const queryableFields = computed(() => ordinaryFields.value.filter((field) => isPublicQueryField(field.type)));
 const queryFields = computed<IFormFieldDef[]>(() => resolveFields(publicSetting.value?.form?.queryLink?.queryFields || [], queryableFields.value).map((field) => ({
@@ -180,6 +183,7 @@ const queryFields = computed<IFormFieldDef[]>(() => resolveFields(publicSetting.
   type: field.type,
   format: field.props?.format,
   options: field.props?.options,
+  level: field.props?.level ?? fieldLevels.value[field.field],
   source: field.type === FieldType.Select1
     ? (field as FieldDef & { effect?: { source?: DynamicSelectSource } }).effect?.source
     : undefined,
@@ -209,7 +213,9 @@ async function bootstrap(accessCode?: string) {
   accessCodeError.value = false;
   accessCodeExpired.value = false;
   try {
-    if (!publicHttp.token.value) {
+    // 初始无码靠 challenge 拿 token；提交访问码时必须用该码重新申请 token 由后端校验，
+    // 否则 challenge token 已在 publicHttp.token 中会导致访问码形同虚设。
+    if (!publicHttp.token.value || accessCode) {
       await bootstrapWithToken(publicHttp, formId.value, PublicScope.QueryLink, accessCode);
     }
     if (!formDef.value) {
@@ -222,7 +228,7 @@ async function bootstrap(accessCode?: string) {
   } catch (err: any) {
     if (toAccessCodeError(err)) {
       accessCodeGate.value = true;
-      accessCodeExpired.value = err instanceof AccessCodeExpiredError;
+      accessCodeExpired.value = err instanceof AccessCodeExpiredError || err?.name === "AccessCodeExpiredError";
       accessCodeError.value = !!accessCode && !accessCodeExpired.value;
     } else {
       formDef.value = undefined;
@@ -321,8 +327,14 @@ function onDetailClose() {
   currentDetailIndex.value = -1;
 }
 
-function formatCell(row: FormData, field: string) {
-  const value = getFieldValue(row.data, field);
+function formatCell(row: FormData, field: FieldDef) {
+  const value = getFieldValue(row.data, field.field);
+  // 地址值对象 { province, city, district, detail } 没有 label/value，按层级拼成「省 / 市 / 区」
+  if (field.type === FieldType.Address && value && typeof value === "object" && !Array.isArray(value)) {
+    const a = value as { province?: string; city?: string; district?: string };
+    const parts = [a.province, a.city, a.district].filter((s) => s);
+    return parts.length ? parts.join(" / ") : "";
+  }
   return formatValue(value);
 }
 
@@ -394,6 +406,7 @@ function isPublicQueryField(type?: FieldType | string) {
     FieldType.Select1,
     FieldType.Number,
     FieldType.TimeStamp,
+    FieldType.Address,
   ].includes(type as FieldType);
 }
 </script>

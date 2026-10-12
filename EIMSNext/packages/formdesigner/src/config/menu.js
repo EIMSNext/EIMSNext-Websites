@@ -21,11 +21,6 @@ export default function createMenu() {
             list: []
         },
         {
-            name: 'chart',
-            title: '图表组件',
-            list: []
-        },
-        {
             name: 'aide',
             title: '辅助组件',
             list: []

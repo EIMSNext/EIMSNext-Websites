@@ -2,6 +2,7 @@ import { FcSubForm as subForm } from '@eimsnext/form-render-core';
 import IconWarning from './icon/IconWarning.vue';
 
 import { FcCheckbox as checkbox } from "./checkbox";
+import { FcAddress as address } from "./address";
 import { FcDepartmentSelect as departmentSelect } from "./departmentselect";
 import { FcEmployeeSelect as employeeSelect } from "./employeeselect";
 import { FcFrame as frame } from "./frame";
@@ -16,10 +17,11 @@ import { FcQuery as query } from "./query";
 import { FcSerialNo as serialno } from "./serialno";
 
 // export { FcCheckbox, FcFrame, FcGroup, FcRadio, FcSelect, FcTree, FcUpload, FcEditor }
-export { FcEditor }
+export { FcEditor, address as FcAddress }
 
 export default [
     checkbox,
+    address,
     departmentSelect,
     employeeSelect,
     frame,

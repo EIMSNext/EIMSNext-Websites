@@ -8,7 +8,7 @@ type StoreGetOptions = {
   silentError?: boolean;
 };
 
-export default function createStore<T extends IIdentity>(id: string, url: string, initData: T[] = []) {
+export default function createStore<T extends IIdentity>(id: string, url: string, initData: T[] = [], defaultQuery: string = "") {
   return defineStore(id, () => {
     const loading = ref(false);
     const items = useStorage<T[]>(id, initData, sessionStorage);
@@ -23,7 +23,7 @@ export default function createStore<T extends IIdentity>(id: string, url: string
         } else {
           loading.value = true;
           http.odata
-            .query<T>(url, query)
+            .query<T>(url, query || defaultQuery)
             .then((res) => {
               items.value = [...initData, ...res];
               resolve(res);

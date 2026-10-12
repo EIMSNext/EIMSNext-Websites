@@ -6,6 +6,10 @@ export interface IAppSetting {
   uploadUrl: string;
   tokenKey: string;
   httpTimeout: number;
+  /** 独立登录应用回跳 redirect_url 的白名单（host:port），同源始终放行 */
+  allowedRedirectHosts: string[];
+  /** redirect_url 缺失/非法时的默认回跳地址 */
+  defaultRedirectUrl: string;
 
   merge(env: any): void;
 }
@@ -18,6 +22,8 @@ class AppSetting implements IAppSetting {
   uploadUrl: string = "https://file.eimsnext.com";
   tokenKey: string = "jat";
   httpTimeout: number = 10000;
+  allowedRedirectHosts: string[] = [];
+  defaultRedirectUrl: string = "";
 
   merge(env: any): void {
     for (let p of Reflect.ownKeys(this)) {

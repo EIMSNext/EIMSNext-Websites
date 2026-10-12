@@ -55,6 +55,7 @@ export enum ConditionFieldType {
   CheckBox = "checkbox",
   Select1 = "select",
   Select2 = "select2",
+  Address = "address",
   TimeStamp = "timestamp",
   Employee1 = "employee1",
   Employee2 = "employee2",
@@ -90,6 +91,9 @@ export function getConditionFieldType(
       break;
     case FieldType.Select2:
       dataType = ConditionFieldType.Select2;
+      break;
+    case FieldType.Address:
+      dataType = ConditionFieldType.Address;
       break;
     case FieldType.Department1:
       dataType = ConditionFieldType.Department1;

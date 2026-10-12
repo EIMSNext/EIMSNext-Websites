@@ -38,6 +38,18 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    sourceMode: {
+      type: String,
+      default: "management",
+    },
+    formId: {
+      type: String,
+      default: "",
+    },
+    fieldId: {
+      type: String,
+      default: "",
+    },
     // 从FormRender的prop.props中接收formCreateInject
     formCreateInject: {
       type: Object,
@@ -125,11 +137,17 @@ export default defineComponent({
       ];
 
       const memberOptions = {
-        showTabs: MemberTabs.Employee | MemberTabs.CurUser,
+        showTabs: props.sourceMode === "form-design"
+          ? MemberTabs.Employee | MemberTabs.DynamicParam
+          : MemberTabs.Employee,
         multiple: multiple,
         limit: limit,
         limitScope: props.limitScope,
         showContract: props.showContract,
+        sourceMode: props.sourceMode,
+        formId: props.formId,
+        fieldId: props.fieldId,
+        sourceType: "employee",
       };
       return (
         <div class={wrapClass} style={{ width: "100%" }}>

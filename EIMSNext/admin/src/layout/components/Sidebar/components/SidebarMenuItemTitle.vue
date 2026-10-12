@@ -4,7 +4,8 @@
   <!-- 菜单标题 -->
   <span
     v-if="isSidebarOpened && title"
-    class="menu-item-title ml-[5px]"
+    class="menu-item-title"
+    :class="{ 'ml-[5px]': !isGroup }"
     :title="displayTitle"
   >
     {{ displayTitle }}
@@ -34,6 +35,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  isGroup:{
+    type: Boolean,
+    default: false,
+  }
 });
 
 const systemStore = useSystemStore();
@@ -50,7 +55,6 @@ const displayTitle = computed(() => translateRouteTitle(t, props.title, te));
 .menu-item-title {
   display: block;
   flex: 1;
-  max-width: var(--et-size-110);
   min-width: 0;
   overflow: hidden;
   text-overflow: clip;

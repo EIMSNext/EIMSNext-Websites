@@ -50,7 +50,9 @@ export default {
                 title: "",
                 props: {
                   multiple: true,
-                  showContract:true
+                  showContract: true,
+                  sourceMode: "form-design",
+                  sourceType: "employee"
                 },
               },
             ],

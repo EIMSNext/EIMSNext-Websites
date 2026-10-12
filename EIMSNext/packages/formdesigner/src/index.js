@@ -11,6 +11,9 @@ import ValueInput from "./components/computed/ValueInput.vue";
 import PatternInput from "./components/computed/PatternInput.vue";
 import StyleConfig from "./components/style/StyleConfig.vue";
 import DividerStyleSelect from "./components/style/DividerStyleSelect.vue";
+import TabsStyleSelect from "./components/style/TabsStyleSelect.vue";
+import RadioButtonGroup from "./components/RadioButtonGroup.vue";
+import ItemsConfig from "./components/ItemsConfig.vue";
 import ComputedConfig from "./components/computed/ComputedConfig.vue";
 import DataLinkConfig from "./components/computed/DataLinkConfig.vue";
 import EventConfig from "./components/EventConfig.vue";
@@ -65,7 +68,9 @@ import ConfigItem from "./components/style/ConfigItem.vue";
 import ConfigTitle from "./components/style/ConfigTitle.vue";
 import RuleSelect from "./components/RuleSelect.vue";
 import HideConfig from "./components/HideConfig.vue";
-import FcEditor from "@eimsnext/form-render-elplus";
+// 注意：@eimsnext/form-render-elplus 的默认导出是 FormCreate 实例，不是富文本组件。
+// 这里必须用具名导出，否则注册给组件的会是整个 FormCreate（面板里会渲染出嵌套表单）。
+import { FcEditor, FcAddress } from "@eimsnext/form-render-elplus";
 import SpanInput from "./components/SpanInput.vue";
 import Id from "./components/Id.vue";
 import SerialNo from "./components/serialno/component.jsx";
@@ -80,10 +85,8 @@ import VideoBox from "./components/aide/VideoBox.vue";
 import BarCodeBox from "./components/aide/BarCodeBox.vue";
 import IframeBox from "./components/aide/IframeBox.vue";
 import QrCodeBox from "./components/aide/QrCodeBox.vue";
-import FcCity from "./components/City.vue";
 import FcTitle from "./components/aide/FcTitle.vue";
 import SignaturePad from "./components/SignaturePad.vue";
-import Echarts from "./components/echarts/Echarts.vue";
 import SourceConfig from "./components/SourceConfig.vue";
 import formCreate, { designerForm } from "./utils/form";
 import draggable from "vuedraggable/src/vuedraggable";
@@ -163,6 +166,9 @@ designerForm.component("SizeInput", SizeInput);
 designerForm.component("PatternInput", PatternInput);
 designerForm.component("StyleConfig", StyleConfig);
 designerForm.component("DividerStyleSelect", DividerStyleSelect);
+designerForm.component("TabsStyleSelect", TabsStyleSelect);
+designerForm.component("RadioButtonGroup", RadioButtonGroup);
+designerForm.component("ItemsConfig", ItemsConfig);
 designerForm.component("GlobalFetchConfig", GlobalFetchConfig);
 designerForm.component("GlobalFetchSelect", GlobalFetchSelect);
 designerForm.component("GlobalEventConfig", GlobalEventConfig);
@@ -197,6 +203,9 @@ designerForm.component("FormSelect", FormSelect);
 addComponent("FcSlot", Slot, SlotView);
 addComponent("FcJson", Json, JsonView);
 addComponent("DataTable", DataTable);
+// 富文本框组件自身的 name 是 fcEditor（画布规则、配置面板项都用这个名字），
+// 按真实名字注册后，type 为 fcEditor 的规则才能正确渲染；同时保留 FcEditor 别名。
+addComponent("fcEditor", FcEditor);
 addComponent("FcEditor", FcEditor);
 addComponent("fcInlineForm", InlineForm);
 addComponent("FcCell", Cell, CellView);
@@ -212,9 +221,10 @@ addComponent("BarCodeBox", BarCodeBox);
 addComponent("IframeBox", IframeBox);
 addComponent("QrCodeBox", QrCodeBox);
 addComponent("SignaturePad", SignaturePad);
-addComponent("FcEcharts", Echarts);
 addComponent("FcTitle", FcTitle);
-addComponent("FcCity", FcCity);
+// 省市区实现在 @eimsnext/form-render-elplus（别名 address → fc-address），
+// 这里只保留老规则 type 为 fcCity 的兼容注册。
+addComponent("FcCity", FcAddress);
 addComponent("FcId", Id);
 addComponent("fc-serialno", SerialNo);
 

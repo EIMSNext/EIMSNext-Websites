@@ -160,7 +160,9 @@ async function bootstrap(accessCode?: string) {
   accessCodeError.value = false;
   accessCodeExpired.value = false;
   try {
-    if (!publicToken.value) {
+    // 初始加载（无码）靠 challenge 拿 token；但一旦用户提交了访问码，必须拿该码重新申请 token，
+    // 由后端校验——否则 challenge token 已在 publicToken 中，会跳过校验导致访问码形同虚设。
+    if (!publicToken.value || accessCode) {
       await bootstrapWithToken(publicHttp, formId.value, PublicScope.FormLink, accessCode);
     }
 
@@ -171,10 +173,13 @@ async function bootstrap(accessCode?: string) {
     renderContent.value = buildPublicContent(form.content || new FormContent());
     prefillData.value = buildInitialPrefill(form);
     refreshFormKey();
+    // 表单已成功加载（含用访问码换到有效 token 的情况），关闭访问码门
+    accessCodeGate.value = false;
   } catch (err: any) {
     if (toAccessCodeError(err)) {
       accessCodeGate.value = true;
-      accessCodeExpired.value = err instanceof AccessCodeExpiredError;
+      // instanceof 在 HMR 下可能失配，用 name 兜底
+      accessCodeExpired.value = err instanceof AccessCodeExpiredError || err?.name === "AccessCodeExpiredError";
       accessCodeError.value = !!accessCode && !accessCodeExpired.value;
     } else {
       errorText.value = t("publicpublish.formNotAvailable");
@@ -191,11 +196,11 @@ async function submitAccessCode() {
   accessCodeSubmitting.value = true;
   try {
     await bootstrap(accessCodeInput.value);
-    if (!accessCodeGate.value) {
-      accessCodeInput.value = "";
-    }
+    // 成功与否由 bootstrap 内部决定：换到有效 token 则它已把 accessCodeGate 置 false 并加载表单；
+    // 访问码无效/过期则它保留门并设置 error/expired。此处只清空输入。
+    accessCodeInput.value = "";
   } catch {
-    accessCodeError.value = true;
+    // bootstrap 已自行处理访问码错误（保留门 + 设置 error/expired），无需额外动作
   } finally {
     accessCodeSubmitting.value = false;
   }

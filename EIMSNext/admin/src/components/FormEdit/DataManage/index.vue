@@ -654,27 +654,27 @@ const updateDraftQueryParams = () => {
 };
 
 const loadCount = async () => {
-  totalRef.value = await formDataService.dynamicCount(queryParams.value);
+  totalRef.value = await formDataService.count(queryParams.value);
 };
 
 const loadData = async () => {
-  dataRef.value = await formDataService.dynamicQuery<FormData>(queryParams.value);
+  dataRef.value = await formDataService.query<FormData>(queryParams.value);
 };
 
 const loadTrashCount = async () => {
-  trashTotalRef.value = await formDataService.dynamicCount(trashQueryParams.value);
+  trashTotalRef.value = await formDataService.count(trashQueryParams.value);
 };
 
 const loadDraftCount = async () => {
-  draftTotalRef.value = await formDataService.dynamicCount(draftQueryParams.value);
+  draftTotalRef.value = await formDataService.count(draftQueryParams.value);
 };
 
 const loadDraftRows = async () => {
-  draftRows.value = await formDataService.dynamicQuery<FormData>(draftQueryParams.value);
+  draftRows.value = await formDataService.query<FormData>(draftQueryParams.value);
 };
 
 const loadTrashRows = async () => {
-  trashRows.value = await formDataService.dynamicQuery<FormData>(trashQueryParams.value);
+  trashRows.value = await formDataService.query<FormData>(trashQueryParams.value);
 };
 
 const handleQuery = async () => {
@@ -703,7 +703,7 @@ const refreshTrashCount = async () => {
     selectedFields: trashSearchState.selectedFields,
     includeDeleted: true,
   });
-  trashTotalRef.value = await formDataService.dynamicCount(countQuery);
+  trashTotalRef.value = await formDataService.count(countQuery);
 };
 
 const selectionChanged = (rows: FormData[]) => {

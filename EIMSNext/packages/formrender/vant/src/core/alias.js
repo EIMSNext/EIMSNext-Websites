@@ -15,6 +15,7 @@ export default {
   select: "fc-select",
   select2: "fc-select",
   cascader: "fc-cascader",
+  address: "fc-address",
   calendar: "fc-calendar",
   checkbox: "fc-checkbox",
   radio: "fc-radio",

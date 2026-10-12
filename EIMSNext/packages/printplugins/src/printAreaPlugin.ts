@@ -256,7 +256,7 @@ export class EimsPrintAreaPlugin {
     const availableWidth = Math.max(mmToPx(paper.widthMm - margins.left - margins.right), 0);
     const availableHeight = Math.max(mmToPx(paper.heightMm - margins.top - margins.bottom), 0);
 
-    const render = this._renderManagerService.getRenderById(this._config.unitId);
+    const render = this._renderManagerService.getRenderUnitById(this._config.unitId);
     const scene = render?.scene;
     const viewport = scene?.getViewport("viewMain");
 

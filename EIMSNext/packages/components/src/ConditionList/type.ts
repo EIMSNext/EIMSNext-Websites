@@ -48,6 +48,7 @@ export const dataOperators: Record<string, string[]> = {
   checkbox: ["in", "allin", "nin", "empty", "notempty"],
   select: ["eq", "ne", "in", "nin", "empty", "notempty"],
   select2: ["in", "allin", "nin", "empty", "notempty"],
+  address: ["in", "nin", "empty", "notempty"],
   department1: ["eq", "ne", "in", "nin", "empty", "notempty"],
   department2: ["in", "allin", "nin", "empty", "notempty"],
   employee1: ["eq", "ne", "in", "nin", "empty", "notempty"],

@@ -163,15 +163,6 @@ const getAppId = () => {
 const loadData = async (reset = false) => {
   const appId = getAppId();
 
-  if (!appId) {
-    dataRef.value = [];
-    pageRef.value = 1;
-    hasMore.value = false;
-    showTopButton.value = false;
-    loadError.value = false;
-    return;
-  }
-
   if (isLoading.value || isLoadingMore.value) {
     return;
   }
@@ -190,8 +181,10 @@ const loadData = async (reset = false) => {
   }
 
   const currentPage = pageRef.value;
+  // 全局待办（无 appId）按当前员工跨应用查询；应用内待办按 appId 过滤。
+  // 后端 WfTask 始终按 EmployeeId 限制，无 appId 不会泄露他人任务。
   const query = buildQuery({
-    filter: { appId },
+    ...(appId ? { filter: { appId } } : {}),
     skip: (currentPage - 1) * PAGE_SIZE,
     top: PAGE_SIZE,
   });

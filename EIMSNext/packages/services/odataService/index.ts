@@ -7,6 +7,7 @@ export * from "./clientService";
 export * from "./crossBindingService";
 export * from "./efRunLogService";
 export * from "./corporateService";
+export * from "./corporateSettingService";
 export * from "./departmentService";
 export * from "./employeeService";
 export * from "./eCoinPriceService";

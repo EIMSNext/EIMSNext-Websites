@@ -35,6 +35,7 @@ const fieldIcons: Record<string, string> = {
   tree: "fc-icon-tree",
   elTreeSelect: "fc-icon-tree-select",
   fcCity: "fc-icon-city",
+  address: "fc-icon-city",
   department1: "fc-icon-select",
   department2: "fc-icon-select",
   employee1: "fc-icon-select",
@@ -52,18 +53,6 @@ const fieldIcons: Record<string, string> = {
   fcSlot: "fc-icon-slot",
   fcJson: "fc-icon-json",
   elFormItem: "fc-icon-form-item",
-
-  // chart - 图表组件
-  lineChart: "fc-icon-chart-line",
-  areaChart: "fc-icon-chart-area",
-  barChart: "fc-icon-chart-bar",
-  stripeChart: "fc-icon-chart-stripe",
-  pieChart: "fc-icon-chart-pie",
-  funnelChart: "fc-icon-chart-funnel",
-  gaugeChart: "fc-icon-chart-gauge",
-  radarChart: "fc-icon-chart-radar",
-  scatterChart: "fc-icon-chart-scatter",
-  customChart: "fc-icon-chart-custom",
 
   // aide - 辅助组件
   elAlert: "fc-icon-alert",

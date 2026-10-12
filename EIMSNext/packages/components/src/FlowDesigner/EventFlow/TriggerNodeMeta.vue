@@ -193,7 +193,7 @@ const showScheduleCondition = computed(() => scheduleValue.value.mode === Trigge
 const httpFields = computed(() => activeData.value.metadata.triggerMeta?.httpSettings?.sampleFields ?? []);
 const hookUrl = computed(() => {
   const eventFlowId = flowContext.definitionId || "{eventFlowId}";
-  return `/api/v1/tenant/{corpId}/eventflow/${eventFlowId}`;
+  return `/api/v1/tenant/{corpId}/hook/${eventFlowId}`;
 });
 const enableIpLimit = computed({
   get: () => (activeData.value.metadata.triggerMeta?.httpSettings?.allowedIps?.length ?? 0) > 0,

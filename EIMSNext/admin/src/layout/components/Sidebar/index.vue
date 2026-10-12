@@ -21,6 +21,7 @@
       v-if="showGroupEditor"
       :app-id="contextStore.appId"
       :menu="editingGroup"
+      :parent-menu-id="editingGroupParentId"
       @cancel="closeGroupDialog"
       @ok="handleAppUpdated"
     />
@@ -113,11 +114,11 @@
                 {{ t("admin.newFlowForm") }}
               </el-dropdown-item>
               <el-divider class="sidebar-divider" />
-              <el-dropdown-item @click="createDashboard">
+              <el-dropdown-item @click="createDashboard()">
                 {{ t("admin.newDashboard") }}
               </el-dropdown-item>
               <el-divider class="sidebar-divider" />
-              <el-dropdown-item @click="createFolder">{{ t("admin.newGroup") }}</el-dropdown-item>
+              <el-dropdown-item @click="createFolder()">{{ t("admin.newGroup") }}</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -133,6 +134,7 @@
         @editMenu="openEditMenu"
         @editGroup="openEditGroup"
         @deleteMenu="deleteMenu"
+        @create="handleMenuCreate"
         @menusChanged="saveMenus"
       />
     </el-scrollbar>
@@ -170,7 +172,12 @@ import FormEdit from "@/components/FormEdit/index.vue";
 import { appDefService, dashboardDefService, formDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { BADGE_REFRESH_INTERVAL, queryAppTaskCount } from "@/utils/badge";
-import { normalizeMenuType } from "@/utils/appEntry";
+import {
+  normalizeMenuType,
+  mergeMenuStructure,
+  moveMenuUnder,
+  type MenuCreatePayload,
+} from "@/utils/appEntry";
 import { ElMessage } from "element-plus";
 import { useAdminPermissions } from "@/composables/useAdminPermissions";
 import { useRoute, useRouter } from "vue-router";
@@ -227,6 +234,7 @@ const showMenuEditor = ref(false);
 const editingMenu = ref<AppMenu>();
 const showGroupEditor = ref(false);
 const editingGroup = ref<AppMenu>();
+const editingGroupParentId = ref<string>();
 var permissionStore = usePermissionStore();
 const { appMenus } = storeToRefs(permissionStore);
 
@@ -257,9 +265,9 @@ const hasAppTask = computed(() => appTaskCount.value > 0);
 const canManageCurrentApp = computed(() => canManageAppId(contextStore.appId));
 let appTaskTimer: ReturnType<typeof setInterval> | null = null;
 
-const loadCurrentApp = async () => {
+const loadCurrentApp = async (force = false) => {
   try {
-    app.value = await appStore.get(contextStore.appId, true, true, { silentError: true });
+    app.value = await appStore.get(contextStore.appId, !force, true, { silentError: true });
   } catch {
     app.value = undefined;
   }
@@ -282,6 +290,15 @@ watch(
     void loadCurrentApp();
   },
   { immediate: true }
+);
+
+// 建/删表单、仪表盘后 app.value 会停留在旧快照，saveMenus 提交的菜单 id 集合
+// 就会缺项而被后端判为「菜单数据与当前应用不一致」，故菜单一变就重新取一次
+watch(
+  () => contextStore.appChanged,
+  () => {
+    void loadCurrentApp();
+  }
 );
 
 const loadAppTaskCount = async () => {
@@ -311,7 +328,7 @@ onBeforeUnmount(() => {
   }
 });
 
-const createForm = (usingFlow: boolean) => {
+const createForm = async (usingFlow: boolean, parentMenuId?: string) => {
   if (!canManageCurrentApp.value) return;
 
   usingWorkflow.value = usingFlow;
@@ -333,13 +350,15 @@ const createForm = (usingFlow: boolean) => {
     usingWorkflow: usingFlow,
   };
 
-  formDefService.post<FormDef>(req).then((resp) => {
-    newForm.value = resp;
-    formStore.update(resp);
-    contextStore.setAppChanged(); //reload 菜单
+  const resp = await formDefService.post<FormDef>(req);
+  newForm.value = resp;
+  formStore.update(resp);
+  await loadCurrentApp(true); // 服务端把菜单节点插在根层，重新取一次才拿得到它
 
-    showFormEditor.value = true;
-  });
+  if (parentMenuId) await moveMenuToParent(resp.id, parentMenuId);
+  else contextStore.setAppChanged(); //reload 菜单
+
+  showFormEditor.value = true;
 };
 
 const editForm = async (formId: string, type: FormType, target: FormEditTarget = formEditTargets.formedit) => {
@@ -377,7 +396,7 @@ watch(
   { immediate: true },
 );
 
-const createDashboard = () => {
+const createDashboard = async (parentMenuId?: string) => {
   if (!canManageCurrentApp.value) return;
 
   let req: DashboardDefRequest = {
@@ -387,12 +406,14 @@ const createDashboard = () => {
     layout: "[]",
   };
 
-  dashboardDefService.post<DashboardDef>(req).then((resp) => {
-    newDash.value = resp;
-    contextStore.setAppChanged(); //reload 菜单
+  const resp = await dashboardDefService.post<DashboardDef>(req);
+  newDash.value = resp;
+  await loadCurrentApp(true);
 
-    showDshEditor.value = true;
-  });
+  if (parentMenuId) await moveMenuToParent(resp.id, parentMenuId);
+  else contextStore.setAppChanged(); //reload 菜单
+
+  showDshEditor.value = true;
 };
 
 const openEditMenu = (menu: AppMenu) => {
@@ -406,12 +427,44 @@ const openEditGroup = (menu: AppMenu) => {
   if (!canManageCurrentApp.value) return;
 
   editingGroup.value = { ...menu };
+  editingGroupParentId.value = undefined;
   showGroupEditor.value = true;
 };
 
 const closeGroupDialog = () => {
   showGroupEditor.value = false;
   editingGroup.value = undefined;
+  editingGroupParentId.value = undefined;
+};
+
+// 新建的表单/仪表盘由服务端插在菜单根层，若要落在某个分组下，建完再整体挪一次
+const moveMenuToParent = async (menuId: string, parentId: string) => {
+  if (!app.value) {
+    contextStore.setAppChanged();
+    return;
+  }
+
+  const merged = moveMenuUnder(
+    mergeMenuStructure(app.value.appMenus ?? [], appMenus.value),
+    menuId,
+    parentId,
+  );
+  if (!merged) {
+    contextStore.setAppChanged();
+    ElMessage.warning(t("common.saveFailed"));
+    return;
+  }
+
+  try {
+    const updated = await appDefService.saveMenus({
+      appId: contextStore.appId,
+      appMenus: merged,
+    });
+    handleAppUpdated(updated);
+  } catch (error: any) {
+    contextStore.setAppChanged();
+    ElMessage.warning(error?.message || t("common.saveFailed"));
+  }
 };
 
 const handleAppUpdated = (updatedApp: AppDef) => {
@@ -428,11 +481,19 @@ const saveMenus = async () => {
     return;
   }
 
-  const updated = await appDefService.saveMenus({
-    appId: contextStore.appId,
-    appMenus: JSON.parse(JSON.stringify(appMenus.value)),
-  });
-  handleAppUpdated(updated);
+  const rawMenus = app.value.appMenus ?? [];
+
+  try {
+    const updated = await appDefService.saveMenus({
+      appId: contextStore.appId,
+      appMenus: mergeMenuStructure(rawMenus, appMenus.value),
+    });
+    handleAppUpdated(updated);
+  } catch (error: any) {
+    // 保存失败时用缓存中的服务端菜单回滚本地拖拽结果
+    contextStore.setAppChanged();
+    ElMessage.warning(error?.message || t("common.saveFailed"));
+  }
 };
 
 const deleteMenu = async (menu: AppMenu) => {
@@ -459,11 +520,19 @@ const deleteMenu = async (menu: AppMenu) => {
   }
 };
 
-const createFolder = () => {
+const createFolder = (parentMenuId?: string) => {
   if (!canManageCurrentApp.value) return;
 
   editingGroup.value = undefined;
+  editingGroupParentId.value = parentMenuId;
   showGroupEditor.value = true;
+};
+
+const handleMenuCreate = (payload: MenuCreatePayload) => {
+  if (payload.kind === "flow-form") createForm(true, payload.parentMenuId);
+  else if (payload.kind === "form") createForm(false, payload.parentMenuId);
+  else if (payload.kind === "dashboard") createDashboard(payload.parentMenuId);
+  else createFolder(payload.parentMenuId);
 };
 </script>
 

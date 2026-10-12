@@ -54,6 +54,7 @@ export default {
     copied: "Copied",
     open: "Open",
     loadFailed: "Load failed",
+    loadMore: "Load more",
     operationFailed: "Operation failed",
     retry: "Retry",
     department: "Department",
@@ -253,6 +254,11 @@ export default {
         dynamic: "Dynamic Assignee",
         curDept: "Current User's Department",
         curUser: "Current User",
+        dynamicParam: "Dynamic parameters",
+      },
+      dynamicParam: {
+        currentUser: "Current User",
+        currentDepartment: "Current User's Department",
       },
       allEmployees: "All Employees",
       cascadeSubDepts: "Include Sub-departments",
@@ -411,6 +417,14 @@ export default {
     dragger: {
       dragHere: "Drag files here or",
       clickToUpload: "click to upload",
+    },
+    upload: {
+      select: "Select",
+      fileHint: "or drag & drop to upload, up to {0} each",
+      imageHint: "or drag & drop images to upload, up to {0} each",
+      dragging: "Drop to upload",
+      compressing: "Compressing…",
+      uploadFailed: "Upload failed",
     },
     formFieldSelect: {
       pleaseSelectField: "Please select a field",
@@ -1348,8 +1362,8 @@ export default {
       containerMissing: "Print designer container not found",
       renderServiceMissing: "Univer render service is not initialized. Print area plugin cannot be loaded",
       unitIdMissing: "Workbook unitId is missing. Print area plugin cannot be loaded",
-      eventApiChanged: "Univer 0.21 runtime event API changed. Please check the facade Event definitions",
-      metadataApiMissing: "Univer 0.21 runtime does not provide setCustomMetaData. Failed to write print field metadata",
+      eventApiChanged: "Univer runtime event API changed. Please check the facade Event definitions",
+      metadataApiMissing: "Univer runtime does not provide setCustomMetaData. Failed to write print field metadata",
       initFailed: "Failed to initialize print designer",
       previewTitle: "Print Preview",
       previewFailed: "Print failed",
@@ -1845,6 +1859,71 @@ export default {
         categories: "Use digits, uppercase, lowercase, special chars. At least 3 types.",
       },
     },
+    enterprise: {
+      title: "Enterprise Settings",
+      basicInfo: "Basic Info",
+      accountMode: "Account Mode",
+      bindTip: "To bind a third-party platform,",
+      consult: "Contact Us",
+      tenantId: "Tenant ID",
+      mode: {
+        public: "Public",
+        wxwork: "WeCom Integration",
+        ding: "DingTalk Integration",
+        feishu: "Feishu Integration",
+        private: "Private",
+      },
+      messages: {
+        copied: "Tenant ID copied",
+        copyFailed: "Copy failed, please copy manually",
+      },
+    },
+    systemSettings: {
+      version: {
+        current: "Current Version",
+        edition: "Enterprise Edition",
+        validity: "Validity: {range}",
+        consultBuy: "Contact Sales",
+        uploadProof: "Upload Proof",
+        coinRate: "(1 Coin = ¥1)",
+        recharge: "Recharge",
+        paymentSettings: "Payment Settings",
+        consumptionStats: "Consumption Stats",
+        usageLog: "Usage Log",
+      },
+      enterpriseSettings: {
+        culture: {
+          title: "Corporate Culture",
+          customLogin: "Custom Login Page",
+          customLoginTip: "Customize the login page logo, banners and login methods. Applies to your enterprise account URL and internal links sent to members.",
+          style: "Enterprise Style",
+          styleTip: "Customize the enterprise style.",
+        },
+        collaboration: {
+          title: "Enterprise Collaboration",
+          notifyMute: "Mute Notifications",
+          notifyMuteTip: "Configure whether members receive in-app notifications.",
+          systemTimezone: "System Time Zone",
+          systemTimezoneFollow: "Follow member device time zone",
+          systemTimezoneTip: "All times in the system are displayed based on the system time zone.",
+        },
+        themeColor: {
+          title: "Enterprise Theme Color",
+          tip: "Takes effect across all modules on both desktop and mobile.",
+          saved: "Enterprise theme color saved",
+          saveFailed: "Save failed, please try again",
+        },
+        style: {
+          saved: "Settings saved",
+          saveFailed: "Save failed, please try again",
+        },
+        learnMore: "Learn More",
+      },
+      productStyle: {
+        title: "Product Style",
+        customWorkbenchTip: "Configure the default workbench layout, content priority and entries.",
+      },
+    },
     department: {
       title: "Employees",
       active: "Active Employees",
@@ -2164,6 +2243,10 @@ export default {
     recordInNode: "Record in the Node",
     selectForm: "Select a form",
     dataCondition: "Conditions",
+    deleteTakeLimit_Tips:
+      "Each run deletes at most the first 200 matching records; the rest are not processed.",
+    updateTakeLimit_Tips:
+      "Each run updates at most the first 200 matching records; the rest are not processed.",
     queryCondition: "Conditions",
     sortRule: "Sort Rule",
     numberOfTake: "Number of Take",
@@ -2309,6 +2392,7 @@ export default {
       },
     },
     otherLoginMethods: "Other login methods",
+    invalidRedirect: "Invalid or missing redirect URL",
   },
   register: {
     title: "Register Jianyiyun Account",
@@ -2389,6 +2473,7 @@ export default {
     field: "Field",
     title: "Title",
     info: "Info",
+    desc: "Description",
     ignore: "ignore field",
     native: "Whether to display title",
     control: "Control",
@@ -2908,7 +2993,6 @@ export default {
     component: "Component",
     subform: "Subform",
     container: "Container",
-    chart: "Chart",
     tree: "Structure",
   },
   formula: {
@@ -3171,6 +3255,7 @@ export default {
     v_datalink: "Data Link",
     v_formula: "Formula Link",
     othersetting: "Other Settings",
+    imageProcess: "Image Processing",
   },
   slots: {
     prefix: "Prefix",
@@ -3416,6 +3501,8 @@ export default {
       },
       props: {
         accordion: "Whether it is in accordion mode",
+        items: "Panels",
+        addItem: "Add panel",
       },
     },
     elCollapseItem: {
@@ -3483,6 +3570,13 @@ export default {
         closable: "Tab Closable",
         tabPosition: "Tab position",
         stretch: "Self-stretching",
+        style: "Style",
+        tabColorCustom: "Custom color",
+        positionLeft: "Left",
+        positionRight: "Right",
+        items: "Tabs",
+        addItem: "Add tab",
+        tabLabel: "Tab {0}",
       },
     },
     elTag: {
@@ -3704,11 +3798,11 @@ export default {
       },
     },
     fcCity: {
-      name: "Province picker",
+      name: "Address",
       props: {
         api: "URI",
-        level: "Level",
-        clearable: "Whether to display the clear button",
+        level: "Type",
+        clearable: "Display the clear button",
         disabled: "Disabled",
         filter: "Data filtering, return selectable data",
       },
@@ -3800,63 +3894,6 @@ export default {
         _loadType: "JSON Rules",
         type: "Type",
       },
-    },
-    lineChart: {
-      name: "Line Chart",
-      data: "Chart Data",
-      pieTypeOpt: {
-        pie: "Pie",
-        doughnut: "Doughnut",
-        "half-doughnut": "Half-doughnut",
-      },
-      funnelSortOpt: {
-        descending: "descending",
-        ascending: "ascending",
-      },
-      props: {
-        title: "Chart name",
-        subtitle: "Chart introduction",
-        valueFormat: "Format numerical display",
-        stack: "Whether to stack when there are multiple columns of data",
-        smooth: "Whether the line transitions smoothly",
-        showLegend: "Whether to display the mark",
-        showSeriesLabel: "Whether to display the value",
-        barBackgroundColor: "Column background color",
-        funnelSort: "Sort method",
-        pieType: "Shape",
-        min: "Minimum value",
-        max: "Maximum value",
-        value: "Number",
-        indicator: "Indicator",
-        loadOptions: "Initialization",
-      },
-    },
-    areaChart: {
-      name: "Area Chart",
-    },
-    barChart: {
-      name: "Bar Chart",
-    },
-    customChart: {
-      name: "Custom Chart",
-    },
-    funnelChart: {
-      name: "Funnel Chart",
-    },
-    gaugeChart: {
-      name: "Gauge Chart",
-    },
-    pieChart: {
-      name: "Pie Chart",
-    },
-    radarChart: {
-      name: "Radar Chart",
-    },
-    scatterChart: {
-      name: "Scatter Chart",
-    },
-    stripeChart: {
-      name: "Horizontal bar Chart",
     },
     fcInlineForm: {
       name: "Inline",
@@ -4426,6 +4463,7 @@ export default {
         limit: "Maximum number of uploads allowed",
         readonly: "Readonly",
         disabled: "Disabled",
+        compress: "Auto compress images",
       },
     },
     fileupload: {

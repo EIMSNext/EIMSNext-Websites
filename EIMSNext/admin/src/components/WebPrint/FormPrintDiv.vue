@@ -13,6 +13,7 @@ import { IPrintData } from './type';
 import { FieldDef, FieldType, SystemField } from '@eimsnext/models';
 import { dateFormat, getObjectType } from '@/utils/common';
 import { getFileFullUrl } from '@eimsnext/utils';
+import { formatAddressObject } from '@eimsnext/components';
 
 const { t } = useI18n();
 
@@ -194,6 +195,10 @@ const getValue = (el: FieldDef, vObj: any): string => {
 
         case "Object":
             switch (el.type) {
+                case FieldType.Address:
+                    // 打印：province + city + district + detail 直接拼接
+                    dValue = formatAddressObject(vObj);
+                    break;
                 case FieldType.Radio:
                 case FieldType.Select1:
                 case FieldType.Department1:

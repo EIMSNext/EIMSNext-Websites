@@ -198,6 +198,7 @@ const filterFields = computed<IFormFieldDef[]>(() => {
     type: field.type,
     format: field.format,
     options: field.options,
+    level: field.level,
     isSubField: field.field.includes(">"),
   }));
 });
