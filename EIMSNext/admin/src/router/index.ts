@@ -1,6 +1,6 @@
 import { UserType } from "@eimsnext/models";
 import type { App } from "vue";
-import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
+import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 
 const AppLayout = () => import("@/layout/applayout/index.vue");
 const AppAdminLayout = () => import("@/layout/appadminlayout/index.vue");
@@ -92,24 +92,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/404",
     component: () => import("@/views/error/404.vue"),
-    meta: { hidden: true },
-  },
-  {
-    name: "login",
-    path: "/login",
-    component: () => import("@/views/login/index.vue"),
-    meta: { hidden: true },
-  },
-  {
-    name: "forget-password",
-    path: "/forget-password",
-    component: () => import("@/views/login/forget-password.vue"),
-    meta: { hidden: true },
-  },
-  {
-    name: "register",
-    path: "/register",
-    component: () => import("@/views/register/index.vue"),
     meta: { hidden: true },
   },
   {
@@ -403,10 +385,26 @@ export const constantRoutes: RouteRecordRaw[] = [
 ];
 
 /**
+ * 旧 hash 链接迁移：/#/app/xxx → /app/xxx（history 模式下 hash 被忽略，直接改写到路径）
+ */
+if (typeof window !== "undefined" && window.location.hash.startsWith("#/")) {
+  window.history.replaceState(null, "", window.location.hash.slice(1));
+}
+
+// 手工输 URL 的本地测试登录页（/dev/token 明文端点，生产由后端 404 拦截），
+// 无任何入口跳转、不带 requiresAuth，不影响 portal 登录链路
+constantRoutes.push({
+  name: "dev-login",
+  path: "/dev-login",
+  component: () => import("@/views/dev-login/index.vue"),
+  meta: { hidden: true },
+});
+
+/**
  * 创建路由
  */
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: constantRoutes,
   // 刷新时，滚动条位置还原
   scrollBehavior: () => ({ left: 0, top: 0 }),

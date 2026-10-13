@@ -219,7 +219,7 @@ const showShareDialog = ref(false);
 const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
 const sideTab = ref<"flow" | "dataLog">("flow");
-const shareUrl = computed(() => `${window.location.origin}/#/app/${route.params.appId}/form/${route.params.formId}/data/${route.params.dataId}`);
+const shareUrl = computed(() => `${window.location.origin}/app/${route.params.appId}/form/${route.params.formId}/data/${route.params.dataId}`);
 const returnToList = () => router.replace(`/app/${route.params.appId}/form/${route.params.formId}`);
 
 const sideTitle = computed(() => {

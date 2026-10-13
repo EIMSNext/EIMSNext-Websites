@@ -9,11 +9,11 @@
     </div>
     <div class="main">
       <div class="lang-switch">
-        <button class="pc-switch" :class="{ on: isDark }" type="button" @click="toggleTheme">
+        <!-- <button class="pc-switch" :class="{ on: isDark }" type="button" @click="toggleTheme">
           <span class="icon icon-sun"><Sunny /></span>
           <span class="icon icon-moon"><Moon /></span>
           <span class="knob"></span>
-        </button>
+        </button> -->
         <div class="pc-lang">
           <button class="trigger" type="button" @click.stop="langMenuOpen = !langMenuOpen">
             <svg viewBox="0 0 1024 1024"><path fill="currentColor" d="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896m0 832a384 384 0 0 0 357.376-256H154.624A384 384 0 0 0 512 896m-376.64-384a384.32 384.32 0 0 0 0 64h753.28a384.32 384.32 0 0 0 0-64zM512 128c-138.56 0-258.56 89.152-301.376 212.992h602.752C770.56 217.152 650.56 128 512 128"/></svg>
@@ -72,6 +72,22 @@
           <button class="pc-btn" type="submit" :disabled="loading || redirecting">
             {{ t("login.login") }}
           </button>
+
+          <div class="integration-login">
+            <div class="integration-title">{{ t("login.otherLoginMethods") }}</div>
+            <div class="integration-list">
+              <button
+                v-for="item in integrationItems"
+                :key="item.type"
+                type="button"
+                class="integration-item"
+                :title="item.label"
+                @click="handleIntegrationLogin(item.type)"
+              >
+                <img class="integration-icon" :src="item.icon" :alt="item.label" />
+              </button>
+            </div>
+          </div>
         </form>
       </div>
     </div>
@@ -121,6 +137,22 @@
             {{ t("login.login") }}
           </button>
 
+          <div class="m-integration">
+            <div class="m-integration-title">{{ t("login.otherLoginMethods") }}</div>
+            <div class="m-integration-list">
+              <button
+                v-for="item in integrationItems"
+                :key="item.type"
+                type="button"
+                class="m-integration-item"
+                :title="item.label"
+                @click="handleIntegrationLogin(item.type)"
+              >
+                <img class="m-integration-icon" :src="item.icon" :alt="item.label" />
+              </button>
+            </div>
+          </div>
+
           <div class="m-links-row">
             <router-link class="m-link" :to="keepQuery('/register')">
               {{ t("login.noAccount") }} {{ t("login.registerNow") }}
@@ -149,9 +181,11 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { Moon, Sunny } from "@element-plus/icons-vue";
-import { accessToken, toggleDarkMode } from "@eimsnext/utils";
+import { accessToken, toggleDarkMode, withLocalAuthCodePrefix } from "@eimsnext/utils";
 import { identityClient, extractAuthError } from "@/auth/client";
 import { currentSession, redirectToCallback, resolveRedirectUrl } from "@/auth/callback";
+import { integrationLoginItems, type IntegrationLoginType } from "@/constants/integrationLogin";
+import { createIntegrationState } from "@/utils/integrationLogin";
 import { isMobile } from "@/utils/device";
 
 const { t, locale } = useI18n();
@@ -167,6 +201,8 @@ const isDark = ref(localStorage.getItem("portal-theme") === "dark");
 const langMenuOpen = ref(false);
 
 const curLangLabel = computed(() => (locale.value === "en" ? "English" : "简体中文"));
+
+const integrationItems = integrationLoginItems;
 
 // redirect_url / reason 等参数在 登录↔注册↔找回密码 之间透传
 function keepQuery(path: string) {
@@ -195,7 +231,7 @@ function checkCapslock(event: KeyboardEvent) {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener("click", onDocClick);
 
   // 调用方因 token 失效回跳（redirect_url 带 reason=invalid_token）时，
@@ -209,7 +245,14 @@ onMounted(() => {
   const target = resolveRedirectUrl(route.query.redirect_url as string);
   if (session && target) {
     redirecting.value = true;
-    redirectToCallback(target, session.token, session.expiresIn);
+    // 已有会话：token 换一次性授权码（lg_ 前缀）回传，URL 不暴露 access_token
+    try {
+      const res: any = await identityClient.post("/identity/authorizeCodeSession", {});
+      redirectToCallback(target, withLocalAuthCodePrefix(res.code));
+    } catch {
+      // 换码失败则留在登录页重新登录
+      redirecting.value = false;
+    }
   }
 });
 
@@ -239,10 +282,50 @@ async function submit() {
 
   loading.value = true;
   try {
-    const res: any = await identityClient.login(username, form.password);
-    redirectToCallback(target, res.access_token, res.expires_in);
+    // 授权码模式：签发 code → portal 自身换取并保留会话（免登录）→ 用会话换新码回传调用方
+    // （授权码一次性，portal 消费后不能复用，须重新签发）
+    const res = await identityClient.requestAuthorizationCode(username, form.password);
+    await identityClient.requestWebToken(withLocalAuthCodePrefix(res.code), true);
+    const session: any = await identityClient.post("/identity/authorizeCodeSession", {});
+    redirectToCallback(target, withLocalAuthCodePrefix(session.code));
   } catch (e) {
     error.value = extractAuthError(e) || t("common.systemError");
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 第三方集成登录：取授权地址后整页跳转（回调处理后续实现）
+async function handleIntegrationLogin(type: IntegrationLoginType) {
+  if (loading.value || redirecting.value) return;
+  error.value = "";
+
+  const target = resolveRedirectUrl(route.query.redirect_url as string);
+  if (!target) {
+    error.value = t("login.invalidRedirect");
+    return;
+  }
+
+  loading.value = true;
+  try {
+    const state = createIntegrationState(type, target.toString());
+    const result = await identityClient.get<{
+      type?: string;
+      Type?: string;
+      enabled?: boolean;
+      Enabled?: boolean;
+      authorizationUrl?: string;
+      AuthorizationUrl?: string;
+    }>("/open/integration/authorize", { type, state }, false, false);
+
+    const authorizationUrl = result.authorizationUrl ?? result.AuthorizationUrl;
+    if (!authorizationUrl) {
+      throw new Error("该集成登录未启用或配置不完整");
+    }
+
+    window.location.href = authorizationUrl;
+  } catch (e) {
+    error.value = extractAuthError(e) || "第三方登录发起失败";
   } finally {
     loading.value = false;
   }

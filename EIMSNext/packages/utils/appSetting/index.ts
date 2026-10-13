@@ -10,6 +10,8 @@ export interface IAppSetting {
   allowedRedirectHosts: string[];
   /** redirect_url 缺失/非法时的默认回跳地址 */
   defaultRedirectUrl: string;
+  /** 独立登录应用（portal）的根地址；配置后登录/401/登出统一跳 portal */
+  portalUrl: string;
 
   merge(env: any): void;
 }
@@ -24,6 +26,7 @@ class AppSetting implements IAppSetting {
   httpTimeout: number = 10000;
   allowedRedirectHosts: string[] = [];
   defaultRedirectUrl: string = "";
+  portalUrl: string = "";
 
   merge(env: any): void {
     for (let p of Reflect.ownKeys(this)) {

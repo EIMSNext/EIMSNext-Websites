@@ -6,6 +6,11 @@ import accessToken from "./token";
 
 const utf8ToBase64 = (s: string) => btoa(unescape(encodeURIComponent(s)));
 
+// authorizeCode 请求的 encrypted 混淆变体：真实 base64 前缀 eyJ（即 '{"'）
+// 替换为 3 位随机数，并去掉末尾 = 补位；后端解密前由 UnscrambleEncrypted 还原
+const scrambleBase64 = (b64: string) =>
+  b64.replace(/^eyJ/, String(Math.floor(100 + Math.random() * 900))).replace(/=+$/, "");
+
 export class PublicTokenError extends Error {
   constructor(message = "访问密码错误") {
     super(message);
@@ -26,12 +31,54 @@ export class IdentityClient {
     this.httpRequest = request;
   }
 
-  login(username: string, password: string, grant_type = "password") {
-    return this.exchangeToken(username, password, grant_type, true);
+  /**
+   * 开发环境明文登录：POST /dev/token（Development-only 端点，明文表单，
+   * grant_type/client_id 由服务端强制，生产环境 404）。token 落盘，供 dev-login 页使用。
+   */
+  requestDevToken(username: string, password: string) {
+    const headers = new AxiosHeaders();
+    headers.setContentType(ContentType.FORM_URLENCODED);
+    return new Promise((resolve, reject) => {
+      this.httpRequest
+        .post({
+          url: `${appSetting.identityUrl}/dev/token`,
+          data: { username, password },
+          headers,
+          withToken: false,
+        })
+        .then((res) => {
+          accessToken.set(res.access_token, res.expires_in);
+          resolve(res);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
   }
 
-  requestToken(username: string, password: string, grant_type = "password") {
-    return this.exchangeToken(username, password, grant_type, false);
+  /**
+   * 门户密码登录签发一次性授权码（60 秒有效、单次使用）。
+   * 不返回 token：调用方（admin/mobile）拿 lg_ 前缀 code 自行换取并保存 token。
+   */
+  requestAuthorizationCode(username: string, password: string) {
+    const payload = { username, password, client_id: appSetting.clientId };
+    const encrypted = scrambleBase64(utf8ToBase64(JSON.stringify(payload)));
+    const headers = new AxiosHeaders();
+    headers.setContentType(ContentType.FORM_URLENCODED);
+    return this.httpRequest.post<{ code: string; expires_in: number }>({
+      url: `${appSetting.identityUrl}/identity/authorizeCode`,
+      data: { encrypted },
+      headers,
+      withToken: false,
+    });
+  }
+
+  /**
+   * 以授权码换取 token（grant_type=authorization_code → /web/token）。
+   * code 按前缀分发：lg_ 本站登录授权码；wx_/ww_/dd_/fs_ 第三方集成登录 code（后端直接换本站 token）。
+   */
+  requestWebToken(code: string, persist = true) {
+    return this.webToken("", "", "authorization_code", persist, undefined, { code });
   }
 
   /**
@@ -64,7 +111,7 @@ export class IdentityClient {
           ? ({ 1: "DashLink", 2: "FormLink", 4: "DataLink", 8: "QueryLink" } as Record<number, string>)[scope] || String(scope)
           : scope;
 
-      return (await this.exchangeToken(
+      return (await this.webToken(
         `public_${targetId}`,
         password,
         "public",
@@ -90,7 +137,7 @@ export class IdentityClient {
     }
   }
 
-  private exchangeToken(
+  private webToken(
     username: string,
     password: string,
     grant_type = "password",
@@ -107,7 +154,7 @@ export class IdentityClient {
       ...(extraFields || {}),
     };
     const encrypted = utf8ToBase64(JSON.stringify(payload));
-    const url = endpoint || `${appSetting.identityUrl}/identity/login`;
+    const url = endpoint || `${appSetting.identityUrl}/web/token`;
     const headers = new AxiosHeaders();
     headers.setContentType(ContentType.FORM_URLENCODED);
     return new Promise((resolve, reject) => {
@@ -126,8 +173,8 @@ export class IdentityClient {
     });
   }
 
-  get<T = any>(url: string, params?: any, withToken?: boolean) {
-    return this.httpRequest.get<T>({ url: getIdentityUrl(url), params, withToken, headers: new AxiosHeaders() });
+  get<T = any>(url: string, params?: any, withToken?: boolean, isApi = true) {
+    return this.httpRequest.get<T>({ url: getIdentityUrl(url, isApi), params, withToken, headers: new AxiosHeaders() });
   }
 
   post<T = any>(

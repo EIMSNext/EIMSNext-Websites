@@ -1,13 +1,24 @@
 import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } from "vue-router";
-import { accessToken } from "@eimsnext/utils";
+import { accessToken, buildPortalAuthUrl, consumeCallbackCode } from "@eimsnext/utils";
 import router from "@/router";
 import { usePermissionStore, useSettingsStore } from "@/store";
 import { useUserStore, useAppStore } from "@eimsnext/store";
+import { identityService } from "@eimsnext/services";
 import { AppMenu, UserType, WorkbenchRecentVisit, WorkbenchRecentVisitRequest, WorkbenchTargetType } from "@eimsnext/models";
 import { workbenchRecentVisitService } from "@eimsnext/services";
 
 export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
+    // portal 授权码回跳：换取并落盘 token 后清除 URL（失败则按未登录继续走守卫）
+    const loginCode = consumeCallbackCode();
+    if (loginCode) {
+      try {
+        await identityService.exchangeAuthorizationCode(loginCode);
+      } catch {
+        console.warn("login code exchange failed");
+      }
+    }
+
     if (!to.meta?.requiresAuth) {
       next();
     } else {
@@ -174,12 +185,20 @@ function escapeODataString(value: string) {
   return value.replace(/'/g, "''");
 }
 
-// 重定向到登录页
+// 未配置独立登录应用时直接报错并终止导航；本分支不提供应用内登录页。
 function redirectToLogin(to: RouteLocationNormalized, next: NavigationGuardNext) {
   const params = new URLSearchParams(to.query as Record<string, string>);
   const queryString = params.toString();
   const redirect = queryString ? `${to.path}?${queryString}` : to.path;
-  next(`/login?redirect=${encodeURIComponent(redirect)}`);
+
+  const portalLogin = buildPortalAuthUrl("login", { redirectPath: redirect });
+  if (portalLogin) {
+    window.location.assign(portalLogin);
+    next(false);
+    return;
+  }
+
+  next(new Error(`portalUrl is not configured; cannot authenticate ${redirect}`));
 }
 
 /** 判断是否有权限 */

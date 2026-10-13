@@ -4,15 +4,9 @@ import { resolve } from "path";
 
 const pathSrc = resolve(__dirname, "src");
 
-// dev 下 identityUrl 为空串（相对路径），由 proxy 转发到本地 Identity，避免后端 CORS 配置
-const devProxy = {
-  "/identity": { target: "https://localhost:7777", changeOrigin: true, secure: false },
-  "/api": { target: "https://localhost:7777", changeOrigin: true, secure: false },
-};
-
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   return {
-    base: "/portal/",
+    base: "/",
     resolve: {
       alias: {
         "@": pathSrc,
@@ -31,7 +25,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     },
     server: {
       port: 5174,
-      proxy: devProxy,
     },
     build: {
       sourcemap: false,

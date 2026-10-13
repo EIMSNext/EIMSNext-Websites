@@ -6,19 +6,18 @@
 
 <script setup lang="ts">
 import { onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { accessToken } from "@eimsnext/utils";
 import { identityClient } from "@/auth/client";
-import { resolveRedirectUrl } from "@/auth/callback";
 
-// 调用方登出流程（接线后）：调用方先自行登出并清掉本 origin 的 token，
-// 再跳转到这里失效 auth 自身会话，最后回跳 redirect_url（不带 token）。
-// 调用方守卫发现无 token，会再次进入 /portal/login 完成重新登录。
+// 调用方登出流程：调用方先自行登出并清掉本 origin 的 token，再跳到这里失效 auth 自身会话。
+// redirect_url 的语义是「重新登录后回到哪」：本页不外跳，仅转发给 /login，
+// 由登录成功后（Login.submit）回跳调用方（admin/mobile 均适用）——
+// 避免登出后先跳回调用方、再被其守卫踢回登录页的多余绕转；登出即单点登出。
 const route = useRoute();
+const router = useRouter();
 
 onMounted(async () => {
-  const target = resolveRedirectUrl(route.query.redirect_url as string);
-
   try {
     if (accessToken.get()) {
       await identityClient.post("/identity/logout", {});
@@ -29,8 +28,7 @@ onMounted(async () => {
     accessToken.clear();
   }
 
-  if (target) {
-    window.location.replace(target.toString());
-  }
+  const redirectUrl = route.query.redirect_url as string | undefined;
+  router.replace(redirectUrl ? { path: "/login", query: { redirect_url: redirectUrl } } : "/login");
 });
 </script>

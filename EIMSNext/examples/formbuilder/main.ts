@@ -33,7 +33,7 @@ let httpConfig: HttpRequestConfig = {
 
 http.setConfig(httpConfig, httpConfig);
 
-http.identity.login("12345678901", "123456");
+http.identity.requestDevToken("12345678901", "123456");
 
 let pinia = createPinia();
 

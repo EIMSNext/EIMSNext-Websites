@@ -1,5 +1,5 @@
 import { createApp } from "vue";
-import { appSetting, DEFAULT_THEME_COLOR, applyTheme, generateThemeColors, setupHttp, toggleDarkMode } from "@eimsnext/utils";
+import { appSetting, buildPortalAuthUrl, DEFAULT_THEME_COLOR, applyTheme, generateThemeColors, setupHttp, toggleDarkMode } from "@eimsnext/utils";
 import { createI18n } from "vue-i18n";
 import { En, ZhCn } from "@eimsnext/locale";
 import { Locale, showToast } from "vant";
@@ -29,9 +29,18 @@ const handleSessionExpired = (message: string) => {
   localStorage.removeItem(tokenKey());
   showToast(String(message || systemErrorText()));
 
-  if (sessionExpiredHandled || router.currentRoute.value.path === "/login") return;
+  if (sessionExpiredHandled) return;
   sessionExpiredHandled = true;
-  void router.replace({ path: "/login", query: { redirect: router.currentRoute.value.fullPath } });
+  // 配置了独立登录应用时整页跳 portal（reason 让其先清自身会话，防回跳死循环）
+  const portalLogin = buildPortalAuthUrl("login", {
+    redirectPath: router.currentRoute.value.fullPath,
+    reason: "invalid_token",
+  });
+  if (portalLogin) {
+    window.location.assign(portalLogin);
+    return;
+  }
+  throw new Error("portalUrl is not configured; cannot authenticate");
 };
 
 const initHttp = () =>

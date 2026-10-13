@@ -363,6 +363,49 @@ html.dark .pc-field input {
   margin-top: 24px;
 }
 
+/* 第三方集成登录（官方品牌 logo，单行，透明按钮 + hover 浮起） */
+.integration-login {
+  margin-top: 28px;
+}
+
+.integration-title {
+  color: var(--et-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+  margin-bottom: 12px;
+}
+
+.integration-list {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.integration-item {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  padding: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.integration-icon {
+  display: block;
+  height: 32px;
+  pointer-events: none;
+  width: 32px;
+}
+
 /* el-switch inline-prompt（Moon/Sunny）观感 */
 .pc-switch {
   background: var(--et-border-color);
@@ -848,6 +891,44 @@ html.dark .pc-forget {
     cursor: not-allowed;
     opacity: 0.6;
   }
+}
+
+/* 第三方集成登录（mobile：官方品牌 logo 单行） */
+.m-integration {
+  margin-top: 16px;
+}
+
+.m-integration-title {
+  color: var(--mobile-text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+  margin-bottom: 10px;
+}
+
+.m-integration-list {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+.m-integration-item {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  padding: 3px;
+  transition: opacity 0.2s ease;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.m-integration-icon {
+  display: block;
+  height: 28px;
+  pointer-events: none;
+  width: 28px;
 }
 
 .m-error {

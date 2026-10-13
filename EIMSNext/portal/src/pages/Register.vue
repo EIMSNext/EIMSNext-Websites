@@ -213,7 +213,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { Moon, Sunny } from "@element-plus/icons-vue";
-import { toggleDarkMode } from "@eimsnext/utils";
+import { toggleDarkMode, withLocalAuthCodePrefix } from "@eimsnext/utils";
 import { identityClient, extractAuthError } from "@/auth/client";
 import { redirectToCallback, resolveRedirectUrl } from "@/auth/callback";
 import { getPasswordStrengthState, isStrongPassword } from "@/utils/password";
@@ -382,10 +382,12 @@ async function submit() {
       password: form.password,
     });
 
-    // 与 admin 注册页一致：注册成功后自动登录
+    // 与 admin 注册页一致：注册成功后自动登录（授权码模式，portal 保留会话后换新码回传）
     const username = registerType.value === "phone" ? form.phone : form.email;
-    const res: any = await identityClient.login(username, form.password);
-    redirectToCallback(target, res.access_token, res.expires_in);
+    const res = await identityClient.requestAuthorizationCode(username, form.password);
+    await identityClient.requestWebToken(withLocalAuthCodePrefix(res.code), true);
+    const session: any = await identityClient.post("/identity/authorizeCodeSession", {});
+    redirectToCallback(target, withLocalAuthCodePrefix(session.code));
   } catch (e) {
     error.value = extractAuthError(e) || t("common.systemError");
   } finally {

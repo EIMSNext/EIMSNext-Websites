@@ -3,6 +3,8 @@ import axios from "axios";
 import qs from "qs";
 import { ContentType, HttpRequestConfig } from "./interface";
 import accessToken from "./token";
+import { appSetting } from "../appSetting";
+import { buildPortalAuthUrl } from "./callbackToken";
 import { bus } from "../eventBus";
 
 export class HttpRequest {
@@ -242,8 +244,14 @@ export class HttpRequest {
       const path = this.currentPath();
       bus.emit("identity:logout", { reason: "401", path });
       if (typeof window !== "undefined" && path !== "/login" && !path.startsWith("/login?")) {
-        const redirect = encodeURIComponent(path);
-        window.location.assign(`/#/login?redirect=${redirect}`);
+        // 配置了独立登录应用时统一跳 portal（带 reason 让其先清自身会话，防「自动跳转 → 401 → 回跳」死循环；
+        // redirectPath 保留触发 401 的深链，登录回跳后直接回到该路由而非默认 workbench）
+        const portalLogin = buildPortalAuthUrl("login", { redirectPath: path, reason: "invalid_token" });
+        if (portalLogin) {
+          window.location.assign(portalLogin);
+        } else {
+          throw new Error("portalUrl is not configured; cannot authenticate");
+        }
       }
     } catch (e) {
       console.error("401 handler error", e);

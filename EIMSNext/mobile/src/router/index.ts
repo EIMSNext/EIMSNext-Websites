@@ -1,19 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import { appSetting } from '@eimsnext/utils'
+import { appSetting, buildPortalAuthUrl, consumeCallbackCode } from '@eimsnext/utils'
 import { useUserStoreHook } from '@eimsnext/store'
+import { identityService } from '@eimsnext/services'
 import { applyCorpThemeIfNeeded } from '@/theme'
 
 const routes: RouteRecordRaw[] = [
   {
+    // 登录由独立 portal 应用承载；保留路径重定向避免旧链接 404
     path: '/login',
-    name: 'Login',
-    component: () => import('@/components/Login.vue'),
-    meta: { titleKey: 'mobile.login.title' }
+    redirect: '/workbench'
   },
   {
     path: '/',
-    redirect: '/login'
+    redirect: '/workbench'
   },
   {
     path: '/workbench',
@@ -75,13 +75,27 @@ let corpThemeApplied = false
 // 每个登录会话只校验一次登录态（token 过期时服务端会返回 401）
 let sessionChecked = false
 
-const toLogin = (redirect: string) => ({
-  path: '/login',
-  query: { redirect },
-  replace: true
-})
+const toLogin = (redirect: string) => {
+  // 配置了独立登录应用时整页跳 portal；返回 false 取消本次导航
+  const portalLogin = buildPortalAuthUrl('login', { redirectPath: redirect })
+  if (portalLogin) {
+    window.location.assign(portalLogin)
+    return false
+  }
+  throw new Error('portalUrl is not configured; cannot authenticate')
+}
 
 router.beforeEach(async (to) => {
+  // portal 授权码回跳：换取并落盘 token 后清除 URL（失败则按未登录继续走守卫）
+  const loginCode = consumeCallbackCode()
+  if (loginCode) {
+    try {
+      await identityService.exchangeAuthorizationCode(loginCode)
+    } catch {
+      console.warn('login code exchange failed')
+    }
+  }
+
   const token = localStorage.getItem(appSetting.tokenKey || 'jat')
 
   if (to.path === '/login') {

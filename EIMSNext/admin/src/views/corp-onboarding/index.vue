@@ -83,6 +83,7 @@ import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useUserStore } from "@eimsnext/store";
+import { redirectToPortalLogout } from "@eimsnext/utils";
 import { corpOnboardingService, corporateService, employeeService, ODataQueryRequest } from "@eimsnext/services";
 import type { Corporate } from "@eimsnext/models";
 import { ElMessage } from "element-plus";
@@ -179,7 +180,10 @@ async function handleInviteDecision(accepted: boolean) {
 
 async function logout() {
   await userStore.logout();
-  await router.replace("/login");
+  // 单点登出：与 NavBar 登出一致，portal 失效 SSO 会话后落到其登录页
+  if (!redirectToPortalLogout()) {
+    throw new Error("portalUrl is not configured; cannot logout");
+  }
 }
 
 </script>

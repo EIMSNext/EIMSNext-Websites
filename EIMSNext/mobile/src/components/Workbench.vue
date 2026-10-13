@@ -69,6 +69,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { AppDef } from "@eimsnext/models";
 import { useUserStoreHook } from "@eimsnext/store";
+import { buildPortalAuthUrl } from "@eimsnext/utils";
 import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
 import { appServiceMobile, taskServiceMobile } from "@/services/mobileService";
@@ -97,14 +98,20 @@ const loadTaskCount = async () => {
   taskCount.value = await taskServiceMobile.getCount();
 };
 
-// 与 PC 端一致：走 userStore.logout() -> identityService.logout()
+// 与 PC 端一致：走 userStore.logout() -> identityService.logout()，
+// 再跳 portal 失效其自身会话（否则下次进 portal 会自动回传 code 重新登录）
 const handleLogout = async () => {
   try {
     await useUserStoreHook().logout();
   } catch {
     // userStore.logout 内部会清理本地 token，服务端拒绝（如 token 已过期）时忽略
   } finally {
-    await router.replace("/login");
+    const portalLogout = buildPortalAuthUrl("logout", { redirectPath: "/" });
+    if (portalLogout) {
+      window.location.assign(portalLogout);
+    } else {
+      throw new Error("portalUrl is not configured; cannot logout");
+    }
   }
 };
 

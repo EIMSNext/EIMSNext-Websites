@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>登录处理中</title>
+    <style>
+      body {
+        align-items: center;
+        background: #f4f7fb;
+        color: #1f2a37;
+        display: flex;
+        font-family: Arial, Helvetica, sans-serif;
+        justify-content: center;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      .panel {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+        max-width: 360px;
+        padding: 32px 28px;
+        text-align: center;
+      }
+
+      .title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .desc {
+        color: #60758a;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <div class="title" id="title">登录处理中</div>
+      <div class="desc" id="desc">正在处理第三方登录，请稍候...</div>
+    </div>
+
+    <script>
+      (function () {
+        const script = document.createElement("script");
+        script.src = window.location.hostname === "localhost" ? "/appSetting.local.js" : "/appSetting.js";
+        script.onload = start;
+        script.onerror = start;
+        document.head.appendChild(script);
+
+        function setMessage(title, desc) {
+          document.getElementById("title").textContent = title;
+          document.getElementById("desc").textContent = desc;
+        }
+
+        // 与 portal/src/utils/integrationLogin.ts 的 parseIntegrationState 同构
+        function parseState(state) {
+          if (!state) return null;
+          try {
+            return JSON.parse(decodeURIComponent(atob(state)));
+          } catch {
+            return null;
+          }
+        }
+
+        // 第三方 code 前缀（与后端 AuthorizationCodeTokenGrantHandler 的前缀分发一致）
+        const INTEGRATION_PREFIXES = {
+          wechat: "wx_",
+          wxwork: "ww_",
+          dingding: "dd_",
+          feishu: "fs_",
+        };
+
+        function writeToken(tokenKey, token, expiresIn) {
+          localStorage.setItem(tokenKey, token);
+          localStorage.setItem(`${tokenKey}_exp`, String(Date.now() + (Number(expiresIn || 0) - 300) * 1000));
+        }
+
+        // code 以 query 追加（searchParams 位于 hash 之前），与 consumeCallbackCode 的读取约定一致
+        function appendCode(target, code) {
+          const url = new URL(target);
+          url.searchParams.set("code", code);
+          return url.toString();
+        }
+
+        const utf8ToBase64 = (s) => btoa(unescape(encodeURIComponent(s)));
+
+        /**
+         * 解析回跳目标（与 portal/src/auth/callback.ts#resolveRedirectUrl 同规则）：
+         * - 根相对路径 → 同源
+         * - 绝对 http(s) URL → 同源放行；跨源必须命中 allowedRedirectHosts
+         */
+        function resolveRedirect(raw, appSetting) {
+          const candidate = raw || appSetting.defaultRedirectUrl || "/";
+          if (candidate.startsWith("/") && !candidate.startsWith("//")) {
+            try {
+              return new URL(candidate, window.location.origin);
+            } catch {
+              return null;
+            }
+          }
+          try {
+            const url = new URL(candidate);
+            if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+            if (url.origin === window.location.origin) return url;
+            const allowed = (appSetting.allowedRedirectHosts || []).some(
+              (host) => String(host).toLowerCase() === url.host.toLowerCase(),
+            );
+            return allowed ? url : null;
+          } catch {
+            return null;
+          }
+        }
+
+        // 第三方 code（带前缀）按 authorization_code grant 换本站 token
+        async function exchangeCode(code, appSetting) {
+          const payload = {
+            grant_type: "authorization_code",
+            code,
+            client_id: appSetting.clientId || "EIMSD160507G0401S171201B1014Next",
+          };
+          const response = await fetch(`${appSetting.identityUrl}/web/token`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+            body: new URLSearchParams({ encrypted: utf8ToBase64(JSON.stringify(payload)) }).toString(),
+          });
+          const data = await response.json();
+          if (!response.ok || !data.access_token) {
+            throw new Error(data.error_description || data.message || "第三方登录失败");
+          }
+          return data;
+        }
+
+        async function start() {
+          const appSetting = window.appSetting || {};
+
+          const searchParams = new URLSearchParams(window.location.search);
+          const code = searchParams.get("code") || searchParams.get("authCode") || "";
+          const state = searchParams.get("state") || "";
+          const parsedState = parseState(state);
+          const type = parsedState && parsedState.type ? parsedState.type : "";
+          const prefix = INTEGRATION_PREFIXES[type];
+
+          if (!prefix || !code) {
+            setMessage("登录失败", "未获取到有效的第三方登录参数。");
+            return;
+          }
+
+          const target = resolveRedirect(parsedState && parsedState.redirect, appSetting);
+          if (!target) {
+            setMessage("登录失败", "回跳地址不在允许列表中。");
+            return;
+          }
+
+          // 第三方 code 加前缀后回传调用方，由调用方换本站 token；
+          // 「第三方 code → 第三方 token → 本站 token」全部由后端处理
+          const prefixedCode = `${prefix}${code}`;
+
+          try {
+            // 同源（portal 自身）→ 就地换取并保留会话；跨源（调用方 app）→ 前缀 code 回传
+            if (target.origin === window.location.origin) {
+              const data = await exchangeCode(prefixedCode, appSetting);
+              writeToken(appSetting.tokenKey || "jat", data.access_token, data.expires_in);
+              setMessage("登录成功", "正在跳转...");
+              window.location.replace(target.toString());
+              return;
+            }
+
+            setMessage("登录成功", "正在跳转...");
+            window.location.replace(appendCode(target, prefixedCode));
+          } catch (error) {
+            setMessage("登录失败", error && error.message ? error.message : "第三方登录失败，请稍后再试。");
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -15,7 +15,7 @@ import {
 } from "./interface";
 import type { HttpRequestConfig } from "./interface";
 import { setupHttp } from "./setupHttp";
-import { buildCallbackUrl, consumeCallbackToken } from "./callbackToken";
+import { buildCallbackUrl, buildPortalAuthUrl, consumeCallbackCode, LOCAL_AUTH_CODE_PREFIX, redirectToPortalLogout, withLocalAuthCodePrefix } from "./callbackToken";
 export { useSubmitGuard } from "../useSubmitGuard";
 
 export {
@@ -35,5 +35,9 @@ export {
   HttpRequestConfig,
   setupHttp,
   buildCallbackUrl,
-  consumeCallbackToken,
+  buildPortalAuthUrl,
+  consumeCallbackCode,
+  LOCAL_AUTH_CODE_PREFIX,
+  withLocalAuthCodePrefix,
+  redirectToPortalLogout,
 };

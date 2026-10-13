@@ -55,7 +55,7 @@ onBeforeMount(() => {
 });
 
 const openLink = () => {
-  window.open(`${location.origin}/#/system/department`, "_blank");
+  window.open(`${location.origin}/system/department`, "_blank");
 };
 
 const emit = defineEmits(["update:modelValue", "cancel", "ok"]);

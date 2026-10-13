@@ -106,7 +106,7 @@ const customPrintTemplates = ref<PrintDef[]>([]);
 const showPdfPreview = ref(false);
 const pdfPreviewTitle = ref("");
 const pdfPreviewUrl = ref("");
-const shareUrl = computed(() => `${window.location.origin}/#/app/${route.params.appId}/form/${props.formId}/data/${props.dataId}`);
+const shareUrl = computed(() => `${window.location.origin}/app/${route.params.appId}/form/${props.formId}/data/${props.dataId}`);
 const returnToList = () => router.replace(`/app/${route.params.appId}/form/${props.formId}`);
 
 const inEdit = computed(() => isEditing.value);

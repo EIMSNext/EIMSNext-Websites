@@ -82,7 +82,7 @@
 import type { AppProfile } from "@eimsnext/models";
 import { appProfileService } from "@eimsnext/services";
 import { useAppDefStore, useContextStore } from "@eimsnext/store";
-import { accessToken } from "@eimsnext/utils";
+import { accessToken, buildPortalAuthUrl } from "@eimsnext/utils";
 import { ElMessage } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -163,7 +163,12 @@ async function install() {
   if (!accessToken.isLoggedIn()) {
     ElMessage.warning(t("admin.appStore.loginRequired"));
     close();
-    await router.push(`/login?redirect=${encodeURIComponent(route.fullPath)}`);
+    const portalLogin = buildPortalAuthUrl("login", { redirectPath: route.fullPath });
+    if (portalLogin) {
+      window.location.assign(portalLogin);
+    } else {
+      throw new Error("portalUrl is not configured; cannot authenticate");
+    }
     return;
   }
 

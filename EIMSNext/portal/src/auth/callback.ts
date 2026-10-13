@@ -10,7 +10,7 @@ export function resolveRedirectUrl(raw: string | null | undefined): URL | undefi
   if (!candidate) return undefined;
 
   let url: URL;
-  if (candidate.startsWith("/")) {
+  if (candidate.startsWith("/") && !candidate.startsWith("//")) {
     try {
       return new URL(candidate, window.location.origin);
     } catch {
@@ -34,9 +34,9 @@ export function resolveRedirectUrl(raw: string | null | undefined): URL | undefi
   return allowed ? url : undefined;
 }
 
-/** 登录成功后回跳调用方：token 以 query 参数追加在 hash 之前，保留原 hash */
-export function redirectToCallback(target: URL, token: string, expiresIn: number): void {
-  window.location.replace(buildCallbackUrl(target, token, expiresIn).toString());
+/** 登录成功后回跳调用方：一次性授权码以 query 追加在 hash 之前，调用方自行换取并保存 token */
+export function redirectToCallback(target: URL, code: string): void {
+  window.location.replace(buildCallbackUrl(target, code).toString());
 }
 
 /**

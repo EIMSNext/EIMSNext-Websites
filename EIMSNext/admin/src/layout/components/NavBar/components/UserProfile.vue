@@ -56,6 +56,7 @@ defineOptions({
 
 import { CurrentUser, UserType } from "@eimsnext/models";
 import { useUserStore, useContextStore } from "@eimsnext/store";
+import { buildPortalAuthUrl, redirectToPortalLogout } from "@eimsnext/utils";
 import { useLocale } from "element-plus";
 const { t } = useLocale();
 
@@ -66,7 +67,12 @@ const router = useRouter();
 
 userStore.get().then((res: CurrentUser) => {
   if (!res) {
-    router.push(`/login?redirect=${route.fullPath}`);
+    const portalLogin = buildPortalAuthUrl("login", { redirectPath: route.fullPath });
+    if (portalLogin) {
+      window.location.assign(portalLogin);
+    } else {
+      throw new Error("portalUrl is not configured; cannot authenticate");
+    }
   }
 });
 const doNothing = (event: Event) => {
@@ -90,8 +96,12 @@ function logout() {
     type: "warning",
     lockScroll: false,
   }).then(() => {
+    // 单点登出：admin 清本地会话后整页跳 portal 失效 SSO 会话，由 portal 落到登录页，
+    // 避免回跳 admin 后 portal 静默续登造成「无法登出」
     userStore.logout().then(() => {
-      router.push(`/login`);
+      if (!redirectToPortalLogout()) {
+        throw new Error("portalUrl is not configured; cannot logout");
+      }
     });
   });
 }

@@ -9,8 +9,14 @@ export interface IntegrationAuthorizationUrlDto {
 }
 
 export class IdentityService extends ServiceBase {
+  /** 开发明文登录（dev/token，Development-only），仅 dev-login/示例链路使用 */
   login(request: LoginRequest) {
-    return this.http().identity.login(request.username, request.password, request.grant_type);
+    return this.http().identity.requestDevToken(request.username, request.password);
+  }
+
+  /** 门户授权码模式：换取并落盘 token（portal 回跳 URL 上携带的 lg_/第三方前缀 code） */
+  exchangeAuthorizationCode(code: string) {
+    return this.http().identity.requestWebToken(code, true);
   }
 
   logout() {
