@@ -5,14 +5,14 @@
 </template>
 
 <script lang="ts" setup>
-import { Department, FormDef, ApproveRequest, ApproveAction} from "@jlsoft/models";
+import { Department, FormDef, ApproveRequest, ApproveAction} from "@eimsnext/models";
 import {
   identityService,
   departmentService,
   formDataService,
   workflowService
-} from "@jlsoft/services";
-import { useUserStore, useFormStore, useDeptStore, useAppStore , useContextStore} from "@jlsoft/store";
+} from "@eimsnext/services";
+import { useUserStore, useFormStore, useDeptStore, useAppStore , useContextStore} from "@eimsnext/store";
 import buildQuery from "odata-query";
 import { storeToRefs } from "pinia";
 

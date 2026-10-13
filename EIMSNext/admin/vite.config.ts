@@ -9,6 +9,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 
 import UnoCSS from "unocss/vite";
+import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "path";
 
 const pathSrc = resolve(__dirname, "src");
@@ -30,6 +31,7 @@ const baseOptimizeDeps = [
   "vue",
   "vue-router",
   "element-plus",
+  "element-plus/es",
   "pinia",
   "axios",
   "lodash-es",
@@ -43,75 +45,19 @@ const baseOptimizeDeps = [
   "path-browserify",
 ];
 
-const elementPlusStyleDeps = [
-  "element-plus/es/components/form/style/css",
-  "element-plus/es/components/form-item/style/css",
-  "element-plus/es/components/button/style/css",
-  "element-plus/es/components/input/style/css",
-  "element-plus/es/components/input-number/style/css",
-  "element-plus/es/components/switch/style/css",
-  "element-plus/es/components/upload/style/css",
-  "element-plus/es/components/menu/style/css",
-  "element-plus/es/components/col/style/css",
-  "element-plus/es/components/icon/style/css",
-  "element-plus/es/components/row/style/css",
-  "element-plus/es/components/tag/style/css",
-  "element-plus/es/components/dialog/style/css",
-  "element-plus/es/components/loading/style/css",
-  "element-plus/es/components/radio/style/css",
-  "element-plus/es/components/radio-group/style/css",
-  "element-plus/es/components/popover/style/css",
-  "element-plus/es/components/scrollbar/style/css",
-  "element-plus/es/components/tooltip/style/css",
-  "element-plus/es/components/dropdown/style/css",
-  "element-plus/es/components/dropdown-menu/style/css",
-  "element-plus/es/components/dropdown-item/style/css",
-  "element-plus/es/components/sub-menu/style/css",
-  "element-plus/es/components/menu-item/style/css",
-  "element-plus/es/components/divider/style/css",
-  "element-plus/es/components/card/style/css",
-  "element-plus/es/components/link/style/css",
-  "element-plus/es/components/breadcrumb/style/css",
-  "element-plus/es/components/breadcrumb-item/style/css",
-  "element-plus/es/components/table/style/css",
-  "element-plus/es/components/tree-select/style/css",
-  "element-plus/es/components/table-column/style/css",
-  "element-plus/es/components/select/style/css",
-  "element-plus/es/components/option/style/css",
-  "element-plus/es/components/pagination/style/css",
-  "element-plus/es/components/tree/style/css",
-  "element-plus/es/components/alert/style/css",
-  "element-plus/es/components/radio-button/style/css",
-  "element-plus/es/components/checkbox-group/style/css",
-  "element-plus/es/components/checkbox/style/css",
-  "element-plus/es/components/tabs/style/css",
-  "element-plus/es/components/tab-pane/style/css",
-  "element-plus/es/components/rate/style/css",
-  "element-plus/es/components/date-picker/style/css",
-  "element-plus/es/components/notification/style/css",
-  "element-plus/es/components/image/style/css",
-  "element-plus/es/components/statistic/style/css",
-  "element-plus/es/components/watermark/style/css",
-  "element-plus/es/components/config-provider/style/css",
-  "element-plus/es/components/text/style/css",
-  "element-plus/es/components/drawer/style/css",
-  "element-plus/es/components/color-picker/style/css",
-  "element-plus/es/components/backtop/style/css",
-  "element-plus/es/components/message-box/style/css",
-  "element-plus/es/components/skeleton/style/css",
-  "element-plus/es/components/skeleton/style/css",
-  "element-plus/es/components/skeleton-item/style/css",
-  "element-plus/es/components/badge/style/css",
-  "element-plus/es/components/steps/style/css",
-  "element-plus/es/components/step/style/css",
-  "element-plus/es/components/avatar/style/css",
-  "element-plus/es/components/descriptions/style/css",
-  "element-plus/es/components/descriptions-item/style/css",
-  "element-plus/es/components/checkbox-group/style/css",
-  "element-plus/es/components/progress/style/css",
-  "element-plus/es/components/image-viewer/style/css",
-  "element-plus/es/components/empty/style/css",
-];
+const elementPlusComponentsDir = resolve(__dirname, "../node_modules/element-plus/es/components");
+
+// 组件样式入口是 ElementPlusResolver 在 transform 阶段注入的 import，Vite 启动扫描看不到：
+// 一旦漏出 include，首次加载用到该组件的模块时才会在运行中发现依赖，触发
+// 「✨ optimized dependencies changed. reloading」→ 整页刷新（已打开的 drawer 会被冲掉）。
+// 按实际安装版本枚举，避免手工维护漏项。
+const elementPlusStyleDeps = existsSync(elementPlusComponentsDir)
+  ? readdirSync(elementPlusComponentsDir, { withFileTypes: true })
+      .filter((entry) =>
+        entry.isDirectory() && existsSync(resolve(elementPlusComponentsDir, entry.name, "style/css.mjs"))
+      )
+      .map((entry) => `element-plus/es/components/${entry.name}/style/css`)
+  : [];
 
 const optimizeDepIncludes = [...baseOptimizeDeps, ...elementPlusStyleDeps];
 

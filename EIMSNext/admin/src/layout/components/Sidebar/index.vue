@@ -7,7 +7,7 @@
       :usingFlow="usingWorkflow"
       :initial-tab="formEditInitialTab"
       :initial-advanced-tab="formEditInitialAdvancedTab"
-      @close="console.log('[Sidebar] FormEdit closed'); showFormEditor = false"
+      @close="showFormEditor = false"
     />
     <DashboardDesigner v-if="showDshEditor && newDash" v-model="showDshEditor" :dash-def="newDash!"></DashboardDesigner>
     <EditFormIcon
