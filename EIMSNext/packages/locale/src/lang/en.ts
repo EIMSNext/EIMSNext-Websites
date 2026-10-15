@@ -997,6 +997,7 @@ export default {
       searchAllFields: "Search all fields",
       searchSpecificFields: "Search specific fields",
       searchFieldPlaceholder: "Search fields",
+      exactSearch: "Exact match",
       searchFieldCount: "{count} fields selected",
       searchAllFieldsTip: "Search across the current searchable fields, {count} field(s) in total.",
       searchTitleField: "Title",

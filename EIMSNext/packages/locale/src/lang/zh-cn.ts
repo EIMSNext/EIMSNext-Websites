@@ -1058,6 +1058,7 @@ export default {
       searchAllFields: "搜索全部字段",
       searchSpecificFields: "搜索指定字段",
       searchFieldPlaceholder: "搜索字段",
+      exactSearch: "精确查找",
       searchFieldCount: "已选 {count} 个字段",
       searchAllFieldsTip: "将在当前可搜索字段中检索，共 {count} 个字段。",
       searchTitleField: "标题",

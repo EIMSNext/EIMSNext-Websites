@@ -56,6 +56,8 @@ export interface FormDataExportRequest {
   permissionGroupId?: string;
   keyword?: string;
   searchFields?: string[];
+  /** 搜索模式：0=模糊（默认），非 0=精确（等值）。 */
+  searchMode?: number;
   includeDeleted?: boolean;
 }
 

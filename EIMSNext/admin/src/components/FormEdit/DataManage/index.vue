@@ -129,8 +129,10 @@
         :selected-fields="searchState.selectedFields"
         :fields="searchableFields"
         :disabled="searchableFields.length === 0"
+        :exact="searchState.exact"
         @update:keyword="searchState.keyword = $event"
         @update:selected-fields="searchState.selectedFields = $event"
+        @update:exact="searchState.exact = $event"
         @search="handleSearch"
       />
       <et-toolbar
@@ -313,6 +315,7 @@ type QueryBuilderOptions = {
   pageSize: number;
   keyword: string;
   selectedFields: string[];
+  exact: boolean;
   includeDeleted: boolean;
 };
 
@@ -383,6 +386,7 @@ const searchableFields = computed(() => filterSearchableFields(buildAllSearchabl
 const searchState = reactive<FormDataSearchState>({
   keyword: "",
   selectedFields: [],
+  exact: true,
 });
 
 const trashSearchState = reactive<FormDataSearchState>({
@@ -619,6 +623,7 @@ const buildFormDataQuery = (options: QueryBuilderOptions): FormDataQueryOptions 
       },
       searchableFields.value,
     ),
+    searchMode: options.exact ? 1 : 0,
     includeDeleted: isTrash,
   };
 };
@@ -629,6 +634,7 @@ const updateQueryParams = () => {
     pageSize: pageSize.value,
     keyword: searchState.keyword,
     selectedFields: searchState.selectedFields,
+    exact: searchState.exact ?? false,
     includeDeleted: false,
   });
 };
@@ -639,6 +645,7 @@ const updateTrashQueryParams = () => {
     pageSize: trashPageSize.value,
     keyword: trashSearchState.keyword,
     selectedFields: trashSearchState.selectedFields,
+    exact: false,
     includeDeleted: true,
   });
 };
@@ -701,6 +708,7 @@ const refreshTrashCount = async () => {
     pageSize: 1,
     keyword: trashSearchState.keyword,
     selectedFields: trashSearchState.selectedFields,
+    exact: false,
     includeDeleted: true,
   });
   trashTotalRef.value = await formDataService.count(countQuery);
@@ -843,6 +851,7 @@ const exportCurrentData = async () => {
     filter: queryParams.value.filter,
     keyword: queryParams.value.keyword,
     searchFields: queryParams.value.searchFields,
+    searchMode: queryParams.value.searchMode,
     includeDeleted: false,
   });
 

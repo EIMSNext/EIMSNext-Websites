@@ -10,6 +10,7 @@ import {
 export type FormDataSearchState = {
   keyword: string;
   selectedFields: string[];
+  exact?: boolean;
 };
 
 export const MAX_SEARCH_FIELD_COUNT = 10;

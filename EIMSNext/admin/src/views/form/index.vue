@@ -71,8 +71,10 @@
         :selected-fields="searchState.selectedFields"
         :fields="searchableFields"
         :disabled="searchableFields.length === 0"
+        :exact="searchState.exact"
         @update:keyword="searchState.keyword = $event"
         @update:selected-fields="searchState.selectedFields = $event"
+        @update:exact="searchState.exact = $event"
         @search="handleSearch"
       />
       <et-toolbar
@@ -270,6 +272,7 @@ const listViewDisplayFields = ref<FormListViewField[]>([]);
 const searchState = reactive<FormDataSearchState>({
   keyword: "",
   selectedFields: [],
+  exact: true,
 });
 const searchFieldsInitialized = ref(false);
 const userStore = useUserStore();
@@ -499,6 +502,7 @@ const submitExport = async () => {
       permissionGroupId: curPermissionGroup.value?.id,
       keyword: queryParams.value.keyword,
       searchFields: queryParams.value.searchFields,
+      searchMode: queryParams.value.searchMode,
       includeDeleted: false,
     });
 
@@ -736,6 +740,7 @@ const updateQueryParams = () => {
   };
   queryParams.value.keyword = searchState.keyword.trim();
   queryParams.value.searchFields = resolvedSearchFields;
+  queryParams.value.searchMode = searchState.exact ? 1 : 0;
   queryParams.value.includeDeleted = false;
 };
 

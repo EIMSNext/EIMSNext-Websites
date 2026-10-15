@@ -70,6 +70,15 @@
         </el-popover>
       </template>
     </el-input>
+    <el-checkbox
+      v-if="props.exact !== undefined"
+      class="exact-toggle"
+      :model-value="props.exact"
+      :disabled="disabled"
+      @change="onExactChange"
+    >
+      {{ t("admin.formList.exactSearch") }}
+    </el-checkbox>
   </div>
 </template>
 
@@ -91,6 +100,7 @@ const props = withDefaults(defineProps<{
   selectedFields: string[];
   fields: IFormFieldDef[];
   disabled?: boolean;
+  exact?: boolean;
 }>(), {
   disabled: false,
 });
@@ -98,6 +108,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   "update:keyword": [value: string];
   "update:selectedFields": [value: string[]];
+  "update:exact": [value: boolean];
   search: [];
 }>();
 
@@ -152,18 +163,30 @@ const emitSearch = () => {
   if (props.disabled) return;
   emit("search");
 };
+
+const onExactChange = (value: string | number | boolean) => {
+  if (props.disabled) return;
+  emit("update:exact", Boolean(value));
+  emit("search");
+};
 </script>
 
 <style scoped lang="scss">
 .form-data-search-bar {
   display: flex;
   align-items: center;
-  flex: 0 0 200px;
-  width: 200px;
+  gap: var(--et-space-8);
+  flex: 0 0 auto;
+  width: auto;
 }
 
 .search-input {
-  width: 100%;
+  width: 200px;
+}
+
+.exact-toggle {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .field-select-trigger {
