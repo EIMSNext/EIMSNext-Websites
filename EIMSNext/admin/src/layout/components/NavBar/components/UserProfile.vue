@@ -69,7 +69,7 @@ userStore.get().then((res: CurrentUser) => {
   if (!res) {
     const portalLogin = buildPortalAuthUrl("login", { redirectPath: route.fullPath });
     if (portalLogin) {
-      window.location.assign(portalLogin);
+      window.location.replace(portalLogin);
     } else {
       throw new Error("portalUrl is not configured; cannot authenticate");
     }

@@ -37,7 +37,8 @@ const handleSessionExpired = (message: string) => {
     reason: "invalid_token",
   });
   if (portalLogin) {
-    window.location.assign(portalLogin);
+    // replace：portal 登录页按 Back 不应回到 mobile 已登出的空页再被弹一次
+    window.location.replace(portalLogin);
     return;
   }
   throw new Error("portalUrl is not configured; cannot authenticate");

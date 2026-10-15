@@ -2393,6 +2393,7 @@ export default {
     },
     otherLoginMethods: "Other login methods",
     invalidRedirect: "Invalid or missing redirect URL",
+    redirecting: "You are signed in. Returning to your workspace...",
   },
   register: {
     title: "Register Jianyiyun Account",

@@ -2391,6 +2391,7 @@ export default {
     },
     otherLoginMethods: "其他登录方式",
     invalidRedirect: "跳转地址无效或缺失，无法返回业务系统",
+    redirecting: "检测到登录状态，正在返回业务系统...",
   },
   register: {
     title: "注册简祎沄账号",

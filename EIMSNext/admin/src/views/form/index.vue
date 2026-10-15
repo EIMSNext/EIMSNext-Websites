@@ -113,7 +113,7 @@
         {{ getViewName(view) }}
       </button>
     </div>
-    <div class="data-list data-list-full-height">
+    <div class="data-list data-list-full-height" v-loading="loading && !listLoadError">
       <el-result v-if="listLoadError" icon="error" :title="$t('common.loadFailed')">
         <template #extra>
           <el-button type="primary" @click="handleQuery">{{ $t("common.retry") }}</el-button>
@@ -130,6 +130,7 @@
           :flatted-data="flattedData"
           :span-method="idBasedSpanMethod"
           :selectable="selectable"
+          :sort-list="sortList"
           :display-fields="listViewDisplayFields"
           @selection-change="selectionChanged"
           @row-click="showDetails"
@@ -394,7 +395,7 @@ const leftBars = ref<ToolbarItem[]>([
   },
 ]);
 
-const rightBars = ref<ToolbarItem[]>([
+const rightBars = computed<ToolbarItem[]>(() => [
   {
     type: "button",
     config: {
@@ -403,6 +404,7 @@ const rightBars = ref<ToolbarItem[]>([
       command: "filter",
       visible: true,
       icon: "el-filter",
+      badge: condList.value.items?.length || undefined,
       onCommand: (cmd: string, e: MouseEvent) => {
         ((filterBtnRef.value = e.currentTarget), (showSort.value = showField.value = false));
         showFilter.value = !showFilter.value;
@@ -431,6 +433,7 @@ const rightBars = ref<ToolbarItem[]>([
       command: "sort",
       visible: true,
       icon: "el-sort",
+      badge: sortList.value.items.length || undefined,
       onCommand: (cmd: string, e: MouseEvent) => {
         ((sortBtnRef.value = e.currentTarget), (showFilter.value = showField.value = false));
         showSort.value = !showSort.value;
@@ -567,6 +570,7 @@ const draftQueryParams = ref<FormDataQueryOptions>({
 const totalRef = ref(0);
 const dataRef = ref<FormData[]>();
 const listLoadError = ref(false);
+const loading = ref(false);
 const draftRows = ref<FormData[]>([]);
 const draftTotalRef = ref(0);
 const draftHasNext = computed(() => draftPageNum.value * draftPageSize.value < draftTotalRef.value);
@@ -762,12 +766,15 @@ const loadCount = () => {
   });
 };
 const loadData = () => {
+  loading.value = true;
   formDataService.query<FormData>(queryParams.value).then((res: FormData[]) => {
     dataRef.value = res;
     processData();
+    loading.value = false;
   }).catch(() => {
     dataRef.value = [];
     listLoadError.value = true;
+    loading.value = false;
   });
 };
 const loadDraftCount = async () => {

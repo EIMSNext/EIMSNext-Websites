@@ -73,6 +73,6 @@ export function redirectToPortalLogout(): boolean {
   const portalLogout = buildPortalAuthUrl("logout", { redirectPath: null });
   if (!portalLogout) return false;
 
-  if (typeof window !== "undefined") window.location.assign(portalLogout);
+  if (typeof window !== "undefined") window.location.replace(portalLogout);
   return true;
 }

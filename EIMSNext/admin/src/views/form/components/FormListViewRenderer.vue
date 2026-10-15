@@ -16,12 +16,12 @@
       <el-table-column type="selection" width="40" :selectable="selectable" />
       <template v-for="col in columns" :key="col.field">
         <template v-if="col.children">
-          <el-table-column :label="col.title" :fieldSetting="col" show-overflow-tooltip :resizable="true">
+          <el-table-column :label="col.title + sortArrow(col.field)" :fieldSetting="col" show-overflow-tooltip :resizable="true">
             <el-table-column
               v-for="sub in col.children"
               :key="sub.field"
               :prop="sub.field"
-              :label="sub.title"
+              :label="sub.title + sortArrow(sub.field)"
               :width="sub.width"
               :resizable="true"
             >
@@ -41,7 +41,7 @@
           </el-table-column>
         </template>
         <template v-else>
-          <el-table-column :prop="col.field" :label="col.title" :width="col.width" show-overflow-tooltip :resizable="true">
+          <el-table-column :prop="col.field" :label="col.title + sortArrow(col.field)" :width="col.width" show-overflow-tooltip :resizable="true">
             <template #default="scope">
               <template v-if="isImageColumn(col)">
                 <img
@@ -180,7 +180,8 @@
 import { computed, ref } from "vue";
 import { FormData, FormDef, FormListView, FormListViewField, FormListViewSettings, FormListViewType, FlowStatus, SystemField } from "@eimsnext/models";
 import type { TableInstance, TableTooltipData } from "element-plus";
-import { flowStatusArray } from "@eimsnext/components";
+import { flowStatusArray, type IFieldSortList } from "@eimsnext/components";
+import { SortDirection } from "@eimsnext/services";
 import { getFileKind, getFilledTextColor } from "@eimsnext/utils";
 import { useI18n } from "vue-i18n";
 import { ITableColumn } from "../type";
@@ -208,11 +209,21 @@ const props = defineProps<{
   spanMethod: (data: { row: any; column: any; rowIndex: number; columnIndex: number }) => any;
   selectable: (row: any, index: number) => boolean;
   displayFields: FormListViewField[];
+  sortList?: IFieldSortList;
 }>();
 
 const emit = defineEmits(["selection-change", "row-click"]);
 const { t } = useI18n();
 const tableRef = ref<TableInstance>();
+
+/** 排序列头指示：列名后追加 ↑/↓，无排序则返回空串（纯视觉，不触发排序交互）。 */
+const sortArrow = (field: string): string => {
+  const item = props.sortList?.items.find((x) => x.field.field === field);
+  if (!item) return "";
+  if (item.sort === SortDirection.Asc) return " ↑";
+  if (item.sort === SortDirection.Desc) return " ↓";
+  return "";
+};
 
 const normalizedRows = computed(() => props.rows.map(flattenDataItem));
 

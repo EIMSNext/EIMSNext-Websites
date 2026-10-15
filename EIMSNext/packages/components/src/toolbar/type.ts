@@ -15,6 +15,7 @@ export interface IToolbarItemConfig {
   class?: string;
   style?: string;
   showDynamicText?: boolean;
+  badge?: number | string;
   menuItems?: IToolbarItemDropdownItem[];
   onCommand?: (...args: any[]) => void;
 }

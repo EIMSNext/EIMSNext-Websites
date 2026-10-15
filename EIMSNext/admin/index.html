@@ -19,7 +19,10 @@
   <body>
     <div id="app">
       <div class="boot-screen">
-        <img class="boot-logo" src="/src/assets/logo.png" alt="" />
+        <div class="boot-badge">
+          <div class="boot-ring"></div>
+          <img class="boot-logo" src="/src/assets/logo.png" alt="" />
+        </div>
         <div class="boot-name">简祎沄</div>
         <div class="boot-bar"><span></span></div>
       </div>
@@ -27,6 +30,50 @@
   </body>
   <script type="module" src="/src/main.ts"></script>
   <script>
+    // 无有效登录态且非免登录场景时，在 bundle 加载前直接整页跳 portal：
+    // 1) 免去 admin 全量 bundle 的一次无效下载与白屏等待；
+    // 2) token 过期（jat_exp）与未持 token 同等对待，避免过期 token 先闪品牌大屏再被弹走。
+    // 不跳的三种情况：/dev-login（本地测试登录）、/public/*（公开页，微信 OAuth code 自用）、
+    // URL 带 ?code=（portal 正在回跳换码，必须留给守卫消费）。
+    (function () {
+      var path = location.pathname.replace(/\/+$/, "");
+      var skip =
+        /\/dev-login$/.test(path) ||
+        /(^|\/)public(\/|$)/.test(path) ||
+        new URLSearchParams(location.search).has("code");
+      var tokenKey = (window.appSetting && window.appSetting.tokenKey) || "jat";
+      var valid = false;
+      try {
+        valid =
+          !!localStorage.getItem(tokenKey) &&
+          Date.now() < Number(localStorage.getItem(tokenKey + "_exp") || 0);
+      } catch (e) {}
+
+      var portalUrl = window.appSetting && window.appSetting.portalUrl;
+      if (valid || skip || !portalUrl) return;
+
+      // 5 秒内已被判跳过一次（如 portal 登录页反复 Back）时不再接力，交回守卫慢路径，防互跳打转
+      var last = 0;
+      try {
+        last = Number(sessionStorage.getItem("login_redirect_ts") || 0);
+      } catch (e) {}
+      if (Date.now() - last <= 5000) return;
+
+      try {
+        sessionStorage.setItem("login_redirect_ts", String(Date.now()));
+      } catch (e) {}
+      var boot = document.querySelector(".boot-screen");
+      if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+      // 旧 hash 链接（/#/app/x）转成路径随 redirect_url 回带，登录后仍能回到原目标
+      var legacyHash = location.hash.indexOf("#/") === 0 ? location.hash.slice(1) : "";
+      var backPath = location.origin + location.pathname.replace(/\/+$/, "") + location.search;
+      var target =
+        portalUrl.replace(/\/+$/, "") +
+        "/login?redirect_url=" +
+        encodeURIComponent(backPath + legacyHash);
+      location.replace(target);
+    })();
+
     // 启动屏跟随已保存的主题（与 settings store 的 useStorage("theme") 一致），避免暗色用户白屏闪烁
     (function () {
       var theme = null;
@@ -56,17 +103,38 @@
       align-items: center;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 20px;
+    }
+
+    .boot-badge {
+      align-items: center;
+      display: flex;
+      height: 96px;
+      justify-content: center;
+      position: relative;
+      width: 96px;
+      animation: boot-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .boot-ring {
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      animation: boot-spin 1.8s linear infinite;
+      background: conic-gradient(from 0deg, transparent 0 62%, rgba(37, 176, 155, 0.9) 82%, rgba(47, 123, 255, 0.95) 100%);
+      border-radius: 50%;
+      inset: 0;
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      position: absolute;
     }
 
     .boot-logo {
       animation: boot-breathe 2.4s ease-in-out infinite;
       border-radius: 50%;
-      height: 72px;
-      width: 72px;
+      height: 68px;
+      width: 68px;
     }
 
     .boot-name {
+      animation: boot-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
       color: rgba(0, 0, 0, 0.82);
       font-size: 20px;
       font-weight: 600;
@@ -75,20 +143,31 @@
     }
 
     .boot-bar {
+      animation: boot-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
       background: rgba(0, 0, 0, 0.06);
-      border-radius: 2px;
+      border-radius: 3px;
       height: 3px;
       overflow: hidden;
-      width: 168px;
+      width: 176px;
     }
 
     .boot-bar span {
-      animation: boot-progress 1.6s ease-in-out infinite;
+      animation: boot-progress 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
       background: linear-gradient(90deg, #25b09b, #2f7bff);
-      border-radius: 2px;
+      border-radius: 3px;
+      box-shadow: 0 0 8px rgba(37, 176, 155, 0.55);
       display: block;
       height: 100%;
-      width: 40%;
+      width: 42%;
+    }
+
+    /* 品牌色微光晕，落在 logo 正下方偏上位置 */
+    .boot-screen::before {
+      background: radial-gradient(circle at 50% 42%, rgba(37, 176, 155, 0.1), transparent 58%);
+      content: "";
+      inset: -40vmax;
+      pointer-events: none;
+      position: fixed;
     }
 
     html.dark .boot-name {
@@ -99,24 +178,48 @@
       background: rgba(255, 255, 255, 0.08);
     }
 
+    html.dark .boot-screen::before {
+      background: radial-gradient(circle at 50% 42%, rgba(37, 176, 155, 0.14), transparent 58%);
+    }
+
     @keyframes boot-breathe {
       0%,
       100% {
         opacity: 0.72;
         transform: scale(0.96);
       }
+
       50% {
         opacity: 1;
         transform: scale(1);
       }
     }
 
+    @keyframes boot-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
     @keyframes boot-progress {
       0% {
-        transform: translateX(-100%);
+        transform: translateX(-110%);
       }
+
       100% {
-        transform: translateX(350%);
+        transform: translateX(340%);
+      }
+    }
+
+    @keyframes boot-rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
   </style>

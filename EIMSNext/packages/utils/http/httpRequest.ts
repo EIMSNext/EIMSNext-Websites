@@ -248,7 +248,8 @@ export class HttpRequest {
         // redirectPath 保留触发 401 的深链，登录回跳后直接回到该路由而非默认 workbench）
         const portalLogin = buildPortalAuthUrl("login", { redirectPath: path, reason: "invalid_token" });
         if (portalLogin) {
-          window.location.assign(portalLogin);
+          // replace：portal 登录页按 Back 不应回到触发 401 的页面再被弹一次
+          window.location.replace(portalLogin);
         } else {
           throw new Error("portalUrl is not configured; cannot authenticate");
         }

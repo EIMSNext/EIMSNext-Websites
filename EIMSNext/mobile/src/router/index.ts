@@ -79,7 +79,8 @@ const toLogin = (redirect: string) => {
   // 配置了独立登录应用时整页跳 portal；返回 false 取消本次导航
   const portalLogin = buildPortalAuthUrl('login', { redirectPath: redirect })
   if (portalLogin) {
-    window.location.assign(portalLogin)
+    // replace：portal 登录页按 Back 不应回到 mobile 再被弹一次
+    window.location.replace(portalLogin)
     return false
   }
   throw new Error('portalUrl is not configured; cannot authenticate')
@@ -93,6 +94,14 @@ router.beforeEach(async (to) => {
       await identityService.exchangeAuthorizationCode(loginCode)
     } catch {
       console.warn('login code exchange failed')
+    }
+
+    // web history 模式下 to.fullPath 仍携带 code，直接放行会把已消费的 code 写回地址栏，
+    // 下次导航会二次消费并报「授权码过期」；剥掉 code 后 replace 重定向
+    if (to.query.code) {
+      const query = { ...to.query }
+      delete query.code
+      return { path: to.path, query, hash: to.hash, replace: true }
     }
   }
 

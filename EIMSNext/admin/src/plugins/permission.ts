@@ -9,13 +9,27 @@ import { workbenchRecentVisitService } from "@eimsnext/services";
 
 export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
-    // portal 授权码回跳：换取并落盘 token 后清除 URL（失败则按未登录继续走守卫）
-    const loginCode = consumeCallbackCode();
-    if (loginCode) {
-      try {
-        await identityService.exchangeAuthorizationCode(loginCode);
-      } catch {
-        console.warn("login code exchange failed");
+    // 公开页（/public/*）URL 上的 code 是微信等 OAuth 回跳参数，由页面自行消费；
+    // 不能被误当 portal 登录授权码换取——换码失败事小，code 还会从地址栏被剥掉，
+    // 导致页面静默丢失微信身份（FormLink 的 wxopenid 取不到值）
+    if (!/(^|\/)public(\/|$)/.test(to.path)) {
+      // portal 授权码回跳：换取并落盘 token 后清除 URL（失败则按未登录继续走守卫）
+      const loginCode = consumeCallbackCode();
+      if (loginCode) {
+        try {
+          await identityService.exchangeAuthorizationCode(loginCode);
+        } catch {
+          console.warn("login code exchange failed");
+        }
+
+        // web history 模式下 to.fullPath 仍携带 code，直接 next() 会把已消费的 code 写回地址栏，
+        // 下次导航会二次消费并报「授权码过期」；剥掉 code 后 replace 重定向
+        if (to.query.code) {
+          const query = { ...to.query };
+          delete query.code;
+          next({ path: to.path, query, hash: to.hash, replace: true });
+          return;
+        }
       }
     }
 
@@ -193,7 +207,8 @@ function redirectToLogin(to: RouteLocationNormalized, next: NavigationGuardNext)
 
   const portalLogin = buildPortalAuthUrl("login", { redirectPath: redirect });
   if (portalLogin) {
-    window.location.assign(portalLogin);
+    // replace：portal 登录页按 Back 不应回到 admin 再被弹一次
+    window.location.replace(portalLogin);
     next(false);
     return;
   }

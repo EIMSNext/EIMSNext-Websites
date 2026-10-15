@@ -1,6 +1,10 @@
 <template>
   <!-- PC：admin 登录页 1:1 -->
   <div v-if="!isMobile" class="pc-login">
+    <div v-if="redirecting" class="redirect-mask">
+      <span class="redirect-ring"></span>
+      <span class="redirect-text">{{ t("login.redirecting") }}</span>
+    </div>
     <a class="brand-logo" href="https://www.eimsnext.com" target="_self">
       <img class="pc-logo" src="@/assets/logo2.png" alt="" />
     </a>
@@ -59,10 +63,6 @@
           <div v-if="isCapslock" class="capslock-tip">{{ t("login.capsLock") }}</div>
 
           <div class="pc-options">
-            <label class="pc-checkbox">
-              <span class="box"></span>
-              {{ t("login.rememberMe") }}
-            </label>
             <router-link class="pc-link forget-password" :to="keepQuery('/forget-password')">
               {{ t("login.forgetPassword") }}
             </router-link>
@@ -95,6 +95,10 @@
 
   <!-- Mobile：原型参考图（居中卡片、填充输入框、底部右下语言切换） -->
   <div v-else class="m-page">
+    <div v-if="redirecting" class="redirect-mask">
+      <span class="redirect-ring"></span>
+      <span class="redirect-text">{{ t("login.redirecting") }}</span>
+    </div>
     <div class="m-login-body">
       <div class="m-card">
         <div class="m-card-title">{{ t("login.loginTitle") }}</div>
@@ -122,10 +126,6 @@
           </div>
 
           <div class="m-check-row">
-            <label class="m-check">
-              <span class="box"></span>
-              {{ t("login.rememberMe") }}
-            </label>
             <router-link class="m-link" :to="keepQuery('/forget-password')">
               {{ t("login.forgetPassword") }}
             </router-link>
@@ -180,8 +180,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { Moon, Sunny } from "@element-plus/icons-vue";
-import { accessToken, toggleDarkMode, withLocalAuthCodePrefix } from "@eimsnext/utils";
+import { accessToken, withLocalAuthCodePrefix } from "@eimsnext/utils";
 import { identityClient, extractAuthError } from "@/auth/client";
 import { currentSession, redirectToCallback, resolveRedirectUrl } from "@/auth/callback";
 import { integrationLoginItems, type IntegrationLoginType } from "@/constants/integrationLogin";
@@ -197,22 +196,20 @@ const redirecting = ref(false);
 const isCapslock = ref(false);
 const showPassword = ref(false);
 const error = ref("");
-const isDark = ref(localStorage.getItem("portal-theme") === "dark");
 const langMenuOpen = ref(false);
 
 const curLangLabel = computed(() => (locale.value === "en" ? "English" : "简体中文"));
 
 const integrationItems = integrationLoginItems;
 
+// 已有会话时对调用方的连续自动回跳上限：调用方反复换码失败（授权码过期/客户端配置错）时，
+// 停留本页等用户手动登录，避免 portal 与调用方之间无声互跳打死结
+const AUTO_REDIRECT_LIMIT = 2;
+const AUTO_REDIRECT_KEY = "portal_auto_redirects";
+
 // redirect_url / reason 等参数在 登录↔注册↔找回密码 之间透传
 function keepQuery(path: string) {
   return { path, query: route.query };
-}
-
-function toggleTheme() {
-  isDark.value = !isDark.value;
-  toggleDarkMode(isDark.value);
-  localStorage.setItem("portal-theme", isDark.value ? "dark" : "light");
 }
 
 function selectLang(lang: string) {
@@ -238,13 +235,27 @@ onMounted(async () => {
   // 同步清掉本应用会话，避免「自动跳转 → 401 → 回跳」死循环
   if (route.query.reason === "invalid_token") {
     accessToken.clear();
+    sessionStorage.removeItem(AUTO_REDIRECT_KEY);
+    return;
+  }
+
+  // 回跳地址非法时登录成功也无处可去，进页面即提示，而非等用户填完账密才报错
+  const target = resolveRedirectUrl(route.query.redirect_url as string);
+  if (!target) {
+    error.value = t("login.invalidRedirect");
     return;
   }
 
   const session = currentSession();
-  const target = resolveRedirectUrl(route.query.redirect_url as string);
-  if (session && target) {
+  if (session) {
     redirecting.value = true;
+    const attempts = Number(sessionStorage.getItem(AUTO_REDIRECT_KEY) || 0);
+    if (attempts >= AUTO_REDIRECT_LIMIT) {
+      redirecting.value = false;
+      return;
+    }
+    sessionStorage.setItem(AUTO_REDIRECT_KEY, String(attempts + 1));
+
     // 已有会话：token 换一次性授权码（lg_ 前缀）回传，URL 不暴露 access_token
     try {
       const res: any = await identityClient.post("/identity/authorizeCodeSession", {});
@@ -286,9 +297,14 @@ async function submit() {
     // （授权码一次性，portal 消费后不能复用，须重新签发）
     const res = await identityClient.requestAuthorizationCode(username, form.password);
     await identityClient.requestWebToken(withLocalAuthCodePrefix(res.code), true);
+    // 凭据已通过、会话已建立：进入回跳阶段，上遮罩锁住表单，防止重复提交/改字段
+    redirecting.value = true;
+    // 手动登录成功即重置自动回跳计数，恢复「有会话免登录」的快捷路径
+    sessionStorage.removeItem(AUTO_REDIRECT_KEY);
     const session: any = await identityClient.post("/identity/authorizeCodeSession", {});
     redirectToCallback(target, withLocalAuthCodePrefix(session.code));
   } catch (e) {
+    redirecting.value = false;
     error.value = extractAuthError(e) || t("common.systemError");
   } finally {
     loading.value = false;

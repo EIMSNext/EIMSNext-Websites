@@ -32,7 +32,9 @@
             handleCommand(item.config.command, $event, item.config.onCommand)
             ">
           <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
-          <span>{{ t(item.config.text) }}</span>
+          <span>{{ t(item.config.text) }}</span><sup
+            v-if="item.config.badge !== undefined && item.config.badge !== null && item.config.badge !== 0 && item.config.badge !== ''"
+            class="toolbar-item-badge">{{ item.config.badge }}</sup>
         </el-button>
       </el-tooltip>
       <el-button v-else :type="item.config.type" :disabled="item.config.disabled" class="toolbar-item"
@@ -40,7 +42,9 @@
           handleCommand(item.config.command, $event, item.config.onCommand)
           ">
         <et-icon v-if="item.config.icon" :icon="item.config.icon" :style="getIconStyle(item)" />
-        <span>{{ t(item.config.text) }}</span>
+        <span>{{ t(item.config.text) }}</span><sup
+          v-if="item.config.badge !== undefined && item.config.badge !== null && item.config.badge !== 0 && item.config.badge !== ''"
+          class="toolbar-item-badge">{{ item.config.badge }}</sup>
       </el-button>
     </template>
   </template>
@@ -101,6 +105,23 @@ const handleCommand = (cmd: string, e: MouseEvent, callback: any) => {
   background-color: var(--el-bg-color-overlay);
   box-sizing: border-box;
   padding: var(--et-space-3);
+}
+
+.toolbar-item-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--et-color-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .el-dropdown-link {
