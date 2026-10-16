@@ -402,7 +402,7 @@ onBeforeMount(async () => {
           top: 20,
         })
       ),
-      formDataService.getChangeLogs(dataId, 0, 20, permissionGroupId, { silentError: true }),
+      formDataService.getChangeLogs(formId, dataId, 0, 20, permissionGroupId, { silentError: true }),
     ]);
 
     if (form) {
