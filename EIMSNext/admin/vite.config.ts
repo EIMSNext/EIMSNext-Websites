@@ -43,6 +43,7 @@ const baseOptimizeDeps = [
   "@wangeditor/editor",
   "@wangeditor/editor-for-vue",
   "path-browserify",
+  "vant",
 ];
 
 const elementPlusComponentsDir = resolve(__dirname, "../node_modules/element-plus/es/components");
@@ -73,7 +74,7 @@ const workspacePackageAliases: Record<string, string> = {
 const packageChunkGroups = [
   {
     chunk: "element-plus",
-    packages: ["element-plus", "@element-plus/"],
+    packages: ["element-plus", "@element-plus/", "@popperjs/", "@sxzz/"],
   },
   {
     chunk: "vue-vendor",
@@ -81,7 +82,7 @@ const packageChunkGroups = [
   },
   {
     chunk: "vant-vendor",
-    packages: ["vant", "@vant/", "@popperjs/", "@sxzz/"],
+    packages: ["vant", "@vant/"],
   },
   {
     chunk: "react-vendor",

@@ -7,7 +7,7 @@
         <el-button @click="onPreview">预览</el-button>
       </div>
     </div>
-    <fc-designer ref="designer" :locale="locale" :handle="handle" :config="config" :isgod="isgod">
+    <component :is="FcDesigner" v-if="FcDesigner" ref="designer" :locale="locale" :handle="handle" :config="config" :isgod="isgod">
       <template #block_fff="scope">
         &lt;template #block_fff="scope"&gt; 自定义内容 &lt;/template&gt;
       </template>
@@ -23,7 +23,7 @@
           </el-button>
         </div>
       </template>
-    </fc-designer>
+    </component>
     <el-dialog :title="title[type]" v-model="state" class="_fc-t-dialog">
       <div ref="editor" v-if="state"></div>
       <span v-if="err" class="builder-error-text">输入内容格式有误!</span>
@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { reactive } from "vue";
+import { reactive, getCurrentInstance } from "vue";
 import jsonlint from "jsonlint-mod";
 import "codemirror/lib/codemirror.css";
 import "codemirror/addon/lint/lint.css";
@@ -61,6 +61,7 @@ import formCreate from "@eimsnext/form-render-elplus";
 import { ArrowDown } from "@element-plus/icons-vue";
 import { FormContent } from "@eimsnext/models";
 import "@eimsnext/form-designer/dist/index.css";
+import "vant/lib/index.css";
 
 const TITLE = [
   "生成规则",
@@ -96,6 +97,7 @@ export default {
       err: false,
       type: -1,
       theme: "",
+      FcDesigner: null,
       themes: [
         {
           value: "var(--et-color-primary)",
@@ -345,20 +347,14 @@ export default {
       this.oldOptions = content?.options ? JSON.stringify(content.options) : "";
       this.$refs.designer.setFieldChangeLogs(content?.fieldChangeLogs || []);
     },
-  },
-  beforeCreate() {
-    window.jsonlint = jsonlint;
-  },
-  mounted() {
-    this.isgod =
-      process.env.NODE_ENV === "development" || this.$route.query.god === "cn";
+    initDesigner() {
+      if (!this.formDef || !this.formDef.content || !this.$refs.designer) return;
 
-      if (this.formDef && this.formDef.content) {
-        this.$refs.designer.setFormId(this.formDef.id);
+      this.$refs.designer.setFormId(this.formDef.id);
 
-        if (this.formDef.content.layout) {
-          this.$refs.designer.setRule(JSON.parse(this.formDef.content.layout));
-        }
+      if (this.formDef.content.layout) {
+        this.$refs.designer.setRule(JSON.parse(this.formDef.content.layout));
+      }
       if (this.formDef.content.options) {
         this.$refs.designer.setOptions(this.formDef.content.options);
       }
@@ -366,7 +362,42 @@ export default {
 
       this.oldLayout = JSON.stringify(this.$refs.designer.getJson());
       this.oldOptions = JSON.stringify(this.$refs.designer.getOptionsJson());
+    },
+  },
+  beforeCreate() {
+    window.jsonlint = jsonlint;
+  },
+  async mounted() {
+    const vm = getCurrentInstance();
+    this.isgod =
+      process.env.NODE_ENV === "development" || this.$route.query.god === "cn";
+
+    // 设计器 chunk 体积大且仅此页面需要，按需异步加载；vant 组件(移动端预览/画布)原在入口全局
+    // 注册(app.use(vant))，随 chunk 惰性注册；加载完成并渲染后再注入 formDef，避免 $refs 竞态
+    try {
+      const [mod, vant] = await Promise.all([
+        import("@eimsnext/form-designer"),
+        import("vant"),
+      ]);
+      vm?.appContext?.app?.use(vant.default);
+      mod.default.setFormula([
+        {
+          menu: "math",
+          name: "test",
+          info: "test",
+          example: "test(val) == !!val",
+          handle(val) {
+            return !!val;
+          },
+        },
+      ]);
+      this.FcDesigner = mod.default;
+    } catch (e) {
+      console.error("FcDesigner 加载失败", e);
+      return;
     }
+    await this.$nextTick();
+    this.initDesigner();
   },
 };
 </script>

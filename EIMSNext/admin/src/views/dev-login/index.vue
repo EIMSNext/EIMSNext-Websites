@@ -48,12 +48,13 @@ async function login() {
   justify-content: center;
   min-height: 100vh;
   background: var(--et-bg-page, #f4f7fb);
+  width: 100%;
 
   .panel {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    width: 320px;
+    width: 360px;
     padding: 28px;
     border-radius: 8px;
     background: var(--et-bg-container, #fff);

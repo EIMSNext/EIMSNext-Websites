@@ -974,6 +974,16 @@ const initializeDesigner = async () => {
   loadError.value = "";
 
   try {
+    // Univer CSS 改为进入打印设计器时才动态加载（原在 main.ts 首屏同步引入），与 JS 懒加载对齐，不阻塞首屏
+    await Promise.all([
+      import("@univerjs/design/lib/index.css"),
+      import("@univerjs/ui/lib/index.css"),
+      import("@univerjs/drawing-ui/lib/index.css"),
+      import("@univerjs/docs-ui/lib/index.css"),
+      import("@univerjs/sheets-drawing-ui/lib/index.css"),
+      import("@univerjs/sheets-ui/lib/index.css"),
+    ]);
+
     const data = parseTemplateContent();
     await nextTick();
     if (disposed) {

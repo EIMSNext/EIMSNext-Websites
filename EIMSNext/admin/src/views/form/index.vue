@@ -54,7 +54,7 @@
     </el-popover>
     <el-popover :visible="showSort" :virtual-ref="sortBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
-      <DataSort :model-value="sortList" :formId="formId" :field-perms="formFieldPermissions" @ok="setSort" @cancel="showSort = false"></DataSort>
+      <DataSort :model-value="sortList" :formId="formId" :field-perms="formFieldPermissions" @ok="setSort" @cancel="showSort = false" @clear="clearSort"></DataSort>
     </el-popover>
     <el-popover :visible="showField" :virtual-ref="fieldBtnRef" virtual-triggering :show-arrow="false" :offset="0" placement="bottom-end"
       width="500" :teleported="false" trigger="click" :destroy-on-close="true">
@@ -195,6 +195,7 @@ import FormDataSearchBar from "./components/FormDataSearchBar.vue";
 import FormDataImportDialog from "./components/FormDataImportDialog.vue";
 import {
   createDefaultFormListView,
+  createDefaultSort,
   buildAllViewFields,
   getViewDisplayFields,
   parseCondition,
@@ -581,7 +582,7 @@ const draftHasNext = computed(() => draftPageNum.value * draftPageSize.value < d
 const showFilter = ref(false);
 const condList = ref<IConditionList>({ id: "", rel: "and", items: [] });
 const showSort = ref(false);
-const sortList = ref<IFieldSortList>({ items: [] });
+const sortList = ref<IFieldSortList>(createDefaultSort(formId, t));
 const showField = ref(false);
 const fieldList = ref<IFormFieldDef[]>([]);
 const pageNum = ref(1);
@@ -702,6 +703,13 @@ const setSort = (sort: IFieldSortList) => {
   handleQuery();
 };
 
+const clearSort = () => {
+  sortList.value = { items: [] };
+
+  updateQueryParams();
+  handleQuery();
+};
+
 const setField = (fields: IFormFieldDef[]) => {
   fieldList.value = fields;
   listViewDisplayFields.value = fields.map((field) => ({
@@ -758,7 +766,6 @@ const handleQuery = () => {
   listLoadError.value = false;
   loadCount();
   loadData();
-  void refreshDraftCount();
 };
 
 const loadCount = () => {
@@ -787,11 +794,6 @@ const loadDraftCount = async () => {
 };
 const loadDraftRows = async () => {
   draftRows.value = await formDataService.query<FormData>(draftQueryParams.value);
-};
-const refreshDraftCount = async () => {
-  if (!formDef.value) return;
-  updateDraftQueryParams();
-  await loadDraftCount();
 };
 const refreshDrafts = async () => {
   if (!formDef.value) return;

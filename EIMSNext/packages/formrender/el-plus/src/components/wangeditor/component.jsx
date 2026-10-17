@@ -29,22 +29,24 @@ export default defineComponent({
   emits: ["update:modelValue"],
   data() {
     return {
-      editor: {},
+      editor: null,
+      unmounted: false,
       uni: uni++,
     };
   },
   watch: {
     disabled() {
-      this.enable();
+      this.editor && this.enable();
     },
     modelValue(n) {
-      if (n !== this.editor.txt.html()) {
+      if (this.editor && n !== this.editor.txt.html()) {
         this.editor.txt.html(n || "");
       }
     },
   },
   methods: {
     enable() {
+      if (!this.editor) return;
       this.disabled ? this.editor.disable() : this.editor.enable();
     },
     result() {
@@ -53,6 +55,8 @@ export default defineComponent({
   },
   mounted() {
     this.$nextTick(() => {
+      // 配置面板同批次重渲染时，卸载可能早于 $nextTick，此时不再创建，避免泄漏
+      if (this.unmounted) return;
       this.editor = new WangEditor(`#editor${this.uni}`);
       this.editor.config.zIndex = 2;
       this.editor.config.focus = false;
@@ -80,8 +84,12 @@ export default defineComponent({
   },
   // Vue 3 不再调用 beforeDestroy（那是 Vue 2 的钩子），编辑器实例会泄漏。
   // 这个组件现在被用在基础配置面板里，字段切换会反复创建，必须用 beforeUnmount 销毁。
+  // editor 实例在 mounted 的 $nextTick 里才创建；卸载早于它时 editor 仍为 null，跳过销毁。
   beforeUnmount() {
-    this.editor && this.editor.destroy();
+    this.unmounted = true;
+    if (this.editor && this.editor.destroy) {
+      this.editor.destroy();
+    }
     this.editor = null;
   },
 });

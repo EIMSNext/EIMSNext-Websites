@@ -27,6 +27,8 @@ export default defineConfig({
         "@eimsnext/form-render-vant",
         "@eimsnext/form-designer",
         "@eimsnext/form-designer/dist/index.css",
+        "vant",
+        "vant/lib/index.css",
         "@eimsnext/components",
         "@eimsnext/models",
         "@eimsnext/services",

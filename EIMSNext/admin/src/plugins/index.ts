@@ -7,9 +7,7 @@ import { setupPermission } from "./permission";
 import webSocketManager from "@/utils/websocket";
 import { InstallCodeMirror } from "codemirror-editor-vue3";
 import ELEMENT from "element-plus";
-import vant from "vant";
 import formCreate from "@eimsnext/form-render-elplus";
-import FcDesigner from "@eimsnext/form-designer";
 import EtPlus from "@eimsnext/components";
 import setupHttp from "../utils/http";
 import { createI18n } from "vue-i18n";
@@ -42,21 +40,9 @@ export default {
     app.use(InstallCodeMirror);
 
     app.use(ELEMENT);
-    app.use(vant);
     app.use(EtPlus);
     app.use(formCreate);
-    app.component("FcDesigner", FcDesigner);
+    // FcDesigner(form-designer)体积大且仅表单设计器页面需要，由 FormBuilder 在 mounted 时按需异步加载，不在此全局注册
     app.use(print);
-    FcDesigner.setFormula([
-      {
-        menu: "math",
-        name: "test",
-        info: "test",
-        example: "test(val) == !!val",
-        handle(val: any) {
-          return !!val;
-        },
-      },
-    ]);
   },
 };

@@ -1,9 +1,9 @@
 <template>
   <div v-click-outside="onClickOutside">
-    <FieldSortList v-model="sortList" :form-id="formId" :formFieldPermissions="formFieldPermissions" @change="onChange"></FieldSortList>
+    <FieldSortList v-model="sortList" :form-id="formId" :formFieldPermissions="formFieldPermissions"></FieldSortList>
     <div class="actions">
       <el-button type="primary" @click="onSort">{{ t("common.sort") }}</el-button>
-      <el-button class="delete-button">{{ t("common.deleteAll") }}</el-button>
+      <el-button class="delete-button" @click="onDeleteAll">{{ t("common.deleteAll") }}</el-button>
     </div>
   </div>
 </template>
@@ -27,14 +27,14 @@ const props = withDefaults(
   {}
 );
 
-const sortList = toRef<IFieldSortList>(props.modelValue);
-const onChange = (sort: IFieldSortList) => {
-  sortList.value = sort;
-};
+const sortList = toRef<IFieldSortList>(props, "modelValue");
 
-const emit = defineEmits(["ok", "cancel"]);
+const emit = defineEmits(["ok", "cancel", "clear"]);
 const onSort = () => {
   emit("ok", sortList.value);
+};
+const onDeleteAll = () => {
+  emit("clear");
 };
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement;

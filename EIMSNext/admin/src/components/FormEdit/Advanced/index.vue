@@ -2,19 +2,19 @@
   <div class="adv-container">
     <el-tabs v-model="activeName" tabPosition="left" class="adv-tabs" @tab-click="handleClick">
       <el-tab-pane :label="$t('admin.advanced.dataCollab')" name="advanced-data" class="adv-panel">
-        <DataAdvanced :form-def="formDef" />
+        <DataAdvanced v-if="activeName === 'advanced-data'" :form-def="formDef" />
       </el-tab-pane>
       <el-tab-pane :label="$t('admin.advanced.notify')" name="notify" class="adv-panel">
-        <NotifyList :form-def="formDef"></NotifyList>
+        <NotifyList v-if="activeName === 'notify'" :form-def="formDef"></NotifyList>
       </el-tab-pane>
       <el-tab-pane :label="$t('admin.advanced.print')" name="print" class="adv-panel">
-        <PrintDefList :form-def="formDef"></PrintDefList>
+        <PrintDefList v-if="activeName === 'print'" :form-def="formDef"></PrintDefList>
       </el-tab-pane>
       <el-tab-pane :label="$t('admin.advanced.eventFlow')" name="eventFlow" class="adv-panel">
-        <EventFlowList :form-def="formDef" />
+        <EventFlowList v-if="activeName === 'eventFlow'" :form-def="formDef" />
       </el-tab-pane>
       <el-tab-pane :label="$t('admin.advanced.webhook')" name="webpush" class="adv-panel">
-        <WebhookList :form-def="formDef" />
+        <WebhookList v-if="activeName === 'webpush'" :form-def="formDef" />
       </el-tab-pane>
     </el-tabs>
   </div>
