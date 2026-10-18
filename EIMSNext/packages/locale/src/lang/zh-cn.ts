@@ -1836,6 +1836,10 @@ export default {
       phoneTips: "请输入新的手机号，并通过验证码完成确认。",
       emailTips: "请输入新的邮箱，并通过验证码完成确认。",
       unbindTips: "身份验证已通过，点击保存后将解绑当前{type}。",
+      nameEdit: {
+        required: "姓名不能为空",
+        tooLong: "不能超过50个字符",
+      },
       rules: {
         passwordRequired: "请输入当前密码",
         codeRequired: "请输入验证码",
@@ -1866,6 +1870,11 @@ export default {
       bindTip: "如需绑定第三方平台，",
       consult: "点此咨询",
       tenantId: "租户 ID",
+      nameEdit: {
+        placeholder: "请输入企业名称",
+        required: "企业名不能为空",
+        tooLong: "不能超过50个字符",
+      },
       mode: {
         public: "公共模式",
         wxwork: "企业微信集成",

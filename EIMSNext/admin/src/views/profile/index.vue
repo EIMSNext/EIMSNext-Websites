@@ -40,8 +40,33 @@
             <div class="panel-row">
               <div class="row-label fixed-label-width">{{ $t("admin.profile.name") }}</div>
               <div class="row-content">
-                <span class="content-row">{{ userStore.currentUser.empName }}</span>
-                <el-link type="primary" underline="never" class="link-btn">{{ $t("admin.profile.edit") }}</el-link>
+                <template v-if="!editingName">
+                  <span class="content-row">{{ userStore.currentUser.empName }}</span>
+                  <el-link type="primary" underline="never" class="link-btn" @click="startEditName">
+                    {{ $t("admin.profile.edit") }}
+                  </el-link>
+                </template>
+                <template v-else>
+                  <div class="name-edit-wrapper">
+                    <el-input
+                      ref="nameInputRef"
+                      v-model="nameDraft"
+                      class="name-input"
+                      maxlength="50"
+                      :placeholder="$t('department.empNamePlaceholder')"
+                      :disabled="savingName"
+                      @keyup.enter="confirmEditName"
+                      @keyup.esc="cancelEditName"
+                    />
+                    <span v-if="nameErrorMsg" class="name-edit-error">{{ nameErrorMsg }}</span>
+                    <el-link type="primary" underline="never" class="link-btn" :disabled="savingName" @click="confirmEditName">
+                      {{ $t("common.ok") }}
+                    </el-link>
+                    <el-link type="info" underline="never" class="link-btn" :disabled="savingName" @click="cancelEditName">
+                      {{ $t("common.cancel") }}
+                    </el-link>
+                  </div>
+                </template>
               </div>
             </div>
             <div class="panel-row">
@@ -91,12 +116,12 @@
                 </el-link>
               </div>
             </div>
-            <div class="panel-row">
+            <!-- <div class="panel-row">
               <div class="row-label fixed-label-width">{{ $t("admin.profile.noConcurrentLogin") }}</div>
               <div class="row-content">
                 <el-switch />
               </div>
-            </div>
+            </div> -->
             <div class="panel-row bind-info-row">
               <div class="row-label fixed-label-width">账号绑定</div>
               <div class="row-content">
@@ -109,7 +134,7 @@
             </div>
           </div>
         </div>
-        <el-divider class="section-divider" />
+        <!-- <el-divider class="section-divider" />
         <div class="biz-panel info-container">
           <div class="panel-wrapper rows-layout">
             <div class="panel-row">
@@ -121,7 +146,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -222,7 +247,7 @@
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore, useContextStore } from "@eimsnext/store";
-import { identityProfileService, systemService } from "@eimsnext/services";
+import { employeeService, identityProfileService, systemService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
@@ -546,6 +571,59 @@ const refreshCurrentUser = async () => {
   Object.assign(userStore.currentUser, currentUser);
 };
 
+const editingName = ref(false);
+const savingName = ref(false);
+const nameDraft = ref("");
+const nameErrorMsg = ref("");
+const nameInputRef = ref();
+
+const startEditName = () => {
+  nameDraft.value = userStore.currentUser.empName || "";
+  nameErrorMsg.value = "";
+  editingName.value = true;
+  nextTick(() => nameInputRef.value?.focus());
+};
+
+const cancelEditName = () => {
+  editingName.value = false;
+  nameErrorMsg.value = "";
+};
+
+const confirmEditName = async () => {
+  if (savingName.value) return;
+  const empName = nameDraft.value.trim();
+  if (!empName) {
+    nameErrorMsg.value = t("admin.profile.nameEdit.required");
+    return;
+  }
+  if (empName.length > 50) {
+    nameErrorMsg.value = t("admin.profile.nameEdit.tooLong");
+    return;
+  }
+  if (empName === userStore.currentUser.empName) {
+    editingName.value = false;
+    return;
+  }
+
+  const empId = userStore.currentUser.empId;
+  if (!empId) {
+    ElMessage.error(t("common.saveFailed"));
+    return;
+  }
+
+  savingName.value = true;
+  try {
+    await employeeService.patch(empId, { id: empId, empName });
+    await refreshCurrentUser();
+    editingName.value = false;
+    ElMessage.success(t("common.saveSuccess"));
+  } catch {
+    ElMessage.error(t("common.saveFailed"));
+  } finally {
+    savingName.value = false;
+  }
+};
+
 const uploadAvatar = async (option: any) => {
   const formData = new FormData();
   formData.append("file", option.file);
@@ -727,6 +805,26 @@ onUnmounted(() => {
 
 .link-btn {
   padding: 0 var(--et-space-12);
+}
+
+.name-edit-wrapper {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.name-input {
+  max-width: 320px;
+  width: 260px;
+}
+
+.name-edit-error {
+  color: var(--el-color-danger);
+  flex-shrink: 0;
+  font-size: var(--et-font-size-13);
+  padding: 0 var(--et-space-8);
+  white-space: nowrap;
 }
 
 .danger-link {

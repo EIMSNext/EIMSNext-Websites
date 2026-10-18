@@ -1837,6 +1837,10 @@ export default {
       phoneTips: "Enter new phone number and confirm via code.",
       emailTips: "Enter new email and confirm via code.",
       unbindTips: "Identity verified. Click save to unbind current {type}.",
+      nameEdit: {
+        required: "Name cannot be empty",
+        tooLong: "Cannot exceed 50 characters",
+      },
       rules: {
         passwordRequired: "Enter current password",
         codeRequired: "Enter code",
@@ -1867,6 +1871,11 @@ export default {
       bindTip: "To bind a third-party platform,",
       consult: "Contact Us",
       tenantId: "Tenant ID",
+      nameEdit: {
+        placeholder: "Please enter team name",
+        required: "Team name cannot be empty",
+        tooLong: "Cannot exceed 50 characters",
+      },
       mode: {
         public: "Public",
         wxwork: "WeCom Integration",

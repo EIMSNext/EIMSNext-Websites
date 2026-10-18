@@ -3,10 +3,33 @@
     <div class="panel-row">
       <div class="row-label fixed-label-width">{{ $t("admin.corpOnboarding.corpName") }}</div>
       <div class="row-content">
-        <span class="team-name-wrapper" :title="corpName">{{ corpName }}</span>
-        <el-link type="primary" underline="never" class="link-btn" @click="emit('edit-name')">
-          {{ $t("admin.profile.edit") }}
-        </el-link>
+        <template v-if="!editing">
+          <span class="team-name-wrapper" :title="corpName">{{ corpName }}</span>
+          <el-link type="primary" underline="never" class="link-btn" @click="startEdit">
+            {{ $t("admin.profile.edit") }}
+          </el-link>
+        </template>
+        <template v-else>
+          <div class="name-edit-wrapper">
+            <el-input
+              ref="nameInputRef"
+              v-model="nameDraft"
+              class="name-input"
+              maxlength="50"
+              :placeholder="$t('admin.enterprise.nameEdit.placeholder')"
+              :disabled="saving"
+              @keyup.enter="confirmEdit"
+              @keyup.esc="cancelEdit"
+            />
+            <span v-if="errorMsg" class="name-edit-error">{{ errorMsg }}</span>
+            <el-link type="primary" underline="never" class="link-btn" :disabled="saving" @click="confirmEdit">
+              {{ $t("common.ok") }}
+            </el-link>
+            <el-link type="info" underline="never" class="link-btn" :disabled="saving" @click="cancelEdit">
+              {{ $t("common.cancel") }}
+            </el-link>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -48,8 +71,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { corporateService } from "@eimsnext/services";
 import { useContextStore, useUserStore } from "@eimsnext/store";
 import { PlatformType } from "@eimsnext/models";
 import { ElMessage } from "element-plus";
@@ -65,10 +89,6 @@ const props = withDefaults(
     consultUrl: "#",
   },
 );
-
-const emit = defineEmits<{
-  (e: "edit-name"): void;
-}>();
 
 const contextStore = useContextStore();
 const userStore = useUserStore();
@@ -86,6 +106,53 @@ const accountModeText = computed(
 );
 const corpName = computed(() => contextStore.corpName || "—");
 const tenantId = computed(() => userStore.currentUser.corpId || "—");
+
+const editing = ref(false);
+const saving = ref(false);
+const nameDraft = ref("");
+const errorMsg = ref("");
+const nameInputRef = ref();
+
+const startEdit = () => {
+  nameDraft.value = contextStore.corpName || "";
+  errorMsg.value = "";
+  editing.value = true;
+  nextTick(() => nameInputRef.value?.focus());
+};
+
+const cancelEdit = () => {
+  editing.value = false;
+  errorMsg.value = "";
+};
+
+const confirmEdit = async () => {
+  if (saving.value) return;
+  const name = nameDraft.value.trim();
+  if (!name) {
+    errorMsg.value = t("admin.enterprise.nameEdit.required");
+    return;
+  }
+  if (name.length > 50) {
+    errorMsg.value = t("admin.enterprise.nameEdit.tooLong");
+    return;
+  }
+  if (name === contextStore.corpName) {
+    editing.value = false;
+    return;
+  }
+
+  saving.value = true;
+  try {
+    await corporateService.patch(contextStore.corpId, { id: contextStore.corpId, name });
+    contextStore.corpName = name;
+    editing.value = false;
+    ElMessage.success(t("common.saveSuccess"));
+  } catch {
+    ElMessage.error(t("common.saveFailed"));
+  } finally {
+    saving.value = false;
+  }
+};
 
 const copyTenantId = async () => {
   const value = tenantId.value;
@@ -145,6 +212,26 @@ const copyTenantId = async () => {
 
 .link-btn {
   padding: 0 var(--et-space-12);
+}
+
+.name-edit-wrapper {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.name-input {
+  max-width: 420px;
+  width: 320px;
+}
+
+.name-edit-error {
+  color: var(--el-color-danger);
+  flex-shrink: 0;
+  font-size: var(--et-font-size-13);
+  padding: 0 var(--et-space-8);
+  white-space: nowrap;
 }
 
 .team-name-wrapper {
