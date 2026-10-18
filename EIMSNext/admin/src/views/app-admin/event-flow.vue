@@ -84,7 +84,7 @@
 <script setup lang="ts">
 import EventFlowDesigner from "@/components/EventFlowDesigner/index.vue";
 import EventFlowRunLogView from "@/components/FormEdit/Advanced/EventFlowRunLogView.vue";
-import { EventSourceType, FlowType, FormDef, WfDefinition } from "@eimsnext/models";
+import { EventSourceType, FlowType, FormDef, WfDefinition, WfDefinitionRequest } from "@eimsnext/models";
 import { formDefService, wfDefinitionService } from "@eimsnext/services";
 import { useContextStore } from "@eimsnext/store";
 import { MessageIcon } from "@eimsnext/components";
@@ -173,10 +173,16 @@ function edit(flow: WfDefinition) {
 }
 
 async function copy(flow: WfDefinition) {
-  const request = {
-    ...flow,
+  const request: WfDefinitionRequest = {
     id: "",
+    appId: flow.appId,
     name: `${flow.name || t("eventFlow.untitledEventFlow")}${t("common.copySuffix")}`,
+    flowType: flow.flowType,
+    externalId: flow.externalId,
+    description: flow.description,
+    content: flow.content,
+    eventSource: flow.eventSource,
+    sourceId: flow.sourceId,
     disabled: true,
   };
   await wfDefinitionService.post<WfDefinition>(request);
@@ -278,6 +284,8 @@ onBeforeMount(loadAll);
 .flow-card {
   border: 1px solid var(--et-border-color);
   border-radius: var(--et-radius-6);
+  display: flex;
+  flex-direction: column;
   min-height: var(--et-size-170);
   min-width: 0;
 }
@@ -286,6 +294,7 @@ onBeforeMount(loadAll);
 .flow-card-footer {
   align-items: center;
   display: flex;
+  flex-shrink: 0;
   justify-content: space-between;
   min-height: var(--et-size-44);
   padding: 0 var(--et-space-12);
@@ -314,8 +323,10 @@ onBeforeMount(loadAll);
 .flow-card-body {
   color: var(--et-text-secondary);
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--et-space-6);
+  justify-content: center;
   min-height: var(--et-size-78);
   padding: var(--et-space-14) var(--et-space-12);
 
