@@ -10,7 +10,7 @@
             <router-link custom :to="{ path: '/workbench' }" v-slot="{ navigate }">
               <div class="main-left-menu-item" @click="navigate">
                 <!-- <AppIcon :app="workbenchApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
-                <et-icon icon="homepage" size="18px" />
+                <et-icon icon="homepage" size="18px" color="var(--et-color-primary)" />
               </div>
             </router-link>
           </el-tooltip>
@@ -21,7 +21,7 @@
               <router-link custom :to="{ path: '/system/department' }" v-slot="{ navigate }">
                 <div class="main-left-menu-item" @click="navigate">
                   <!-- <AppIcon :app="systemApp" iconSize="12px" style="width: 22px;height: 22px;" /> -->
-                  <et-icon icon="icon-settings" size="18px" />
+                  <et-icon icon="icon-settings" size="18px" color="var(--et-color-primary)" />
                 </div>
               </router-link>
             </el-tooltip>

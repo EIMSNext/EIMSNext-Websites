@@ -71,7 +71,7 @@
             <div class="filter-label">{{ $t("admin.corpLog.operator") }}</div>
             <el-input v-model="actionFilters.operatorName" clearable :placeholder="$t('admin.corpLog.operatorPlaceholder')" />
           </div>
-          <div class="filter-item range-item action-range-item">
+          <div class="filter-item range-item">
             <div class="filter-label">{{ $t("admin.corpLog.operationTime") }}</div>
             <el-date-picker v-model="actionFilters.dateRange" type="daterange" value-format="x" :start-placeholder="$t('common.date.start')"
               :end-placeholder="$t('common.date.end')" range-separator="~" clearable />
@@ -491,7 +491,7 @@ onMounted(async () => {
 }
 
 .action-grid {
-  grid-template-columns: minmax(180px, 240px) minmax(180px, 240px) minmax(220px, 1fr);
+  grid-template-columns: minmax(150px, 190px) minmax(150px, 190px) minmax(200px, 1fr) minmax(300px, 360px) 1fr;
 }
 
 .filter-item {
@@ -502,10 +502,6 @@ onMounted(async () => {
   :deep(.el-date-editor) {
     width: 100%;
   }
-}
-
-.action-range-item {
-  grid-column: span 2;
 }
 
 .filter-label {
@@ -557,10 +553,6 @@ onMounted(async () => {
   .login-grid,
   .action-grid {
     grid-template-columns: 1fr;
-  }
-
-  .action-range-item {
-    grid-column: span 1;
   }
 
   .filter-actions {
