@@ -17,7 +17,7 @@
           <template #reference>
             <et-icon
               :icon="formData.icon"
-              :color="formData.iconColor || '#1296db'"
+              :color="getAppIconColor(formData)"
               size="28px"
               style="cursor: pointer"
             />
@@ -37,7 +37,7 @@
 import { AppMenu, EditAppMenuRequest, FormType } from "@eimsnext/models";
 import { appDefService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
-import { getFormIcon } from "@/utils/common";
+import { getAppIconColor, getFormIcon } from "@/utils/common";
 
 const { t } = useI18n();
 
@@ -60,7 +60,7 @@ const title = computed(() =>
 const formData = ref({
   name: props.menu.title || "",
   icon: getFormIcon(props.menu),
-  iconColor: props.menu.iconColor || "#1296db",
+  iconColor: props.menu.iconColor || "",
 });
 
 const rules = reactive({

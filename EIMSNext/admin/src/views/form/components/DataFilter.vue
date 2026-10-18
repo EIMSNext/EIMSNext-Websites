@@ -1,7 +1,7 @@
 <template>
   <div v-click-outside="onClickOutside">
     <!-- <div> -->
-    <ConditionList v-model="condList" :form-id="formId" :max-level="1" :field-build-setting="filterFieldBuildSetting" @change="onChange" @remove="onClear">
+    <ConditionList :model-value="modelValue" :form-id="formId" :max-level="1" :field-build-setting="filterFieldBuildSetting" @remove="onClear">
     </ConditionList>
     <div class="actions">
       <el-button type="primary" @click="onSearch">{{ t("common.filter") }}</el-button>
@@ -11,7 +11,7 @@
 </template>
 <script setup lang="ts">
 import { IConditionList } from "@eimsnext/components";
-import { FieldType, FormFieldPermission } from "@eimsnext/models";
+import { FieldType, FormFieldPermission, SystemField } from "@eimsnext/models";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -29,26 +29,24 @@ const props = withDefaults(
   {}
 );
 
-const condList = toRef<IConditionList>(props.modelValue);
 const filterFieldBuildSetting = computed(() => ({
   version: 0,
   rule: 0,
   matchType: false,
   fieldLimit: {
     excludeFieldTypes: [FieldType.DataSelect],
+    // TODO: 暂时不允许 dataTitle 作为筛选条件（任何情况），后续如恢复删掉此行即可
+    excludeSystemFields: [SystemField.DataTitle],
     formFieldPermissions: props.formFieldPermissions,
   },
 }));
-const onChange = (filter: IConditionList) => {
-  condList.value = filter;
-};
 const onClear = () => {
-  condList.value.items = []
+  props.modelValue.items = [];
 }
 
 const emit = defineEmits(["ok", "cancel"]);
 const onSearch = () => {
-  emit("ok", condList.value);
+  emit("ok", props.modelValue);
 };
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement;

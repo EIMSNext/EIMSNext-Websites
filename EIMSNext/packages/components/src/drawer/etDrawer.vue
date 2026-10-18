@@ -9,6 +9,8 @@
     :close-on-click-modal="false"
     size="100%"
     :show-close="false"
+    :before-close="onBeforeClose"
+    @update:modelValue="onUpdateModelValue"
   >
     <div class="top-nav-bar">
       <div class="nav-left">
@@ -45,11 +47,31 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:modelValue", "close"]);
 
-async function close() {
+async function allowClose() {
   let allow = true;
   if (props.closing) allow = await props.closing();
+  return allow;
+}
 
-  if (allow) {
+// 左上角返回按钮：守卫通过后同步父组件并 emit close
+async function close() {
+  if (await allowClose()) {
+    emit("update:modelValue", false);
+    emit("close");
+  }
+}
+
+// Escape 等 el-drawer 内部关闭意图：先过守卫，再把决定权交还 el-drawer。
+// 拒绝时 hide(true)，visible 不变——避免"视觉已关、父组件仍持 true"的状态不一致
+async function onBeforeClose(hide: (cancel?: boolean) => void) {
+  if (await allowClose()) hide();
+  else hide(true);
+}
+
+// el-drawer 关闭动画结束会补发 update:modelValue(false)（use-dialog afterLeave）：
+// 父组件仍持 true 时代为同步 + emit close（守卫已由 close/onBeforeClose 跑过，此处不重跑）
+function onUpdateModelValue(val: boolean) {
+  if (!val && props.modelValue) {
     emit("update:modelValue", false);
     emit("close");
   }

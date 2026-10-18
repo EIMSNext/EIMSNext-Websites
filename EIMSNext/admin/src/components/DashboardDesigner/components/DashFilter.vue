@@ -1,6 +1,6 @@
 <template>
     <div v-click-outside="onClickOutside">
-        <ConditionList v-model="condList" :form-id="formId" :max-level="1" @change="onChange" @remove="onClear">
+        <ConditionList v-model="condList" :form-id="formId" :max-level="1" :field-build-setting="filterFieldBuildSetting" @change="onChange" @remove="onClear">
         </ConditionList>
         <div class="actions">
             <el-button type="primary" @click="onSearch">{{ t("common.filter") }}</el-button>
@@ -10,6 +10,7 @@
 </template>
 <script setup lang="ts">
 import { IConditionList } from "@eimsnext/components";
+import { SystemField } from "@eimsnext/models";
 import { uniqueId } from "@eimsnext/utils";
 import { ClickOutside as vClickOutside } from "element-plus";
 import { useI18n } from "vue-i18n";
@@ -27,7 +28,24 @@ const props = withDefaults(
     {}
 );
 
-const condList = toRef<IConditionList>(props.modelValue);
+const condList = ref(props.modelValue);
+// 与 ConditionList 默认 setting 保持一致（rule: All=0, matchType: false），仅追加 dataTitle 排除
+const filterFieldBuildSetting = {
+    version: 0,
+    rule: 0,
+    matchType: false,
+    fieldLimit: {
+        // TODO: 暂时不允许 dataTitle 作为筛选条件（任何情况），后续如恢复删掉此行即可
+        excludeSystemFields: [SystemField.DataTitle],
+    },
+};
+watch(
+  () => props.modelValue,
+  (list) => {
+    condList.value = list;
+  },
+  { immediate: true }
+);
 
     const onChange = (filter: IConditionList) => {
     condList.value = filter;

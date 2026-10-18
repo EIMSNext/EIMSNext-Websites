@@ -324,7 +324,7 @@ const onCondInput = (list: IConditionList) => {
 };
 const onCondClear = () => {
   condList.value.items = [];
-  activeData.value.metadata.queryManyMeta!.condition = condList.value;
+  activeData.value.metadata.triggerMeta!.condition = condList.value;
 };
 const onNodeInput = (val: string) => {
   activeData.value.metadata.triggerMeta!.wfNodeId = val;
@@ -405,7 +405,7 @@ function buildNotifyTimeFieldOptions(formDef: FormDef): TriggerTimeFieldOption[]
 onBeforeMount(() => {
   selectedTriggers.value =
     activeData.value.metadata.triggerMeta!.eventType ?? 0;
-  condList.value = activeData.value.metadata.triggerMeta!.condition;
+  condList.value = activeData.value.metadata.triggerMeta!.condition ?? { id: uniqueId(), rel: "and", items: [] };
   wfNodeId.value = activeData.value.metadata.triggerMeta!.wfNodeId;
   nodeAction.value = activeData.value.metadata.triggerMeta!.nodeAction;
   allowedIpText.value = (activeData.value.metadata.triggerMeta?.httpSettings?.allowedIps ?? []).join("\n");

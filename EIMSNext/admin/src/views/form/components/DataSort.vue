@@ -27,7 +27,7 @@ const props = withDefaults(
   {}
 );
 
-const sortList = toRef<IFieldSortList>(props, "modelValue");
+const sortList = toRef(props, "modelValue");
 
 const emit = defineEmits(["ok", "cancel", "clear"]);
 const onSort = () => {

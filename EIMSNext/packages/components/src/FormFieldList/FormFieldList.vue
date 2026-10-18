@@ -16,12 +16,12 @@
             <el-dropdown-item
               class="add-trigger"
               :disabled="
-                !!selectedFields.items.find(
+                !!modelValue.items.find(
                   (x) => x.field.field == field.field.field,
                 )
               "
               :class="{
-                notAllow: selectedFields.items.find(
+                notAllow: modelValue.items.find(
                   (x) => x.field.field == field.field.field,
                 ),
               }"
@@ -34,7 +34,7 @@
       </template>
     </el-dropdown>
     <template
-      v-for="(item, idx) in selectedFields.items"
+      v-for="(item, idx) in modelValue.items"
       :key="item.field.field"
     >
       <FormFieldItem
@@ -42,7 +42,7 @@
         :nodes="nodes"
         :field-setting="fieldSetting"
         :removable="!showAll"
-        :sibling-fields="selectedFields.items"
+        :sibling-fields="modelValue.items"
         :error-message="errorMap[item.field.field]"
         :fieldValueChanging="fieldValueChanging"
         @change="onInput"
@@ -68,7 +68,7 @@ import {
   IFormFieldMap,
   INodeForm,
 } from "../NodeFieldList/type";
-import { nextTick, onMounted, ref, toRef, watch } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import { IFormFieldDef, splitSubField } from "@/FieldSelect/type";
 import { normalizeFormulaValue, validateFormulaFieldList } from "@/FlowDesigner/EventFlow/formula";
 const { t } = useLocale();
@@ -97,7 +97,6 @@ const props = withDefaults(
 );
 
 const allFields = ref<IFormFieldItem[]>([]);
-const selectedFields = toRef<IFormFieldList>(props.modelValue);
 const fieldSetting = ref<IFieldBuildSetting>({
   version: 0,
   rule: FieldBuildRule.OneLevelTable,
@@ -113,18 +112,18 @@ const emit = defineEmits(["update:modelValue", "change"]);
 
 const addingField = async (fieldItem: IFormFieldItem) => {
   if (!props.fieldSelecting || (await props.fieldSelecting(fieldItem))) {
-    selectedFields.value.items.push(fieldItem);
+    props.modelValue.items.push(fieldItem);
     emitChange();
   }
 };
 
 const onRemove = (fieldItem: IFormFieldItem) => {
-  if (fieldItem && selectedFields.value.items) {
-    let index = selectedFields.value.items.findIndex(
+  if (fieldItem && props.modelValue.items) {
+    let index = props.modelValue.items.findIndex(
       (x) => x.field == fieldItem.field,
     );
     if (index > -1) {
-      selectedFields.value.items.splice(index, 1);
+      props.modelValue.items.splice(index, 1);
     }
   }
 
@@ -132,8 +131,8 @@ const onRemove = (fieldItem: IFormFieldItem) => {
 };
 
 const onInput = (fieldItem: IFormFieldItem) => {
-  if (fieldItem && selectedFields.value.items) {
-    let item = selectedFields.value.items.find(
+  if (fieldItem && props.modelValue.items) {
+    let item = props.modelValue.items.find(
       (x) => x.field.field == fieldItem.field.field,
     );
     if (item) {
@@ -149,12 +148,12 @@ const onInput = (fieldItem: IFormFieldItem) => {
 const updateFieldSetting = () => {
   let mapping: Record<string, IFormFieldMap> = {};
   markMissingSelectedFields();
-  selectedFields.value.items.forEach((x) => {
+  props.modelValue.items.forEach((x) => {
     if (x.value.type == FieldValueType.Formula && x.value.formulaValue) {
       x.value.formulaValue = normalizeFormulaValue(
         x.value.formulaValue,
         x.field,
-        selectedFields.value.items,
+        props.modelValue.items,
       );
     }
 
@@ -212,14 +211,14 @@ const updateFieldSetting = () => {
   fieldSetting.value.version += 1;
 
   const validation = validateFormulaFieldList(
-    selectedFields.value.items,
+    props.modelValue.items,
     t("eventFlow.formulaInferenceError"),
   );
   errorMap.value = {};
   validation.errors.forEach((item) => {
     errorMap.value[item.field] = item.message;
   });
-  selectedFields.value.items.forEach((item) => {
+  props.modelValue.items.forEach((item) => {
     const valueField = item.value.fieldValue ?? item.value.formulaValue?.drivingField;
     const hasMissingFormulaRef = item.value.formulaValue?.refs?.some((ref) => ref.field?.missing);
     if (item.field.missing || valueField?.missing || hasMissingFormulaRef) {
@@ -229,13 +228,13 @@ const updateFieldSetting = () => {
 };
 
 const emitChange = () => {
-  emit("update:modelValue", selectedFields.value);
-  emit("change", selectedFields.value);
+  emit("update:modelValue", props.modelValue);
+  emit("change", props.modelValue);
 };
 
 const markMissingSelectedFields = () => {
   const currentFields = new Set(allFields.value.map((item) => item.field.field));
-  selectedFields.value.items.forEach((item) => {
+  props.modelValue.items.forEach((item) => {
     if (!item.field?.field || currentFields.size === 0) return;
     if (!currentFields.has(item.field.field)) {
       item.field.missing = true;

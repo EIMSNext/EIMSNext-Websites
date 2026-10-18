@@ -15,13 +15,13 @@
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <template v-for="(item, idx) in selectedFields.items" :key="item.field.field">
+    <template v-for="(item, idx) in modelValue.items" :key="item.field.field">
       <SortItem :modelValue="item" @editable="editable" @change="onChange" @remove="onRemove"></SortItem>
     </template>
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useLocale } from "element-plus";
 import { buildSortListItems, ISortField, ISortItem, ISortList } from "./type";
 import { SortDirection } from "@eimsnext/services";
@@ -46,21 +46,20 @@ const props = withDefaults(
   }
 );
 
-const selectedFields = toRef<ISortList>(props.modelValue);
 const allFields = ref<IListItem[]>([]);
 const disabledFieldIds = computed(() => {
-  return selectedFields.value.items.map(item => item.field.field);
+  return props.modelValue.items.map(item => item.field.field);
 });
 
 const emit = defineEmits(["update:modelValue", "change"]);
 
 const addField = (field: ISortField) => {
-  selectedFields.value.items.push({ field: field, sort: SortDirection.Asc });
+  props.modelValue.items.push({ field: field, sort: SortDirection.Asc });
 };
 
 const onRemove = (sortItem: ISortItem) => {
-  if (sortItem && selectedFields.value.items) {
-    selectedFields.value.items = selectedFields.value.items.filter(x => x.field.field != sortItem.field.field)
+  if (sortItem && props.modelValue.items) {
+    props.modelValue.items = props.modelValue.items.filter(x => x.field.field != sortItem.field.field)
   }
 
   emitChange();
@@ -68,20 +67,20 @@ const onRemove = (sortItem: ISortItem) => {
 
 const onChange = (sortItem: ISortItem) => {
   if (props.multiple) {
-    if (sortItem && selectedFields.value.items) {
-      let item = selectedFields.value.items.find((x) => x.field.field == sortItem.field.field);
+    if (sortItem && props.modelValue.items) {
+      let item = props.modelValue.items.find((x) => x.field.field == sortItem.field.field);
       if (item) {
         item.sort = sortItem.sort;
       }
     }
   }
   else {
-    if (sortItem && selectedFields.value.items) {
-      const newSortItems = selectedFields.value.items.map((item) => ({
+    if (sortItem && props.modelValue.items) {
+      const newSortItems = props.modelValue.items.map((item) => ({
         ...item,
         sort: item.field.field === sortItem.field.field ? sortItem.sort : SortDirection.Unset
       }));
-      selectedFields.value.items = newSortItems
+      props.modelValue.items = newSortItems
     }
   }
 
@@ -89,8 +88,8 @@ const onChange = (sortItem: ISortItem) => {
 };
 
 const emitChange = () => {
-  emit("update:modelValue", selectedFields.value);
-  emit("change", selectedFields.value);
+  emit("update:modelValue", props.modelValue);
+  emit("change", props.modelValue);
 };
 
 watch(
@@ -98,14 +97,6 @@ watch(
   () => {
     if (props.editable)
       allFields.value = buildSortListItems(props.sortFields);
-  },
-  { immediate: true }
-);
-
-watch(
-  [() => props.modelValue],
-  () => {
-    selectedFields.value = props.modelValue
   },
   { immediate: true }
 );

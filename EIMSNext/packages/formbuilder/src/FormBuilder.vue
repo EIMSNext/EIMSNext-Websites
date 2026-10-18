@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { reactive, getCurrentInstance } from "vue";
+import { reactive, getCurrentInstance, markRaw } from "vue";
 import jsonlint from "jsonlint-mod";
 import "codemirror/lib/codemirror.css";
 import "codemirror/addon/lint/lint.css";
@@ -62,6 +62,10 @@ import { ArrowDown } from "@element-plus/icons-vue";
 import { FormContent } from "@eimsnext/models";
 import "@eimsnext/form-designer/dist/index.css";
 import "vant/lib/index.css";
+
+// vant 与 setFormula 均为 app/类级注册，抽屉反复开合只做一次，否则重复 app.use 触发
+// "Plugin has already been applied to target app" 警告
+let designerPluginsRegistered = false;
 
 const TITLE = [
   "生成规则",
@@ -379,19 +383,22 @@ export default {
         import("@eimsnext/form-designer"),
         import("vant"),
       ]);
-      vm?.appContext?.app?.use(vant.default);
-      mod.default.setFormula([
-        {
-          menu: "math",
-          name: "test",
-          info: "test",
-          example: "test(val) == !!val",
-          handle(val) {
-            return !!val;
+      if (!designerPluginsRegistered) {
+        designerPluginsRegistered = true;
+        vm?.appContext?.app?.use(vant.default);
+        mod.default.setFormula([
+          {
+            menu: "math",
+            name: "test",
+            info: "test",
+            example: "test(val) == !!val",
+            handle(val) {
+              return !!val;
+            },
           },
-        },
-      ]);
-      this.FcDesigner = mod.default;
+        ]);
+      }
+      this.FcDesigner = markRaw(mod.default);
     } catch (e) {
       console.error("FcDesigner 加载失败", e);
       return;

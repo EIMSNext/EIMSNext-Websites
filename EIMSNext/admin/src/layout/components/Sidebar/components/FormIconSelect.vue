@@ -61,8 +61,9 @@ const colorOptions = [
   { name: "purple", value: "#8B5CF6" },
 ];
 
+// 未配置时不预选任何颜色：否则仅改图标也会经 emitOk 把默认色静默写进菜单
 const selectedIcon = ref(props.icon);
-const selectedColor = ref<string>(props.iconColor || colorOptions[colorOptions.length - 1].value);
+const selectedColor = ref<string>(props.iconColor || "");
 
 const selectColor = (color: string) => {
   selectedColor.value = color;
