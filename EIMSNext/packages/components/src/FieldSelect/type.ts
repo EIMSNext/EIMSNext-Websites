@@ -114,8 +114,9 @@ export function buildFieldListItems(
     !fieldLimit.limitField ||
     fieldLimit.limitField == "master"
   ) {
-    // TODO: dataTitle 暂时从筛选条件可选字段中移除（各过滤入口经 fieldLimit.excludeSystemFields 排除），
-    // 后续如恢复，删掉下面这处守卫及两个过滤入口的 excludeSystemFields 配置即可
+    // dataTitle 不作为条件/回填可选字段：查询链 FieldExpression 对它恒返回 null::text，选了必是死条件。
+    // 常规排除统一在 FieldSelect（条件字段/条件取值/回填目标的唯一入口）合并 excludeSystemFields 实现，
+    // 此守卫是直接调用 buildFieldListItems 的过滤入口（DataFilter/DashFilter）的兜底；如恢复 dataTitle，删掉两处即可。
     if (!fieldLimit?.excludeSystemFields?.includes(SystemField.DataTitle)) {
       let dataTitle: IFormFieldDef = toFormFieldDef(
         formId,

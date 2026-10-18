@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { useFormStore } from "@eimsnext/store";
-import { buildFieldLevelMap } from "@eimsnext/models";
+import { buildFieldLevelMap, SystemField } from "@eimsnext/models";
 import { IFormFieldDef, buildFieldListItems } from "./type";
 import { computed, ref, watch } from "vue";
 import { IListItem } from "@/list/type";
@@ -95,6 +95,9 @@ watch(
           const levelMap = buildFieldLevelMap(form.content);
           const items = buildFieldListItems(newFormId, form?.content?.items, form.usingWorkflow, undefined, {
             ...(props.fieldLimit || {}),
+            // FieldSelect 只服务条件字段/条件取值/回填目标三类场景；dataTitle 是运行时计算列
+            // （查询链 FieldExpression 对它恒返回 null::text，脚本求值为 undefined），选了必是死条件，一律排除。
+            excludeSystemFields: [...(props.fieldLimit?.excludeSystemFields || []), SystemField.DataTitle],
             t,
           });
           items.forEach((item) => {
