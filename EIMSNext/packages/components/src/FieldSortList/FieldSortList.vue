@@ -45,7 +45,7 @@ const props = withDefaults(
 
 const formStore = useFormStore();
 
-const selectedFields = toRef<IFieldSortList>(props, "modelValue");
+const selectedFields = toRef(props, "modelValue");
 const allFields = ref<IListItem[]>([]);
 const disabledFieldIds = computed(() => {
   return selectedFields.value.items.map(item => item.field.field);

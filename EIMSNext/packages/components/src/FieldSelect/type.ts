@@ -11,6 +11,7 @@ import {
   getCreateBy,
   getCreateTime,
   FormFieldPermission,
+  SystemField,
   ValueOption,
 } from "@eimsnext/models";
 
@@ -113,18 +114,22 @@ export function buildFieldListItems(
     !fieldLimit.limitField ||
     fieldLimit.limitField == "master"
   ) {
-    let dataTitle: IFormFieldDef = toFormFieldDef(
-      formId,
-      getDataTitle(getSystemFieldLabel("dataTitle")),
-      undefined,
-      nodeId,
-    );
-    items.push({
-      id: dataTitle.field,
-      label: dataTitle.label,
-      data: dataTitle,
-      type: DataItemType.Field,
-    });
+    // TODO: dataTitle 暂时从筛选条件可选字段中移除（各过滤入口经 fieldLimit.excludeSystemFields 排除），
+    // 后续如恢复，删掉下面这处守卫及两个过滤入口的 excludeSystemFields 配置即可
+    if (!fieldLimit?.excludeSystemFields?.includes(SystemField.DataTitle)) {
+      let dataTitle: IFormFieldDef = toFormFieldDef(
+        formId,
+        getDataTitle(getSystemFieldLabel("dataTitle")),
+        undefined,
+        nodeId,
+      );
+      items.push({
+        id: dataTitle.field,
+        label: dataTitle.label,
+        data: dataTitle,
+        type: DataItemType.Field,
+      });
+    }
 
     if (usingWf) {
       let status: IFormFieldDef = toFormFieldDef(

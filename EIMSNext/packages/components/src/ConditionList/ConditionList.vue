@@ -6,7 +6,7 @@
           <!-- <span v-if="groupLevel == 1">条件组，</span> -->
           {{ t("comp.meetCondition") }}
         </div>
-        <el-select v-model="list.rel" size="small" class="relation-select">
+        <el-select v-model="modelValue.rel" size="small" class="relation-select">
           <el-option :label="t('comp.rel_And')" value="and" />
           <el-option :label="t('comp.rel_Or')" value="or" />
         </el-select>
@@ -39,7 +39,7 @@
       <div class="flex-1"></div>
     </div>
     <div class="cond-item-wrapper">
-      <template v-for="(item, idx) in list.items" :key="item.id">
+      <template v-for="(item, idx) in modelValue.items" :key="item.id">
         <template v-if="item.isGroup">
           <ConditionList
             :modelValue="item"
@@ -85,7 +85,7 @@ import {
   IFieldBuildSetting,
   INodeForm,
 } from "@/NodeFieldList/type";
-import { computed, ref, toRef, watch } from "vue";
+import { computed } from "vue";
 import type { DynamicSelectOption, DynamicSelectSource } from "@eimsnext/utils";
 
 const { t } = useLocale();
@@ -131,11 +131,10 @@ const valueBuildSettingRef = computed(
       matchType: true,
     },
 );
-const list = toRef(props.modelValue);
-const groupLevel = ref(1);
+const groupLevel = computed(() => props.modelValue.groupLevel ?? 1);
 
 const addItem = () => {
-  if (!list.value.items) list.value.items = [];
+  if (!props.modelValue.items) props.modelValue.items = [];
 
   const newItem = {
     id: uniqueId(),
@@ -143,14 +142,14 @@ const addItem = () => {
     op: "empty",
     value: { type: ConditionValueType.Custom, value: null },
   };
-  list.value.items.push(newItem);
+  props.modelValue.items.push(newItem);
 };
 const removeItem = (idx: number) => {
-  list.value.items!.splice(idx, 1);
+  props.modelValue.items!.splice(idx, 1);
   onInput();
 };
 const addGroup = () => {
-  if (!list.value.items) list.value.items = [];
+  if (!props.modelValue.items) props.modelValue.items = [];
 
   const newGroup = {
     id: uniqueId(),
@@ -159,17 +158,17 @@ const addGroup = () => {
     isGroup: true,
     groupLevel: groupLevel.value + 1,
   };
-  list.value.items.push(newGroup);
+  props.modelValue.items.push(newGroup);
 };
 const removeGroup = (idx: number) => {
-  list.value.items!.splice(idx, 1);
+  props.modelValue.items!.splice(idx, 1);
   onInput();
 };
 
 const emit = defineEmits(["update:modelValue", "change", "remove"]);
 const onInput = (condItem?: IConditionList) => {
-  if (condItem && list.value.items) {
-    let item = list.value.items.find((x) => x.id == condItem.id);
+  if (condItem && props.modelValue.items) {
+    let item = props.modelValue.items.find((x) => x.id == condItem.id);
     if (item) {
       item.field = condItem.field;
       item.op = condItem.op;
@@ -177,20 +176,12 @@ const onInput = (condItem?: IConditionList) => {
     }
   }
 
-  emit("update:modelValue", list.value);
-  emit("change", list.value);
+  emit("update:modelValue", props.modelValue);
+  emit("change", props.modelValue);
 };
 const onRemove = () => {
   emit("remove", props.modelValue);
 };
-watch(
-  () => props.modelValue,
-  (newModel) => {
-    list.value = newModel;
-    groupLevel.value = newModel.groupLevel ?? 1;
-  },
-  { immediate: true },
-);
 </script>
 <style lang="scss" scoped>
 .cond-list {

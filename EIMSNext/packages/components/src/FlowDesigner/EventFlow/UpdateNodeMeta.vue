@@ -509,6 +509,9 @@ const init = () => {
         updateMeta.insertFieldList.items,
         true,
       );
+
+      updateMeta.formFieldList = formFieldList.value;
+      updateMeta.insertFieldList = insertFieldList.value;
     }
 
     ready.value = true;

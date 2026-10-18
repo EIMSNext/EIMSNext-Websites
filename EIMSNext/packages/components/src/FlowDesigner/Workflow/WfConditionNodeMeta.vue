@@ -43,13 +43,4 @@ const init = () => {
 }
 
 init()
-
-// watch(
-//   () => flowContext.activeData,
-//   (newValue: IFlowContext) => {
-//     activeData.value = newValue.activeData;
-//     condList.value = activeData.value.metadata.conditionMeta!.condition!;
-//   },
-//   { immediate: true }
-// );
 </script>

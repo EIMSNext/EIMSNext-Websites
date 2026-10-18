@@ -99,12 +99,14 @@ const init = () => {
     formItem.value = { id: formId.value };
 
     let formDef = await formStore.get(formId.value);
-    if (formDef)
+    if (formDef) {
       formFieldList.value.items = mergeFieldList(
         formDef,
         activeData.value.metadata.insertMeta!.formFieldList.items,
         true,
       );
+      activeData.value.metadata.insertMeta!.formFieldList = formFieldList.value;
+    }
 
     ready.value = true;
   });

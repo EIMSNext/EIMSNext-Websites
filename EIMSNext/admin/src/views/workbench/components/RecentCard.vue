@@ -9,7 +9,7 @@
     <div v-if="designMode" class="workbench-empty design-empty" data-workbench-height-content>{{ t("admin.workbench.recentEmpty") }}</div>
     <div v-else-if="recent.length" class="workbench-list" data-workbench-height-content>
       <div v-for="item in recent" :key="`${item.targetType}:${item.targetId}`" class="workbench-list-item" @click="openItem(item)">
-        <div class="workbench-list-icon" :style="{ backgroundColor: item.iconColor || 'var(--et-color-info)' }">
+        <div class="workbench-list-icon" :style="{ backgroundColor: getAppIconColor(item) }">
           <et-icon :icon="item.icon || defaultIcon(item.targetType)" />
         </div>
         <div class="workbench-list-main">
@@ -28,6 +28,7 @@ import { WorkbenchTargetType, type WorkbenchRecentVisit } from "@eimsnext/models
 import { useContextStore } from "@eimsnext/store";
 import { workbenchRecentVisitService } from "@eimsnext/services";
 import { useI18n } from "vue-i18n";
+import { getAppIconColor } from "@/utils/common";
 
 defineOptions({
   name: "WorkbenchRecentCard",
