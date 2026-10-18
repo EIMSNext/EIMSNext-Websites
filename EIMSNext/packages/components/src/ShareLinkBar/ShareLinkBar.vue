@@ -7,6 +7,7 @@
         t("comp.shareLinkBar.open")
       }}</el-button>
       <el-popover
+        v-if="!props.hideQrcode"
         placement="bottom-end"
         trigger="click"
         :width="220"
@@ -38,9 +39,15 @@ defineOptions({
   name: "ShareLinkBar",
 });
 
-const props = defineProps<{
-  url: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    url: string;
+    hideQrcode?: boolean;
+  }>(),
+  {
+    hideQrcode: false,
+  }
+);
 
 const qrCodeRef = ref<HTMLDivElement | null>(null);
 let qrCode: QRCodeStyling | null = null;

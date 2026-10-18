@@ -48,9 +48,21 @@
           <div class="flow-card-title">
             <span>{{ flow.name || t("eventFlow.untitledEventFlow") }}</span>
             <div class="card-actions">
-              <el-button link @click="edit(flow)">{{ t("common.edit") }}</el-button>
-              <el-button link @click="copy(flow)">{{ t("common.copy") }}</el-button>
-              <el-button link type="danger" @click="remove(flow)">{{ t("common.delete") }}</el-button>
+              <el-tooltip :content="t('common.edit')" placement="top">
+                <el-button link @click="edit(flow)">
+                  <et-icon icon="el-Edit" size="14px" />
+                </el-button>
+              </el-tooltip>
+              <el-tooltip :content="t('common.copy')" placement="top">
+                <el-button link @click="copy(flow)">
+                  <et-icon icon="el-CopyDocument" size="14px" />
+                </el-button>
+              </el-tooltip>
+              <el-tooltip :content="t('common.delete')" placement="top">
+                <el-button link type="danger" @click="remove(flow)">
+                  <et-icon icon="el-Delete" size="14px" />
+                </el-button>
+              </el-tooltip>
             </div>
           </div>
           <div class="flow-card-body">
@@ -267,6 +279,7 @@ onBeforeMount(loadAll);
   border: 1px solid var(--et-border-color);
   border-radius: var(--et-radius-6);
   min-height: var(--et-size-170);
+  min-width: 0;
 }
 
 .flow-card-title,
@@ -281,10 +294,21 @@ onBeforeMount(loadAll);
 .flow-card-title {
   border-bottom: 1px solid var(--et-border-color-light);
   font-weight: 700;
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .card-actions {
   display: flex;
+
+  .el-button + .el-button {
+    margin-left: 6px;
+  }
 }
 
 .flow-card-body {

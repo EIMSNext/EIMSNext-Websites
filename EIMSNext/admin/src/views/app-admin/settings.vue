@@ -1,20 +1,16 @@
 <template>
   <div class="app-admin-page">
     <AddEditApp v-if="showEditApp" :edit="true" :app="app" @cancel="showEditApp = false" @ok="onAppEdited" />
-    <et-dialog v-model="showHomeDialog" :title="t('admin.appAdmin.homeEntries')" width="680px" @ok="saveHomeEntries" @cancel="showHomeDialog = false">
+    <et-dialog v-model="showHomeDialog" :title="t('admin.appAdmin.homeEntries')" width="680px" @ok="saveHomeEntries"
+      @cancel="showHomeDialog = false">
       <div class="home-dialog">
         <div class="home-column">
           <el-input v-model="dashboardKeyword" clearable :placeholder="t('admin.appAdmin.searchByName')">
             <template #prefix><et-icon icon="el-search" size="14px" /></template>
           </el-input>
           <div class="home-list">
-            <div
-              v-for="item in filteredDashboards"
-              :key="item.id"
-              class="home-list-item"
-              :class="{ selected: draftHomeEntryIds.includes(item.id) }"
-              @click="toggleHomeEntry(item.id)"
-            >
+            <div v-for="item in filteredDashboards" :key="item.id" class="home-list-item"
+              :class="{ selected: draftHomeEntryIds.includes(item.id) }" @click="toggleHomeEntry(item.id)">
               <et-icon :icon="item.icon || 'dashboard'" size="14px" />
               <span>{{ item.title }}</span>
               <et-icon v-if="draftHomeEntryIds.includes(item.id)" icon="el-check" size="14px" />
@@ -22,14 +18,18 @@
           </div>
         </div>
         <div class="home-column selected-column">
-          <div class="selected-count">{{ t("admin.appAdmin.selectedHomeCount", { count: draftHomeEntryIds.length, max: maxHomeEntries }) }}</div>
+          <div class="selected-count">{{ t("admin.appAdmin.selectedHomeCount", {
+            count: draftHomeEntryIds.length, max:
+            maxHomeEntries }) }}</div>
           <div class="home-list">
             <div v-for="(id, index) in draftHomeEntryIds" :key="id" class="home-list-item">
               <span class="drag-mark">::</span>
               <span>{{ dashboardTitle(id) }}</span>
               <div class="item-actions">
-                <el-button link :disabled="index === 0" @click.stop="moveHome(index, -1)">{{ t("common.moveUp") }}</el-button>
-                <el-button link :disabled="index === draftHomeEntryIds.length - 1" @click.stop="moveHome(index, 1)">{{ t("common.moveDown") }}</el-button>
+                <el-button link :disabled="index === 0" @click.stop="moveHome(index, -1)">{{ t("common.moveUp")
+                  }}</el-button>
+                <el-button link :disabled="index === draftHomeEntryIds.length - 1" @click.stop="moveHome(index, 1)">{{
+                  t("common.moveDown") }}</el-button>
                 <el-button link type="danger" @click.stop="removeHome(id)">{{ t("common.delete") }}</el-button>
               </div>
             </div>
@@ -65,12 +65,7 @@
         <div class="settings-row">
           <div class="settings-label">{{ t("admin.appAdmin.appUrl") }}</div>
           <div class="settings-value value-grow">
-            <el-input :model-value="appUrl" readonly>
-              <template #append>
-                <el-button @click="copy(appUrl)">{{ t("common.copy") }}</el-button>
-                <el-button @click="openUrl(appUrl)">{{ t("comp.shareLinkBar.open") }}</el-button>
-              </template>
-            </el-input>
+            <ShareLinkBar :url="appUrl" hide-qrcode />
           </div>
         </div>
         <div class="settings-row">
@@ -87,6 +82,7 @@
 
 <script setup lang="ts">
 import AddEditApp from "@/views/app/components/AddEditApp.vue";
+import { ShareLinkBar } from "@eimsnext/components";
 import { AppDef, FormType } from "@eimsnext/models";
 import { appDefService } from "@eimsnext/services";
 import { useAppStore, useContextStore } from "@eimsnext/store";
@@ -104,7 +100,7 @@ const dashboardKeyword = ref("");
 const draftHomeEntryIds = ref<string[]>([]);
 const maxHomeEntries = 10;
 
-const appUrl = computed(() => `${window.location.origin}${window.location.pathname}#/app/${contextStore.appId}`);
+const appUrl = computed(() => `${window.location.origin}/app/${contextStore.appId}`);
 const dashboards = computed(() => flattenAppMenus(app.value?.appMenus || []).filter((item) => item.type === FormType.Dashboard));
 const filteredDashboards = computed(() => {
   const keyword = dashboardKeyword.value.trim().toLowerCase();
@@ -182,12 +178,7 @@ async function copy(text: string) {
   ElMessage.success(t("comp.triggerNodeMeta.copied"));
 }
 
-function openUrl(url: string) {
-  window.open(url, "_blank");
-}
-
-onBeforeMount(loadApp);
-</script>
+onBeforeMount(loadApp);</script>
 
 <style scoped lang="scss">
 .app-admin-page {
@@ -266,7 +257,7 @@ onBeforeMount(loadApp);
   padding: var(--et-space-10);
 }
 
-.home-column + .home-column {
+.home-column+.home-column {
   border-left: 1px solid var(--et-border-color);
 }
 
