@@ -47,7 +47,7 @@
     <script>
       (function () {
         const script = document.createElement("script");
-        script.src = window.location.hostname === "localhost" ? "/appSetting.local.js" : "/appSetting.js";
+        script.src = "/appSetting.js";
         script.onload = start;
         script.onerror = start;
         document.head.appendChild(script);
@@ -77,7 +77,10 @@
 
         function writeToken(tokenKey, token, expiresIn) {
           localStorage.setItem(tokenKey, token);
-          localStorage.setItem(`${tokenKey}_exp`, String(Date.now() + (Number(expiresIn || 0) - 300) * 1000));
+          localStorage.setItem(
+            `${tokenKey}_exp`,
+            String(Date.now() + (Number(expiresIn || 0) - 300) * 1000)
+          );
         }
 
         // code 以 query 追加（searchParams 位于 hash 之前），与 consumeCallbackCode 的读取约定一致
@@ -105,10 +108,11 @@
           }
           try {
             const url = new URL(candidate);
-            if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+            if (url.protocol !== "http:" && url.protocol !== "https:")
+              return null;
             if (url.origin === window.location.origin) return url;
             const allowed = (appSetting.allowedRedirectHosts || []).some(
-              (host) => String(host).toLowerCase() === url.host.toLowerCase(),
+              (host) => String(host).toLowerCase() === url.host.toLowerCase()
             );
             return allowed ? url : null;
           } catch {
@@ -121,16 +125,23 @@
           const payload = {
             grant_type: "authorization_code",
             code,
-            client_id: appSetting.clientId || "EIMSD160507G0401S171201B1014Next",
+            client_id:
+              appSetting.clientId || "EIMSD160507G0401S171201B1014Next",
           };
           const response = await fetch(`${appSetting.identityUrl}/web/token`, {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-            body: new URLSearchParams({ encrypted: utf8ToBase64(JSON.stringify(payload)) }).toString(),
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            },
+            body: new URLSearchParams({
+              encrypted: utf8ToBase64(JSON.stringify(payload)),
+            }).toString(),
           });
           const data = await response.json();
           if (!response.ok || !data.access_token) {
-            throw new Error(data.error_description || data.message || "第三方登录失败");
+            throw new Error(
+              data.error_description || data.message || "第三方登录失败"
+            );
           }
           return data;
         }
@@ -139,7 +150,8 @@
           const appSetting = window.appSetting || {};
 
           const searchParams = new URLSearchParams(window.location.search);
-          const code = searchParams.get("code") || searchParams.get("authCode") || "";
+          const code =
+            searchParams.get("code") || searchParams.get("authCode") || "";
           const state = searchParams.get("state") || "";
           const parsedState = parseState(state);
           const type = parsedState && parsedState.type ? parsedState.type : "";
@@ -150,7 +162,10 @@
             return;
           }
 
-          const target = resolveRedirect(parsedState && parsedState.redirect, appSetting);
+          const target = resolveRedirect(
+            parsedState && parsedState.redirect,
+            appSetting
+          );
           if (!target) {
             setMessage("登录失败", "回跳地址不在允许列表中。");
             return;
@@ -164,7 +179,11 @@
             // 同源（portal 自身）→ 就地换取并保留会话；跨源（调用方 app）→ 前缀 code 回传
             if (target.origin === window.location.origin) {
               const data = await exchangeCode(prefixedCode, appSetting);
-              writeToken(appSetting.tokenKey || "jat", data.access_token, data.expires_in);
+              writeToken(
+                appSetting.tokenKey || "jat",
+                data.access_token,
+                data.expires_in
+              );
               setMessage("登录成功", "正在跳转...");
               window.location.replace(target.toString());
               return;
@@ -173,7 +192,12 @@
             setMessage("登录成功", "正在跳转...");
             window.location.replace(appendCode(target, prefixedCode));
           } catch (error) {
-            setMessage("登录失败", error && error.message ? error.message : "第三方登录失败，请稍后再试。");
+            setMessage(
+              "登录失败",
+              error && error.message
+                ? error.message
+                : "第三方登录失败，请稍后再试。"
+            );
           }
         }
       })();
