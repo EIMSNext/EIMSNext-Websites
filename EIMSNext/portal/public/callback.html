@@ -146,6 +146,26 @@
           return data;
         }
 
+        // 用 portal 会话换一次性本站授权码（与 Login.vue 登录成功后的换码一致）
+        async function exchangeSession(token, appSetting) {
+          const response = await fetch(
+            `${appSetting.identityUrl}/identity/authorizeCodeSession`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: "{}",
+            }
+          );
+          const data = await response.json();
+          if (!response.ok || !data.code) {
+            throw new Error(data.message || "换取授权码失败");
+          }
+          return data;
+        }
+
         async function start() {
           const appSetting = window.appSetting || {};
 
@@ -171,26 +191,22 @@
             return;
           }
 
-          // 第三方 code 加前缀后回传调用方，由调用方换本站 token；
-          // 「第三方 code → 第三方 token → 本站 token」全部由后端处理
+          // 统一链路（同源/跨源一致）：三方 code（带前缀）→ 换本站 token 并在 portal 落盘
+          // → authorizeCodeSession 换一次性 lg_ code → 回传业务系统（业务系统自行换 token）。
+          // 三方 code 不透传给业务系统——「三方 code → 三方 token → 本站 token」的换取
+          // 必须收口在 portal，统一会话归属；后端按前缀完成全部换取。
           const prefixedCode = `${prefix}${code}`;
 
           try {
-            // 同源（portal 自身）→ 就地换取并保留会话；跨源（调用方 app）→ 前缀 code 回传
-            if (target.origin === window.location.origin) {
-              const data = await exchangeCode(prefixedCode, appSetting);
-              writeToken(
-                appSetting.tokenKey || "jat",
-                data.access_token,
-                data.expires_in
-              );
-              setMessage("登录成功", "正在跳转...");
-              window.location.replace(target.toString());
-              return;
-            }
-
+            const data = await exchangeCode(prefixedCode, appSetting);
+            writeToken(
+              appSetting.tokenKey || "jat",
+              data.access_token,
+              data.expires_in
+            );
+            const session = await exchangeSession(data.access_token, appSetting);
             setMessage("登录成功", "正在跳转...");
-            window.location.replace(appendCode(target, prefixedCode));
+            window.location.replace(appendCode(target, `lg_${session.code}`));
           } catch (error) {
             setMessage(
               "登录失败",
