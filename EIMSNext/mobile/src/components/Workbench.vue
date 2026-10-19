@@ -1,6 +1,9 @@
 <template>
   <MobilePage :title="t('mobile.workbench.title')" @back="goBack">
     <template #right>
+      <van-button class="lang-button" size="mini" plain @click="showLangSheet = true">
+        {{ t("navbar.language") }}
+      </van-button>
       <van-button class="logout-button" size="mini" plain type="danger" @click="showLogoutConfirm = true">
         {{ t("navbar.logout") }}
       </van-button>
@@ -54,6 +57,14 @@
     </div>
   </MobilePage>
 
+  <van-action-sheet
+    v-model:show="showLangSheet"
+    :actions="langActions"
+    :cancel-text="t('common.cancel')"
+    close-on-click-action
+    @select="onLangSelect"
+  />
+
   <van-dialog
     v-model:show="showLogoutConfirm"
     :title="t('shell.logoutTitle')"
@@ -64,9 +75,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { Locale, showToast } from "vant";
+import enUS from "vant/es/locale/lang/en-US";
+import zhCN from "vant/es/locale/lang/zh-CN";
 import type { AppDef } from "@eimsnext/models";
 import { useUserStoreHook } from "@eimsnext/store";
 import { buildPortalAuthUrl } from "@eimsnext/utils";
@@ -75,9 +89,24 @@ import MobilePage from "@/components/base/MobilePage.vue";
 import { appServiceMobile, taskServiceMobile } from "@/services/mobileService";
 
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const refreshing = ref(false);
 const taskCount = ref(0);
+
+// 语言切换：i18n + vant 内置文案 + localStorage（admin/portal 同 key）一次生效
+const showLangSheet = ref(false);
+const langActions = computed(() => [
+  { name: "简体中文", key: "zh-CN", color: locale.value === "zh-CN" ? "var(--van-primary-color)" : undefined },
+  { name: "English", key: "en", color: locale.value === "en" ? "var(--van-primary-color)" : undefined },
+]);
+
+const onLangSelect = (action: { key: string }) => {
+  if (action.key === locale.value) return;
+  locale.value = action.key;
+  localStorage.setItem("language", action.key);
+  Locale.use(action.key === "en" ? "en-US" : "zh-CN", action.key === "en" ? enUS : zhCN);
+  showToast(t("langSelect.message.success"));
+};
 const apps = ref<AppDef[]>([]);
 const showLogoutConfirm = ref(false);
 
@@ -126,6 +155,11 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.lang-button {
+  padding: 0 8px;
+  margin-right: 8px;
+}
+
 .logout-button {
   padding: 0 8px;
 }

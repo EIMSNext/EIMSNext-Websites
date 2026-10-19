@@ -195,16 +195,19 @@
     </div>
 
     <div class="m-lang left">
-      <button class="trigger" type="button" @click="langMenuOpen = !langMenuOpen">
+      <button class="trigger" type="button" @click.stop="langSheetOpen = true">
         <svg viewBox="0 0 1024 1024"><path fill="currentColor" d="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896m0 832a384 384 0 0 0 357.376-256H154.624A384 384 0 0 0 512 896m-376.64-384a384.32 384.32 0 0 0 0 64h753.28a384.32 384.32 0 0 0 0-64zM512 128c-138.56 0-258.56 89.152-301.376 212.992h602.752C770.56 217.152 650.56 128 512 128"/></svg>
         <span>{{ curLangLabel }}</span>
         <svg viewBox="0 0 1024 1024"><path fill="currentColor" d="M831.872 340.864 512 652.672 192.128 340.864a30.592 30.592 0 0 0-42.752 0 29.12 29.12 0 0 0 0 41.6L489.664 714.24a32 32 0 0 0 44.672 0l340.288-331.712a29.12 29.12 0 0 0 0-41.728 30.592 30.592 0 0 0-42.752 0z"/></svg>
       </button>
+      <!-- 小屏下拉浮层不适用移动端，改用底部弹出语言选择（对齐 mobile 端 vant 交互）：
       <div v-if="langMenuOpen" class="menu left">
         <button type="button" :class="{ active: locale === 'zh-CN' }" @click="selectLang('zh-CN')">简体中文</button>
         <button type="button" :class="{ active: locale === 'en' }" @click="selectLang('en')">English</button>
-      </div>
+      </div> -->
     </div>
+
+    <LanguageSheet v-model:show="langSheetOpen" :current="locale" @select="selectLang" />
   </div>
 </template>
 
@@ -218,6 +221,7 @@ import { identityClient, extractAuthError } from "@/auth/client";
 import { redirectToCallback, resolveRedirectUrl } from "@/auth/callback";
 import { getPasswordStrengthState, isStrongPassword } from "@/utils/password";
 import { isMobile } from "@/utils/device";
+import LanguageSheet from "@/components/LanguageSheet.vue";
 
 type RegisterType = "phone" | "email";
 
@@ -234,6 +238,8 @@ const error = ref("");
 const notice = ref("");
 const isDark = ref(localStorage.getItem("portal-theme") === "dark");
 const langMenuOpen = ref(false);
+// 移动端语言选择底部弹层（PC 仍用下拉）
+const langSheetOpen = ref(false);
 
 let countdownTimer: ReturnType<typeof setInterval> | undefined;
 let noticeTimer: ReturnType<typeof setTimeout> | undefined;

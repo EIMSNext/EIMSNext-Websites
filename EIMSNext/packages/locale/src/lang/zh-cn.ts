@@ -2439,6 +2439,7 @@ export default {
     homepage: "项目官网",
     source: "源码地址",
     profile: "个人设置",
+    language: "语言",
   },
   sizeSelect: {
     tooltip: "布局大小",

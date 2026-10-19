@@ -2441,6 +2441,7 @@ export default {
     homepage: "Project Home",
     source: "Source Code",
     profile: "User Profile",
+    language: "Language",
   },
   sizeSelect: {
     tooltip: "Layout Size",
