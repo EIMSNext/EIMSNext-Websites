@@ -29,7 +29,7 @@
             </div>
             <div class="">
               <div class="flow-time">
-                <span>{{ task.approveNodeStartTime }}</span>
+                <span>{{ formatDateTime(task.approveNodeStartTime) }}</span>
               </div>
             </div>
           </template>
@@ -98,7 +98,10 @@ import { WfTask } from "@eimsnext/models";
 import { wfTaskService } from "@eimsnext/services";
 import { EtDialog } from "@eimsnext/components";
 import buildQuery from "odata-query";
+import { dateFormat } from "@/utils/common";
 import WfProcess from "./WfProcess.vue";
+
+const formatDateTime = (value?: number) => dateFormat(value, "YYYY-MM-DD HH:mm") || "-";
 
 const PAGE_SIZE = 20;
 const SCROLL_THRESHOLD = 120;

@@ -13,6 +13,7 @@ import App from "./App.vue";
 import router from "./router";
 import "vant/lib/index.css";
 import "./styles/index.scss";
+import { isErrorHandled } from "@/utils/httpFeedback";
 
 // 与 admin 端保持一致：统一处理接口错误提示（packages/../admin/src/utils/http.ts）
 const systemErrorText = () => (localStorage.getItem("language") === "en" ? En : ZhCn).common.systemError;
@@ -54,6 +55,9 @@ const initHttp = () =>
     // 登录/登出由页面自己提示，这里不重复弹
     if (isAuthRequest(response?.config?.url)) return;
 
+    // 页面已渲染错误态/重试入口或自行 toast 的请求，不重复提示
+    if (isErrorHandled(error)) return;
+
     if (response?.status === 401) {
       handleSessionExpired(message);
       return;
@@ -61,11 +65,6 @@ const initHttp = () =>
 
     showToast(String(message));
   });
-
-// 回到登录页后重新允许会话过期提示（登录成功会跳走，flag 保持为 false）
-router.afterEach((to) => {
-  if (to.path === "/login") sessionExpiredHandled = false;
-});
 
 const initTheme = () => {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;

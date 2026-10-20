@@ -9,7 +9,8 @@
         <van-button size="small" @click="initialize">{{ t("common.retry") }}</van-button>
       </van-empty>
 
-      <template v-else>
+      <van-pull-refresh v-else v-model="refreshing" @refresh="onRefresh">
+        <div v-if="loading && dataList.length === 0" class="empty-tip">{{ t("common.loading") }}</div>
         <div class="table-toolbar mobile-card">
           <div class="toolbar-tip">{{ currentView?.name || t("admin.formListView.defaultView") }}</div>
           <van-dropdown-menu v-if="permissionGroups.length" class="auth-group-menu">
@@ -51,11 +52,11 @@
           </div>
           <div v-if="!loading && dataList.length === 0" class="empty-tip mobile-card">{{ t("common.noData") }}</div>
         </div>
-      </template>
+      </van-pull-refresh>
     </div>
 
-    <template #footer>
-      <div v-if="!loadError" class="pagination-wrap">
+    <template v-if="!loadError && total > pageSize" #footer>
+      <div class="pagination-wrap">
         <van-pagination v-model="currentPage" :total-items="total" :items-per-page="pageSize" mode="simple" @change="loadData" />
       </div>
     </template>
@@ -82,6 +83,8 @@ import MobilePage from "@/components/base/MobilePage.vue";
 import { SortDirection, type IDynamicFilter } from "@eimsnext/services";
 import { FlagEnum } from "@eimsnext/utils";
 import { createNonDraftFilter, formDataPermissionGroupServiceMobile, formDataServiceMobile, formServiceMobile, formListViewServiceMobile } from "@/services/mobileService";
+import { formatDateValue } from "@/utils/format";
+import { markErrorHandled } from "@/utils/httpFeedback";
 
 const router = useRouter();
 const route = useRoute();
@@ -90,6 +93,7 @@ const appId = route.params.appId as string;
 const formId = route.params.formId as string;
 
 const loading = ref(false);
+const refreshing = ref(false);
 const currentPage = ref(1);
 const pageSize = ref(20);
 const total = ref(0);
@@ -149,11 +153,18 @@ const loadData = async () => {
     ]);
     dataList.value = list;
     total.value = count;
-  } catch {
+  } catch (error) {
+    markErrorHandled(error);
     loadError.value = true;
   } finally {
     loading.value = false;
+    refreshing.value = false;
   }
+};
+
+const onRefresh = () => {
+  currentPage.value = 1;
+  void loadData();
 };
 
 const initialize = async () => {
@@ -161,30 +172,87 @@ const initialize = async () => {
   try {
     await loadForm();
     await loadData();
-  } catch {
+  } catch (error) {
+    markErrorHandled(error);
     loadError.value = true;
   }
+};
+
+const normalizeValue = (value: any): any => {
+  if (Array.isArray(value) && value.length > 0 && Array.isArray(value[0])) {
+    return value.map((item) => (Array.isArray(item) && item.length > 0 ? item[0] : item));
+  }
+  return value;
+};
+
+// 与 PC admin/src/views/form/listViewUtils.ts::formatFormValue 对齐：
+// 下拉/单选/多选/人员/部门按 options 或对象 label 解析，日期尊重字段配置格式
+const formatOption = (fieldDef: any, item: any): string => {
+  if (item === undefined || item === null || item === "") return "";
+  if (typeof item === "object") {
+    if (item.label || item.name) return String(item.label || item.name);
+    item = item.value;
+  }
+  const options = fieldDef?.props?.options;
+  const option = options?.find((candidate: any) => String(candidate.value) === String(item));
+  return option?.label ?? String(item);
 };
 
 const formatCell = (row: FormData, field: string) => {
   if (field === SystemField.DataTitle) return row.dataTitle || "";
   const value = row.data?.[field];
-  if (value === null || value === undefined) return "";
+  if (value === null || value === undefined || value === "") return "";
   const fieldDef = form.value?.content?.items?.find((item) => item.field === field);
+  const normalized = normalizeValue(value);
+  const type = fieldDef?.type;
+  const options = fieldDef?.props?.options;
+
   // 地址：province + city + district + detail 直接拼接（与打印一致）
-  if (fieldDef?.type === FieldType.Address) {
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      const addr = value as Record<string, any>;
+  if (type === FieldType.Address) {
+    if (normalized && typeof normalized === "object" && !Array.isArray(normalized)) {
+      const addr = normalized as Record<string, any>;
       return ["province", "city", "district", "detail"].map((key) => String(addr[key] ?? "").trim()).join("");
     }
-    if (Array.isArray(value)) return value.map((item: any) => String(item ?? "").trim()).filter(Boolean).join("");
-    return String(value);
+    if (Array.isArray(normalized)) return normalized.map((item: any) => String(item ?? "").trim()).filter(Boolean).join("");
+    return String(normalized);
   }
-  if (fieldDef?.type === FieldType.TimeStamp) return formatDate(value, fieldDef.props?.format);
-  if (fieldDef?.type === FieldType.ImageUpload) return imageText(value);
-  if (Array.isArray(value)) return value.map((item) => item?.label || item?.name || item).join(", ");
-  if (typeof value === "object") return value.label || value.name || JSON.stringify(value);
-  return String(value);
+  if (type === FieldType.TimeStamp) return formatDateValue(value, fieldDef?.props?.format);
+  if (type === FieldType.ImageUpload) return imageText(value);
+  // 数据关联（dataselect）：数组项形如 { label, name, value }
+  if (type === FieldType.DataSelect && Array.isArray(normalized)) {
+    return normalized
+      .map((item: any) => {
+        if (!item || typeof item !== "object") return String(item ?? "");
+        const label = item.label || item.name || "";
+        const itemValue = item.value ?? "";
+        return label ? `${label}: ${itemValue}` : String(itemValue);
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (
+    type === FieldType.Radio ||
+    type === FieldType.CheckBox ||
+    type === FieldType.Select1 ||
+    type === FieldType.Select2 ||
+    type === FieldType.Employee1 ||
+    type === FieldType.Employee2 ||
+    type === FieldType.Department1 ||
+    type === FieldType.Department2
+  ) {
+    if (Array.isArray(normalized)) return normalized.map((item) => formatOption(fieldDef, item)).filter(Boolean).join(", ");
+    return formatOption(fieldDef, normalized);
+  }
+  if (Array.isArray(normalized)) {
+    return normalized
+      .map((item) => (Array.isArray(item) ? item.map((sub) => formatOption(fieldDef, sub)).join(", ") : formatOption({ props: { options } }, item)))
+      .filter(Boolean)
+      .join(", ");
+  }
+  if (typeof normalized === "object") {
+    return normalized.label || normalized.name || normalized.value || JSON.stringify(normalized);
+  }
+  return String(normalized);
 };
 
 const cardTitle = (row: FormData) => {
@@ -229,8 +297,7 @@ const buildSort = () => {
 
 const isSystemField = (field: string) => Object.values(SystemField).includes(field as SystemField);
 
-const toDynamicFilter = (filter: any): IDynamicFilter => {
-  if (filter.items?.length) {
+const toDynamicFilter = (filter: any): IDynamicFilter => {  if (filter.items?.length) {
     return { rel: filter.rel || "and", items: filter.items.map(toDynamicFilter) };
   }
   if (!filter.field?.field) return {};
@@ -240,13 +307,6 @@ const toDynamicFilter = (filter: any): IDynamicFilter => {
     op: filter.op,
     value: filter.value?.value,
   };
-};
-
-const formatDate = (value: any, _format?: string) => {
-  const date = new Date(Number(value));
-  if (Number.isNaN(date.getTime())) return String(value);
-  const pad = (num: number) => String(num).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 };
 
 const imageText = (value: any) => {
@@ -298,13 +358,21 @@ onMounted(() => {
   th {
     position: sticky;
     top: 0;
-    background: var(--mobile-bg-page);
+    background: var(--mobile-bg-card);
     color: var(--mobile-text-secondary);
     z-index: 1;
   }
 
   td {
     color: var(--mobile-text-primary);
+  }
+
+  tbody tr {
+    cursor: pointer;
+
+    &:active {
+      background: var(--mobile-bg-page);
+    }
   }
 }
 
@@ -324,6 +392,11 @@ onMounted(() => {
   padding: 12px;
   border-radius: 8px;
   border: 1px solid var(--mobile-border-color);
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
 }
 
 .card-title {

@@ -51,16 +51,9 @@ body {
   background-color: var(--mobile-bg-page);
 }
 
-.page-content {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   min-height: 44px;
   padding: 0 16px;
   background-color: var(--mobile-bg-header);
@@ -70,27 +63,25 @@ body {
   .header-right {
     display: flex;
     align-items: center;
-    min-width: 32px;
+    flex: 1;
+    min-width: 0;
     color: var(--mobile-text-primary);
+  }
+
+  .header-right {
+    justify-content: flex-end;
   }
 
   .header-title {
+    flex: 0 1 auto;
+    max-width: 60%;
     font-size: 16px;
     font-weight: 500;
     color: var(--mobile-text-primary);
-  }
-}
-
-.page-back {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  color: var(--mobile-text-primary);
-
-  .van-icon {
-    font-size: 20px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -102,6 +93,7 @@ body {
 .page-footer {
   background-color: var(--mobile-bg-card);
   border-top: 1px solid var(--mobile-border-color);
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .mobile-card {

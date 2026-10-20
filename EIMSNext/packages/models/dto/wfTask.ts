@@ -19,5 +19,5 @@ export interface WfTask extends CorpModelBase {
 export interface BriefField {
   field: string;
   title: string;
-  value?: any;
+  value?: string;
 }

@@ -14,16 +14,13 @@ import {
   SortDirection,
   type IDynamicFilter,
   formDataPermissionGroupService,
-  identityService,
   formDataService,
   formDefService,
   formListViewService,
-  systemService,
   wfTaskService,
   wfTaskLogService,
   workflowService,
 } from "@eimsnext/services";
-import type { LoginRequest } from "@eimsnext/services";
 import { ODataQueryRequest } from "@eimsnext/services";
 import type { FormListView } from "@eimsnext/models";
 
@@ -51,7 +48,7 @@ const WF_TASK_LOG_FILTER = {
   cced: "result eq 7",
 } as const;
 
-export type WorkflowTaskScope = keyof typeof WF_TASK_LOG_FILTER;
+type WorkflowTaskScope = keyof typeof WF_TASK_LOG_FILTER;
 
 // 待办(WfTask) 与流转记录(WfTaskLog) 字段不同，统一成列表行模型给视图使用
 export interface WorkflowTaskItem {
@@ -107,15 +104,6 @@ const queryTaskLogs = async (
   return (await wfTaskLogService.query<WfTaskLog>(query)).map(toLogItem);
 };
 
-export const mobileIdentityService = {
-  login(request: LoginRequest) {
-    return identityService.login(request);
-  },
-  getCurrentUser() {
-    return systemService.getCurrentUser();
-  },
-};
-
 export const appServiceMobile = {
   getMyApps(): Promise<AppDef[]> {
     // 与 admin 的 appDefStore 保持一致：显式指定单页上限，避免应用较多时被服务端默认分页截断
@@ -127,7 +115,8 @@ export const appServiceMobile = {
 };
 
 export const formServiceMobile = {
-  query(appId: string, skip = 0, top = 20): Promise<FormDef[]> {
+  // 与 appServiceMobile 一致：显式指定单页上限，避免表单较多时被服务端默认分页截断（FormList 无分页）
+  query(appId: string, skip = 0, top = 100): Promise<FormDef[]> {
     return formDefService.query<FormDef>(
       buildODataQuery(`appId eq '${escapeODataLiteral(appId)}'`, skip, top, "createTime asc")
     );
@@ -138,9 +127,8 @@ export const formServiceMobile = {
 };
 
 export const formListViewServiceMobile = {
-  // 与 admin 端保持一致：formid 为系统生成的标识，无需转义
   query(formId: string): Promise<FormListView[]> {
-    return formListViewService.query<FormListView>(`$filter=formid eq '${formId}'&$orderby=sortIndex asc,createTime asc`);
+    return formListViewService.query<FormListView>(`$filter=formid eq '${escapeODataLiteral(formId)}'&$orderby=sortIndex asc,createTime asc`);
   },
 };
 
@@ -186,7 +174,7 @@ export const formDataServiceMobile = {
       formId: form.id,
       data,
       action,
-    } as never);
+    });
   },
   put(entity: FormData, data: Record<string, unknown>, action: DataAction = DataAction.Save): Promise<FormData> {
     return formDataService.put<FormData>(entity.id, {
@@ -195,7 +183,7 @@ export const formDataServiceMobile = {
       formId: entity.formId,
       data,
       action,
-    } as never);
+    });
   },
 };
 
@@ -221,9 +209,6 @@ export const taskServiceMobile = {
   },
   get(taskId: string): Promise<WfTask> {
     return wfTaskService.get<WfTask>(taskId);
-  },
-  approve(dataId: string, action: ApproveAction, comment = "") {
-    return workflowService.approve({ dataId, action, comment });
   },
   submit(dataId: string, wfInstanceId: string, wfNodeId: string, comment = "") {
     return workflowService.submit({ dataId, wfInstanceId, wfNodeId, action: ApproveAction.Approve, comment });

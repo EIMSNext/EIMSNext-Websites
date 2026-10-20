@@ -1,34 +1,26 @@
 <template>
-  <main class="not-found">
-    <h1>404</h1>
-    <p>页面不存在</p>
-    <button type="button" @click="router.replace('/workbench')">返回工作台</button>
-  </main>
+  <MobilePage :title="t('mobile.notFound.title')" :backable="false">
+    <div class="not-found">
+      <van-empty :description="t('mobile.notFound.message')">
+        <van-button type="primary" size="small" round @click="router.replace('/workbench')">
+          {{ t("mobile.notFound.back") }}
+        </van-button>
+      </van-empty>
+    </div>
+  </MobilePage>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import MobilePage from "@/components/base/MobilePage.vue";
 
-const router = useRouter()
+const router = useRouter();
+const { t } = useI18n();
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .not-found {
-  min-height: 100vh;
-  display: grid;
-  place-content: center;
-  gap: 12px;
-  padding: 24px;
-  text-align: center;
-}
-
-h1,
-p {
-  margin: 0;
-}
-
-button {
-  min-height: 40px;
-  padding: 0 16px;
+  padding-top: 30vh;
 }
 </style>

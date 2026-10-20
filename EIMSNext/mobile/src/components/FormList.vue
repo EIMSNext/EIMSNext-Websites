@@ -15,7 +15,10 @@
         <van-tab :title="t('mobile.formList.catalog')" name="forms">
           <div class="form-list-wrap">
             <van-search v-model="keyword" :placeholder="t('mobile.formList.searchPlaceholder')" />
-            <van-pull-refresh v-model="refreshing" @refresh="loadForms">
+            <van-empty v-if="formsError" image="error" :description="t('admin.formData.dataNotAvailable')">
+              <van-button size="small" @click="loadForms">{{ t("common.retry") }}</van-button>
+            </van-empty>
+            <van-pull-refresh v-else v-model="refreshing" @refresh="loadForms">
               <div class="form-list">
                 <MobileCard
                   v-for="form in filteredForms"
@@ -53,6 +56,7 @@ import MobileCard from "@/components/base/MobileCard.vue";
 import MobilePage from "@/components/base/MobilePage.vue";
 import WorkflowTabs from "@/components/WorkflowTabs.vue";
 import { appServiceMobile, formServiceMobile } from "@/services/mobileService";
+import { markErrorHandled } from "@/utils/httpFeedback";
 
 const router = useRouter();
 const route = useRoute();
@@ -64,6 +68,7 @@ const refreshing = ref(false);
 const keyword = ref("");
 const app = ref<AppDef>();
 const forms = ref<FormDef[]>([]);
+const formsError = ref(false);
 
 const filteredForms = computed(() => {
   const search = keyword.value.trim().toLowerCase();
@@ -81,12 +86,22 @@ const loadApp = async () => {
 };
 
 const loadForms = async () => {
-  forms.value = await formServiceMobile.query(appId);
-  refreshing.value = false;
+  formsError.value = false;
+  try {
+    forms.value = await formServiceMobile.query(appId);
+  } catch (error) {
+    markErrorHandled(error);
+    formsError.value = true;
+  } finally {
+    // 失败时也必须复位，否则下拉刷新 spinner 卡死
+    refreshing.value = false;
+  }
 };
 
 onMounted(() => {
-  void Promise.all([loadApp(), loadForms()]);
+  // app 加载失败不应阻断表单列表；各自独立兜底
+  void loadApp().catch((error) => markErrorHandled(error));
+  void loadForms();
 });
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-  <MobilePage :title="t('mobile.workbench.title')" @back="goBack">
+  <MobilePage :title="t('mobile.workbench.title')" :backable="false" @back="goBack">
     <template #right>
       <van-button class="lang-button" size="mini" plain @click="showLangSheet = true">
         {{ t("navbar.language") }}
@@ -145,8 +145,12 @@ const handleLogout = async () => {
 };
 
 const onRefresh = async () => {
-  await Promise.all([loadApps(), loadTaskCount()]);
-  refreshing.value = false;
+  try {
+    await Promise.all([loadApps(), loadTaskCount()]);
+  } finally {
+    // 失败时也必须复位，否则下拉刷新 spinner 卡死
+    refreshing.value = false;
+  }
 };
 
 onMounted(() => {
@@ -173,6 +177,11 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
 }
 
 .task-main {
@@ -218,6 +227,11 @@ onMounted(() => {
   padding: 8px 0;
   color: var(--mobile-text-secondary);
   font-size: 12px;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
 }
 
 .section-title {
@@ -240,6 +254,11 @@ onMounted(() => {
   gap: 10px;
   min-height: 108px;
   justify-content: center;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
 }
 
 .app-icon {
