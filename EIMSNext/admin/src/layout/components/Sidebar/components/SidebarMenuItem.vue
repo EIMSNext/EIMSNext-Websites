@@ -359,7 +359,8 @@ onMounted(() => {
 
 .more-wrapper {
   position: absolute;
-  right: var(--et-space-8);
+  // 预留滚动条宽度，避免 hover 时"更多/创建"图标被滚动条盖住
+  right: var(--et-space-14);
   display: flex;
   flex-direction: row-reverse;
   align-items: center;

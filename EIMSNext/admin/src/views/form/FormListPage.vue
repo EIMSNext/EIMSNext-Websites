@@ -34,6 +34,8 @@ const viewModules = import.meta.glob([
   "../**/*.vue",
   "!../form/index.vue",
   "!../form/FormListPage.vue",
+  // AddFormData 被 DataManage/index.vue 静态导入，排除出动态 chunk 消除构建警告
+  "!../form/components/AddFormData.vue",
 ]);
 
 const normalizeComponentPath = (value?: string | null) => {

@@ -18,8 +18,12 @@ export function setupPermission() {
       if (loginCode) {
         try {
           await identityService.exchangeAuthorizationCode(loginCode);
-        } catch {
-          console.warn("login code exchange failed");
+        } catch (error) {
+          // 换码失败必须清掉可能残留的旧失效 token：
+          // 否则 isLoggedIn() 仍为 true，守卫会带着坏 token 继续走，
+          // 页面接口全部 401（表现为“回跳后 401，手动刷新才恢复”）。
+          console.warn("login code exchange failed:", error);
+          accessToken.clear();
         }
 
         // web history 模式下 to.fullPath 仍携带 code，直接 next() 会把已消费的 code 写回地址栏，
