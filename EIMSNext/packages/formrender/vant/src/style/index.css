@@ -1064,3 +1064,41 @@
 .form-create-m .van-collapse {
   width: 100%;
 }
+
+/* 图片字段双入口（拍照/相册）：隐藏 vant 自带「+」入口，由自建按钮触发隐藏 input。
+   仅图片字段走 .fc-uploader-dual 包裹，文件字段保持 vant 默认单入口。 */
+.form-create-m .fc-uploader-dual .van-uploader__upload {
+  display: none;
+}
+
+.form-create-m .fc-uploader-dual-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: var(--fc-field-option-gap, 4px);
+}
+
+.form-create-m .fc-uploader-dual-btn {
+  flex: 1;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--fc-divider-color, #ebedf0);
+  border-radius: 6px;
+  background: var(--van-gray-1, #f7f8fa);
+  color: var(--van-text-color-2, #323233);
+  font-size: 12px;
+  line-height: 28px;
+  cursor: pointer;
+}
+
+.form-create-m .fc-uploader-dual-btn:active {
+  background: var(--van-gray-2, #f2f3f5);
+}
+
+.form-create-m .fc-uploader-dual-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-create-m .fc-uploader-dual-input {
+  display: none;
+}

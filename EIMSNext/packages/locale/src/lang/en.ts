@@ -425,6 +425,8 @@ export default {
       dragging: "Drop to upload",
       compressing: "Compressing…",
       uploadFailed: "Upload failed",
+      takePhoto: "Camera",
+      chooseFromAlbum: "Album",
     },
     formFieldSelect: {
       pleaseSelectField: "Please select a field",

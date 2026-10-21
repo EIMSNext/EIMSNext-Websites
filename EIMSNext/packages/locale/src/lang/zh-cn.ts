@@ -476,6 +476,8 @@ export default {
       dragging: "松开即可上传",
       compressing: "压缩中…",
       uploadFailed: "上传失败",
+      takePhoto: "拍照",
+      chooseFromAlbum: "相册",
     },
     formFieldSelect: {
       pleaseSelectField: "请选择字段",

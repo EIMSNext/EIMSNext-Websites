@@ -1,5 +1,12 @@
 import { defineComponent, ref, watch, computed } from "vue";
 import { MemberSelectDialog, MemberTabs } from "@eimsnext/components";
+import { useUserStore } from "@eimsnext/store";
+import {
+  DYNAMIC_MEMBER_MARKERS,
+  hasDynamicMemberTag,
+  isRuntimeSourceMode,
+  resolveDynamicMemberValue,
+} from "../dynamicMemberValue";
 import "../departmentSelect/style.css";
 
 export default defineComponent({
@@ -59,10 +66,30 @@ export default defineComponent({
   emits: ["update:modelValue", "change"],
   setup(props, { emit }) {
     const showDialog = ref(false);
+    const userStore = useUserStore();
+    const dynamicResolveSequence = ref(0);
     const normalizeValue = (value) => value === "" || value === null || value === undefined
       ? (props.multiple ? [] : undefined)
       : value;
     const selectedValue = ref(normalizeValue(props.modelValue));
+
+    // 默认值里的「当前用户」动态参数在新建/编辑时解析为真实成员；解析不到则丢弃
+    const resolveDynamicValue = (value) => {
+      if (!isRuntimeSourceMode(props.sourceMode)) return;
+      if (!hasDynamicMemberTag(value, DYNAMIC_MEMBER_MARKERS.CUR_USER)) return;
+      const sequence = ++dynamicResolveSequence.value;
+      resolveDynamicMemberValue(value, DYNAMIC_MEMBER_MARKERS.CUR_USER, props.multiple, {
+        currentUser: userStore.currentUser,
+        formId: props.formId,
+        fieldId: props.fieldId,
+      }).then((resolved) => {
+        if (sequence !== dynamicResolveSequence.value) return;
+        selectedValue.value = normalizeValue(resolved);
+        emit("update:modelValue", resolved);
+        emit("change", resolved);
+      });
+    };
+    resolveDynamicValue(props.modelValue);
 
     // 结合props和上下文的preview属性，确定是否处于查看模式
     // 优先使用props.preview，因为FormDataView组件会将isView=true传递给FormView组件，
@@ -88,6 +115,7 @@ export default defineComponent({
       () => props.modelValue,
       (newVal) => {
         selectedValue.value = normalizeValue(newVal);
+        resolveDynamicValue(newVal);
       },
     );
 
@@ -139,7 +167,9 @@ export default defineComponent({
       const memberOptions = {
         showTabs: props.sourceMode === "form-design"
           ? MemberTabs.Employee | MemberTabs.DynamicParam
-          : MemberTabs.Employee,
+          : props.sourceMode === "form-runtime"
+            ? MemberTabs.Employee | MemberTabs.CurUser
+            : MemberTabs.Employee,
         multiple: multiple,
         limit: limit,
         limitScope: props.limitScope,

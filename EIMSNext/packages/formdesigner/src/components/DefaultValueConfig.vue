@@ -16,13 +16,13 @@
       <el-date-picker v-if="activeRule.type == 'timestamp'" v-model="customValue" value-format="x"
         :type="activeRule.props.type" :format="activeRule.props.format"></el-date-picker>
       <fc-department-select v-if="activeRule.type == 'department1'" v-model="customValue"
-        @change="onOrgChanged"></fc-department-select>
+        source-mode="form-design" @change="onOrgChanged"></fc-department-select>
       <fc-department-select v-if="activeRule.type == 'department2'" v-model="customValue" @change="onOrgChanged"
-        :multiple="true"></fc-department-select>
+        source-mode="form-design" :multiple="true"></fc-department-select>
       <fc-employee-select v-if="activeRule.type == 'employee1'" v-model="customValue"
-        @change="onOrgChanged"></fc-employee-select>
+        source-mode="form-design" @change="onOrgChanged"></fc-employee-select>
       <fc-employee-select v-if="activeRule.type == 'employee2'" v-model="customValue" @change="onOrgChanged"
-        :multiple="true"></fc-employee-select>
+        source-mode="form-design" :multiple="true"></fc-employee-select>
       <el-select v-if="activeRule.type == 'radio'" v-model="customValue">
         <el-option v-for="opt in activeRule.options" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
       </el-select>

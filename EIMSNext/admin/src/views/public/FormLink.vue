@@ -374,6 +374,7 @@ function filterPublicRules(rules: any[], allowed?: Set<string>, parentField?: st
     })
     .map((rule) => {
       const orgField = isOrgField(rule.type);
+      // public 页 org 组件禁用且无成员数据，「当前用户/当前部门」动态默认值不应用（避免标签落库）
       const next = isPublicSystemRule(rule)
         ? {
             ...rule,
@@ -382,7 +383,11 @@ function filterPublicRules(rules: any[], allowed?: Set<string>, parentField?: st
             props: { ...(rule.props || {}), disabled: true },
           }
         : orgField
-          ? { ...rule, props: { ...(rule.props || {}), disabled: true, readonly: true } }
+          ? {
+              ...rule,
+              computed: rule.computed ? { ...rule.computed, defaultValue: undefined } : rule.computed,
+              props: { ...(rule.props || {}), disabled: true, readonly: true },
+            }
           : { ...rule };
       if (Array.isArray(next.children)) {
         next.children = filterPublicRules(next.children, allowed, parentField);
