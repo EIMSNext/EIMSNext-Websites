@@ -1218,6 +1218,7 @@ export default {
       publish: "Publish",
       updatePublish: "Update",
       publishSuccess: "Published successfully",
+      publishWarnings: "Published with skipped resources",
       runtimePlugin: "Runtime Plugin",
       runtimeDescription: "Attribute Description",
       summary: "Store Summary",
