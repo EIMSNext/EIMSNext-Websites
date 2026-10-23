@@ -1286,7 +1286,9 @@ onBeforeMount(() => {
     }
   } else {
     setSelectedNodes();
-
+  }
+  // 「当前用户/当前部门」快捷 tab：按 tab 开关加载数据（form-runtime 也会显示这两个 tab）
+  if (FlagEnum.has(options.showTabs!, MemberTabs.CurDept)) {
     const currentDepartmentId = userStore.currentUser.departmentIds?.[0] ?? userStore.currentUser.deptId;
     if (currentDepartmentId) {
       deptStore.get(currentDepartmentId).then((x) => {
@@ -1296,16 +1298,16 @@ onBeforeMount(() => {
         }
       });
     }
-    if (userStore.currentUser) {
-      const emp: Employee = {
-        id: userStore.currentUser.empId!,
-        code: userStore.currentUser.empCode!,
-        empName: userStore.currentUser.empName!,
-        status: 0,
-        userBound: true,
-      };
-      curEmpData.value = [employeeToListItem(emp)];
-    }
+  }
+  if (FlagEnum.has(options.showTabs!, MemberTabs.CurUser) && userStore.currentUser) {
+    const emp: Employee = {
+      id: userStore.currentUser.empId!,
+      code: userStore.currentUser.empCode!,
+      empName: userStore.currentUser.empName!,
+      status: 0,
+      userBound: true,
+    };
+    curEmpData.value = [employeeToListItem(emp)];
   }
 
   employeeGroupLoading.clear();

@@ -140,7 +140,9 @@ import { ShareLinkBar } from "@eimsnext/components";
 import { sha256 } from "@eimsnext/utils";
 import LimitSection from "./LimitSection.vue";
 import EmbedLinkContent from "./EmbedLinkContent.vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const { t } = useI18n();
 
 const props = defineProps<{
@@ -169,7 +171,7 @@ const accessCodeInput = ref("");
 const isDirtyState = ref(false);
 
 const submitUrl = computed(
-  () => `${window.location.origin}${window.location.pathname}#/public/form/${props.formDef.id}/submit`,
+  () => `${window.location.origin}${router.resolve(`/public/form/${props.formDef.id}/submit`).href}`,
 );
 
 function markDirty() {

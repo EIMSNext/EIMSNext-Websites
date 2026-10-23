@@ -425,6 +425,8 @@ export default {
       dragging: "Drop to upload",
       compressing: "Compressing…",
       uploadFailed: "Upload failed",
+      takePhoto: "Camera",
+      chooseFromAlbum: "Album",
     },
     formFieldSelect: {
       pleaseSelectField: "Please select a field",
@@ -1216,6 +1218,7 @@ export default {
       publish: "Publish",
       updatePublish: "Update",
       publishSuccess: "Published successfully",
+      publishWarnings: "Published with skipped resources",
       runtimePlugin: "Runtime Plugin",
       runtimeDescription: "Attribute Description",
       summary: "Store Summary",

@@ -10,6 +10,7 @@ import { useUserStore } from "@eimsnext/store";
 
 const TYPE_DEPARTMENT = 1;
 const TYPE_EMPLOYEE = 2;
+const TYPE_DYNAMIC = 4;
 const SEARCH_DELAY = 300;
 const DEPARTMENT_PAGE_SIZE = 200;
 const EMPLOYEE_PAGE_SIZE = 100;
@@ -137,6 +138,7 @@ const makeOrganizationSelect = ({ name, kind, placeholder }) =>
         (value) => {
           committed.value = asTags(value);
           if (!show.value) draft.value = asTags(value);
+          resolveDynamicTags(value);
         },
         { deep: true },
       );
@@ -259,6 +261,79 @@ const makeOrganizationSelect = ({ name, kind, placeholder }) =>
           currentDepartments.value = [];
         }
       };
+
+      let dynamicResolveSequence = 0;
+
+      const fetchCurrentDepartmentTag = async () => {
+        const user = userStore.currentUser;
+        const departmentId = user?.departmentIds?.[0] || user?.deptId;
+        if (!departmentId) return null;
+        try {
+          if (isFormSourceMode.value) {
+            const page = await formSourceService.departmentsPage({
+              formId: props.formId || undefined,
+              fieldId: props.fieldId || undefined,
+              sourceType: "department",
+              design: false,
+              filter: { field: "Id", op: "eq", value: departmentId },
+              skip: 0,
+              take: 1,
+            });
+            const department = page.value?.[0];
+            if (!department) return null;
+            return {
+              id: department.id,
+              value: department.code || "",
+              label: department.label || department.name || "",
+              type: TYPE_DEPARTMENT,
+            };
+          }
+          const items = await departmentService.query(
+            `$filter=Id eq '${escapeOData(departmentId)}'&$top=1`,
+          );
+          const department = items?.[0];
+          if (!department) return null;
+          return {
+            id: department.id,
+            value: department.code || "",
+            label: department.name || "",
+            type: TYPE_DEPARTMENT,
+          };
+        } catch {
+          // 部门信息拉取失败时丢弃动态标签：设计期标记不应作为业务数据落库
+          return null;
+        }
+      };
+
+      // 默认值里的「当前用户/当前部门」动态参数在新建/编辑时解析为真实成员；解析不到则丢弃。
+      // public 页员工/部门组件禁用且无成员数据，动态默认值由 public 页入口（FormLink）清除，不走解析
+      const resolveDynamicTags = async (value) => {
+        if (props.sourceMode !== "form-runtime") return;
+        const tags = asTags(value);
+        if (!tags.some((item) => item.type === TYPE_DYNAMIC)) return;
+        const sequence = ++dynamicResolveSequence;
+        const resolved = [];
+        for (const tag of tags) {
+          if (tag.type !== TYPE_DYNAMIC) {
+            resolved.push(cleanTag(tag));
+            continue;
+          }
+          let target = null;
+          if (tag.id === "curuser" && kind === "employee") {
+            target = currentUserTag.value;
+          } else if (tag.id === "curdept" && kind === "department") {
+            target = await fetchCurrentDepartmentTag();
+          }
+          if (target) resolved.push(target);
+        }
+        if (sequence !== dynamicResolveSequence) return;
+        committed.value = resolved;
+        if (!show.value) draft.value = resolved.map(cleanTag);
+        const emitValue = props.multiple ? resolved : resolved[0] || "";
+        emit("update:modelValue", emitValue);
+        emit("change", emitValue);
+      };
+      resolveDynamicTags(props.modelValue);
       const hasDraftChanges = computed(() => {
         const normalize = (items) =>
           items.map((item) => `${item.type}:${item.id}`).sort().join("|");

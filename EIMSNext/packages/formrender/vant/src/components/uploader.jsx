@@ -103,12 +103,16 @@ export default defineComponent({
      */
     const fieldAttrs = () => _.attrs;
 
-    /** 是否图片字段：优先看 uploadType，其次按 accept 推断。 */
+    /** 是否图片字段：优先看 uploadType；规则类型（imageupload/fileupload）比 attrs 更可靠
+     *  —— FieldProp 强类型模型没有 uploadType/accept 存储位，存量表单可能两者都缺。 */
     const isImageField = () => {
       const attrs = fieldAttrs();
       if (attrs.uploadType === "image" || attrs.uploadType === "file") {
         return attrs.uploadType === "image";
       }
+      const ruleType = String(props.formCreateInject?.rule?.type || "");
+      if (ruleType === "imageupload") return true;
+      if (ruleType === "fileupload") return false;
       return String(attrs.accept || "").includes("image");
     };
 
@@ -207,10 +211,55 @@ export default defineComponent({
     const uploadItems = (items) =>
       Promise.all(items.map((item) => uploadItem(item))).then(() => uploadValue());
 
+    /**
+     * 图片字段双入口（拍照 / 相册）：自建两个隐藏 input 绕开系统文件选择器的
+     * 不可控行为（部分安卓 WebView / 微信内不提供拍照入口）。两个入口汇入
+     * 同一条上传管道（uploadItems），压缩/上传/回写逻辑与 vant 默认路径完全一致。
+     */
+    const galleryInputRef = ref(null);
+    const cameraInputRef = ref(null);
+
+    const entryDisabled = () => {
+      const max = resolvedMaxCount();
+      return Number.isFinite(max) && fileList.value.length >= max;
+    };
+
+    const onCustomInput = (event) => {
+      const input = event.target;
+      const picked = Array.from(input.files || []);
+      // 清空 value 允许再次选择同一文件
+      input.value = "";
+      if (!picked.length) return;
+      const max = resolvedMaxCount();
+      const remain = Number.isFinite(max) ? Math.max(0, max - fileList.value.length) : picked.length;
+      const items = picked.slice(0, remain).map((file) => ({ file, status: "", message: "" }));
+      if (!items.length) return;
+      fileList.value.push(...items);
+      uploadItems(items);
+    };
+
     return {
       fileList,
       modelValue,
+      galleryInputRef,
+      cameraInputRef,
       resolvedMaxCount,
+      entryDisabled,
+      onCustomInput,
+      pickFromGallery() {
+        if (!entryDisabled()) galleryInputRef.value?.click();
+      },
+      takePhoto() {
+        if (!entryDisabled()) cameraInputRef.value?.click();
+      },
+      /** 隐藏入口的场景（disabled/readonly/非图片字段）回落到 vant 默认单入口 */
+      hasDualEntry() {
+        const attrs = _.attrs;
+        return isImageField() && !attrs.disabled && !attrs.readonly;
+      },
+      entryLabel(key, fallback) {
+        return t(key) || fallback;
+      },
       onDelete(file) {
         uploadValue();
         _.emit("delete", file);
@@ -229,7 +278,7 @@ export default defineComponent({
     };
   },
   render() {
-    return (
+    const uploaderNode = () => (
       <van-uploader
         {...this.$attrs}
         model-value={this.fileList}
@@ -238,6 +287,48 @@ export default defineComponent({
         afterRead={this.uploadFile}
         onDelete={this.onDelete}
       />
+    );
+
+    if (!this.hasDualEntry()) return uploaderNode();
+
+    return (
+      <div class="fc-uploader-dual">
+        {uploaderNode()}
+        <div class="fc-uploader-dual-actions">
+          <button
+            type="button"
+            class="fc-uploader-dual-btn"
+            disabled={this.entryDisabled()}
+            onClick={this.takePhoto}
+          >
+            {this.entryLabel("comp.upload.takePhoto", "拍照")}
+          </button>
+          <button
+            type="button"
+            class="fc-uploader-dual-btn"
+            disabled={this.entryDisabled()}
+            onClick={this.pickFromGallery}
+          >
+            {this.entryLabel("comp.upload.chooseFromAlbum", "相册")}
+          </button>
+        </div>
+        <input
+          ref="galleryInputRef"
+          class="fc-uploader-dual-input"
+          type="file"
+          accept={String(this.$attrs.accept || "image/*")}
+          multiple
+          onChange={this.onCustomInput}
+        />
+        <input
+          ref="cameraInputRef"
+          class="fc-uploader-dual-input"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={this.onCustomInput}
+        />
+      </div>
     );
   },
 });

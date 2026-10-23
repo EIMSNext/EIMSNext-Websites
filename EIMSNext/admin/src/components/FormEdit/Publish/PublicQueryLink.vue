@@ -89,7 +89,9 @@ import { sha256 } from "@eimsnext/utils";
 import LimitSection from "./LimitSection.vue";
 import EmbedLinkContent from "./EmbedLinkContent.vue";
 import { isPublicSystemFieldDef } from "@/utils/publicSystemFields";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const { t } = useI18n();
 
 const props = defineProps<{
@@ -112,7 +114,7 @@ const showEmbed = ref(false);
 const isDirtyState = ref(false);
 
 const querylinkUrl = computed(
-  () => `${window.location.origin}${window.location.pathname}#/public/form/${props.formDef.id}/query`,
+  () => `${window.location.origin}${router.resolve(`/public/form/${props.formDef.id}/query`).href}`,
 );
 
 const queryableFields = computed(() => flattenFields(props.formDef.content?.items || [], isPublicQueryField));

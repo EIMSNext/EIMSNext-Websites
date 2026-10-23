@@ -476,6 +476,8 @@ export default {
       dragging: "松开即可上传",
       compressing: "压缩中…",
       uploadFailed: "上传失败",
+      takePhoto: "拍照",
+      chooseFromAlbum: "相册",
     },
     formFieldSelect: {
       pleaseSelectField: "请选择字段",
@@ -1277,6 +1279,7 @@ export default {
       publish: "发布",
       updatePublish: "更新发布",
       publishSuccess: "发布成功",
+      publishWarnings: "发布完成，但部分资源被跳过",
       runtimePlugin: "运行时插件",
       runtimeDescription: "Attribute 描述",
       summary: "市场摘要",

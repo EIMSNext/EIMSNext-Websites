@@ -99,6 +99,7 @@ import { appDefService, dashboardDefService, publicSettingService } from "@eimsn
 import { useAppStore, useContextStore } from "@eimsnext/store";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 import { sha256 } from "@eimsnext/utils";
 
 const props = defineProps<{
@@ -111,6 +112,7 @@ const emit = defineEmits<{
 
 const contextStore = useContextStore();
 const appStore = useAppStore();
+const router = useRouter();
 const { t } = useI18n();
 const localDash = ref<DashboardDef>({ ...props.dashDef });
 const app = ref<AppDef>();
@@ -130,7 +132,7 @@ const memberOptions = {
 const isHomeEntry = ref(false);
 
 const publicUrl = computed(() => {
-  return `${window.location.origin}${window.location.pathname}#/public/dash/${localDash.value.id}`;
+  return `${window.location.origin}${router.resolve(`/public/dash/${localDash.value.id}`).href}`;
 });
 const embedCode = computed(() => `<iframe width="100%" height="100%" style="border: none;" src="${publicUrl.value}"></iframe>`);
 

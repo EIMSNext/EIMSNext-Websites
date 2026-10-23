@@ -269,8 +269,9 @@ import {
   systemService,
 } from "@eimsnext/services";
 import { Check, Download, Plus, Refresh, Search, Upload } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
 import { useI18n } from "vue-i18n";
+import { h } from "vue";
 
 interface EditablePrice {
   id?: string;
@@ -440,7 +441,14 @@ const doPublishApp = async () => {
   if (!id) return;
   publishingApp.value = true;
   try {
-    await appDefService.publish(id);
+    const result = await appDefService.publish(id);
+    if (result.warnings?.length) {
+      ElNotification.warning({
+        title: t("admin.platformAdmin.publishWarnings"),
+        message: h("div", { style: "white-space:pre-line" }, result.warnings.join("\n")),
+        duration: 0,
+      });
+    }
     ElMessage.success(t("admin.platformAdmin.publishSuccess"));
     publishAppId.value = "";
   } finally {
