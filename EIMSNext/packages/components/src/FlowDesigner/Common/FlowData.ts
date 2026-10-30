@@ -45,10 +45,13 @@ export enum FlowNodeType {
   //并行节点
   Branch2,
 }
+// 数值必须与后端 EIMSNext.Entities.CascadeMode（Wf_Definition.cs）保持一致：
+// content JSON 原样往返无映射，错位会导致「选 Specified 后端读成 All」。
+// 三值设计（无 NotSet）：All=0 兼容存量 content（缺省/0 的定义保持全触发），Specified=1，Never=2
 export enum CascadeMode {
   All = 0,
-  Specified,
-  Never,
+  Specified = 1,
+  Never = 2,
 }
 export enum UpdateMode {
   Form = 0,

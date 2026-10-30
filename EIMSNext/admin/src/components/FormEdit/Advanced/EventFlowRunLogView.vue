@@ -95,7 +95,14 @@
               <el-button link type="primary" @click="viewNodeConfig">{{ t("eventFlow.runlog.viewNodeConfig") }}</el-button>
             </div>
 
-            <el-button v-if="selectedLog && !selectedLog.success" type="primary" disabled class="retry-button">
+            <el-button
+              v-if="selectedLog && !selectedLog.success"
+              type="primary"
+              :loading="retrying"
+              :disabled="retrying || detail?.run.retryInProgress === true"
+              class="retry-button"
+              @click="retrySelectedNode"
+            >
               {{ t("eventFlow.runlog.retry") }}
             </el-button>
 
@@ -177,6 +184,7 @@ const successFilter = ref<"" | "success" | "failed">("");
 const detail = ref<EfRunLogDetail>();
 const selectedNode = ref<IFlowNodeData>();
 const selectedLog = ref<EfRunLogNode>();
+const retrying = ref(false);
 const showConfig = ref(false);
 
 const flowData = ref<IFlowData>(createFlowData());
@@ -325,6 +333,17 @@ function viewNodeConfig() {
   if (!selectedNode.value) return;
   flowContext.activeData = selectedNode.value;
   showConfig.value = true;
+}
+
+async function retrySelectedNode() {
+  if (!detail.value?.run.id || !selectedLog.value?.nodeId || retrying.value) return;
+  retrying.value = true;
+  try {
+    await efRunLogService.retryRun(detail.value.run.id, selectedLog.value.nodeId);
+    await openRunDetail(detail.value.run);
+  } finally {
+    retrying.value = false;
+  }
 }
 
 function formatDate(value?: number) {

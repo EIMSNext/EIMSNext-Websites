@@ -112,6 +112,30 @@
     </div>
   </template>
 
+    <MetaItemHeader class="mt-[12px]" :label="t('eventFlow.cascadeTrigger')" :required="false" />
+    <div class="section-indent">
+      <div class="muted-text">{{ t("eventFlow.cascadeTriggerDesc") }}</div>
+      <div class="cascade-row">
+        <span class="cascade-label">{{ t("eventFlow.cascadeTriggersOther") }}</span>
+        <el-select v-model="efCascade" size="default" class="cascade-select">
+          <el-option v-for="item in cascadeOptions" :key="item.value" :label="t(item.labelKey)" :value="item.value" />
+        </el-select>
+      </div>
+      <div v-if="efCascade === CascadeMode.Specified" class="cascade-specified">
+        <el-select
+          v-model="specifiedEventIds"
+          multiple
+          filterable
+          reserve-keyword
+          size="default"
+          class="cascade-multi"
+          :placeholder="t('eventFlow.cascadeSpecifiedPlaceholder')"
+        >
+          <el-option v-for="item in eventFlowOptions" :key="item.id" :label="item.name" :value="item.id" />
+        </el-select>
+      </div>
+    </div>
+
   <HttpSampleDialog
     v-model="showSampleDialog"
     :event-flow-id="flowContext.definitionId"
@@ -128,18 +152,20 @@ import {
   IFlowContext,
   IFlowNodeData,
   EventType,
+  CascadeMode,
 } from "../Common/FlowData";
 import {
   EventFlowScheduleSourceType,
   EventFlowTriggerKind,
   FieldType,
+  FlowType,
   FormDef,
   TimerOffsetDirection,
   TimerOffsetUnit,
   TimerRepeatType,
   WfDefinition,
 } from "@eimsnext/models";
-import { useFormStore } from "@eimsnext/store";
+import { useFormStore, useContextStore } from "@eimsnext/store";
 import { FlagEnum, uniqueId } from "@eimsnext/utils";
 import { EventFlowHttpSampleResult, wfDefinitionService } from "@eimsnext/services";
 import buildQuery from "odata-query";
@@ -164,6 +190,7 @@ defineOptions({
 });
 
 const formStore = useFormStore();
+const contextStore = useContextStore();
 const formRef = ref<FormDef>();
 const formName = ref("");
 const usingFlow = ref(false);
@@ -177,7 +204,8 @@ const nodeAction = ref("submit");
 const nodeList = ref<IListItem[]>([]);
 const allowedIpText = ref("");
 const showSampleDialog = ref(false);
-const corpId = computed(() => (flowContext as any).corpId || "");
+// IFlowContext 未定义 corpId，统一从 contextStore 取（登录进 app 时 setCorpId 写入）
+const corpId = computed(() => contextStore.corpId || (flowContext as any).corpId || "");
 const actionList = computed<IListItem[]>(() => [
   {
     id: "submit",
@@ -188,6 +216,49 @@ const actionList = computed<IListItem[]>(() => [
 ]);
 
 const triggerKind = computed(() => activeData.value.metadata.triggerMeta?.triggerKind ?? EventFlowTriggerKind.Form);
+
+// 联动触发（Cascade）：控制本数据机器人执行时是否/如何触发其他数据机器人。
+// 与后端 CascadeMode 三值一一对应，随 flowData 序列化进定义 content。
+const efCascade = computed({
+  // 缺省（存量 content 无该键）= 0 = All：与后端 EfCascade 默认值 0 一致，显示即行为
+  get: () => flowContext.flowData.efCascade ?? CascadeMode.All,
+  set: (value: CascadeMode) => {
+    flowContext.flowData.efCascade = value;
+  },
+});
+
+const specifiedEventIds = computed({
+  get: () => flowContext.flowData.eventIds ?? [],
+  set: (value: string[]) => {
+    flowContext.flowData.eventIds = value.length > 0 ? value : undefined;
+  },
+});
+
+const cascadeOptions = computed(() => [
+  { value: CascadeMode.All, labelKey: "eventFlow.cascadeAll" },
+  { value: CascadeMode.Specified, labelKey: "eventFlow.cascadeSpecified" },
+  { value: CascadeMode.Never, labelKey: "eventFlow.cascadeNever" },
+]);
+
+const eventFlowOptions = ref<{ id: string; name: string }[]>([]);
+
+async function loadEventFlowOptions() {
+  if (!corpId.value) return;
+  try {
+    const query = buildQuery({
+      // DeleteFlag 不在 OData EDM 上（软删走后端全局查询过滤），不能进 filter
+      filter: { flowType: FlowType.EventFlow, disabled: false },
+      // $query 端点无正 $top 时按 DefaultPageSize(50) 封顶，清单会被静默截断
+      top: 200,
+    });
+    const res = await wfDefinitionService.query<WfDefinition>(query);
+    eventFlowOptions.value = (res ?? [])
+      .filter((x) => x.id !== flowContext.definitionId)
+      .map((x) => ({ id: x.id, name: x.name }));
+  } catch {
+    eventFlowOptions.value = [];
+  }
+}
 const availableTimeFields = computed<TriggerTimeFieldOption[]>(() => formRef.value ? buildNotifyTimeFieldOptions(formRef.value) : []);
 const showScheduleCondition = computed(() => scheduleValue.value.mode === TriggerTimeMode.Field);
 const httpFields = computed(() => activeData.value.metadata.triggerMeta?.httpSettings?.sampleFields ?? []);
@@ -403,6 +474,8 @@ function buildNotifyTimeFieldOptions(formDef: FormDef): TriggerTimeFieldOption[]
 }
 
 onBeforeMount(() => {
+  loadEventFlowOptions();
+
   selectedTriggers.value =
     activeData.value.metadata.triggerMeta!.eventType ?? 0;
   condList.value = activeData.value.metadata.triggerMeta!.condition ?? { id: uniqueId(), rel: "and", items: [] };
@@ -479,6 +552,29 @@ onBeforeMount(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.cascade-row {
+  display: flex;
+  align-items: center;
+  gap: var(--et-space-5);
+  margin-top: var(--et-space-5);
+}
+
+.cascade-label {
+  flex-shrink: 0;
+}
+
+.cascade-select {
+  width: var(--et-size-200);
+}
+
+.cascade-specified {
+  margin-top: var(--et-space-5);
+}
+
+.cascade-multi {
+  width: 100%;
 }
 
 .http-table {

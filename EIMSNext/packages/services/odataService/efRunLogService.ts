@@ -13,6 +13,10 @@ export class EfRunLogService extends ReadonlyODataServiceBase<EfRunLogNode> {
   getRunDetail(runLogId: string): Promise<EfRunLogDetail> {
     return this.http().api.get<EfRunLogDetail>(`/EfRunLog/Runs/${runLogId}`);
   }
+
+  retryRun(runLogId: string, nodeId: string): Promise<{ runLogId: string; queued: boolean }> {
+    return this.http().api.post(`/EfRunLog/${runLogId}/Retry`, { nodeId });
+  }
 }
 
 const efRunLogService = new EfRunLogService();

@@ -17,6 +17,7 @@ export interface EfRunLog extends CorpModelBase {
   endTime?: number;
   success: boolean;
   errMsg?: string;
+  retryInProgress?: boolean;
 }
 
 export interface EfRunLogNode extends ModelBase {
