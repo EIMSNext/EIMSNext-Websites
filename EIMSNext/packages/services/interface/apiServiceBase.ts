@@ -1,5 +1,5 @@
 import { IdBase } from "@eimsnext/models";
-import { BatchDeleteRequest } from "../requestModel";
+import { BatchDeleteRequest, SingleDeleteRequest } from "../requestModel";
 import { ServiceBase } from "./serviceBase";
 
 export abstract class ApiServiceBase<T = IdBase, R = any> extends ServiceBase {
@@ -35,7 +35,7 @@ export abstract class ApiServiceBase<T = IdBase, R = any> extends ServiceBase {
     return this.http().api.patch<T>(url, data);
   }
 
-  delete<T>(id: string, data?: BatchDeleteRequest) {
+  delete<T>(id: string, data?: BatchDeleteRequest | SingleDeleteRequest) {
     let url = this.getUrl(this.modelName(), id);
     return this.http().api.delete<T>(url, data);
   }

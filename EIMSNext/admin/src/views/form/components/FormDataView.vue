@@ -316,7 +316,7 @@ const execDelete = async () => {
   if (deleting) return;
   deleting = true;
   try {
-    await formDataService.delete(props.dataId);
+    await formDataService.delete(props.dataId, { formId: props.formId });
     emit("ok");
     bus.emit("data:deleted", { formId: props.formId });
   } catch {

@@ -1,11 +1,11 @@
 <template>
   <div class="navbar__right">
-    <div v-if="!isPlatAdmin" class="workbench-trigger" @click="router.push('/workbench/customize')">
+    <div v-if="isCorpSuperAdmin" class="workbench-trigger" @click="router.push('/workbench/customize')">
       <div class="appstore-entry">
         <et-icon icon="el-Monitor" size="18" /><span>{{ $t("admin.workbench.customize") }}</span>
       </div>
     </div>
-    <div class="appstore-trigger" @click="settingStore.appStoreVisible = true">
+    <div v-if="isCorpSuperAdmin" class="appstore-trigger" @click="settingStore.appStoreVisible = true">
       <div class="appstore-entry">
         <et-icon icon="icon-appdefault" size="18" /><span>{{ $t("admin.shell.appCenter") }}</span>
       </div>
@@ -42,6 +42,10 @@ const router = useRouter();
 const settingStore = useSettingsStore();
 const userStore = useUserStore();
 const isPlatAdmin = computed(() => userStore.currentUser.userType === UserType.PlatAdmin);
+// 企业超管（超级管理员）= UserType.CorpAdmin
+const isCorpSuperAdmin = computed(
+  () => (userStore.currentUser.userType & UserType.CorpAdmin) === UserType.CorpAdmin
+);
 </script>
 
 <style lang="scss" scoped>

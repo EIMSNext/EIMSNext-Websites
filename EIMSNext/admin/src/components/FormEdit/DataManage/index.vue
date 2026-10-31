@@ -725,33 +725,33 @@ const trashSelectionChanged = (rows: FormData[]) => {
 };
 
 const execDelete = async () => {
-  await formDataService.delete("batch", { keys: checkedDatas.value.map((item) => item[SystemField.Id]) });
+  await formDataService.delete("batch", { keys: checkedDatas.value.map((item) => item[SystemField.Id]), formId: props.formDef.id });
   showDeleteConfirmDialog.value = false;
   checkedDatas.value = [];
   await Promise.all([handleSearch(), showTrashDrawer.value ? loadTrash() : Promise.resolve()]);
 };
 
 const execRestore = async () => {
-  await formDataService.restore({ keys: trashCheckedDatas.value.map((item) => item.id) });
+  await formDataService.restore({ keys: trashCheckedDatas.value.map((item) => item.id), formId: props.formDef.id });
   showRestoreConfirmDialog.value = false;
   trashCheckedDatas.value = [];
   await Promise.all([handleQuery(), loadTrash()]);
 };
 
 const execPurge = async () => {
-  await formDataService.purge({ keys: trashCheckedDatas.value.map((item) => item.id) });
+  await formDataService.purge({ keys: trashCheckedDatas.value.map((item) => item.id), formId: props.formDef.id });
   showPurgeConfirmDialog.value = false;
   trashCheckedDatas.value = [];
   await Promise.all([handleQuery(), loadTrash()]);
 };
 
 const restoreOne = async (row: FormData) => {
-  await formDataService.restore({ keys: [row.id] });
+  await formDataService.restore({ keys: [row.id], formId: props.formDef.id });
   await Promise.all([handleQuery(), loadTrash(), showDraftDrawer.value ? refreshDrafts() : Promise.resolve()]);
 };
 
 const purgeOne = async (row: FormData) => {
-  await formDataService.purge({ keys: [row.id] });
+  await formDataService.purge({ keys: [row.id], formId: props.formDef.id });
   await Promise.all([handleQuery(), loadTrash()]);
 };
 
@@ -762,7 +762,7 @@ const openDraft = (row: FormData) => {
 };
 
 const deleteDraft = async (row: FormData) => {
-  await formDataService.delete(row.id);
+  await formDataService.delete(row.id, { formId: props.formDef.id });
   await Promise.all([handleQuery(), refreshDrafts(), showTrashDrawer.value ? loadTrash() : Promise.resolve()]);
 };
 

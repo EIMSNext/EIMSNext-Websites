@@ -676,7 +676,7 @@ const execDelete = async () => {
   deleting = true;
   if (!canRemove.value) return;
   try {
-    await formDataService.delete("batch", { keys: checkedDatas.value.map((x) => x[SystemField.Id]) });
+    await formDataService.delete("batch", { keys: checkedDatas.value.map((x) => x[SystemField.Id]), formId });
       showDeleteConfirmDialog.value = false;
       checkedDatas.value = [];
       await handleQuery();
@@ -940,7 +940,7 @@ const deleteDraft = async (row: FormData) => {
   if (deleting) return;
   deleting = true;
   try {
-    await formDataService.delete(row.id);
+    await formDataService.delete(row.id, { formId });
     await Promise.all([refreshDrafts(), Promise.resolve(handleQuery())]);
   } catch {
     ElMessage.error(t("common.deleteFailed"));
