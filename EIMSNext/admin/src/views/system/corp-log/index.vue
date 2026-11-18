@@ -26,6 +26,34 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="showDetailDialog" :title="$t('admin.corpLog.detail')" width="720px" class="log-detail-dialog">
+      <div class="log-detail-meta">
+        <span>{{ formatAction(detailRow?.action) }}</span>
+        <span>{{ formatEntityType(detailRow?.entityType) }}</span>
+        <span>{{ formatDateTime(detailRow?.createTime) }}</span>
+        <span>{{ detailRow?.createBy?.label || "-" }}</span>
+        <span>{{ detailRow?.clientIp || "-" }}</span>
+      </div>
+
+      <template v-if="detailChanges && detailChanges.length > 0">
+        <div v-for="(item, index) in detailChanges" :key="index" class="change-row">
+          <div class="change-field">{{ item.label || item.field }}</div>
+          <div class="change-values">
+            <span class="change-old">{{ isBatchSetting ? "—" : formatChangeValue(item.old, item.type) }}</span>
+            <span class="change-arrow">→</span>
+            <span class="change-new">{{ formatChangeValue(item.new, item.type) }}</span>
+          </div>
+        </div>
+      </template>
+      <pre v-else-if="detailLegacy" class="log-condition">{{ detailLegacy }}</pre>
+      <div v-else class="log-empty">{{ $t("admin.corpLog.batchNoChanges") }}</div>
+
+      <template v-if="detailRow?.dataFilter">
+        <div class="log-section-title">{{ $t("admin.corpLog.operationCondition") }}</div>
+        <pre class="log-condition">{{ detailRow.dataFilter }}</pre>
+      </template>
+    </el-dialog>
+
     <el-card shadow="never" class="corp-log-card">
       <el-tabs v-model="activeTab" class="corp-log-tabs" @tab-change="handleTabChange">
         <el-tab-pane :label="$t('admin.corpLog.loginTab')" name="login" />
@@ -57,14 +85,14 @@
             <div class="filter-label">{{ $t("admin.corpLog.entityType") }}</div>
             <el-select v-model="actionFilters.entityType" clearable :placeholder="$t('common.all')">
               <el-option :label="$t('common.all')" value="" />
-              <el-option v-for="item in entityTypeOptions" :key="item" :label="item" :value="item" />
+              <el-option v-for="item in entityTypeOptions" :key="item" :label="formatEntityType(item)" :value="item" />
             </el-select>
           </div>
           <div class="filter-item">
             <div class="filter-label">{{ $t("admin.corpLog.actionType") }}</div>
             <el-select v-model="actionFilters.action" clearable :placeholder="$t('common.all')">
               <el-option :label="$t('common.all')" value="" />
-              <el-option v-for="item in actionOptions" :key="item" :label="item" :value="item" />
+              <el-option v-for="item in actionOptions" :key="item" :label="formatAction(item)" :value="item" />
             </el-select>
           </div>
           <div class="filter-item">
@@ -113,6 +141,14 @@
                 {{ scope.row.failReason || "-" }}
               </template>
             </el-table-column>
+            <el-table-column :label="$t('admin.corpLog.result')" min-width="90">
+              <template #default="scope">
+                {{ scope.row.success ? $t("common.success") : $t("admin.corpLog.failed") }}
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('admin.corpLog.grantType')" min-width="120" prop="grantType" />
+            <el-table-column :label="$t('admin.corpLog.userId')" min-width="160" prop="userId" />
+            <el-table-column :label="$t('admin.corpLog.clientId')" min-width="160" prop="clientId" />
             <el-table-column :label="$t('admin.corpLog.ip')" min-width="140" prop="clientIp" />
           </template>
 
@@ -127,9 +163,26 @@
                 {{ formatDateTime(scope.row.createTime) }}
               </template>
             </el-table-column>
-            <el-table-column :label="$t('admin.corpLog.actionType')" min-width="160" prop="action" />
-            <el-table-column :label="$t('admin.corpLog.entityType')" min-width="160" prop="entityType" />
-            <el-table-column :label="$t('admin.corpLog.detail')" min-width="320" prop="detail" />
+            <el-table-column :label="$t('admin.corpLog.actionType')" min-width="110">
+              <template #default="scope">
+                <el-tag :type="actionTagType(scope.row.action)" size="small" effect="light" class="log-tag">
+                  {{ formatAction(scope.row.action) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('admin.corpLog.entityType')" min-width="140">
+              <template #default="scope">{{ formatEntityType(scope.row.entityType) }}</template>
+            </el-table-column>
+            <el-table-column :label="$t('admin.corpLog.detail')" min-width="320">
+              <template #default="scope">
+                <div class="detail-cell">
+                  <span class="detail-summary">{{ detailSummary(scope.row) }}</span>
+                  <el-button link type="primary" size="small" @click="openDetail(scope.row)">
+                    {{ $t("admin.misc.viewDetails") }}
+                  </el-button>
+                </div>
+              </template>
+            </el-table-column>
             <el-table-column :label="$t('admin.corpLog.ip')" min-width="140" prop="clientIp" />
           </template>
         </el-table>
@@ -168,6 +221,32 @@ defineOptions({
 
 type TabType = "login" | "action";
 type DateRange = [string, string] | [];
+type TagType = "success" | "warning" | "danger" | "info";
+
+interface AuditLogChange {
+  field?: string;
+  type?: string;
+  label?: string;
+  old?: unknown;
+  new?: unknown;
+}
+
+type AuditLogRow = AuditLog & { dataFilter?: string };
+
+const actionLabelKeys: Record<string, string> = {
+  "1": "admin.formData.changeAdded", "2": "admin.formData.changeModified",
+  "3": "admin.formData.changeDeleted", "4": "admin.corpLog.actionPhysicalDelete",
+  insert: "admin.formData.changeAdded", update: "admin.formData.changeModified",
+  delete: "admin.formData.changeDeleted", physicaldelete: "admin.corpLog.actionPhysicalDelete",
+};
+const entityTypeOptions = [
+  "FormData", "FormDef", "AppDef", "Wf_Definition",
+  "Wf_Task", "PrintDef", "WorkbenchRecentVisit",
+  "WorkbenchConfig", "DashboardDef", "DashboardItemDef",
+  "ExportLog", "Corporate", "CorporateSetting",
+  "CorpOnboardingRequest",
+];
+const entityTypeKeySet = new Set(entityTypeOptions);
 
 const activeTab = ref<TabType>("login");
 const loading = ref(false);
@@ -175,30 +254,36 @@ const totalRef = ref(0);
 const pageNum = ref(1);
 const pageSize = ref(20);
 const loginData = ref<IdentityLoginAudit[]>([]);
-const actionData = ref<AuditLog[]>([]);
-const actionOptions = ref<string[]>([]);
-const entityTypeOptions = ref<string[]>([]);
+const actionData = ref<AuditLogRow[]>([]);
+const actionOptions = ["1", "2", "3", "4"];
 const showExportDialog = ref(false);
 const exporting = ref(false);
 const exportFormat = ref<ExportFormat>(ExportFormat.Csv);
 const selectedExportColumnKeys = ref<string[]>([]);
+const showDetailDialog = ref(false);
+const detailRow = ref<AuditLogRow | null>(null);
 
-const loginExportColumns: ExportColumn[] = [
+const loginExportColumns = computed<ExportColumn[]>(() => [
   { key: "userName", header: t("admin.corpLog.loginUser"), type: ExportColumnType.String },
   { key: "createTime", header: t("admin.corpLog.loginTime"), type: ExportColumnType.Date },
   { key: "loginId", header: t("admin.corpLog.loginId"), type: ExportColumnType.String },
   { key: "failReason", header: t("admin.corpLog.failReason"), type: ExportColumnType.String },
+  { key: "success", header: t("admin.corpLog.result"), type: ExportColumnType.String },
+  { key: "grantType", header: t("admin.corpLog.grantType"), type: ExportColumnType.String },
+  { key: "userId", header: t("admin.corpLog.userId"), type: ExportColumnType.String },
+  { key: "clientId", header: t("admin.corpLog.clientId"), type: ExportColumnType.String },
   { key: "clientIp", header: t("admin.corpLog.ip"), type: ExportColumnType.String },
-];
+]);
 
-const actionExportColumns: ExportColumn[] = [
+const actionExportColumns = computed<ExportColumn[]>(() => [
   { key: "operatorName", header: t("admin.corpLog.operator"), type: ExportColumnType.String },
   { key: "createTime", header: t("admin.corpLog.operationTime"), type: ExportColumnType.Date },
   { key: "action", header: t("admin.corpLog.actionType"), type: ExportColumnType.String },
   { key: "entityType", header: t("admin.corpLog.entityType"), type: ExportColumnType.String },
   { key: "detail", header: t("admin.corpLog.detail"), type: ExportColumnType.String },
+  { key: "dataFilter", header: t("admin.corpLog.operationCondition"), type: ExportColumnType.String },
   { key: "clientIp", header: t("admin.corpLog.ip"), type: ExportColumnType.String },
-];
+]);
 
 const loginFilters = reactive({
   userName: "",
@@ -217,7 +302,7 @@ const tableData = computed(() => {
 });
 
 const currentExportColumns = computed(() => {
-  return activeTab.value === "login" ? loginExportColumns : actionExportColumns;
+  return activeTab.value === "login" ? loginExportColumns.value : actionExportColumns.value;
 });
 
 const queryParams = computed<ODataQuery<any>>(() => {
@@ -228,6 +313,11 @@ const queryParams = computed<ODataQuery<any>>(() => {
     orderBy: "createTime desc",
     skip,
     top: pageSize.value,
+    // Detail 可能超长（历史最大 118K 字符），只取展示所需列
+    select:
+      activeTab.value === "login"
+        ? "id,userName,loginId,failReason,clientIp,createTime,createBy,success,grantType,userId,clientId"
+        : "id,action,entityType,detail,dataFilter,createBy,clientIp,createTime",
   };
 });
 
@@ -288,11 +378,6 @@ function mergeFilters(filters: any[]) {
 const handleTabChange = async () => {
   pageNum.value = 1;
   totalRef.value = 0;
-
-  if (activeTab.value === "action" && actionOptions.value.length === 0) {
-    await loadActionOptions();
-  }
-
   await handleQuery();
 };
 
@@ -350,22 +435,112 @@ const loadData = async () => {
     if (activeTab.value === "login") {
       loginData.value = await identityLoginAuditService.query<IdentityLoginAudit>(query);
     } else {
-      actionData.value = await auditLogService.query<AuditLog>(query);
+      actionData.value = await auditLogService.query<AuditLogRow>(query);
     }
   } finally {
     loading.value = false;
   }
 };
 
-const loadActionOptions = async () => {
-  const query = buildQuery({ top: 200, orderBy: "createTime desc" });
-  const items = await auditLogService.query<AuditLog>(query);
+const detailChanges = computed<AuditLogChange[] | null>(() => parseChanges(detailRow.value?.detail));
+const detailLegacy = computed(() => {
+  const text = detailRow.value?.detail?.trim() || "";
+  return detailChanges.value === null && text ? text : "";
+});
 
-  actionOptions.value = [...new Set(items.map((item) => item.action).filter(Boolean))] as string[];
-  entityTypeOptions.value = [
-    ...new Set(items.map((item) => item.entityType).filter(Boolean)),
-  ] as string[];
-};
+// 批量 ExecuteUpdate 只记录被设置的字段（old 恒 null）；用 action + old 全空判定，
+// 避免把「新增」误判为批量，也不依赖 DataFilter 是否存在。
+function isBatchSettingRow(row: AuditLogRow, changes: AuditLogChange[] | null) {
+  const action = String(row.action ?? "").toLowerCase();
+  return (
+    (action === "2" || action === "update") &&
+    !!changes &&
+    changes.length > 0 &&
+    changes.every((item) => item.old === null || item.old === undefined)
+  );
+}
+
+const isBatchSetting = computed(() =>
+  detailRow.value ? isBatchSettingRow(detailRow.value, detailChanges.value) : false
+);
+
+function parseChanges(detail?: string): AuditLogChange[] | null {
+  const text = detail?.trim();
+  if (!text || !text.startsWith("[")) return null;
+  try {
+    const parsed = JSON.parse(text);
+    if (!Array.isArray(parsed)) return null;
+    if (parsed.length === 0) return [];
+    return parsed.every(
+      (item) => item && typeof item === "object" && ("label" in item || "field" in item)
+    )
+      ? (parsed as AuditLogChange[])
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function formatAction(action?: string) {
+  if (!action) return "-";
+  const key = actionLabelKeys[String(action).toLowerCase()];
+  return key ? t(key) : String(action);
+}
+
+function actionTagType(action?: string): TagType {
+  switch (String(action ?? "").toLowerCase()) {
+    case "1":
+    case "insert":
+      return "success";
+    case "2":
+    case "update":
+      return "warning";
+    case "3":
+    case "delete":
+    case "4":
+    case "physicaldelete":
+      return "danger";
+    default:
+      return "info";
+  }
+}
+
+function formatEntityType(entityType?: string) {
+  if (!entityType) return "-";
+  return entityTypeKeySet.has(entityType) ? t(`admin.corpLog.entityTypes.${entityType}`) : entityType;
+}
+
+function formatChangeValue(value: unknown, type?: string) {
+  if (value === null || value === undefined || value === "") return t("admin.corpLog.emptyValue");
+  if (type === "datetime" && typeof value === "number") {
+    return dateFormat(value, "YYYY-MM-DD HH:mm:ss") || String(value);
+  }
+  if (type === "switch" || typeof value === "boolean") return value ? t("common.yes") : t("common.no");
+  if (typeof value === "object") return JSON.stringify(value);
+  const text = String(value);
+  return text.length > 300 ? `${text.slice(0, 300)}…` : text;
+}
+
+function detailSummary(row: AuditLogRow) {
+  const changes = parseChanges(row.detail);
+  if (changes === null) return (row.detail || "").slice(0, 60) || "-";
+  if (changes.length === 0) return row.dataFilter ? t("admin.corpLog.batchConditionHint") : t("admin.corpLog.noChanges");
+  // 删除/物理删除显示被删前的值，其余动作显示新值（清空的字段如实显示 (空)）
+  const isDelete = ["3", "4", "delete", "physicaldelete"].includes(String(row.action ?? "").toLowerCase());
+  const head = changes
+    .slice(0, 2)
+    .map((item) => `${item.label || item.field}: ${formatChangeValue(isDelete ? item.old : item.new, item.type)}`)
+    .join(t("admin.corpLog.listSeparator"));
+  const summary = changes.length > 2
+    ? `${head} ${t("admin.corpLog.moreItems", { count: changes.length - 2 })}`
+    : head;
+  return isBatchSettingRow(row, changes) ? t("admin.corpLog.batchSetting", { summary }) : summary;
+}
+
+function openDetail(row: AuditLogRow) {
+  detailRow.value = row;
+  showDetailDialog.value = true;
+}
 
 const formatDateTime = (value?: number) => {
   return dateFormat(value, "YYYY-MM-DD HH:mm:ss") || "-";
@@ -546,6 +721,95 @@ onMounted(async () => {
   flex-shrink: 0;
   justify-content: flex-end;
   margin-top: var(--et-space-8);
+}
+
+.log-tag {
+  border-radius: 6px;
+}
+
+.detail-cell {
+  align-items: center;
+  display: flex;
+  gap: var(--et-space-8);
+  min-width: 0;
+}
+
+.detail-summary {
+  color: var(--et-text-primary);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.log-detail-meta {
+  color: var(--et-text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--et-space-16);
+  margin-bottom: var(--et-space-16);
+}
+
+.change-row {
+  border-bottom: 1px solid var(--et-bg-page);
+  display: flex;
+  gap: var(--et-space-16);
+  padding: var(--et-space-8) 0;
+}
+
+.change-field {
+  color: var(--et-text-primary);
+  flex: 0 0 140px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.change-values {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: var(--et-space-8);
+  min-width: 0;
+  word-break: break-all;
+}
+
+.change-old {
+  color: var(--et-text-secondary);
+  text-decoration: line-through;
+}
+
+.change-new {
+  color: var(--et-color-primary);
+}
+
+.change-arrow {
+  color: var(--et-text-secondary);
+  flex-shrink: 0;
+}
+
+.log-section-title {
+  color: var(--et-text-primary);
+  font-weight: 600;
+  margin: var(--et-space-16) 0 var(--et-space-8);
+}
+
+.log-condition {
+  background: var(--et-bg-page);
+  border-radius: var(--et-radius-8);
+  color: var(--et-text-primary);
+  font-family: inherit;
+  margin: 0;
+  max-height: 200px;
+  overflow: auto;
+  padding: var(--et-space-12);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log-empty {
+  color: var(--et-text-secondary);
+  padding: var(--et-space-16) 0;
 }
 
 @media (max-width: 1200px) {

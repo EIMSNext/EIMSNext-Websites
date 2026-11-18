@@ -356,7 +356,7 @@ function formatExecTime(log?: EfRunLogNode) {
     return `${formatDate(log.startTime)} ~ ${formatDate(log.endTime)}`;
   }
 
-  return formatDate(log.startTime || log.execTime);
+  return formatDate(log.startTime || log.endTime);
 }
 
 function getTriggerLabel(run: EfRunLog) {
